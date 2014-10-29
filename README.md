@@ -1,6 +1,6 @@
 # Openssl
 
-* [![Build Status](https://travis-ci.org/zzak/openssl)](https://travis-ci.org/zzak/openssl)
+* [![Build Status](https://travis-ci.org/zzak/openssl.svg?branch=master)](https://travis-ci.org/zzak/openssl)
 
 OpenSSL provides SSL, TLS and general purpose cryptography.  It wraps the OpenSSL library.
 
