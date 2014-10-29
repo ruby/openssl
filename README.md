@@ -2,7 +2,7 @@
 
 * [![Build Status](https://travis-ci.org/zzak/openssl)](https://travis-ci.org/zzak/openssl)
 
-TODO: Write a gem description
+OpenSSL provides SSL, TLS and general purpose cryptography.  It wraps the OpenSSL library.
 
 ## Installation
 
