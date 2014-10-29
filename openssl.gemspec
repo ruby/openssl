@@ -6,11 +6,11 @@ require 'openssl/version'
 Gem::Specification.new do |spec|
   spec.name          = "openssl"
   spec.version       = OpenSSL::VERSION
-  spec.authors       = ["SHIBATA Hiroshi"]
-  spec.email         = ["hsbt@ruby-lang.org"]
-  spec.summary       = %q{Write a short summary. Required.}
-  spec.description   = %q{Write a longer description. Optional.}
-  spec.homepage      = ""
+  spec.authors       = ["Martin Bosslet", "SHIBATA Hiroshi", "Zachary Scott"]
+  spec.email         = ["ruby-core@ruby-lang.org"]
+  spec.summary       = %q{OpenSSL provides SSL, TLS and general purpose cryptography.}
+  spec.description   = %q{It wraps the OpenSSL library.}
+  spec.homepage      = "http://www.ruby-lang.org/"
 
   spec.files         = `git ls-files -z`.split("\x0")
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
