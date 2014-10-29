@@ -1,5 +1,7 @@
 # Openssl
 
+* [![Build Status](https://travis-ci.org/zzak/openssl)](https://travis-ci.org/zzak/openssl)
+
 TODO: Write a gem description
 
 ## Installation
