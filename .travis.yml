@@ -1,0 +1,9 @@
+script: "bundle exec rake test"
+
+rvm:
+  - ruby-head
+
+matrix:
+  allow_failures:
+    - rvm: ruby-head
+  fast_finish: true
