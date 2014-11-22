@@ -34,7 +34,9 @@ TODO: Write usage instructions here
 
 ## Updating from source
 
+```
 ~/code/openssl => cp -R ~/src/ruby/ext/openssl/*.{c,h} ext/openssl/.
 ~/code/openssl => cp -R ~/src/ruby/ext/openssl/deprecation.rb ext/openssl/deprecation.rb
 ~/code/openssl => cp -R ~/src/ruby/ext/openssl/extconf.rb ext/openssl/extconf.rb
 ~/code/openssl => cp -R ~/src/ruby/ext/openssl/lib/* lib/.
+```
