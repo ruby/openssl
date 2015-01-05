@@ -15,10 +15,10 @@
 
 #define WrapOCSPReq(klass, obj, req) do { \
     if(!(req)) ossl_raise(rb_eRuntimeError, "Request wasn't initialized!"); \
-    (obj) = Data_Wrap_Struct((klass), 0, OCSP_REQUEST_free, (req)); \
+    (obj) = TypedData_Wrap_Struct((klass), &ossl_ocsp_request_type, (req)); \
 } while (0)
 #define GetOCSPReq(obj, req) do { \
-    Data_Get_Struct((obj), OCSP_REQUEST, (req)); \
+    TypedData_Get_Struct((obj), OCSP_REQUEST, &ossl_ocsp_request_type, (req)); \
     if(!(req)) ossl_raise(rb_eRuntimeError, "Request wasn't initialized!"); \
 } while (0)
 #define SafeGetOCSPReq(obj, req) do { \
@@ -28,10 +28,10 @@
 
 #define WrapOCSPRes(klass, obj, res) do { \
     if(!(res)) ossl_raise(rb_eRuntimeError, "Response wasn't initialized!"); \
-    (obj) = Data_Wrap_Struct((klass), 0, OCSP_RESPONSE_free, (res)); \
+    (obj) = TypedData_Wrap_Struct((klass), &ossl_ocsp_response_type, (res)); \
 } while (0)
 #define GetOCSPRes(obj, res) do { \
-    Data_Get_Struct((obj), OCSP_RESPONSE, (res)); \
+    TypedData_Get_Struct((obj), OCSP_RESPONSE, &ossl_ocsp_response_type, (res)); \
     if(!(res)) ossl_raise(rb_eRuntimeError, "Response wasn't initialized!"); \
 } while (0)
 #define SafeGetOCSPRes(obj, res) do { \
@@ -41,10 +41,10 @@
 
 #define WrapOCSPBasicRes(klass, obj, res) do { \
     if(!(res)) ossl_raise(rb_eRuntimeError, "Response wasn't initialized!"); \
-    (obj) = Data_Wrap_Struct((klass), 0, OCSP_BASICRESP_free, (res)); \
+    (obj) = TypedData_Wrap_Struct((klass), &ossl_ocsp_basicresp_type, (res)); \
 } while (0)
 #define GetOCSPBasicRes(obj, res) do { \
-    Data_Get_Struct((obj), OCSP_BASICRESP, (res)); \
+    TypedData_Get_Struct((obj), OCSP_BASICRESP, &ossl_ocsp_basicresp_type, (res)); \
     if(!(res)) ossl_raise(rb_eRuntimeError, "Response wasn't initialized!"); \
 } while (0)
 #define SafeGetOCSPBasicRes(obj, res) do { \
@@ -54,10 +54,10 @@
 
 #define WrapOCSPCertId(klass, obj, cid) do { \
     if(!(cid)) ossl_raise(rb_eRuntimeError, "Cert ID wasn't initialized!"); \
-    (obj) = Data_Wrap_Struct((klass), 0, OCSP_CERTID_free, (cid)); \
+    (obj) = TypedData_Wrap_Struct((klass), &ossl_ocsp_certid_type, (cid)); \
 } while (0)
 #define GetOCSPCertId(obj, cid) do { \
-    Data_Get_Struct((obj), OCSP_CERTID, (cid)); \
+    TypedData_Get_Struct((obj), OCSP_CERTID, &ossl_ocsp_certid_type, (cid)); \
     if(!(cid)) ossl_raise(rb_eRuntimeError, "Cert ID wasn't initialized!"); \
 } while (0)
 #define SafeGetOCSPCertId(obj, cid) do { \
@@ -71,6 +71,62 @@ VALUE cOCSPReq;
 VALUE cOCSPRes;
 VALUE cOCSPBasicRes;
 VALUE cOCSPCertId;
+
+static void
+ossl_ocsp_request_free(void *ptr)
+{
+    OCSP_REQUEST_free(ptr);
+}
+
+static const rb_data_type_t ossl_ocsp_request_type = {
+    "OpenSSL/OCSP/REQUEST",
+    {
+	0, ossl_ocsp_request_free,
+    },
+    0, 0, RUBY_TYPED_FREE_IMMEDIATELY,
+};
+
+static void
+ossl_ocsp_response_free(void *ptr)
+{
+    OCSP_RESPONSE_free(ptr);
+}
+
+static const rb_data_type_t ossl_ocsp_response_type = {
+    "OpenSSL/OCSP/RESPONSE",
+    {
+	0, ossl_ocsp_response_free,
+    },
+    0, 0, RUBY_TYPED_FREE_IMMEDIATELY,
+};
+
+static void
+ossl_ocsp_basicresp_free(void *ptr)
+{
+    OCSP_BASICRESP_free(ptr);
+}
+
+static const rb_data_type_t ossl_ocsp_basicresp_type = {
+    "OpenSSL/OCSP/BASICRESP",
+    {
+	0, ossl_ocsp_basicresp_free,
+    },
+    0, 0, RUBY_TYPED_FREE_IMMEDIATELY,
+};
+
+static void
+ossl_ocsp_certid_free(void *ptr)
+{
+    OCSP_CERTID_free(ptr);
+}
+
+static const rb_data_type_t ossl_ocsp_certid_type = {
+    "OpenSSL/OCSP/CERTID",
+    {
+	0, ossl_ocsp_certid_free,
+    },
+    0, 0, RUBY_TYPED_FREE_IMMEDIATELY,
+};
 
 /*
  * Public

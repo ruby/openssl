@@ -20,6 +20,8 @@ typedef struct {
 #define EXPORT_PEM 0
 #define EXPORT_DER 1
 
+static const rb_data_type_t ossl_ec_group_type;
+static const rb_data_type_t ossl_ec_point_type;
 
 #define GetPKeyEC(obj, pkey) do { \
     GetPKey((obj), (pkey)); \
@@ -30,7 +32,7 @@ typedef struct {
 
 #define SafeGet_ec_group(obj, group) do { \
     OSSL_Check_Kind((obj), cEC_GROUP); \
-    Data_Get_Struct((obj), ossl_ec_group, (group)); \
+    TypedData_Get_Struct((obj), ossl_ec_group, &ossl_ec_group_type, (group)); \
 } while(0)
 
 #define Get_EC_KEY(obj, key) do { \
@@ -52,7 +54,7 @@ typedef struct {
 
 #define Get_EC_GROUP(obj, g) do { \
     ossl_ec_group *ec_group; \
-    Data_Get_Struct((obj), ossl_ec_group, ec_group); \
+    TypedData_Get_Struct((obj), ossl_ec_group, &ossl_ec_group_type, ec_group); \
     if (ec_group == NULL) \
         ossl_raise(eEC_GROUP, "missing ossl_ec_group structure"); \
     (g) = ec_group->group; \
@@ -71,7 +73,7 @@ typedef struct {
 
 #define Get_EC_POINT(obj, p) do { \
     ossl_ec_point *ec_point; \
-    Data_Get_Struct((obj), ossl_ec_point, ec_point); \
+    TypedData_Get_Struct((obj), ossl_ec_point, &ossl_ec_point_type, ec_point); \
     if (ec_point == NULL) \
         ossl_raise(eEC_POINT, "missing ossl_ec_point structure"); \
     (p) = ec_point->point; \
@@ -369,7 +371,7 @@ static VALUE ossl_ec_point_dup(const EC_POINT *point, VALUE group_v)
     ossl_ec_point *new_point;
 
     obj = rb_obj_alloc(cEC_POINT);
-    Data_Get_Struct(obj, ossl_ec_point, new_point);
+    TypedData_Get_Struct(obj, ossl_ec_point, &ossl_ec_point_type, new_point);
 
     SafeRequire_EC_GROUP(group_v, group);
 
@@ -707,19 +709,28 @@ static VALUE ossl_ec_key_dsa_verify_asn1(VALUE self, VALUE data, VALUE sig)
     UNREACHABLE;
 }
 
-static void ossl_ec_group_free(ossl_ec_group *ec_group)
+static void ossl_ec_group_free(void *ptr)
 {
+    ossl_ec_group *ec_group = ptr;
     if (!ec_group->dont_free && ec_group->group)
         EC_GROUP_clear_free(ec_group->group);
     ruby_xfree(ec_group);
 }
+
+static const rb_data_type_t ossl_ec_group_type = {
+    "OpenSSL/ec_group",
+    {
+	0, ossl_ec_group_free,
+    },
+    0, 0, RUBY_TYPED_FREE_IMMEDIATELY,
+};
 
 static VALUE ossl_ec_group_alloc(VALUE klass)
 {
     ossl_ec_group *ec_group;
     VALUE obj;
 
-    obj = Data_Make_Struct(klass, ossl_ec_group, 0, ossl_ec_group_free, ec_group);
+    obj = TypedData_Make_Struct(klass, ossl_ec_group, &ossl_ec_group_type, ec_group);
 
     return obj;
 }
@@ -746,7 +757,7 @@ static VALUE ossl_ec_group_initialize(int argc, VALUE *argv, VALUE self)
     ossl_ec_group *ec_group;
     EC_GROUP *group = NULL;
 
-    Data_Get_Struct(self, ossl_ec_group, ec_group);
+    TypedData_Get_Struct(self, ossl_ec_group, &ossl_ec_group_type, ec_group);
     if (ec_group->group != NULL)
         ossl_raise(rb_eRuntimeError, "EC_GROUP is already initialized");
 
@@ -1219,19 +1230,28 @@ static VALUE ossl_ec_group_to_text(VALUE self)
 }
 
 
-static void ossl_ec_point_free(ossl_ec_point *ec_point)
+static void ossl_ec_point_free(void *ptr)
 {
+    ossl_ec_point *ec_point = ptr;
     if (!ec_point->dont_free && ec_point->point)
         EC_POINT_clear_free(ec_point->point);
     ruby_xfree(ec_point);
 }
+
+static const rb_data_type_t ossl_ec_point_type = {
+    "OpenSSL/ec_point",
+    {
+	0, ossl_ec_point_free,
+    },
+    0, 0, RUBY_TYPED_FREE_IMMEDIATELY,
+};
 
 static VALUE ossl_ec_point_alloc(VALUE klass)
 {
     ossl_ec_point *ec_point;
     VALUE obj;
 
-    obj = Data_Make_Struct(klass, ossl_ec_point, 0, ossl_ec_point_free, ec_point);
+    obj = TypedData_Make_Struct(klass, ossl_ec_point, &ossl_ec_point_type, ec_point);
 
     return obj;
 }
@@ -1252,7 +1272,7 @@ static VALUE ossl_ec_point_initialize(int argc, VALUE *argv, VALUE self)
     VALUE group_v = Qnil;
     const EC_GROUP *group = NULL;
 
-    Data_Get_Struct(self, ossl_ec_point, ec_point);
+    TypedData_Get_Struct(self, ossl_ec_point, &ossl_ec_point_type, ec_point);
     if (ec_point->point)
         ossl_raise(eEC_POINT, "EC_POINT already initialized");
 

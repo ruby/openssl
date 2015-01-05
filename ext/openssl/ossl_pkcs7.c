@@ -14,10 +14,10 @@
     if (!(pkcs7)) { \
 	ossl_raise(rb_eRuntimeError, "PKCS7 wasn't initialized."); \
     } \
-    (obj) = Data_Wrap_Struct((klass), 0, PKCS7_free, (pkcs7)); \
+    (obj) = TypedData_Wrap_Struct((klass), &ossl_pkcs7_type, (pkcs7)); \
 } while (0)
 #define GetPKCS7(obj, pkcs7) do { \
-    Data_Get_Struct((obj), PKCS7, (pkcs7)); \
+    TypedData_Get_Struct((obj), PKCS7, &ossl_pkcs7_type, (pkcs7)); \
     if (!(pkcs7)) { \
 	ossl_raise(rb_eRuntimeError, "PKCS7 wasn't initialized."); \
     } \
@@ -31,10 +31,10 @@
     if (!(p7si)) { \
 	ossl_raise(rb_eRuntimeError, "PKCS7si wasn't initialized."); \
     } \
-    (obj) = Data_Wrap_Struct((klass), 0, PKCS7_SIGNER_INFO_free, (p7si)); \
+    (obj) = TypedData_Wrap_Struct((klass), &ossl_pkcs7_signer_info_type, (p7si)); \
 } while (0)
 #define GetPKCS7si(obj, p7si) do { \
-    Data_Get_Struct((obj), PKCS7_SIGNER_INFO, (p7si)); \
+    TypedData_Get_Struct((obj), PKCS7_SIGNER_INFO, &ossl_pkcs7_signer_info_type, (p7si)); \
     if (!(p7si)) { \
 	ossl_raise(rb_eRuntimeError, "PKCS7si wasn't initialized."); \
     } \
@@ -48,10 +48,10 @@
     if (!(p7ri)) { \
 	ossl_raise(rb_eRuntimeError, "PKCS7ri wasn't initialized."); \
     } \
-    (obj) = Data_Wrap_Struct((klass), 0, PKCS7_RECIP_INFO_free, (p7ri)); \
+    (obj) = TypedData_Wrap_Struct((klass), &ossl_pkcs7_recip_info_type, (p7ri)); \
 } while (0)
 #define GetPKCS7ri(obj, p7ri) do { \
-    Data_Get_Struct((obj), PKCS7_RECIP_INFO, (p7ri)); \
+    TypedData_Get_Struct((obj), PKCS7_RECIP_INFO, &ossl_pkcs7_recip_info_type, (p7ri)); \
     if (!(p7ri)) { \
 	ossl_raise(rb_eRuntimeError, "PKCS7ri wasn't initialized."); \
     } \
@@ -75,6 +75,48 @@ VALUE cPKCS7;
 VALUE cPKCS7Signer;
 VALUE cPKCS7Recipient;
 VALUE ePKCS7Error;
+
+static void
+ossl_pkcs7_free(void *ptr)
+{
+    PKCS7_free(ptr);
+}
+
+static const rb_data_type_t ossl_pkcs7_type = {
+    "OpenSSL/PKCS7",
+    {
+	0, ossl_pkcs7_free,
+    },
+    0, 0, RUBY_TYPED_FREE_IMMEDIATELY,
+};
+
+static void
+ossl_pkcs7_signer_info_free(void *ptr)
+{
+    PKCS7_SIGNER_INFO_free(ptr);
+}
+
+static const rb_data_type_t ossl_pkcs7_signer_info_type = {
+    "OpenSSL/PKCS7/SIGNER_INFO",
+    {
+	0, ossl_pkcs7_signer_info_free,
+    },
+    0, 0, RUBY_TYPED_FREE_IMMEDIATELY,
+};
+
+static void
+ossl_pkcs7_recip_info_free(void *ptr)
+{
+    PKCS7_RECIP_INFO_free(ptr);
+}
+
+static const rb_data_type_t ossl_pkcs7_recip_info_type = {
+    "OpenSSL/PKCS7/RECIP_INFO",
+    {
+	0, ossl_pkcs7_recip_info_free,
+    },
+    0, 0, RUBY_TYPED_FREE_IMMEDIATELY,
+};
 
 /*
  * Public
