@@ -27,7 +27,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   end
 
   def test_not_started_session
-    pend "non socket argument of SSLSocket.new is not supported on this platform" if /mswin|mingw/ =~ RUBY_PLATFORM
+    skip "non socket argument of SSLSocket.new is not supported on this platform" if /mswin|mingw/ =~ RUBY_PLATFORM
     open(__FILE__) do |f|
       assert_nil OpenSSL::SSL::SSLSocket.new(f).cert
     end
