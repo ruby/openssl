@@ -12,6 +12,7 @@ require "digest/md5"
 require 'tempfile'
 require "rbconfig"
 require "socket"
+require "envutil"
 
 module OpenSSL::TestUtils
   TEST_KEY_RSA1024 = OpenSSL::PKey::RSA.new <<-_end_of_pem_
