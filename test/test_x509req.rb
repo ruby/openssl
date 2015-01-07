@@ -1,6 +1,6 @@
 require_relative "utils"
 
-if defined?(OpenSSL)
+if defined?(OpenSSL::TestUtils)
 
 class OpenSSL::TestX509Request < Test::Unit::TestCase
   def setup
@@ -138,7 +138,7 @@ class OpenSSL::TestX509Request < Test::Unit::TestCase
     req.version = 1
     assert_equal(false, req.verify(@rsa1024))
   rescue OpenSSL::X509::RequestError
-    pend
+    skip
   end
 
   def test_sign_and_verify_dsa_md5
