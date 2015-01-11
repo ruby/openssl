@@ -1,9 +1,9 @@
 require_relative 'utils'
 
-if defined?(OpenSSL)
+if defined?(OpenSSL::TestUtils)
 
 require 'socket'
-require_relative 'ut_eof'
+require_relative '../ruby/ut_eof'
 
 module OpenSSL::SSLPairM
   def server

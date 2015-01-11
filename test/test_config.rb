@@ -23,7 +23,7 @@ __EOD__
   def test_constants
     assert(defined?(OpenSSL::Config::DEFAULT_CONFIG_FILE))
     config_file = OpenSSL::Config::DEFAULT_CONFIG_FILE
-    pend "DEFAULT_CONFIG_FILE may return a wrong path on your platforms. [Bug #6830]" unless File.readable?(config_file)
+    skip "DEFAULT_CONFIG_FILE may return a wrong path on your platforms. [Bug #6830]" unless File.readable?(config_file)
     assert_nothing_raised do
       OpenSSL::Config.load(config_file)
     end
@@ -294,4 +294,4 @@ __EOC__
     @it['newsection'] = {'a' => 'b'}
     assert_not_equal(@it.sections.sort, c.sections.sort)
   end
-end if defined?(OpenSSL)
+end if defined?(OpenSSL::TestUtils)

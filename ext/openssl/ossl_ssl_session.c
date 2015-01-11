@@ -4,25 +4,26 @@
 
 #include "ossl.h"
 
-#define GetSSLSession(obj, sess) do { \
-	Data_Get_Struct((obj), SSL_SESSION, (sess)); \
-	if (!(sess)) { \
-		ossl_raise(rb_eRuntimeError, "SSL Session wasn't initialized."); \
-	} \
-} while (0)
-
-#define SafeGetSSLSession(obj, sess) do { \
-	OSSL_Check_Kind((obj), cSSLSession); \
-	GetSSLSession((obj), (sess)); \
-} while (0)
-
-
 VALUE cSSLSession;
 static VALUE eSSLSession;
 
+static void
+ossl_ssl_session_free(void *ptr)
+{
+    SSL_SESSION_free(ptr);
+}
+
+const rb_data_type_t ossl_ssl_session_type = {
+    "OpenSSL/SSL/Session",
+    {
+	0, ossl_ssl_session_free,
+    },
+    0, 0, RUBY_TYPED_FREE_IMMEDIATELY,
+};
+
 static VALUE ossl_ssl_session_alloc(VALUE klass)
 {
-	return Data_Wrap_Struct(klass, 0, SSL_SESSION_free, NULL);
+	return TypedData_Wrap_Struct(klass, &ossl_ssl_session_type, NULL);
 }
 
 /*
@@ -43,7 +44,7 @@ static VALUE ossl_ssl_session_initialize(VALUE self, VALUE arg1)
 	if (rb_obj_is_instance_of(arg1, cSSLSocket)) {
 		SSL *ssl;
 
-		Data_Get_Struct(arg1, SSL, ssl);
+		GetSSL(arg1, ssl);
 
 		if (!ssl || (ctx = SSL_get1_session(ssl)) == NULL)
 			ossl_raise(eSSLSession, "no session available");
@@ -78,7 +79,11 @@ int SSL_SESSION_cmp(const SSL_SESSION *a,const SSL_SESSION *b)
     if (a->ssl_version != b->ssl_version ||
 	a->session_id_length != b->session_id_length)
 	return 1;
-    return memcmp(a->session_id,b-> session_id, a->session_id_length);
+#if defined(_WIN32)
+    return memcmp(a->session_id, b->session_id, a->session_id_length);
+#else
+    return CRYPTO_memcmp(a->session_id, b->session_id, a->session_id_length);
+#endif
 }
 #endif
 
