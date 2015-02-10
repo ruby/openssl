@@ -473,7 +473,7 @@ eom
           assert_operator(a.fdiv(b), :<, limit, message(message) {"#{n}: #{b} => #{a}"})
         end
       rescue LoadError
-        skip
+        pend
       end
 
       def assert_is_minus_zero(f)
