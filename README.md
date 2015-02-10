@@ -22,7 +22,8 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+See the documentation on OpenSSL for more usage,
+and the official [openssl library](http://www.openssl.org/).
 
 ## Contributing
 
