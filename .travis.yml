@@ -1,3 +1,7 @@
+before_install:
+  - "gem update rubygems-update"
+  - "gem update --system"
+  - "gem update bundler"
 script: "bundle exec rake test"
 
 rvm:
