@@ -476,6 +476,14 @@ eom
         pend
       end
 
+      def message msg = nil, ending = ".", &default
+        proc {
+          msg = msg.call.chomp(".") if Proc === msg
+          custom_message = "#{msg}.\n" unless msg.nil? or msg.to_s.empty?
+          "#{custom_message}#{default.call}#{ending}"
+        }
+      end
+
       def assert_is_minus_zero(f)
         assert(1.0/f == -Float::INFINITY, "#{f} is not -0.0")
       end
