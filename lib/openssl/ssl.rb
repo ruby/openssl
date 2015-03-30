@@ -143,8 +143,7 @@ module OpenSSL
           case san.tag
           when 2 # dNSName in GeneralName (RFC5280)
             should_verify_common_name = false
-            reg = Regexp.escape(san.value).gsub(/\\\*/, "[^.]+")
-            return true if /\A#{reg}\z/i =~ hostname
+            return true if verify_hostname(hostname, san.value)
           when 7 # iPAddress in GeneralName (RFC5280)
             should_verify_common_name = false
             # follows GENERAL_NAME_print() in x509v3/v3_alt.c
@@ -159,14 +158,50 @@ module OpenSSL
       if should_verify_common_name
         cert.subject.to_a.each{|oid, value|
           if oid == "CN"
-            reg = Regexp.escape(value).gsub(/\\\*/, "[^.]+")
-            return true if /\A#{reg}\z/i =~ hostname
+            return true if verify_hostname(hostname, value)
           end
         }
       end
       return false
     end
     module_function :verify_certificate_identity
+
+    def verify_hostname(hostname, san) # :nodoc:
+      san_parts = san.split(".")
+
+      # TODO: this behavior should probably be more strict
+      return san == hostname if san_parts.size < 2
+
+      host_parts = hostname.split(".")
+      return false unless san_parts.size == host_parts.size
+
+      # RFC 6125, section 6.4.3, subitem 1.
+      # The client SHOULD NOT attempt to match a presented identifier in
+      # which the wildcard character comprises a label other than the
+      # left-most label (e.g., do not match bar.*.example.net).
+      return false unless verify_wildcard(host_parts.shift, san_parts.shift)
+
+      san_parts.join(".") == host_parts.join(".")
+    end
+    module_function :verify_hostname
+
+    def verify_wildcard(domain_component, san_component) # :nodoc:
+      parts = san_component.split("*", -1)
+
+      return false if parts.size > 2
+      return san_component == domain_component if parts.size == 1
+
+      # RFC 6125, section 6.4.3, subitem 3.
+      # The client SHOULD NOT attempt to match a presented identifier
+      # where the wildcard character is embedded within an A-label or
+      # U-label of an internationalized domain name.
+      return false if domain_component.start_with?("xn--") && (!parts[0].empty? || !parts[1].empty?)
+
+      parts[0].length + parts[1].length < domain_component.length &&
+      domain_component.start_with?(parts[0]) &&
+      domain_component.end_with?(parts[1])
+    end
+    module_function :verify_wildcard
 
     class SSLSocket
       include Buffering
