@@ -426,6 +426,22 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     end
   end
 
+  def test_verify_hostname
+    assert_equal(true,  OpenSSL::SSL.verify_hostname("www.example.com", "*.example.com"))
+    assert_equal(false, OpenSSL::SSL.verify_hostname("www.subdomain.example.com", "*.example.com"))
+  end
+
+  def test_verify_wildcard
+    assert_equal(false, OpenSSL::SSL.verify_wildcard("foo", "x*"))
+    assert_equal(true,  OpenSSL::SSL.verify_wildcard("foo", "foo"))
+    assert_equal(true,  OpenSSL::SSL.verify_wildcard("foo", "f*"))
+    assert_equal(true,  OpenSSL::SSL.verify_wildcard("foo", "*"))
+    assert_equal(false, OpenSSL::SSL.verify_wildcard("abc*bcd", "abcd"))
+    assert_equal(false, OpenSSL::SSL.verify_wildcard("xn--qdk4b9b", "x*"))
+    assert_equal(false, OpenSSL::SSL.verify_wildcard("xn--qdk4b9b", "*--qdk4b9b")
+    assert_equal(true,  OpenSSL::SSL.verify_wildcard("xn--qdk4b9b", "xn--qdk4b9b"))
+  end
+
   # Create NULL byte SAN certificate
   def create_null_byte_SAN_certificate(critical = false)
     ef = OpenSSL::X509::ExtensionFactory.new
