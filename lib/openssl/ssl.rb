@@ -173,6 +173,11 @@ module OpenSSL
       include SocketForwarder
       include Nonblock
 
+      ##
+      # Perform hostname verification after an SSL connection is established
+      #
+      # This method MUST be called after calling #connect to ensure that the
+      # hostname of a remote peer has been verified.
       def post_connection_check(hostname)
         unless OpenSSL::SSL.verify_certificate_identity(peer_cert, hostname)
           raise SSLError, "hostname \"#{hostname}\" does not match the server certificate"
