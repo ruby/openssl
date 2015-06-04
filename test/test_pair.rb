@@ -328,7 +328,7 @@ module OpenSSL::TestPairM
     sock1.close if sock1
     sock2.close if sock2
     accepted.close if accepted.respond_to?(:close)
-  end
+  end if RUBY_VERSION.to_f > 2.2
 
   def test_connect_accept_nonblock
     ctx = OpenSSL::SSL::SSLContext.new()
