@@ -1,5 +1,5 @@
 before_install:
-  - "openssl version"
+  - "ruby -ropenssl -e 'puts OpenSSL::OPENSSL_VERSION'"
   - "gem update rubygems-update"
   - "gem update --system"
   - "gem update bundler"
