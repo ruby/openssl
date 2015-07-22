@@ -3,6 +3,12 @@ require "open3"
 require "timeout"
 require_relative "find_executable"
 
+unless defined?(MiniTest)
+  module MiniTest
+    Assertion = Test::Unit::AssertionFailedError
+  end
+end
+
 module EnvUtil
   def rubybin
     if ruby = ENV["RUBY"]
