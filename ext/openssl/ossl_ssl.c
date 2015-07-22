@@ -65,6 +65,7 @@ static VALUE eSSLErrorWaitWritable;
 #define ossl_sslctx_get_cert_store(o)    	rb_iv_get((o),"@cert_store")
 #define ossl_sslctx_get_extra_cert(o)    	rb_iv_get((o),"@extra_chain_cert")
 #define ossl_sslctx_get_client_cert_cb(o) 	rb_iv_get((o),"@client_cert_cb")
+#define ossl_sslctx_get_tmp_ecdh_cb(o)          rb_iv_get((o),"@tmp_ecdh_callback")
 #define ossl_sslctx_get_tmp_dh_cb(o)     	rb_iv_get((o),"@tmp_dh_callback")
 #define ossl_sslctx_get_sess_id_ctx(o)   	rb_iv_get((o),"@session_id_context")
 
@@ -74,6 +75,7 @@ static const char *ossl_sslctx_attrs[] = {
     "verify_callback", "options", "cert_store", "extra_chain_cert",
     "client_cert_cb", "tmp_dh_callback", "session_id_context",
     "session_get_cb", "session_new_cb", "session_remove_cb",
+    "tmp_ecdh_callback",
 #ifdef HAVE_SSL_SET_TLSEXT_HOST_NAME
     "servername_cb",
 #endif
@@ -89,6 +91,7 @@ static const char *ossl_sslctx_attrs[] = {
 #define ossl_ssl_get_x509(o)         rb_iv_get((o),"@x509")
 #define ossl_ssl_get_key(o)          rb_iv_get((o),"@key")
 #define ossl_ssl_get_tmp_dh(o)       rb_iv_get((o),"@tmp_dh")
+#define ossl_ssl_get_tmp_ecdh(o)     rb_iv_get((o),"@tmp_ecdh")
 
 #define ossl_ssl_set_io(o,v)         rb_iv_set((o),"@io",(v))
 #define ossl_ssl_set_ctx(o,v)        rb_iv_set((o),"@context",(v))
@@ -96,6 +99,7 @@ static const char *ossl_sslctx_attrs[] = {
 #define ossl_ssl_set_x509(o,v)       rb_iv_set((o),"@x509",(v))
 #define ossl_ssl_set_key(o,v)        rb_iv_set((o),"@key",(v))
 #define ossl_ssl_set_tmp_dh(o,v)     rb_iv_set((o),"@tmp_dh",(v))
+#define ossl_ssl_set_tmp_ecdh(o,v)   rb_iv_set((o),"@tmp_ecdh",(v))
 
 static const char *ossl_ssl_attr_readers[] = { "io", "context", };
 static const char *ossl_ssl_attrs[] = {
@@ -152,6 +156,7 @@ int ossl_ssl_ex_store_p;
 int ossl_ssl_ex_ptr_idx;
 int ossl_ssl_ex_client_cert_cb_idx;
 int ossl_ssl_ex_tmp_dh_callback_idx;
+int ossl_ssl_ex_tmp_ecdh_callback_idx;
 
 static void
 ossl_sslctx_free(void *ptr)
@@ -336,6 +341,41 @@ ossl_default_tmp_dh_callback(SSL *ssl, int is_export, int keylength)
     return NULL;
 }
 #endif /* OPENSSL_NO_DH */
+
+#if !defined(OPENSSL_NO_EC)
+static VALUE
+ossl_call_tmp_ecdh_callback(VALUE args)
+{
+    SSL *ssl;
+    VALUE cb, ecdh;
+    EVP_PKEY *pkey;
+
+    GetSSL(rb_ary_entry(args, 0), ssl);
+    cb = (VALUE)SSL_get_ex_data(ssl, ossl_ssl_ex_tmp_ecdh_callback_idx);
+    if (NIL_P(cb)) return Qfalse;
+    ecdh = rb_apply(cb, rb_intern("call"), args);
+    pkey = GetPKeyPtr(ecdh);
+    if (EVP_PKEY_type(pkey->type) != EVP_PKEY_EC) return Qfalse;
+    ossl_ssl_set_tmp_ecdh(rb_ary_entry(args, 0), ecdh);
+
+    return Qtrue;
+}
+
+static EC_KEY*
+ossl_tmp_ecdh_callback(SSL *ssl, int is_export, int keylength)
+{
+    VALUE args, success, rb_ssl;
+
+    rb_ssl = (VALUE)SSL_get_ex_data(ssl, ossl_ssl_ex_ptr_idx);
+
+    args = rb_ary_new_from_args(3, rb_ssl, INT2FIX(is_export), INT2FIX(keylength));
+
+    success = rb_protect(ossl_call_tmp_ecdh_callback, args, NULL);
+    if (!RTEST(success)) return NULL;
+
+    return GetPKeyPtr(ossl_ssl_get_tmp_ecdh(rb_ssl))->pkey.ec;
+}
+#endif
 
 static int
 ossl_ssl_verify_callback(int preverify_ok, X509_STORE_CTX *ctx)
@@ -600,13 +640,13 @@ ssl_npn_encode_protocol_i(VALUE cur, VALUE encoded)
     return Qnil;
 }
 
-static void
-ssl_npn_encode_protocols(VALUE sslctx, VALUE protocols)
+static VALUE
+ssl_encode_npn_protocols(VALUE protocols)
 {
     VALUE encoded = rb_str_new2("");
     rb_iterate(rb_each, protocols, ssl_npn_encode_protocol_i, encoded);
     StringValueCStr(encoded);
-    rb_iv_set(sslctx, "@_protocols", encoded);
+    return encoded;
 }
 
 static int
@@ -645,6 +685,33 @@ ssl_npn_select_cb(SSL *s, unsigned char **out, unsigned char *outlen, const unsi
 
     return SSL_TLSEXT_ERR_OK;
 }
+
+#ifdef HAVE_SSL_CTX_SET_ALPN_SELECT_CB
+static int
+ssl_alpn_select_cb(SSL *ssl, const unsigned char **out, unsigned char *outlen, const unsigned char *in, unsigned int inlen, void *arg)
+{
+    int i = 0;
+    VALUE sslctx_obj, cb, protocols, selected;
+
+    sslctx_obj = (VALUE) arg;
+    cb = rb_iv_get(sslctx_obj, "@alpn_select_cb");
+    protocols = rb_ary_new();
+
+    /* The format is len_1|proto_1|...|len_n|proto_n\0 */
+    while (in[i]) {
+	VALUE protocol = rb_str_new((const char *) &in[i + 1], in[i]);
+	rb_ary_push(protocols, protocol);
+	i += in[i] + 1;
+    }
+
+    selected = rb_funcall(cb, rb_intern("call"), 1, protocols);
+    *out = (unsigned char *) StringValuePtr(selected);
+    *outlen = RSTRING_LENINT(selected);
+
+    return SSL_TLSEXT_ERR_OK;
+}
+#endif
+
 #endif
 
 /* This function may serve as the entry point to support further
@@ -691,6 +758,13 @@ ossl_sslctx_setup(VALUE self)
 	SSL_CTX_set_tmp_dh_callback(ctx, ossl_default_tmp_dh_callback);
     }
 #endif
+
+#if !defined(OPENSSL_NO_EC)
+    if (RTEST(ossl_sslctx_get_tmp_ecdh_cb(self))){
+	SSL_CTX_set_tmp_ecdh_callback(ctx, ossl_tmp_ecdh_callback);
+    }
+#endif
+
     SSL_CTX_set_ex_data(ctx, ossl_ssl_ex_ptr_idx, (void*)self);
 
     val = ossl_sslctx_get_cert_store(self);
@@ -781,13 +855,26 @@ ossl_sslctx_setup(VALUE self)
 #ifdef HAVE_OPENSSL_NPN_NEGOTIATED
     val = rb_iv_get(self, "@npn_protocols");
     if (!NIL_P(val)) {
-	ssl_npn_encode_protocols(self, val);
+	rb_iv_set(self, "@_protocols", ssl_encode_npn_protocols(val));
 	SSL_CTX_set_next_protos_advertised_cb(ctx, ssl_npn_advertise_cb, (void *) self);
 	OSSL_Debug("SSL NPN advertise callback added");
     }
     if (RTEST(rb_iv_get(self, "@npn_select_cb"))) {
 	SSL_CTX_set_next_proto_select_cb(ctx, ssl_npn_select_cb, (void *) self);
 	OSSL_Debug("SSL NPN select callback added");
+    }
+#endif
+
+#ifdef HAVE_SSL_CTX_SET_ALPN_SELECT_CB
+    val = rb_iv_get(self, "@alpn_protocols");
+    if (!NIL_P(val)) {
+	VALUE rprotos = ssl_encode_npn_protocols(val);
+	SSL_CTX_set_alpn_protos(ctx, StringValueCStr(rprotos), RSTRING_LEN(rprotos));
+	OSSL_Debug("SSL ALPN values added");
+    }
+    if (RTEST(rb_iv_get(self, "@alpn_select_cb"))) {
+	SSL_CTX_set_alpn_select_cb(ctx, ssl_alpn_select_cb, (void *) self);
+	OSSL_Debug("SSL ALPN select callback added");
     }
 #endif
 
@@ -1234,6 +1321,8 @@ ossl_ssl_setup(VALUE self)
 	SSL_set_ex_data(ssl, ossl_ssl_ex_client_cert_cb_idx, (void*)cb);
 	cb = ossl_sslctx_get_tmp_dh_cb(v_ctx);
 	SSL_set_ex_data(ssl, ossl_ssl_ex_tmp_dh_callback_idx, (void*)cb);
+	cb = ossl_sslctx_get_tmp_ecdh_cb(v_ctx);
+	SSL_set_ex_data(ssl, ossl_ssl_ex_tmp_ecdh_callback_idx, (void*)cb);
 	SSL_set_info_callback(ssl, ssl_info_cb);
     }
 
@@ -1905,6 +1994,29 @@ ossl_ssl_npn_protocol(VALUE self)
     else
 	return rb_str_new((const char *) out, outlen);
 }
+
+/*
+ * call-seq:
+ *    ssl.alpn_protocol => String
+ *
+ * Returns the ALPN protocol string that was finally selected by the client
+ * during the handshake.
+ */
+static VALUE
+ossl_ssl_alpn_protocol(VALUE self)
+{
+    SSL *ssl;
+    const unsigned char *out;
+    unsigned int outlen;
+
+    ossl_ssl_data_get_struct(self, ssl);
+
+    SSL_get0_alpn_selected(ssl, &out, &outlen);
+    if (!outlen)
+	return Qnil;
+    else
+	return rb_str_new((const char *) out, outlen);
+}
 # endif
 #endif /* !defined(OPENSSL_NO_SOCK) */
 
@@ -1927,6 +2039,8 @@ Init_ossl_ssl(void)
 	SSL_get_ex_new_index(0,(void *)"ossl_ssl_ex_client_cert_cb_idx",0,0,0);
     ossl_ssl_ex_tmp_dh_callback_idx =
 	SSL_get_ex_new_index(0,(void *)"ossl_ssl_ex_tmp_dh_callback_idx",0,0,0);
+    ossl_ssl_ex_tmp_ecdh_callback_idx =
+	SSL_get_ex_new_index(0,(void *)"ossl_ssl_ex_tmp_ecdh_callback_idx",0,0,0);
 
     /* Document-module: OpenSSL::SSL
      *
@@ -2050,6 +2164,18 @@ Init_ossl_ssl(void)
     rb_attr(cSSLContext, rb_intern("client_cert_cb"), 1, 1, Qfalse);
 
     /*
+     * A callback invoked when ECDH parameters are required.
+     *
+     * The callback is invoked with the Session for the key exchange, an
+     * flag indicating the use of an export cipher and the keylength
+     * required.
+     *
+     * The callback must return an OpenSSL::PKey::EC instance of the correct
+     * key length.
+     */
+    rb_attr(cSSLContext, rb_intern("tmp_ecdh_callback"), 1, 1, Qfalse);
+
+     /*
      * A callback invoked when DH parameters are required.
      *
      * The callback is invoked with the Session for the key exchange, an
@@ -2154,6 +2280,38 @@ Init_ossl_ssl(void)
      *   end
      */
     rb_attr(cSSLContext, rb_intern("npn_select_cb"), 1, 1, Qfalse);
+#endif
+
+#ifdef HAVE_SSL_CTX_SET_ALPN_SELECT_CB
+    /*
+     * An Enumerable of Strings. Each String represents a protocol to be
+     * advertised as the list of supported protocols for Application-Layer Protocol
+     * Negotiation. Supported in OpenSSL 1.0.1 and higher. Has no effect
+     * on the client side. If not set explicitly, the NPN extension will
+     * not be sent by the server in the handshake.
+     *
+     * === Example
+     *
+     *   ctx.alpn_protocols = ["http/1.1", "spdy/2", "h2"]
+     */
+    rb_attr(cSSLContext, rb_intern("alpn_protocols"), 1, 1, Qfalse);
+    /*
+     * A callback invoked on the server side when the server needs to select
+     * a protocol from the list sent by the client. Supported in OpenSSL 1.0.2
+     * and higher. The server MUST select a protocol of those advertised by
+     * the client. If none is acceptable, raising an error in the callback
+     * will cause the handshake to fail. Not setting this callback explicitly
+     * means not supporting the ALPN extension on the client - any protocols
+     * advertised by the server will be ignored.
+     *
+     * === Example
+     *
+     *   ctx.alpn_select_cb = lambda do |protocols|
+     *     #inspect the protocols and select one
+     *     protocols.first
+     *   end
+     */
+    rb_attr(cSSLContext, rb_intern("alpn_select_cb"), 1, 1, Qfalse);
 #endif
 
     rb_define_alias(cSSLContext, "ssl_timeout", "timeout");
@@ -2268,6 +2426,9 @@ Init_ossl_ssl(void)
     rb_define_method(cSSLSocket, "session=",    ossl_ssl_set_session, 1);
     rb_define_method(cSSLSocket, "verify_result", ossl_ssl_get_verify_result, 0);
     rb_define_method(cSSLSocket, "client_ca", ossl_ssl_get_client_ca_list, 0);
+# ifdef HAVE_SSL_CTX_SET_ALPN_SELECT_CB
+    rb_define_method(cSSLSocket, "alpn_protocol", ossl_ssl_alpn_protocol, 0);
+# endif
 # ifdef HAVE_OPENSSL_NPN_NEGOTIATED
     rb_define_method(cSSLSocket, "npn_protocol", ossl_ssl_npn_protocol, 0);
 # endif
