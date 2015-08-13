@@ -94,5 +94,7 @@ RUN cd /build/ruby/ruby-2.2.2 && \
       --disable-install-doc && \
     make && make install
 
-#ONBUILD ENV GEM_HOME /home/openssl/.gem/
 ONBUILD WORKDIR /home/openssl/code
+
+COPY init.sh /home/openssl/init.sh
+ENTRYPOINT ["/home/openssl/init.sh"]
