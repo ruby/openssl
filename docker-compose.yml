@@ -1,0 +1,11 @@
+compile: &defaults
+  build: .
+  volumes:
+    - .:/home/openssl/code:rw
+  environment:
+    RUBY_VERSION:
+    OPENSSL_VERSION:
+  command: bundle exec rake compile
+test:
+  <<: *defaults
+  command: bundle exec rake test
