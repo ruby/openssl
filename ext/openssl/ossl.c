@@ -597,7 +597,7 @@ static void Init_ossl_locks(void)
  * ahold of the key may use it unless it is encrypted.  In order to securely
  * export a key you may export it with a pass phrase.
  *
- *   cipher = OpenSSL::Cipher.new 'AES-128-CBC'
+ *   cipher = OpenSSL::Cipher.new 'AES-256-CBC'
  *   pass_phrase = 'my secure pass phrase goes here'
  *
  *   key_secure = key.export cipher, pass_phrase
@@ -704,7 +704,7 @@ static void Init_ossl_locks(void)
  * using PBKDF2. PKCS #5 v2.0 recommends at least 8 bytes for the salt,
  * the number of iterations largely depends on the hardware being used.
  *
- *   cipher = OpenSSL::Cipher.new 'AES-128-CBC'
+ *   cipher = OpenSSL::Cipher.new 'AES-256-CBC'
  *   cipher.encrypt
  *   iv = cipher.random_iv
  *
@@ -727,7 +727,7 @@ static void Init_ossl_locks(void)
  * Use the same steps as before to derive the symmetric AES key, this time
  * setting the Cipher up for decryption.
  *
- *   cipher = OpenSSL::Cipher.new 'AES-128-CBC'
+ *   cipher = OpenSSL::Cipher.new 'AES-256-CBC'
  *   cipher.decrypt
  *   cipher.iv = iv # the one generated with #random_iv
  *
@@ -762,7 +762,7 @@ static void Init_ossl_locks(void)
  *
  * First set up the cipher for encryption
  *
- *   encryptor = OpenSSL::Cipher.new 'AES-128-CBC'
+ *   encryptor = OpenSSL::Cipher.new 'AES-256-CBC'
  *   encryptor.encrypt
  *   encryptor.pkcs5_keyivgen pass_phrase, salt
  *
@@ -775,7 +775,7 @@ static void Init_ossl_locks(void)
  *
  * Use a new Cipher instance set up for decryption
  *
- *   decryptor = OpenSSL::Cipher.new 'AES-128-CBC'
+ *   decryptor = OpenSSL::Cipher.new 'AES-256-CBC'
  *   decryptor.decrypt
  *   decryptor.pkcs5_keyivgen pass_phrase, salt
  *
@@ -861,7 +861,7 @@ static void Init_ossl_locks(void)
  *
  *   ca_key = OpenSSL::PKey::RSA.new 2048
  *
- *   cipher = OpenSSL::Cipher::Cipher.new 'AES-128-CBC'
+ *   cipher = OpenSSL::Cipher::Cipher.new 'AES-256-CBC'
  *
  *   open 'ca_key.pem', 'w', 0400 do |io|
  *     io.write ca_key.export(cipher, pass_phrase)
