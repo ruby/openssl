@@ -9,3 +9,6 @@ compile: &defaults
 test:
   <<: *defaults
   command: bundle exec rake test
+shell:
+  <<: *defaults
+  command: bundle exec irb
