@@ -186,7 +186,6 @@ module OpenSSL::Buffering
       buf.replace(ret)
       ret = buf
     end
-    raise EOFError if ret.empty?
     ret
   end
 
