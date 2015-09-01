@@ -8,4 +8,5 @@ Rake::ExtensionTask.new('openssl')
 # the same as before
 Rake::TestTask.new do |t|
   t.libs << 'test'
+  t.warning = true
 end

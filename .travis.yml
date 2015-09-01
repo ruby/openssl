@@ -1,15 +1,17 @@
+language: c
+sudo: required
+services:
+  - docker
 before_install:
-  - "ruby -ropenssl -e 'puts OpenSSL::OPENSSL_VERSION'"
-  - "gem update rubygems-update"
-  - "gem update --system"
-  - "gem update bundler"
-script: "bundle exec rake test"
-
-rvm:
-  - 2.2
-  - ruby-head
-
+  - sudo apt-get -qq update
+install:
+  - sudo sh -c "curl -L https://github.com/docker/compose/releases/download/1.3.3/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose"
+  - sudo chmod +x /usr/local/bin/docker-compose
+script:
+  - docker-compose run test
 matrix:
-  allow_failures:
-    - rvm: ruby-head
+  include:
+    - env: RUBY_VERSION=2.2.2 OPENSSL_VERSION=1.0.0s
+    - env: RUBY_VERSION=2.2.2 OPENSSL_VERSION=1.0.1p
+    - env: RUBY_VERSION=2.2.2 OPENSSL_VERSION=1.0.2d
   fast_finish: true
