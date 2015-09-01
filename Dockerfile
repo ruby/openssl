@@ -17,17 +17,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   xz-utils \
   zlib1g-dev
 
-# Supported OpenSSL versions: 0.9.8, 1.0.0, 1.0.1, 1.0.2
-RUN mkdir -p /build/openssl && \
-    curl -s https://www.openssl.org/source/openssl-0.9.8zg.tar.gz | tar -C /build/openssl -xzf - && \
-    cd build/openssl/openssl-0.9.8zg && \
-    ./config \
-       --openssldir=/opt/openssl/openssl-0.9.8zg \
-       --libdir=lib \
-       shared \
-       zlib-dynamic && \
-    make && make install
-
+# Supported OpenSSL versions: 1.0.0, 1.0.1, 1.0.2
 RUN mkdir -p /build/openssl && \
     curl -s https://www.openssl.org/source/openssl-1.0.0s.tar.gz | tar -C /build/openssl -xzf - && \
     cd build/openssl/openssl-1.0.0s && \
@@ -83,14 +73,6 @@ RUN cd /build/ruby/ruby-2.2.2 && \
     autoconf && ./configure \
       --with-openssl-dir=/opt/openssl/openssl-1.0.2d \
       --prefix=/opt/ruby/ruby-2.2.2-with-openssl-1.0.2d \
-      --disable-install-doc && \
-    make && make install
-
-RUN cd /build/ruby/ruby-2.2.2 && \
-    make distclean && \
-    autoconf && ./configure \
-      --with-openssl-dir=/opt/openssl/openssl-0.9.8zg \
-      --prefix=/opt/ruby/ruby-2.2.2-with-openssl-0.9.8zg \
       --disable-install-doc && \
     make && make install
 

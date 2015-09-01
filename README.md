@@ -4,7 +4,6 @@ Th following rubies are currently included:
 
 ```
 $ docker run -it ruby-openssl-docker ls /opt/ruby
--  ruby-2.2.2-with-openssl-0.9.8zg
 -  ruby-2.2.2-with-openssl-1.0.0s
 -  ruby-2.2.2-with-openssl-1.0.1p
 -  ruby-2.2.2-with-openssl-1.0.2d
