@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   file \
   git \
   gzip \
+  libreadline-dev \
   make \
   patch \
   sed \
