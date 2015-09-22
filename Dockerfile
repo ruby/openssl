@@ -49,8 +49,35 @@ RUN mkdir -p /build/openssl && \
        zlib-dynamic && \
     make && make install
 
-# Supported Ruby versions: 2.2.2
+# Supported Ruby versions: 2.2.2, 2.2.3
 RUN mkdir -p /build/ruby && \
+    curl -s https://cache.ruby-lang.org/pub/ruby/2.2/ruby-2.2.3.tar.gz | tar -C /build/ruby -xzf - && \
+    cd /build/ruby/ruby-2.2.3 && \
+    autoconf && ./configure \
+      --with-openssl-dir=/opt/openssl/openssl-1.0.1p \
+      --prefix=/opt/ruby/ruby-2.2.3-with-openssl-1.0.1p \
+      --disable-install-doc && \
+    make && make install
+
+ENV PATH /opt/ruby/ruby-2.2.3-with-openssl-1.0.1p/bin:$PATH
+
+RUN cd /build/ruby/ruby-2.2.3 && \
+    make distclean && \
+    autoconf && ./configure \
+      --with-openssl-dir=/opt/openssl/openssl-1.0.0s \
+      --prefix=/opt/ruby/ruby-2.2.3-with-openssl-1.0.0s \
+      --disable-install-doc && \
+    make && make install
+
+RUN cd /build/ruby/ruby-2.2.3 && \
+    make distclean && \
+    autoconf && ./configure \
+      --with-openssl-dir=/opt/openssl/openssl-1.0.2d \
+      --prefix=/opt/ruby/ruby-2.2.3-with-openssl-1.0.2d \
+      --disable-install-doc && \
+    make && make install
+
+RUN cd /build/ruby && \
     curl -s https://cache.ruby-lang.org/pub/ruby/2.2/ruby-2.2.2.tar.gz | tar -C /build/ruby -xzf - && \
     cd /build/ruby/ruby-2.2.2 && \
     autoconf && ./configure \
@@ -58,8 +85,6 @@ RUN mkdir -p /build/ruby && \
       --prefix=/opt/ruby/ruby-2.2.2-with-openssl-1.0.1p \
       --disable-install-doc && \
     make && make install
-
-ENV PATH /opt/ruby/ruby-2.2.2-with-openssl-1.0.1p/bin:$PATH
 
 RUN cd /build/ruby/ruby-2.2.2 && \
     make distclean && \

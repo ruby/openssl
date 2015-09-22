@@ -7,6 +7,9 @@ $ docker run -it ruby-openssl-docker ls /opt/ruby
 -  ruby-2.2.2-with-openssl-1.0.0s
 -  ruby-2.2.2-with-openssl-1.0.1p
 -  ruby-2.2.2-with-openssl-1.0.2d
+-  ruby-2.2.3-with-openssl-1.0.1p
+-  ruby-2.2.3-with-openssl-1.0.0s
+-  ruby-2.2.3-with-openssl-1.0.2d
 ```
 
 For example:
