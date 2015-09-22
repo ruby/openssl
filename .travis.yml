@@ -11,7 +11,7 @@ script:
   - docker-compose run test
 matrix:
   include:
-    - env: RUBY_VERSION=2.2.2 OPENSSL_VERSION=1.0.0s
-    - env: RUBY_VERSION=2.2.2 OPENSSL_VERSION=1.0.1p
-    - env: RUBY_VERSION=2.2.2 OPENSSL_VERSION=1.0.2d
+    - env: RUBY_VERSION=2.2.3 OPENSSL_VERSION=1.0.0s
+    - env: RUBY_VERSION=2.2.3 OPENSSL_VERSION=1.0.1p
+    - env: RUBY_VERSION=2.2.3 OPENSSL_VERSION=1.0.2d
   fast_finish: true
