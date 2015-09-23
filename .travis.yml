@@ -1,5 +1,6 @@
 language: c
 sudo: required
+group: edge
 services:
   - docker
 before_install:
@@ -9,6 +10,7 @@ install:
   - sudo chmod +x /usr/local/bin/docker-compose
 script:
   - docker-compose build --no-cache
+  - docker-compose run compile
   - docker-compose run test
 matrix:
   include:
