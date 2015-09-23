@@ -1,7 +1,5 @@
 # -*- coding: us-ascii -*-
 =begin
-= $RCSfile$ -- Generator for Makefile
-
 = Info
   'OpenSSL for Ruby 2' project
   Copyright (C) 2002  Michal Rokos <m.rokos@sh.cvut.cz>
@@ -10,9 +8,6 @@
 = Licence
   This program is licensed under the same licence as Ruby.
   (See the file 'LICENCE'.)
-
-= Version
-  $Id$
 =end
 
 require "mkmf"
@@ -104,6 +99,9 @@ have_func("OPENSSL_cleanse")
 have_func("SSLv2_method")
 have_func("SSLv2_server_method")
 have_func("SSLv2_client_method")
+have_func("SSLv3_method")
+have_func("SSLv3_server_method")
+have_func("SSLv3_client_method")
 have_func("TLSv1_1_method")
 have_func("TLSv1_1_server_method")
 have_func("TLSv1_1_client_method")

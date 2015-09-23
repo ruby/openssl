@@ -1,5 +1,4 @@
 /*
- * $Id$
  * 'OpenSSL for Ruby' project
  * Copyright (C) 2001 Michal Rokos <m.rokos@sh.cvut.cz>
  * All rights reserved.
@@ -84,8 +83,6 @@ void Init_ossl_dsa(void);
  */
 extern VALUE cDH;
 extern VALUE eDHError;
-extern DH *OSSL_DEFAULT_DH_512;
-extern DH *OSSL_DEFAULT_DH_1024;
 
 VALUE ossl_dh_new(EVP_PKEY *);
 void Init_ossl_dh(void);
