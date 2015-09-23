@@ -5,13 +5,13 @@ compile: &defaults
   environment:
     RUBY_VERSION:
     OPENSSL_VERSION:
-  command: bundle exec rake compile
+  command: rake compile
 test:
   <<: *defaults
-  command: bundle exec rake test
+  command: rake test
 shell:
   <<: *defaults
-  command: bundle exec irb
+  command: irb
 debug:
   <<: *defaults
   command: /bin/bash
