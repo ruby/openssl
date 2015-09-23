@@ -12,3 +12,6 @@ test:
 shell:
   <<: *defaults
   command: bundle exec irb
+debug:
+  <<: *defaults
+  command: /bin/bash
