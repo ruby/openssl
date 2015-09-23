@@ -38,4 +38,6 @@ and the official [openssl library](http://www.openssl.org/).
 ```
 ~/code/openssl => cp ../ruby/ext/openssl/*.{c,h,rb} ext/openssl/.
 ~/code/openssl => cp -R ../ruby/ext/openssl/lib/ lib/
+~/code/openssl => cp ../ruby/test/openssl/test_*.rb test/.
+~/code/openssl => cp ../ruby/test/openssl/utils.rb test/utils.rb
 ```
