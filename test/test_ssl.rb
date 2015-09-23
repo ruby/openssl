@@ -412,7 +412,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
       server_connect(port, ctx) { |ssl|
         msg = "Peer verification enabled, but no certificate received. Anonymous cipher suite " \
           "ADH-AES256-GCM-SHA384 was negotiated. Anonymous suites must be disabled to use peer verification."
-        assert_raise_with_message(sslerr,msg){ssl.post_connection_check("localhost.localdomain")}
+        assert_raise(sslerr.new(msg)){ssl.post_connection_check("localhost.localdomain")}
       }
     }
   end
