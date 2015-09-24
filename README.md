@@ -33,7 +33,7 @@ and the official [openssl library](http://www.openssl.org/).
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create a new Pull Request
 
-## Updating from source
+## Updating from trunk
 
 ```
 ~/code/openssl => cp ../ruby/ext/openssl/*.{c,h,rb} ext/openssl/.
