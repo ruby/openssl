@@ -89,7 +89,7 @@ module OpenSSL
 
       attr_accessor :tmp_dh_callback
 
-      if OpenSSL::ExtConfig::HAVE_TLSEXT_HOST_NAME
+      if ExtConfig::HAVE_TLSEXT_HOST_NAME
         # A callback invoked at connect time to distinguish between multiple
         # server names.
         #
@@ -249,10 +249,10 @@ module OpenSSL
       include Buffering
       include SocketForwarder
 
-      if OpenSSL::ExtConfig::OPENSSL_NO_SOCK
+      if ExtConfig::OPENSSL_NO_SOCK
         def initialize(io, ctx = nil); raise NotImplmentedError; end
       else
-        if OpenSSL::ExtConfig::HAVE_TLSEXT_HOST_NAME
+        if ExtConfig::HAVE_TLSEXT_HOST_NAME
           attr_accessor :hostname
         end
 
