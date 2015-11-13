@@ -10,9 +10,8 @@ class OpenSSL::TestCipher < Test::Unit::TestCase
       ciphers = OpenSSL::Cipher.ciphers
       # redefine method so we can use the cached ciphers value from the closure
       # and need not recompute the list each time
-      undef has_cipher?
-      define_singleton_method :has_cipher? do |cipher|
-        ciphers.include?(cipher)
+      define_singleton_method :has_cipher? do |name|
+        ciphers.include?(name)
       end
       has_cipher?(name)
     end
