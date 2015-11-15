@@ -50,6 +50,8 @@ unless result
   end
 end
 
+have_header("openssl/e_os2.h")
+
 unless have_header("openssl/conf_api.h")
   raise "OpenSSL 0.9.6 or later required."
 end
