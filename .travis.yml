@@ -1,12 +1,13 @@
 language: c
 sudo: required
 group: edge
+dist: trusty
 services:
   - docker
 before_install:
   - sudo apt-get -qq update
 install:
-  - sudo sh -c "curl -L https://github.com/docker/compose/releases/download/1.3.3/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose"
+  - sudo sh -c "curl -L https://github.com/docker/compose/releases/download/1.4.2/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose"
   - sudo chmod +x /usr/local/bin/docker-compose
 script:
   - docker-compose build --no-cache
