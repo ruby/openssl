@@ -449,7 +449,6 @@ eom
         token_re = Regexp.quote(token)
         envs = args.shift if Array === args and Hash === args.first
         args = [
-          "--disable=gems",
           "-r", File.expand_path("../memory_status", __FILE__),
           *args,
           "-v", "-",
