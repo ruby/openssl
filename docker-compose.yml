@@ -3,15 +3,16 @@ compile: &defaults
   volumes:
     - .:/home/openssl/code:rw
   environment:
-    RUBY_VERSION:
+    RUBY_VERSION: 2.2.3
     OPENSSL_VERSION:
-  command: bundle exec rake compile
+    LIBRESSL_VERSION:
+  command: rake compile
 test:
   <<: *defaults
-  command: bundle exec rake test
+  command: rake test
 shell:
   <<: *defaults
-  command: bundle exec irb
+  command: irb
 debug:
   <<: *defaults
   command: /bin/bash

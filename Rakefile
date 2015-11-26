@@ -1,4 +1,5 @@
-require "bundler/gem_tasks"
+gem 'rake-compiler', '~> 0.9'
+
 require 'rake'
 require 'rake/extensiontask'
 require 'rake/testtask'
