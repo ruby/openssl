@@ -20,24 +20,24 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Supported OpenSSL versions: 1.0.0, 1.0.1, 1.0.2
 RUN mkdir -p /build/openssl && \
-    curl -s https://www.openssl.org/source/openssl-1.0.0s.tar.gz | tar -C /build/openssl -xzf - && \
-    cd build/openssl/openssl-1.0.0s && \
+    curl -s https://www.openssl.org/source/openssl-1.0.0t.tar.gz | tar -C /build/openssl -xzf - && \
+    cd build/openssl/openssl-1.0.0t && \
     ./config \
-      --openssldir=/opt/openssl/openssl-1.0.0s \
+      --openssldir=/opt/openssl/openssl-1.0.0t \
       shared && \
     make && make install
 
-RUN curl -s https://www.openssl.org/source/openssl-1.0.1p.tar.gz | tar -C /build/openssl -xzf - && \
-    cd build/openssl/openssl-1.0.1p && \
+RUN curl -s https://www.openssl.org/source/openssl-1.0.1q.tar.gz | tar -C /build/openssl -xzf - && \
+    cd build/openssl/openssl-1.0.1q && \
     ./config \
-       --openssldir=/opt/openssl/openssl-1.0.1p \
+       --openssldir=/opt/openssl/openssl-1.0.1q \
        shared && \
     make && make install
 
-RUN curl -s https://www.openssl.org/source/openssl-1.0.2d.tar.gz | tar -C /build/openssl -xzf - && \
-    cd build/openssl/openssl-1.0.2d && \
+RUN curl -s https://www.openssl.org/source/openssl-1.0.2e.tar.gz | tar -C /build/openssl -xzf - && \
+    cd build/openssl/openssl-1.0.2e && \
     ./config \
-       --openssldir=/opt/openssl/openssl-1.0.2d \
+       --openssldir=/opt/openssl/openssl-1.0.2e \
        shared && \
     make && make install
 
