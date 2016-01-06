@@ -41,7 +41,16 @@ RUN curl -s https://www.openssl.org/source/openssl-1.0.2d.tar.gz | tar -C /build
        shared && \
     make && make install
 
+# Supported libressl versions: 2.1.9, 2.2.5, 2.3.1
 RUN mkdir -p /build/libressl
+RUN curl -s http://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.1.9.tar.gz | tar -C /build/libressl -xzf -
+RUN cd /build/libressl/libressl-2.1.9 && \
+  ./configure --prefix=/opt/libressl/libressl-2.1.9 && make && make install
+
+RUN curl -s http://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.2.5.tar.gz | tar -C /build/libressl -xzf -
+RUN cd /build/libressl/libressl-2.2.5 && \
+  ./configure --prefix=/opt/libressl/libressl-2.2.5 && make && make install
+
 RUN curl -s http://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.3.1.tar.gz | tar -C /build/libressl -xzf -
 RUN cd /build/libressl/libressl-2.3.1 && \
   ./configure --prefix=/opt/libressl/libressl-2.3.1 && make && make install
