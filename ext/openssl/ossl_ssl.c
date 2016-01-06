@@ -28,8 +28,8 @@
 } while (0)
 
 VALUE mSSL;
-VALUE mSSLExtConfig;
-VALUE eSSLError;
+static VALUE mSSLExtConfig;
+static VALUE eSSLError;
 VALUE cSSLContext;
 VALUE cSSLSocket;
 
@@ -75,7 +75,7 @@ static VALUE eSSLErrorWaitWritable;
 #define ossl_ssl_set_tmp_dh(o,v)     rb_iv_set((o),"@tmp_dh",(v))
 #define ossl_ssl_set_tmp_ecdh(o,v)   rb_iv_set((o),"@tmp_ecdh",(v))
 
-ID ID_callback_state;
+static ID ID_callback_state;
 
 static VALUE sym_exception, sym_wait_readable, sym_wait_writable;
 
@@ -120,9 +120,9 @@ static const struct {
 #undef OSSL_SSL_METHOD_ENTRY
 };
 
-int ossl_ssl_ex_vcb_idx;
-int ossl_ssl_ex_store_p;
-int ossl_ssl_ex_ptr_idx;
+static int ossl_ssl_ex_vcb_idx;
+static int ossl_ssl_ex_store_p;
+static int ossl_ssl_ex_ptr_idx;
 
 static void
 ossl_sslctx_free(void *ptr)
@@ -585,19 +585,16 @@ ssl_npn_select_cb_common(VALUE cb, const unsigned char **out, unsigned char *out
 {
     VALUE selected;
     long len;
-    unsigned char l;
     VALUE protocols = rb_ary_new();
+    unsigned char l;
+    const unsigned char *in_end = in + inlen;
 
-    /* The format is len_1|proto_1|...|len_n|proto_n\0 */
-    while ((l = *in++) != '\0') {
-	VALUE protocol;
-	if (l > inlen) {
-	    ossl_raise(eSSLError, "Invalid protocol name list");
-	}
-	protocol = rb_str_new((const char *)in, l);
-	rb_ary_push(protocols, protocol);
+    /* assume OpenSSL verifies this format */
+    /* The format is len_1|proto_1|...|len_n|proto_n */
+    while (in < in_end) {
+	l = *in++;
+	rb_ary_push(protocols, rb_str_new((const char *)in, l));
 	in += l;
-	inlen -= l;
     }
 
     selected = rb_funcall(cb, rb_intern("call"), 1, protocols);
