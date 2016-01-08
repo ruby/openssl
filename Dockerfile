@@ -55,17 +55,17 @@ RUN curl -s http://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.3.1.tar.gz | 
 RUN cd /build/libressl/libressl-2.3.1 && \
   ./configure --prefix=/opt/libressl/libressl-2.3.1 && make && make install
 
-# Supported Ruby versions: 2.2.4
+# Supported Ruby versions: 2.3.0
 RUN mkdir -p /build/ruby && \
-    curl -s https://cache.ruby-lang.org/pub/ruby/2.2/ruby-2.2.4.tar.gz | tar -C /build/ruby -xzf - && \
-    cd /build/ruby/ruby-2.2.4 && \
+    curl -s https://cache.ruby-lang.org/pub/ruby/2.2/ruby-2.3.0.tar.gz | tar -C /build/ruby -xzf - && \
+    cd /build/ruby/ruby-2.3.0 && \
     autoconf && ./configure \
       --without-openssl \
-      --prefix=/opt/ruby/ruby-2.2.4 \
+      --prefix=/opt/ruby/ruby-2.3.0 \
       --disable-install-doc && \
     make && make install
 
-ENV PATH /opt/ruby/ruby-2.2.4/bin:$PATH
+ENV PATH /opt/ruby/ruby-2.3.0/bin:$PATH
 
 ONBUILD WORKDIR /home/openssl/code
 
