@@ -57,7 +57,7 @@ RUN cd /build/libressl/libressl-2.3.1 && \
 
 # Supported Ruby versions: 2.3.0
 RUN mkdir -p /build/ruby && \
-    curl -s https://cache.ruby-lang.org/pub/ruby/2.2/ruby-2.3.0.tar.gz | tar -C /build/ruby -xzf - && \
+    curl -s https://cache.ruby-lang.org/pub/ruby/2.3/ruby-2.3.0.tar.gz | tar -C /build/ruby -xzf - && \
     cd /build/ruby/ruby-2.3.0 && \
     autoconf && ./configure \
       --without-openssl \
