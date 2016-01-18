@@ -32,12 +32,3 @@ and the official [openssl library](http://www.openssl.org/).
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create a new Pull Request
-
-## Updating from trunk
-
-```
-~/code/openssl => cp ../ruby/ext/openssl/*.{c,h,rb} ext/openssl/.
-~/code/openssl => cp -R ../ruby/ext/openssl/lib/ lib/
-~/code/openssl => cp ../ruby/test/openssl/test_*.rb test/.
-~/code/openssl => cp ../ruby/test/openssl/utils.rb test/utils.rb
-```
