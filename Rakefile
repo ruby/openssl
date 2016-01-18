@@ -12,6 +12,11 @@ Rake::TestTask.new do |t|
   t.warning = true
 end
 
+task :test => :debug
+task :debug do
+  sh "ruby -ropenssl -e 'puts OpenSSL::OPENSSL_LIBRARY_VERSION'"
+end
+
 task :sync do
   trunk = ENV.fetch("RUBY_TRUNK_PATH", "../ruby")
 
