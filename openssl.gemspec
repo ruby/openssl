@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.summary       = %q{OpenSSL provides SSL, TLS and general purpose cryptography.}
   spec.description   = %q{It wraps the OpenSSL library.}
   spec.homepage      = "http://www.ruby-lang.org/"
-  spec.license       = "ruby"
+  spec.license       = "Ruby"
 
   spec.files         = `git ls-files -z`.split("\x0")
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
