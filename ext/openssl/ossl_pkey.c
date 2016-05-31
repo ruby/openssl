@@ -20,20 +20,6 @@ ID id_private_q;
 /*
  * callback for generating keys
  */
-void
-ossl_generate_cb(int p, int n, void *arg)
-{
-    VALUE ary;
-
-    ary = rb_ary_new2(2);
-    rb_ary_store(ary, 0, INT2NUM(p));
-    rb_ary_store(ary, 1, INT2NUM(n));
-
-    rb_yield(ary);
-}
-
-#if HAVE_BN_GENCB
-/* OpenSSL 2nd version of GN generation callback */
 int
 ossl_generate_cb_2(int p, int n, BN_GENCB *cb)
 {
@@ -66,7 +52,6 @@ ossl_generate_cb_stop(void *ptr)
     struct ossl_generate_cb_arg *arg = (struct ossl_generate_cb_arg *)ptr;
     arg->stop = 1;
 }
-#endif
 
 static void
 ossl_evp_pkey_free(void *ptr)
@@ -121,8 +106,8 @@ ossl_pkey_new_from_file(VALUE filename)
     FILE *fp;
     EVP_PKEY *pkey;
 
-    SafeStringValue(filename);
-    if (!(fp = fopen(RSTRING_PTR(filename), "r"))) {
+    rb_check_safe_obj(filename);
+    if (!(fp = fopen(StringValueCStr(filename), "r"))) {
 	ossl_raise(ePKeyError, "%s", strerror(errno));
     }
     rb_fd_fix_cloexec(fileno(fp));
@@ -152,27 +137,21 @@ ossl_pkey_new_from_file(VALUE filename)
 static VALUE
 ossl_pkey_new_from_data(int argc, VALUE *argv, VALUE self)
 {
-     EVP_PKEY *pkey;
-     BIO *bio;
-     VALUE data, pass;
-     char *passwd = NULL;
+    EVP_PKEY *pkey;
+    BIO *bio;
+    VALUE data, pass;
 
-     rb_scan_args(argc, argv, "11", &data, &pass);
+    rb_scan_args(argc, argv, "11", &data, &pass);
+    pass = ossl_pem_passwd_value(pass);
 
-     bio = ossl_obj2bio(data);
-     if (!(pkey = d2i_PrivateKey_bio(bio, NULL))) {
+    bio = ossl_obj2bio(data);
+    if (!(pkey = d2i_PrivateKey_bio(bio, NULL))) {
 	OSSL_BIO_reset(bio);
-	if (!NIL_P(pass)) {
-	    passwd = StringValuePtr(pass);
-	}
-	if (!(pkey = PEM_read_bio_PrivateKey(bio, NULL, ossl_pem_passwd_cb, passwd))) {
+	if (!(pkey = PEM_read_bio_PrivateKey(bio, NULL, ossl_pem_passwd_cb, (void *)pass))) {
 	    OSSL_BIO_reset(bio);
 	    if (!(pkey = d2i_PUBKEY_bio(bio, NULL))) {
 		OSSL_BIO_reset(bio);
-		if (!NIL_P(pass)) {
-		    passwd = StringValuePtr(pass);
-		}
-		pkey = PEM_read_bio_PUBKEY(bio, NULL, ossl_pem_passwd_cb, passwd);
+		pkey = PEM_read_bio_PUBKEY(bio, NULL, ossl_pem_passwd_cb, (void *)pass);
 	    }
 	}
     }
@@ -374,7 +353,7 @@ Init_ossl_pkey(void)
      * algorithm consists of two parts: a public key that may be distributed
      * to others and a private key that needs to remain secret.
      *
-     * Messages encrypted with a public key can only be encrypted by
+     * Messages encrypted with a public key can only be decrypted by
      * recipients that are in possession of the associated private key.
      * Since public key algorithms are considerably slower than symmetric
      * key algorithms (cf. OpenSSL::Cipher) they are often used to establish

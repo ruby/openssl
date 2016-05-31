@@ -77,7 +77,6 @@ ossl_rsa_new(EVP_PKEY *pkey)
 /*
  * Private
  */
-#if defined(HAVE_RSA_GENERATE_KEY_EX) && HAVE_BN_GENCB
 struct rsa_blocking_gen_arg {
     RSA *rsa;
     BIGNUM *e;
@@ -93,12 +92,10 @@ rsa_blocking_gen(void *arg)
     gen->result = RSA_generate_key_ex(gen->rsa, gen->size, gen->e, gen->cb);
     return 0;
 }
-#endif
 
 static RSA *
 rsa_generate(int size, unsigned long exp)
 {
-#if defined(HAVE_RSA_GENERATE_KEY_EX) && HAVE_BN_GENCB
     int i;
     BN_GENCB cb;
     struct ossl_generate_cb_arg cb_arg;
@@ -139,15 +136,16 @@ rsa_generate(int size, unsigned long exp)
     if (!gen_arg.result) {
 	BN_free(e);
 	RSA_free(rsa);
-	if (cb_arg.state) rb_jump_tag(cb_arg.state);
+	if (cb_arg.state) {
+	    /* must clear OpenSSL error stack */
+	    ossl_clear_error();
+	    rb_jump_tag(cb_arg.state);
+	}
 	return 0;
     }
 
     BN_free(e);
     return rsa;
-#else
-    return RSA_generate_key(size, exp, rb_block_given_p() ? ossl_generate_cb : NULL, NULL);
-#endif
 }
 
 /*
@@ -206,7 +204,6 @@ ossl_rsa_initialize(int argc, VALUE *argv, VALUE self)
     EVP_PKEY *pkey;
     RSA *rsa;
     BIO *in;
-    char *passwd = NULL;
     VALUE arg, pass;
 
     GetPKey(self, pkey);
@@ -218,10 +215,10 @@ ossl_rsa_initialize(int argc, VALUE *argv, VALUE self)
 	if (!rsa) ossl_raise(eRSAError, NULL);
     }
     else {
-	if (!NIL_P(pass)) passwd = StringValuePtr(pass);
+	pass = ossl_pem_passwd_value(pass);
 	arg = ossl_to_der_if_possible(arg);
 	in = ossl_obj2bio(arg);
-	rsa = PEM_read_bio_RSAPrivateKey(in, NULL, ossl_pem_passwd_cb, passwd);
+	rsa = PEM_read_bio_RSAPrivateKey(in, NULL, ossl_pem_passwd_cb, (void *)pass);
 	if (!rsa) {
 	    OSSL_BIO_reset(in);
 	    rsa = PEM_read_bio_RSA_PUBKEY(in, NULL, NULL, NULL);
@@ -306,7 +303,6 @@ ossl_rsa_export(int argc, VALUE *argv, VALUE self)
     EVP_PKEY *pkey;
     BIO *out;
     const EVP_CIPHER *ciph = NULL;
-    char *passwd = NULL;
     VALUE cipher, pass, str;
 
     GetPKeyRSA(self, pkey);
@@ -315,19 +311,14 @@ ossl_rsa_export(int argc, VALUE *argv, VALUE self)
 
     if (!NIL_P(cipher)) {
 	ciph = GetCipherPtr(cipher);
-	if (!NIL_P(pass)) {
-	    StringValue(pass);
-	    if (RSTRING_LENINT(pass) < OSSL_MIN_PWD_LEN)
-		ossl_raise(eOSSLError, "OpenSSL requires passwords to be at least four characters long");
-	    passwd = RSTRING_PTR(pass);
-	}
+	pass = ossl_pem_passwd_value(pass);
     }
     if (!(out = BIO_new(BIO_s_mem()))) {
 	ossl_raise(eRSAError, NULL);
     }
     if (RSA_HAS_PRIVATE(pkey->pkey.rsa)) {
 	if (!PEM_write_bio_RSAPrivateKey(out, pkey->pkey.rsa, ciph,
-					 NULL, 0, ossl_pem_passwd_cb, passwd)) {
+					 NULL, 0, ossl_pem_passwd_cb, (void *)pass)) {
 	    BIO_free(out);
 	    ossl_raise(eRSAError, NULL);
 	}
@@ -391,6 +382,8 @@ ossl_rsa_public_encrypt(int argc, VALUE *argv, VALUE self)
     VALUE str, buffer, padding;
 
     GetPKeyRSA(self, pkey);
+    if (!pkey->pkey.rsa->n)
+	ossl_raise(eRSAError, "incomplete RSA");
     rb_scan_args(argc, argv, "11", &buffer, &padding);
     pad = (argc == 1) ? RSA_PKCS1_PADDING : NUM2INT(padding);
     StringValue(buffer);
@@ -420,6 +413,8 @@ ossl_rsa_public_decrypt(int argc, VALUE *argv, VALUE self)
     VALUE str, buffer, padding;
 
     GetPKeyRSA(self, pkey);
+    if (!pkey->pkey.rsa->n)
+	ossl_raise(eRSAError, "incomplete RSA");
     rb_scan_args(argc, argv, "11", &buffer, &padding);
     pad = (argc == 1) ? RSA_PKCS1_PADDING : NUM2INT(padding);
     StringValue(buffer);
@@ -449,9 +444,10 @@ ossl_rsa_private_encrypt(int argc, VALUE *argv, VALUE self)
     VALUE str, buffer, padding;
 
     GetPKeyRSA(self, pkey);
-    if (!RSA_PRIVATE(self, pkey->pkey.rsa)) {
-	ossl_raise(eRSAError, "private key needed.");
-    }
+    if (!pkey->pkey.rsa->n)
+	ossl_raise(eRSAError, "incomplete RSA");
+    if (!RSA_PRIVATE(self, pkey->pkey.rsa))
+	ossl_raise(eRSAError, "private key needed");
     rb_scan_args(argc, argv, "11", &buffer, &padding);
     pad = (argc == 1) ? RSA_PKCS1_PADDING : NUM2INT(padding);
     StringValue(buffer);
@@ -481,9 +477,10 @@ ossl_rsa_private_decrypt(int argc, VALUE *argv, VALUE self)
     VALUE str, buffer, padding;
 
     GetPKeyRSA(self, pkey);
-    if (!RSA_PRIVATE(self, pkey->pkey.rsa)) {
-	ossl_raise(eRSAError, "private key needed.");
-    }
+    if (!pkey->pkey.rsa->n)
+	ossl_raise(eRSAError, "incomplete RSA");
+    if (!RSA_PRIVATE(self, pkey->pkey.rsa))
+	ossl_raise(eRSAError, "private key needed");
     rb_scan_args(argc, argv, "11", &buffer, &padding);
     pad = (argc == 1) ? RSA_PKCS1_PADDING : NUM2INT(padding);
     StringValue(buffer);

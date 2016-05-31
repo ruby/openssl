@@ -182,7 +182,14 @@ AQjjxMXhwULlmuR/K+WwlaZPiLIBYalLAZQ7ZbOPeVkJ8ePao0eLAgEC
     end
   end
 
-  class OpenSSL::SSLTestCase < Test::Unit::TestCase
+  class OpenSSL::TestCase < Test::Unit::TestCase
+    def teardown
+      # OpenSSL error stack must be empty
+      assert_equal([], OpenSSL.errors)
+    end
+  end
+
+  class OpenSSL::SSLTestCase < OpenSSL::TestCase
     RUBY = EnvUtil.rubybin
     ITERATIONS = ($0 == __FILE__) ? 100 : 10
 
@@ -205,9 +212,6 @@ AQjjxMXhwULlmuR/K+WwlaZPiLIBYalLAZQ7ZbOPeVkJ8ePao0eLAgEC
       @svr_cert = issue_cert(@svr, @svr_key, 2, now, now+1800, ee_exts, @ca_cert, @ca_key, OpenSSL::Digest::SHA1.new)
       @cli_cert = issue_cert(@cli, @cli_key, 3, now, now+1800, ee_exts, @ca_cert, @ca_key, OpenSSL::Digest::SHA1.new)
       @server = nil
-    end
-
-    def teardown
     end
 
     def issue_cert(*arg)
@@ -278,6 +282,7 @@ AQjjxMXhwULlmuR/K+WwlaZPiLIBYalLAZQ7ZbOPeVkJ8ePao0eLAgEC
         ctx.cert = @svr_cert
         ctx.key = @svr_key
         ctx.tmp_dh_callback = proc { OpenSSL::TestUtils::TEST_KEY_DH1024 }
+        ctx.ecdh_curves = "P-256"
         ctx.verify_mode = verify_mode
         ctx_proc.call(ctx) if ctx_proc
 

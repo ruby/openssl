@@ -56,19 +56,16 @@ module OpenSSL
         }.join(":"),
         :options => -> {
           opts = OpenSSL::SSL::OP_ALL
-          opts &= ~OpenSSL::SSL::OP_DONT_INSERT_EMPTY_FRAGMENTS if defined?(OpenSSL::SSL::OP_DONT_INSERT_EMPTY_FRAGMENTS)
+          opts &= ~OpenSSL::SSL::OP_DONT_INSERT_EMPTY_FRAGMENTS
           opts |= OpenSSL::SSL::OP_NO_COMPRESSION if defined?(OpenSSL::SSL::OP_NO_COMPRESSION)
-          opts |= OpenSSL::SSL::OP_NO_SSLv2 if defined?(OpenSSL::SSL::OP_NO_SSLv2)
-          opts |= OpenSSL::SSL::OP_NO_SSLv3 if defined?(OpenSSL::SSL::OP_NO_SSLv3)
+          opts |= OpenSSL::SSL::OP_NO_SSLv2 | OpenSSL::SSL::OP_NO_SSLv3
           opts
         }.call
       }
 
       DEFAULT_CERT_STORE = OpenSSL::X509::Store.new
       DEFAULT_CERT_STORE.set_default_paths
-      if defined?(OpenSSL::X509::V_FLAG_CRL_CHECK_ALL)
-        DEFAULT_CERT_STORE.flags = OpenSSL::X509::V_FLAG_CRL_CHECK_ALL
-      end
+      DEFAULT_CERT_STORE.flags = OpenSSL::X509::V_FLAG_CRL_CHECK_ALL
 
       INIT_VARS = ["cert", "key", "client_ca", "ca_file", "ca_path",
         "timeout", "verify_mode", "verify_depth", "renegotiation_cb",
@@ -250,47 +247,21 @@ module OpenSSL
       include Buffering
       include SocketForwarder
 
-      if ExtConfig::OPENSSL_NO_SOCK
-        def initialize(io, ctx = nil); raise NotImplementedError; end
-      else
-        if ExtConfig::HAVE_TLSEXT_HOST_NAME
-          attr_accessor :hostname
-        end
-
-        attr_reader :io, :context
-        attr_accessor :sync_close
-        alias :to_io :io
-
-        # call-seq:
-        #    SSLSocket.new(io) => aSSLSocket
-        #    SSLSocket.new(io, ctx) => aSSLSocket
-        #
-        # Creates a new SSL socket from +io+ which must be a real ruby object (not an
-        # IO-like object that responds to read/write).
-        #
-        # If +ctx+ is provided the SSL Sockets initial params will be taken from
-        # the context.
-        #
-        # The OpenSSL::Buffering module provides additional IO methods.
-        #
-        # This method will freeze the SSLContext if one is provided;
-        # however, session management is still allowed in the frozen SSLContext.
-
-        def initialize(io, context = OpenSSL::SSL::SSLContext.new)
-          @io         = io
-          @context    = context
-          @sync_close = false
-          @hostname   = nil
-          @io.nonblock = true if @io.respond_to?(:nonblock=)
-          context.setup
-          super()
-        end
+      if ExtConfig::HAVE_TLSEXT_HOST_NAME
+        attr_reader :hostname
       end
+
+      attr_reader :io, :context
+      attr_accessor :sync_close
+      alias :to_io :io
 
       # call-seq:
       #    ssl.sysclose => nil
       #
-      # Shuts down the SSL connection and prepares it for another connection.
+      # Sends "close notify" to the peer and tries to shut down the SSL
+      # connection gracefully.
+      #
+      # If sync_close is set to +true+, the underlying IO is also closed.
       def sysclose
         return if closed?
         stop

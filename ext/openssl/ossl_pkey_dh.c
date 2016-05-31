@@ -20,7 +20,7 @@
 
 #define DH_HAS_PRIVATE(dh) ((dh)->priv_key)
 
-#ifdef OSSL_ENGINE_ENABLED
+#if !defined(OPENSSL_NO_ENGINE)
 #  define DH_PRIVATE(dh) (DH_HAS_PRIVATE(dh) || (dh)->engine)
 #else
 #  define DH_PRIVATE(dh) DH_HAS_PRIVATE(dh)
@@ -82,7 +82,6 @@ ossl_dh_new(EVP_PKEY *pkey)
 /*
  * Private
  */
-#if defined(HAVE_DH_GENERATE_PARAMETERS_EX) && HAVE_BN_GENCB
 struct dh_blocking_gen_arg {
     DH *dh;
     int size;
@@ -98,12 +97,10 @@ dh_blocking_gen(void *arg)
     gen->result = DH_generate_parameters_ex(gen->dh, gen->size, gen->gen, gen->cb);
     return 0;
 }
-#endif
 
 static DH *
 dh_generate(int size, int gen)
 {
-#if defined(HAVE_DH_GENERATE_PARAMETERS_EX) && HAVE_BN_GENCB
     BN_GENCB cb;
     struct ossl_generate_cb_arg cb_arg;
     struct dh_blocking_gen_arg gen_arg;
@@ -129,15 +126,13 @@ dh_generate(int size, int gen)
 
     if (!gen_arg.result) {
 	DH_free(dh);
-	if (cb_arg.state) rb_jump_tag(cb_arg.state);
+	if (cb_arg.state) {
+	    /* Clear OpenSSL error queue before re-raising. */
+	    ossl_clear_error();
+	    rb_jump_tag(cb_arg.state);
+	}
 	return 0;
     }
-#else
-    DH *dh;
-
-    dh = DH_generate_parameters(size, gen, rb_block_given_p() ? ossl_generate_cb : NULL, NULL);
-    if (!dh) return 0;
-#endif
 
     if (!DH_generate_key(dh)) {
         DH_free(dh);
@@ -506,6 +501,8 @@ ossl_dh_compute_key(VALUE self, VALUE pub)
 
     GetPKeyDH(self, pkey);
     dh = pkey->pkey.dh;
+    if (!dh->p)
+	ossl_raise(eDHError, "incomplete DH");
     pub_key = GetBNPtr(pub);
     len = DH_size(dh);
     str = rb_str_new(0, len);

@@ -752,7 +752,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
 
     ctx3 = OpenSSL::SSL::SSLContext.new
     ctx3.ciphers = "DH"
-    refute_predicate ctx3, :frozen?
+    assert_not_predicate ctx3, :frozen?
 
     ctx2 = OpenSSL::SSL::SSLContext.new
     ctx2.ciphers = "DH"
@@ -869,10 +869,8 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     start_server(OpenSSL::SSL::VERIFY_NONE, true, :ctx_proc => ctx_proc, :server_proc => server_proc) do |server, port|
       2.times do |i|
         ctx = OpenSSL::SSL::SSLContext.new
-        if defined?(OpenSSL::SSL::OP_NO_TICKET)
-          # disable RFC4507 support
-          ctx.options = OpenSSL::SSL::OP_NO_TICKET
-        end
+        # disable RFC4507 support
+        ctx.options = OpenSSL::SSL::OP_NO_TICKET
         server_connect(port, ctx) { |ssl|
           ssl.hostname = (i & 1 == 0) ? 'foo.example.com' : 'bar.example.com'
           str = "x" * 100 + "\n"
@@ -1064,7 +1062,9 @@ if OpenSSL::OPENSSL_VERSION_NUMBER >= 0x10002000
   end
 end
 
-if OpenSSL::OPENSSL_VERSION_NUMBER > 0x10001000
+if OpenSSL::OPENSSL_VERSION_NUMBER > 0x10001000 &&
+	OpenSSL::SSL::SSLContext.method_defined?(:npn_select_cb)
+  # NPN may be disabled by OpenSSL configure option
 
   def test_npn_protocol_selection_ary
     advertised = ["http/1.1", "spdy/2"]
@@ -1165,6 +1165,57 @@ end
       ssl.close
       assert(s.closed?)
     }
+  end
+
+  def test_close_and_socket_close_while_connecting
+    # test it doesn't cause a segmentation fault
+    ctx = OpenSSL::SSL::SSLContext.new
+    ctx.ciphers = "aNULL"
+
+    sock1, sock2 = socketpair
+    ssl1 = OpenSSL::SSL::SSLSocket.new(sock1, ctx)
+    ssl2 = OpenSSL::SSL::SSLSocket.new(sock2, ctx)
+
+    t = Thread.new { ssl1.connect }
+    ssl2.accept
+
+    ssl1.close
+    sock1.close
+    t.value rescue nil
+  ensure
+    ssl1.close if ssl1
+    ssl2.close if ssl2
+    sock1.close if sock1
+    sock2.close if sock2
+  end
+
+  def test_get_ephemeral_key
+    return unless OpenSSL::SSL::SSLSocket.method_defined?(:tmp_key)
+    pkey = OpenSSL::PKey
+    ciphers = {
+        'ECDHE-RSA-AES128-SHA' => (pkey::EC if defined?(pkey::EC)),
+        'DHE-RSA-AES128-SHA' => (pkey::DH if defined?(pkey::DH)),
+        'AES128-SHA' => nil
+    }
+    conf_proc = Proc.new { |ctx| ctx.ciphers = 'ALL' }
+    start_server(OpenSSL::SSL::VERIFY_NONE, true, :ctx_proc => conf_proc) do |server, port|
+      ciphers.each do |cipher, ephemeral|
+        ctx = OpenSSL::SSL::SSLContext.new
+        begin
+          ctx.ciphers = cipher
+        rescue OpenSSL::SSL::SSLError => e
+          next if /no cipher match/ =~ e.message
+          raise
+        end
+        server_connect(port, ctx) do |ssl|
+          if ephemeral
+            assert_instance_of(ephemeral, ssl.tmp_key)
+          else
+            assert_nil(ssl.tmp_key)
+          end
+        end
+      end
+    end
   end
 
   private

@@ -141,7 +141,7 @@ ossl_x509attr_set_oid(VALUE self, VALUE oid)
     ASN1_OBJECT *obj;
     char *s;
 
-    s = StringValuePtr(oid);
+    s = StringValueCStr(oid);
     obj = OBJ_txt2obj(s, 0);
     if(!obj) obj = OBJ_txt2obj(s, 1);
     if(!obj) ossl_raise(eX509AttrError, NULL);
@@ -178,14 +178,6 @@ ossl_x509attr_get_oid(VALUE self)
     return ret;
 }
 
-#if defined(HAVE_ST_X509_ATTRIBUTE_SINGLE) || defined(HAVE_ST_SINGLE)
-#  define OSSL_X509ATTR_IS_SINGLE(attr)  ((attr)->single)
-#  define OSSL_X509ATTR_SET_SINGLE(attr) ((attr)->single = 1)
-#else
-#  define OSSL_X509ATTR_IS_SINGLE(attr)  (!(attr)->value.set)
-#  define OSSL_X509ATTR_SET_SINGLE(attr) ((attr)->value.set = 0)
-#endif
-
 /*
  * call-seq:
  *    attr.value = asn1 => asn1
@@ -196,6 +188,7 @@ ossl_x509attr_set_value(VALUE self, VALUE value)
     X509_ATTRIBUTE *attr;
     ASN1_TYPE *a1type;
 
+    OSSL_Check_Kind(value, cASN1Data);
     if(!(a1type = ossl_asn1_get_asn1type(value)))
 	ossl_raise(eASN1Error, "could not get ASN1_TYPE");
     if(ASN1_TYPE_get(a1type) == V_ASN1_SEQUENCE){
@@ -204,10 +197,10 @@ ossl_x509attr_set_value(VALUE self, VALUE value)
     }
     GetX509Attr(self, attr);
     if(attr->value.set){
-	if(OSSL_X509ATTR_IS_SINGLE(attr)) ASN1_TYPE_free(attr->value.single);
+	if(attr->single) ASN1_TYPE_free(attr->value.single);
 	else sk_ASN1_TYPE_free(attr->value.set);
     }
-    OSSL_X509ATTR_SET_SINGLE(attr);
+    attr->single = 1;
     attr->value.single = a1type;
 
     return value;
@@ -227,7 +220,7 @@ ossl_x509attr_get_value(VALUE self)
 
     GetX509Attr(self, attr);
     if(attr->value.ptr == NULL) return Qnil;
-    if(OSSL_X509ATTR_IS_SINGLE(attr)){
+    if(attr->single){
 	length = i2d_ASN1_TYPE(attr->value.single, NULL);
 	str = rb_str_new(0, length);
 	p = (unsigned char *)RSTRING_PTR(str);
@@ -268,7 +261,7 @@ ossl_x509attr_to_der(VALUE self)
     p = (unsigned char *)RSTRING_PTR(str);
     if(i2d_X509_ATTRIBUTE(attr, &p) <= 0)
 	ossl_raise(eX509AttrError, NULL);
-    rb_str_set_len(str, p - (unsigned char*)RSTRING_PTR(str));
+    ossl_str_adjust(str, p);
 
     return str;
 }

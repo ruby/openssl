@@ -116,7 +116,7 @@ ossl_cipher_initialize(VALUE self, VALUE str)
     char *name;
     unsigned char key[EVP_MAX_KEY_LENGTH];
 
-    name = StringValuePtr(str);
+    name = StringValueCStr(str);
     GetCipherInit(self, ctx);
     if (ctx) {
 	ossl_raise(rb_eRuntimeError, "Cipher already inititalized!");
@@ -124,7 +124,7 @@ ossl_cipher_initialize(VALUE self, VALUE str)
     AllocCipher(self, ctx);
     EVP_CIPHER_CTX_init(ctx);
     if (!(cipher = EVP_get_cipherbyname(name))) {
-	ossl_raise(rb_eRuntimeError, "unsupported cipher algorithm (%s)", name);
+	ossl_raise(rb_eRuntimeError, "unsupported cipher algorithm (%"PRIsVALUE")", str);
     }
     /*
      * The EVP which has EVP_CIPH_RAND_KEY flag (such as DES3) allows
@@ -158,16 +158,13 @@ ossl_cipher_copy(VALUE self, VALUE other)
     return self;
 }
 
-#ifdef HAVE_OBJ_NAME_DO_ALL_SORTED
 static void*
 add_cipher_name_to_ary(const OBJ_NAME *name, VALUE ary)
 {
     rb_ary_push(ary, rb_str_new2(name->name));
     return NULL;
 }
-#endif
 
-#ifdef HAVE_OBJ_NAME_DO_ALL_SORTED
 /*
  *  call-seq:
  *     OpenSSL::Cipher.ciphers -> array[string...]
@@ -186,9 +183,6 @@ ossl_s_ciphers(VALUE self)
 
     return ary;
 }
-#else
-#define ossl_s_ciphers rb_f_notimplement
-#endif
 
 /*
  *  call-seq:
@@ -480,15 +474,17 @@ static VALUE
 ossl_cipher_set_key(VALUE self, VALUE key)
 {
     EVP_CIPHER_CTX *ctx;
+    int key_len;
 
     StringValue(key);
     GetCipher(self, ctx);
 
-    if (RSTRING_LEN(key) < EVP_CIPHER_CTX_key_length(ctx))
-        ossl_raise(eCipherError, "key length too short");
+    key_len = EVP_CIPHER_CTX_key_length(ctx);
+    if (RSTRING_LEN(key) != key_len)
+	ossl_raise(rb_eArgError, "key must be %d bytes", key_len);
 
     if (EVP_CipherInit_ex(ctx, NULL, NULL, (unsigned char *)RSTRING_PTR(key), NULL, -1) != 1)
-        ossl_raise(eCipherError, NULL);
+	ossl_raise(eCipherError, NULL);
 
     return key;
 }
@@ -512,12 +508,14 @@ static VALUE
 ossl_cipher_set_iv(VALUE self, VALUE iv)
 {
     EVP_CIPHER_CTX *ctx;
+    int iv_len;
 
     StringValue(iv);
     GetCipher(self, ctx);
 
-    if (RSTRING_LEN(iv) < EVP_CIPHER_CTX_iv_length(ctx))
-        ossl_raise(eCipherError, "iv length too short");
+    iv_len = EVP_CIPHER_CTX_iv_length(ctx);
+    if (RSTRING_LEN(iv) != iv_len)
+	ossl_raise(rb_eArgError, "iv must be %d bytes", iv_len);
 
     if (EVP_CipherInit_ex(ctx, NULL, NULL, NULL, (unsigned char *)RSTRING_PTR(iv), -1) != 1)
 	ossl_raise(eCipherError, NULL);
@@ -719,7 +717,6 @@ ossl_cipher_set_key_length(VALUE self, VALUE key_length)
     return key_length;
 }
 
-#if defined(HAVE_EVP_CIPHER_CTX_SET_PADDING)
 /*
  *  call-seq:
  *     cipher.padding = integer -> integer
@@ -741,9 +738,6 @@ ossl_cipher_set_padding(VALUE self, VALUE padding)
 	ossl_raise(eCipherError, NULL);
     return padding;
 }
-#else
-#define ossl_cipher_set_padding rb_f_notimplement
-#endif
 
 #define CIPHER_0ARG_INT(func)					\
     static VALUE						\

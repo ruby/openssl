@@ -78,9 +78,9 @@ ossl_x509_new_from_file(VALUE filename)
     FILE *fp;
     VALUE obj;
 
-    SafeStringValue(filename);
+    rb_check_safe_obj(filename);
     obj = NewX509(cX509Cert);
-    if (!(fp = fopen(RSTRING_PTR(filename), "r"))) {
+    if (!(fp = fopen(StringValueCStr(filename), "r"))) {
 	ossl_raise(eX509CertError, "%s", strerror(errno));
     }
     rb_fd_fix_cloexec(fileno(fp));
@@ -591,18 +591,19 @@ ossl_x509_verify(VALUE self, VALUE key)
 {
     X509 *x509;
     EVP_PKEY *pkey;
-    int i;
 
     pkey = GetPKeyPtr(key); /* NO NEED TO DUP */
     GetX509(self, x509);
-    if ((i = X509_verify(x509, pkey)) < 0) {
+
+    switch (X509_verify(x509, pkey)) {
+      case 1:
+	return Qtrue;
+      case 0:
+	ossl_clear_error();
+	return Qfalse;
+      default:
 	ossl_raise(eX509CertError, NULL);
     }
-    if (i > 0) {
-	return Qtrue;
-    }
-
-    return Qfalse;
 }
 
 /*

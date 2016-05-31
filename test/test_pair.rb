@@ -280,6 +280,35 @@ module OpenSSL::TestPairM
     }
   end
 
+  def test_write_nonblock_retry
+    ssl_pair {|s1, s2|
+      # fill up a socket so we hit EAGAIN
+      written = String.new
+      n = 0
+      buf = 'a' * 11
+      case ret = s1.write_nonblock(buf, exception: false)
+      when :wait_readable then break
+      when :wait_writable then break
+      when Integer
+        written << buf
+        n += ret
+        exp = buf.bytesize
+        if ret != exp
+          buf = buf.byteslice(ret, exp - ret)
+        end
+      end while true
+      assert_kind_of Symbol, ret
+
+      # make more space for subsequent write:
+      readed = s2.read(n)
+      assert_equal written, readed
+
+      # this fails if SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER is missing:
+      buf2 = Marshal.load(Marshal.dump(buf))
+      assert_kind_of Integer, s1.write_nonblock(buf2, exception: false)
+    }
+  end
+
   def tcp_pair
     host = "127.0.0.1"
     serv = TCPServer.new(host, 0)
@@ -343,41 +372,73 @@ module OpenSSL::TestPairM
   end
 
   def test_ecdh_callback
-    called = false
-    ctx2 = OpenSSL::SSL::SSLContext.new
-    ctx2.ciphers = "ECDH"
-    ctx2.tmp_ecdh_callback = ->(*args) {
-      called = true
-      OpenSSL::PKey::EC.new "prime256v1"
-    }
+    return unless OpenSSL::SSL::SSLContext.instance_methods.include?(:tmp_ecdh_callback)
+    EnvUtil.suppress_warning do # tmp_ecdh_callback is deprecated (2016-05)
+      begin
+        called = false
+        ctx2 = OpenSSL::SSL::SSLContext.new
+        ctx2.ciphers = "ECDH"
+        ctx2.tmp_ecdh_callback = ->(*args) {
+          called = true
+          OpenSSL::PKey::EC.new "prime256v1"
+        }
 
+        sock1, sock2 = tcp_pair
+
+        s2 = OpenSSL::SSL::SSLSocket.new(sock2, ctx2)
+        ctx1 = OpenSSL::SSL::SSLContext.new
+        ctx1.ciphers = "ECDH"
+
+        s1 = OpenSSL::SSL::SSLSocket.new(sock1, ctx1)
+        th = Thread.new do
+          begin
+            rv = s1.connect_nonblock(exception: false)
+            case rv
+            when :wait_writable
+              IO.select(nil, [s1], nil, 5)
+            when :wait_readable
+              IO.select([s1], nil, nil, 5)
+            end
+          end until rv == s1
+        end
+
+        accepted = s2.accept
+        assert called, 'ecdh callback should be called'
+      rescue OpenSSL::SSL::SSLError => e
+        if e.message =~ /no cipher match/
+          skip "ECDH cipher not supported."
+        else
+          raise e
+        end
+      ensure
+        th.join if th
+        s1.close if s1
+        s2.close if s2
+        sock1.close if sock1
+        sock2.close if sock2
+      end
+    end
+  end
+
+  def test_ecdh_curves
     sock1, sock2 = tcp_pair
 
-    s2 = OpenSSL::SSL::SSLSocket.new(sock2, ctx2)
     ctx1 = OpenSSL::SSL::SSLContext.new
     ctx1.ciphers = "ECDH"
-
+    ctx1.ecdh_curves = "P-384:P-521"
     s1 = OpenSSL::SSL::SSLSocket.new(sock1, ctx1)
-    th = Thread.new do
-      begin
-        rv = s1.connect_nonblock(exception: false)
-        case rv
-        when :wait_writable
-          IO.select(nil, [s1], nil, 5)
-        when :wait_readable
-          IO.select([s1], nil, nil, 5)
-        end
-      end until rv == s1
-    end
 
-    accepted = s2.accept
+    ctx2 = OpenSSL::SSL::SSLContext.new
+    ctx2.ciphers = "ECDH"
+    ctx2.ecdh_curves = "P-256:P-384"
+    s2 = OpenSSL::SSL::SSLSocket.new(sock2, ctx2)
 
-    assert called, 'ecdh callback should be called'
-  rescue OpenSSL::SSL::SSLError => e
-    if e.message =~ /no cipher match/
-      skip "ECDH cipher not supported."
-    else
-      raise e
+    th = Thread.new { s1.accept }
+    s2.connect
+
+    assert s2.cipher[0].start_with?("AECDH"), "AECDH should be used"
+    if s2.respond_to?(:tmp_key)
+      assert_equal "secp384r1", s2.tmp_key.group.curve_name
     end
   ensure
     th.join if th
@@ -385,7 +446,6 @@ module OpenSSL::TestPairM
     s2.close if s2
     sock1.close if sock1
     sock2.close if sock2
-    accepted.close if accepted.respond_to?(:close)
   end
 
   def test_connect_accept_nonblock_no_exception
@@ -488,36 +548,36 @@ module OpenSSL::TestPairM
   end
 end
 
-class OpenSSL::TestEOF1 < Test::Unit::TestCase
+class OpenSSL::TestEOF1 < OpenSSL::TestCase
   include TestEOF
   include OpenSSL::SSLPair
   include OpenSSL::TestEOF1M
 end
 
-class OpenSSL::TestEOF1LowlevelSocket < Test::Unit::TestCase
+class OpenSSL::TestEOF1LowlevelSocket < OpenSSL::TestCase
   include TestEOF
   include OpenSSL::SSLPairLowlevelSocket
   include OpenSSL::TestEOF1M
 end
 
-class OpenSSL::TestEOF2 < Test::Unit::TestCase
+class OpenSSL::TestEOF2 < OpenSSL::TestCase
   include TestEOF
   include OpenSSL::SSLPair
   include OpenSSL::TestEOF2M
 end
 
-class OpenSSL::TestEOF2LowlevelSocket < Test::Unit::TestCase
+class OpenSSL::TestEOF2LowlevelSocket < OpenSSL::TestCase
   include TestEOF
   include OpenSSL::SSLPairLowlevelSocket
   include OpenSSL::TestEOF2M
 end
 
-class OpenSSL::TestPair < Test::Unit::TestCase
+class OpenSSL::TestPair < OpenSSL::TestCase
   include OpenSSL::SSLPair
   include OpenSSL::TestPairM
 end
 
-class OpenSSL::TestPairLowlevelSocket < Test::Unit::TestCase
+class OpenSSL::TestPairLowlevelSocket < OpenSSL::TestCase
   include OpenSSL::SSLPairLowlevelSocket
   include OpenSSL::TestPairM
 end
