@@ -51,9 +51,11 @@ module OpenSSL
       return str
     end
 
-    # This class is only provided for backwards compatibility.  Use OpenSSL::Cipher in the future.
-    class Cipher < Cipher
-      # add warning
-    end
+    # Deprecated.
+    #
+    # This class is only provided for backwards compatibility.
+    # Use OpenSSL::Cipher.
+    class Cipher < Cipher; end
+    deprecate_constant :Cipher
   end # Cipher
 end # OpenSSL

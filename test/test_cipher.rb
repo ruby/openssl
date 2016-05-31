@@ -24,7 +24,7 @@ class OpenSSL::TestCipher < OpenSSL::TestCase
   end
 
   def setup
-    @c1 = OpenSSL::Cipher::Cipher.new("DES-EDE3-CBC")
+    @c1 = OpenSSL::Cipher.new("DES-EDE3-CBC")
     @c2 = OpenSSL::Cipher::DES.new(:EDE3, "CBC")
     @key = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
     @iv = "\0\0\0\0\0\0\0\0"
@@ -118,7 +118,7 @@ class OpenSSL::TestCipher < OpenSSL::TestCase
     OpenSSL::Cipher.ciphers.each{|name|
       next if /netbsd/ =~ RUBY_PLATFORM && /idea|rc5/i =~ name
       begin
-        assert_kind_of(OpenSSL::Cipher::Cipher, OpenSSL::Cipher::Cipher.new(name))
+        assert_kind_of(OpenSSL::Cipher, OpenSSL::Cipher.new(name))
       rescue OpenSSL::Cipher::CipherError => e
         next if /wrap/ =~ name and e.message == 'wrap mode not allowed'
         raise
