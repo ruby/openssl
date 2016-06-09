@@ -44,8 +44,7 @@ RUN curl -s https://www.openssl.org/source/openssl-1.0.2h.tar.gz | tar -C /build
 RUN curl -s https://www.openssl.org/source/openssl-1.1.0-pre5.tar.gz | tar -C /build/openssl -xzf - && \
     cd build/openssl/openssl-1.1.0-pre5 && \
     ./config \
-       --openssldir=/opt/openssl/openssl-1.1.0-pre5 \
-       shared && \
+       --prefix=/opt/openssl/openssl-1.1.0-pre5 && \
     make && make install
 
 # Supported libressl versions: 2.1.10, 2.2.8, 2.3.5, 2.4.0
