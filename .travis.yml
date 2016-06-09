@@ -25,5 +25,5 @@ matrix:
     - env: RUBY_VERSION=2.3.1 LIBRESSL_VERSION=2.3.5
     - env: RUBY_VERSION=2.3.1 LIBRESSL_VERSION=2.4.0
   fast_finish: true
-  allowed_failures:
+  allow_failures:
     - env: RUBY_VERSION=2.3.1 OPENSSL_VERSION=1.1.0-pre5
