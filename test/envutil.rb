@@ -368,9 +368,10 @@ module Test
         line -= 5 # lines until src
         src = <<eom
 # -*- coding: #{src.encoding}; -*-
-  require #{__dir__.dump}'/test/unit';include Test::Unit::Assertions
+  require 'test/unit';include Test::Unit::Assertions
   END {
-    puts [Marshal.dump($!)].pack('m'), "assertions=\#{self._assertions}"
+    puts [Marshal.dump($!)].pack('m')#, "assertions=\#{self._assertions}"
+    exit
   }
 #{src}
   class Test::Unit::Runner
@@ -382,7 +383,7 @@ eom
         stdout, stderr, status = EnvUtil.invoke_ruby(args, src, true, true, **opt)
         abort = status.coredump? || (status.signaled? && ABORT_SIGNALS.include?(status.termsig))
         assert(!abort, FailDesc[status, nil, stderr])
-        self._assertions += stdout[/^assertions=(\d+)/, 1].to_i
+        #self._assertions += stdout[/^assertions=(\d+)/, 1].to_i
         begin
           res = Marshal.load(stdout.unpack("m")[0])
         rescue => marshal_error

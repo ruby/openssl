@@ -258,7 +258,7 @@ ossl_verify_cb(int ok, X509_STORE_CTX *ctx)
 
     proc = (VALUE)X509_STORE_CTX_get_ex_data(ctx, ossl_store_ctx_ex_verify_cb_idx);
     if (!proc)
-	proc = (VALUE)X509_STORE_get_ex_data(ctx->ctx, ossl_store_ex_verify_cb_idx);
+	proc = (VALUE)X509_STORE_get_ex_data(X509_STORE_CTX_get0_store(ctx), ossl_store_ex_verify_cb_idx);
     if (!proc)
 	return ok;
     if (!NIL_P(proc)) {
@@ -508,6 +508,7 @@ ossl_fips_mode_set(VALUE self, VALUE enabled)
 #endif
 }
 
+#if !defined(HAVE_OPENSSL_110_THREADING_API)
 /**
  * Stores locks needed for OpenSSL thread safety
  */
@@ -595,6 +596,7 @@ static void Init_ossl_locks(void)
     CRYPTO_set_dynlock_lock_callback(ossl_dyn_lock_callback);
     CRYPTO_set_dynlock_destroy_callback(ossl_dyn_destroy_callback);
 }
+#endif /* !HAVE_OPENSSL_110_THREADING_API */
 
 /*
  * OpenSSL provides SSL, TLS and general purpose cryptography.  It wraps the
@@ -1195,7 +1197,9 @@ Init_openssl(void)
      */
     ossl_s_to_der = rb_intern("to_der");
 
+#if !defined(HAVE_OPENSSL_110_THREADING_API)
     Init_ossl_locks();
+#endif
 
     /*
      * Init components
