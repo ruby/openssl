@@ -14,15 +14,38 @@ class OpenSSL::TestEC < OpenSSL::TestCase
     OpenSSL::PKey::EC.builtin_curves.each do |curve, comment|
       group = OpenSSL::PKey::EC::Group.new(curve)
 
-      key = OpenSSL::PKey::EC.new(group)
-      key.generate_key!
-
       # Oakley curves and X25519 are not suitable for signing
       next if ["Oakley", "X25519"].any? { |n| curve.start_with?(n) }
+
+      key = OpenSSL::PKey::EC.new(group)
+      key.generate_key!
 
       @groups << group
       @keys << key
     end
+  end
+
+  def test_dup
+    key = OpenSSL::PKey::EC.new("prime256v1")
+    key.generate_key!
+    key2 = key.dup
+    assert_equal key.to_der, key2.to_der
+    key_tmp = OpenSSL::PKey::EC.new("prime256v1").generate_key!
+    key2.private_key = key_tmp.private_key
+    key2.public_key = key_tmp.public_key
+    assert_not_equal key.to_der, key2.to_der
+
+    group = key.group
+    group2 = group.dup
+    assert_equal group.to_der, group2.to_der
+    group2.asn1_flag ^= OpenSSL::PKey::EC::NAMED_CURVE
+    assert_not_equal group.to_der, group2.to_der
+
+    point = key.public_key
+    point2 = point.dup
+    assert_equal point.to_bn, point2.to_bn
+    point2.invert!
+    assert_not_equal point.to_bn, point2.to_bn
   end
 
   def compare_keys(k1, k2)

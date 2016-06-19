@@ -179,7 +179,7 @@ void X509_REQ_get0_signature(ASN1_BIT_STRING **psig, X509_ALGOR **palg, X509_REQ
 static inline _type *EVP_PKEY_get0_##_type(EVP_PKEY *pkey) { \
 	return pkey->pkey._name; }
 #define IMPL_KEY_ACCESSOR2(_type, _group, a1, a2, _fail_cond) \
-static inline void _type##_get0_##_group(_type *obj, BIGNUM **a1, BIGNUM **a2) { \
+static inline void _type##_get0_##_group(_type *obj, const BIGNUM **a1, const BIGNUM **a2) { \
 	if (a1) *a1 = obj->a1; \
 	if (a2) *a2 = obj->a2; } \
 static inline int _type##_set0_##_group(_type *obj, BIGNUM *a1, BIGNUM *a2) { \
@@ -188,7 +188,7 @@ static inline int _type##_set0_##_group(_type *obj, BIGNUM *a1, BIGNUM *a2) { \
 	BN_clear_free(obj->a2); obj->a2 = a2; \
 	return 1; }
 #define IMPL_KEY_ACCESSOR3(_type, _group, a1, a2, a3, _fail_cond) \
-static inline void _type##_get0_##_group(_type *obj, BIGNUM **a1, BIGNUM **a2, BIGNUM **a3) { \
+static inline void _type##_get0_##_group(_type *obj, const BIGNUM **a1, const BIGNUM **a2, const BIGNUM **a3) { \
 	if (a1) *a1 = obj->a1; \
 	if (a2) *a2 = obj->a2; \
 	if (a3) *a3 = obj->a3; } \
@@ -201,7 +201,7 @@ static inline int _type##_set0_##_group(_type *obj, BIGNUM *a1, BIGNUM *a2, BIGN
 
 #if !defined(OPENSSL_NO_RSA)
 IMPL_PKEY_GETTER(RSA, rsa)
-IMPL_KEY_ACCESSOR3(RSA, key, n, e, d, (n == obj->n || e == obj->e || (obj->d && e == obj->d)))
+IMPL_KEY_ACCESSOR3(RSA, key, n, e, d, (n == obj->n || e == obj->e || (obj->d && d == obj->d)))
 IMPL_KEY_ACCESSOR2(RSA, factors, p, q, (p == obj->p || q == obj->q))
 IMPL_KEY_ACCESSOR3(RSA, crt_params, dmp1, dmq1, iqmp, (dmp1 == obj->dmp1 || dmq1 == obj->dmq1 || iqmp == obj->iqmp))
 #endif
@@ -215,7 +215,7 @@ IMPL_KEY_ACCESSOR3(DSA, pqg, p, q, g, (p == obj->p || q == obj->q || g == obj->g
 #if !defined(OPENSSL_NO_DH)
 IMPL_PKEY_GETTER(DH, dh)
 IMPL_KEY_ACCESSOR2(DH, key, pub_key, priv_key, (pub_key == obj->pub_key || (obj->priv_key && priv_key == obj->priv_key)))
-IMPL_KEY_ACCESSOR3(DH, pqg, p, q, g, (p == obj->p || q == obj->q || g == obj->g))
+IMPL_KEY_ACCESSOR3(DH, pqg, p, q, g, (p == obj->p || obj->q && q == obj->q || g == obj->g))
 static inline ENGINE *DH_get0_engine(DH *dh) { return dh->engine; }
 #endif
 
@@ -227,5 +227,10 @@ IMPL_PKEY_GETTER(EC_KEY, ec)
 #undef IMPL_KEY_ACCESSOR2
 #undef IMPL_KEY_ACCESSOR3
 #endif /* HAVE_OPAQUE_OPENSSL */
+
+#if defined(HAVE_AUTHENTICATED_ENCRYPTION) && !defined(EVP_CTRL_AEAD_GET_TAG)
+#  define EVP_CTRL_AEAD_GET_TAG EVP_CTRL_GCM_GET_TAG
+#  define EVP_CTRL_AEAD_SET_TAG EVP_CTRL_GCM_SET_TAG
+#endif
 
 #endif /* _OSSL_OPENSSL_MISSING_H_ */

@@ -26,7 +26,7 @@
 static inline int
 DSA_HAS_PRIVATE(DSA *dsa)
 {
-    BIGNUM *bn;
+    const BIGNUM *bn;
     DSA_get0_key(dsa, NULL, &bn);
     return !!bn;
 }
@@ -269,6 +269,26 @@ ossl_dsa_initialize(int argc, VALUE *argv, VALUE self)
     return self;
 }
 
+static VALUE
+ossl_dsa_initialize_copy(VALUE self, VALUE other)
+{
+    EVP_PKEY *pkey;
+    DSA *dsa, *dsa_new;
+
+    GetPKey(self, pkey);
+    if (EVP_PKEY_base_id(pkey) != EVP_PKEY_NONE)
+	ossl_raise(eDSAError, "DSA already initialized");
+    GetDSA(other, dsa);
+
+    dsa_new = ASN1_dup((i2d_of_void *)i2d_DSAPrivateKey, (d2i_of_void *)d2i_DSAPrivateKey, (char *)dsa);
+    if (!dsa_new)
+	ossl_raise(eDSAError, "ASN1_dup");
+
+    EVP_PKEY_assign_DSA(pkey, dsa_new);
+
+    return self;
+}
+
 /*
  *  call-seq:
  *    dsa.public? -> true | false
@@ -280,7 +300,7 @@ static VALUE
 ossl_dsa_is_public(VALUE self)
 {
     DSA *dsa;
-    BIGNUM *bn;
+    const BIGNUM *bn;
 
     GetDSA(self, dsa);
     DSA_get0_key(dsa, &bn, NULL);
@@ -402,7 +422,7 @@ ossl_dsa_get_params(VALUE self)
 {
     DSA *dsa;
     VALUE hash;
-    BIGNUM *p, *q, *g, *pub_key, *priv_key;
+    const BIGNUM *p, *q, *g, *pub_key, *priv_key;
 
     GetDSA(self, dsa);
     DSA_get0_pqg(dsa, &p, &q, &g);
@@ -509,7 +529,7 @@ static VALUE
 ossl_dsa_sign(VALUE self, VALUE data)
 {
     DSA *dsa;
-    BIGNUM *dsa_q;
+    const BIGNUM *dsa_q;
     unsigned int buf_len;
     VALUE str;
 
@@ -610,6 +630,7 @@ Init_ossl_dsa(void)
 
     rb_define_singleton_method(cDSA, "generate", ossl_dsa_s_generate, 1);
     rb_define_method(cDSA, "initialize", ossl_dsa_initialize, -1);
+    rb_define_copy_func(cDSA, ossl_dsa_initialize_copy);
 
     rb_define_method(cDSA, "public?", ossl_dsa_is_public, 0);
     rb_define_method(cDSA, "private?", ossl_dsa_is_private, 0);

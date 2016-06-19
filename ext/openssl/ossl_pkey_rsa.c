@@ -26,7 +26,7 @@
 static inline int
 RSA_HAS_PRIVATE(RSA *rsa)
 {
-    BIGNUM *p, *q;
+    const BIGNUM *p, *q;
 
     RSA_get0_factors(rsa, &p, &q);
     return p && q; /* d? why? */
@@ -271,6 +271,26 @@ ossl_rsa_initialize(int argc, VALUE *argv, VALUE self)
     return self;
 }
 
+static VALUE
+ossl_rsa_initialize_copy(VALUE self, VALUE other)
+{
+    EVP_PKEY *pkey;
+    RSA *rsa, *rsa_new;
+
+    GetPKey(self, pkey);
+    if (EVP_PKEY_base_id(pkey) != EVP_PKEY_NONE)
+	ossl_raise(eRSAError, "RSA already initialized");
+    GetRSA(other, rsa);
+
+    rsa_new = ASN1_dup((i2d_of_void *)i2d_RSAPrivateKey, (d2i_of_void *)d2i_RSAPrivateKey, (char *)rsa);
+    if (!rsa_new)
+	ossl_raise(eRSAError, "ASN1_dup");
+
+    EVP_PKEY_assign_RSA(pkey, rsa_new);
+
+    return self;
+}
+
 /*
  * call-seq:
  *   rsa.public? => true
@@ -398,7 +418,7 @@ static VALUE
 ossl_rsa_public_encrypt(int argc, VALUE *argv, VALUE self)
 {
     RSA *rsa;
-    BIGNUM *rsa_n;
+    const BIGNUM *rsa_n;
     int buf_len, pad;
     VALUE str, buffer, padding;
 
@@ -430,7 +450,7 @@ static VALUE
 ossl_rsa_public_decrypt(int argc, VALUE *argv, VALUE self)
 {
     RSA *rsa;
-    BIGNUM *rsa_n;
+    const BIGNUM *rsa_n;
     int buf_len, pad;
     VALUE str, buffer, padding;
 
@@ -462,7 +482,7 @@ static VALUE
 ossl_rsa_private_encrypt(int argc, VALUE *argv, VALUE self)
 {
     RSA *rsa;
-    BIGNUM *rsa_n;
+    const BIGNUM *rsa_n;
     int buf_len, pad;
     VALUE str, buffer, padding;
 
@@ -496,7 +516,7 @@ static VALUE
 ossl_rsa_private_decrypt(int argc, VALUE *argv, VALUE self)
 {
     RSA *rsa;
-    BIGNUM *rsa_n;
+    const BIGNUM *rsa_n;
     int buf_len, pad;
     VALUE str, buffer, padding;
 
@@ -534,7 +554,7 @@ ossl_rsa_get_params(VALUE self)
 {
     RSA *rsa;
     VALUE hash;
-    BIGNUM *n, *e, *d, *p, *q, *dmp1, *dmq1, *iqmp;
+    const BIGNUM *n, *e, *d, *p, *q, *dmp1, *dmq1, *iqmp;
 
     GetRSA(self, rsa);
     RSA_get0_key(rsa, &n, &e, &d);
@@ -675,6 +695,7 @@ Init_ossl_rsa(void)
 
     rb_define_singleton_method(cRSA, "generate", ossl_rsa_s_generate, -1);
     rb_define_method(cRSA, "initialize", ossl_rsa_initialize, -1);
+    rb_define_copy_func(cRSA, ossl_rsa_initialize_copy);
 
     rb_define_method(cRSA, "public?", ossl_rsa_is_public, 0);
     rb_define_method(cRSA, "private?", ossl_rsa_is_private, 0);

@@ -365,7 +365,7 @@ module Test
           file ||= loc.path
           line ||= loc.lineno
         end
-        line -= 5 # lines until src
+        line -= 6 # lines until src
         src = <<eom
 # -*- coding: #{src.encoding}; -*-
   require 'test/unit';include Test::Unit::Assertions
@@ -373,6 +373,7 @@ module Test
     puts [Marshal.dump($!)].pack('m')#, "assertions=\#{self._assertions}"
     exit
   }
+  def pend(msg = nil) $stdout.syswrite [Marshal.dump(msg.to_s)].pack("m"); exit! 0 end
 #{src}
   class Test::Unit::Runner
     @@stop_auto_run = true
@@ -389,7 +390,9 @@ eom
         rescue => marshal_error
           ignore_stderr = nil
         end
-        if res
+        if res.is_a?(String)
+          pend res
+        elsif res
           if bt = res.backtrace
             bt.each do |l|
               l.sub!(/\A-:(\d+)/){"#{file}:#{line + $1.to_i}"}
