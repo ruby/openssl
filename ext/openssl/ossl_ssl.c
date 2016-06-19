@@ -193,6 +193,91 @@ ossl_sslctx_set_ssl_version(VALUE self, VALUE ssl_method)
     ossl_raise(rb_eArgError, "unknown SSL method `%"PRIsVALUE"'.", m);
 }
 
+static int
+parse_proto_version(VALUE str)
+{
+    int i;
+    static const struct {
+	const char *name;
+	int version;
+    } map[] = {
+	{ "SSL2", SSL2_VERSION },
+	{ "SSL3", SSL3_VERSION },
+	{ "TLS1", TLS1_VERSION },
+	{ "TLS1_1", TLS1_1_VERSION },
+	{ "TLS1_2", TLS1_2_VERSION },
+#ifdef TLS1_3_VERSION
+	{ "TLS1_3", TLS1_3_VERSION },
+#endif
+    };
+
+    if (NIL_P(str))
+	return 0;
+    if (RB_INTEGER_TYPE_P(str))
+	return NUM2INT(str);
+
+    if (SYMBOL_P(str))
+	str = rb_sym2str(str);
+    StringValue(str);
+    for (i = 0; i < numberof(map); i++)
+	if (!strncmp(map[i].name, RSTRING_PTR(str), RSTRING_LEN(str)))
+	    return map[i].version;
+    rb_raise(rb_eArgError, "unrecognized version %+"PRIsVALUE, str);
+}
+
+/*
+ * call-seq:
+ *    ctx.set_minmax_proto_version(min, max) -> nil
+ *
+ * Sets the minimum and maximum supported protocol versions. See #min_version=
+ * and #max_version=.
+ */
+static VALUE
+ossl_sslctx_set_minmax_proto_version(VALUE self, VALUE min_v, VALUE max_v)
+{
+    SSL_CTX *ctx;
+    int min, max;
+
+    GetSSLCTX(self, ctx);
+    min = parse_proto_version(min_v);
+    max = parse_proto_version(max_v);
+
+#ifdef HAVE_SSL_CTX_SET_MIN_PROTO_VERSION
+    if (!SSL_CTX_set_min_proto_version(ctx, min))
+	ossl_raise(eSSLError, "SSL_CTX_set_min_proto_version");
+    if (!SSL_CTX_set_max_proto_version(ctx, max))
+	ossl_raise(eSSLError, "SSL_CTX_set_max_proto_version");
+#else
+    {
+	unsigned long sum = 0, opts = 0;
+	int i;
+	static const struct {
+	    int ver;
+	    unsigned long opts;
+	} options_map[] = {
+	    { SSL2_VERSION, SSL_OP_NO_SSLv2 },
+	    { SSL3_VERSION, SSL_OP_NO_SSLv3 },
+	    { TLS1_VERSION, SSL_OP_NO_TLSv1 },
+	    { TLS1_1_VERSION, SSL_OP_NO_TLSv1_1 },
+	    { TLS1_2_VERSION, SSL_OP_NO_TLSv1_2 },
+# if defined(TLS1_3_VERSION)
+	    { TLS1_3_VERSION, SSL_OP_NO_TLSv1_3 },
+# endif
+	};
+
+	for (i = 0; i < numberof(options_map); i++) {
+	    sum |= options_map[i].opts;
+	    if (min && min > options_map[i].ver || max && max < options_map[i].ver)
+		opts |= options_map[i].opts;
+	}
+	SSL_CTX_clear_options(ctx, sum);
+	SSL_CTX_set_options(ctx, opts);
+    }
+#endif
+
+    return Qnil;
+}
+
 static VALUE
 ossl_call_client_cert_cb(VALUE obj)
 {
@@ -2548,6 +2633,8 @@ Init_ossl_ssl(void)
     rb_define_alias(cSSLContext, "ssl_timeout", "timeout");
     rb_define_alias(cSSLContext, "ssl_timeout=", "timeout=");
     rb_define_method(cSSLContext, "ssl_version=", ossl_sslctx_set_ssl_version, 1);
+    rb_define_private_method(cSSLContext, "set_minmax_proto_version",
+			     ossl_sslctx_set_minmax_proto_version, 2);
     rb_define_method(cSSLContext, "ciphers",     ossl_sslctx_get_ciphers, 0);
     rb_define_method(cSSLContext, "ciphers=",    ossl_sslctx_set_ciphers, 1);
     rb_define_method(cSSLContext, "ecdh_curves=", ossl_sslctx_set_ecdh_curves, 1);
@@ -2749,6 +2836,26 @@ Init_ossl_ssl(void)
     rb_define_const(mSSL, "OP_NETSCAPE_CA_DN_BUG", ULONG2NUM(SSL_OP_NETSCAPE_CA_DN_BUG));
     /* Deprecated in OpenSSL 1.1.0. */
     rb_define_const(mSSL, "OP_NETSCAPE_DEMO_CIPHER_CHANGE_BUG", ULONG2NUM(SSL_OP_NETSCAPE_DEMO_CIPHER_CHANGE_BUG));
+
+
+    /*
+     * SSL/TLS version constants. Used by SSLContext#min_version= and
+     * #max_version=
+     */
+    /* SSL 2.0 */
+    rb_define_const(mSSL, "SSL2_VERSION", INT2NUM(SSL2_VERSION));
+    /* SSL 3.0 */
+    rb_define_const(mSSL, "SSL3_VERSION", INT2NUM(SSL3_VERSION));
+    /* TLS 1.0 */
+    rb_define_const(mSSL, "TLS1_VERSION", INT2NUM(TLS1_VERSION));
+    /* TLS 1.1 */
+    rb_define_const(mSSL, "TLS1_1_VERSION", INT2NUM(TLS1_1_VERSION));
+    /* TLS 1.2 */
+    rb_define_const(mSSL, "TLS1_2_VERSION", INT2NUM(TLS1_2_VERSION));
+#ifdef TLS1_3_VERSION /* OpenSSL 1.1.1 */
+    /* TLS 1.3 */
+    rb_define_const(mSSL, "TLS1_3_VERSION", INT2NUM(TLS1_3_VERSION));
+#endif
 
 
     sym_exception = ID2SYM(rb_intern("exception"));

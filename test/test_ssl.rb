@@ -775,100 +775,199 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     }
   end
 
-if OpenSSL::SSL::SSLContext::METHODS.include?(:TLSv1) && OpenSSL::SSL::SSLContext::METHODS.include?(:SSLv3)
+  def check_supported_protocol_versions
+    possible_versions = [
+      OpenSSL::SSL::SSL3_VERSION,
+      OpenSSL::SSL::TLS1_VERSION,
+      OpenSSL::SSL::TLS1_1_VERSION,
+      OpenSSL::SSL::TLS1_2_VERSION,
+      # OpenSSL 1.1.1
+      defined?(OpenSSL::SSL::TLS1_3_VERSION) && OpenSSL::SSL::TLS1_3_VERSION,
+    ].compact
 
-  def test_forbid_ssl_v3_for_client
-    ctx_proc = Proc.new { |ctx| ctx.options = OpenSSL::SSL::OP_ALL | OpenSSL::SSL::OP_NO_SSLv3 }
-    start_server_version(:SSLv23, ctx_proc) { |port|
-      ctx = OpenSSL::SSL::SSLContext.new
-      ctx.ssl_version = :SSLv3
-      assert_handshake_error { server_connect(port, ctx) }
+    # Prepare for testing & do sanity check
+    supported = []
+    possible_versions.each do |ver|
+      catch(:unsupported) {
+        ctx_proc = proc { |ctx|
+          begin
+            ctx.min_version = ctx.max_version = ver
+          rescue ArgumentError, OpenSSL::SSL::SSLError
+            throw :unsupported
+          end
+        }
+        start_server(ctx_proc: ctx_proc, ignore_listener_error: true) do |port|
+          begin
+            server_connect(port) { }
+          rescue OpenSSL::SSL::SSLError, Errno::ECONNRESET
+          else
+            supported << ver
+          end
+        end
+      }
+    end
+    assert_not_empty supported
+
+    supported
+  end
+
+  def test_minmax_version
+    supported = check_supported_protocol_versions
+
+    # name: The string that would be returned by SSL_get_version()
+    # method: The version-specific method name (if any)
+    vmap = {
+      OpenSSL::SSL::SSL3_VERSION => { name: "SSLv3", method: "SSLv3" },
+      OpenSSL::SSL::SSL3_VERSION => { name: "SSLv3", method: "SSLv3" },
+      OpenSSL::SSL::TLS1_VERSION => { name: "TLSv1", method: "TLSv1" },
+      OpenSSL::SSL::TLS1_1_VERSION => { name: "TLSv1.1", method: "TLSv1_1" },
+      OpenSSL::SSL::TLS1_2_VERSION => { name: "TLSv1.2", method: "TLSv1_2" },
+      # OpenSSL 1.1.1
+      defined?(OpenSSL::SSL::TLS1_3_VERSION) && OpenSSL::SSL::TLS1_3_VERSION =>
+      { name: "TLSv1.3", method: nil },
+    }
+
+    # Server enables a single version
+    supported.each do |ver|
+      ctx_proc = proc { |ctx| ctx.min_version = ctx.max_version = ver }
+      start_server(ctx_proc: ctx_proc, ignore_listener_error: true) { |port|
+        supported.each do |cver|
+          # Client enables a single version
+          ctx1 = OpenSSL::SSL::SSLContext.new
+          ctx1.min_version = ctx1.max_version = cver
+          if ver == cver
+            server_connect(port, ctx1) { |ssl|
+              assert_equal vmap[cver][:name], ssl.ssl_version
+            }
+          else
+            assert_handshake_error { server_connect(port, ctx1) { } }
+          end
+
+          # There is no version-specific SSL methods for TLS 1.3
+          if cver <= OpenSSL::SSL::TLS1_2_VERSION
+            # Client enables a single version using #ssl_version=
+            ctx2 = OpenSSL::SSL::SSLContext.new
+            ctx2.ssl_version = vmap[cver][:method]
+            if ver == cver
+              server_connect(port, ctx2) { |ssl|
+                assert_equal vmap[cver][:name], ssl.ssl_version
+              }
+            else
+              assert_handshake_error { server_connect(port, ctx2) { } }
+            end
+          end
+        end
+
+        # Client enables all supported versions
+        ctx3 = OpenSSL::SSL::SSLContext.new
+        ctx3.min_version = ctx3.max_version = nil
+        server_connect(port, ctx3) { |ssl|
+          assert_equal vmap[ver][:name], ssl.ssl_version
+        }
+      }
+    end
+
+    if supported.size == 1
+      pend "More than one protocol version must be supported"
+    end
+
+    # Server sets min_version (earliest is disabled)
+    sver = supported[1]
+    ctx_proc = proc { |ctx| ctx.min_version = sver }
+    start_server(ctx_proc: ctx_proc, ignore_listener_error: true) { |port|
+      supported.each do |cver|
+        # Client sets min_version
+        ctx1 = OpenSSL::SSL::SSLContext.new
+        ctx1.min_version = cver
+        server_connect(port, ctx1) { |ssl|
+          assert_equal vmap[supported.last][:name], ssl.ssl_version
+        }
+
+        # Client sets max_version
+        ctx2 = OpenSSL::SSL::SSLContext.new
+        ctx2.max_version = cver
+        if cver >= sver
+          server_connect(port, ctx2) { |ssl|
+            assert_equal vmap[cver][:name], ssl.ssl_version
+          }
+        else
+          assert_handshake_error { server_connect(port, ctx2) { } }
+        end
+      end
+    }
+
+    # Server sets max_version (latest is disabled)
+    sver = supported[-2]
+    ctx_proc = proc { |ctx| ctx.max_version = sver }
+    start_server(ctx_proc: ctx_proc, ignore_listener_error: true) { |port|
+      supported.each do |cver|
+        # Client sets min_version
+        ctx1 = OpenSSL::SSL::SSLContext.new
+        ctx1.min_version = cver
+        if cver <= sver
+          server_connect(port, ctx1) { |ssl|
+            assert_equal vmap[sver][:name], ssl.ssl_version
+          }
+        else
+          assert_handshake_error { server_connect(port, ctx1) { } }
+        end
+
+        # Client sets max_version
+        ctx2 = OpenSSL::SSL::SSLContext.new
+        ctx2.max_version = cver
+        server_connect(port, ctx2) { |ssl|
+          if cver >= sver
+            assert_equal vmap[sver][:name], ssl.ssl_version
+          else
+            assert_equal vmap[cver][:name], ssl.ssl_version
+          end
+        }
+      end
     }
   end
 
-  def test_forbid_ssl_v3_from_server
-    start_server_version(:SSLv3) { |port|
-      ctx = OpenSSL::SSL::SSLContext.new
-      ctx.options = OpenSSL::SSL::OP_ALL | OpenSSL::SSL::OP_NO_SSLv3
-      assert_handshake_error { server_connect(port, ctx) }
-    }
+  def test_options_disable_versions
+    # Note: Use of these OP_* flags has been deprecated since OpenSSL 1.1.0.
+    supported = check_supported_protocol_versions
+
+    if supported.include?(OpenSSL::SSL::TLS1_1_VERSION) &&
+        supported.include?(OpenSSL::SSL::TLS1_2_VERSION)
+      # Server disables ~ TLS 1.1
+      ctx_proc = proc { |ctx|
+        ctx.options |= OpenSSL::SSL::OP_NO_SSLv2 | OpenSSL::SSL::OP_NO_SSLv3 |
+          OpenSSL::SSL::OP_NO_TLSv1 | OpenSSL::SSL::OP_NO_TLSv1_1
+      }
+      start_server(ctx_proc: ctx_proc, ignore_listener_error: true) { |port|
+        # Client only supports TLS 1.1
+        ctx1 = OpenSSL::SSL::SSLContext.new
+        ctx1.min_version = ctx1.max_version = OpenSSL::SSL::TLS1_1_VERSION
+        assert_handshake_error { server_connect(port, ctx1) { } }
+
+        # Client only supports TLS 1.2
+        ctx2 = OpenSSL::SSL::SSLContext.new
+        ctx2.min_version = ctx2.max_version = OpenSSL::SSL::TLS1_2_VERSION
+        assert_nothing_raised { server_connect(port, ctx2) { } }
+      }
+
+      # Server only supports TLS 1.1
+      ctx_proc = proc { |ctx|
+        ctx.min_version = ctx.max_version = OpenSSL::SSL::TLS1_1_VERSION
+      }
+      start_server(ctx_proc: ctx_proc, ignore_listener_error: true) { |port|
+        # Client disables TLS 1.1
+        ctx1 = OpenSSL::SSL::SSLContext.new
+        ctx1.options |= OpenSSL::SSL::OP_NO_TLSv1_1
+        assert_handshake_error { server_connect(port, ctx1) { } }
+
+        # Client disables TLS 1.2
+        ctx2 = OpenSSL::SSL::SSLContext.new
+        ctx2.options |= OpenSSL::SSL::OP_NO_TLSv1_2
+        assert_nothing_raised { server_connect(port, ctx2) { } }
+      }
+    else
+      pend "TLS 1.1 and TLS 1.2 must be supported; skipping"
+    end
   end
-
-end
-
-if OpenSSL::SSL::SSLContext::METHODS.include?(:TLSv1_1) && OpenSSL::SSL::SSLContext::METHODS.include?(:TLSv1)
-
-  def test_tls_v1_1
-    start_server_version(:TLSv1_1) { |port|
-      ctx = OpenSSL::SSL::SSLContext.new(:TLSv1_1)
-      server_connect(port, ctx) { |ssl| assert_equal("TLSv1.1", ssl.ssl_version) }
-    }
-  end
-
-  def test_forbid_tls_v1_for_client
-    ctx_proc = Proc.new { |ctx| ctx.options = OpenSSL::SSL::OP_ALL | OpenSSL::SSL::OP_NO_TLSv1 }
-    start_server_version(:SSLv23, ctx_proc) { |port|
-      ctx = OpenSSL::SSL::SSLContext.new
-      ctx.ssl_version = :TLSv1
-      assert_handshake_error { server_connect(port, ctx) }
-    }
-  end
-
-  def test_forbid_tls_v1_from_server
-    start_server_version(:TLSv1) { |port|
-      ctx = OpenSSL::SSL::SSLContext.new
-      ctx.options = OpenSSL::SSL::OP_ALL | OpenSSL::SSL::OP_NO_TLSv1
-      assert_handshake_error { server_connect(port, ctx) }
-    }
-  end
-
-end
-
-if OpenSSL::SSL::SSLContext::METHODS.include?(:TLSv1_2) && OpenSSL::SSL::SSLContext::METHODS.include?(:TLSv1_1)
-
-  def test_tls_v1_2
-    start_server_version(:TLSv1_2) { |port|
-      ctx = OpenSSL::SSL::SSLContext.new
-      ctx.ssl_version = :TLSv1_2_client
-      server_connect(port, ctx) { |ssl| assert_equal("TLSv1.2", ssl.ssl_version) }
-    }
-  end
-
-  def test_forbid_tls_v1_1_for_client
-    ctx_proc = Proc.new { |ctx| ctx.options = OpenSSL::SSL::OP_ALL | OpenSSL::SSL::OP_NO_TLSv1_1 }
-    start_server_version(:SSLv23, ctx_proc) { |port|
-      ctx = OpenSSL::SSL::SSLContext.new
-      ctx.ssl_version = :TLSv1_1
-      assert_handshake_error { server_connect(port, ctx) }
-    }
-  end
-
-  def test_forbid_tls_v1_1_from_server
-    start_server_version(:TLSv1_1) { |port|
-      ctx = OpenSSL::SSL::SSLContext.new
-      ctx.options = OpenSSL::SSL::OP_ALL | OpenSSL::SSL::OP_NO_TLSv1_1
-      assert_handshake_error { server_connect(port, ctx) }
-    }
-  end
-
-  def test_forbid_tls_v1_2_for_client
-    ctx_proc = Proc.new { |ctx| ctx.options = OpenSSL::SSL::OP_ALL | OpenSSL::SSL::OP_NO_TLSv1_2 }
-    start_server_version(:SSLv23, ctx_proc) { |port|
-      ctx = OpenSSL::SSL::SSLContext.new
-      ctx.ssl_version = :TLSv1_2
-      assert_handshake_error { server_connect(port, ctx) }
-    }
-  end
-
-  def test_forbid_tls_v1_2_from_server
-    start_server_version(:TLSv1_2) { |port|
-      ctx = OpenSSL::SSL::SSLContext.new
-      ctx.options = OpenSSL::SSL::OP_ALL | OpenSSL::SSL::OP_NO_TLSv1_2
-      assert_handshake_error { server_connect(port, ctx) }
-    }
-  end
-
-end
 
   def test_renegotiation_cb
     num_handshakes = 0

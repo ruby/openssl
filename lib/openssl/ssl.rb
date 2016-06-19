@@ -17,14 +17,13 @@ module OpenSSL
   module SSL
     class SSLContext
       DEFAULT_PARAMS = { # :nodoc:
-        :ssl_version => "SSLv23",
+        :min_version => OpenSSL::SSL::TLS1_VERSION,
         :verify_mode => OpenSSL::SSL::VERIFY_PEER,
         :verify_hostname => true,
         :options => -> {
           opts = OpenSSL::SSL::OP_ALL
           opts &= ~OpenSSL::SSL::OP_DONT_INSERT_EMPTY_FRAGMENTS
           opts |= OpenSSL::SSL::OP_NO_COMPRESSION
-          opts |= OpenSSL::SSL::OP_NO_SSLv2 | OpenSSL::SSL::OP_NO_SSLv3
           opts
         }.call
       }
@@ -109,11 +108,15 @@ YoaOffgTf5qxiwkjnlVZQc3whgnEt9FpVMvQ9eknyeGB5KHfayAc3+hUAvI3/Cr3
       attr_accessor :servername_cb
 
       # call-seq:
-      #    SSLContext.new => ctx
-      #    SSLContext.new(:TLSv1) => ctx
-      #    SSLContext.new("SSLv23_client") => ctx
+      #    SSLContext.new           -> ctx
+      #    SSLContext.new(:TLSv1)   -> ctx
+      #    SSLContext.new("SSLv23") -> ctx
       #
-      # You can get a list of valid methods with OpenSSL::SSL::SSLContext::METHODS
+      # Creates a new SSL context.
+      #
+      # If an argument is given, #ssl_version= is called with the value. Note
+      # that this form is deprecated. New applications should use #min_version=
+      # and #max_version= as necessary.
       def initialize(version = nil)
         self.options |= OpenSSL::SSL::OP_ALL
         self.ssl_version = version if version
@@ -140,6 +143,43 @@ YoaOffgTf5qxiwkjnlVZQc3whgnEt9FpVMvQ9eknyeGB5KHfayAc3+hUAvI3/Cr3
           end
         end
         return params
+      end
+
+      # call-seq:
+      #    ctx.min_version = OpenSSL::SSL::TLS1_2_VERSION
+      #    ctx.min_version = :TLS1_2
+      #    ctx.min_version = nil
+      #
+      # Sets the lower bound on the supported SSL/TLS protocol version. The
+      # version may be specified by an integer constant named
+      # OpenSSL::SSL::*_VERSION, a Symbol, or +nil+ which means "any version".
+      #
+      # Be careful that you don't overwrite OpenSSL::SSL::OP_NO_{SSL,TLS}v*
+      # options by #options= once you have called #min_version= or
+      # #max_version=.
+      #
+      # === Example
+      #   ctx = OpenSSL::SSL::SSLContext.new
+      #   ctx.min_version = OpenSSL::SSL::TLS1_1_VERSION
+      #   ctx.max_version = OpenSSL::SSL::TLS1_2_VERSION
+      #
+      #   sock = OpenSSL::SSL::SSLSocket.new(tcp_sock, ctx)
+      #   sock.connect # Initiates a connection using either TLS 1.1 or TLS 1.2
+      def min_version=(version)
+        set_minmax_proto_version(version, @max_proto_version ||= nil)
+        @min_proto_version = version
+      end
+
+      # call-seq:
+      #    ctx.max_version = OpenSSL::SSL::TLS1_2_VERSION
+      #    ctx.max_version = :TLS1_2
+      #    ctx.max_version = nil
+      #
+      # Sets the upper bound of the supported SSL/TLS protocol version. See
+      # #min_version= for the possible values.
+      def max_version=(version)
+        set_minmax_proto_version(@min_proto_version ||= nil, version)
+        @max_proto_version = version
       end
     end
 
