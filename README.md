@@ -25,6 +25,12 @@ Or install it yourself as:
 See the documentation on OpenSSL for more usage,
 and the official [openssl library](http://www.openssl.org/).
 
+## Getting Started
+
+1. `$ gem install rake-compiler`
+2. `$ rake compile`
+3. `$ rake test`
+
 ## Contributing
 
 1. Fork it ( https://github.com/ruby/openssl/fork )

@@ -1,4 +1,4 @@
-gem 'rake-compiler', '~> 0.9'
+gem 'rake-compiler'
 
 require 'rake'
 require 'rake/extensiontask'
