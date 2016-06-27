@@ -64,6 +64,7 @@ static VALUE eSSLErrorWaitWritable;
 #define ossl_sslctx_get_client_cert_cb(o) 	rb_iv_get((o),"@client_cert_cb")
 #define ossl_sslctx_get_tmp_ecdh_cb(o)          rb_iv_get((o),"@tmp_ecdh_callback")
 #define ossl_sslctx_get_sess_id_ctx(o)   	rb_iv_get((o),"@session_id_context")
+#define ossl_sslctx_get_verify_hostname(o)	rb_iv_get((o),"@verify_hostname")
 
 #define ossl_ssl_get_io(o)           rb_iv_get((o),"@io")
 #define ossl_ssl_get_ctx(o)          rb_iv_get((o),"@context")
@@ -319,14 +320,48 @@ ossl_tmp_ecdh_callback(SSL *ssl, int is_export, int keylength)
 }
 #endif
 
+static VALUE
+call_verify_certificate_identity(VALUE ctx_v)
+{
+    X509_STORE_CTX *ctx = (X509_STORE_CTX *)ctx_v;
+    SSL *ssl;
+    VALUE ssl_obj, hostname, cert_obj;
+
+    ssl = X509_STORE_CTX_get_ex_data(ctx, SSL_get_ex_data_X509_STORE_CTX_idx());
+    ssl_obj = (VALUE)SSL_get_ex_data(ssl, ossl_ssl_ex_ptr_idx);
+    hostname = rb_attr_get(ssl_obj, rb_intern("@hostname"));
+
+    if (!RTEST(hostname)) {
+	rb_warning("verify_hostname requires hostname to be set");
+	return Qtrue;
+    }
+
+    cert_obj = ossl_x509_new(X509_STORE_CTX_get_current_cert(ctx));
+    return rb_funcall(mSSL, rb_intern("verify_certificate_identity"), 2,
+		      cert_obj, hostname);
+}
+
 static int
 ossl_ssl_verify_callback(int preverify_ok, X509_STORE_CTX *ctx)
 {
-    VALUE cb;
+    VALUE cb, ssl_obj, verify_hostname, ret;
     SSL *ssl;
+    int status;
 
     ssl = X509_STORE_CTX_get_ex_data(ctx, SSL_get_ex_data_X509_STORE_CTX_idx());
     cb = (VALUE)SSL_get_ex_data(ssl, ossl_ssl_ex_vcb_idx);
+    ssl_obj = (VALUE)SSL_get_ex_data(ssl, ossl_ssl_ex_ptr_idx);
+    verify_hostname = ossl_sslctx_get_verify_hostname(ossl_ssl_get_ctx(ssl_obj));
+
+    if (preverify_ok && RTEST(verify_hostname) && !SSL_is_server(ssl) &&
+	!X509_STORE_CTX_get_error_depth(ctx)) {
+	ret = rb_protect(call_verify_certificate_identity, (VALUE)ctx, &status);
+	if (status) {
+	    rb_ivar_set(ssl_obj, ID_callback_state, INT2NUM(status));
+	    return 0;
+	}
+	preverify_ok = ret == Qtrue;
+    }
 
     return ossl_verify_cb_call(cb, preverify_ok, ctx);
 }
@@ -2278,9 +2313,18 @@ Init_ossl_ssl(void)
      * +store_context+ is an OpenSSL::X509::StoreContext containing the
      * context used for certificate verification.
      *
-     * If the callback returns false verification is stopped.
+     * If the callback returns false, the chain verification is immediately
+     * stopped and a bad_certificate alert is then sent.
      */
     rb_attr(cSSLContext, rb_intern("verify_callback"), 1, 1, Qfalse);
+
+    /*
+     * Whether to check the server certificate is valid for the hostname.
+     *
+     * In order to make this work, verify_mode must be set to VERIFY_PEER and
+     * the server hostname must be given by OpenSSL::SSL::SSLSocket#hostname=.
+     */
+    rb_attr(cSSLContext, rb_intern("verify_hostname"), 1, 1, Qfalse);
 
     /*
      * An OpenSSL::X509::Store used for certificate verification

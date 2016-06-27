@@ -19,6 +19,7 @@ module OpenSSL
       DEFAULT_PARAMS = {
         :ssl_version => "SSLv23",
         :verify_mode => OpenSSL::SSL::VERIFY_PEER,
+        :verify_hostname => true,
         :ciphers => %w{
           ECDHE-ECDSA-AES128-GCM-SHA256
           ECDHE-RSA-AES128-GCM-SHA256
@@ -71,7 +72,7 @@ module OpenSSL
         "session_get_cb", "session_new_cb", "session_remove_cb",
         "tmp_ecdh_callback", "servername_cb", "npn_protocols",
         "alpn_protocols", "alpn_select_cb",
-        "npn_select_cb"].map { |x| "@#{x}" }
+        "npn_select_cb", "verify_hostname"].map { |x| "@#{x}" }
 
       # A callback invoked when DH parameters are required.
       #
@@ -107,13 +108,17 @@ module OpenSSL
       end
 
       ##
-      # Sets the parameters for this SSL context to the values in +params+.
+      # call-seq:
+      #   ctx.set_params(params = {}) -> params
+      #
+      # Sets saner defaults optimized for the use with HTTP-like protocols.
+      #
+      # If a Hash +params+ is given, the parameters are overridden with it.
       # The keys in +params+ must be assignment methods on SSLContext.
       #
       # If the verify_mode is not VERIFY_NONE and ca_file, ca_path and
       # cert_store are not set then the system default certificate store is
       # used.
-
       def set_params(params={})
         params = DEFAULT_PARAMS.merge(params)
         params.each{|name, value| self.__send__("#{name}=", value) }

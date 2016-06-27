@@ -889,6 +889,53 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     end
   end
 
+  def test_verify_hostname_on_connect
+    ctx_proc = proc { |ctx|
+      now = Time.now
+      exts = [
+        ["keyUsage", "keyEncipherment,digitalSignature", true],
+        ["subjectAltName", "DNS:a.example.com,DNS:*.b.example.com," \
+                           "DNS:c*.example.com,DNS:d.*.example.com"],
+      ]
+      ctx.cert = issue_cert(@svr, @svr_key, 4, now, now+1800, exts,
+                            @ca_cert, @ca_key, OpenSSL::Digest::SHA1.new)
+      ctx.key = @svr_key
+    }
+
+    start_server(OpenSSL::SSL::VERIFY_NONE, true, ctx_proc: ctx_proc,
+                 ignore_listener_error: true) do |svr, port|
+      ctx = OpenSSL::SSL::SSLContext.new
+      ctx.verify_hostname = true
+      ctx.cert_store = OpenSSL::X509::Store.new
+      ctx.cert_store.add_cert(@ca_cert)
+      ctx.verify_mode = OpenSSL::SSL::VERIFY_PEER
+
+      [
+        ["a.example.com", true],
+        ["A.Example.Com", true],
+        ["x.example.com", false],
+        ["b.example.com", false],
+        ["x.b.example.com", true],
+        ["cx.example.com", true],
+        ["d.x.example.com", false],
+      ].each do |name, expected_ok|
+        begin
+          sock = TCPSocket.new("127.0.0.1", port)
+          ssl = OpenSSL::SSL::SSLSocket.new(sock, ctx)
+          ssl.hostname = name
+          if expected_ok
+            assert_nothing_raised { ssl.connect }
+          else
+            assert_raise(OpenSSL::SSL::SSLError) { ssl.connect }
+          end
+        ensure
+          ssl.close if ssl
+          sock.close if sock
+        end
+      end
+    end
+  end
+
   def test_multibyte_read_write
     #German a umlaut
     auml = [%w{ C3 A4 }.join('')].pack('H*')
