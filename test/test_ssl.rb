@@ -879,7 +879,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     return unless OpenSSL::SSL::SSLSocket.instance_methods.include?(:hostname)
 
     ctx_proc = Proc.new do |ctx, ssl|
-      foo_ctx = ctx.dup
+      foo_ctx = OpenSSL::SSL::SSLContext.new
 
       ctx.servername_cb = Proc.new do |ssl2, hostname|
         case hostname
@@ -1312,6 +1312,19 @@ end
     # ctx.security_level = 2
     # assert_raise(OpenSSL::SSL::SSLError) { ctx.key = OpenSSL::TestUtils::TEST_KEY_RSA1024 }
     pend "FIXME: SSLContext#key= currently does not raise because SSL_CTX_use_certificate() is delayed"
+  end
+
+  def test_dup
+    ctx = OpenSSL::SSL::SSLContext.new
+    sock1, sock2 = socketpair
+    ssl = OpenSSL::SSL::SSLSocket.new(sock1, ctx)
+
+    assert_raise(NoMethodError) { ctx.dup }
+    assert_raise(NoMethodError) { ssl.dup }
+  ensure
+    ssl.close if ssl
+    sock1.close
+    sock2.close
   end
 
   private

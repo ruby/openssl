@@ -181,6 +181,25 @@ ossl_x509name_initialize(int argc, VALUE *argv, VALUE self)
     return self;
 }
 
+static VALUE
+ossl_x509name_initialize_copy(VALUE self, VALUE other)
+{
+    X509_NAME *name, *name_other, *name_new;
+
+    rb_check_frozen(self);
+    GetX509Name(self, name);
+    SafeGetX509Name(other, name_other);
+
+    name_new = X509_NAME_dup(name_other);
+    if (!name_new)
+	ossl_raise(eX509NameError, "X509_NAME_dup");
+
+    SetX509Name(self, name_new);
+    X509_NAME_free(name);
+
+    return self;
+}
+
 /*
  * call-seq:
  *    name.add_entry(oid, value [, type]) => self
@@ -464,6 +483,7 @@ Init_ossl_x509name(void)
 
     rb_define_alloc_func(cX509Name, ossl_x509name_alloc);
     rb_define_method(cX509Name, "initialize", ossl_x509name_initialize, -1);
+    rb_define_copy_func(cX509Name, ossl_x509name_initialize_copy);
     rb_define_method(cX509Name, "add_entry", ossl_x509name_add_entry, -1);
     rb_define_method(cX509Name, "to_s", ossl_x509name_to_s, -1);
     rb_define_method(cX509Name, "to_a", ossl_x509name_to_a, 0);

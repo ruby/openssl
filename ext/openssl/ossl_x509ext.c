@@ -323,6 +323,25 @@ ossl_x509ext_initialize(int argc, VALUE *argv, VALUE self)
 }
 
 static VALUE
+ossl_x509ext_initialize_copy(VALUE self, VALUE other)
+{
+    X509_EXTENSION *ext, *ext_other, *ext_new;
+
+    rb_check_frozen(self);
+    GetX509Ext(self, ext);
+    SafeGetX509Ext(other, ext_other);
+
+    ext_new = X509_EXTENSION_dup(ext_other);
+    if (!ext_new)
+	ossl_raise(eX509ExtError, "X509_EXTENSION_dup");
+
+    SetX509Ext(self, ext_new);
+    X509_EXTENSION_free(ext);
+
+    return self;
+}
+
+static VALUE
 ossl_x509ext_set_oid(VALUE self, VALUE oid)
 {
     X509_EXTENSION *ext;
@@ -475,6 +494,7 @@ Init_ossl_x509ext(void)
     cX509Ext = rb_define_class_under(mX509, "Extension", rb_cObject);
     rb_define_alloc_func(cX509Ext, ossl_x509ext_alloc);
     rb_define_method(cX509Ext, "initialize", ossl_x509ext_initialize, -1);
+    rb_define_copy_func(cX509Ext, ossl_x509ext_initialize_copy);
     rb_define_method(cX509Ext, "oid=", ossl_x509ext_set_oid, 1);
     rb_define_method(cX509Ext, "value=", ossl_x509ext_set_value, 1);
     rb_define_method(cX509Ext, "critical=", ossl_x509ext_set_critical, 1);

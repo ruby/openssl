@@ -73,6 +73,26 @@ static VALUE ossl_ssl_session_initialize(VALUE self, VALUE arg1)
 	return self;
 }
 
+static VALUE
+ossl_ssl_session_initialize_copy(VALUE self, VALUE other)
+{
+    SSL_SESSION *sess, *sess_other, *sess_new;
+
+    rb_check_frozen(self);
+    sess = RTYPEDDATA_DATA(self); /* XXX */
+    SafeGetSSLSession(other, sess_other);
+
+    sess_new = ASN1_dup((i2d_of_void *)i2d_SSL_SESSION, (d2i_of_void *)d2i_SSL_SESSION,
+			(char *)sess_other);
+    if (!sess_new)
+	ossl_raise(eSSLSession, "ASN1_dup");
+
+    RTYPEDDATA_DATA(self) = sess_new;
+    SSL_SESSION_free(sess);
+
+    return self;
+}
+
 #if HAVE_SSL_SESSION_CMP == 0
 int SSL_SESSION_cmp(const SSL_SESSION *a,const SSL_SESSION *b)
 {
@@ -317,6 +337,7 @@ void Init_ossl_ssl_session(void)
 
 	rb_define_alloc_func(cSSLSession, ossl_ssl_session_alloc);
 	rb_define_method(cSSLSession, "initialize", ossl_ssl_session_initialize, 1);
+	rb_define_copy_func(cSSLSession, ossl_ssl_session_initialize_copy);
 
 	rb_define_method(cSSLSession, "==", ossl_ssl_session_eq, 1);
 

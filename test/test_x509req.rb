@@ -147,6 +147,11 @@ class OpenSSL::TestX509Request < OpenSSL::TestCase
       issue_csr(0, @dn, @dsa512, OpenSSL::Digest::MD5.new) }
   end
 
+  def test_dup
+    req = issue_csr(0, @dn, @rsa1024, OpenSSL::Digest::SHA1.new)
+    assert_equal(req.to_der, req.dup.to_der)
+  end
+
   private
 
   def request_error_returns_false

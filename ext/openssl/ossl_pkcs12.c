@@ -65,6 +65,25 @@ ossl_pkcs12_s_allocate(VALUE klass)
     return obj;
 }
 
+static VALUE
+ossl_pkcs12_initialize_copy(VALUE self, VALUE other)
+{
+    PKCS12 *p12, *p12_old, *p12_new;
+
+    rb_check_frozen(self);
+    GetPKCS12(self, p12_old);
+    SafeGetPKCS12(other, p12);
+
+    p12_new = ASN1_dup((i2d_of_void *)i2d_PKCS12, (d2i_of_void *)d2i_PKCS12, (char *)p12);
+    if (!p12_new)
+	ossl_raise(ePKCS12Error, "ASN1_dup");
+
+    SetPKCS12(self, p12_new);
+    PKCS12_free(p12_old);
+
+    return self;
+}
+
 /*
  * call-seq:
  *    PKCS12.create(pass, name, key, cert [, ca, [, key_pbe [, cert_pbe [, key_iter [, mac_iter [, keytype]]]]]])
@@ -231,6 +250,7 @@ Init_ossl_pkcs12(void)
     rb_define_singleton_method(cPKCS12, "create", ossl_pkcs12_s_create, -1);
 
     rb_define_alloc_func(cPKCS12, ossl_pkcs12_s_allocate);
+    rb_define_copy_func(cPKCS12, ossl_pkcs12_initialize_copy);
     rb_attr(cPKCS12, rb_intern("key"), 1, 0, Qfalse);
     rb_attr(cPKCS12, rb_intern("certificate"), 1, 0, Qfalse);
     rb_attr(cPKCS12, rb_intern("ca_certs"), 1, 0, Qfalse);

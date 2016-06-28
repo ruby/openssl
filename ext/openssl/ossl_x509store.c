@@ -675,6 +675,7 @@ Init_ossl_x509store(void)
     rb_attr(cX509Store, rb_intern("chain"), 1, 0, Qfalse);
     rb_define_alloc_func(cX509Store, ossl_x509store_alloc);
     rb_define_method(cX509Store, "initialize",   ossl_x509store_initialize, -1);
+    rb_undef_method(cX509Store, "initialize_copy");
     rb_define_method(cX509Store, "verify_callback=", ossl_x509store_set_vfy_cb, 1);
     rb_define_method(cX509Store, "flags=",       ossl_x509store_set_flags, 1);
     rb_define_method(cX509Store, "purpose=",     ossl_x509store_set_purpose, 1);
@@ -691,6 +692,7 @@ Init_ossl_x509store(void)
     x509stctx = cX509StoreContext;
     rb_define_alloc_func(cX509StoreContext, ossl_x509stctx_alloc);
     rb_define_method(x509stctx,"initialize",  ossl_x509stctx_initialize, -1);
+    rb_undef_method(x509stctx, "initialize_copy");
     rb_define_method(x509stctx,"verify",      ossl_x509stctx_verify, 0);
     rb_define_method(x509stctx,"chain",       ossl_x509stctx_get_chain,0);
     rb_define_method(x509stctx,"error",       ossl_x509stctx_get_err, 0);

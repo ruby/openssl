@@ -2256,6 +2256,7 @@ Init_ossl_ssl(void)
      */
     cSSLContext = rb_define_class_under(mSSL, "SSLContext", rb_cObject);
     rb_define_alloc_func(cSSLContext, ossl_sslctx_s_alloc);
+    rb_undef_method(cSSLContext, "initialize_copy");
 
     /*
      * Context certificate
@@ -2580,6 +2581,7 @@ Init_ossl_ssl(void)
     rb_define_const(mSSLExtConfig, "OPENSSL_NO_SOCK", Qfalse);
     rb_define_alloc_func(cSSLSocket, ossl_ssl_s_alloc);
     rb_define_method(cSSLSocket, "initialize", ossl_ssl_initialize, -1);
+    rb_undef_method(cSSLSocket, "initialize_copy");
     rb_define_method(cSSLSocket, "connect",    ossl_ssl_connect, 0);
     rb_define_method(cSSLSocket, "connect_nonblock",    ossl_ssl_connect_nonblock, -1);
     rb_define_method(cSSLSocket, "accept",     ossl_ssl_accept, 0);
