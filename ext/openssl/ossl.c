@@ -242,54 +242,54 @@ ossl_pem_passwd_cb(char *buf, int max_len, int flag, void *pwd_)
 int ossl_store_ctx_ex_verify_cb_idx;
 int ossl_store_ex_verify_cb_idx;
 
-VALUE
+struct ossl_verify_cb_args {
+    VALUE proc;
+    VALUE preverify_ok;
+    VALUE store_ctx;
+};
+
+static VALUE
 ossl_call_verify_cb_proc(struct ossl_verify_cb_args *args)
 {
     return rb_funcall(args->proc, rb_intern("call"), 2,
-                      args->preverify_ok, args->store_ctx);
+		      args->preverify_ok, args->store_ctx);
 }
 
 int
-ossl_verify_cb(int ok, X509_STORE_CTX *ctx)
+ossl_verify_cb_call(VALUE proc, int ok, X509_STORE_CTX *ctx)
 {
-    VALUE proc, rctx, ret;
+    VALUE rctx, ret;
     struct ossl_verify_cb_args args;
-    int state = 0;
+    int state;
 
-    proc = (VALUE)X509_STORE_CTX_get_ex_data(ctx, ossl_store_ctx_ex_verify_cb_idx);
-    if (!proc)
-	proc = (VALUE)X509_STORE_get_ex_data(X509_STORE_CTX_get0_store(ctx), ossl_store_ex_verify_cb_idx);
-    if (!proc)
+    if (NIL_P(proc))
 	return ok;
-    if (!NIL_P(proc)) {
-	ret = Qfalse;
-	rctx = rb_protect((VALUE(*)(VALUE))ossl_x509stctx_new,
-			  (VALUE)ctx, &state);
+
+    ret = Qfalse;
+    rctx = rb_protect((VALUE(*)(VALUE))ossl_x509stctx_new, (VALUE)ctx, &state);
+    if (state) {
+	rb_set_errinfo(Qnil);
+	rb_warn("StoreContext initialization failure");
+    }
+    else {
+	args.proc = proc;
+	args.preverify_ok = ok ? Qtrue : Qfalse;
+	args.store_ctx = rctx;
+	ret = rb_protect((VALUE(*)(VALUE))ossl_call_verify_cb_proc, (VALUE)&args, &state);
 	if (state) {
 	    rb_set_errinfo(Qnil);
-	    rb_warn("StoreContext initialization failure");
+	    rb_warn("exception in verify_callback is ignored");
 	}
-	else {
-	    args.proc = proc;
-	    args.preverify_ok = ok ? Qtrue : Qfalse;
-	    args.store_ctx = rctx;
-	    ret = rb_protect((VALUE(*)(VALUE))ossl_call_verify_cb_proc, (VALUE)&args, &state);
-	    if (state) {
-		rb_set_errinfo(Qnil);
-		rb_warn("exception in verify_callback is ignored");
-	    }
-	    ossl_x509stctx_clear_ptr(rctx);
-	}
-	if (ret == Qtrue) {
-	    X509_STORE_CTX_set_error(ctx, X509_V_OK);
-	    ok = 1;
-	}
-	else{
-	    if (X509_STORE_CTX_get_error(ctx) == X509_V_OK) {
-		X509_STORE_CTX_set_error(ctx, X509_V_ERR_CERT_REJECTED);
-	    }
-	    ok = 0;
-	}
+	ossl_x509stctx_clear_ptr(rctx);
+    }
+    if (ret == Qtrue) {
+	X509_STORE_CTX_set_error(ctx, X509_V_OK);
+	ok = 1;
+    }
+    else {
+	if (X509_STORE_CTX_get_error(ctx) == X509_V_OK)
+	    X509_STORE_CTX_set_error(ctx, X509_V_ERR_CERT_REJECTED);
+	ok = 0;
     }
 
     return ok;
