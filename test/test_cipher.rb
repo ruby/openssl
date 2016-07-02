@@ -247,6 +247,46 @@ class OpenSSL::TestCipher < OpenSSL::TestCase
       end
     end
 
+    def test_aes_gcm_variable_iv_len
+      pt = "You should all use Authenticated Encryption!"
+      cipher = OpenSSL::Cipher.new("aes-128-gcm").encrypt
+      cipher.key = "x" * 16
+      assert_equal(12, cipher.iv_len)
+      cipher.iv = "a" * 12
+      ct1 = cipher.update(pt) << cipher.final
+      tag1 = cipher.auth_tag
+
+      cipher = OpenSSL::Cipher.new("aes-128-gcm").encrypt
+      cipher.key = "x" * 16
+      cipher.iv_len = 10
+      assert_equal(10, cipher.iv_len)
+      cipher.iv = "a" * 10
+      ct2 = cipher.update(pt) << cipher.final
+      tag2 = cipher.auth_tag
+
+      assert_not_equal ct1, ct2
+      assert_not_equal tag1, tag2
+
+      decipher = OpenSSL::Cipher.new("aes-128-gcm").decrypt
+      decipher.auth_tag = tag1
+      decipher.key = "x" * 16
+      decipher.iv_len = 12
+      decipher.iv = "a" * 12
+      assert_equal(pt, decipher.update(ct1) << decipher.final)
+
+      decipher.reset
+      decipher.auth_tag = tag2
+      assert_raise(OpenSSL::Cipher::CipherError) {
+        decipher.update(ct2) << decipher.final
+      }
+
+      decipher.reset
+      decipher.auth_tag = tag2
+      decipher.iv_len = 10
+      decipher.iv = "a" * 10
+      assert_equal(pt, decipher.update(ct2) << decipher.final)
+    end
+
   end
 
   private
