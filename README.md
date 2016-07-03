@@ -1,40 +1,55 @@
-# Openssl
+# OpenSSL
 
 [![Build Status](https://travis-ci.org/ruby/openssl.svg?branch=master)](https://travis-ci.org/ruby/openssl)
 
-OpenSSL provides SSL, TLS and general purpose cryptography.  It wraps the OpenSSL library.
+OpenSSL provides SSL, TLS and general purpose cryptography. It wraps the
+OpenSSL library.
 
 ## Installation
 
-Add this line to your application's Gemfile:
+The openssl gem is available at [rubygems.org](https://rubygems.org/gems/openssl).
+You can install with:
 
-```ruby
-gem 'openssl'
+```
+gem install openssl
 ```
 
-And then execute:
+You may need to specify the path where OpenSSL is installed.
 
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install openssl
+```
+gem install openssl -- --with-openssl-dir=/opt/openssl
+```
 
 ## Usage
 
+After you install it, you can require "openssl" in your application.
+
+```ruby
+require "openssl"
+```
+
+If you are using Ruby 2.3, you may need to tell RubyGems to prefer the gem
+version of openssl.
+
+```ruby
+gem "openssl"
+require "openssl"
+```
+
 See the documentation on OpenSSL for more usage,
-and the official [openssl library](http://www.openssl.org/).
+and the official [OpenSSL library](http://www.openssl.org/).
 
 ## Getting Started
 
-1. `$ gem install rake-compiler`
+1. `$ gem install rake-compiler test-unit`
 2. `$ rake compile`
 3. `$ rake test`
 
 ## Contributing
 
-1. Fork it ( https://github.com/ruby/openssl/fork )
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create a new Pull Request
+Please read CONTRIBURING.md for instructions.
+
+## Security
+
+Security issues should be reported following the process described in the
+[Security page on ruby-lang.org](https://www.ruby-lang.org/en/security/).
