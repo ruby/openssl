@@ -67,15 +67,11 @@ static VALUE eSSLErrorWaitWritable;
 
 #define ossl_ssl_get_io(o)           rb_iv_get((o),"@io")
 #define ossl_ssl_get_ctx(o)          rb_iv_get((o),"@context")
-#define ossl_ssl_get_x509(o)         rb_iv_get((o),"@x509")
-#define ossl_ssl_get_key(o)          rb_iv_get((o),"@key")
 
 #define ossl_ssl_set_io(o,v)         rb_iv_set((o),"@io",(v))
 #define ossl_ssl_set_ctx(o,v)        rb_iv_set((o),"@context",(v))
 #define ossl_ssl_set_sync_close(o,v) rb_iv_set((o),"@sync_close",(v))
 #define ossl_ssl_set_hostname_v(o,v) rb_iv_set((o),"@hostname",(v))
-#define ossl_ssl_set_x509(o,v)       rb_iv_set((o),"@x509",(v))
-#define ossl_ssl_set_key(o,v)        rb_iv_set((o),"@key",(v))
 #define ossl_ssl_set_tmp_dh(o,v)     rb_iv_set((o),"@tmp_dh",(v))
 #define ossl_ssl_set_tmp_ecdh(o,v)   rb_iv_set((o),"@tmp_ecdh",(v))
 
@@ -225,28 +221,30 @@ ossl_call_client_cert_cb(VALUE obj)
 {
     VALUE cb, ary, cert, key;
 
-    cb = rb_funcall(obj, rb_intern("client_cert_cb"), 0);
-    if (NIL_P(cb)) return Qfalse;
+    cb = ossl_sslctx_get_client_cert_cb(ossl_ssl_get_ctx(obj));
+    if (NIL_P(cb))
+	return Qnil;
+
     ary = rb_funcall(cb, rb_intern("call"), 1, obj);
     Check_Type(ary, T_ARRAY);
     GetX509CertPtr(cert = rb_ary_entry(ary, 0));
     GetPKeyPtr(key = rb_ary_entry(ary, 1));
-    ossl_ssl_set_x509(obj, cert);
-    ossl_ssl_set_key(obj, key);
 
-    return Qtrue;
+    return rb_ary_new3(2, cert, key);
 }
 
 static int
 ossl_client_cert_cb(SSL *ssl, X509 **x509, EVP_PKEY **pkey)
 {
-    VALUE obj, success;
+    VALUE obj, ret;
 
     obj = (VALUE)SSL_get_ex_data(ssl, ossl_ssl_ex_ptr_idx);
-    success = rb_protect(ossl_call_client_cert_cb, obj, NULL);
-    if (!RTEST(success)) return 0;
-    *x509 = DupX509CertPtr(ossl_ssl_get_x509(obj));
-    *pkey = DupPKeyPtr(ossl_ssl_get_key(obj));
+    ret = rb_protect(ossl_call_client_cert_cb, obj, NULL);
+    if (NIL_P(ret))
+	return 0;
+
+    *x509 = DupX509CertPtr(RARRAY_AREF(ret, 0));
+    *pkey = DupPKeyPtr(RARRAY_AREF(ret, 1));
 
     return 1;
 }
