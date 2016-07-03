@@ -158,7 +158,8 @@ ossl_pkey_new_from_data(int argc, VALUE *argv, VALUE self)
 
     BIO_free(bio);
     if (!pkey)
-	ossl_raise(rb_eArgError, "Could not parse PKey");
+	ossl_raise(ePKeyError, "Could not parse PKey");
+
     return ossl_pkey_new(pkey);
 }
 
