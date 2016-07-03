@@ -236,6 +236,26 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     }
   end
 
+  def test_client_auth_public_key
+    vflag = OpenSSL::SSL::VERIFY_PEER|OpenSSL::SSL::VERIFY_FAIL_IF_NO_PEER_CERT
+    start_server(vflag, true, ignore_listener_error: true) do |server, port|
+      assert_raise(ArgumentError) {
+        ctx = OpenSSL::SSL::SSLContext.new
+        ctx.key = @cli_key.public_key
+        ctx.cert = @cli_cert
+        server_connect(port, ctx) { }
+      }
+
+      assert_raise(OpenSSL::SSL::SSLError) {
+        ctx = OpenSSL::SSL::SSLContext.new
+        ctx.client_cert_cb = Proc.new{ |ssl|
+          [@cli_cert, @cli_key.public_key]
+        }
+        server_connect(port, ctx) { }
+      }
+    end
+  end
+
   def test_client_ca
     ctx_proc = Proc.new do |ctx|
       ctx.client_ca = [@ca_cert]

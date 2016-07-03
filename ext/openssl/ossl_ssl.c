@@ -228,7 +228,7 @@ ossl_call_client_cert_cb(VALUE obj)
     ary = rb_funcall(cb, rb_intern("call"), 1, obj);
     Check_Type(ary, T_ARRAY);
     GetX509CertPtr(cert = rb_ary_entry(ary, 0));
-    GetPKeyPtr(key = rb_ary_entry(ary, 1));
+    GetPrivPKeyPtr(key = rb_ary_entry(ary, 1));
 
     return rb_ary_new3(2, cert, key);
 }
@@ -774,7 +774,7 @@ ossl_sslctx_setup(VALUE self)
     val = ossl_sslctx_get_cert(self);
     cert = NIL_P(val) ? NULL : GetX509CertPtr(val); /* NO DUP NEEDED */
     val = ossl_sslctx_get_key(self);
-    key = NIL_P(val) ? NULL : GetPKeyPtr(val); /* NO DUP NEEDED */
+    key = NIL_P(val) ? NULL : GetPrivPKeyPtr(val); /* NO DUP NEEDED */
     if (cert && key) {
         if (!SSL_CTX_use_certificate(ctx, cert)) {
             /* Adds a ref => Safe to FREE */
