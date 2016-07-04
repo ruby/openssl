@@ -100,27 +100,6 @@ ossl_pkey_new(EVP_PKEY *pkey)
     UNREACHABLE;
 }
 
-VALUE
-ossl_pkey_new_from_file(VALUE filename)
-{
-    FILE *fp;
-    EVP_PKEY *pkey;
-
-    rb_check_safe_obj(filename);
-    if (!(fp = fopen(StringValueCStr(filename), "r"))) {
-	ossl_raise(ePKeyError, "%s", strerror(errno));
-    }
-    rb_fd_fix_cloexec(fileno(fp));
-
-    pkey = PEM_read_PrivateKey(fp, NULL, ossl_pem_passwd_cb, NULL);
-    fclose(fp);
-    if (!pkey) {
-	ossl_raise(ePKeyError, NULL);
-    }
-
-    return ossl_pkey_new(pkey);
-}
-
 /*
  *  call-seq:
  *     OpenSSL::PKey.read(string [, pwd ] ) -> PKey
