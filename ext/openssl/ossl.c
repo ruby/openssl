@@ -1063,14 +1063,20 @@ static void Init_ossl_locks(void)
  * SSLSocket#connect must be called to initiate the SSL handshake and start
  * encryption.  A key and certificate are not required for the client socket.
  *
+ * Note that SSLSocket#close doesn't close the underlying socket by default. Set
+ * SSLSocket#sync_close to true if you want.
+ *
  *   require 'socket'
  *
  *   tcp_socket = TCPSocket.new 'localhost', 5000
  *   ssl_client = OpenSSL::SSL::SSLSocket.new tcp_socket, context
+ *   ssl_client.sync_close = true
  *   ssl_client.connect
  *
  *   ssl_client.puts "hello server!"
  *   puts ssl_client.gets
+ *
+ *   ssl_client.close # shutdown the TLS connection and close tcp_socket
  *
  * === Peer Verification
  *
