@@ -50,9 +50,6 @@ module OpenSSL
           AES256-SHA256
           AES128-SHA
           AES256-SHA
-          ECDHE-ECDSA-RC4-SHA
-          ECDHE-RSA-RC4-SHA
-          RC4-SHA
         }.join(":"),
         :options => -> {
           opts = OpenSSL::SSL::OP_ALL
