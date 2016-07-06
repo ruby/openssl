@@ -3,7 +3,9 @@ require_relative 'utils'
 
 if defined?(OpenSSL::TestUtils) && defined?(OpenSSL::PKey::EC)
 
-class OpenSSL::TestEC < OpenSSL::TestCase
+class OpenSSL::TestEC < OpenSSL::PKeyTestCase
+  P256 = OpenSSL::TestUtils::TEST_KEY_EC_P256V1
+
   def setup
     @data1 = 'foo'
     @data2 = 'bar' * 1000 # data too long for DSA sig
@@ -171,75 +173,87 @@ class OpenSSL::TestEC < OpenSSL::TestCase
     end
   end
 
-  def test_read_private_key_der
-    ec = OpenSSL::TestUtils::TEST_KEY_EC_P256V1
-    der = ec.to_der
-    ec2 = OpenSSL::PKey.read(der)
-    assert(ec2.private_key?)
-    assert_equal(der, ec2.to_der)
+  def test_ECPrivateKey
+    asn1 = OpenSSL::ASN1::Sequence([
+      OpenSSL::ASN1::Integer(1),
+      OpenSSL::ASN1::OctetString(P256.private_key.to_s(2)),
+      OpenSSL::ASN1::ASN1Data.new(
+        [OpenSSL::ASN1::ObjectId("prime256v1")],
+        0, :CONTEXT_SPECIFIC
+      ),
+      OpenSSL::ASN1::ASN1Data.new(
+        [OpenSSL::ASN1::BitString(P256.public_key.to_bn.to_s(2))],
+        1, :CONTEXT_SPECIFIC
+      )
+    ])
+    key = OpenSSL::PKey::EC.new(asn1.to_der)
+    assert_predicate(key, :private?)
+    assert_same_ec(P256, key)
+
+    pem = <<~EOF
+    -----BEGIN EC PRIVATE KEY-----
+    MHcCAQEEIID49FDqcf1O1eO8saTgG70UbXQw9Fqwseliit2aWhH1oAoGCCqGSM49
+    AwEHoUQDQgAEFglk2c+oVUIKQ64eZG9bhLNPWB7lSZ/ArK41eGy5wAzU/0G51Xtt
+    CeBUl+MahZtn9fO1JKdF4qJmS39dXnpENg==
+    -----END EC PRIVATE KEY-----
+    EOF
+    key = OpenSSL::PKey::EC.new(pem)
+    assert_same_ec(P256, key)
+
+    assert_equal(asn1.to_der, P256.to_der)
+    assert_equal(pem, P256.export)
   end
 
-  def test_read_private_key_pem
-    ec = OpenSSL::TestUtils::TEST_KEY_EC_P256V1
-    pem = ec.to_pem
-    ec2 = OpenSSL::PKey.read(pem)
-    assert(ec2.private_key?)
-    assert_equal(pem, ec2.to_pem)
+  def test_ECPrivateKey_encrypted
+    # key = abcdef
+    pem = <<~EOF
+    -----BEGIN EC PRIVATE KEY-----
+    Proc-Type: 4,ENCRYPTED
+    DEK-Info: AES-128-CBC,85743EB6FAC9EA76BF99D9328AFD1A66
+
+    nhsP1NHxb53aeZdzUe9umKKyr+OIwQq67eP0ONM6E1vFTIcjkDcFLR6PhPFufF4m
+    y7E2HF+9uT1KPQhlE+D63i1m1Mvez6PWfNM34iOQp2vEhaoHHKlR3c43lLyzaZDI
+    0/dGSU5SzFG+iT9iFXCwCvv+bxyegkBOyALFje1NAsM=
+    -----END EC PRIVATE KEY-----
+    EOF
+    key = OpenSSL::PKey::EC.new(pem, "abcdef")
+    assert_same_ec(P256, key)
+    key = OpenSSL::PKey::EC.new(pem) { "abcdef" }
+    assert_same_ec(P256, key)
+
+    cipher = OpenSSL::Cipher.new("aes-128-cbc")
+    exported = P256.to_pem(cipher, "abcdef\0\1")
+    assert_same_ec(P256, OpenSSL::PKey::EC.new(exported, "abcdef\0\1"))
+    assert_raise(OpenSSL::PKey::ECError) {
+      OpenSSL::PKey::EC.new(exported, "abcdef")
+    }
   end
 
-  def test_read_public_key_der
-    ec = OpenSSL::TestUtils::TEST_KEY_EC_P256V1
-    ec2 = OpenSSL::PKey::EC.new(ec.group)
-    ec2.public_key = ec.public_key
-    der = ec2.to_der
-    ec3 = OpenSSL::PKey.read(der)
-    assert(!ec3.private_key?)
-    assert_equal(der, ec3.to_der)
-  end
+  def test_PUBKEY
+    asn1 = OpenSSL::ASN1::Sequence([
+      OpenSSL::ASN1::Sequence([
+        OpenSSL::ASN1::ObjectId("id-ecPublicKey"),
+        OpenSSL::ASN1::ObjectId("prime256v1")
+      ]),
+      OpenSSL::ASN1::BitString(
+        P256.public_key.to_bn.to_s(2)
+      )
+    ])
+    key = OpenSSL::PKey::EC.new(asn1.to_der)
+    assert_not_predicate(key, :private?)
+    assert_same_ec(dup_public(P256), key)
 
-  def test_read_public_key_pem
-    ec = OpenSSL::TestUtils::TEST_KEY_EC_P256V1
-    ec2 = OpenSSL::PKey::EC.new(ec.group)
-    ec2.public_key = ec.public_key
-    pem = ec2.to_pem
-    ec3 = OpenSSL::PKey.read(pem)
-    assert(!ec3.private_key?)
-    assert_equal(pem, ec3.to_pem)
-  end
+    pem = <<~EOF
+    -----BEGIN PUBLIC KEY-----
+    MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEFglk2c+oVUIKQ64eZG9bhLNPWB7l
+    SZ/ArK41eGy5wAzU/0G51XttCeBUl+MahZtn9fO1JKdF4qJmS39dXnpENg==
+    -----END PUBLIC KEY-----
+    EOF
+    key = OpenSSL::PKey::EC.new(pem)
+    assert_same_ec(dup_public(P256), key)
 
-  def test_read_private_key_pem_pw
-    ec = OpenSSL::TestUtils::TEST_KEY_EC_P256V1
-    pem = ec.to_pem(OpenSSL::Cipher.new('AES-128-CBC'), 'secret')
-    #callback form for password
-    ec2 = OpenSSL::PKey.read(pem) do
-      'secret'
-    end
-    assert(ec2.private_key?)
-    # pass password directly
-    ec2 = OpenSSL::PKey.read(pem, 'secret')
-    assert(ec2.private_key?)
-    #omit pem equality check, will be different due to cipher iv
-  end
-
-  def test_export_password_length
-    key = OpenSSL::TestUtils::TEST_KEY_EC_P256V1
-    assert_raise(OpenSSL::OpenSSLError) do
-      key.export(OpenSSL::Cipher.new('AES-128-CBC'), 'sec')
-    end
-    pem = key.export(OpenSSL::Cipher.new('AES-128-CBC'), 'secr')
-    assert(pem)
-  end
-
-  def test_export_password_funny
-    key = OpenSSL::TestUtils::TEST_KEY_EC_P256V1
-    pem = key.export(OpenSSL::Cipher.new('AES-128-CBC'), "pass\0wd")
-    assert_raise(OpenSSL::PKey::PKeyError) do
-      OpenSSL::PKey.read(pem, "pass")
-    end
-    key2 = OpenSSL::PKey.read(pem, "pass\0wd")
-    assert(key2.private_key?)
-    key3 = OpenSSL::PKey::EC.new(pem, "pass\0wd")
-    assert(key3.private_key?)
+    assert_equal(asn1.to_der, dup_public(P256).to_der)
+    assert_equal(pem, dup_public(P256).export)
   end
 
   def test_ec_point_mul
@@ -271,7 +285,7 @@ class OpenSSL::TestEC < OpenSSL::TestCase
       raise if $!.message !~ /unsupported field/
     end
 
-    p256_key = OpenSSL::TestUtils::TEST_KEY_EC_P256V1
+    p256_key = P256
     p256_g = p256_key.group
     assert_equal(p256_key.public_key, p256_g.generator.mul(p256_key.private_key))
 
@@ -285,6 +299,11 @@ class OpenSSL::TestEC < OpenSSL::TestCase
 
 # test Group: asn1_flag, point_conversion
 
+  private
+
+  def assert_same_ec(expected, key)
+    check_component(expected, key, [:group, :public_key, :private_key])
+  end
 end
 
 end
