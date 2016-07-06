@@ -382,21 +382,10 @@ static VALUE
 ossl_x509crl_to_der(VALUE self)
 {
     X509_CRL *crl;
-    BIO *out;
-    BUF_MEM *buf;
     VALUE str;
 
     GetX509CRL(self, crl);
-    if (!(out = BIO_new(BIO_s_mem()))) {
-	ossl_raise(eX509CRLError, NULL);
-    }
-    if (!i2d_X509_CRL_bio(out, crl)) {
-	BIO_free(out);
-	ossl_raise(eX509CRLError, NULL);
-    }
-    BIO_get_mem_ptr(out, &buf);
-    str = rb_str_new(buf->data, buf->length);
-    BIO_free(out);
+    ossl_i2d(i2d_X509_CRL, crl, str);
 
     return str;
 }

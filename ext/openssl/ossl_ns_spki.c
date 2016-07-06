@@ -110,17 +110,9 @@ ossl_spki_to_der(VALUE self)
 {
     NETSCAPE_SPKI *spki;
     VALUE str;
-    long len;
-    unsigned char *p;
 
     GetSPKI(self, spki);
-    if ((len = i2d_NETSCAPE_SPKI(spki, NULL)) <= 0)
-        ossl_raise(eX509CertError, NULL);
-    str = rb_str_new(0, len);
-    p = (unsigned char *)RSTRING_PTR(str);
-    if (i2d_NETSCAPE_SPKI(spki, &p) <= 0)
-        ossl_raise(eX509CertError, NULL);
-    ossl_str_adjust(str, p);
+    ossl_i2d(i2d_NETSCAPE_SPKI, spki, str);
 
     return str;
 }

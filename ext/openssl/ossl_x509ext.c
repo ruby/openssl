@@ -443,18 +443,10 @@ static VALUE
 ossl_x509ext_to_der(VALUE obj)
 {
     X509_EXTENSION *ext;
-    unsigned char *p;
-    long len;
     VALUE str;
 
     GetX509Ext(obj, ext);
-    if((len = i2d_X509_EXTENSION(ext, NULL)) <= 0)
-	ossl_raise(eX509ExtError, NULL);
-    str = rb_str_new(0, len);
-    p = (unsigned char *)RSTRING_PTR(str);
-    if(i2d_X509_EXTENSION(ext, &p) < 0)
-	ossl_raise(eX509ExtError, NULL);
-    ossl_str_adjust(str, p);
+    ossl_i2d(i2d_X509_EXTENSION, ext, str);
 
     return str;
 }
