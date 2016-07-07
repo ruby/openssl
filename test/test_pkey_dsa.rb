@@ -39,32 +39,6 @@ class OpenSSL::TestPKeyDSA < OpenSSL::PKeyTestCase
     assert(key.sysverify(digest, sig))
   end
 
-  def test_sign_verify
-    check_sign_verify(OpenSSL::Digest::DSS1.new)
-  end if defined?(OpenSSL::Digest::DSS1)
-
-if (OpenSSL::OPENSSL_VERSION_NUMBER > 0x10000000)
-  def test_sign_verify_sha1
-    check_sign_verify(OpenSSL::Digest::SHA1.new)
-  end
-
-  def test_sign_verify_sha256
-    check_sign_verify(OpenSSL::Digest::SHA256.new)
-  end
-end
-
-  def test_digest_state_irrelevant_verify
-    key = OpenSSL::TestUtils::TEST_KEY_DSA256
-    digest1 = OpenSSL::TestUtils::DSA_SIGNATURE_DIGEST.new
-    digest2 = OpenSSL::TestUtils::DSA_SIGNATURE_DIGEST.new
-    data = 'Sign me!'
-    sig = key.sign(digest1, data)
-    digest1.reset
-    digest1 << 'Change state of digest1'
-    assert(key.verify(digest1, sig, data))
-    assert(key.verify(digest2, sig, data))
-  end
-
   def test_DSAPrivateKey
     # OpenSSL DSAPrivateKey format; similar to RSAPrivateKey
     asn1 = OpenSSL::ASN1::Sequence([
@@ -193,13 +167,6 @@ fWLOqqkzFeRrYMDzUpl36XktY6Yq8EJYlW9pCMmBVNy/dQ==
   end
 
   private
-  def check_sign_verify(digest)
-    key = OpenSSL::TestUtils::TEST_KEY_DSA256
-    data = 'Sign me!'
-    sig = key.sign(digest, data)
-    assert(key.verify(digest, sig, data))
-  end
-
   def assert_same_dsa(expected, key)
     check_component(expected, key, [:p, :q, :g, :pub_key, :priv_key])
   end

@@ -70,14 +70,6 @@ class OpenSSL::TestPKeyRSA < OpenSSL::PKeyTestCase
     end
   end
 
-  def test_sign_verify
-    key = RSA1024
-    digest = OpenSSL::Digest::SHA1.new
-    data = 'Sign me!'
-    sig = key.sign(digest, data)
-    assert(key.verify(digest, sig, data))
-  end
-
   def test_sign_verify_memory_leak
     bug9743 = '[ruby-core:62038] [Bug #9743]'
     assert_no_memory_leak(%w[-ropenssl], <<-PREP, <<-CODE, bug9743, rss: true, timeout: 30)
