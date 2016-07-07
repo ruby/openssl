@@ -22,4 +22,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rake", "~> 10.3"
   spec.add_development_dependency "rake-compiler", "~> 0.9"
   spec.add_development_dependency "test-unit", "~> 3.0"
+  spec.add_development_dependency "rdoc", "~> 4.2"
 end
