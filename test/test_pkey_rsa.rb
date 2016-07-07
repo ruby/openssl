@@ -70,14 +70,6 @@ class OpenSSL::TestPKeyRSA < OpenSSL::PKeyTestCase
     end
   end
 
-  def test_sign_verify
-    key = RSA1024
-    digest = OpenSSL::Digest::SHA1.new
-    data = 'Sign me!'
-    sig = key.sign(digest, data)
-    assert(key.verify(digest, sig, data))
-  end
-
   def test_digest_state_irrelevant_sign
     key = RSA1024
     digest1 = OpenSSL::Digest::SHA1.new
