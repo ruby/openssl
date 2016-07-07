@@ -52,8 +52,6 @@ VALUE cBN;
 
 /* Document-class: OpenSSL::BNError
  *
- * BNError < OpenSSLError
- *
  * Generic Error for all of OpenSSL::BN (big num)
  */
 VALUE eBNError;
@@ -135,6 +133,7 @@ ossl_bn_alloc(VALUE klass)
 
 /* Document-method: OpenSSL::BN.new
  *
+ * call-seq:
  *    OpenSSL::BN.new => aBN
  *    OpenSSL::BN.new(bn) => aBN
  *    OpenSSL::BN.new(integer) => aBN
@@ -239,11 +238,11 @@ ossl_bn_initialize(int argc, VALUE *argv, VALUE self)
  *
  * === Parameters
  * * +base+ - integer
- * * * Valid values:
- * * * * 0 - MPI
- * * * * 2 - binary
- * * * * 10 - the default
- * * * * 16 - hex
+ *   Valid values:
+ *   * 0 - MPI
+ *   * 2 - binary
+ *   * 10 - the default
+ *   * 16 - hex
  */
 static VALUE
 ossl_bn_to_s(int argc, VALUE *argv, VALUE self)
@@ -346,18 +345,21 @@ ossl_bn_coerce(VALUE self, VALUE other)
 
 /*
  * Document-method: OpenSSL::BN#zero?
+ * call-seq:
  *   bn.zero? => true | false
  */
 BIGNUM_BOOL1(is_zero)
 
 /*
  * Document-method: OpenSSL::BN#one?
+ * call-seq:
  *   bn.one? => true | false
  */
 BIGNUM_BOOL1(is_one)
 
 /*
  * Document-method: OpenSSL::BN#odd?
+ * call-seq:
  *   bn.odd? => true | false
  */
 BIGNUM_BOOL1(is_odd)
@@ -383,6 +385,7 @@ BIGNUM_BOOL1(is_odd)
 
 /*
  * Document-method: OpenSSL::BN#sqr
+ * call-seq:
  *   bn.sqr => aBN
  */
 BIGNUM_1c(sqr)
@@ -408,12 +411,14 @@ BIGNUM_1c(sqr)
 
 /*
  * Document-method: OpenSSL::BN#+
+ * call-seq:
  *   bn + bn2 => aBN
  */
 BIGNUM_2(add)
 
 /*
  * Document-method: OpenSSL::BN#-
+ * call-seq:
  *   bn - bn2 => aBN
  */
 BIGNUM_2(sub)
@@ -439,42 +444,49 @@ BIGNUM_2(sub)
 
 /*
  * Document-method: OpenSSL::BN#*
+ * call-seq:
  *   bn * bn2 => aBN
  */
 BIGNUM_2c(mul)
 
 /*
  * Document-method: OpenSSL::BN#%
+ * call-seq:
  *   bn % bn2 => aBN
  */
 BIGNUM_2c(mod)
 
 /*
  * Document-method: OpenSSL::BN#**
+ * call-seq:
  *   bn ** bn2 => aBN
  */
 BIGNUM_2c(exp)
 
 /*
  * Document-method: OpenSSL::BN#gcd
+ * call-seq:
  *   bn.gcd(bn2) => aBN
  */
 BIGNUM_2c(gcd)
 
 /*
  * Document-method: OpenSSL::BN#mod_sqr
+ * call-seq:
  *   bn.mod_sqr(bn2) => aBN
  */
 BIGNUM_2c(mod_sqr)
 
 /*
  * Document-method: OpenSSL::BN#mod_inverse
+ * call-seq:
  *   bn.mod_inverse(bn2) => aBN
  */
 BIGNUM_2c(mod_inverse)
 
 /*
  * Document-method: OpenSSL::BN#/
+ * call-seq:
  *    bn1 / bn2 => [result, remainder]
  *
  * Division of OpenSSL::BN instances
@@ -529,24 +541,28 @@ ossl_bn_div(VALUE self, VALUE other)
 
 /*
  * Document-method: OpenSSL::BN#mod_add
+ * call-seq:
  *   bn.mod_add(bn1, bn2) -> aBN
  */
 BIGNUM_3c(mod_add)
 
 /*
  * Document-method: OpenSSL::BN#mod_sub
+ * call-seq:
  *   bn.mod_sub(bn1, bn2) -> aBN
  */
 BIGNUM_3c(mod_sub)
 
 /*
  * Document-method: OpenSSL::BN#mod_mul
+ * call-seq:
  *   bn.mod_mul(bn1, bn2) -> aBN
  */
 BIGNUM_3c(mod_mul)
 
 /*
  * Document-method: OpenSSL::BN#mod_exp
+ * call-seq:
  *   bn.mod_exp(bn1, bn2) -> aBN
  */
 BIGNUM_3c(mod_exp)
@@ -565,29 +581,31 @@ BIGNUM_3c(mod_exp)
 
 /*
  * Document-method: OpenSSL::BN#set_bit!
+ * call-seq:
  *   bn.set_bit!(bit) -> self
  */
 BIGNUM_BIT(set_bit)
 
 /*
  * Document-method: OpenSSL::BN#clear_bit!
+ * call-seq:
  *   bn.clear_bit!(bit) -> self
  */
 BIGNUM_BIT(clear_bit)
 
 /*
  * Document-method: OpenSSL::BN#mask_bit!
+ * call-seq:
  *   bn.mask_bit!(bit) -> self
  */
 BIGNUM_BIT(mask_bits)
 
 /* Document-method: OpenSSL::BN#bit_set?
+ * call-seq:
+ *   bn.bit_set?(bit) => true | false
  *
  * Returns boolean of whether +bit+ is set.
  * Bitwise operations for openssl BIGNUMs.
- *
- *    bn.bit_set?(bit) => true | false
- *
  */
 static VALUE
 ossl_bn_is_bit_set(VALUE self, VALUE bit)
@@ -653,12 +671,14 @@ BIGNUM_SHIFT(rshift)
 
 /*
  * Document-method: OpenSSL::BN#lshift!
+ * call-seq:
  *   bn.lshift!(bits) -> self
  */
 BIGNUM_SELF_SHIFT(lshift)
 
 /*
  * Document-method: OpenSSL::BN#rshift!
+ * call-seq:
  *   bn.rshift!(bits) -> self
  */
 BIGNUM_SELF_SHIFT(rshift)
@@ -722,6 +742,7 @@ BIGNUM_RAND(pseudo_rand)
 
 /*
  * Document-method: OpenSSL::BN.rand_range
+ * call-seq:
  *   BN.rand_range(range) -> aBN
  *
  */
@@ -729,6 +750,7 @@ BIGNUM_RAND_RANGE(rand)
 
 /*
  * Document-method: OpenSSL::BN.pseudo_rand_range
+ * call-seq:
  *   BN.pseudo_rand_range(range) -> aBN
  *
  */
@@ -790,12 +812,14 @@ ossl_bn_s_generate_prime(int argc, VALUE *argv, VALUE klass)
 
 /*
  * Document-method: OpenSSL::BN#num_bytes
+ * call-seq:
  *   bn.num_bytes => integer
  */
 BIGNUM_NUM(num_bytes)
 
 /*
  * Document-method: OpenSSL::BN#num_bits
+ * call-seq:
  *   bn.num_bits => integer
  */
 BIGNUM_NUM(num_bits)
@@ -829,16 +853,19 @@ ossl_bn_copy(VALUE self, VALUE other)
 
 /*
  * Document-method: OpenSSL::BN#cmp
+ * call-seq:
  *   bn.cmp(bn2) => integer
  */
 /*
  * Document-method: OpenSSL::BN#<=>
+ * call-seq:
  *   bn <=> bn2 => integer
  */
 BIGNUM_CMP(cmp)
 
 /*
  * Document-method: OpenSSL::BN#ucmp
+ * call-seq:
  *   bn.ucmp(bn2) => integer
  */
 BIGNUM_CMP(ucmp)
@@ -921,9 +948,9 @@ ossl_bn_hash(VALUE self)
  *    bn.prime? => true | false
  *    bn.prime?(checks) => true | false
  *
- *  Performs a Miller-Rabin probabilistic primality test with +checks+
- *  iterations. If +nchecks+ is not specified, a number of iterations is used
- *  that yields a false positive rate of at most 2^-80 for random input.
+ * Performs a Miller-Rabin probabilistic primality test with +checks+
+ * iterations. If +nchecks+ is not specified, a number of iterations is used
+ * that yields a false positive rate of at most 2^-80 for random input.
  *
  * === Parameters
  * * +checks+ - integer
@@ -957,8 +984,8 @@ ossl_bn_is_prime(int argc, VALUE *argv, VALUE self)
  *    bn.prime_fasttest?(checks) => true | false
  *    bn.prime_fasttest?(checks, trial_div) => true | false
  *
- *  Performs a Miller-Rabin primality test. This is same as #prime? except this
- *  first attempts trial divisions with some small primes.
+ * Performs a Miller-Rabin primality test. This is same as #prime? except this
+ * first attempts trial divisions with some small primes.
  *
  * === Parameters
  * * +checks+ - integer
@@ -1001,7 +1028,8 @@ void
 Init_ossl_bn(void)
 {
 #if 0
-    mOSSL = rb_define_module("OpenSSL"); /* let rdoc know about mOSSL */
+    mOSSL = rb_define_module("OpenSSL");
+    eOSSLError = rb_define_class_under(mOSSL, "OpenSSLError", rb_eStandardError);
 #endif
 
     if (!(ossl_bn_ctx = BN_CTX_new())) {

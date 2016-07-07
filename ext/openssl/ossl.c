@@ -483,9 +483,8 @@ ossl_debug_set(VALUE self, VALUE val)
  * so otherwise will result in an error.
  *
  * === Examples
- *
- * OpenSSL.fips_mode = true   # turn FIPS mode on
- * OpenSSL.fips_mode = false  # and off again
+ *   OpenSSL.fips_mode = true   # turn FIPS mode on
+ *   OpenSSL.fips_mode = false  # and off again
  */
 static VALUE
 ossl_fips_mode_set(VALUE self, VALUE enabled)
@@ -910,7 +909,7 @@ static void Init_ossl_locks(void)
  *   ca_key = OpenSSL::PKey::RSA.new 2048
  *   pass_phrase = 'my secure pass phrase goes here'
  *
- *   cipher = OpenSSL::Cipher::Cipher.new 'AES-128-CBC'
+ *   cipher = OpenSSL::Cipher.new 'AES-128-CBC'
  *
  *   open 'ca_key.pem', 'w', 0400 do |io|
  *     io.write ca_key.export(cipher, pass_phrase)
@@ -1160,11 +1159,14 @@ Init_openssl(void)
     /*
      * Boolean indicating whether OpenSSL is FIPS-enabled or not
      */
+    rb_define_const(mOSSL, "OPENSSL_FIPS",
 #ifdef OPENSSL_FIPS
-    rb_define_const(mOSSL, "OPENSSL_FIPS", Qtrue);
+		    Qtrue
 #else
-    rb_define_const(mOSSL, "OPENSSL_FIPS", Qfalse);
+		    Qfalse
 #endif
+		   );
+
     rb_define_module_function(mOSSL, "fips_mode=", ossl_fips_mode_set, 1);
 
     /*

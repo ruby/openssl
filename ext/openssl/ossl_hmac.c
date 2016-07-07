@@ -348,8 +348,8 @@ void
 Init_ossl_hmac(void)
 {
 #if 0
-    /* :nodoc: */
-    mOSSL = rb_define_module("OpenSSL"); /* let rdoc know about mOSSL */
+    mOSSL = rb_define_module("OpenSSL");
+    eOSSLError = rb_define_class_under(mOSSL, "OpenSSLError", rb_eStandardError);
 #endif
 
     eHMACError = rb_define_class_under(mOSSL, "HMACError", eOSSLError);

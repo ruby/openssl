@@ -74,8 +74,8 @@ ossl_pkcs12_s_allocate(VALUE klass)
  * * +name+ - A string describing the key.
  * * +key+ - Any PKey.
  * * +cert+ - A X509::Certificate.
- * * * The public_key portion of the certificate must contain a valid public key.
- * * * The not_before and not_after fields must be filled in.
+ *   * The public_key portion of the certificate must contain a valid public key.
+ *   * The not_before and not_after fields must be filled in.
  * * +ca+ - An optional array of X509::Certificate's.
  * * +key_pbe+ - string
  * * +cert_pbe+ - string
@@ -216,6 +216,11 @@ ossl_pkcs12_to_der(VALUE self)
 void
 Init_ossl_pkcs12(void)
 {
+#if 0
+    mOSSL = rb_define_module("OpenSSL");
+    eOSSLError = rb_define_class_under(mOSSL, "OpenSSLError", rb_eStandardError);
+#endif
+
     /*
      * Defines a file format commonly used to store private keys with
      * accompanying public key certificates, protected with a password-based

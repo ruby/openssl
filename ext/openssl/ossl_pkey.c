@@ -128,11 +128,11 @@ ossl_pkey_new_from_file(VALUE filename)
  *
  * === Parameters
  * * +string+ is a DER- or PEM-encoded string containing an arbitrary private
- * or public key.
+ *   or public key.
  * * +file+ is an instance of +File+ containing a DER- or PEM-encoded
- * arbitrary private or public key.
+ *   arbitrary private or public key.
  * * +pwd+ is an optional password in case +string+ or +file+ is an encrypted
- * PEM resource.
+ *   PEM resource.
  */
 static VALUE
 ossl_pkey_new_from_data(int argc, VALUE *argv, VALUE self)
@@ -352,7 +352,8 @@ void
 Init_ossl_pkey(void)
 {
 #if 0
-    mOSSL = rb_define_module("OpenSSL"); /* let rdoc know about mOSSL */
+    mOSSL = rb_define_module("OpenSSL");
+    eOSSLError = rb_define_class_under(mOSSL, "OpenSSLError", rb_eStandardError);
 #endif
 
     /* Document-module: OpenSSL::PKey

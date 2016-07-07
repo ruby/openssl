@@ -335,7 +335,7 @@ ossl_rsa_is_private(VALUE self)
  *
  * Outputs this keypair in PEM encoding.  If +cipher+ and +pass_phrase+ are
  * given they will be used to encrypt the key.  +cipher+ must be an
- * OpenSSL::Cipher::Cipher instance.
+ * OpenSSL::Cipher instance.
  */
 static VALUE
 ossl_rsa_export(int argc, VALUE *argv, VALUE self)
@@ -669,8 +669,9 @@ void
 Init_ossl_rsa(void)
 {
 #if 0
-    mOSSL = rb_define_module("OpenSSL"); /* let rdoc know about mOSSL and mPKey */
     mPKey = rb_define_module_under(mOSSL, "PKey");
+    cPKey = rb_define_class_under(mPKey, "PKey", rb_cObject);
+    ePKeyError = rb_define_class_under(mPKey, "PKeyError", eOSSLError);
 #endif
 
     /* Document-class: OpenSSL::PKey::RSAError

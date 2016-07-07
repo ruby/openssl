@@ -225,12 +225,11 @@ ossl_x509extfactory_initialize(int argc, VALUE *argv, VALUE self)
 }
 
 /*
- * Array to X509_EXTENSION
- * Structure:
- * ["ln", "value", bool_critical] or
- * ["sn", "value", bool_critical] or
- * ["ln", "critical,value"] or the same for sn
- * ["ln", "value"] => not critical
+ * call-seq:
+ *   ef.create_ext(ln_or_sn, "value", critical = false) -> X509::Extension
+ *   ef.create_ext(ln_or_sn, "critical,value")          -> X509::Extension
+ *
+ * Creates a new X509::Extension with passed values. See also x509v3_config(5).
  */
 static VALUE
 ossl_x509extfactory_create_ext(int argc, VALUE *argv, VALUE self)
@@ -447,6 +446,12 @@ ossl_x509ext_to_der(VALUE obj)
 void
 Init_ossl_x509ext(void)
 {
+#if 0
+    mOSSL = rb_define_module("OpenSSL");
+    eOSSLError = rb_define_class_under(mOSSL, "OpenSSLError", rb_eStandardError);
+    mX509 = rb_define_module_under(mOSSL, "X509");
+#endif
+
     eX509ExtError = rb_define_class_under(mX509, "ExtensionError", eOSSLError);
 
     cX509ExtFactory = rb_define_class_under(mX509, "ExtensionFactory", rb_cObject);

@@ -599,12 +599,10 @@ static VALUE ossl_ec_key_to_string(VALUE self, VALUE ciph, VALUE pass, int forma
  *     key.export([cipher, pass_phrase]) => String
  *     key.to_pem([cipher, pass_phrase]) => String
  *
- * Outputs the EC key in PEM encoding.  If +cipher+ and +pass_phrase+ are
- * given they will be used to encrypt the key.  +cipher+ must be an
- * OpenSSL::Cipher::Cipher instance. Note that encryption will only be
- * effective for a private key, public keys will always be encoded in plain
- * text.
- *
+ * Outputs the EC key in PEM encoding.  If +cipher+ and +pass_phrase+ are given
+ * they will be used to encrypt the key.  +cipher+ must be an OpenSSL::Cipher
+ * instance. Note that encryption will only be effective for a private key,
+ * public keys will always be encoded in plain text.
  */
 static VALUE ossl_ec_key_export(int argc, VALUE *argv, VALUE self)
 {
@@ -1694,9 +1692,11 @@ static VALUE ossl_ec_point_mul(int argc, VALUE *argv, VALUE self)
 
 void Init_ossl_ec(void)
 {
-#ifdef DONT_NEED_RDOC_WORKAROUND
-    mOSSL = rb_define_module("OpenSSL");
+#if 0
     mPKey = rb_define_module_under(mOSSL, "PKey");
+    cPKey = rb_define_class_under(mPKey, "PKey", rb_cObject);
+    eOSSLError = rb_define_class_under(mOSSL, "OpenSSLError", rb_eStandardError);
+    ePKeyError = rb_define_class_under(mPKey, "PKeyError", eOSSLError);
 #endif
 
     eECError = rb_define_class_under(mPKey, "ECError", ePKeyError);
