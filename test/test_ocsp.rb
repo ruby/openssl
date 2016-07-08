@@ -184,6 +184,17 @@ class OpenSSL::TestOCSP < OpenSSL::TestCase
     assert_equal false, bres.verify([], store1, OpenSSL::OCSP::NOCHAIN)
   end
 
+  def test_basic_response_sign_verify_use_extra_chain
+    # OpenSSL had a bug on this; test that our workaround works
+    cid = OpenSSL::OCSP::CertificateId.new(@cert2, @cert, OpenSSL::Digest::SHA256.new)
+    bres = OpenSSL::OCSP::BasicResponse.new
+    bres.add_status(cid, OpenSSL::OCSP::V_CERTSTATUS_GOOD, nil, -400, -300, 500, [])
+    bres.sign(@ocsp_cert, @ocsp_key, [], 0, "SHA256")
+    store1 = OpenSSL::X509::Store.new; store1.add_cert(@ca_cert)
+    assert_equal true, bres.verify([@cert], store1)
+    assert_equal false, bres.verify([], store1, OpenSSL::OCSP::NOCHAIN)
+  end
+
   def test_basic_response_dup
     bres = OpenSSL::OCSP::BasicResponse.new
     cid = OpenSSL::OCSP::CertificateId.new(@cert, @ca_cert, OpenSSL::Digest::SHA1.new)
