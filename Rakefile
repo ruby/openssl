@@ -3,6 +3,7 @@ gem 'rake-compiler'
 require 'rake'
 require 'rake/extensiontask'
 require 'rake/testtask'
+require 'rdoc/task'
 
 Rake::ExtensionTask.new('openssl')
 
@@ -10,6 +11,10 @@ Rake::ExtensionTask.new('openssl')
 Rake::TestTask.new do |t|
   t.libs << 'test'
   t.warning = true
+end
+
+RDoc::Task.new do |rdoc|
+  rdoc.rdoc_files.include("README.md", "lib/**/*.rb", "ext/**/*.c")
 end
 
 task :test => :debug

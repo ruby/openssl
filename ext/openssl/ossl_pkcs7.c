@@ -1054,6 +1054,11 @@ ossl_pkcs7ri_get_enc_key(VALUE self)
 void
 Init_ossl_pkcs7(void)
 {
+#if 0
+    mOSSL = rb_define_module("OpenSSL");
+    eOSSLError = rb_define_class_under(mOSSL, "OpenSSLError", rb_eStandardError);
+#endif
+
     cPKCS7 = rb_define_class_under(mOSSL, "PKCS7", rb_cObject);
     ePKCS7Error = rb_define_class_under(cPKCS7, "PKCS7Error", eOSSLError);
     rb_define_singleton_method(cPKCS7, "read_smime", ossl_pkcs7_s_read_smime, 1);

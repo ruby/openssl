@@ -1687,6 +1687,11 @@ ossl_ocspcid_to_der(VALUE self)
 void
 Init_ossl_ocsp(void)
 {
+#if 0
+    mOSSL = rb_define_module("OpenSSL");
+    eOSSLError = rb_define_class_under(mOSSL, "OpenSSLError", rb_eStandardError);
+#endif
+
     /*
      * OpenSSL::OCSP implements Online Certificate Status Protocol requests
      * and responses.

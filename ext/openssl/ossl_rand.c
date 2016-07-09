@@ -214,7 +214,8 @@ void
 Init_ossl_rand(void)
 {
 #if 0
-    mOSSL = rb_define_module("OpenSSL"); /* let rdoc know about mOSSL */
+    mOSSL = rb_define_module("OpenSSL");
+    eOSSLError = rb_define_class_under(mOSSL, "OpenSSLError", rb_eStandardError);
 #endif
 
     mRandom = rb_define_module_under(mOSSL, "Random");

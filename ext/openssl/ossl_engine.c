@@ -161,8 +161,6 @@ ossl_engine_s_load(int argc, VALUE *argv, VALUE klass)
  * OpenSSL::Engine.load. However, running cleanup before exit is recommended.
  *
  * Note that this is needed and works only in OpenSSL < 1.1.0.
- *
- * See also, https://www.openssl.org/docs/crypto/engine.html
  */
 static VALUE
 ossl_engine_s_cleanup(VALUE self)
@@ -531,6 +529,11 @@ ossl_engine_inspect(VALUE self)
 void
 Init_ossl_engine(void)
 {
+#if 0
+    mOSSL = rb_define_module("OpenSSL");
+    eOSSLError = rb_define_class_under(mOSSL, "OpenSSLError", rb_eStandardError);
+#endif
+
     cEngine = rb_define_class_under(mOSSL, "Engine", rb_cObject);
     eEngineError = rb_define_class_under(cEngine, "EngineError", eOSSLError);
 

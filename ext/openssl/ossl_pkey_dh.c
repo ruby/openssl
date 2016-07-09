@@ -560,8 +560,9 @@ void
 Init_ossl_dh(void)
 {
 #if 0
-    mOSSL = rb_define_module("OpenSSL"); /* let rdoc know about mOSSL and mPKey */
     mPKey = rb_define_module_under(mOSSL, "PKey");
+    cPKey = rb_define_class_under(mPKey, "PKey", rb_cObject);
+    ePKeyError = rb_define_class_under(mPKey, "PKeyError", eOSSLError);
 #endif
 
     /* Document-class: OpenSSL::PKey::DHError
@@ -578,15 +579,15 @@ Init_ossl_dh(void)
      * on.
      *
      * === Accessor methods for the Diffie-Hellman parameters
-     * * DH#p
-     * The prime (an OpenSSL::BN) of the Diffie-Hellman parameters.
-     * * DH#g
-     * The generator (an OpenSSL::BN) g of the Diffie-Hellman parameters.
-     * * DH#pub_key
-     * The per-session public key (an OpenSSL::BN) matching the private key.
-     * This needs to be passed to DH#compute_key.
-     * * DH#priv_key
-     * The per-session private key, an OpenSSL::BN.
+     * DH#p::
+     *   The prime (an OpenSSL::BN) of the Diffie-Hellman parameters.
+     * DH#g::
+     *   The generator (an OpenSSL::BN) g of the Diffie-Hellman parameters.
+     * DH#pub_key::
+     *   The per-session public key (an OpenSSL::BN) matching the private key.
+     *   This needs to be passed to DH#compute_key.
+     * DH#priv_key::
+     *   The per-session private key, an OpenSSL::BN.
      *
      * === Example of a key exchange
      *  dh1 = OpenSSL::PKey::DH.new(2048)

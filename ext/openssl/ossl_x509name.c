@@ -450,6 +450,12 @@ Init_ossl_x509name(void)
 {
     VALUE utf8str, ptrstr, ia5str, hash;
 
+#if 0
+    mOSSL = rb_define_module("OpenSSL");
+    eOSSLError = rb_define_class_under(mOSSL, "OpenSSLError", rb_eStandardError);
+    mX509 = rb_define_module_under(mOSSL, "X509");
+#endif
+
     id_aref = rb_intern("[]");
     eX509NameError = rb_define_class_under(mX509, "NameError", eOSSLError);
     cX509Name = rb_define_class_under(mX509, "Name", rb_cObject);
@@ -474,8 +480,7 @@ Init_ossl_x509name(void)
     ptrstr = INT2NUM(V_ASN1_PRINTABLESTRING);
     ia5str = INT2NUM(V_ASN1_IA5STRING);
 
-    /* Document-const: DEFAULT_OBJECT_TYPE
-     *
+    /*
      * The default object type for name entries.
      */
     rb_define_const(cX509Name, "DEFAULT_OBJECT_TYPE", utf8str);
@@ -489,14 +494,12 @@ Init_ossl_x509name(void)
     rb_hash_aset(hash, rb_str_new2("domainComponent"), ia5str);
     rb_hash_aset(hash, rb_str_new2("emailAddress"), ia5str);
 
-    /* Document-const: OBJECT_TYPE_TEMPLATE
-     *
+    /*
      * The default object type template for name entries.
      */
     rb_define_const(cX509Name, "OBJECT_TYPE_TEMPLATE", hash);
 
-    /* Document-const: COMPAT
-     *
+    /*
      * A flag for #to_s.
      *
      * Breaks the name returned into multiple lines if longer than 80
@@ -504,24 +507,21 @@ Init_ossl_x509name(void)
      */
     rb_define_const(cX509Name, "COMPAT", ULONG2NUM(XN_FLAG_COMPAT));
 
-    /* Document-const: RFC2253
-     *
+    /*
      * A flag for #to_s.
      *
      * Returns an RFC2253 format name.
      */
     rb_define_const(cX509Name, "RFC2253", ULONG2NUM(XN_FLAG_RFC2253));
 
-    /* Document-const: ONELINE
-     *
+    /*
      * A flag for #to_s.
      *
      * Returns a more readable format than RFC2253.
      */
     rb_define_const(cX509Name, "ONELINE", ULONG2NUM(XN_FLAG_ONELINE));
 
-    /* Document-const: MULTILINE
-     *
+    /*
      * A flag for #to_s.
      *
      * Returns a multiline format.

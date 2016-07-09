@@ -1471,7 +1471,8 @@ Init_ossl_asn1(void)
     int i;
 
 #if 0
-    mOSSL = rb_define_module("OpenSSL"); /* let rdoc know about mOSSL */
+    mOSSL = rb_define_module("OpenSSL");
+    eOSSLError = rb_define_class_under(mOSSL, "OpenSSLError", rb_eStandardError);
 #endif
 
     sUNIVERSAL = rb_intern("UNIVERSAL");
@@ -1804,10 +1805,6 @@ Init_ossl_asn1(void)
      *
      * NOTE: While OpenSSL::ASN1::ObjectId.new will allocate a new ObjectId,
      * it is not typically allocated this way, but rather that are received from
-     * parsed ASN1 encodings.
-     *
-     * While OpenSSL::ASN1::ObjectId.new will allocate a new ObjectId, it is
-     * not typically allocated this way, but rather that are received from
      * parsed ASN1 encodings.
      *
      * === Additional attributes
