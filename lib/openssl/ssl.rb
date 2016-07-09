@@ -249,7 +249,11 @@ module OpenSSL
       end
 
       attr_reader :io, :context
+
+      # Whether to close the underlying socket as well, when the SSL/TLS
+      # connection is shut down. This defaults to +false+.
       attr_accessor :sync_close
+
       alias :to_io :io
 
       # call-seq:
