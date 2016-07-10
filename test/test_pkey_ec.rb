@@ -233,7 +233,7 @@ class OpenSSL::TestEC < OpenSSL::TestCase
   def test_export_password_funny
     key = OpenSSL::TestUtils::TEST_KEY_EC_P256V1
     pem = key.export(OpenSSL::Cipher.new('AES-128-CBC'), "pass\0wd")
-    assert_raise(ArgumentError) do
+    assert_raise(OpenSSL::PKey::PKeyError) do
       OpenSSL::PKey.read(pem, "pass")
     end
     key2 = OpenSSL::PKey.read(pem, "pass\0wd")

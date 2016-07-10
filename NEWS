@@ -35,6 +35,10 @@ Backward compatibility notes
 * RC4 cipher suites are removed from OpenSSL::SSL::SSLContext::DEFAULT_PARAMS.
   RC4 is now considered to be weak. [GH ruby/openssl#50]
 
+* OpenSSL::PKey.read raises OpenSSL::PKey::PKeyError instead of ArgumentError
+  for consistency with OpenSSL::PKey::{DH,DSA,RSA,EC}#new.
+  [Bug #11774] [GH ruby/openssl#55]
+
 Updates since Ruby 2.3
 ----------------------
 
@@ -78,6 +82,10 @@ Updates since Ruby 2.3
     OpenSSL::PKey::RSA#set_key, #set_factors, #set_crt_params,
     OpenSSL::PKey::DSA#set_pqg, #set_key, OpenSSL::PKey::DH#set_pqg and #set_key
     are added.
+
+  - OpenSSL::PKey.read raises OpenSSL::PKey::PKeyError instead of ArgumentError
+    for consistency with OpenSSL::PKey::{DH,DSA,RSA,EC}#new.
+    [Bug #11774] [GH ruby/openssl#55]
 
 * OpenSSL::Random
 
