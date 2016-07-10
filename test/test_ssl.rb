@@ -687,11 +687,11 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     hostname = 'example.org'
 
     ctx3 = OpenSSL::SSL::SSLContext.new
-    ctx3.ciphers = "DH"
+    ctx3.ciphers = "aNULL"
+    ctx3.tmp_dh_callback = proc { OpenSSL::TestUtils::TEST_KEY_DH1024 }
     ctx3.security_level = 0
 
     ctx2 = OpenSSL::SSL::SSLContext.new
-    ctx2.ciphers = "DH"
     ctx2.servername_cb = lambda { |args| ctx3 }
 
     sock1, sock2 = socketpair
@@ -699,7 +699,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     s2 = OpenSSL::SSL::SSLSocket.new(sock2, ctx2)
 
     ctx1 = OpenSSL::SSL::SSLContext.new
-    ctx1.ciphers = "DH"
+    ctx1.ciphers = "aNULL"
     ctx1.security_level = 0
 
     s1 = OpenSSL::SSL::SSLSocket.new(sock1, ctx1)
@@ -722,7 +722,8 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     hostname = 'example.org'
 
     ctx2 = OpenSSL::SSL::SSLContext.new
-    ctx2.ciphers = "DH"
+    ctx2.ciphers = "aNULL"
+    ctx2.tmp_dh_callback = proc { OpenSSL::TestUtils::TEST_KEY_DH1024 }
     ctx2.security_level = 0
     ctx2.servername_cb = lambda { |args| Object.new }
 
@@ -731,7 +732,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     s2 = OpenSSL::SSL::SSLSocket.new(sock2, ctx2)
 
     ctx1 = OpenSSL::SSL::SSLContext.new
-    ctx1.ciphers = "DH"
+    ctx1.ciphers = "aNULL"
     ctx1.security_level = 0
 
     s1 = OpenSSL::SSL::SSLSocket.new(sock1, ctx1)
@@ -756,12 +757,12 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     hostname = 'example.org'
 
     ctx3 = OpenSSL::SSL::SSLContext.new
-    ctx3.ciphers = "DH"
+    ctx3.ciphers = "aNULL"
+    ctx3.tmp_dh_callback = proc { OpenSSL::TestUtils::TEST_KEY_DH1024 }
     ctx3.security_level = 0
     assert_not_predicate ctx3, :frozen?
 
     ctx2 = OpenSSL::SSL::SSLContext.new
-    ctx2.ciphers = "DH"
     ctx2.servername_cb = lambda { |args| ctx3 }
 
     sock1, sock2 = socketpair
@@ -769,7 +770,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     s2 = OpenSSL::SSL::SSLSocket.new(sock2, ctx2)
 
     ctx1 = OpenSSL::SSL::SSLContext.new
-    ctx1.ciphers = "DH"
+    ctx1.ciphers = "aNULL"
     ctx1.security_level = 0
 
     s1 = OpenSSL::SSL::SSLSocket.new(sock1, ctx1)
@@ -791,7 +792,8 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     hostname = 'example.org'
 
     ctx2 = OpenSSL::SSL::SSLContext.new
-    ctx2.ciphers = "DH"
+    ctx2.ciphers = "aNULL"
+    ctx2.tmp_dh_callback = proc { OpenSSL::TestUtils::TEST_KEY_DH1024 }
     ctx2.security_level = 0
     ctx2.servername_cb = lambda { |args| nil }
 
@@ -800,7 +802,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     s2 = OpenSSL::SSL::SSLSocket.new(sock2, ctx2)
 
     ctx1 = OpenSSL::SSL::SSLContext.new
-    ctx1.ciphers = "DH"
+    ctx1.ciphers = "aNULL"
     ctx1.security_level = 0
 
     s1 = OpenSSL::SSL::SSLSocket.new(sock1, ctx1)
@@ -823,7 +825,8 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     hostname = 'example.org'
 
     ctx2 = OpenSSL::SSL::SSLContext.new
-    ctx2.ciphers = "DH"
+    ctx2.ciphers = "aNULL"
+    ctx2.tmp_dh_callback = proc { OpenSSL::TestUtils::TEST_KEY_DH1024 }
     ctx2.security_level = 0
     ctx2.servername_cb = lambda do |args|
       cb_socket     = args[0]
@@ -836,7 +839,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     s2 = OpenSSL::SSL::SSLSocket.new(sock2, ctx2)
 
     ctx1 = OpenSSL::SSL::SSLContext.new
-    ctx1.ciphers = "DH"
+    ctx1.ciphers = "aNULL"
     ctx1.security_level = 0
 
     s1 = OpenSSL::SSL::SSLSocket.new(sock1, ctx1)
@@ -1182,6 +1185,7 @@ end
     # test it doesn't cause a segmentation fault
     ctx = OpenSSL::SSL::SSLContext.new
     ctx.ciphers = "aNULL"
+    ctx.tmp_dh_callback = proc { OpenSSL::TestUtils::TEST_KEY_DH1024 }
     ctx.security_level = 0
 
     sock1, sock2 = socketpair

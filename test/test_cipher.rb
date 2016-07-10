@@ -5,16 +5,12 @@ if defined?(OpenSSL::TestUtils)
 
 class OpenSSL::TestCipher < OpenSSL::TestCase
 
+  @ciphers = OpenSSL::Cipher.ciphers
+
   class << self
 
     def has_cipher?(name)
-      ciphers = OpenSSL::Cipher.ciphers
-      # redefine method so we can use the cached ciphers value from the closure
-      # and need not recompute the list each time
-      define_singleton_method :has_cipher? do |name|
-        ciphers.include?(name)
-      end
-      has_cipher?(name)
+      @ciphers.include?(name)
     end
 
     def has_ciphers?(list)

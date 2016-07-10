@@ -330,7 +330,7 @@ module OpenSSL::TestPairM
     ctx2.tmp_dh_callback = nil
     sock1, sock2 = tcp_pair
     s2 = OpenSSL::SSL::SSLSocket.new(sock2, ctx2)
-    accepted = s2.accept_nonblock(exception: false)
+    s2.accept_nonblock(exception: false)
 
     ctx1 = OpenSSL::SSL::SSLContext.new
     ctx1.ciphers = "DH"
@@ -339,16 +339,16 @@ module OpenSSL::TestPairM
     s1 = OpenSSL::SSL::SSLSocket.new(sock1, ctx1)
     t = Thread.new { s1.connect }
 
-    accept = s2.accept
+    EnvUtil.suppress_warning { # uses default callback
+      assert_nothing_raised { s2.accept }
+    }
     assert_equal s1, t.value
-    assert accept
   ensure
     t.join if t
     s1.close if s1
     s2.close if s2
     sock1.close if sock1
     sock2.close if sock2
-    accepted.close if accepted.respond_to?(:close)
   end
 
   def test_connect_without_setting_dh_callback
@@ -357,7 +357,7 @@ module OpenSSL::TestPairM
     ctx2.security_level = 0
     sock1, sock2 = tcp_pair
     s2 = OpenSSL::SSL::SSLSocket.new(sock2, ctx2)
-    accepted = s2.accept_nonblock(exception: false)
+    s2.accept_nonblock(exception: false)
 
     ctx1 = OpenSSL::SSL::SSLContext.new
     ctx1.ciphers = "DH"
@@ -365,16 +365,16 @@ module OpenSSL::TestPairM
     s1 = OpenSSL::SSL::SSLSocket.new(sock1, ctx1)
     t = Thread.new { s1.connect }
 
-    accept = s2.accept
+    EnvUtil.suppress_warning { # default DH
+      assert_nothing_raised { s2.accept }
+    }
     assert_equal s1, t.value
-    assert accept
   ensure
     t.join if t
     s1.close if s1
     s2.close if s2
     sock1.close if sock1
     sock2.close if sock2
-    accepted.close if accepted.respond_to?(:close)
   end
 
   def test_ecdh_callback
@@ -411,7 +411,7 @@ module OpenSSL::TestPairM
           end until rv == s1
         end
 
-        accepted = s2.accept
+        s2.accept
         assert called, 'ecdh callback should be called'
       rescue OpenSSL::SSL::SSLError => e
         if e.message =~ /no cipher match/
