@@ -659,10 +659,12 @@ static void Init_ossl_locks(void)
  *
  *   key2 = OpenSSL::PKey::RSA.new File.read 'private_key.pem'
  *   key2.public? # => true
+ *   key2.private? # => true
  *
  * or
  *
  *   key3 = OpenSSL::PKey::RSA.new File.read 'public_key.pem'
+ *   key3.public? # => true
  *   key3.private? # => false
  *
  * === Loading an Encrypted Key
