@@ -331,25 +331,23 @@ ossl_cipher_update_long(EVP_CIPHER_CTX *ctx, unsigned char *out, long *out_len_p
 			const unsigned char *in, long in_len)
 {
     int out_part_len;
+    int limit = INT_MAX / 2 + 1;
     long out_len = 0;
-#define UPDATE_LENGTH_LIMIT INT_MAX
 
-#if SIZEOF_LONG > UPDATE_LENGTH_LIMIT
-    if (in_len > UPDATE_LENGTH_LIMIT) {
-	const int in_part_len = (UPDATE_LENGTH_LIMIT / 2 + 1) & ~1;
-	do {
-	    if (!EVP_CipherUpdate(ctx, out ? (out + out_len) : 0,
-				  &out_part_len, in, in_part_len))
-		return 0;
-	    out_len += out_part_len;
-	    in += in_part_len;
-	} while ((in_len -= in_part_len) > UPDATE_LENGTH_LIMIT);
-    }
-#endif
-    if (!EVP_CipherUpdate(ctx, out ? (out + out_len) : 0,
-			  &out_part_len, in, (int)in_len))
-	return 0;
-    if (out_len_ptr) *out_len_ptr = out_len += out_part_len;
+    do {
+	int in_part_len = in_len > limit ? limit : in_len;
+
+	if (!EVP_CipherUpdate(ctx, out ? (out + out_len) : 0,
+			      &out_part_len, in, in_part_len))
+	    return 0;
+
+	out_len += out_part_len;
+	in += in_part_len;
+    } while ((in_len -= limit) > 0);
+
+    if (out_len_ptr)
+	*out_len_ptr = out_len;
+
     return 1;
 }
 
