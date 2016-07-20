@@ -53,6 +53,10 @@ Updates since Ruby 2.3
   - OpenSSL::Cipher#key= and #iv= reject too long inputs. They used to truncate
     silently. [Bug #12561]
 
+  - OpenSSL::Cipher#iv_len= is added. It allows changing IV (nonce) length if
+    using AEAD ciphers.
+    [Bug #8667] [Bug #10420] [GH ruby/ruby#569] [GH ruby/openssl#58]
+
 * OpenSSL::Engine
 
   - OpenSSL::Engine.cleanup does nothing when built with OpenSSL 1.1.0.
