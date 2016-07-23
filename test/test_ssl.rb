@@ -321,7 +321,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     start_server(OpenSSL::SSL::VERIFY_NONE, true, :ignore_listener_error => true){|server, port|
       sock = TCPSocket.new("127.0.0.1", port)
       ctx = OpenSSL::SSL::SSLContext.new
-      ctx.set_params
+      ctx.verify_mode = OpenSSL::SSL::VERIFY_PEER
       ssl = OpenSSL::SSL::SSLSocket.new(sock, ctx)
       ssl.sync_close = true
       begin
@@ -335,12 +335,11 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     start_server(OpenSSL::SSL::VERIFY_NONE, true){|server, port|
       sock = TCPSocket.new("127.0.0.1", port)
       ctx = OpenSSL::SSL::SSLContext.new
-      ctx.set_params(
-        :verify_callback => Proc.new do |preverify_ok, store_ctx|
-          store_ctx.error = OpenSSL::X509::V_OK
-          true
-        end
-      )
+      ctx.verify_mode = OpenSSL::SSL::VERIFY_PEER
+      ctx.verify_callback = Proc.new do |preverify_ok, store_ctx|
+        store_ctx.error = OpenSSL::X509::V_OK
+        true
+      end
       ssl = OpenSSL::SSL::SSLSocket.new(sock, ctx)
       ssl.sync_close = true
       begin
@@ -354,12 +353,11 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     start_server(OpenSSL::SSL::VERIFY_NONE, true, :ignore_listener_error => true){|server, port|
       sock = TCPSocket.new("127.0.0.1", port)
       ctx = OpenSSL::SSL::SSLContext.new
-      ctx.set_params(
-        :verify_callback => Proc.new do |preverify_ok, store_ctx|
-          store_ctx.error = OpenSSL::X509::V_ERR_APPLICATION_VERIFICATION
-          false
-        end
-      )
+      ctx.verify_mode = OpenSSL::SSL::VERIFY_PEER
+      ctx.verify_callback = Proc.new do |preverify_ok, store_ctx|
+        store_ctx.error = OpenSSL::X509::V_ERR_APPLICATION_VERIFICATION
+        false
+      end
       ssl = OpenSSL::SSL::SSLSocket.new(sock, ctx)
       ssl.sync_close = true
       begin
@@ -375,12 +373,11 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     start_server(OpenSSL::SSL::VERIFY_NONE, true, :ignore_listener_error => true){|server, port|
       sock = TCPSocket.new("127.0.0.1", port)
       ctx = OpenSSL::SSL::SSLContext.new
-      ctx.set_params(
-        :verify_callback => Proc.new do |preverify_ok, store_ctx|
-          store_ctx.error = OpenSSL::X509::V_OK
-          raise RuntimeError
-        end
-      )
+      ctx.verify_mode = OpenSSL::SSL::VERIFY_PEER
+      ctx.verify_callback = Proc.new do |preverify_ok, store_ctx|
+        store_ctx.error = OpenSSL::X509::V_OK
+        raise RuntimeError
+      end
       ssl = OpenSSL::SSL::SSLSocket.new(sock, ctx)
       ssl.sync_close = true
       begin
