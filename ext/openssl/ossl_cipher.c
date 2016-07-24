@@ -335,7 +335,7 @@ ossl_cipher_update_long(EVP_CIPHER_CTX *ctx, unsigned char *out, long *out_len_p
     long out_len = 0;
 
     do {
-	int in_part_len = in_len > limit ? limit : in_len;
+	int in_part_len = in_len > limit ? limit : (int)in_len;
 
 	if (!EVP_CipherUpdate(ctx, out ? (out + out_len) : 0,
 			      &out_part_len, in, in_part_len))
