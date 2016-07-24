@@ -70,12 +70,12 @@ const rb_data_type_t ossl_evp_pkey_type = {
     0, 0, RUBY_TYPED_FREE_IMMEDIATELY,
 };
 
-VALUE
-ossl_pkey_new(EVP_PKEY *pkey)
+static VALUE
+pkey_new0(EVP_PKEY *pkey)
 {
-    if (!pkey) {
-	ossl_raise(ePKeyError, "Cannot make new key from NULL.");
-    }
+    if (!pkey)
+	ossl_raise(ePKeyError, "cannot make new key from NULL");
+
     switch (EVP_PKEY_base_id(pkey)) {
 #if !defined(OPENSSL_NO_RSA)
     case EVP_PKEY_RSA:
@@ -96,8 +96,21 @@ ossl_pkey_new(EVP_PKEY *pkey)
     default:
 	ossl_raise(ePKeyError, "unsupported key type");
     }
+}
 
-    UNREACHABLE;
+VALUE
+ossl_pkey_new(EVP_PKEY *pkey)
+{
+    VALUE obj;
+    int status;
+
+    obj = rb_protect((VALUE (*)(VALUE))pkey_new0, (VALUE)pkey, &status);
+    if (status) {
+	EVP_PKEY_free(pkey);
+	rb_jump_tag(status);
+    }
+
+    return obj;
 }
 
 /*
