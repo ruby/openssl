@@ -39,6 +39,11 @@ Backward compatibility notes
   for consistency with OpenSSL::PKey::{DH,DSA,RSA,EC}#new.
   [Bug #11774] [GH ruby/openssl#55]
 
+* OpenSSL::SSL::SSLContext#set_params enables verify_hostname option. With the
+  SNI hostname set by OpenSSL::SSL::SSLSocket#hostname=, the hostname
+  verification on the server certificate is automatically performed during the
+  handshake. [GH ruby/openssl#60]
+
 Updates since Ruby 2.3
 ----------------------
 
@@ -118,3 +123,8 @@ Updates since Ruby 2.3
 
   - RC4 cipher suites are removed from OpenSSL::SSL::SSLContext::DEFAULT_PARAMS.
     RC4 is now considered to be weak. [GH ruby/openssl#50]
+
+  - A new option 'verify_hostname' is added to OpenSSL::SSL::SSLContext. When it
+    is enabled, and the SNI hostname is also set, the hostname verification on
+    the server certificate is automatically performed. It is now enabled by
+    OpenSSL::SSL::Context#set_params. [GH ruby/openssl#60]
