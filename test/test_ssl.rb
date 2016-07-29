@@ -413,26 +413,15 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   end
 
   def test_sslctx_set_params
-    start_server(OpenSSL::SSL::VERIFY_NONE, true, :ignore_listener_error => true){|server, port|
-      sock = TCPSocket.new("127.0.0.1", port)
-      ctx = OpenSSL::SSL::SSLContext.new
-      ctx.set_params
-      assert_equal(OpenSSL::SSL::VERIFY_PEER, ctx.verify_mode)
-      assert_equal(OpenSSL::SSL::SSLContext::DEFAULT_PARAMS[:options], ctx.options)
-      ciphers = ctx.ciphers
-      ciphers_versions = ciphers.collect{|_, v, _, _| v }
-      ciphers_names = ciphers.collect{|v, _, _, _| v }
-      assert(ciphers_names.all?{|v| /A(EC)?DH/ !~ v })
-      assert(ciphers_versions.all?{|v| /SSLv2/ !~ v })
-      ssl = OpenSSL::SSL::SSLSocket.new(sock, ctx)
-      ssl.sync_close = true
-      begin
-        assert_raise(OpenSSL::SSL::SSLError){ ssl.connect }
-        assert_equal(OpenSSL::X509::V_ERR_SELF_SIGNED_CERT_IN_CHAIN, ssl.verify_result)
-      ensure
-        ssl.close
-      end
-    }
+    ctx = OpenSSL::SSL::SSLContext.new
+    ctx.set_params
+    assert_equal(OpenSSL::SSL::VERIFY_PEER, ctx.verify_mode)
+    ciphers = ctx.ciphers
+    ciphers_versions = ciphers.collect{|_, v, _, _| v }
+    ciphers_names = ciphers.collect{|v, _, _, _| v }
+    assert(ciphers_names.all?{|v| /A(EC)?DH/ !~ v })
+    assert(ciphers_names.all?{|v| /(RC4|MD5|EXP)/ !~ v })
+    assert(ciphers_versions.all?{|v| /SSLv2/ !~ v })
   end
 
   def test_post_connect_check_with_anon_ciphers
