@@ -353,17 +353,15 @@ ossl_x509ext_set_value(VALUE self, VALUE data)
     X509_EXTENSION *ext;
     ASN1_OCTET_STRING *asn1s;
 
+    GetX509Ext(self, ext);
     data = ossl_to_der_if_possible(data);
     StringValue(data);
-    if(!(asn1s = ASN1_OCTET_STRING_new())){
-	ossl_raise(eX509ExtError, NULL);
+    asn1s = X509_EXTENSION_get_data(ext);
+
+    if (!ASN1_OCTET_STRING_set(asn1s, (unsigned char *)RSTRING_PTR(data),
+			       RSTRING_LENINT(data))) {
+	ossl_raise(eX509ExtError, "ASN1_OCTET_STRING_set");
     }
-    if(!ASN1_STRING_set((ASN1_STRING *)asn1s, (unsigned char *)RSTRING_PTR(data), RSTRING_LENINT(data))){
-	ASN1_OCTET_STRING_free(asn1s);
-	ossl_raise(eX509ExtError, NULL);
-    }
-    GetX509Ext(self, ext);
-    X509_EXTENSION_set_data(ext, asn1s);
 
     return data;
 }
