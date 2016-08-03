@@ -861,13 +861,11 @@ ossl_ocspbres_add_status(VALUE self, VALUE cid, VALUE status,
 	X509_EXTENSION *x509ext;
 
 	for(i = 0; i < RARRAY_LEN(ext); i++){
-	    x509ext = DupX509ExtPtr(RARRAY_AREF(ext, i));
+	    x509ext = GetX509ExtPtr(RARRAY_AREF(ext, i));
 	    if(!OCSP_SINGLERESP_add_ext(single, x509ext, -1)){
-		X509_EXTENSION_free(x509ext);
 		error = 1;
 		goto err;
 	    }
-	    X509_EXTENSION_free(x509ext);
 	}
     }
 

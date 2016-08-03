@@ -66,7 +66,6 @@ extern VALUE eX509ExtError;
 
 VALUE ossl_x509ext_new(X509_EXTENSION *);
 X509_EXTENSION *GetX509ExtPtr(VALUE);
-X509_EXTENSION *DupX509ExtPtr(VALUE);
 void Init_ossl_x509ext(void);
 
 /*

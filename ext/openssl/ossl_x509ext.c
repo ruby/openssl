@@ -95,19 +95,6 @@ GetX509ExtPtr(VALUE obj)
     return ext;
 }
 
-X509_EXTENSION *
-DupX509ExtPtr(VALUE obj)
-{
-    X509_EXTENSION *ext, *new;
-
-    SafeGetX509Ext(obj, ext);
-    if (!(new = X509_EXTENSION_dup(ext))) {
-	ossl_raise(eX509ExtError, NULL);
-    }
-
-    return new;
-}
-
 /*
  * Private
  */

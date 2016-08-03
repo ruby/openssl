@@ -667,13 +667,10 @@ ossl_x509_set_extensions(VALUE self, VALUE ary)
     while ((ext = X509_delete_ext(x509, 0)))
 	X509_EXTENSION_free(ext);
     for (i=0; i<RARRAY_LEN(ary); i++) {
-	ext = DupX509ExtPtr(RARRAY_AREF(ary, i));
-
-	if (!X509_add_ext(x509, ext, -1)) { /* DUPs ext - FREE it */
-	    X509_EXTENSION_free(ext);
+	ext = GetX509ExtPtr(RARRAY_AREF(ary, i));
+	if (!X509_add_ext(x509, ext, -1)) { /* DUPs ext */
 	    ossl_raise(eX509CertError, NULL);
 	}
-	X509_EXTENSION_free(ext);
     }
 
     return ary;
@@ -690,12 +687,10 @@ ossl_x509_add_extension(VALUE self, VALUE extension)
     X509_EXTENSION *ext;
 
     GetX509(self, x509);
-    ext = DupX509ExtPtr(extension);
+    ext = GetX509ExtPtr(extension);
     if (!X509_add_ext(x509, ext, -1)) { /* DUPs ext - FREE it */
-	X509_EXTENSION_free(ext);
 	ossl_raise(eX509CertError, NULL);
     }
-    X509_EXTENSION_free(ext);
 
     return extension;
 }
