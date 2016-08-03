@@ -189,20 +189,6 @@ ossl_x509extfactory_set_crl(VALUE self, VALUE crl)
 }
 
 static VALUE
-ossl_x509extfactory_set_config(VALUE self, VALUE config)
-{
-    X509V3_CTX *ctx;
-    CONF *conf;
-
-    GetX509ExtFactory(self, ctx);
-    rb_iv_set(self, "@config", config);
-    conf = DupConfigPtr(config);
-    X509V3_set_nconf(ctx, conf);
-
-    return config;
-}
-
-static VALUE
 ossl_x509extfactory_initialize(int argc, VALUE *argv, VALUE self)
 {
     /*X509V3_CTX *ctx;*/
@@ -483,13 +469,12 @@ Init_ossl_x509ext(void)
     rb_attr(cX509ExtFactory, rb_intern("subject_certificate"), 1, 0, Qfalse);
     rb_attr(cX509ExtFactory, rb_intern("subject_request"), 1, 0, Qfalse);
     rb_attr(cX509ExtFactory, rb_intern("crl"), 1, 0, Qfalse);
-    rb_attr(cX509ExtFactory, rb_intern("config"), 1, 0, Qfalse);
+    rb_attr(cX509ExtFactory, rb_intern("config"), 1, 1, Qfalse);
 
     rb_define_method(cX509ExtFactory, "issuer_certificate=", ossl_x509extfactory_set_issuer_cert, 1);
     rb_define_method(cX509ExtFactory, "subject_certificate=", ossl_x509extfactory_set_subject_cert, 1);
     rb_define_method(cX509ExtFactory, "subject_request=", ossl_x509extfactory_set_subject_req, 1);
     rb_define_method(cX509ExtFactory, "crl=", ossl_x509extfactory_set_crl, 1);
-    rb_define_method(cX509ExtFactory, "config=", ossl_x509extfactory_set_config, 1);
     rb_define_method(cX509ExtFactory, "create_ext", ossl_x509extfactory_create_ext, -1);
 
     cX509Ext = rb_define_class_under(mX509, "Extension", rb_cObject);
