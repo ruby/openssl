@@ -542,6 +542,7 @@ static VALUE ossl_ec_key_to_string(VALUE self, VALUE ciph, VALUE pass, int forma
     int i = -1;
     int private = 0;
     VALUE str;
+    const EVP_CIPHER *cipher = NULL;
 
     Require_EC_KEY(self, ec);
 
@@ -554,17 +555,17 @@ static VALUE ossl_ec_key_to_string(VALUE self, VALUE ciph, VALUE pass, int forma
     if (EC_KEY_get0_private_key(ec))
         private = 1;
 
+    if (!NIL_P(ciph)) {
+	cipher = GetCipherPtr(ciph);
+	pass = ossl_pem_passwd_value(pass);
+    }
+
     if (!(out = BIO_new(BIO_s_mem())))
         ossl_raise(eECError, "BIO_new(BIO_s_mem())");
 
     switch(format) {
     case EXPORT_PEM:
     	if (private) {
-	    const EVP_CIPHER *cipher = NULL;
-	    if (!NIL_P(ciph)) {
-		cipher = GetCipherPtr(ciph);
-		pass = ossl_pem_passwd_value(pass);
-	    }
             i = PEM_write_bio_ECPrivateKey(out, ec, cipher, NULL, 0, ossl_pem_passwd_cb, (void *)pass);
     	} else {
             i = PEM_write_bio_EC_PUBKEY(out, ec);
