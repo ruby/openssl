@@ -329,13 +329,15 @@ ossl_rsa_is_private(VALUE self)
 
 /*
  * call-seq:
- *   rsa.export([cipher, pass_phrase]) => PEM-format String
- *   rsa.to_pem([cipher, pass_phrase]) => PEM-format String
- *   rsa.to_s([cipher, pass_phrase]) => PEM-format String
+ *   rsa.export([cipher, pass_phrase,] format: nil) => PEM-format String
+ *   rsa.to_pem([cipher, pass_phrase,] format: nil) => PEM-format String
+ *   rsa.to_s([cipher, pass_phrase,] format: nil) => PEM-format String
  *
  * Outputs this keypair in PEM encoding.  If +cipher+ and +pass_phrase+ are
  * given they will be used to encrypt the key.  +cipher+ must be an
  * OpenSSL::Cipher instance.
+ *
+ * See also OpenSSL::PKey::PKey#export.
  */
 static VALUE
 ossl_rsa_export(int argc, VALUE *argv, VALUE self)
@@ -343,11 +345,15 @@ ossl_rsa_export(int argc, VALUE *argv, VALUE self)
     RSA *rsa;
     BIO *out;
     const EVP_CIPHER *ciph = NULL;
-    VALUE cipher, pass, str;
+    VALUE cipher, pass, opts;
+    enum ossl_pkey_export_format format;
 
     GetRSA(self, rsa);
+    rb_scan_args(argc, argv, "02:", &cipher, &pass, &opts);
+    format = ossl_pkey_parse_export_format(self, opts);
 
-    rb_scan_args(argc, argv, "02", &cipher, &pass);
+    if (format != OSSL_PKEY_EXPORT_PRIVATE)
+	return rb_call_super(argc, argv);
 
     if (!NIL_P(cipher)) {
 	ciph = GetCipherPtr(cipher);
@@ -356,40 +362,35 @@ ossl_rsa_export(int argc, VALUE *argv, VALUE self)
     if (!(out = BIO_new(BIO_s_mem()))) {
 	ossl_raise(eRSAError, NULL);
     }
-    if (RSA_HAS_PRIVATE(rsa)) {
-	if (!PEM_write_bio_RSAPrivateKey(out, rsa, ciph, NULL, 0,
-					 ossl_pem_passwd_cb, (void *)pass)) {
-	    BIO_free(out);
-	    ossl_raise(eRSAError, NULL);
-	}
-    } else {
-	if (!PEM_write_bio_RSA_PUBKEY(out, rsa)) {
-	    BIO_free(out);
-	    ossl_raise(eRSAError, NULL);
-	}
+    if (!PEM_write_bio_RSAPrivateKey(out, rsa, ciph, NULL, 0,
+				     ossl_pem_passwd_cb, (void *)pass)) {
+	BIO_free(out);
+	ossl_raise(eRSAError, NULL);
     }
-    str = ossl_membio2str(out);
-
-    return str;
+    return ossl_membio2str(out);
 }
 
 /*
  * call-seq:
- *   rsa.to_der => DER-format String
+ *   rsa.to_der(format: nil) => DER-format String
  *
  * Outputs this keypair in DER encoding.
  */
 static VALUE
-ossl_rsa_to_der(VALUE self)
+ossl_rsa_to_der(int argc, VALUE *argv, VALUE self)
 {
     RSA *rsa;
-    VALUE str;
+    VALUE cipher, pass, opts, str;
+    enum ossl_pkey_export_format format;
 
     GetRSA(self, rsa);
-    if (RSA_HAS_PRIVATE(rsa))
-	ossl_i2d(i2d_RSAPrivateKey, rsa, str);
-    else
-	ossl_i2d(i2d_RSA_PUBKEY, rsa, str);
+    rb_scan_args(argc, argv, "02:", &cipher, &pass, &opts);
+    format = ossl_pkey_parse_export_format(self, opts);
+
+    if (format != OSSL_PKEY_EXPORT_PRIVATE)
+	return rb_call_super(argc, argv);
+
+    ossl_i2d(i2d_RSAPrivateKey, rsa, str);
 
     return str;
 }
@@ -694,7 +695,7 @@ Init_ossl_rsa(void)
     rb_define_method(cRSA, "export", ossl_rsa_export, -1);
     rb_define_alias(cRSA, "to_pem", "export");
     rb_define_alias(cRSA, "to_s", "export");
-    rb_define_method(cRSA, "to_der", ossl_rsa_to_der, 0);
+    rb_define_method(cRSA, "to_der", ossl_rsa_to_der, -1);
     rb_define_method(cRSA, "public_key", ossl_rsa_to_public_key, 0);
     rb_define_method(cRSA, "public_encrypt", ossl_rsa_public_encrypt, -1);
     rb_define_method(cRSA, "public_decrypt", ossl_rsa_public_decrypt, -1);

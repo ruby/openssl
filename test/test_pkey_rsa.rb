@@ -160,7 +160,15 @@ class OpenSSL::TestPKeyRSA < OpenSSL::PKeyTestCase
     assert_same_rsa(RSA1024, key)
 
     assert_equal(asn1.to_der, RSA1024.to_der)
+    assert_equal(asn1.to_der, RSA1024.to_der(format: :private))
+    assert_raise(OpenSSL::PKey::PKeyError) {
+      dup_public(RSA1024).to_der(format: :private)
+    }
     assert_equal(pem, RSA1024.export)
+    assert_equal(pem, RSA1024.export(format: :private))
+    assert_raise(OpenSSL::PKey::PKeyError) {
+      dup_public(RSA1024).export(format: :private)
+    }
   end
 
   def test_RSAPrivateKey_encrypted
@@ -247,7 +255,9 @@ class OpenSSL::TestPKeyRSA < OpenSSL::PKeyTestCase
     assert_same_rsa(dup_public(RSA1024), key)
 
     assert_equal(asn1.to_der, dup_public(RSA1024).to_der)
+    assert_equal(asn1.to_der, RSA1024.to_der(format: :public))
     assert_equal(pem, dup_public(RSA1024).export)
+    assert_equal(pem, RSA1024.export(format: :public))
   end
 
   def test_dup

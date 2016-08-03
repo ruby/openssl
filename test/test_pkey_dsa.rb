@@ -67,7 +67,15 @@ class OpenSSL::TestPKeyDSA < OpenSSL::PKeyTestCase
     assert_same_dsa(DSA512, key)
 
     assert_equal(asn1.to_der, DSA512.to_der)
+    assert_equal(asn1.to_der, DSA512.to_der(format: :private))
+    assert_raise(OpenSSL::PKey::PKeyError) {
+      dup_public(DSA512).to_der(format: :private)
+    }
     assert_equal(pem, DSA512.export)
+    assert_equal(pem, DSA512.export(format: :private))
+    assert_raise(OpenSSL::PKey::PKeyError) {
+      dup_public(DSA512).export(format: :private)
+    }
   end
 
   def test_DSAPrivateKey_encrypted
@@ -130,7 +138,9 @@ class OpenSSL::TestPKeyDSA < OpenSSL::PKeyTestCase
     assert_same_dsa(dup_public(DSA512), key)
 
     assert_equal(asn1.to_der, dup_public(DSA512).to_der)
+    assert_equal(asn1.to_der, DSA512.to_der(format: :public))
     assert_equal(pem, dup_public(DSA512).export)
+    assert_equal(pem, DSA512.export(format: :public))
   end
 
   def test_read_DSAPublicKey_pem

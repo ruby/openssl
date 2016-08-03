@@ -327,20 +327,13 @@ ossl_dsa_is_private(VALUE self)
 
 /*
  *  call-seq:
- *    dsa.export([cipher, password]) -> aString
- *    dsa.to_pem([cipher, password]) -> aString
- *    dsa.to_s([cipher, password]) -> aString
+ *    dsa.export([cipher, password,] format: nil) -> aString
+ *    dsa.to_pem([cipher, password,] format: nil) -> aString
+ *    dsa.to_s([cipher, password,] format: nil) -> aString
  *
  * Encodes this DSA to its PEM encoding.
  *
- * === Parameters
- * * +cipher+ is an OpenSSL::Cipher.
- * * +password+ is a string containing your password.
- *
- * === Examples
- *  DSA.to_pem -> aString
- *  DSA.to_pem(cipher, 'mypassword') -> aString
- *
+ * See also OpenSSL::PKey::PKey#export.
  */
 static VALUE
 ossl_dsa_export(int argc, VALUE *argv, VALUE self)
@@ -348,10 +341,16 @@ ossl_dsa_export(int argc, VALUE *argv, VALUE self)
     DSA *dsa;
     BIO *out;
     const EVP_CIPHER *ciph = NULL;
-    VALUE cipher, pass, str;
+    VALUE cipher, pass, opts;
+    enum ossl_pkey_export_format format;
 
     GetDSA(self, dsa);
-    rb_scan_args(argc, argv, "02", &cipher, &pass);
+    rb_scan_args(argc, argv, "02:", &cipher, &pass, &opts);
+    format = ossl_pkey_parse_export_format(self, opts);
+
+    if (format != OSSL_PKEY_EXPORT_PRIVATE)
+	return rb_call_super(argc, argv);
+
     if (!NIL_P(cipher)) {
 	ciph = GetCipherPtr(cipher);
 	pass = ossl_pem_passwd_value(pass);
@@ -359,41 +358,36 @@ ossl_dsa_export(int argc, VALUE *argv, VALUE self)
     if (!(out = BIO_new(BIO_s_mem()))) {
 	ossl_raise(eDSAError, NULL);
     }
-    if (DSA_HAS_PRIVATE(dsa)) {
-	if (!PEM_write_bio_DSAPrivateKey(out, dsa, ciph, NULL, 0,
-					 ossl_pem_passwd_cb, (void *)pass)){
-	    BIO_free(out);
-	    ossl_raise(eDSAError, NULL);
-	}
-    } else {
-	if (!PEM_write_bio_DSA_PUBKEY(out, dsa)) {
-	    BIO_free(out);
-	    ossl_raise(eDSAError, NULL);
-	}
+    if (!PEM_write_bio_DSAPrivateKey(out, dsa, ciph, NULL, 0,
+				     ossl_pem_passwd_cb, (void *)pass)){
+	BIO_free(out);
+	ossl_raise(eDSAError, NULL);
     }
-    str = ossl_membio2str(out);
-
-    return str;
+    return ossl_membio2str(out);
 }
 
 /*
  *  call-seq:
- *    dsa.to_der -> aString
+ *    dsa.to_der(format: nil) -> aString
  *
  * Encodes this DSA to its DER encoding.
  *
  */
 static VALUE
-ossl_dsa_to_der(VALUE self)
+ossl_dsa_to_der(int argc, VALUE *argv, VALUE self)
 {
     DSA *dsa;
-    VALUE str;
+    VALUE cipher, pass, opts, str;
+    enum ossl_pkey_export_format format;
 
     GetDSA(self, dsa);
-    if (DSA_HAS_PRIVATE(dsa))
-	ossl_i2d(i2d_DSAPrivateKey, dsa, str);
-    else
-	ossl_i2d(i2d_DSA_PUBKEY, dsa, str);
+    rb_scan_args(argc, argv, "02:", &cipher, &pass, &opts);
+    format = ossl_pkey_parse_export_format(self, opts);
+
+    if (format != OSSL_PKEY_EXPORT_PRIVATE)
+	return rb_call_super(argc, argv);
+
+    ossl_i2d(i2d_DSAPrivateKey, dsa, str);
 
     return str;
 }
@@ -628,7 +622,7 @@ Init_ossl_dsa(void)
     rb_define_method(cDSA, "export", ossl_dsa_export, -1);
     rb_define_alias(cDSA, "to_pem", "export");
     rb_define_alias(cDSA, "to_s", "export");
-    rb_define_method(cDSA, "to_der", ossl_dsa_to_der, 0);
+    rb_define_method(cDSA, "to_der", ossl_dsa_to_der, -1);
     rb_define_method(cDSA, "public_key", ossl_dsa_to_public_key, 0);
     rb_define_method(cDSA, "syssign", ossl_dsa_sign, 1);
     rb_define_method(cDSA, "sysverify", ossl_dsa_verify, 2);

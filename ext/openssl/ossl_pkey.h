@@ -47,6 +47,20 @@ struct ossl_generate_cb_arg {
 int ossl_generate_cb_2(int p, int n, BN_GENCB *cb);
 void ossl_generate_cb_stop(void *ptr);
 
+enum ossl_pkey_export_format {
+    /*
+     * X.509 SubjectPublicKeyInfo format. The default format for PKeys
+     * containing only public data.
+     */
+    OSSL_PKEY_EXPORT_PUBKEY,
+    /*
+     * PKCS #1 RSAPrivateKey, OpenSSL's DSAPrivateKey or SEC 1 ECPrivateKey
+     * format. The default format for PKeys containing a private key.
+     */
+    OSSL_PKEY_EXPORT_PRIVATE,
+};
+enum ossl_pkey_export_format ossl_pkey_parse_export_format(VALUE, VALUE);
+
 VALUE ossl_pkey_new(EVP_PKEY *);
 EVP_PKEY *GetPKeyPtr(VALUE);
 EVP_PKEY *DupPKeyPtr(VALUE);

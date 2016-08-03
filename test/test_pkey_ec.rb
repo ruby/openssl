@@ -201,7 +201,15 @@ class OpenSSL::TestEC < OpenSSL::PKeyTestCase
     assert_same_ec(P256, key)
 
     assert_equal(asn1.to_der, P256.to_der)
+    assert_equal(asn1.to_der, P256.to_der(format: :private))
+    assert_raise(OpenSSL::PKey::PKeyError) {
+      dup_public(P256).to_der(format: :private)
+    }
     assert_equal(pem, P256.export)
+    assert_equal(pem, P256.export(format: :private))
+    assert_raise(OpenSSL::PKey::PKeyError) {
+      dup_public(P256).export(format: :private)
+    }
   end
 
   def test_ECPrivateKey_encrypted
@@ -253,7 +261,9 @@ class OpenSSL::TestEC < OpenSSL::PKeyTestCase
     assert_same_ec(dup_public(P256), key)
 
     assert_equal(asn1.to_der, dup_public(P256).to_der)
+    assert_equal(asn1.to_der, P256.to_der(format: :public))
     assert_equal(pem, dup_public(P256).export)
+    assert_equal(pem, P256.export(format: :public))
   end
 
   def test_ec_point_mul
