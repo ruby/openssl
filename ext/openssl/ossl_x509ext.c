@@ -333,14 +333,16 @@ ossl_x509ext_set_oid(VALUE self, VALUE oid)
 {
     X509_EXTENSION *ext;
     ASN1_OBJECT *obj;
-    char *s;
 
-    s = StringValueCStr(oid);
-    obj = OBJ_txt2obj(s, 0);
-    if(!obj) obj = OBJ_txt2obj(s, 1);
-    if(!obj) ossl_raise(eX509ExtError, NULL);
     GetX509Ext(self, ext);
-    X509_EXTENSION_set_object(ext, obj);
+    obj = OBJ_txt2obj(StringValueCStr(oid), 0);
+    if (!obj)
+	ossl_raise(eX509ExtError, "OBJ_txt2obj");
+    if (!X509_EXTENSION_set_object(ext, obj)) {
+	ASN1_OBJECT_free(obj);
+	ossl_raise(eX509ExtError, "X509_EXTENSION_set_object");
+    }
+    ASN1_OBJECT_free(obj);
 
     return oid;
 }
