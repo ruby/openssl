@@ -196,7 +196,7 @@ ossl_x509extfactory_set_config(VALUE self, VALUE config)
 
     GetX509ExtFactory(self, ctx);
     rb_iv_set(self, "@config", config);
-    conf = GetConfigPtr(config);  /* NO DUP NEEDED */
+    conf = DupConfigPtr(config);
     X509V3_set_nconf(ctx, conf);
 
     return config;
@@ -257,7 +257,7 @@ ossl_x509extfactory_create_ext(int argc, VALUE *argv, VALUE self)
     GetX509ExtFactory(self, ctx);
     obj = NewX509Ext(cX509Ext);
     rconf = rb_iv_get(self, "@config");
-    conf = NIL_P(rconf) ? NULL : GetConfigPtr(rconf);
+    conf = NIL_P(rconf) ? NULL : DupConfigPtr(rconf);
     ext = X509V3_EXT_nconf_nid(conf, ctx, nid, RSTRING_PTR(valstr));
     if (!ext){
 	ossl_raise(eX509ExtError, "%"PRIsVALUE" = %"PRIsVALUE, oid, valstr);
