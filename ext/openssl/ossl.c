@@ -9,6 +9,7 @@
  */
 #include "ossl.h"
 #include <stdarg.h> /* for ossl_raise */
+#include <ruby/thread_native.h> /* for OpenSSL < 1.1.0 locks */
 
 /*
  * String to HEXString conversion
@@ -511,7 +512,6 @@ ossl_fips_mode_set(VALUE self, VALUE enabled)
 /**
  * Stores locks needed for OpenSSL thread safety
  */
-#include "ruby/thread_native.h"
 static rb_nativethread_lock_t *ossl_locks;
 
 static void
