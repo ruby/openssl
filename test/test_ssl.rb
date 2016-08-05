@@ -13,10 +13,10 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
 
   def test_ctx_setup_invalid
     m = OpenSSL::SSL::SSLContext::METHODS.first
-    assert_raise(ArgumentError.new("string contains null byte")) {
+    assert_raise_with_message(ArgumentError, /null/) {
       OpenSSL::SSL::SSLContext.new("#{m}\0")
     }
-    assert_raise(ArgumentError.new("unknown SSL method `\u{ff33 ff33 ff2c}'.")) {
+    assert_raise_with_message(ArgumentError, /\u{ff33 ff33 ff2c}/) {
       OpenSSL::SSL::SSLContext.new("\u{ff33 ff33 ff2c}")
     }
   end
@@ -443,9 +443,9 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
       ctx.ciphers = "aNULL"
       ctx.security_level = 0
       server_connect(port, ctx) { |ssl|
-        msg = "Peer verification enabled, but no certificate received. Anonymous cipher suite " \
-          "ADH-AES256-GCM-SHA384 was negotiated. Anonymous suites must be disabled to use peer verification."
-        assert_raise(sslerr.new(msg)){ssl.post_connection_check("localhost.localdomain")}
+        assert_raise_with_message(sslerr, /anonymous cipher suite/i){
+          ssl.post_connection_check("localhost.localdomain")
+        }
       }
     }
   end if OpenSSL::ExtConfig::TLS_DH_anon_WITH_AES_256_GCM_SHA384
@@ -1130,7 +1130,7 @@ if OpenSSL::OPENSSL_VERSION_NUMBER >= 0x10002000
     ctx_proc = Proc.new { |ctx|
       ctx.alpn_select_cb = -> (protocols) { nil }
     }
-    assert_raises(MiniTest::Assertion) do # minitest/assertion comes from `assert_join_threads`
+    assert_raise(MiniTest::Assertion) do # minitest/assertion comes from `assert_join_threads`
       start_server_version(:SSLv23, ctx_proc) { |server, port|
         ctx = OpenSSL::SSL::SSLContext.new
         ctx.alpn_protocols = ["http/1.1"]
