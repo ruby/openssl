@@ -20,6 +20,11 @@ class OpenSSL::TestPKeyDSA < OpenSSL::TestCase
     key = OpenSSL::PKey::DSA.new 256
     pem  = key.public_key.to_pem
     OpenSSL::PKey::DSA.new pem
+    if $0 == __FILE__
+      assert_nothing_raised {
+        key = OpenSSL::PKey::DSA.new 2048
+      }
+    end
   end
 
   def test_new_break
