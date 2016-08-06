@@ -116,8 +116,7 @@ class OpenSSL::TestCipher < OpenSSL::TestCase
       begin
         assert_kind_of(OpenSSL::Cipher, OpenSSL::Cipher.new(name))
       rescue OpenSSL::Cipher::CipherError => e
-        next if /wrap/ =~ name and e.message == 'wrap mode not allowed'
-        raise
+        raise unless /wrap/ =~ name and /wrap mode not allowed/ =~ e.message
       end
     }
   end
