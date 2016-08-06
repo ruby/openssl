@@ -259,6 +259,7 @@ ossl_x509extfactory_create_ext(int argc, VALUE *argv, VALUE self)
     rconf = rb_iv_get(self, "@config");
     conf = NIL_P(rconf) ? NULL : DupConfigPtr(rconf);
     ext = X509V3_EXT_nconf_nid(conf, ctx, nid, RSTRING_PTR(valstr));
+    NCONF_free(conf);
     if (!ext){
 	ossl_raise(eX509ExtError, "%"PRIsVALUE" = %"PRIsVALUE, oid, valstr);
     }
