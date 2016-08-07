@@ -839,12 +839,12 @@ ossl_pkcs7_add_data(VALUE self, VALUE data)
     char buf[4096];
     int len;
 
-    in = ossl_obj2bio(data);
     GetPKCS7(self, pkcs7);
     if(PKCS7_type_is_signed(pkcs7)){
 	if(!PKCS7_content_new(pkcs7, NID_pkcs7_data))
 	    ossl_raise(ePKCS7Error, NULL);
     }
+    in = ossl_obj2bio(data);
     if(!(out = PKCS7_dataInit(pkcs7, NULL))) goto err;
     for(;;){
 	if((len = BIO_read(in, buf, sizeof(buf))) <= 0)
@@ -856,7 +856,7 @@ ossl_pkcs7_add_data(VALUE self, VALUE data)
     ossl_pkcs7_set_data(self, Qnil);
 
  err:
-    BIO_free(out);
+    BIO_free_all(out);
     BIO_free(in);
     if(ERR_peek_error()){
 	ossl_raise(ePKCS7Error, NULL);
