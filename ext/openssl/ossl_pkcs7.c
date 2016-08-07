@@ -772,7 +772,9 @@ ossl_pkcs7_verify(int argc, VALUE *argv, VALUE self)
     VALUE data;
     const char *msg;
 
+    GetPKCS7(self, p7);
     rb_scan_args(argc, argv, "22", &certs, &store, &indata, &flags);
+    x509st = GetX509StorePtr(store);
     flg = NIL_P(flags) ? 0 : NUM2INT(flags);
     if(NIL_P(indata)) indata = ossl_pkcs7_get_data(self);
     in = NIL_P(indata) ? NULL : ossl_obj2bio(indata);
@@ -784,8 +786,6 @@ ossl_pkcs7_verify(int argc, VALUE *argv, VALUE self)
 	    rb_jump_tag(status);
 	}
     }
-    x509st = GetX509StorePtr(store);
-    GetPKCS7(self, p7);
     if(!(out = BIO_new(BIO_s_mem()))){
 	BIO_free(in);
 	sk_X509_pop_free(x509s, X509_free);
@@ -793,13 +793,13 @@ ossl_pkcs7_verify(int argc, VALUE *argv, VALUE self)
     }
     ok = PKCS7_verify(p7, x509s, x509st, in, out, flg);
     BIO_free(in);
-    if (ok < 0) ossl_raise(ePKCS7Error, NULL);
+    sk_X509_pop_free(x509s, X509_free);
+    if (ok < 0) ossl_raise(ePKCS7Error, "PKCS7_verify");
     msg = ERR_reason_error_string(ERR_get_error());
     ossl_pkcs7_set_err_string(self, msg ? rb_str_new2(msg) : Qnil);
     ossl_clear_error();
     data = ossl_membio2str(out);
     ossl_pkcs7_set_data(self, data);
-    sk_X509_pop_free(x509s, X509_free);
 
     return (ok == 1) ? Qtrue : Qfalse;
 }
