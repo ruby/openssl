@@ -454,24 +454,14 @@ ossl_debug_get(VALUE self)
  * call-seq:
  *   OpenSSL.debug = boolean -> boolean
  *
- * Turns on or off CRYPTO_MEM_CHECK.
- * Also shows some debugging message on stderr.
+ * Turns on or off debug mode. With debug mode, all erros added to the OpenSSL
+ * error queue will be printed to stderr.
  */
 static VALUE
 ossl_debug_set(VALUE self, VALUE val)
 {
-    VALUE old = dOSSL;
-    dOSSL = val;
+    dOSSL = RTEST(val) ? Qtrue : Qfalse;
 
-    if (old != dOSSL) {
-	if (dOSSL == Qtrue) {
-	    CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_ON);
-	    fprintf(stderr, "OSSL_DEBUG: IS NOW ON!\n");
-	} else if (old == Qtrue) {
-	    CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_OFF);
-	    fprintf(stderr, "OSSL_DEBUG: IS NOW OFF!\n");
-	}
-    }
     return val;
 }
 
