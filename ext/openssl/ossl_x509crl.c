@@ -308,6 +308,7 @@ ossl_x509crl_set_revoked(VALUE self, VALUE ary)
 {
     X509_CRL *crl;
     X509_REVOKED *rev;
+    STACK_OF(X509_REVOKED) *sk;
     long i;
 
     Check_Type(ary, T_ARRAY);
@@ -316,7 +317,10 @@ ossl_x509crl_set_revoked(VALUE self, VALUE ary)
 	OSSL_Check_Kind(RARRAY_AREF(ary, i), cX509Rev);
     }
     GetX509CRL(self, crl);
-    sk_X509_REVOKED_pop_free(X509_CRL_get_REVOKED(crl), X509_REVOKED_free);
+    if ((sk = X509_CRL_get_REVOKED(crl))) {
+	while ((rev = sk_X509_REVOKED_pop(sk)))
+	    X509_REVOKED_free(rev);
+    }
     for (i=0; i<RARRAY_LEN(ary); i++) {
 	rev = DupX509RevokedPtr(RARRAY_AREF(ary, i));
 	if (!X509_CRL_add0_revoked(crl, rev)) { /* NO DUP - don't free! */
