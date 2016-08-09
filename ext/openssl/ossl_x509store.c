@@ -106,6 +106,20 @@ DupX509StorePtr(VALUE obj)
 /*
  * Private functions
  */
+static int
+x509store_verify_cb(int ok, X509_STORE_CTX *ctx)
+{
+    VALUE proc;
+
+    proc = (VALUE)X509_STORE_CTX_get_ex_data(ctx, ossl_store_ctx_ex_verify_cb_idx);
+    if (!proc)
+	proc = (VALUE)X509_STORE_get_ex_data(X509_STORE_CTX_get0_store(ctx), ossl_store_ex_verify_cb_idx);
+    if (!proc)
+	return ok;
+
+    return ossl_verify_cb_call(proc, ok, ctx);
+}
+
 static VALUE
 ossl_x509store_alloc(VALUE klass)
 {
@@ -153,7 +167,7 @@ ossl_x509store_initialize(int argc, VALUE *argv, VALUE self)
     /* [Bug #405] [Bug #1678] [Bug #3000]; already fixed? */
     store->ex_data.sk = NULL;
 #endif
-    X509_STORE_set_verify_cb(store, ossl_verify_cb);
+    X509_STORE_set_verify_cb(store, x509store_verify_cb);
     ossl_x509store_set_vfy_cb(self, Qnil);
 
     /* last verification status */
@@ -661,6 +675,7 @@ Init_ossl_x509store(void)
     rb_attr(cX509Store, rb_intern("chain"), 1, 0, Qfalse);
     rb_define_alloc_func(cX509Store, ossl_x509store_alloc);
     rb_define_method(cX509Store, "initialize",   ossl_x509store_initialize, -1);
+    rb_undef_method(cX509Store, "initialize_copy");
     rb_define_method(cX509Store, "verify_callback=", ossl_x509store_set_vfy_cb, 1);
     rb_define_method(cX509Store, "flags=",       ossl_x509store_set_flags, 1);
     rb_define_method(cX509Store, "purpose=",     ossl_x509store_set_purpose, 1);
@@ -677,6 +692,7 @@ Init_ossl_x509store(void)
     x509stctx = cX509StoreContext;
     rb_define_alloc_func(cX509StoreContext, ossl_x509stctx_alloc);
     rb_define_method(x509stctx,"initialize",  ossl_x509stctx_initialize, -1);
+    rb_undef_method(x509stctx, "initialize_copy");
     rb_define_method(x509stctx,"verify",      ossl_x509stctx_verify, 0);
     rb_define_method(x509stctx,"chain",       ossl_x509stctx_get_chain,0);
     rb_define_method(x509stctx,"error",       ossl_x509stctx_get_err, 0);

@@ -51,6 +51,14 @@ class OpenSSL::TestX509Attribute < OpenSSL::TestCase
     }
     assert_equal(test_der, attr.to_der)
   end
+
+  def test_dup
+    val = OpenSSL::ASN1::Set([
+      OpenSSL::ASN1::UTF8String("abc123")
+    ])
+    attr = OpenSSL::X509::Attribute.new("challengePassword", val)
+    assert_equal(attr.to_der, attr.dup.to_der)
+  end
 end
 
 end

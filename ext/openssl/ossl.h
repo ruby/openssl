@@ -154,14 +154,7 @@ void ossl_clear_error(void);
 extern int ossl_store_ctx_ex_verify_cb_idx;
 extern int ossl_store_ex_verify_cb_idx;
 
-struct ossl_verify_cb_args {
-    VALUE proc;
-    VALUE preverify_ok;
-    VALUE store_ctx;
-};
-
-VALUE ossl_call_verify_cb_proc(struct ossl_verify_cb_args *);
-int ossl_verify_cb(int, X509_STORE_CTX *);
+int ossl_verify_cb_call(VALUE, int, X509_STORE_CTX *);
 
 /*
  * String to DER String

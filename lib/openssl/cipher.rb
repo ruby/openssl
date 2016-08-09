@@ -18,7 +18,7 @@ module OpenSSL
       klass = Class.new(Cipher){
         define_method(:initialize){|*args|
           cipher_name = args.inject(name){|n, arg| "#{n}-#{arg}" }
-          super(cipher_name)
+          super(cipher_name.downcase)
         }
       }
       const_set(name, klass)
@@ -26,10 +26,8 @@ module OpenSSL
 
     %w(128 192 256).each{|keylen|
       klass = Class.new(Cipher){
-        define_method(:initialize){|mode|
-          mode ||= "CBC"
-          cipher_name = "AES-#{keylen}-#{mode}"
-          super(cipher_name)
+        define_method(:initialize){|mode = "CBC"|
+          super("aes-#{keylen}-#{mode}".downcase)
         }
       }
       const_set("AES#{keylen}", klass)

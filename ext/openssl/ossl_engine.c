@@ -543,6 +543,7 @@ Init_ossl_engine(void)
     rb_define_singleton_method(cEngine, "engines", ossl_engine_s_engines, 0);
     rb_define_singleton_method(cEngine, "by_id", ossl_engine_s_by_id, 1);
     rb_undef_method(CLASS_OF(cEngine), "new");
+    rb_undef_method(cEngine, "initialize_copy");
 
     rb_define_method(cEngine, "id", ossl_engine_get_id, 0);
     rb_define_method(cEngine, "name", ossl_engine_get_name, 0);

@@ -62,6 +62,12 @@ class OpenSSL::TestX509Extension < OpenSSL::TestCase
       %r{URI:ldap://ldap.example.com/cn=ca\?certificateRevocationList;binary},
       cdp.value)
   end
+
+  def test_dup
+    ext = OpenSSL::X509::Extension.new(@basic_constraints.to_der)
+    assert_equal(@basic_constraints.to_der, ext.to_der)
+    assert_equal(ext.to_der, ext.dup.to_der)
+  end
 end
 
 end

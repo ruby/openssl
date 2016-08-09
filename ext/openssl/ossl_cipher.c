@@ -331,25 +331,23 @@ ossl_cipher_update_long(EVP_CIPHER_CTX *ctx, unsigned char *out, long *out_len_p
 			const unsigned char *in, long in_len)
 {
     int out_part_len;
+    int limit = INT_MAX / 2 + 1;
     long out_len = 0;
-#define UPDATE_LENGTH_LIMIT INT_MAX
 
-#if SIZEOF_LONG > UPDATE_LENGTH_LIMIT
-    if (in_len > UPDATE_LENGTH_LIMIT) {
-	const int in_part_len = (UPDATE_LENGTH_LIMIT / 2 + 1) & ~1;
-	do {
-	    if (!EVP_CipherUpdate(ctx, out ? (out + out_len) : 0,
-				  &out_part_len, in, in_part_len))
-		return 0;
-	    out_len += out_part_len;
-	    in += in_part_len;
-	} while ((in_len -= in_part_len) > UPDATE_LENGTH_LIMIT);
-    }
-#endif
-    if (!EVP_CipherUpdate(ctx, out ? (out + out_len) : 0,
-			  &out_part_len, in, (int)in_len))
-	return 0;
-    if (out_len_ptr) *out_len_ptr = out_len += out_part_len;
+    do {
+	int in_part_len = in_len > limit ? limit : (int)in_len;
+
+	if (!EVP_CipherUpdate(ctx, out ? (out + out_len) : 0,
+			      &out_part_len, in, in_part_len))
+	    return 0;
+
+	out_len += out_part_len;
+	in += in_part_len;
+    } while ((in_len -= limit) > 0);
+
+    if (out_len_ptr)
+	*out_len_ptr = out_len;
+
     return 1;
 }
 
@@ -499,12 +497,17 @@ static VALUE
 ossl_cipher_set_iv(VALUE self, VALUE iv)
 {
     EVP_CIPHER_CTX *ctx;
-    int iv_len;
+    int iv_len = 0;
 
     StringValue(iv);
     GetCipher(self, ctx);
 
-    iv_len = EVP_CIPHER_CTX_iv_length(ctx);
+#if defined(HAVE_AUTHENTICATED_ENCRYPTION)
+    if (EVP_CIPHER_CTX_flags(ctx) & EVP_CIPH_FLAG_AEAD_CIPHER)
+	iv_len = (int)(VALUE)EVP_CIPHER_CTX_get_app_data(ctx);
+#endif
+    if (!iv_len)
+	iv_len = EVP_CIPHER_CTX_iv_length(ctx);
     if (RSTRING_LEN(iv) != iv_len)
 	ossl_raise(rb_eArgError, "iv must be %d bytes", iv_len);
 
@@ -638,11 +641,42 @@ ossl_cipher_is_authenticated(VALUE self)
 
     return (EVP_CIPHER_CTX_flags(ctx) & EVP_CIPH_FLAG_AEAD_CIPHER) ? Qtrue : Qfalse;
 }
+
+/*
+ * call-seq:
+ *   cipher.iv_len = integer -> integer
+ *
+ * Sets the IV/nonce length of the Cipher. Normally block ciphers don't allow
+ * changing the IV length, but some make use of IV for 'nonce'. You may need
+ * this for interoperability with other applications.
+ */
+static VALUE
+ossl_cipher_set_iv_length(VALUE self, VALUE iv_length)
+{
+    int len = NUM2INT(iv_length);
+    EVP_CIPHER_CTX *ctx;
+
+    GetCipher(self, ctx);
+    if (!(EVP_CIPHER_CTX_flags(ctx) & EVP_CIPH_FLAG_AEAD_CIPHER))
+	ossl_raise(eCipherError, "cipher does not support AEAD");
+
+    if (!EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_SET_IVLEN, len, NULL))
+	ossl_raise(eCipherError, "unable to set IV length");
+
+    /*
+     * EVP_CIPHER_CTX_iv_length() returns the default length. So we need to save
+     * the length somewhere. Luckily currently we aren't using app_data.
+     */
+    EVP_CIPHER_CTX_set_app_data(ctx, (void *)(VALUE)len);
+
+    return iv_length;
+}
 #else
 #define ossl_cipher_set_auth_data rb_f_notimplement
 #define ossl_cipher_get_auth_tag rb_f_notimplement
 #define ossl_cipher_set_auth_tag rb_f_notimplement
 #define ossl_cipher_is_authenticated rb_f_notimplement
+#define ossl_cipher_set_iv_length rb_f_notimplement
 #endif
 
 /*
@@ -708,13 +742,30 @@ ossl_cipher_set_padding(VALUE self, VALUE padding)
  *  Returns the key length in bytes of the Cipher.
  */
 CIPHER_0ARG_INT(key_length)
+
 /*
  *  call-seq:
  *     cipher.iv_len -> integer
  *
  *  Returns the expected length in bytes for an IV for this Cipher.
  */
-CIPHER_0ARG_INT(iv_length)
+static VALUE
+ossl_cipher_iv_length(VALUE self)
+{
+    EVP_CIPHER_CTX *ctx;
+    int len = 0;
+
+    GetCipher(self, ctx);
+#if defined(HAVE_AUTHENTICATED_ENCRYPTION)
+    if (EVP_CIPHER_CTX_flags(ctx) & EVP_CIPH_FLAG_AEAD_CIPHER)
+	len = (int)(VALUE)EVP_CIPHER_CTX_get_app_data(ctx);
+#endif
+    if (!len)
+	len = EVP_CIPHER_CTX_iv_length(ctx);
+
+    return INT2NUM(len);
+}
+
 /*
  *  call-seq:
  *     cipher.block_size -> integer
@@ -953,6 +1004,7 @@ Init_ossl_cipher(void)
     rb_define_method(cCipher, "key_len=", ossl_cipher_set_key_length, 1);
     rb_define_method(cCipher, "key_len", ossl_cipher_key_length, 0);
     rb_define_method(cCipher, "iv=", ossl_cipher_set_iv, 1);
+    rb_define_method(cCipher, "iv_len=", ossl_cipher_set_iv_length, 1);
     rb_define_method(cCipher, "iv_len", ossl_cipher_iv_length, 0);
     rb_define_method(cCipher, "block_size", ossl_cipher_block_size, 0);
     rb_define_method(cCipher, "padding=", ossl_cipher_set_padding, 1);

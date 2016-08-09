@@ -64,18 +64,15 @@ static VALUE eSSLErrorWaitWritable;
 #define ossl_sslctx_get_client_cert_cb(o) 	rb_iv_get((o),"@client_cert_cb")
 #define ossl_sslctx_get_tmp_ecdh_cb(o)          rb_iv_get((o),"@tmp_ecdh_callback")
 #define ossl_sslctx_get_sess_id_ctx(o)   	rb_iv_get((o),"@session_id_context")
+#define ossl_sslctx_get_verify_hostname(o)	rb_iv_get((o),"@verify_hostname")
 
 #define ossl_ssl_get_io(o)           rb_iv_get((o),"@io")
 #define ossl_ssl_get_ctx(o)          rb_iv_get((o),"@context")
-#define ossl_ssl_get_x509(o)         rb_iv_get((o),"@x509")
-#define ossl_ssl_get_key(o)          rb_iv_get((o),"@key")
 
 #define ossl_ssl_set_io(o,v)         rb_iv_set((o),"@io",(v))
 #define ossl_ssl_set_ctx(o,v)        rb_iv_set((o),"@context",(v))
 #define ossl_ssl_set_sync_close(o,v) rb_iv_set((o),"@sync_close",(v))
 #define ossl_ssl_set_hostname_v(o,v) rb_iv_set((o),"@hostname",(v))
-#define ossl_ssl_set_x509(o,v)       rb_iv_set((o),"@x509",(v))
-#define ossl_ssl_set_key(o,v)        rb_iv_set((o),"@key",(v))
 #define ossl_ssl_set_tmp_dh(o,v)     rb_iv_set((o),"@tmp_dh",(v))
 #define ossl_ssl_set_tmp_ecdh(o,v)   rb_iv_set((o),"@tmp_ecdh",(v))
 
@@ -225,28 +222,30 @@ ossl_call_client_cert_cb(VALUE obj)
 {
     VALUE cb, ary, cert, key;
 
-    cb = rb_funcall(obj, rb_intern("client_cert_cb"), 0);
-    if (NIL_P(cb)) return Qfalse;
+    cb = ossl_sslctx_get_client_cert_cb(ossl_ssl_get_ctx(obj));
+    if (NIL_P(cb))
+	return Qnil;
+
     ary = rb_funcall(cb, rb_intern("call"), 1, obj);
     Check_Type(ary, T_ARRAY);
     GetX509CertPtr(cert = rb_ary_entry(ary, 0));
-    GetPKeyPtr(key = rb_ary_entry(ary, 1));
-    ossl_ssl_set_x509(obj, cert);
-    ossl_ssl_set_key(obj, key);
+    GetPrivPKeyPtr(key = rb_ary_entry(ary, 1));
 
-    return Qtrue;
+    return rb_ary_new3(2, cert, key);
 }
 
 static int
 ossl_client_cert_cb(SSL *ssl, X509 **x509, EVP_PKEY **pkey)
 {
-    VALUE obj, success;
+    VALUE obj, ret;
 
     obj = (VALUE)SSL_get_ex_data(ssl, ossl_ssl_ex_ptr_idx);
-    success = rb_protect(ossl_call_client_cert_cb, obj, NULL);
-    if (!RTEST(success)) return 0;
-    *x509 = DupX509CertPtr(ossl_ssl_get_x509(obj));
-    *pkey = DupPKeyPtr(ossl_ssl_get_key(obj));
+    ret = rb_protect(ossl_call_client_cert_cb, obj, NULL);
+    if (NIL_P(ret))
+	return 0;
+
+    *x509 = DupX509CertPtr(RARRAY_AREF(ret, 0));
+    *pkey = DupPKeyPtr(RARRAY_AREF(ret, 1));
 
     return 1;
 }
@@ -319,16 +318,50 @@ ossl_tmp_ecdh_callback(SSL *ssl, int is_export, int keylength)
 }
 #endif
 
+static VALUE
+call_verify_certificate_identity(VALUE ctx_v)
+{
+    X509_STORE_CTX *ctx = (X509_STORE_CTX *)ctx_v;
+    SSL *ssl;
+    VALUE ssl_obj, hostname, cert_obj;
+
+    ssl = X509_STORE_CTX_get_ex_data(ctx, SSL_get_ex_data_X509_STORE_CTX_idx());
+    ssl_obj = (VALUE)SSL_get_ex_data(ssl, ossl_ssl_ex_ptr_idx);
+    hostname = rb_attr_get(ssl_obj, rb_intern("@hostname"));
+
+    if (!RTEST(hostname)) {
+	rb_warning("verify_hostname requires hostname to be set");
+	return Qtrue;
+    }
+
+    cert_obj = ossl_x509_new(X509_STORE_CTX_get_current_cert(ctx));
+    return rb_funcall(mSSL, rb_intern("verify_certificate_identity"), 2,
+		      cert_obj, hostname);
+}
+
 static int
 ossl_ssl_verify_callback(int preverify_ok, X509_STORE_CTX *ctx)
 {
-    VALUE cb;
+    VALUE cb, ssl_obj, verify_hostname, ret;
     SSL *ssl;
+    int status;
 
     ssl = X509_STORE_CTX_get_ex_data(ctx, SSL_get_ex_data_X509_STORE_CTX_idx());
     cb = (VALUE)SSL_get_ex_data(ssl, ossl_ssl_ex_vcb_idx);
-    X509_STORE_CTX_set_ex_data(ctx, ossl_store_ctx_ex_verify_cb_idx, (void *)cb);
-    return ossl_verify_cb(preverify_ok, ctx);
+    ssl_obj = (VALUE)SSL_get_ex_data(ssl, ossl_ssl_ex_ptr_idx);
+    verify_hostname = ossl_sslctx_get_verify_hostname(ossl_ssl_get_ctx(ssl_obj));
+
+    if (preverify_ok && RTEST(verify_hostname) && !SSL_is_server(ssl) &&
+	!X509_STORE_CTX_get_error_depth(ctx)) {
+	ret = rb_protect(call_verify_certificate_identity, (VALUE)ctx, &status);
+	if (status) {
+	    rb_ivar_set(ssl_obj, ID_callback_state, INT2NUM(status));
+	    return 0;
+	}
+	preverify_ok = ret == Qtrue;
+    }
+
+    return ossl_verify_cb_call(cb, preverify_ok, ctx);
 }
 
 static VALUE
@@ -464,7 +497,7 @@ ossl_sslctx_session_remove_cb(SSL_CTX *ctx, SSL_SESSION *sess)
     rb_ary_push(ary, sslctx_obj);
     rb_ary_push(ary, sess_obj);
 
-    rb_protect((VALUE(*)_((VALUE)))ossl_call_session_remove_cb, ary, &state);
+    rb_protect(ossl_call_session_remove_cb, ary, &state);
     if (state) {
 /*
   the SSL_CTX is frozen, nowhere to save state.
@@ -540,7 +573,7 @@ ssl_servername_cb(SSL *ssl, int *ad, void *arg)
     rb_ary_push(ary, ssl_obj);
     rb_ary_push(ary, rb_str_new2(servername));
 
-    rb_protect((VALUE(*)_((VALUE)))ossl_call_servername_cb, ary, &state);
+    rb_protect(ossl_call_servername_cb, ary, &state);
     if (state) {
         rb_ivar_set(ssl_obj, ID_callback_state, INT2NUM(state));
         return SSL_TLSEXT_ERR_ALERT_FATAL;
@@ -624,8 +657,7 @@ ssl_npn_select_cb_common(VALUE cb, const unsigned char **out, unsigned char *out
 static int
 ssl_npn_advertise_cb(SSL *ssl, const unsigned char **out, unsigned int *outlen, void *arg)
 {
-    VALUE sslctx_obj = (VALUE) arg;
-    VALUE protocols = rb_iv_get(sslctx_obj, "@_protocols");
+    VALUE protocols = (VALUE)arg;
 
     *out = (const unsigned char *) RSTRING_PTR(protocols);
     *outlen = RSTRING_LENINT(protocols);
@@ -776,7 +808,7 @@ ossl_sslctx_setup(VALUE self)
     val = ossl_sslctx_get_cert(self);
     cert = NIL_P(val) ? NULL : GetX509CertPtr(val); /* NO DUP NEEDED */
     val = ossl_sslctx_get_key(self);
-    key = NIL_P(val) ? NULL : GetPKeyPtr(val); /* NO DUP NEEDED */
+    key = NIL_P(val) ? NULL : GetPrivPKeyPtr(val); /* NO DUP NEEDED */
     if (cert && key) {
         if (!SSL_CTX_use_certificate(ctx, cert)) {
             /* Adds a ref => Safe to FREE */
@@ -835,8 +867,8 @@ ossl_sslctx_setup(VALUE self)
 #ifdef HAVE_SSL_CTX_SET_NEXT_PROTO_SELECT_CB
     val = rb_iv_get(self, "@npn_protocols");
     if (!NIL_P(val)) {
-	rb_iv_set(self, "@_protocols", ssl_encode_npn_protocols(val));
-	SSL_CTX_set_next_protos_advertised_cb(ctx, ssl_npn_advertise_cb, (void *) self);
+	VALUE encoded = ssl_encode_npn_protocols(val);
+	SSL_CTX_set_next_protos_advertised_cb(ctx, ssl_npn_advertise_cb, (void *)encoded);
 	OSSL_Debug("SSL NPN advertise callback added");
     }
     if (RTEST(rb_iv_get(self, "@npn_select_cb"))) {
@@ -1744,7 +1776,13 @@ ossl_ssl_write_internal(VALUE self, VALUE str, VALUE opts)
 
     if (ssl_started(ssl)) {
 	for (;;){
-	    nwrite = SSL_write(ssl, RSTRING_PTR(str), RSTRING_LENINT(str));
+	    int num = RSTRING_LENINT(str);
+
+	    /* SSL_write(3ssl) manpage states num == 0 is undefined */
+	    if (num == 0)
+		goto end;
+
+	    nwrite = SSL_write(ssl, RSTRING_PTR(str), num);
 	    switch(ssl_get_error(ssl, nwrite)){
 	    case SSL_ERROR_NONE:
 		goto end;
@@ -2223,6 +2261,7 @@ Init_ossl_ssl(void)
      */
     cSSLContext = rb_define_class_under(mSSL, "SSLContext", rb_cObject);
     rb_define_alloc_func(cSSLContext, ossl_sslctx_s_alloc);
+    rb_undef_method(cSSLContext, "initialize_copy");
 
     /*
      * Context certificate
@@ -2278,9 +2317,18 @@ Init_ossl_ssl(void)
      * +store_context+ is an OpenSSL::X509::StoreContext containing the
      * context used for certificate verification.
      *
-     * If the callback returns false verification is stopped.
+     * If the callback returns false, the chain verification is immediately
+     * stopped and a bad_certificate alert is then sent.
      */
     rb_attr(cSSLContext, rb_intern("verify_callback"), 1, 1, Qfalse);
+
+    /*
+     * Whether to check the server certificate is valid for the hostname.
+     *
+     * In order to make this work, verify_mode must be set to VERIFY_PEER and
+     * the server hostname must be given by OpenSSL::SSL::SSLSocket#hostname=.
+     */
+    rb_attr(cSSLContext, rb_intern("verify_hostname"), 1, 1, Qfalse);
 
     /*
      * An OpenSSL::X509::Store used for certificate verification
@@ -2538,6 +2586,7 @@ Init_ossl_ssl(void)
     rb_define_const(mSSLExtConfig, "OPENSSL_NO_SOCK", Qfalse);
     rb_define_alloc_func(cSSLSocket, ossl_ssl_s_alloc);
     rb_define_method(cSSLSocket, "initialize", ossl_ssl_initialize, -1);
+    rb_undef_method(cSSLSocket, "initialize_copy");
     rb_define_method(cSSLSocket, "connect",    ossl_ssl_connect, 0);
     rb_define_method(cSSLSocket, "connect_nonblock",    ossl_ssl_connect_nonblock, -1);
     rb_define_method(cSSLSocket, "accept",     ossl_ssl_accept, 0);

@@ -203,7 +203,9 @@ ossl_digest_update(VALUE self, VALUE data)
 
     StringValue(data);
     GetDigest(self, ctx);
-    EVP_DigestUpdate(ctx, RSTRING_PTR(data), RSTRING_LEN(data));
+
+    if (!EVP_DigestUpdate(ctx, RSTRING_PTR(data), RSTRING_LEN(data)))
+	ossl_raise(eDigestError, "EVP_DigestUpdate");
 
     return self;
 }
@@ -218,19 +220,21 @@ ossl_digest_finish(int argc, VALUE *argv, VALUE self)
 {
     EVP_MD_CTX *ctx;
     VALUE str;
-
-    rb_scan_args(argc, argv, "01", &str);
+    int out_len;
 
     GetDigest(self, ctx);
+    rb_scan_args(argc, argv, "01", &str);
+    out_len = EVP_MD_CTX_size(ctx);
 
     if (NIL_P(str)) {
-        str = rb_str_new(NULL, EVP_MD_CTX_size(ctx));
+        str = rb_str_new(NULL, out_len);
     } else {
         StringValue(str);
-        rb_str_resize(str, EVP_MD_CTX_size(ctx));
+        rb_str_resize(str, out_len);
     }
 
-    EVP_DigestFinal_ex(ctx, (unsigned char *)RSTRING_PTR(str), NULL);
+    if (!EVP_DigestFinal_ex(ctx, (unsigned char *)RSTRING_PTR(str), NULL))
+	ossl_raise(eDigestError, "EVP_DigestFinal_ex");
 
     return str;
 }

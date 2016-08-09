@@ -31,6 +31,10 @@ Notable changes
   - OpenSSL::Cipher#key= and #iv= reject too long inputs. They used to truncate
     silently. [Bug #12561]
 
+  - OpenSSL::Cipher#iv_len= is added. It allows changing IV (nonce) length if
+    using AEAD ciphers.
+    [Bug #8667] [Bug #10420] [GH ruby/ruby#569] [GH ruby/openssl#58]
+
 * OpenSSL::OCSP
 
   - Accessor methods are added to OpenSSL::OCSP::CertificateId. [Feature #7181]
@@ -62,6 +66,11 @@ Notable changes
   - OpenSSL::SSL::SSLContext#security_level= is added. You can set the "security
     level" of the SSL context. This is effective only when built with OpenSSL
     1.1.0.
+
+  - A new option 'verify_hostname' is added to OpenSSL::SSL::SSLContext. When it
+    is enabled, and the SNI hostname is also set, the hostname verification on
+    the server certificate is automatically performed. It is now enabled by
+    OpenSSL::SSL::Context#set_params. [GH ruby/openssl#60]
 
 Removals
 --------
@@ -104,4 +113,3 @@ Deprecations
     first added in Ruby 2.3.0. To specify the curve to be used in ephemeral
     ECDH, use OpenSSL::SSL::SSLContext#ecdh_curves=. The automatic curve
     selection is also now enabled by default when built with a capable OpenSSL.
-

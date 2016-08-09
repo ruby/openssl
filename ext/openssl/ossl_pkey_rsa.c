@@ -383,7 +383,7 @@ static VALUE
 ossl_rsa_to_der(VALUE self)
 {
     RSA *rsa;
-    int (*i2d_func)_((const RSA*, unsigned char**));
+    int (*i2d_func)(const RSA *, unsigned char **);
     unsigned char *p;
     long len;
     VALUE str;
@@ -392,7 +392,7 @@ ossl_rsa_to_der(VALUE self)
     if (RSA_HAS_PRIVATE(rsa))
 	i2d_func = i2d_RSAPrivateKey;
     else
-	i2d_func = (int (*)(const RSA*, unsigned char**))i2d_RSA_PUBKEY;
+	i2d_func = (int (*)(const RSA *, unsigned char **))i2d_RSA_PUBKEY;
     if((len = i2d_func(rsa, NULL)) <= 0)
 	ossl_raise(eRSAError, NULL);
     str = rb_str_new(0, len);

@@ -15,7 +15,7 @@
 VALUE mPKey;
 VALUE cPKey;
 VALUE ePKeyError;
-ID id_private_q;
+static ID id_private_q;
 
 /*
  * callback for generating keys
@@ -197,20 +197,6 @@ DupPKeyPtr(VALUE obj)
     return pkey;
 }
 
-EVP_PKEY *
-DupPrivPKeyPtr(VALUE obj)
-{
-    EVP_PKEY *pkey;
-
-    if (rb_funcallv(obj, id_private_q, 0, NULL) != Qtrue) {
-	ossl_raise(rb_eArgError, "Private key is needed.");
-    }
-    SafeGetPKey(obj, pkey);
-    EVP_PKEY_up_ref(pkey);
-
-    return pkey;
-}
-
 /*
  * Private
  */
@@ -272,9 +258,7 @@ ossl_pkey_sign(VALUE self, VALUE digest, VALUE data)
     VALUE str;
     int result;
 
-    if (rb_funcallv(self, id_private_q, 0, NULL) != Qtrue)
-	ossl_raise(rb_eArgError, "Private key is needed.");
-    GetPKey(self, pkey);
+    pkey = GetPrivPKeyPtr(self);
     md = GetDigestPtr(digest);
     StringValue(data);
     str = rb_str_new(0, EVP_PKEY_size(pkey)+16);
