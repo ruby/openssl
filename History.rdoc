@@ -1,0 +1,107 @@
+Version x.y.z
+=============
+
+This is the first release of openssl gem, formerly a standard library of Ruby,
+ext/openssl. This is the successor of the version included in Ruby 2.3.
+
+Compatibility notes
+-------------------
+
+* Support for OpenSSL version 0.9.6 and 0.9.7 is completely removed. openssl gem
+  still works with OpenSSL 0.9.8, but users are strongly encouraged to upgrade
+  to at least 1.0.1, as OpenSSL < 1.0.1 will not receive any security fixes from
+  the OpenSSL development team.
+
+Supported platforms
+-------------------
+
+* OpenSSL 1.0.0, 1.0.1, 1.0.2, 1.1.0
+* OpenSSL < 0.9.8 is no longer supported.
+* LibreSSL 2.1, 2.2, 2.3, 2.4
+* Ruby 2.3, 2.4
+
+Notable changes
+---------------
+
+* Add support for OpenSSL 1.1.0. [Feature #12324]
+* Add support for LibreSSL
+
+* OpenSSL::Cipher
+
+  - OpenSSL::Cipher#key= and #iv= reject too long inputs. They used to truncate
+    silently. [Bug #12561]
+
+* OpenSSL::OCSP
+
+  - Accessor methods are added to OpenSSL::OCSP::CertificateId. [Feature #7181]
+
+  - OpenSSL::OCSP::Request and BasicResponse can be signed with non-SHA-1 hash
+    algorithm. [Feature #11552]
+
+  - OpenSSL::OCSP::CertificateId and BasicResponse can be encoded into DER.
+
+  - A new class OpenSSL::OCSP::SingleResponse is added for convenience.
+
+  - OpenSSL::OCSP::BasicResponse#add_status accepts absolute times. They used to
+    accept only relative seconds from the current time.
+
+* OpenSSL::PKey::EC follows the general PKey interface. [Bug #6567]
+
+* OpenSSL::PKey.read raises OpenSSL::PKey::PKeyError instead of ArgumentError
+  for consistency with OpenSSL::PKey::{DH,DSA,RSA,EC}#new.
+  [Bug #11774] [GH ruby/openssl#55]
+
+* OpenSSL::SSL
+
+  - OpenSSL::SSL::SSLSocket#tmp_key is added. A client can call it after the
+    connection is established to retrieve the ephemeral key. [GH ruby/ruby#1318]
+
+  - The automatic ephemeral ECDH curve selection is enabled by default when
+    built with OpenSSL >= 1.0.2 or LibreSSL.
+
+  - OpenSSL::SSL::SSLContext#security_level= is added. You can set the "security
+    level" of the SSL context. This is effective only when built with OpenSSL
+    1.1.0.
+
+Removals
+--------
+
+* OpenSSL::Engine
+
+  - OpenSSL::Engine.cleanup does nothing when built with OpenSSL 1.1.0.
+
+* OpenSSL::SSL
+
+  - OpenSSL::PKey::DH::DEFAULT_512 is removed. Hence servers no longer use
+    512-bit DH group by default. It is considered too weak nowadays.
+    [Bug #11968] [GH ruby/ruby#1196]
+
+  - RC4 cipher suites are removed from OpenSSL::SSL::SSLContext::DEFAULT_PARAMS.
+    RC4 is now considered to be weak. [GH ruby/openssl#50]
+
+Deprecations
+------------
+
+* OpenSSL::PKey
+
+  - OpenSSL::PKey::RSA#n=, #e=, #d=, #p=, #q=, #dmp1=, #dmq1=, #iqmp=,
+    OpenSSL::PKey::DSA#p=, #q=, #g=, #priv_key=, #pub_key=,
+    OpenSSL::PKey::DH#p=, #g=, #priv_key= and #pub_key= are deprecated. They are
+    disabled when built with OpenSSL 1.1.0, due to its API change. Instead,
+    OpenSSL::PKey::RSA#set_key, #set_factors, #set_crt_params,
+    OpenSSL::PKey::DSA#set_pqg, #set_key, OpenSSL::PKey::DH#set_pqg and #set_key
+    are added.
+
+* OpenSSL::Random
+
+  - OpenSSL::Random.pseudo_bytes is deprecated, and not defined when built with
+    OpenSSL 1.1.0. Use OpenSSL::Random.random_bytes instead.
+
+* OpenSSL::SSL
+
+  - OpenSSL::SSL::SSLContext#tmp_ecdh_callback is deprecated, as the underlying
+    API SSL_CTX_set_tmp_ecdh_callback() is removed in OpenSSL 1.1.0. It was
+    first added in Ruby 2.3.0. To specify the curve to be used in ephemeral
+    ECDH, use OpenSSL::SSL::SSLContext#ecdh_curves=. The automatic curve
+    selection is also now enabled by default when built with a capable OpenSSL.
+
