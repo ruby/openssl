@@ -250,7 +250,7 @@ ossl_x509req_get_version(VALUE self)
     GetX509Req(self, req);
     version = X509_REQ_get_version(req);
 
-    return LONG2FIX(version);
+    return LONG2NUM(version);
 }
 
 static VALUE
@@ -259,12 +259,12 @@ ossl_x509req_set_version(VALUE self, VALUE version)
     X509_REQ *req;
     long ver;
 
-    if ((ver = FIX2LONG(version)) < 0) {
+    if ((ver = NUM2LONG(version)) < 0) {
 	ossl_raise(eX509ReqError, "version must be >= 0!");
     }
     GetX509Req(self, req);
     if (!X509_REQ_set_version(req, ver)) {
-	ossl_raise(eX509ReqError, NULL);
+	ossl_raise(eX509ReqError, "X509_REQ_set_version");
     }
 
     return version;
