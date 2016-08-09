@@ -1194,6 +1194,114 @@ ossl_sslctx_set_security_level(VALUE self, VALUE value)
 }
 
 /*
+ * call-seq:
+ *    ctx.add_certificate(certiticate, pkey [, extra_certs]) -> self
+ *
+ * Adds a certificate to the context. _pkey_ must be a corresponding private
+ * key with _certificate_.
+ *
+ * Multiple certificates with different public key type can be added by
+ * repeated calls of this method, and OpenSSL will choose the most appropriate
+ * certificate during the handshake.
+ *
+ * #cert=, #key=, and #extra_chain_cert= are old accessor methods for setting
+ * certificate and internally call this method.
+ *
+ * === Parameters
+ * _certificate_::
+ *   A certificate. An instance of OpenSSL::X509::Certificate.
+ * _pkey_::
+ *   The private key for _certificate_. An instance of OpenSSL::PKey::PKey.
+ * _extra_certs_::
+ *   Optional. An array of OpenSSL::X509::Certificate. When sending a
+ *   certificate chain, the certificates specified by this are sent following
+ *   _certificate_, in the order in the array.
+ *
+ * === Example
+ *   rsa_cert = OpenSSL::X509::Certificate.new(...)
+ *   rsa_pkey = OpenSSL::PKey.read(...)
+ *   ca_intermediate_cert = OpenSSL::X509::Certificate.new(...)
+ *   ctx.add_certificate(rsa_cert, rsa_pkey, [ca_intermediate_cert])
+ *
+ *   ecdsa_cert = ...
+ *   ecdsa_pkey = ...
+ *   another_ca_cert = ...
+ *   ctx.add_certificate(ecdsa_cert, ecdsa_pkey, [another_ca_cert])
+ *
+ * === Note
+ * OpenSSL before the version 1.0.2 could handle only one extra chain across
+ * all key types. Calling this method discards the chain set previously.
+ */
+static VALUE
+ossl_sslctx_add_certificate(int argc, VALUE *argv, VALUE self)
+{
+    VALUE cert, key, extra_chain_ary;
+    SSL_CTX *ctx;
+    X509 *x509;
+    STACK_OF(X509) *extra_chain = NULL;
+    EVP_PKEY *pkey, *pub_pkey;
+
+    GetSSLCTX(self, ctx);
+    rb_scan_args(argc, argv, "21", &cert, &key, &extra_chain_ary);
+    rb_check_frozen(self);
+    x509 = GetX509CertPtr(cert);
+    pkey = GetPrivPKeyPtr(key);
+
+    /*
+     * The reference counter is bumped, and decremented immediately.
+     * X509_get0_pubkey() is only available in OpenSSL >= 1.1.0.
+     */
+    pub_pkey = X509_get_pubkey(x509);
+    EVP_PKEY_free(pub_pkey);
+    if (!pub_pkey)
+	rb_raise(rb_eArgError, "certificate does not contain public key");
+    if (EVP_PKEY_cmp(pub_pkey, pkey) != 1)
+	rb_raise(rb_eArgError, "public key mismatch");
+
+    if (argc >= 3)
+	extra_chain = ossl_x509_ary2sk(extra_chain_ary);
+
+    if (!SSL_CTX_use_certificate(ctx, x509)) {
+	sk_X509_pop_free(extra_chain, X509_free);
+	ossl_raise(eSSLError, "SSL_CTX_use_certificate");
+    }
+    if (!SSL_CTX_use_PrivateKey(ctx, pkey)) {
+	sk_X509_pop_free(extra_chain, X509_free);
+	ossl_raise(eSSLError, "SSL_CTX_use_PrivateKey");
+    }
+
+    if (extra_chain) {
+#if OPENSSL_VERSION_NUMBER >= 0x10002000 && !defined(LIBRESSL_VERSION_NUMBER)
+	if (!SSL_CTX_set0_chain(ctx, extra_chain)) {
+	    sk_X509_pop_free(extra_chain, X509_free);
+	    ossl_raise(eSSLError, "SSL_CTX_set0_chain");
+	}
+#else
+	STACK_OF(X509) *orig_extra_chain;
+	X509 *x509_tmp;
+
+	/* First, clear the existing chain */
+	SSL_CTX_get_extra_chain_certs(ctx, &orig_extra_chain);
+	if (orig_extra_chain && sk_X509_num(orig_extra_chain)) {
+	    rb_warning("SSL_CTX_set0_chain() is not available; " \
+		       "clearing previously set certificate chain");
+	    SSL_CTX_clear_extra_chain_certs(ctx);
+	}
+	while ((x509_tmp = sk_X509_shift(extra_chain))) {
+	    /* Transfers ownership */
+	    if (!SSL_CTX_add_extra_chain_cert(ctx, x509_tmp)) {
+		X509_free(x509_tmp);
+		sk_X509_pop_free(extra_chain, X509_free);
+		ossl_raise(eSSLError, "SSL_CTX_add_extra_chain_cert");
+	    }
+	}
+	sk_X509_free(extra_chain);
+#endif
+    }
+    return self;
+}
+
+/*
  *  call-seq:
  *     ctx.session_add(session) -> true | false
  *
@@ -2324,11 +2432,17 @@ Init_ossl_ssl(void)
 
     /*
      * Context certificate
+     *
+     * The _cert_, _key_, and _extra_chain_cert_ attributes are deprecated.
+     * It is recommended to use #add_certificate instead.
      */
     rb_attr(cSSLContext, rb_intern("cert"), 1, 1, Qfalse);
 
     /*
      * Context private key
+     *
+     * The _cert_, _key_, and _extra_chain_cert_ attributes are deprecated.
+     * It is recommended to use #add_certificate instead.
      */
     rb_attr(cSSLContext, rb_intern("key"), 1, 1, Qfalse);
 
@@ -2402,6 +2516,9 @@ Init_ossl_ssl(void)
     /*
      * An Array of extra X509 certificates to be added to the certificate
      * chain.
+     *
+     * The _cert_, _key_, and _extra_chain_cert_ attributes are deprecated.
+     * It is recommended to use #add_certificate instead.
      */
     rb_attr(cSSLContext, rb_intern("extra_chain_cert"), 1, 1, Qfalse);
 
@@ -2557,6 +2674,7 @@ Init_ossl_ssl(void)
     rb_define_method(cSSLContext, "ecdh_curves=", ossl_sslctx_set_ecdh_curves, 1);
     rb_define_method(cSSLContext, "security_level", ossl_sslctx_get_security_level, 0);
     rb_define_method(cSSLContext, "security_level=", ossl_sslctx_set_security_level, 1);
+    rb_define_method(cSSLContext, "add_certificate", ossl_sslctx_add_certificate, -1);
 
     rb_define_method(cSSLContext, "setup", ossl_sslctx_setup, 0);
     rb_define_alias(cSSLContext, "freeze", "setup");
