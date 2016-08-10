@@ -96,6 +96,11 @@ Updates since Ruby 2.3
     for consistency with OpenSSL::PKey::{DH,DSA,RSA,EC}#new.
     [Bug #11774] [GH ruby/openssl#55]
 
+  - OpenSSL::PKey::{RSA,DSA,EC}#to_der and #export learnt a new keyword argument
+    'format'. This allows encoding a PKey containing the private key to DER/PEM
+    string in SubjectPublicKeyInfo format without duplicating the PKey first.
+    [GH ruby/openssl#61]
+
 * OpenSSL::Random
 
   - OpenSSL::Random.pseudo_bytes is deprecated, and not defined when built with

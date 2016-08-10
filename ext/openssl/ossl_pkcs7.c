@@ -870,17 +870,9 @@ ossl_pkcs7_to_der(VALUE self)
 {
     PKCS7 *pkcs7;
     VALUE str;
-    long len;
-    unsigned char *p;
 
     GetPKCS7(self, pkcs7);
-    if((len = i2d_PKCS7(pkcs7, NULL)) <= 0)
-	ossl_raise(ePKCS7Error, NULL);
-    str = rb_str_new(0, len);
-    p = (unsigned char *)RSTRING_PTR(str);
-    if(i2d_PKCS7(pkcs7, &p) <= 0)
-	ossl_raise(ePKCS7Error, NULL);
-    ossl_str_adjust(str, p);
+    ossl_i2d(i2d_PKCS7, pkcs7, str);
 
     return str;
 }

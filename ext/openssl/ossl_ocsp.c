@@ -450,17 +450,9 @@ ossl_ocspreq_to_der(VALUE self)
 {
     OCSP_REQUEST *req;
     VALUE str;
-    unsigned char *p;
-    long len;
 
     GetOCSPReq(self, req);
-    if((len = i2d_OCSP_REQUEST(req, NULL)) <= 0)
-	ossl_raise(eOCSPError, NULL);
-    str = rb_str_new(0, len);
-    p = (unsigned char *)RSTRING_PTR(str);
-    if(i2d_OCSP_REQUEST(req, &p) <= 0)
-	ossl_raise(eOCSPError, NULL);
-    ossl_str_adjust(str, p);
+    ossl_i2d(i2d_OCSP_REQUEST, req, str);
 
     return str;
 }
@@ -631,17 +623,9 @@ ossl_ocspres_to_der(VALUE self)
 {
     OCSP_RESPONSE *res;
     VALUE str;
-    long len;
-    unsigned char *p;
 
     GetOCSPRes(self, res);
-    if((len = i2d_OCSP_RESPONSE(res, NULL)) <= 0)
-	ossl_raise(eOCSPError, NULL);
-    str = rb_str_new(0, len);
-    p = (unsigned char *)RSTRING_PTR(str);
-    if(i2d_OCSP_RESPONSE(res, &p) <= 0)
-	ossl_raise(eOCSPError, NULL);
-    ossl_str_adjust(str, p);
+    ossl_i2d(i2d_OCSP_RESPONSE, res, str);
 
     return str;
 }
@@ -1132,17 +1116,9 @@ ossl_ocspbres_to_der(VALUE self)
 {
     OCSP_BASICRESP *res;
     VALUE str;
-    long len;
-    unsigned char *p;
 
     GetOCSPBasicRes(self, res);
-    if ((len = i2d_OCSP_BASICRESP(res, NULL)) <= 0)
-	ossl_raise(eOCSPError, NULL);
-    str = rb_str_new(0, len);
-    p = (unsigned char *)RSTRING_PTR(str);
-    if (i2d_OCSP_BASICRESP(res, &p) <= 0)
-	ossl_raise(eOCSPError, NULL);
-    ossl_str_adjust(str, p);
+    ossl_i2d(i2d_OCSP_BASICRESP, res, str);
 
     return str;
 }
@@ -1423,17 +1399,9 @@ ossl_ocspsres_to_der(VALUE self)
 {
     OCSP_SINGLERESP *sres;
     VALUE str;
-    long len;
-    unsigned char *p;
 
     GetOCSPSingleRes(self, sres);
-    if ((len = i2d_OCSP_SINGLERESP(sres, NULL)) <= 0)
-	ossl_raise(eOCSPError, NULL);
-    str = rb_str_new(0, len);
-    p = (unsigned char *)RSTRING_PTR(str);
-    if (i2d_OCSP_SINGLERESP(sres, &p) <= 0)
-	ossl_raise(eOCSPError, NULL);
-    ossl_str_adjust(str, p);
+    ossl_i2d(i2d_OCSP_SINGLERESP, sres, str);
 
     return str;
 }
@@ -1669,17 +1637,9 @@ ossl_ocspcid_to_der(VALUE self)
 {
     OCSP_CERTID *id;
     VALUE str;
-    long len;
-    unsigned char *p;
 
     GetOCSPCertId(self, id);
-    if ((len = i2d_OCSP_CERTID(id, NULL)) <= 0)
-	ossl_raise(eOCSPError, NULL);
-    str = rb_str_new(0, len);
-    p = (unsigned char *)RSTRING_PTR(str);
-    if (i2d_OCSP_CERTID(id, &p) <= 0)
-	ossl_raise(eOCSPError, NULL);
-    ossl_str_adjust(str, p);
+    ossl_i2d(i2d_OCSP_CERTID, id, str);
 
     return str;
 }

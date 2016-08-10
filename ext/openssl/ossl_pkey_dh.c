@@ -356,18 +356,10 @@ static VALUE
 ossl_dh_to_der(VALUE self)
 {
     DH *dh;
-    unsigned char *p;
-    long len;
     VALUE str;
 
     GetDH(self, dh);
-    if((len = i2d_DHparams(dh, NULL)) <= 0)
-	ossl_raise(eDHError, NULL);
-    str = rb_str_new(0, len);
-    p = (unsigned char *)RSTRING_PTR(str);
-    if(i2d_DHparams(dh, &p) < 0)
-	ossl_raise(eDHError, NULL);
-    ossl_str_adjust(str, p);
+    ossl_i2d(i2d_DHparams, dh, str);
 
     return str;
 }

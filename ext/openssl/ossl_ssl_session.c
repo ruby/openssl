@@ -240,24 +240,16 @@ static VALUE ossl_ssl_session_get_id(VALUE self)
  *
  * Returns an ASN1 encoded String that contains the Session object.
 */
-static VALUE ossl_ssl_session_to_der(VALUE self)
+static VALUE
+ossl_ssl_session_to_der(VALUE self)
 {
-	SSL_SESSION *ctx;
-	unsigned char *p;
-	int len;
-	VALUE str;
+    SSL_SESSION *ctx;
+    VALUE str;
 
-	GetSSLSession(self, ctx);
-	len = i2d_SSL_SESSION(ctx, NULL);
-	if (len <= 0) {
-		ossl_raise(eSSLSession, "i2d_SSL_SESSION");
-	}
+    GetSSLSession(self, ctx);
+    ossl_i2d(i2d_SSL_SESSION, ctx, str);
 
-	str = rb_str_new(0, len);
-	p = (unsigned char *)RSTRING_PTR(str);
-	i2d_SSL_SESSION(ctx, &p);
-	ossl_str_adjust(str, p);
-	return str;
+    return str;
 }
 
 /*

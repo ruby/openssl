@@ -120,6 +120,22 @@ do{\
 }while(0)
 
 /*
+ * Encodes +obj+ into DER string using +i2d_func+ and stores to +out+. Note that
+ * it may raise.
+ */
+#define ossl_i2d(i2d_func, obj, out) do { \
+    long len; \
+    unsigned char *p; \
+    if ((len = (i2d_func)(obj, NULL)) <= 0) \
+	ossl_raise(eOSSLError, #i2d_func); \
+    (out) = rb_str_new(0, len); \
+    p = (unsigned char *)RSTRING_PTR((out)); \
+    if (((i2d_func)(obj, &p)) <= 0) \
+	ossl_raise(eOSSLError, #i2d_func); \
+    ossl_str_adjust((out), p); \
+} while (0)
+
+/*
  * Our default PEM callback
  */
 /* Convert the argument to String and validate the length. Note this may raise. */

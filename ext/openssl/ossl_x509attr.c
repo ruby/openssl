@@ -287,17 +287,9 @@ ossl_x509attr_to_der(VALUE self)
 {
     X509_ATTRIBUTE *attr;
     VALUE str;
-    int len;
-    unsigned char *p;
 
     GetX509Attr(self, attr);
-    if((len = i2d_X509_ATTRIBUTE(attr, NULL)) <= 0)
-	ossl_raise(eX509AttrError, NULL);
-    str = rb_str_new(0, len);
-    p = (unsigned char *)RSTRING_PTR(str);
-    if(i2d_X509_ATTRIBUTE(attr, &p) <= 0)
-	ossl_raise(eX509AttrError, NULL);
-    ossl_str_adjust(str, p);
+    ossl_i2d(i2d_X509_ATTRIBUTE, attr, str);
 
     return str;
 }

@@ -100,27 +100,6 @@ ossl_pkey_new(EVP_PKEY *pkey)
     UNREACHABLE;
 }
 
-VALUE
-ossl_pkey_new_from_file(VALUE filename)
-{
-    FILE *fp;
-    EVP_PKEY *pkey;
-
-    rb_check_safe_obj(filename);
-    if (!(fp = fopen(StringValueCStr(filename), "r"))) {
-	ossl_raise(ePKeyError, "%s", strerror(errno));
-    }
-    rb_fd_fix_cloexec(fileno(fp));
-
-    pkey = PEM_read_PrivateKey(fp, NULL, ossl_pem_passwd_cb, NULL);
-    fclose(fp);
-    if (!pkey) {
-	ossl_raise(ePKeyError, NULL);
-    }
-
-    return ossl_pkey_new(pkey);
-}
-
 /*
  *  call-seq:
  *     OpenSSL::PKey.read(string [, pwd ] ) -> PKey
@@ -321,6 +300,7 @@ ossl_pkey_verify(VALUE self, VALUE digest, VALUE sig, VALUE data)
     EVP_MD_CTX_free(ctx);
     switch (result) {
     case 0:
+	ossl_clear_error();
 	return Qfalse;
     case 1:
 	return Qtrue;
@@ -328,6 +308,127 @@ ossl_pkey_verify(VALUE self, VALUE digest, VALUE sig, VALUE data)
 	ossl_raise(ePKeyError, NULL);
     }
     return Qnil; /* dummy */
+}
+
+enum ossl_pkey_export_format
+ossl_pkey_parse_export_format(VALUE obj, VALUE opts)
+{
+    ID kwids[1], id;
+    VALUE kwargs[1];
+
+    kwids[0] = rb_intern("format");
+    rb_get_kwargs(opts, kwids, 0, 1, kwargs);
+    if (kwargs[0] == Qundef || !RTEST(kwargs[0])) {
+	if (RTEST(rb_funcall(obj, id_private_q, 0)))
+	    return OSSL_PKEY_EXPORT_PRIVATE;
+	else
+	    return OSSL_PKEY_EXPORT_PUBKEY;
+    }
+
+    id = rb_to_id(kwargs[0]);
+    if (id == rb_intern("public")) {
+	return OSSL_PKEY_EXPORT_PUBKEY;
+    }
+    else if (id == rb_intern("private")) {
+	if (!RTEST(rb_funcall(obj, id_private_q, 0)))
+	    ossl_raise(ePKeyError, "private key required");
+	return OSSL_PKEY_EXPORT_PRIVATE;
+    }
+    else {
+	ossl_raise(rb_eArgError, "unsupported format %"PRIsVALUE, kwargs[0]);
+    }
+}
+
+/*
+ * call-seq:
+ *   key.export([cipher, pass_phrase,] format: nil) -> String
+ *   key.to_pem([cipher, pass_phrase,] format: nil) -> String
+ *   key.to_s([cipher, pass_phrase,] format: nil)   -> String
+ *
+ * Encodes the PKey into a PEM string. If +cipher+ and +pass_phrase+ are given,
+ * they will be used to encrypt the key. +cipher+ must be an OpenSSL::Cipher
+ * instance. Note that encryption will only be effective for a private key,
+ * public keys will always be encoded in unencrypted format. The output format
+ * can be specified with +format+. It must be one of these:
+ *
+ * private:: Raw private key format. For example, PKCS #1 RSAPrivateKey format
+ *           for RSA keys, OpenSSL's DSAPrivateKey format for DSA keys, SEC 1
+ *           ECPrivateKey format for EC keys.
+ * public:: X.509 SubjectPublicKeyInfo format.
+ *
+ * When +format+ is not given, the default (:private for PKeys containing private
+ * component, :public otherwise) is used.
+ *
+ * === Examples
+ *  dsa = OpenSSL::PKey::DSA.new(1024) # generates a new key
+ *  dsa.to_pem
+ *  #=> "-----BEGIN DSA PRIVATE KEY-----\n..."
+ *  dsa.to_pem(format: "public")
+ *  #=> "-----BEGIN PUBLIC KEY-----\n..."
+ */
+static VALUE
+ossl_pkey_export(int argc, VALUE *argv, VALUE self)
+{
+    EVP_PKEY *pkey;
+    BIO *out;
+    const EVP_CIPHER *ciph = NULL;
+    VALUE cipher, pass, opts;
+    int ret;
+    enum ossl_pkey_export_format format;
+
+    GetPKey(self, pkey);
+    rb_scan_args(argc, argv, "02:", &cipher, &pass, &opts);
+    format = ossl_pkey_parse_export_format(self, opts);
+    if (!NIL_P(cipher)) {
+	ciph = GetCipherPtr(cipher);
+	pass = ossl_pem_passwd_value(pass);
+    }
+
+    if (!(out = BIO_new(BIO_s_mem())))
+	ossl_raise(ePKeyError, "BIO_new");
+    switch (format) {
+      case OSSL_PKEY_EXPORT_PUBKEY:
+	ret = PEM_write_bio_PUBKEY(out, pkey);
+	break;
+      default:
+	BIO_free(out);
+	rb_notimplement();
+    }
+    if (!ret) {
+	BIO_free(out);
+	ossl_raise(ePKeyError, NULL);
+    }
+
+    return ossl_membio2str(out);
+}
+
+/*
+ * call-seq:
+ *   key.to_der(format: nil) -> String
+ *
+ * Encodes the PKey into a DER string. +format+ is handled in the same way as
+ * #export.
+ */
+static VALUE
+ossl_pkey_to_der(int argc, VALUE *argv, VALUE self)
+{
+    EVP_PKEY *pkey;
+    VALUE cipher, pass, opts, str;
+    enum ossl_pkey_export_format format;
+
+    GetPKey(self, pkey);
+    rb_scan_args(argc, argv, "02:", &cipher, &pass, &opts);
+    format = ossl_pkey_parse_export_format(self, opts);
+
+    switch (format) {
+      case OSSL_PKEY_EXPORT_PUBKEY:
+	ossl_i2d(i2d_PUBKEY, pkey, str);
+	break;
+      default:
+	rb_notimplement();
+    }
+
+    return str;
 }
 
 /*
@@ -418,6 +519,11 @@ Init_ossl_pkey(void)
 
     rb_define_method(cPKey, "sign", ossl_pkey_sign, 2);
     rb_define_method(cPKey, "verify", ossl_pkey_verify, 3);
+
+    rb_define_method(cPKey, "export", ossl_pkey_export, -1);
+    rb_define_alias(cPKey, "to_pem", "export");
+    rb_define_alias(cPKey, "to_s", "export");
+    rb_define_method(cPKey, "to_der", ossl_pkey_to_der, -1);
 
     id_private_q = rb_intern("private?");
 

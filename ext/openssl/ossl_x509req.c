@@ -183,17 +183,9 @@ ossl_x509req_to_der(VALUE self)
 {
     X509_REQ *req;
     VALUE str;
-    long len;
-    unsigned char *p;
 
     GetX509Req(self, req);
-    if ((len = i2d_X509_REQ(req, NULL)) <= 0)
-	ossl_raise(eX509ReqError, NULL);
-    str = rb_str_new(0, len);
-    p = (unsigned char *)RSTRING_PTR(str);
-    if (i2d_X509_REQ(req, &p) <= 0)
-	ossl_raise(eX509ReqError, NULL);
-    ossl_str_adjust(str, p);
+    ossl_i2d(i2d_X509_REQ, req, str);
 
     return str;
 }
