@@ -1399,11 +1399,24 @@ end
       return
     end
     assert_equal(1, ctx.security_level)
-    # assert_raise(OpenSSL::SSL::SSLError) { ctx.key = Fixtures.pkey("dsa512") }
-    # ctx.key = Fixtures.pkey("rsa1024")
-    # ctx.security_level = 2
-    # assert_raise(OpenSSL::SSL::SSLError) { ctx.key = Fixtures.pkey("rsa1024") }
-    pend "FIXME: SSLContext#key= currently does not raise because SSL_CTX_use_certificate() is delayed"
+
+    dsa512 = Fixtures.pkey("dsa512")
+    dsa512_cert = issue_cert(@svr, dsa512, 50, [], @ca_cert, @ca_key)
+    rsa1024 = Fixtures.pkey("rsa1024")
+    rsa1024_cert = issue_cert(@svr, rsa1024, 51, [], @ca_cert, @ca_key)
+
+    assert_raise(OpenSSL::SSL::SSLError) {
+      # 512 bit DSA key is rejected because it offers < 80 bits of security
+      ctx.add_certificate(dsa512_cert, dsa512)
+    }
+    assert_nothing_raised {
+      ctx.add_certificate(rsa1024_cert, rsa1024)
+    }
+    ctx.security_level = 2
+    assert_raise(OpenSSL::SSL::SSLError) {
+      # < 112 bits of security
+      ctx.add_certificate(rsa1024_cert, rsa1024)
+    }
   end
 
   def test_dup
