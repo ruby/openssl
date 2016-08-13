@@ -12,6 +12,9 @@ class OpenSSL::TestX509Attribute < OpenSSL::TestCase
     attr = OpenSSL::X509::Attribute.new("extReq", val)
     assert_equal("extReq", attr.oid)
     assert_equal(val.to_der, attr.value.to_der)
+
+    attr = OpenSSL::X509::Attribute.new("1.2.840.113549.1.9.14", val)
+    assert_equal("extReq", attr.oid)
   end
 
   def test_from_der

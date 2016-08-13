@@ -160,12 +160,15 @@ ossl_x509attr_set_oid(VALUE self, VALUE oid)
     ASN1_OBJECT *obj;
     char *s;
 
+    GetX509Attr(self, attr);
     s = StringValueCStr(oid);
     obj = OBJ_txt2obj(s, 0);
-    if(!obj) obj = OBJ_txt2obj(s, 1);
     if(!obj) ossl_raise(eX509AttrError, NULL);
-    GetX509Attr(self, attr);
-    X509_ATTRIBUTE_set1_object(attr, obj);
+    if (!X509_ATTRIBUTE_set1_object(attr, obj)) {
+	ASN1_OBJECT_free(obj);
+	ossl_raise(eX509AttrError, "X509_ATTRIBUTE_set1_object");
+    }
+    ASN1_OBJECT_free(obj);
 
     return oid;
 }
