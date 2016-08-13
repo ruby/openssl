@@ -1088,7 +1088,11 @@ ossl_sslctx_set_ecdh_curves(VALUE self, VALUE arg)
 	if (!ec)
 	    ossl_raise(eSSLError, NULL);
 	EC_KEY_set_asn1_flag(ec, OPENSSL_EC_NAMED_CURVE);
-	SSL_CTX_set_tmp_ecdh(ctx, ec);
+	if (!SSL_CTX_set_tmp_ecdh(ctx, ec)) {
+	    EC_KEY_free(ec);
+	    ossl_raise(eSSLError, "SSL_CTX_set_tmp_ecdh");
+	}
+	EC_KEY_free(ec);
 # if defined(HAVE_SSL_CTX_SET_ECDH_AUTO)
 	/* tmp_ecdh and ecdh_auto conflict. tmp_ecdh is ignored when ecdh_auto
 	 * is enabled. So disable ecdh_auto. */
