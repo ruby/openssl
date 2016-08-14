@@ -895,16 +895,16 @@ Init_ossl_cipher(void)
      * of the IV as a nonce (number used once) - it's public but random and
      * unpredictable. A secure random IV can be created as follows
      *
-     *  cipher = ...
-     *  cipher.encrypt
-     *  key = cipher.random_key
-     *  iv = cipher.random_iv # also sets the generated IV on the Cipher
+     *   cipher = ...
+     *   cipher.encrypt
+     *   key = cipher.random_key
+     *   iv = cipher.random_iv # also sets the generated IV on the Cipher
      *
-     *  Although the key is generally a random value, too, it is a bad choice
-     *  as an IV. There are elaborate ways how an attacker can take advantage
-     *  of such an IV. As a general rule of thumb, exposing the key directly
-     *  or indirectly should be avoided at all cost and exceptions only be
-     *  made with good reason.
+     * Although the key is generally a random value, too, it is a bad choice
+     * as an IV. There are elaborate ways how an attacker can take advantage
+     * of such an IV. As a general rule of thumb, exposing the key directly
+     * or indirectly should be avoided at all cost and exceptions only be
+     * made with good reason.
      *
      * === Calling Cipher#final
      *
@@ -960,27 +960,38 @@ Init_ossl_cipher(void)
      *
      * If no associated data is needed for encryption and later decryption,
      * the OpenSSL library still requires a value to be set - "" may be used in
-     * case none is available. An example using the GCM (Galois Counter Mode):
+     * case none is available.
      *
-     *   cipher = OpenSSL::Cipher.new("aes-128-gcm")
-     *   cipher.encrypt
-     *   key = cipher.random_key
-     *   iv = cipher.random_iv
-     *   cipher.auth_data = ""
+     * An example using the GCM (Galois/Counter Mode). You have 16 bytes +key+,
+     * 12 bytes (96 bits) +nonce+ and the associated data +auth_data+. Be sure
+     * not to reuse the +key+ and +nonce+ pair. Reusing an nonce ruins the
+     * security gurantees of GCM mode.
+     *
+     *   cipher = OpenSSL::Cipher::AES.new(128, :GCM).encrypt
+     *   cipher.key = key
+     *   cipher.iv = nonce
+     *   cipher.auth_data = auth_data
      *
      *   encrypted = cipher.update(data) + cipher.final
-     *   tag = cipher.auth_tag
+     *   tag = cipher.auth_tag # produces 16 bytes tag by default
      *
-     *   decipher = OpenSSL::Cipher.new("aes-128-gcm")
-     *   decipher.decrypt
+     * Now you are the receiver. You know the +key+ and +nonce+, and have
+     * received +encrypted+ and +tag+ through an untrusted network. Note that
+     * GCM accepts an arbitrary length tag between 1 and 16 bytes. You may
+     * additionally need to check that the received tag has the correct length,
+     * or you allow attackers to forge a valid single byte tag for the tampered
+     * ciphertext with a probability of 1/256.
+     *
+     *   raise "tag is truncated!" unless tag.bytesize == 16
+     *   decipher = OpenSSL::Cipher::AES.new(128, :GCM).decrypt
      *   decipher.key = key
-     *   decipher.iv = iv
+     *   decipher.iv = nonce
      *   decipher.auth_tag = tag
-     *   decipher.auth_data = ""
+     *   decipher.auth_data = auth_data
      *
-     *   plain = decipher.update(encrypted) + decipher.final
+     *   decrypted = decipher.update(encrypted) + decipher.final
      *
-     *   puts data == plain #=> true
+     *   puts data == decrypted #=> true
      */
     cCipher = rb_define_class_under(mOSSL, "Cipher", rb_cObject);
     eCipherError = rb_define_class_under(cCipher, "CipherError", eOSSLError);
