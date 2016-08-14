@@ -7,10 +7,15 @@ require 'rdoc/task'
 
 Rake::ExtensionTask.new('openssl')
 
-# the same as before
 Rake::TestTask.new do |t|
   t.libs << 'test'
   t.warning = true
+end
+
+Rake::ExtensionTask.new('test/mdebug') do |ext|
+  # hack to emit mdebug.so under ./test/
+  ext.ext_dir = 'test/mdebug'
+  ext.lib_dir = '.'
 end
 
 RDoc::Task.new do |rdoc|

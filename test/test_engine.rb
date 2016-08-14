@@ -83,7 +83,7 @@ class OpenSSL::TestEngine < OpenSSL::TestCase
 
   # this is required because OpenSSL::Engine methods change global state
   def with_openssl(code)
-    assert_separately(["-ropenssl"], <<~"end;")
+    assert_separately([{ "MDEBUG" => nil }, "-ropenssl"], <<~"end;")
       require #{__FILE__.dump}
       include OpenSSL::TestEngine::Utils
       #{code}
