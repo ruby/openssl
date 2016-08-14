@@ -36,6 +36,7 @@
  */
 VALUE cCipher;
 VALUE eCipherError;
+static ID id_auth_tag_len;
 
 static VALUE ossl_cipher_alloc(VALUE klass);
 static void ossl_cipher_free(void *ptr);
@@ -565,8 +566,9 @@ ossl_cipher_set_auth_data(VALUE self, VALUE data)
  *  then set on the decryption cipher to authenticate the contents of the
  *  ciphertext against changes. If the optional integer parameter +tag_len+ is
  *  given, the returned tag will be +tag_len+ bytes long. If the parameter is
- *  omitted, the maximum length of 16 bytes will be returned. For maximum
- *  security, the default of 16 bytes should be chosen.
+ *  omitted, the default length of 16 bytes or the length previously set by
+ *  #auth_tag_len= will be used. For maximum security, the longest possible
+ *  should be chosen.
  *
  *  The tag may only be retrieved after calling Cipher#final.
  */
@@ -577,7 +579,10 @@ ossl_cipher_get_auth_tag(int argc, VALUE *argv, VALUE self)
     EVP_CIPHER_CTX *ctx;
     int tag_len = 16;
 
-    if (rb_scan_args(argc, argv, "01", &vtag_len) == 1)
+    rb_scan_args(argc, argv, "01", &vtag_len);
+    if (NIL_P(vtag_len))
+	vtag_len = rb_attr_get(self, id_auth_tag_len);
+    if (!NIL_P(vtag_len))
 	tag_len = NUM2INT(vtag_len);
 
     GetCipher(self, ctx);
@@ -603,6 +608,9 @@ ossl_cipher_get_auth_tag(int argc, VALUE *argv, VALUE self)
  *  decrypting any of the ciphertext. After all decryption is
  *  performed, the tag is verified automatically in the call to
  *  Cipher#final.
+ *
+ *  For OCB mode, the tag length must be supplied with #auth_tag_len=
+ *  beforehand.
  */
 static VALUE
 ossl_cipher_set_auth_tag(VALUE self, VALUE vtag)
@@ -623,6 +631,36 @@ ossl_cipher_set_auth_tag(VALUE self, VALUE vtag)
 	ossl_raise(eCipherError, "unable to set AEAD tag");
 
     return vtag;
+}
+
+/*
+ *  call-seq:
+ *     cipher.auth_tag_len = Integer -> Integer
+ *
+ *  Sets the length of the authentication tag to be generated or to be given for
+ *  AEAD ciphers that requires it as in input parameter. Note that not all AEAD
+ *  ciphers support this method.
+ *
+ *  In OCB mode, the length must be supplied both when encrypting and when
+ *  decrypting, and must be before specifying an IV.
+ */
+static VALUE
+ossl_cipher_set_auth_tag_len(VALUE self, VALUE vlen)
+{
+    int tag_len = NUM2INT(vlen);
+    EVP_CIPHER_CTX *ctx;
+
+    GetCipher(self, ctx);
+    if (!(EVP_CIPHER_CTX_flags(ctx) & EVP_CIPH_FLAG_AEAD_CIPHER))
+	ossl_raise(eCipherError, "AEAD not supported by this cipher");
+
+    if (!EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_SET_TAG, tag_len, NULL))
+	ossl_raise(eCipherError, "unable to set authentication tag length");
+
+    /* for #auth_tag */
+    rb_ivar_set(self, id_auth_tag_len, INT2NUM(tag_len));
+
+    return vlen;
 }
 
 /*
@@ -675,6 +713,7 @@ ossl_cipher_set_iv_length(VALUE self, VALUE iv_length)
 #define ossl_cipher_set_auth_data rb_f_notimplement
 #define ossl_cipher_get_auth_tag rb_f_notimplement
 #define ossl_cipher_set_auth_tag rb_f_notimplement
+#define ossl_cipher_set_auth_tag_len rb_f_notimplement
 #define ossl_cipher_is_authenticated rb_f_notimplement
 #define ossl_cipher_set_iv_length rb_f_notimplement
 #endif
@@ -1000,6 +1039,7 @@ Init_ossl_cipher(void)
     rb_define_method(cCipher, "auth_data=", ossl_cipher_set_auth_data, 1);
     rb_define_method(cCipher, "auth_tag=", ossl_cipher_set_auth_tag, 1);
     rb_define_method(cCipher, "auth_tag", ossl_cipher_get_auth_tag, -1);
+    rb_define_method(cCipher, "auth_tag_len=", ossl_cipher_set_auth_tag_len, 1);
     rb_define_method(cCipher, "authenticated?", ossl_cipher_is_authenticated, 0);
     rb_define_method(cCipher, "key_len=", ossl_cipher_set_key_length, 1);
     rb_define_method(cCipher, "key_len", ossl_cipher_key_length, 0);
@@ -1008,4 +1048,6 @@ Init_ossl_cipher(void)
     rb_define_method(cCipher, "iv_len", ossl_cipher_iv_length, 0);
     rb_define_method(cCipher, "block_size", ossl_cipher_block_size, 0);
     rb_define_method(cCipher, "padding=", ossl_cipher_set_padding, 1);
+
+    id_auth_tag_len = rb_intern_const("auth_tag_len");
 }
