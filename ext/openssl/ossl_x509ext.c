@@ -95,19 +95,6 @@ GetX509ExtPtr(VALUE obj)
     return ext;
 }
 
-X509_EXTENSION *
-DupX509ExtPtr(VALUE obj)
-{
-    X509_EXTENSION *ext, *new;
-
-    SafeGetX509Ext(obj, ext);
-    if (!(new = X509_EXTENSION_dup(ext))) {
-	ossl_raise(eX509ExtError, NULL);
-    }
-
-    return new;
-}
-
 /*
  * Private
  */
@@ -189,20 +176,6 @@ ossl_x509extfactory_set_crl(VALUE self, VALUE crl)
 }
 
 static VALUE
-ossl_x509extfactory_set_config(VALUE self, VALUE config)
-{
-    X509V3_CTX *ctx;
-    CONF *conf;
-
-    GetX509ExtFactory(self, ctx);
-    rb_iv_set(self, "@config", config);
-    conf = GetConfigPtr(config);  /* NO DUP NEEDED */
-    X509V3_set_nconf(ctx, conf);
-
-    return config;
-}
-
-static VALUE
 ossl_x509extfactory_initialize(int argc, VALUE *argv, VALUE self)
 {
     /*X509V3_CTX *ctx;*/
@@ -257,8 +230,9 @@ ossl_x509extfactory_create_ext(int argc, VALUE *argv, VALUE self)
     GetX509ExtFactory(self, ctx);
     obj = NewX509Ext(cX509Ext);
     rconf = rb_iv_get(self, "@config");
-    conf = NIL_P(rconf) ? NULL : GetConfigPtr(rconf);
+    conf = NIL_P(rconf) ? NULL : DupConfigPtr(rconf);
     ext = X509V3_EXT_nconf_nid(conf, ctx, nid, RSTRING_PTR(valstr));
+    NCONF_free(conf);
     if (!ext){
 	ossl_raise(eX509ExtError, "%"PRIsVALUE" = %"PRIsVALUE, oid, valstr);
     }
@@ -346,14 +320,16 @@ ossl_x509ext_set_oid(VALUE self, VALUE oid)
 {
     X509_EXTENSION *ext;
     ASN1_OBJECT *obj;
-    char *s;
 
-    s = StringValueCStr(oid);
-    obj = OBJ_txt2obj(s, 0);
-    if(!obj) obj = OBJ_txt2obj(s, 1);
-    if(!obj) ossl_raise(eX509ExtError, NULL);
     GetX509Ext(self, ext);
-    X509_EXTENSION_set_object(ext, obj);
+    obj = OBJ_txt2obj(StringValueCStr(oid), 0);
+    if (!obj)
+	ossl_raise(eX509ExtError, "OBJ_txt2obj");
+    if (!X509_EXTENSION_set_object(ext, obj)) {
+	ASN1_OBJECT_free(obj);
+	ossl_raise(eX509ExtError, "X509_EXTENSION_set_object");
+    }
+    ASN1_OBJECT_free(obj);
 
     return oid;
 }
@@ -364,17 +340,15 @@ ossl_x509ext_set_value(VALUE self, VALUE data)
     X509_EXTENSION *ext;
     ASN1_OCTET_STRING *asn1s;
 
+    GetX509Ext(self, ext);
     data = ossl_to_der_if_possible(data);
     StringValue(data);
-    if(!(asn1s = ASN1_OCTET_STRING_new())){
-	ossl_raise(eX509ExtError, NULL);
+    asn1s = X509_EXTENSION_get_data(ext);
+
+    if (!ASN1_OCTET_STRING_set(asn1s, (unsigned char *)RSTRING_PTR(data),
+			       RSTRING_LENINT(data))) {
+	ossl_raise(eX509ExtError, "ASN1_OCTET_STRING_set");
     }
-    if(!ASN1_STRING_set((ASN1_STRING *)asn1s, (unsigned char *)RSTRING_PTR(data), RSTRING_LENINT(data))){
-	ASN1_OCTET_STRING_free(asn1s);
-	ossl_raise(eX509ExtError, NULL);
-    }
-    GetX509Ext(self, ext);
-    X509_EXTENSION_set_data(ext, asn1s);
 
     return data;
 }
@@ -482,13 +456,12 @@ Init_ossl_x509ext(void)
     rb_attr(cX509ExtFactory, rb_intern("subject_certificate"), 1, 0, Qfalse);
     rb_attr(cX509ExtFactory, rb_intern("subject_request"), 1, 0, Qfalse);
     rb_attr(cX509ExtFactory, rb_intern("crl"), 1, 0, Qfalse);
-    rb_attr(cX509ExtFactory, rb_intern("config"), 1, 0, Qfalse);
+    rb_attr(cX509ExtFactory, rb_intern("config"), 1, 1, Qfalse);
 
     rb_define_method(cX509ExtFactory, "issuer_certificate=", ossl_x509extfactory_set_issuer_cert, 1);
     rb_define_method(cX509ExtFactory, "subject_certificate=", ossl_x509extfactory_set_subject_cert, 1);
     rb_define_method(cX509ExtFactory, "subject_request=", ossl_x509extfactory_set_subject_req, 1);
     rb_define_method(cX509ExtFactory, "crl=", ossl_x509extfactory_set_crl, 1);
-    rb_define_method(cX509ExtFactory, "config=", ossl_x509extfactory_set_config, 1);
     rb_define_method(cX509ExtFactory, "create_ext", ossl_x509extfactory_create_ext, -1);
 
     cX509Ext = rb_define_class_under(mX509, "Extension", rb_cObject);

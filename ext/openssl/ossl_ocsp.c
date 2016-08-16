@@ -321,12 +321,17 @@ static VALUE
 ossl_ocspreq_add_certid(VALUE self, VALUE certid)
 {
     OCSP_REQUEST *req;
-    OCSP_CERTID *id;
+    OCSP_CERTID *id, *id_new;
 
     GetOCSPReq(self, req);
     GetOCSPCertId(certid, id);
-    if(!OCSP_request_add0_id(req, OCSP_CERTID_dup(id)))
-	ossl_raise(eOCSPError, NULL);
+
+    if (!(id_new = OCSP_CERTID_dup(id)))
+	ossl_raise(eOCSPError, "OCSP_CERTID_dup");
+    if (!OCSP_request_add0_id(req, id_new)) {
+	OCSP_CERTID_free(id_new);
+	ossl_raise(eOCSPError, "OCSP_request_add0_id");
+    }
 
     return self;
 }
@@ -856,13 +861,11 @@ ossl_ocspbres_add_status(VALUE self, VALUE cid, VALUE status,
 	X509_EXTENSION *x509ext;
 
 	for(i = 0; i < RARRAY_LEN(ext); i++){
-	    x509ext = DupX509ExtPtr(RARRAY_AREF(ext, i));
+	    x509ext = GetX509ExtPtr(RARRAY_AREF(ext, i));
 	    if(!OCSP_SINGLERESP_add_ext(single, x509ext, -1)){
-		X509_EXTENSION_free(x509ext);
 		error = 1;
 		goto err;
 	    }
-	    X509_EXTENSION_free(x509ext);
 	}
     }
 
