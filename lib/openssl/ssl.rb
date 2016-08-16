@@ -20,38 +20,6 @@ module OpenSSL
         :ssl_version => "SSLv23",
         :verify_mode => OpenSSL::SSL::VERIFY_PEER,
         :verify_hostname => true,
-        :ciphers => %w{
-          ECDHE-ECDSA-AES128-GCM-SHA256
-          ECDHE-RSA-AES128-GCM-SHA256
-          ECDHE-ECDSA-AES256-GCM-SHA384
-          ECDHE-RSA-AES256-GCM-SHA384
-          DHE-RSA-AES128-GCM-SHA256
-          DHE-DSS-AES128-GCM-SHA256
-          DHE-RSA-AES256-GCM-SHA384
-          DHE-DSS-AES256-GCM-SHA384
-          ECDHE-ECDSA-AES128-SHA256
-          ECDHE-RSA-AES128-SHA256
-          ECDHE-ECDSA-AES128-SHA
-          ECDHE-RSA-AES128-SHA
-          ECDHE-ECDSA-AES256-SHA384
-          ECDHE-RSA-AES256-SHA384
-          ECDHE-ECDSA-AES256-SHA
-          ECDHE-RSA-AES256-SHA
-          DHE-RSA-AES128-SHA256
-          DHE-RSA-AES256-SHA256
-          DHE-RSA-AES128-SHA
-          DHE-RSA-AES256-SHA
-          DHE-DSS-AES128-SHA256
-          DHE-DSS-AES256-SHA256
-          DHE-DSS-AES128-SHA
-          DHE-DSS-AES256-SHA
-          AES128-GCM-SHA256
-          AES256-GCM-SHA384
-          AES128-SHA256
-          AES256-SHA256
-          AES128-SHA
-          AES256-SHA
-        }.join(":"),
         :options => -> {
           opts = OpenSSL::SSL::OP_ALL
           opts &= ~OpenSSL::SSL::OP_DONT_INSERT_EMPTY_FRAGMENTS
@@ -60,6 +28,44 @@ module OpenSSL
           opts
         }.call
       }
+
+      if !(OpenSSL::OPENSSL_VERSION.start_with?("OpenSSL") &&
+           OpenSSL::OPENSSL_VERSION_NUMBER >= 0x10100000)
+        DEFAULT_PARAMS.merge!(
+          ciphers: %w{
+            ECDHE-ECDSA-AES128-GCM-SHA256
+            ECDHE-RSA-AES128-GCM-SHA256
+            ECDHE-ECDSA-AES256-GCM-SHA384
+            ECDHE-RSA-AES256-GCM-SHA384
+            DHE-RSA-AES128-GCM-SHA256
+            DHE-DSS-AES128-GCM-SHA256
+            DHE-RSA-AES256-GCM-SHA384
+            DHE-DSS-AES256-GCM-SHA384
+            ECDHE-ECDSA-AES128-SHA256
+            ECDHE-RSA-AES128-SHA256
+            ECDHE-ECDSA-AES128-SHA
+            ECDHE-RSA-AES128-SHA
+            ECDHE-ECDSA-AES256-SHA384
+            ECDHE-RSA-AES256-SHA384
+            ECDHE-ECDSA-AES256-SHA
+            ECDHE-RSA-AES256-SHA
+            DHE-RSA-AES128-SHA256
+            DHE-RSA-AES256-SHA256
+            DHE-RSA-AES128-SHA
+            DHE-RSA-AES256-SHA
+            DHE-DSS-AES128-SHA256
+            DHE-DSS-AES256-SHA256
+            DHE-DSS-AES128-SHA
+            DHE-DSS-AES256-SHA
+            AES128-GCM-SHA256
+            AES256-GCM-SHA384
+            AES128-SHA256
+            AES256-SHA256
+            AES128-SHA
+            AES256-SHA
+          }.join(":"),
+        )
+      end
 
       DEFAULT_CERT_STORE = OpenSSL::X509::Store.new
       DEFAULT_CERT_STORE.set_default_paths
