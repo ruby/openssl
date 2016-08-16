@@ -15,15 +15,14 @@ script:
   - docker-compose build --no-cache
   - docker-compose run test
 matrix:
-  include:
-    - env: RUBY_VERSION=2.3.1 OPENSSL_VERSION=1.0.0t
-    - env: RUBY_VERSION=2.3.1 OPENSSL_VERSION=1.0.1t
-    - env: RUBY_VERSION=2.3.1 OPENSSL_VERSION=1.0.2h
-    - env: RUBY_VERSION=2.3.1 OPENSSL_VERSION=1.1.0-pre6
-    - env: RUBY_VERSION=2.3.1 LIBRESSL_VERSION=2.1.10
-    - env: RUBY_VERSION=2.3.1 LIBRESSL_VERSION=2.2.9
-    - env: RUBY_VERSION=2.3.1 LIBRESSL_VERSION=2.3.7
-    - env: RUBY_VERSION=2.3.1 LIBRESSL_VERSION=2.4.2
   fast_finish: true
+  include:
+    - env: RUBY_VERSION=ruby-2.3 OPENSSL_VERSION=openssl-1.0.0
+    - env: RUBY_VERSION=ruby-2.3 OPENSSL_VERSION=openssl-1.0.1
+    - env: RUBY_VERSION=ruby-2.3 OPENSSL_VERSION=openssl-1.0.2
+    - env: RUBY_VERSION=ruby-2.3 OPENSSL_VERSION=openssl-1.1.0
+    - env: RUBY_VERSION=ruby-2.3 OPENSSL_VERSION=libressl-2.1
+    - env: RUBY_VERSION=ruby-2.3 OPENSSL_VERSION=libressl-2.2
+    - env: RUBY_VERSION=ruby-2.3 OPENSSL_VERSION=libressl-2.3
+    - env: RUBY_VERSION=ruby-2.3 OPENSSL_VERSION=libressl-2.4
   allow_failures:
-    - env: RUBY_VERSION=2.3.1 OPENSSL_VERSION=1.1.0-pre6
