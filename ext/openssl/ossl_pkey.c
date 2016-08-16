@@ -321,6 +321,7 @@ ossl_pkey_verify(VALUE self, VALUE digest, VALUE sig, VALUE data)
     EVP_MD_CTX_free(ctx);
     switch (result) {
     case 0:
+	ossl_clear_error();
 	return Qfalse;
     case 1:
 	return Qtrue;
