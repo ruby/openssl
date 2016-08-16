@@ -22,29 +22,31 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN mkdir -p /build/openssl
 RUN curl -s https://www.openssl.org/source/openssl-1.0.0t.tar.gz | tar -C /build/openssl -xzf - && \
     cd /build/openssl/openssl-1.0.0t && \
-    ./config \
+    ./Configure \
       --openssldir=/opt/openssl/openssl-1.0.0 \
-      shared && \
+      shared debug-linux-x86_64 && \
     make && make install
 
 RUN curl -s https://www.openssl.org/source/openssl-1.0.1t.tar.gz | tar -C /build/openssl -xzf - && \
     cd /build/openssl/openssl-1.0.1t && \
-    ./config \
+    ./Configure \
       --openssldir=/opt/openssl/openssl-1.0.1 \
-      shared && \
+      shared debug-linux-x86_64 && \
     make && make install
 
 RUN curl -s https://www.openssl.org/source/openssl-1.0.2h.tar.gz | tar -C /build/openssl -xzf - && \
     cd /build/openssl/openssl-1.0.2h && \
-    ./config \
+    ./Configure \
       --openssldir=/opt/openssl/openssl-1.0.2 \
-      shared && \
+      shared debug-linux-x86_64 && \
     make && make install
 
 RUN curl -s https://www.openssl.org/source/openssl-1.1.0-pre6.tar.gz | tar -C /build/openssl -xzf - && \
     cd /build/openssl/openssl-1.1.0-pre6 && \
-    ./config \
-      --prefix=/opt/openssl/openssl-1.1.0 && \
+    ./Configure \
+      --prefix=/opt/openssl/openssl-1.1.0 \
+      enable-crypto-mdebug enable-crypto-mdebug-backtrace \
+      debug-linux-x86_64 && \
     make && make install
 
 # Supported libressl versions: 2.1, 2.2, 2.3, 2.4
