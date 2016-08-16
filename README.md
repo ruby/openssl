@@ -20,16 +20,27 @@ You may need to specify the path where OpenSSL is installed.
 gem install openssl -- --with-openssl-dir=/opt/openssl
 ```
 
+Alternatively, you can install the gem with `bundler`:
+
+```ruby
+# Gemfile
+gem 'openssl'
+# or specify git master
+gem 'openssl', github: 'ruby/openssl'
+```
+
+After doing `bundle install`, you should have the gem installed in your bundle.
+
 ## Usage
 
-After you install it, you can require "openssl" in your application.
+Once installed, you can require "openssl" in your application.
 
 ```ruby
 require "openssl"
 ```
 
-If you are using Ruby 2.3, you may need to tell RubyGems to prefer the gem
-version of openssl.
+If you are using Ruby 2.3, you may activate the gem version of openssl,
+instead of using the default gem packaged with the Ruby installation.
 
 ```ruby
 gem "openssl"
@@ -51,5 +62,5 @@ Please read CONTRIBURING.md for instructions.
 
 ## Security
 
-Security issues should be reported following the process described in the
-[Security page on ruby-lang.org](https://www.ruby-lang.org/en/security/).
+Security issues should be reported to ruby-core by following the process
+described on ["Security at ruby-lang.org"](https://www.ruby-lang.org/en/security/).
