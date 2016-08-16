@@ -73,6 +73,7 @@ Please see [Security] page on ruby-lang.org website for details.
 Reported problems will be published after a fix is released.
 
 _Thanks for your contributions!_
+
   _\- The Ruby OpenSSL team_
 
 [GitHub]: https://github.com/ruby/openssl
