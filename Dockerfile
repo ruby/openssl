@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   libreadline-dev \
   make \
   patch \
+  pkg-config \
   sed \
   xz-utils \
   zlib1g-dev
