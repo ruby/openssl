@@ -39,8 +39,8 @@ Once installed, you can require "openssl" in your application.
 require "openssl"
 ```
 
-If you are using Ruby 2.3, you may activate the gem version of openssl,
-instead of using the default gem packaged with the Ruby installation.
+If you are using Ruby 2.3 (and not Bundler), you must activate the gem version
+of openssl, instead of using the default gem packaged with the Ruby installation.
 
 ```ruby
 gem "openssl"
@@ -58,9 +58,12 @@ and the official [OpenSSL library](http://www.openssl.org/).
 
 ## Contributing
 
-Please read CONTRIBURING.md for instructions.
+Please read our [CONTRIBURING.md] for instructions.
 
 ## Security
 
 Security issues should be reported to ruby-core by following the process
 described on ["Security at ruby-lang.org"](https://www.ruby-lang.org/en/security/).
+
+
+[CONTRIBURING.md]: https://github.com/ruby/openssl/tree/master/CONTRIBURING.md
