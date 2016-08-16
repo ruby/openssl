@@ -59,7 +59,7 @@ and the official [OpenSSL library](http://www.openssl.org/).
 
 ## Contributing
 
-Please read our [CONTRIBURING.md] for instructions.
+Please read our [CONTRIBUTING.md] for instructions.
 
 ## Security
 
@@ -67,4 +67,4 @@ Security issues should be reported to ruby-core by following the process
 described on ["Security at ruby-lang.org"](https://www.ruby-lang.org/en/security/).
 
 
-[CONTRIBURING.md]: https://github.com/ruby/openssl/tree/master/CONTRIBURING.md
+[CONTRIBUTING.md]: https://github.com/ruby/openssl/tree/master/CONTRIBUTING.md
