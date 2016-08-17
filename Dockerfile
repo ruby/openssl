@@ -85,6 +85,7 @@ RUN curl -s https://cache.ruby-lang.org/pub/ruby/2.3/ruby-2.3.1.tar.gz | tar -C 
       --disable-install-doc && \
     make && make install
 
+ONBUILD ADD . /home/openssl/code
 ONBUILD WORKDIR /home/openssl/code
 
 COPY init.sh /home/openssl/init.sh
