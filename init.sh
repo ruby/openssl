@@ -1,22 +1,29 @@
 #!/bin/bash
 
-if [[ "$OPENSSL_VERSION" != "" ]]
+if [[ "$RUBY_VERSION" = "" ]]
 then
-  echo "Using Ruby ${RUBY_VERSION} with OpenSSL ${OPENSSL_VERSION}."
-  export PATH="/opt/ruby/ruby-${RUBY_VERSION}/bin:$PATH"
-elif [[ "$LIBRESSL_VERSION" != "" ]]
-then
-  echo "Using Ruby ${RUBY_VERSION} with LibreSSL ${LIBRESSL_VERSION}."
-  export PATH="/opt/ruby/ruby-${RUBY_VERSION}/bin:$PATH"
+  RUBY_VERSION=ruby-2.3
 fi
 
-gem build openssl.gemspec
-if [[ "$OPENSSL_VERSION" != "" ]]
+if [[ "$OPENSSL_VERSION" = "" ]]
 then
-  gem install --development --clear-sources -s http://rubygems.org openssl-*.gem -- --with-openssl-dir=/opt/openssl/openssl-$OPENSSL_VERSION
-elif [[ "$LIBRESSL_VERSION" != "" ]]
-then
-  gem install --development --clear-sources -s http://rubygems.org openssl-*.gem -- --with-openssl-dir=/opt/libressl/libressl-$LIBRESSL_VERSION
+  OPENSSL_VERSION=openssl-1.0.2
 fi
+
+echo "Using Ruby ${RUBY_VERSION} with OpenSSL ${OPENSSL_VERSION}."
+export PATH="/opt/ruby/${RUBY_VERSION}/bin:$PATH"
+export LD_LIBRARY_PATH="/opt/openssl/${OPENSSL_VERSION}/lib"
+export PKG_CONFIG_PATH="/opt/openssl/${OPENSSL_VERSION}/lib/pkgconfig"
+
+ruby -e '
+  newsource = Gem::Source.new("http://rubygems.org")
+  Gem.sources.replace([newsource])
+  Gem.configuration.write
+
+  spec = eval(File.read("openssl.gemspec"))
+  spec.development_dependencies.each do |dep|
+    Gem.install(dep.name, dep.requirement, force: true)
+  end
+'
 
 exec $*
