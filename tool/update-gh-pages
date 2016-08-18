@@ -1,0 +1,22 @@
+#!/bin/sh
+set -e
+
+# Generates RDoc HTML and update gh-pages branch.
+
+HEAD_DESCRIPTION=$(git describe --dirty --always --abbrev=12)
+
+[ -d html ] &&
+	rm -r html
+rake rdoc
+
+[ ! -d tmp/gh-pages ] &&
+	git worktree add tmp/gh-pages gh-pages
+(
+	cd tmp/gh-pages
+
+	git rm -r .
+	cp -r ../../html/* .
+	rm created.rid js/*.gz # to avoid unnecessary change :x
+	git add .
+	git commit -m "Sync with $HEAD_DESCRIPTION"
+)
