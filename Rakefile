@@ -19,7 +19,8 @@ Rake::ExtensionTask.new('test/mdebug') do |ext|
 end
 
 RDoc::Task.new do |rdoc|
-  rdoc.rdoc_files.include("README.md", "lib/**/*.rb", "ext/**/*.c")
+  rdoc.main = "README.md"
+  rdoc.rdoc_files.include("*.md", "lib/**/*.rb", "ext/**/*.c")
 end
 
 task :test => :debug
