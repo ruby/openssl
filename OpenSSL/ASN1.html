@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="UTF-8">
+
+<title>module OpenSSL::ASN1 - RDoc Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "../";
+</script>
+
+<script src="../js/jquery.js"></script>
+<script src="../js/darkfish.js"></script>
+
+<link href="../css/fonts.css" rel="stylesheet">
+<link href="../css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="module">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="../index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="../table_of_contents.html#pages">Pages</a>
+    <a href="../table_of_contents.html#classes">Classes</a>
+    <a href="../table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+<div class="nav-section">
+  <h3>Table of Contents</h3>
+
+  <ul class="link-list" role="directory">
+    <li><a href="#module-OpenSSL::ASN1-label-ASN.1+class+hierarchy">ASN.1 class hierarchy</a>
+    <li><a href="#module-OpenSSL::ASN1-label-Constructive">Constructive</a>
+    <li><a href="#module-OpenSSL::ASN1-label-ASN1-3A-3ASet+and+ASN1-3A-3ASequence">ASN1::Set and ASN1::Sequence</a>
+    <li><a href="#module-OpenSSL::ASN1-label-Primitive">Primitive</a>
+    <li><a href="#module-OpenSSL::ASN1-label-Possible+values+for+tagging">Possible values for <code>tagging</code></a>
+    <li><a href="#module-OpenSSL::ASN1-label-Possible+values+for+tag_class">Possible values for <code>tag_class</code></a>
+    <li><a href="#module-OpenSSL::ASN1-label-Tag+constants">Tag constants</a>
+    <li><a href="#module-OpenSSL::ASN1-label-UNIVERSAL_TAG_NAME+constant">UNIVERSAL_TAG_NAME constant</a>
+    <li><a href="#module-OpenSSL::ASN1-label-Example+usage">Example usage</a>
+    <li><a href="#module-OpenSSL::ASN1-label-Decoding+and+viewing+a+DER-encoded+file">Decoding and viewing a DER-encoded file</a>
+    <li><a href="#module-OpenSSL::ASN1-label-Creating+an+ASN.1+structure+and+DER-encoding+it">Creating an ASN.1 structure and DER-encoding it</a>
+  </ul>
+</div>
+
+
+  <div id="class-metadata">
+    
+    
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-c-decode">::decode</a>
+    
+    <li ><a href="#method-c-decode_all">::decode_all</a>
+    
+    <li ><a href="#method-c-traverse">::traverse</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="module-OpenSSL::ASN1">
+  <h1 id="module-OpenSSL::ASN1" class="module">
+    module OpenSSL::ASN1
+  </h1>
+
+  <section class="description">
+    
+<p>Abstract Syntax Notation One (or ASN.1) is a notation syntax to describe
+data structures and is defined in ITU-T X.680. ASN.1 itself does not
+mandate any encoding or parsing rules, but usually ASN.1 data structures
+are encoded using the Distinguished Encoding Rules (DER) or less often the
+Basic Encoding Rules (BER) described in ITU-T X.690. DER and BER encodings
+are binary Tag-Length-Value (TLV) encodings that are quite concise compared
+to other popular data description formats such as XML, JSON etc. ASN.1 data
+structures are very common in cryptographic applications, e.g. X.509 public
+key certificates or certificate revocation lists (CRLs) are all defined in
+ASN.1 and DER-encoded. ASN.1, DER and BER are the building blocks of
+applied cryptography. The <a href="ASN1.html">ASN1</a> module provides the
+necessary classes that allow generation of ASN.1 data structures and the
+methods to encode them using a DER encoding. The decode method allows
+parsing arbitrary BER-/DER-encoded data to a Ruby object that can then be
+modified and re-encoded at will.</p>
+
+<h2 id="module-OpenSSL::ASN1-label-ASN.1+class+hierarchy">ASN.1 class hierarchy<span><a href="#module-OpenSSL::ASN1-label-ASN.1+class+hierarchy">&para;</a> <a href="#top">&uarr;</a></span></h2>
+
+<p>The base class representing ASN.1 structures is <a
+href="ASN1/ASN1Data.html">ASN1Data</a>. <a
+href="ASN1/ASN1Data.html">ASN1Data</a> offers attributes to read and set
+the <code>tag</code>, the <code>tag_class</code> and finally the
+<code>value</code> of a particular ASN.1 item. Upon parsing, any tagged
+values (implicit or explicit) will be represented by <a
+href="ASN1/ASN1Data.html">ASN1Data</a> instances because their “real type”
+can only be determined using out-of-band information from the ASN.1 type
+declaration. Since this information is normally known when encoding a type,
+all sub-classes of <a href="ASN1/ASN1Data.html">ASN1Data</a> offer an
+additional attribute <code>tagging</code> that allows to encode a value
+implicitly (<code>:IMPLICIT</code>) or explicitly (<code>:EXPLICIT</code>).</p>
+
+<h3 id="module-OpenSSL::ASN1-label-Constructive"><a href="ASN1/Constructive.html">Constructive</a><span><a href="#module-OpenSSL::ASN1-label-Constructive">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p><a href="ASN1/Constructive.html">Constructive</a> is, as its name implies,
+the base class for all constructed encodings, i.e. those that consist of
+several values, opposed to “primitive” encodings with just one single
+value. <a href="ASN1/Primitive.html">Primitive</a> values that are encoded
+with “infinite length” are typically constructed (their values come in
+multiple chunks) and are therefore represented by instances of <a
+href="ASN1/Constructive.html">Constructive</a>. The value of an <a
+href="ASN1/Constructive.html">Constructive</a> is always an Array.</p>
+
+<h4 id="module-OpenSSL::ASN1-label-ASN1-3A-3ASet+and+ASN1-3A-3ASequence">ASN1::Set and ASN1::Sequence<span><a href="#module-OpenSSL::ASN1-label-ASN1-3A-3ASet+and+ASN1-3A-3ASequence">&para;</a> <a href="#top">&uarr;</a></span></h4>
+
+<p>The most common constructive encodings are SETs and SEQUENCEs, which is why
+there are two sub-classes of <a
+href="ASN1/Constructive.html">Constructive</a> representing each of them.</p>
+
+<h3 id="module-OpenSSL::ASN1-label-Primitive"><a href="ASN1/Primitive.html">Primitive</a><span><a href="#module-OpenSSL::ASN1-label-Primitive">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>This is the super class of all primitive values. <a
+href="ASN1/Primitive.html">Primitive</a> itself is not used when parsing
+ASN.1 data, all values are either instances of a corresponding sub-class of
+<a href="ASN1/Primitive.html">Primitive</a> or they are instances of <a
+href="ASN1/ASN1Data.html">ASN1Data</a> if the value was tagged implicitly
+or explicitly. Please cf. <a href="ASN1/Primitive.html">Primitive</a>
+documentation for details on sub-classes and their respective mappings of
+ASN.1 data types to Ruby objects.</p>
+
+<h2 id="module-OpenSSL::ASN1-label-Possible+values+for+tagging">Possible values for <code>tagging</code><span><a href="#module-OpenSSL::ASN1-label-Possible+values+for+tagging">&para;</a> <a href="#top">&uarr;</a></span></h2>
+
+<p>When constructing an <a href="ASN1/ASN1Data.html">ASN1Data</a> object the
+ASN.1 type definition may require certain elements to be either implicitly
+or explicitly tagged. This can be achieved by setting the
+<code>tagging</code> attribute manually for sub-classes of <a
+href="ASN1/ASN1Data.html">ASN1Data</a>. Use the symbol
+<code>:IMPLICIT</code> for implicit tagging and <code>:EXPLICIT</code> if
+the element requires explicit tagging.</p>
+
+<h2 id="module-OpenSSL::ASN1-label-Possible+values+for+tag_class">Possible values for <code>tag_class</code><span><a href="#module-OpenSSL::ASN1-label-Possible+values+for+tag_class">&para;</a> <a href="#top">&uarr;</a></span></h2>
+
+<p>It is possible to create arbitrary <a
+href="ASN1/ASN1Data.html">ASN1Data</a> objects that also support a PRIVATE
+or APPLICATION tag class. Possible values for the <code>tag_class</code>
+attribute are:</p>
+<ul><li>
+<p><code>:UNIVERSAL</code> (the default for untagged values)</p>
+</li><li>
+<p><code>:CONTEXT_SPECIFIC</code> (the default for tagged values)</p>
+</li><li>
+<p><code>:APPLICATION</code></p>
+</li><li>
+<p><code>:PRIVATE</code></p>
+</li></ul>
+
+<h2 id="module-OpenSSL::ASN1-label-Tag+constants">Tag constants<span><a href="#module-OpenSSL::ASN1-label-Tag+constants">&para;</a> <a href="#top">&uarr;</a></span></h2>
+
+<p>There is a constant defined for each universal tag:</p>
+<ul><li>
+<p>OpenSSL::ASN1::EOC (0)</p>
+</li><li>
+<p>OpenSSL::ASN1::BOOLEAN (1)</p>
+</li><li>
+<p>OpenSSL::ASN1::INTEGER (2)</p>
+</li><li>
+<p>OpenSSL::ASN1::BIT_STRING (3)</p>
+</li><li>
+<p>OpenSSL::ASN1::OCTET_STRING (4)</p>
+</li><li>
+<p>OpenSSL::ASN1::NULL (5)</p>
+</li><li>
+<p>OpenSSL::ASN1::OBJECT (6)</p>
+</li><li>
+<p>OpenSSL::ASN1::ENUMERATED (10)</p>
+</li><li>
+<p>OpenSSL::ASN1::UTF8STRING (12)</p>
+</li><li>
+<p>OpenSSL::ASN1::SEQUENCE (16)</p>
+</li><li>
+<p>OpenSSL::ASN1::SET (17)</p>
+</li><li>
+<p>OpenSSL::ASN1::NUMERICSTRING (18)</p>
+</li><li>
+<p>OpenSSL::ASN1::PRINTABLESTRING (19)</p>
+</li><li>
+<p>OpenSSL::ASN1::T61STRING (20)</p>
+</li><li>
+<p>OpenSSL::ASN1::VIDEOTEXSTRING (21)</p>
+</li><li>
+<p>OpenSSL::ASN1::IA5STRING (22)</p>
+</li><li>
+<p>OpenSSL::ASN1::UTCTIME (23)</p>
+</li><li>
+<p>OpenSSL::ASN1::GENERALIZEDTIME (24)</p>
+</li><li>
+<p>OpenSSL::ASN1::GRAPHICSTRING (25)</p>
+</li><li>
+<p>OpenSSL::ASN1::ISO64STRING (26)</p>
+</li><li>
+<p>OpenSSL::ASN1::GENERALSTRING (27)</p>
+</li><li>
+<p>OpenSSL::ASN1::UNIVERSALSTRING (28)</p>
+</li><li>
+<p>OpenSSL::ASN1::BMPSTRING (30)</p>
+</li></ul>
+
+<h2 id="module-OpenSSL::ASN1-label-UNIVERSAL_TAG_NAME+constant"><a href="ASN1.html#UNIVERSAL_TAG_NAME">UNIVERSAL_TAG_NAME</a> constant<span><a href="#module-OpenSSL::ASN1-label-UNIVERSAL_TAG_NAME+constant">&para;</a> <a href="#top">&uarr;</a></span></h2>
+
+<p>An Array that stores the name of a given tag number. These names are the
+same as the name of the tag constant that is additionally defined, e.g. <a
+href="2">UNIVERSAL_TAG_NAME</a> = “INTEGER” and OpenSSL::ASN1::INTEGER = 2.</p>
+
+<h2 id="module-OpenSSL::ASN1-label-Example+usage">Example usage<span><a href="#module-OpenSSL::ASN1-label-Example+usage">&para;</a> <a href="#top">&uarr;</a></span></h2>
+
+<h3 id="module-OpenSSL::ASN1-label-Decoding+and+viewing+a+DER-encoded+file">Decoding and viewing a DER-encoded file<span><a href="#module-OpenSSL::ASN1-label-Decoding+and+viewing+a+DER-encoded+file">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby"><span class="ruby-identifier">require</span> <span class="ruby-string">&#39;openssl&#39;</span>
+<span class="ruby-identifier">require</span> <span class="ruby-string">&#39;pp&#39;</span>
+<span class="ruby-identifier">der</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">binread</span>(<span class="ruby-string">&#39;data.der&#39;</span>)
+<span class="ruby-identifier">asn1</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span>.<span class="ruby-identifier">decode</span>(<span class="ruby-identifier">der</span>)
+<span class="ruby-identifier">pp</span> <span class="ruby-identifier">der</span>
+</pre>
+
+<h3 id="module-OpenSSL::ASN1-label-Creating+an+ASN.1+structure+and+DER-encoding+it">Creating an ASN.1 structure and DER-encoding it<span><a href="#module-OpenSSL::ASN1-label-Creating+an+ASN.1+structure+and+DER-encoding+it">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby"><span class="ruby-identifier">require</span> <span class="ruby-string">&#39;openssl&#39;</span>
+<span class="ruby-identifier">version</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span><span class="ruby-operator">::</span><span class="ruby-constant">Integer</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">1</span>)
+<span class="ruby-comment"># Explicitly 0-tagged implies context-specific tag class</span>
+<span class="ruby-identifier">serial</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span><span class="ruby-operator">::</span><span class="ruby-constant">Integer</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">12345</span>, <span class="ruby-value">0</span>, :<span class="ruby-constant">EXPLICIT</span>, :<span class="ruby-constant">CONTEXT_SPECIFIC</span>)
+<span class="ruby-identifier">name</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span><span class="ruby-operator">::</span><span class="ruby-constant">PrintableString</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;Data 1&#39;</span>)
+<span class="ruby-identifier">sequence</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span><span class="ruby-operator">::</span><span class="ruby-constant">Sequence</span>.<span class="ruby-identifier">new</span>( [ <span class="ruby-identifier">version</span>, <span class="ruby-identifier">serial</span>, <span class="ruby-identifier">name</span> ] )
+<span class="ruby-identifier">der</span> = <span class="ruby-identifier">sequence</span>.<span class="ruby-identifier">to_der</span>
+</pre>
+
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+    <section class="constants-list">
+      <header>
+        <h3>Constants</h3>
+      </header>
+      <dl>
+      
+        <dt id="UNIVERSAL_TAG_NAME">UNIVERSAL_TAG_NAME
+        
+        <dd><p>Array storing tag names at the tag&#39;s index.</p>
+        
+      
+      </dl>
+    </section>
+    
+
+    
+
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-decode" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            OpenSSL::ASN1.decode(der) &rarr; ASN1Data
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Decodes a BER- or DER-encoded value and creates an <a
+href="ASN1/ASN1Data.html">ASN1Data</a> instance. <code>der</code> may be a
+<code>String</code> or any object that features a <code>#to_der</code>
+method transforming it into a BER-/DER-encoded <code>String</code>.</p>
+
+<h2 id="method-c-decode-label-Example">Example<span><a href="#method-c-decode-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h2>
+
+<pre class="ruby"><span class="ruby-identifier">der</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">binread</span>(<span class="ruby-string">&#39;asn1data&#39;</span>)
+<span class="ruby-identifier">asn1</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span>.<span class="ruby-identifier">decode</span>(<span class="ruby-identifier">der</span>)
+</pre>
+          
+          
+
+          
+          <div class="method-source-code" id="decode-source">
+            <pre>static VALUE
+ossl_asn1_decode(VALUE self, VALUE obj)
+{
+    VALUE ret;
+    unsigned char *p;
+    VALUE tmp;
+    long len, read = 0, offset = 0;
+
+    obj = ossl_to_der_if_possible(obj);
+    tmp = rb_str_new4(StringValue(obj));
+    p = (unsigned char *)RSTRING_PTR(tmp);
+    len = RSTRING_LEN(tmp);
+    ret = ossl_asn1_decode0(&amp;p, len, &amp;offset, 0, 0, &amp;read);
+    RB_GC_GUARD(tmp);
+    int_ossl_decode_sanity_check(len, read, offset);
+    return ret;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-decode_all" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            OpenSSL::ASN1.decode_all(der) &rarr; Array of ASN1Data
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Similar to <code>decode</code> with the difference that <code>decode</code>
+expects one distinct value represented in <code>der</code>.
+<code>decode_all</code> on the contrary decodes a sequence of sequential
+BER/DER values lined up in <code>der</code> and returns them as an array.</p>
+
+<h2 id="method-c-decode_all-label-Example">Example<span><a href="#method-c-decode_all-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h2>
+
+<pre class="ruby"><span class="ruby-identifier">ders</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">binread</span>(<span class="ruby-string">&#39;asn1data_seq&#39;</span>)
+<span class="ruby-identifier">asn1_ary</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span>.<span class="ruby-identifier">decode_all</span>(<span class="ruby-identifier">ders</span>)
+</pre>
+          
+          
+
+          
+          <div class="method-source-code" id="decode_all-source">
+            <pre>static VALUE
+ossl_asn1_decode_all(VALUE self, VALUE obj)
+{
+    VALUE ary, val;
+    unsigned char *p;
+    long len, tmp_len = 0, read = 0, offset = 0;
+    VALUE tmp;
+
+    obj = ossl_to_der_if_possible(obj);
+    tmp = rb_str_new4(StringValue(obj));
+    p = (unsigned char *)RSTRING_PTR(tmp);
+    len = RSTRING_LEN(tmp);
+    tmp_len = len;
+    ary = rb_ary_new();
+    while (tmp_len &gt; 0) {
+        long tmp_read = 0;
+        val = ossl_asn1_decode0(&amp;p, tmp_len, &amp;offset, 0, 0, &amp;tmp_read);
+        rb_ary_push(ary, val);
+        read += tmp_read;
+        tmp_len -= tmp_read;
+    }
+    RB_GC_GUARD(tmp);
+    int_ossl_decode_sanity_check(len, read, offset);
+    return ary;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-traverse" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            OpenSSL::ASN1.traverse(asn1) &rarr; nil
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>If a block is given, it prints out each of the elements encountered. Block
+parameters are (in that order):</p>
+<ul><li>
+<p>depth: The recursion depth, plus one with each constructed value being
+encountered (Number)</p>
+</li><li>
+<p>offset: Current byte offset (Number)</p>
+</li><li>
+<p>header length: Combined length in bytes of the Tag and Length headers.
+(Number)</p>
+</li><li>
+<p>length: The overall remaining length of the entire data (Number)</p>
+</li><li>
+<p>constructed: Whether this value is constructed or not (Boolean)</p>
+</li><li>
+<p>tag_class: Current tag class (Symbol)</p>
+</li><li>
+<p>tag: The current tag (Number)</p>
+</li></ul>
+
+<h2 id="method-c-traverse-label-Example">Example<span><a href="#method-c-traverse-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h2>
+
+<pre class="ruby"><span class="ruby-identifier">der</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">binread</span>(<span class="ruby-string">&#39;asn1data.der&#39;</span>)
+<span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span>.<span class="ruby-identifier">traverse</span>(<span class="ruby-identifier">der</span>) <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span> <span class="ruby-identifier">depth</span>, <span class="ruby-identifier">offset</span>, <span class="ruby-identifier">header_len</span>, <span class="ruby-identifier">length</span>, <span class="ruby-identifier">constructed</span>, <span class="ruby-identifier">tag_class</span>, <span class="ruby-identifier">tag</span><span class="ruby-operator">|</span>
+  <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;Depth: #{depth} Offset: #{offset} Length: #{length}&quot;</span>
+  <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;Header length: #{header_len} Tag: #{tag} Tag class: #{tag_class} Constructed: #{constructed}&quot;</span>
+<span class="ruby-keyword">end</span>
+</pre>
+          
+          
+
+          
+          <div class="method-source-code" id="traverse-source">
+            <pre>static VALUE
+ossl_asn1_traverse(VALUE self, VALUE obj)
+{
+    unsigned char *p;
+    VALUE tmp;
+    long len, read = 0, offset = 0;
+
+    obj = ossl_to_der_if_possible(obj);
+    tmp = rb_str_new4(StringValue(obj));
+    p = (unsigned char *)RSTRING_PTR(tmp);
+    len = RSTRING_LEN(tmp);
+    ossl_asn1_decode0(&amp;p, len, &amp;offset, 0, 1, &amp;read);
+    RB_GC_GUARD(tmp);
+    int_ossl_decode_sanity_check(len, read, offset);
+    return Qnil;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.2.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="UTF-8">
+
+<title>module OpenSSL::SSL::SocketForwarder - RDoc Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "../../";
+</script>
+
+<script src="../../js/jquery.js"></script>
+<script src="../../js/darkfish.js"></script>
+
+<link href="../../css/fonts.css" rel="stylesheet">
+<link href="../../css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="module">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="../../index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="../../table_of_contents.html#pages">Pages</a>
+    <a href="../../table_of_contents.html#classes">Classes</a>
+    <a href="../../table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-i-addr">#addr</a>
+    
+    <li ><a href="#method-i-closed-3F">#closed?</a>
+    
+    <li ><a href="#method-i-do_not_reverse_lookup-3D">#do_not_reverse_lookup=</a>
+    
+    <li ><a href="#method-i-fcntl">#fcntl</a>
+    
+    <li ><a href="#method-i-getsockopt">#getsockopt</a>
+    
+    <li ><a href="#method-i-peeraddr">#peeraddr</a>
+    
+    <li ><a href="#method-i-setsockopt">#setsockopt</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="module-OpenSSL::SSL::SocketForwarder">
+  <h1 id="module-OpenSSL::SSL::SocketForwarder" class="module">
+    module OpenSSL::SSL::SocketForwarder
+  </h1>
+
+  <section class="description">
+    
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-addr" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">addr</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="addr-source">
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 141</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">addr</span>
+  <span class="ruby-identifier">to_io</span>.<span class="ruby-identifier">addr</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-closed-3F" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">closed?</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="closed-3F-source">
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 161</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">closed?</span>
+  <span class="ruby-identifier">to_io</span>.<span class="ruby-identifier">closed?</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-do_not_reverse_lookup-3D" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">do_not_reverse_lookup=</span><span
+            class="method-args">(flag)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="do_not_reverse_lookup-3D-source">
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 165</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">do_not_reverse_lookup=</span>(<span class="ruby-identifier">flag</span>)
+  <span class="ruby-identifier">to_io</span>.<span class="ruby-identifier">do_not_reverse_lookup</span> = <span class="ruby-identifier">flag</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-fcntl" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">fcntl</span><span
+            class="method-args">(*args)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="fcntl-source">
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 157</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">fcntl</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">args</span>)
+  <span class="ruby-identifier">to_io</span>.<span class="ruby-identifier">fcntl</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">args</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-getsockopt" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">getsockopt</span><span
+            class="method-args">(level, optname)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="getsockopt-source">
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 153</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">getsockopt</span>(<span class="ruby-identifier">level</span>, <span class="ruby-identifier">optname</span>)
+  <span class="ruby-identifier">to_io</span>.<span class="ruby-identifier">getsockopt</span>(<span class="ruby-identifier">level</span>, <span class="ruby-identifier">optname</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-peeraddr" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">peeraddr</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="peeraddr-source">
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 145</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">peeraddr</span>
+  <span class="ruby-identifier">to_io</span>.<span class="ruby-identifier">peeraddr</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-setsockopt" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">setsockopt</span><span
+            class="method-args">(level, optname, optval)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="setsockopt-source">
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 149</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">setsockopt</span>(<span class="ruby-identifier">level</span>, <span class="ruby-identifier">optname</span>, <span class="ruby-identifier">optval</span>)
+  <span class="ruby-identifier">to_io</span>.<span class="ruby-identifier">setsockopt</span>(<span class="ruby-identifier">level</span>, <span class="ruby-identifier">optname</span>, <span class="ruby-identifier">optval</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.2.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

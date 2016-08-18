@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="UTF-8">
+
+<title>class OpenSSL::Netscape::SPKI - RDoc Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "../../";
+</script>
+
+<script src="../../js/jquery.js"></script>
+<script src="../../js/darkfish.js"></script>
+
+<link href="../../css/fonts.css" rel="stylesheet">
+<link href="../../css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="class">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="../../index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="../../table_of_contents.html#pages">Pages</a>
+    <a href="../../table_of_contents.html#classes">Classes</a>
+    <a href="../../table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+<div class="nav-section">
+  <h3>Table of Contents</h3>
+
+  <ul class="link-list" role="directory">
+    <li><a href="#class-OpenSSL::Netscape::SPKI-label-Examples">Examples</a>
+    <li><a href="#class-OpenSSL::Netscape::SPKI-label-Creating+an+SPKI">Creating an SPKI</a>
+    <li><a href="#class-OpenSSL::Netscape::SPKI-label-Verifiying+an+SPKI+request">Verifiying an SPKI request</a>
+  </ul>
+</div>
+
+
+  <div id="class-metadata">
+    
+    <div id="parent-class-section" class="nav-section">
+  <h3>Parent</h3>
+
+  
+  <p class="link">Object
+  
+</div>
+
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-c-new">::new</a>
+    
+    <li ><a href="#method-i-challenge">#challenge</a>
+    
+    <li ><a href="#method-i-challenge-3D">#challenge=</a>
+    
+    <li ><a href="#method-i-public_key">#public_key</a>
+    
+    <li ><a href="#method-i-public_key-3D">#public_key=</a>
+    
+    <li ><a href="#method-i-sign">#sign</a>
+    
+    <li ><a href="#method-i-to_der">#to_der</a>
+    
+    <li ><a href="#method-i-to_pem">#to_pem</a>
+    
+    <li ><a href="#method-i-to_s">#to_s</a>
+    
+    <li ><a href="#method-i-to_text">#to_text</a>
+    
+    <li ><a href="#method-i-verify">#verify</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="class-OpenSSL::Netscape::SPKI">
+  <h1 id="class-OpenSSL::Netscape::SPKI" class="class">
+    class OpenSSL::Netscape::SPKI
+  </h1>
+
+  <section class="description">
+    
+<p>A Simple Public Key Infrastructure implementation (pronounced “spookey”).
+The structure is defined as</p>
+
+<pre>PublicKeyAndChallenge ::= SEQUENCE {
+  spki SubjectPublicKeyInfo,
+  challenge IA5STRING
+}
+
+SignedPublicKeyAndChallenge ::= SEQUENCE {
+  publicKeyAndChallenge PublicKeyAndChallenge,
+  signatureAlgorithm AlgorithmIdentifier,
+  signature BIT STRING
+}</pre>
+
+<p>where the definitions of SubjectPublicKeyInfo and AlgorithmIdentifier can
+be found in RFC5280. <a href="SPKI.html">SPKI</a> is typically used in
+browsers for generating a public/private key pair and a subsequent
+certificate request, using the HTML &lt;keygen&gt; element.</p>
+
+<h2 id="class-OpenSSL::Netscape::SPKI-label-Examples">Examples<span><a href="#class-OpenSSL::Netscape::SPKI-label-Examples">&para;</a> <a href="#top">&uarr;</a></span></h2>
+
+<h3 id="class-OpenSSL::Netscape::SPKI-label-Creating+an+SPKI">Creating an <a href="SPKI.html">SPKI</a><span><a href="#class-OpenSSL::Netscape::SPKI-label-Creating+an+SPKI">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby"><span class="ruby-identifier">key</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">RSA</span>.<span class="ruby-identifier">new</span> <span class="ruby-value">2048</span>
+<span class="ruby-identifier">spki</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Netscape</span><span class="ruby-operator">::</span><span class="ruby-constant">SPKI</span>.<span class="ruby-identifier">new</span>
+<span class="ruby-identifier">spki</span>.<span class="ruby-identifier">challenge</span> = <span class="ruby-string">&quot;RandomChallenge&quot;</span>
+<span class="ruby-identifier">spki</span>.<span class="ruby-identifier">public_key</span> = <span class="ruby-identifier">key</span>.<span class="ruby-identifier">public_key</span>
+<span class="ruby-identifier">spki</span>.<span class="ruby-identifier">sign</span>(<span class="ruby-identifier">key</span>, <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span><span class="ruby-operator">::</span><span class="ruby-constant">SHA256</span>.<span class="ruby-identifier">new</span>)
+<span class="ruby-comment">#send a request containing this to a server generating a certificate</span>
+</pre>
+
+<h3 id="class-OpenSSL::Netscape::SPKI-label-Verifiying+an+SPKI+request">Verifiying an <a href="SPKI.html">SPKI</a> request<span><a href="#class-OpenSSL::Netscape::SPKI-label-Verifiying+an+SPKI+request">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby"><span class="ruby-identifier">request</span> = <span class="ruby-comment">#...</span>
+<span class="ruby-identifier">spki</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Netscape</span><span class="ruby-operator">::</span><span class="ruby-constant">SPKI</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">request</span>
+<span class="ruby-keyword">unless</span> <span class="ruby-identifier">spki</span>.<span class="ruby-identifier">verify</span>(<span class="ruby-identifier">spki</span>.<span class="ruby-identifier">public_key</span>)
+  <span class="ruby-comment"># signature is invalid</span>
+<span class="ruby-keyword">end</span>
+<span class="ruby-comment">#proceed</span>
+</pre>
+
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-new" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            new([request]) &rarr; spki
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <h3 id="method-c-new-label-Parameters">Parameters<span><a href="#method-c-new-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
+<ul><li>
+<p><code>request</code> - optional raw request, either in PEM or DER format.</p>
+</li></ul>
+          
+          
+
+          
+          <div class="method-source-code" id="new-source">
+            <pre>static VALUE
+ossl_spki_initialize(int argc, VALUE *argv, VALUE self)
+{
+    NETSCAPE_SPKI *spki;
+    VALUE buffer;
+    const unsigned char *p;
+
+    if (rb_scan_args(argc, argv, &quot;01&quot;, &amp;buffer) == 0) {
+        return self;
+    }
+    StringValue(buffer);
+    if (!(spki = NETSCAPE_SPKI_b64_decode(RSTRING_PTR(buffer), RSTRING_LENINT(buffer)))) {
+        ossl_clear_error();
+        p = (unsigned char *)RSTRING_PTR(buffer);
+        if (!(spki = d2i_NETSCAPE_SPKI(NULL, &amp;p, RSTRING_LEN(buffer)))) {
+            ossl_raise(eSPKIError, NULL);
+        }
+    }
+    NETSCAPE_SPKI_free(DATA_PTR(self));
+    SetSPKI(self, spki);
+
+    return self;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-challenge" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            challenge &rarr; string
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Returns the challenge string associated with this <a
+href="SPKI.html">SPKI</a>.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="challenge-source">
+            <pre>static VALUE
+ossl_spki_get_challenge(VALUE self)
+{
+    NETSCAPE_SPKI *spki;
+
+    GetSPKI(self, spki);
+    if (spki-&gt;spkac-&gt;challenge-&gt;length &lt;= 0) {
+        OSSL_Debug(&quot;Challenge.length &lt;= 0?&quot;);
+        return rb_str_new(0, 0);
+    }
+
+    return rb_str_new((const char *)spki-&gt;spkac-&gt;challenge-&gt;data,
+                      spki-&gt;spkac-&gt;challenge-&gt;length);
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-challenge-3D" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            challenge = str &rarr; string
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <h3 id="method-i-challenge-3D-label-Parameters">Parameters<span><a href="#method-i-challenge-3D-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
+<ul><li>
+<p><code>str</code> - the challenge string to be set for this instance</p>
+</li></ul>
+
+<p>Sets the challenge to be associated with the <a href="SPKI.html">SPKI</a>.
+May be used by the server, e.g. to prevent replay.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="challenge-3D-source">
+            <pre>static VALUE
+ossl_spki_set_challenge(VALUE self, VALUE str)
+{
+    NETSCAPE_SPKI *spki;
+
+    StringValue(str);
+    GetSPKI(self, spki);
+    if (!ASN1_STRING_set(spki-&gt;spkac-&gt;challenge, RSTRING_PTR(str),
+                         RSTRING_LENINT(str))) {
+        ossl_raise(eSPKIError, NULL);
+    }
+
+    return str;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-public_key" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            public_key &rarr; pkey
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Returns the public key associated with the <a href="SPKI.html">SPKI</a>, an
+instance of <a href="../PKey.html">OpenSSL::PKey</a>.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="public_key-source">
+            <pre>static VALUE
+ossl_spki_get_public_key(VALUE self)
+{
+    NETSCAPE_SPKI *spki;
+    EVP_PKEY *pkey;
+
+    GetSPKI(self, spki);
+    if (!(pkey = NETSCAPE_SPKI_get_pubkey(spki))) { /* adds an reference */
+        ossl_raise(eSPKIError, NULL);
+    }
+
+    return ossl_pkey_new(pkey); /* NO DUP - OK */
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-public_key-3D" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            public_key = pub &rarr; pkey
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <h3 id="method-i-public_key-3D-label-Parameters">Parameters<span><a href="#method-i-public_key-3D-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
+<ul><li>
+<p><code>pub</code> - the public key to be set for this instance</p>
+</li></ul>
+
+<p>Sets the public key to be associated with the <a href="SPKI.html">SPKI</a>,
+an instance of <a href="../PKey.html">OpenSSL::PKey</a>. This should be the
+public key corresponding to the private key used for signing the <a
+href="SPKI.html">SPKI</a>.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="public_key-3D-source">
+            <pre>static VALUE
+ossl_spki_set_public_key(VALUE self, VALUE key)
+{
+    NETSCAPE_SPKI *spki;
+
+    GetSPKI(self, spki);
+    if (!NETSCAPE_SPKI_set_pubkey(spki, GetPKeyPtr(key))) { /* NO NEED TO DUP */
+        ossl_raise(eSPKIError, NULL);
+    }
+
+    return key;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-sign" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            sign(key, digest) &rarr; spki
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <h3 id="method-i-sign-label-Parameters">Parameters<span><a href="#method-i-sign-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
+<ul><li>
+<p><code>key</code> - the private key to be used for signing this instance</p>
+</li><li>
+<p><code>digest</code> - the digest to be used for signing this instance</p>
+</li></ul>
+
+<p>To sign an <a href="SPKI.html">SPKI</a>, the private key corresponding to
+the public key set for this instance should be used, in addition to a
+digest algorithm in the form of an <a
+href="../Digest.html">OpenSSL::Digest</a>. The private key should be an
+instance of <a href="../PKey.html">OpenSSL::PKey</a>.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="sign-source">
+            <pre>static VALUE
+ossl_spki_sign(VALUE self, VALUE key, VALUE digest)
+{
+    NETSCAPE_SPKI *spki;
+    EVP_PKEY *pkey;
+    const EVP_MD *md;
+
+    pkey = GetPrivPKeyPtr(key); /* NO NEED TO DUP */
+    md = GetDigestPtr(digest);
+    GetSPKI(self, spki);
+    if (!NETSCAPE_SPKI_sign(spki, pkey, md)) {
+        ossl_raise(eSPKIError, NULL);
+    }
+
+    return self;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-to_der" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            to_der &rarr; DER-encoded string
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Returns the DER encoding of this <a href="SPKI.html">SPKI</a>.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="to_der-source">
+            <pre>static VALUE
+ossl_spki_to_der(VALUE self)
+{
+    NETSCAPE_SPKI *spki;
+    VALUE str;
+    long len;
+    unsigned char *p;
+
+    GetSPKI(self, spki);
+    if ((len = i2d_NETSCAPE_SPKI(spki, NULL)) &lt;= 0)
+        ossl_raise(eX509CertError, NULL);
+    str = rb_str_new(0, len);
+    p = (unsigned char *)RSTRING_PTR(str);
+    if (i2d_NETSCAPE_SPKI(spki, &amp;p) &lt;= 0)
+        ossl_raise(eX509CertError, NULL);
+    ossl_str_adjust(str, p);
+
+    return str;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-to_pem" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            to_pem &rarr; PEM-encoded string
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Returns the PEM encoding of this <a href="SPKI.html">SPKI</a>.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="to_pem-source">
+            <pre>static VALUE
+ossl_spki_to_pem(VALUE self)
+{
+    NETSCAPE_SPKI *spki;
+    char *data;
+    VALUE str;
+
+    GetSPKI(self, spki);
+    if (!(data = NETSCAPE_SPKI_b64_encode(spki))) {
+        ossl_raise(eSPKIError, NULL);
+    }
+    str = ossl_buf2str(data, rb_long2int(strlen(data)));
+
+    return str;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+        <div class="aliases">
+          Also aliased as: <a href="SPKI.html#method-i-to_s">to_s</a>
+        </div>
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-to_s" class="method-detail method-alias">
+        
+        <div class="method-heading">
+          <span class="method-name">to_s</span><span
+            class="method-args">()</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+
+        
+        <div class="aliases">
+          Alias for: <a href="SPKI.html#method-i-to_pem">to_pem</a>
+        </div>
+        
+      </div>
+
+    
+      <div id="method-i-to_text" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            to_text &rarr; string
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Returns a textual representation of this <a href="SPKI.html">SPKI</a>,
+useful for debugging purposes.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="to_text-source">
+            <pre>static VALUE
+ossl_spki_print(VALUE self)
+{
+    NETSCAPE_SPKI *spki;
+    BIO *out;
+    BUF_MEM *buf;
+    VALUE str;
+
+    GetSPKI(self, spki);
+    if (!(out = BIO_new(BIO_s_mem()))) {
+        ossl_raise(eSPKIError, NULL);
+    }
+    if (!NETSCAPE_SPKI_print(out, spki)) {
+        BIO_free(out);
+        ossl_raise(eSPKIError, NULL);
+    }
+    BIO_get_mem_ptr(out, &amp;buf);
+    str = rb_str_new(buf-&gt;data, buf-&gt;length);
+    BIO_free(out);
+
+    return str;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-verify" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            verify(key) &rarr; boolean
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <h3 id="method-i-verify-label-Parameters">Parameters<span><a href="#method-i-verify-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
+<ul><li>
+<p><code>key</code> - the public key to be used for verifying the <a
+href="SPKI.html">SPKI</a> signature</p>
+</li></ul>
+
+<p>Returns <code>true</code> if the signature is valid, <code>false</code>
+otherwise. To verify an <a href="SPKI.html">SPKI</a>, the public key
+contained within the <a href="SPKI.html">SPKI</a> should be used.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="verify-source">
+            <pre>static VALUE
+ossl_spki_verify(VALUE self, VALUE key)
+{
+    NETSCAPE_SPKI *spki;
+
+    GetSPKI(self, spki);
+    switch (NETSCAPE_SPKI_verify(spki, GetPKeyPtr(key))) { /* NO NEED TO DUP */
+    case 0:
+        return Qfalse;
+    case 1:
+        return Qtrue;
+    default:
+        ossl_raise(eSPKIError, NULL);
+    }
+    return Qnil; /* dummy */
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.2.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

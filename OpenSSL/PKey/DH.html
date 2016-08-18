@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="UTF-8">
+
+<title>class OpenSSL::PKey::DH - RDoc Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "../../";
+</script>
+
+<script src="../../js/jquery.js"></script>
+<script src="../../js/darkfish.js"></script>
+
+<link href="../../css/fonts.css" rel="stylesheet">
+<link href="../../css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="class">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="../../index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="../../table_of_contents.html#pages">Pages</a>
+    <a href="../../table_of_contents.html#classes">Classes</a>
+    <a href="../../table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+<div class="nav-section">
+  <h3>Table of Contents</h3>
+
+  <ul class="link-list" role="directory">
+    <li><a href="#class-OpenSSL::PKey::DH-label-Accessor+methods+for+the+Diffie-Hellman+parameters">Accessor methods for the Diffie-Hellman parameters</a>
+    <li><a href="#class-OpenSSL::PKey::DH-label-Example+of+a+key+exchange">Example of a key exchange</a>
+  </ul>
+</div>
+
+
+  <div id="class-metadata">
+    
+    <div id="parent-class-section" class="nav-section">
+  <h3>Parent</h3>
+
+  
+  <p class="link"><a href="PKey.html">OpenSSL::PKey::PKey</a>
+  
+</div>
+
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-c-generate">::generate</a>
+    
+    <li ><a href="#method-c-new">::new</a>
+    
+    <li ><a href="#method-i-compute_key">#compute_key</a>
+    
+    <li ><a href="#method-i-export">#export</a>
+    
+    <li ><a href="#method-i-generate_key-21">#generate_key!</a>
+    
+    <li ><a href="#method-i-params">#params</a>
+    
+    <li ><a href="#method-i-params_ok-3F">#params_ok?</a>
+    
+    <li ><a href="#method-i-private-3F">#private?</a>
+    
+    <li ><a href="#method-i-public-3F">#public?</a>
+    
+    <li ><a href="#method-i-public_key">#public_key</a>
+    
+    <li ><a href="#method-i-to_der">#to_der</a>
+    
+    <li ><a href="#method-i-to_pem">#to_pem</a>
+    
+    <li ><a href="#method-i-to_s">#to_s</a>
+    
+    <li ><a href="#method-i-to_text">#to_text</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="class-OpenSSL::PKey::DH">
+  <h1 id="class-OpenSSL::PKey::DH" class="class">
+    class OpenSSL::PKey::DH
+  </h1>
+
+  <section class="description">
+    
+<p>An implementation of the Diffie-Hellman key exchange protocol based on
+discrete logarithms in finite fields, the same basis that <a
+href="DSA.html">DSA</a> is built on.</p>
+
+<h3 id="class-OpenSSL::PKey::DH-label-Accessor+methods+for+the+Diffie-Hellman+parameters">Accessor methods for the Diffie-Hellman parameters<span><a href="#class-OpenSSL::PKey::DH-label-Accessor+methods+for+the+Diffie-Hellman+parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
+<dl class="rdoc-list note-list"><dt>DH#p
+<dd>
+<p>The prime (an <a href="../BN.html">OpenSSL::BN</a>) of the Diffie-Hellman
+parameters.</p>
+</dd><dt>DH#g
+<dd>
+<p>The generator (an <a href="../BN.html">OpenSSL::BN</a>) g of the
+Diffie-Hellman parameters.</p>
+</dd><dt>DH#pub_key
+<dd>
+<p>The per-session public key (an <a href="../BN.html">OpenSSL::BN</a>)
+matching the private key. This needs to be passed to <a
+href="DH.html#method-i-compute_key">#compute_key</a>.</p>
+</dd><dt>DH#priv_key
+<dd>
+<p>The per-session private key, an <a href="../BN.html">OpenSSL::BN</a>.</p>
+</dd></dl>
+
+<h3 id="class-OpenSSL::PKey::DH-label-Example+of+a+key+exchange">Example of a key exchange<span><a href="#class-OpenSSL::PKey::DH-label-Example+of+a+key+exchange">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby"><span class="ruby-identifier">dh1</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">DH</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">2048</span>)
+<span class="ruby-identifier">der</span> = <span class="ruby-identifier">dh1</span>.<span class="ruby-identifier">public_key</span>.<span class="ruby-identifier">to_der</span> <span class="ruby-comment">#you may send this publicly to the participating party</span>
+<span class="ruby-identifier">dh2</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">DH</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">der</span>)
+<span class="ruby-identifier">dh2</span>.<span class="ruby-identifier">generate_key!</span> <span class="ruby-comment">#generate the per-session key pair</span>
+<span class="ruby-identifier">symm_key1</span> = <span class="ruby-identifier">dh1</span>.<span class="ruby-identifier">compute_key</span>(<span class="ruby-identifier">dh2</span>.<span class="ruby-identifier">pub_key</span>)
+<span class="ruby-identifier">symm_key2</span> = <span class="ruby-identifier">dh2</span>.<span class="ruby-identifier">compute_key</span>(<span class="ruby-identifier">dh1</span>.<span class="ruby-identifier">pub_key</span>)
+
+<span class="ruby-identifier">puts</span> <span class="ruby-identifier">symm_key1</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">symm_key2</span> <span class="ruby-comment"># =&gt; true</span>
+</pre>
+
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+    <section class="constants-list">
+      <header>
+        <h3>Constants</h3>
+      </header>
+      <dl>
+      
+        <dt id="DEFAULT_1024">DEFAULT_1024
+        
+        <dd>
+        
+      
+        <dt id="DEFAULT_2048">DEFAULT_2048
+        
+        <dd>
+        
+      
+      </dl>
+    </section>
+    
+
+    
+
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-generate" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            generate(size [, generator]) &rarr; dh
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Creates a new <a href="DH.html">DH</a> instance from scratch by generating
+the private and public components alike.</p>
+
+<h3 id="method-c-generate-label-Parameters">Parameters<span><a href="#method-c-generate-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
+<ul><li>
+<p><code>size</code> is an integer representing the desired key size. Keys
+smaller than 1024 bits should be considered insecure.</p>
+</li><li>
+<p><code>generator</code> is a small number &gt; 1, typically 2 or 5.</p>
+</li></ul>
+          
+          
+
+          
+          <div class="method-source-code" id="generate-source">
+            <pre>static VALUE
+ossl_dh_s_generate(int argc, VALUE *argv, VALUE klass)
+{
+    DH *dh ;
+    int g = 2;
+    VALUE size, gen, obj;
+
+    if (rb_scan_args(argc, argv, &quot;11&quot;, &amp;size, &amp;gen) == 2) {
+        g = NUM2INT(gen);
+    }
+    dh = dh_generate(NUM2INT(size), g);
+    obj = dh_instance(klass, dh);
+    if (obj == Qfalse) {
+        DH_free(dh);
+        ossl_raise(eDHError, NULL);
+    }
+
+    return obj;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-new" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            new([size [, generator] | string]) &rarr; dh
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Either generates a <a href="DH.html">DH</a> instance from scratch or by
+reading already existing <a href="DH.html">DH</a> parameters from
+<code>string</code>. Note that when reading a <a href="DH.html">DH</a>
+instance from data that was encoded from a <a href="DH.html">DH</a>
+instance by using <a href="DH.html#method-i-to_pem">#to_pem</a> or <a
+href="DH.html#method-i-to_der">#to_der</a> the result will
+<strong>not</strong> contain a public/private key pair yet. This needs to
+be generated using <a
+href="DH.html#method-i-generate_key-21">#generate_key!</a> first.</p>
+
+<h3 id="method-c-new-label-Parameters">Parameters<span><a href="#method-c-new-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
+<ul><li>
+<p><code>size</code> is an integer representing the desired key size. Keys
+smaller than 1024 bits should be considered insecure.</p>
+</li><li>
+<p><code>generator</code> is a small number &gt; 1, typically 2 or 5.</p>
+</li><li>
+<p><code>string</code> contains the DER or PEM encoded key.</p>
+</li></ul>
+
+<h3 id="method-c-new-label-Examples">Examples<span><a href="#method-c-new-label-Examples">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby"><span class="ruby-constant">DH</span>.<span class="ruby-identifier">new</span> <span class="ruby-comment"># -&gt; dh</span>
+<span class="ruby-constant">DH</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">1024</span>) <span class="ruby-comment"># -&gt; dh</span>
+<span class="ruby-constant">DH</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">1024</span>, <span class="ruby-value">5</span>) <span class="ruby-comment"># -&gt; dh</span>
+<span class="ruby-comment">#Reading DH parameters</span>
+<span class="ruby-identifier">dh</span> = <span class="ruby-constant">DH</span>.<span class="ruby-identifier">new</span>(<span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span>(<span class="ruby-string">&#39;parameters.pem&#39;</span>)) <span class="ruby-comment"># -&gt; dh, but no public/private key yet</span>
+<span class="ruby-identifier">dh</span>.<span class="ruby-identifier">generate_key!</span> <span class="ruby-comment"># -&gt; dh with public and private key</span>
+</pre>
+          
+          
+
+          
+          <div class="method-source-code" id="new-source">
+            <pre>static VALUE
+ossl_dh_initialize(int argc, VALUE *argv, VALUE self)
+{
+    EVP_PKEY *pkey;
+    DH *dh;
+    int g = 2;
+    BIO *in;
+    VALUE arg, gen;
+
+    GetPKey(self, pkey);
+    if(rb_scan_args(argc, argv, &quot;02&quot;, &amp;arg, &amp;gen) == 0) {
+      dh = DH_new();
+    }
+    else if (FIXNUM_P(arg)) {
+        if (!NIL_P(gen)) {
+            g = NUM2INT(gen);
+        }
+        if (!(dh = dh_generate(FIX2INT(arg), g))) {
+            ossl_raise(eDHError, NULL);
+        }
+    }
+    else {
+        arg = ossl_to_der_if_possible(arg);
+        in = ossl_obj2bio(arg);
+        dh = PEM_read_bio_DHparams(in, NULL, NULL, NULL);
+        if (!dh){
+            OSSL_BIO_reset(in);
+            dh = d2i_DHparams_bio(in, NULL);
+        }
+        BIO_free(in);
+        if (!dh) {
+            ossl_raise(eDHError, NULL);
+        }
+    }
+    if (!EVP_PKEY_assign_DH(pkey, dh)) {
+        DH_free(dh);
+        ossl_raise(eDHError, NULL);
+    }
+    return self;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-compute_key" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            compute_key(pub_bn) &rarr; aString
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Returns a String containing a shared secret computed from the other
+party&#39;s public value. See DH_compute_key() for further information.</p>
+
+<h3 id="method-i-compute_key-label-Parameters">Parameters<span><a href="#method-i-compute_key-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
+<ul><li>
+<p><code>pub_bn</code> is a <a href="../BN.html">OpenSSL::BN</a>,
+<strong>not</strong> the <a href="DH.html">DH</a> instance returned by</p>
+</li></ul>
+
+<p><a href="DH.html#method-i-public_key">#public_key</a> as that contains the
+<a href="DH.html">DH</a> parameters only.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="compute_key-source">
+            <pre>static VALUE
+ossl_dh_compute_key(VALUE self, VALUE pub)
+{
+    DH *dh;
+    const BIGNUM *pub_key, *dh_p;
+    VALUE str;
+    int len;
+
+    GetDH(self, dh);
+    DH_get0_pqg(dh, &amp;dh_p, NULL, NULL);
+    if (!dh_p)
+        ossl_raise(eDHError, &quot;incomplete DH&quot;);
+    pub_key = GetBNPtr(pub);
+    len = DH_size(dh);
+    str = rb_str_new(0, len);
+    if ((len = DH_compute_key((unsigned char *)RSTRING_PTR(str), pub_key, dh)) &lt; 0) {
+        ossl_raise(eDHError, NULL);
+    }
+    rb_str_set_len(str, len);
+
+    return str;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-export" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            export &rarr; aString
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            to_pem &rarr; aString
+          </span>
+          
+        </div>
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            to_s &rarr; aString
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Encodes this <a href="DH.html">DH</a> to its PEM encoding. Note that any
+existing per-session public/private keys will <strong>not</strong> get
+encoded, just the Diffie-Hellman parameters will be encoded.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="export-source">
+            <pre>static VALUE
+ossl_dh_export(VALUE self)
+{
+    DH *dh;
+    BIO *out;
+    VALUE str;
+
+    GetDH(self, dh);
+    if (!(out = BIO_new(BIO_s_mem()))) {
+        ossl_raise(eDHError, NULL);
+    }
+    if (!PEM_write_bio_DHparams(out, dh)) {
+        BIO_free(out);
+        ossl_raise(eDHError, NULL);
+    }
+    str = ossl_membio2str(out);
+
+    return str;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+        <div class="aliases">
+          Also aliased as: <a href="DH.html#method-i-to_pem">to_pem</a>, <a href="DH.html#method-i-to_s">to_s</a>
+        </div>
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-generate_key-21" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            generate_key! &rarr; self
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Generates a private and public key unless a private key already exists. If
+this <a href="DH.html">DH</a> instance was generated from public <a
+href="DH.html">DH</a> parameters (e.g. by encoding the result of <a
+href="DH.html#method-i-public_key">#public_key</a>), then this method needs
+to be called first in order to generate the per-session keys before
+performing the actual key exchange.</p>
+
+<h3 id="method-i-generate_key-21-label-Example">Example<span><a href="#method-i-generate_key-21-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby"><span class="ruby-identifier">dh</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">DH</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">2048</span>)
+<span class="ruby-identifier">public_key</span> = <span class="ruby-identifier">dh</span>.<span class="ruby-identifier">public_key</span> <span class="ruby-comment">#contains no private/public key yet</span>
+<span class="ruby-identifier">public_key</span>.<span class="ruby-identifier">generate_key!</span>
+<span class="ruby-identifier">puts</span> <span class="ruby-identifier">public_key</span>.<span class="ruby-identifier">private?</span> <span class="ruby-comment"># =&gt; true</span>
+</pre>
+          
+          
+
+          
+          <div class="method-source-code" id="generate_key-21-source">
+            <pre>static VALUE
+ossl_dh_generate_key(VALUE self)
+{
+    DH *dh;
+
+    GetDH(self, dh);
+    if (!DH_generate_key(dh))
+        ossl_raise(eDHError, &quot;Failed to generate key&quot;);
+    return self;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-params" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            params &rarr; hash
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Stores all parameters of key to the hash INSECURE: PRIVATE INFORMATIONS CAN
+LEAK OUT!!! Don&#39;t use :-)) (I&#39;s up to you)</p>
+          
+          
+
+          
+          <div class="method-source-code" id="params-source">
+            <pre>static VALUE
+ossl_dh_get_params(VALUE self)
+{
+    DH *dh;
+    VALUE hash;
+    const BIGNUM *p, *q, *g, *pub_key, *priv_key;
+
+    GetDH(self, dh);
+    DH_get0_pqg(dh, &amp;p, &amp;q, &amp;g);
+    DH_get0_key(dh, &amp;pub_key, &amp;priv_key);
+
+    hash = rb_hash_new();
+    rb_hash_aset(hash, rb_str_new2(&quot;p&quot;), ossl_bn_new(p));
+    rb_hash_aset(hash, rb_str_new2(&quot;q&quot;), ossl_bn_new(q));
+    rb_hash_aset(hash, rb_str_new2(&quot;g&quot;), ossl_bn_new(g));
+    rb_hash_aset(hash, rb_str_new2(&quot;pub_key&quot;), ossl_bn_new(pub_key));
+    rb_hash_aset(hash, rb_str_new2(&quot;priv_key&quot;), ossl_bn_new(priv_key));
+
+    return hash;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-params_ok-3F" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            params_ok? &rarr; true | false
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Validates the Diffie-Hellman parameters associated with this instance. It
+checks whether a safe prime and a suitable generator are used. If this is
+not the case, <code>false</code> is returned.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="params_ok-3F-source">
+            <pre>static VALUE
+ossl_dh_check_params(VALUE self)
+{
+    DH *dh;
+    int codes;
+
+    GetDH(self, dh);
+    if (!DH_check(dh, &amp;codes)) {
+        return Qfalse;
+    }
+
+    return codes == 0 ? Qtrue : Qfalse;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-private-3F" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            private? &rarr; true | false
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Indicates whether this <a href="DH.html">DH</a> instance has a private key
+associated with it or not. The private key may be retrieved with
+DH#priv_key.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="private-3F-source">
+            <pre>static VALUE
+ossl_dh_is_private(VALUE self)
+{
+    DH *dh;
+    const BIGNUM *bn;
+
+    GetDH(self, dh);
+    DH_get0_key(dh, NULL, &amp;bn);
+
+#if !defined(OPENSSL_NO_ENGINE)
+    return (bn || DH_get0_engine(dh)) ? Qtrue : Qfalse;
+#else
+    return bn ? Qtrue : Qfalse;
+#endif
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-public-3F" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            public? &rarr; true | false
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Indicates whether this <a href="DH.html">DH</a> instance has a public key
+associated with it or not. The public key may be retrieved with DH#pub_key.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="public-3F-source">
+            <pre>static VALUE
+ossl_dh_is_public(VALUE self)
+{
+    DH *dh;
+    const BIGNUM *bn;
+
+    GetDH(self, dh);
+    DH_get0_key(dh, &amp;bn, NULL);
+
+    return bn ? Qtrue : Qfalse;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-public_key" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            public_key &rarr; aDH
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Returns a new <a href="DH.html">DH</a> instance that carries just the
+public information, i.e. the prime <code>p</code> and the generator
+<code>g</code>, but no public/private key yet. Such a pair may be generated
+using <a href="DH.html#method-i-generate_key-21">#generate_key!</a>. The
+“public key” needed for a key exchange with <a
+href="DH.html#method-i-compute_key">#compute_key</a> is considered as
+per-session information and may be retrieved with DH#pub_key once a key
+pair has been generated. If the current instance already contains private
+information (and thus a valid public/private key pair), this information
+will no longer be present in the new instance generated by <a
+href="DH.html#method-i-public_key">#public_key</a>. This feature is helpful
+for publishing the Diffie-Hellman parameters without leaking any of the
+private per-session information.</p>
+
+<h3 id="method-i-public_key-label-Example">Example<span><a href="#method-i-public_key-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby"><span class="ruby-identifier">dh</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">DH</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">2048</span>) <span class="ruby-comment"># has public and private key set</span>
+<span class="ruby-identifier">public_key</span> = <span class="ruby-identifier">dh</span>.<span class="ruby-identifier">public_key</span> <span class="ruby-comment"># contains only prime and generator</span>
+<span class="ruby-identifier">parameters</span> = <span class="ruby-identifier">public_key</span>.<span class="ruby-identifier">to_der</span> <span class="ruby-comment"># it&#39;s safe to publish this</span>
+</pre>
+          
+          
+
+          
+          <div class="method-source-code" id="public_key-source">
+            <pre>static VALUE
+ossl_dh_to_public_key(VALUE self)
+{
+    DH *orig_dh, *dh;
+    VALUE obj;
+
+    GetDH(self, orig_dh);
+    dh = DHparams_dup(orig_dh); /* err check perfomed by dh_instance */
+    obj = dh_instance(CLASS_OF(self), dh);
+    if (obj == Qfalse) {
+        DH_free(dh);
+        ossl_raise(eDHError, NULL);
+    }
+
+    return obj;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-to_der" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            to_der &rarr; aString
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Encodes this <a href="DH.html">DH</a> to its DER encoding. Note that any
+existing per-session public/private keys will <strong>not</strong> get
+encoded, just the Diffie-Hellman parameters will be encoded.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="to_der-source">
+            <pre>static VALUE
+ossl_dh_to_der(VALUE self)
+{
+    DH *dh;
+    unsigned char *p;
+    long len;
+    VALUE str;
+
+    GetDH(self, dh);
+    if((len = i2d_DHparams(dh, NULL)) &lt;= 0)
+        ossl_raise(eDHError, NULL);
+    str = rb_str_new(0, len);
+    p = (unsigned char *)RSTRING_PTR(str);
+    if(i2d_DHparams(dh, &amp;p) &lt; 0)
+        ossl_raise(eDHError, NULL);
+    ossl_str_adjust(str, p);
+
+    return str;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-to_pem" class="method-detail method-alias">
+        
+        <div class="method-heading">
+          <span class="method-name">to_pem</span><span
+            class="method-args">()</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+
+        
+        <div class="aliases">
+          Alias for: <a href="DH.html#method-i-export">export</a>
+        </div>
+        
+      </div>
+
+    
+      <div id="method-i-to_s" class="method-detail method-alias">
+        
+        <div class="method-heading">
+          <span class="method-name">to_s</span><span
+            class="method-args">()</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+
+        
+        <div class="aliases">
+          Alias for: <a href="DH.html#method-i-export">export</a>
+        </div>
+        
+      </div>
+
+    
+      <div id="method-i-to_text" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            to_text &rarr; aString
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Prints all parameters of key to buffer INSECURE: PRIVATE INFORMATIONS CAN
+LEAK OUT!!! Don&#39;t use :-)) (I&#39;s up to you)</p>
+          
+          
+
+          
+          <div class="method-source-code" id="to_text-source">
+            <pre>static VALUE
+ossl_dh_to_text(VALUE self)
+{
+    DH *dh;
+    BIO *out;
+    VALUE str;
+
+    GetDH(self, dh);
+    if (!(out = BIO_new(BIO_s_mem()))) {
+        ossl_raise(eDHError, NULL);
+    }
+    if (!DHparams_print(out, dh)) {
+        BIO_free(out);
+        ossl_raise(eDHError, NULL);
+    }
+    str = ossl_membio2str(out);
+
+    return str;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.2.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

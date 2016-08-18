@@ -1,0 +1,1992 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="UTF-8">
+
+<title>class OpenSSL::SSL::SSLContext - RDoc Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "../../";
+</script>
+
+<script src="../../js/jquery.js"></script>
+<script src="../../js/darkfish.js"></script>
+
+<link href="../../css/fonts.css" rel="stylesheet">
+<link href="../../css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="class">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="../../index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="../../table_of_contents.html#pages">Pages</a>
+    <a href="../../table_of_contents.html#classes">Classes</a>
+    <a href="../../table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    <div id="parent-class-section" class="nav-section">
+  <h3>Parent</h3>
+
+  
+  <p class="link">Object
+  
+</div>
+
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-c-new">::new</a>
+    
+    <li ><a href="#method-i-ciphers">#ciphers</a>
+    
+    <li ><a href="#method-i-ciphers-3D">#ciphers=</a>
+    
+    <li ><a href="#method-i-ecdh_curves-3D">#ecdh_curves=</a>
+    
+    <li ><a href="#method-i-flush_sessions">#flush_sessions</a>
+    
+    <li ><a href="#method-i-options">#options</a>
+    
+    <li ><a href="#method-i-options-3D">#options=</a>
+    
+    <li ><a href="#method-i-security_level">#security_level</a>
+    
+    <li ><a href="#method-i-security_level-3D">#security_level=</a>
+    
+    <li ><a href="#method-i-session_add">#session_add</a>
+    
+    <li ><a href="#method-i-session_cache_mode">#session_cache_mode</a>
+    
+    <li ><a href="#method-i-session_cache_mode-3D">#session_cache_mode=</a>
+    
+    <li ><a href="#method-i-session_cache_size">#session_cache_size</a>
+    
+    <li ><a href="#method-i-session_cache_size-3D">#session_cache_size=</a>
+    
+    <li ><a href="#method-i-session_cache_stats">#session_cache_stats</a>
+    
+    <li ><a href="#method-i-session_remove">#session_remove</a>
+    
+    <li ><a href="#method-i-set_params">#set_params</a>
+    
+    <li ><a href="#method-i-setup">#setup</a>
+    
+    <li ><a href="#method-i-ssl_version-3D">#ssl_version=</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="class-OpenSSL::SSL::SSLContext">
+  <h1 id="class-OpenSSL::SSL::SSLContext" class="class">
+    class OpenSSL::SSL::SSLContext
+  </h1>
+
+  <section class="description">
+    
+<p>An <a href="SSLContext.html">SSLContext</a> is used to set various options
+regarding certificates, algorithms, verification, session caching, etc. 
+The <a href="SSLContext.html">SSLContext</a> is used to create an <a
+href="SSLSocket.html">SSLSocket</a>.</p>
+
+<p>All attributes must be set before creating an <a
+href="SSLSocket.html">SSLSocket</a> as the <a
+href="SSLContext.html">SSLContext</a> will be frozen afterward.</p>
+
+<p>The following attributes are available but don&#39;t show up in rdoc:</p>
+<ul><li>
+<p>ssl_version, cert, key, <a
+href="SSLContext.html#attribute-i-client_ca">#client_ca</a>, <a
+href="SSLContext.html#attribute-i-ca_file">#ca_file</a>, <a
+href="SSLContext.html#attribute-i-ca_path">#ca_path</a>, timeout,</p>
+</li><li>
+<p><a href="SSLContext.html#attribute-i-verify_mode">#verify_mode</a>, <a
+href="SSLContext.html#attribute-i-verify_depth">#verify_depth</a> <a
+href="SSLContext.html#attribute-i-client_cert_cb">#client_cert_cb</a>, <a
+href="SSLContext.html#attribute-i-tmp_dh_callback">#tmp_dh_callback</a>,</p>
+</li><li>
+<p><a
+href="SSLContext.html#attribute-i-session_id_context">#session_id_context</a>,
+session_add_cb, <a
+href="SSLContext.html#attribute-i-session_new_cb">#session_new_cb</a>, <a
+href="SSLContext.html#attribute-i-session_remove_cb">#session_remove_cb</a></p>
+</li></ul>
+
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+    <section class="constants-list">
+      <header>
+        <h3>Constants</h3>
+      </header>
+      <dl>
+      
+        <dt id="DEFAULT_CERT_STORE">DEFAULT_CERT_STORE
+        
+        <dd>
+        
+      
+        <dt id="DEFAULT_PARAMS">DEFAULT_PARAMS
+        
+        <dd>
+        
+      
+        <dt id="INIT_VARS">INIT_VARS
+        
+        <dd>
+        
+      
+        <dt id="METHODS">METHODS
+        
+        <dd><p>The list of available SSL/TLS methods</p>
+        
+      
+        <dt id="SESSION_CACHE_BOTH">SESSION_CACHE_BOTH
+        
+        <dd><p>Both client and server sessions are added to the session cache</p>
+        
+      
+        <dt id="SESSION_CACHE_CLIENT">SESSION_CACHE_CLIENT
+        
+        <dd><p>Client sessions are added to the session cache</p>
+        
+      
+        <dt id="SESSION_CACHE_NO_AUTO_CLEAR">SESSION_CACHE_NO_AUTO_CLEAR
+        
+        <dd><p>Normally the session cache is checked for expired sessions every 255
+connections.  Since this may lead to a delay that cannot be controlled, the
+automatic flushing may be disabled and <a
+href="SSLContext.html#method-i-flush_sessions">flush_sessions</a> can be
+called explicitly.</p>
+        
+      
+        <dt id="SESSION_CACHE_NO_INTERNAL">SESSION_CACHE_NO_INTERNAL
+        
+        <dd><p>Enables both <a
+href="SSLContext.html#SESSION_CACHE_NO_INTERNAL_LOOKUP">SESSION_CACHE_NO_INTERNAL_LOOKUP</a>
+and <a
+href="SSLContext.html#SESSION_CACHE_NO_INTERNAL_STORE">SESSION_CACHE_NO_INTERNAL_STORE</a>.</p>
+        
+      
+        <dt id="SESSION_CACHE_NO_INTERNAL_LOOKUP">SESSION_CACHE_NO_INTERNAL_LOOKUP
+        
+        <dd><p>Always perform external lookups of sessions even if they are in the
+internal cache.</p>
+
+<p>This flag has no effect on clients</p>
+        
+      
+        <dt id="SESSION_CACHE_NO_INTERNAL_STORE">SESSION_CACHE_NO_INTERNAL_STORE
+        
+        <dd><p>Never automatically store sessions in the internal store.</p>
+        
+      
+        <dt id="SESSION_CACHE_OFF">SESSION_CACHE_OFF
+        
+        <dd><p>No session caching for client or server</p>
+        
+      
+        <dt id="SESSION_CACHE_SERVER">SESSION_CACHE_SERVER
+        
+        <dd><p>Server sessions are added to the session cache</p>
+        
+      
+      </dl>
+    </section>
+    
+
+    
+    <section class="attribute-method-details" class="method-section">
+      <header>
+        <h3>Attributes</h3>
+      </header>
+
+      
+      <div id="attribute-i-alpn_protocols" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">alpn_protocols</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        <p>An Enumerable of Strings. Each String represents a protocol to be
+advertised as the list of supported protocols for Application-Layer
+Protocol Negotiation. Supported in <a href="../../OpenSSL.html">OpenSSL</a>
+1.0.1 and higher. Has no effect on the client side. If not set explicitly,
+the NPN extension will not be sent by the server in the handshake.</p>
+
+<h3 id="attribute-i-alpn_protocols-label-Example">Example<span><a href="#attribute-i-alpn_protocols-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby"><span class="ruby-identifier">ctx</span>.<span class="ruby-identifier">alpn_protocols</span> = [<span class="ruby-string">&quot;http/1.1&quot;</span>, <span class="ruby-string">&quot;spdy/2&quot;</span>, <span class="ruby-string">&quot;h2&quot;</span>]
+</pre>
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-alpn_select_cb" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">alpn_select_cb</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        <p>A callback invoked on the server side when the server needs to select a
+protocol from the list sent by the client. Supported in <a
+href="../../OpenSSL.html">OpenSSL</a> 1.0.2 and higher. The server MUST
+select a protocol of those advertised by the client. If none is acceptable,
+raising an error in the callback will cause the handshake to fail. Not
+setting this callback explicitly means not supporting the ALPN extension on
+the client - any protocols advertised by the server will be ignored.</p>
+
+<h3 id="attribute-i-alpn_select_cb-label-Example">Example<span><a href="#attribute-i-alpn_select_cb-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby"><span class="ruby-identifier">ctx</span>.<span class="ruby-identifier">alpn_select_cb</span> = <span class="ruby-identifier">lambda</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">protocols</span><span class="ruby-operator">|</span>
+  <span class="ruby-comment">#inspect the protocols and select one</span>
+  <span class="ruby-identifier">protocols</span>.<span class="ruby-identifier">first</span>
+<span class="ruby-keyword">end</span>
+</pre>
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-ca_file" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">ca_file</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        <p>The path to a file containing a PEM-format CA certificate</p>
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-ca_path" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">ca_path</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        <p>The path to a directory containing CA certificates in PEM format.</p>
+
+<p>Files are looked up by subject&#39;s <a href="../X509.html">X509</a>
+name&#39;s hash value.</p>
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-cert" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">cert</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        <p>Context certificate</p>
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-cert_store" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">cert_store</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        <p>An <a href="../X509/Store.html">OpenSSL::X509::Store</a> used for
+certificate verification</p>
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-client_ca" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">client_ca</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        <p>A certificate or Array of certificates that will be sent to the client.</p>
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-client_cert_cb" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">client_cert_cb</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        <p>A callback invoked when a client certificate is requested by a server and
+no certificate has been set.</p>
+
+<p>The callback is invoked with a <a href="Session.html">Session</a> and must
+return an Array containing an <a
+href="../X509/Certificate.html">OpenSSL::X509::Certificate</a> and an <a
+href="../PKey.html">OpenSSL::PKey</a>.  If any other value is returned the
+handshake is suspended.</p>
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-extra_chain_cert" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">extra_chain_cert</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        <p>An Array of extra <a href="../X509.html">X509</a> certificates to be added
+to the certificate chain.</p>
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-key" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">key</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        <p>Context private key</p>
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-npn_protocols" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">npn_protocols</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        <p>An Enumerable of Strings. Each String represents a protocol to be
+advertised as the list of supported protocols for Next Protocol
+Negotiation. Supported in <a href="../../OpenSSL.html">OpenSSL</a> 1.0.1
+and higher. Has no effect on the client side. If not set explicitly, the
+NPN extension will not be sent by the server in the handshake.</p>
+
+<h3 id="attribute-i-npn_protocols-label-Example">Example<span><a href="#attribute-i-npn_protocols-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby"><span class="ruby-identifier">ctx</span>.<span class="ruby-identifier">npn_protocols</span> = [<span class="ruby-string">&quot;http/1.1&quot;</span>, <span class="ruby-string">&quot;spdy/2&quot;</span>]
+</pre>
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-npn_select_cb" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">npn_select_cb</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        <p>A callback invoked on the client side when the client needs to select a
+protocol from the list sent by the server. Supported in <a
+href="../../OpenSSL.html">OpenSSL</a> 1.0.1 and higher. The client MUST
+select a protocol of those advertised by the server. If none is acceptable,
+raising an error in the callback will cause the handshake to fail. Not
+setting this callback explicitly means not supporting the NPN extension on
+the client - any protocols advertised by the server will be ignored.</p>
+
+<h3 id="attribute-i-npn_select_cb-label-Example">Example<span><a href="#attribute-i-npn_select_cb-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby"><span class="ruby-identifier">ctx</span>.<span class="ruby-identifier">npn_select_cb</span> = <span class="ruby-identifier">lambda</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">protocols</span><span class="ruby-operator">|</span>
+  <span class="ruby-comment">#inspect the protocols and select one</span>
+  <span class="ruby-identifier">protocols</span>.<span class="ruby-identifier">first</span>
+<span class="ruby-keyword">end</span>
+</pre>
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-renegotiation_cb" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">renegotiation_cb</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        <p>A callback invoked whenever a new handshake is initiated. May be used to
+disable renegotiation entirely.</p>
+
+<p>The callback is invoked with the active <a
+href="SSLSocket.html">SSLSocket</a>. The callback&#39;s return value is
+irrelevant, normal return indicates “approval” of the renegotiation and
+will continue the process. To forbid renegotiation and to cancel the
+process, an Error may be raised within the callback.</p>
+
+<h3 id="attribute-i-renegotiation_cb-label-Disable+client+renegotiation">Disable client renegotiation<span><a href="#attribute-i-renegotiation_cb-label-Disable+client+renegotiation">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>When running a server, it is often desirable to disable client
+renegotiation entirely. You may use a callback as follows to implement this
+feature:</p>
+
+<pre class="ruby"><span class="ruby-identifier">num_handshakes</span> = <span class="ruby-value">0</span>
+<span class="ruby-identifier">ctx</span>.<span class="ruby-identifier">renegotiation_cb</span> = <span class="ruby-identifier">lambda</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">ssl</span><span class="ruby-operator">|</span>
+  <span class="ruby-identifier">num_handshakes</span> <span class="ruby-operator">+=</span> <span class="ruby-value">1</span>
+  <span class="ruby-identifier">raise</span> <span class="ruby-constant">RuntimeError</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&quot;Client renegotiation disabled&quot;</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">num_handshakes</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">1</span>
+<span class="ruby-keyword">end</span>
+</pre>
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-session_get_cb" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">session_get_cb</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        <p>A callback invoked on a server when a session is proposed by the client but
+the session could not be found in the server&#39;s internal cache.</p>
+
+<p>The callback is invoked with the <a href="SSLSocket.html">SSLSocket</a> and
+session id.  The callback may return a <a href="Session.html">Session</a>
+from an external cache.</p>
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-session_id_context" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">session_id_context</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        <p>Sets the context in which a session can be reused.  This allows sessions
+for multiple applications to be distinguished, for example, by name.</p>
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-session_new_cb" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">session_new_cb</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        <p>A callback invoked when a new session was negotiated.</p>
+
+<p>The callback is invoked with an <a href="SSLSocket.html">SSLSocket</a>.  If
+false is returned the session will be removed from the internal cache.</p>
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-session_remove_cb" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">session_remove_cb</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        <p>A callback invoked when a session is removed from the internal cache.</p>
+
+<p>The callback is invoked with an <a href="SSLContext.html">SSLContext</a>
+and a <a href="Session.html">Session</a>.</p>
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-ssl_timeout" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">ssl_timeout</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        <p>Maximum session lifetime.</p>
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-timeout" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">timeout</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        <p>Maximum session lifetime.</p>
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-tmp_dh_callback" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">tmp_dh_callback</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        <p>A callback invoked when DH parameters are required.</p>
+
+<p>The callback is invoked with the <a href="Session.html">Session</a> for the
+key exchange, an flag indicating the use of an export cipher and the
+keylength required.</p>
+
+<p>The callback must return an <a href="../PKey/DH.html">OpenSSL::PKey::DH</a>
+instance of the correct key length.</p>
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-tmp_ecdh_callback" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">tmp_ecdh_callback</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        <p>A callback invoked when ECDH parameters are required.</p>
+
+<p>The callback is invoked with the <a href="Session.html">Session</a> for the
+key exchange, an flag indicating the use of an export cipher and the
+keylength required.</p>
+
+<p>The callback is deprecated. This does not work with recent versions of <a
+href="../../OpenSSL.html">OpenSSL</a>. Use <a
+href="SSLContext.html#method-i-ecdh_curves-3D">#ecdh_curves=</a> instead.</p>
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-verify_callback" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">verify_callback</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        <p>A callback for additional certificate verification.  The callback is
+invoked for each certificate in the chain.</p>
+
+<p>The callback is invoked with two values.  <code>preverify_ok</code>
+indicates indicates if the verification was passed (true) or not (false).
+<code>store_context</code> is an <a
+href="../X509/StoreContext.html">OpenSSL::X509::StoreContext</a> containing
+the context used for certificate verification.</p>
+
+<p>If the callback returns false, the chain verification is immediately
+stopped and a bad_certificate alert is then sent.</p>
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-verify_depth" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">verify_depth</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        <p>Number of CA certificates to walk when verifying a certificate chain.</p>
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-verify_hostname" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">verify_hostname</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        <p>Whether to check the server certificate is valid for the hostname.</p>
+
+<p>In order to make this work, <a
+href="SSLContext.html#attribute-i-verify_mode">#verify_mode</a> must be set
+to VERIFY_PEER and the server hostname must be given by <a
+href="SSLSocket.html#method-i-hostname-3D">OpenSSL::SSL::SSLSocket#hostname=</a>.</p>
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-verify_mode" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">verify_mode</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        <p><a href="Session.html">Session</a> verification mode.</p>
+
+<p>Valid modes are VERIFY_NONE, VERIFY_PEER, VERIFY_CLIENT_ONCE,
+VERIFY_FAIL_IF_NO_PEER_CERT and defined on <a
+href="../SSL.html">OpenSSL::SSL</a></p>
+        
+        </div>
+      </div>
+      
+    </section>
+    
+
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-new" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            new &rarr; ctx
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            new(:TLSv1) &rarr; ctx
+          </span>
+          
+        </div>
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            new(&quot;SSLv23_client&quot;) &rarr; ctx
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>You can get a list of valid methods with OpenSSL::SSL::SSLContext::METHODS</p>
+          
+          
+
+          
+          <div class="method-source-code" id="new-source">
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 109</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">version</span> = <span class="ruby-keyword">nil</span>)
+  <span class="ruby-constant">INIT_VARS</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">v</span><span class="ruby-operator">|</span> <span class="ruby-identifier">instance_variable_set</span> <span class="ruby-identifier">v</span>, <span class="ruby-keyword">nil</span> }
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">options</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">options</span> <span class="ruby-operator">|</span> <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">OP_ALL</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">version</span>
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">ssl_version</span> = <span class="ruby-identifier">version</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-ciphers" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            ciphers &rarr; [[name, version, bits, alg_bits], ...]
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>The list of ciphers configured for this context.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="ciphers-source">
+            <pre>static VALUE
+ossl_sslctx_get_ciphers(VALUE self)
+{
+    SSL_CTX *ctx;
+    STACK_OF(SSL_CIPHER) *ciphers;
+    const SSL_CIPHER *cipher;
+    VALUE ary;
+    int i, num;
+
+    GetSSLCTX(self, ctx);
+    if(!ctx){
+        rb_warning(&quot;SSL_CTX is not initialized.&quot;);
+        return Qnil;
+    }
+    ciphers = SSL_CTX_get_ciphers(ctx);
+
+    if (!ciphers)
+        return rb_ary_new();
+
+    num = sk_SSL_CIPHER_num(ciphers);
+    ary = rb_ary_new2(num);
+    for(i = 0; i &lt; num; i++){
+        cipher = sk_SSL_CIPHER_value(ciphers, i);
+        rb_ary_push(ary, ossl_ssl_cipher_to_ary(cipher));
+    }
+    return ary;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-ciphers-3D" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            ciphers = &quot;cipher1:cipher2:...&quot;
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            ciphers = [name, ...]
+          </span>
+          
+        </div>
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            ciphers = [[name, version, bits, alg_bits], ...]
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Sets the list of available ciphers for this context.  Note in a server
+context some ciphers require the appropriate certificates.  For example, an
+RSA cipher can only be chosen when an RSA certificate is available.</p>
+
+<p>See also <a href="../Cipher.html">OpenSSL::Cipher</a> and <a
+href="../Cipher.html#method-c-ciphers">OpenSSL::Cipher.ciphers</a></p>
+          
+          
+
+          
+          <div class="method-source-code" id="ciphers-3D-source">
+            <pre>static VALUE
+ossl_sslctx_set_ciphers(VALUE self, VALUE v)
+{
+    SSL_CTX *ctx;
+    VALUE str, elem;
+    int i;
+
+    rb_check_frozen(self);
+    if (NIL_P(v))
+        return v;
+    else if (RB_TYPE_P(v, T_ARRAY)) {
+        str = rb_str_new(0, 0);
+        for (i = 0; i &lt; RARRAY_LEN(v); i++) {
+            elem = rb_ary_entry(v, i);
+            if (RB_TYPE_P(elem, T_ARRAY)) elem = rb_ary_entry(elem, 0);
+            elem = rb_String(elem);
+            rb_str_append(str, elem);
+            if (i &lt; RARRAY_LEN(v)-1) rb_str_cat2(str, &quot;:&quot;);
+        }
+    } else {
+        str = v;
+        StringValue(str);
+    }
+
+    GetSSLCTX(self, ctx);
+    if(!ctx){
+        ossl_raise(eSSLError, &quot;SSL_CTX is not initialized.&quot;);
+        return Qnil;
+    }
+    if (!SSL_CTX_set_cipher_list(ctx, StringValueCStr(str))) {
+        ossl_raise(eSSLError, &quot;SSL_CTX_set_cipher_list&quot;);
+    }
+
+    return v;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-ecdh_curves-3D" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            ecdh_curves = curve_list &rarr; curve_list
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Sets the list of “supported elliptic curves” for this context.</p>
+
+<p>For a TLS client, the list is directly used in the Supported Elliptic
+Curves Extension. For a server, the list is used by <a
+href="../../OpenSSL.html">OpenSSL</a> to determine the set of shared
+curves. <a href="../../OpenSSL.html">OpenSSL</a> will pick the most
+appropriate one from it.</p>
+
+<p>Note that this works differently with old <a
+href="../../OpenSSL.html">OpenSSL</a> (&lt;= 1.0.1). Only one curve can be
+set, and this has no effect for TLS clients.</p>
+
+<h3 id="method-i-ecdh_curves-3D-label-Example">Example<span><a href="#method-i-ecdh_curves-3D-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby"><span class="ruby-identifier">ctx1</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSLContext</span>.<span class="ruby-identifier">new</span>
+<span class="ruby-identifier">ctx1</span>.<span class="ruby-identifier">ecdh_curves</span> = <span class="ruby-string">&quot;X25519:P-256:P-224&quot;</span>
+<span class="ruby-identifier">svr</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSLServer</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">tcp_svr</span>, <span class="ruby-identifier">ctx1</span>)
+<span class="ruby-constant">Thread</span>.<span class="ruby-identifier">new</span> { <span class="ruby-identifier">svr</span>.<span class="ruby-identifier">accept</span> }
+
+<span class="ruby-identifier">ctx2</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSLContext</span>.<span class="ruby-identifier">new</span>
+<span class="ruby-identifier">ctx2</span>.<span class="ruby-identifier">ecdh_curves</span> = <span class="ruby-string">&quot;P-256&quot;</span>
+<span class="ruby-identifier">cli</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSLSocket</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">tcp_sock</span>, <span class="ruby-identifier">ctx2</span>)
+<span class="ruby-identifier">cli</span>.<span class="ruby-identifier">connect</span>
+
+<span class="ruby-identifier">p</span> <span class="ruby-identifier">cli</span>.<span class="ruby-identifier">tmp_key</span>.<span class="ruby-identifier">group</span>.<span class="ruby-identifier">curve_name</span>
+<span class="ruby-comment"># =&gt; &quot;prime256v1&quot; (is an alias for NIST P-256)</span>
+</pre>
+          
+          
+
+          
+          <div class="method-source-code" id="ecdh_curves-3D-source">
+            <pre>static VALUE
+ossl_sslctx_set_ecdh_curves(VALUE self, VALUE arg)
+{
+    SSL_CTX *ctx;
+
+    rb_check_frozen(self);
+    GetSSLCTX(self, ctx);
+    StringValueCStr(arg);
+
+#if defined(HAVE_SSL_CTX_SET1_CURVES_LIST)
+    if (!SSL_CTX_set1_curves_list(ctx, RSTRING_PTR(arg)))
+        ossl_raise(eSSLError, NULL);
+#else
+    /* OpenSSL does not have SSL_CTX_set1_curves_list()... Fallback to
+     * SSL_CTX_set_tmp_ecdh(). So only the first curve is used. */
+    {
+        VALUE curve, splitted;
+        EC_KEY *ec;
+        int nid;
+
+        splitted = rb_str_split(arg, &quot;:&quot;);
+        if (!RARRAY_LEN(splitted))
+            ossl_raise(eSSLError, &quot;invalid input format&quot;);
+        curve = RARRAY_AREF(splitted, 0);
+        StringValueCStr(curve);
+
+        /* SSL_CTX_set1_curves_list() accepts NIST names */
+        nid = EC_curve_nist2nid(RSTRING_PTR(curve));
+        if (nid == NID_undef)
+            nid = OBJ_txt2nid(RSTRING_PTR(curve));
+        if (nid == NID_undef)
+            ossl_raise(eSSLError, &quot;unknown curve name&quot;);
+
+        ec = EC_KEY_new_by_curve_name(nid);
+        if (!ec)
+            ossl_raise(eSSLError, NULL);
+        EC_KEY_set_asn1_flag(ec, OPENSSL_EC_NAMED_CURVE);
+        if (!SSL_CTX_set_tmp_ecdh(ctx, ec)) {
+            EC_KEY_free(ec);
+            ossl_raise(eSSLError, &quot;SSL_CTX_set_tmp_ecdh&quot;);
+        }
+        EC_KEY_free(ec);
+# if defined(HAVE_SSL_CTX_SET_ECDH_AUTO)
+        /* tmp_ecdh and ecdh_auto conflict. tmp_ecdh is ignored when ecdh_auto
+         * is enabled. So disable ecdh_auto. */
+        if (!SSL_CTX_set_ecdh_auto(ctx, 0))
+            ossl_raise(eSSLError, &quot;SSL_CTX_set_ecdh_auto&quot;);
+# endif
+    }
+#endif
+
+    return arg;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-flush_sessions" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            flush_sessions(time | nil) &rarr; self
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Removes sessions in the internal cache that have expired at
+<code>time</code>.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="flush_sessions-source">
+            <pre>static VALUE
+ossl_sslctx_flush_sessions(int argc, VALUE *argv, VALUE self)
+{
+    VALUE arg1;
+    SSL_CTX *ctx;
+    time_t tm = 0;
+
+    rb_scan_args(argc, argv, &quot;01&quot;, &amp;arg1);
+
+    GetSSLCTX(self, ctx);
+
+    if (NIL_P(arg1)) {
+        tm = time(0);
+    } else if (rb_obj_is_instance_of(arg1, rb_cTime)) {
+        tm = NUM2LONG(rb_funcall(arg1, rb_intern(&quot;to_i&quot;), 0));
+    } else {
+        ossl_raise(rb_eArgError, &quot;arg must be Time or nil&quot;);
+    }
+
+    SSL_CTX_flush_sessions(ctx, (long)tm);
+
+    return self;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-options" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">options</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Gets various <a href="../../OpenSSL.html">OpenSSL</a> options.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="options-source">
+            <pre>static VALUE
+ossl_sslctx_get_options(VALUE self)
+{
+    SSL_CTX *ctx;
+    GetSSLCTX(self, ctx);
+    return LONG2NUM(SSL_CTX_get_options(ctx));
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-options-3D" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">options=</span><span
+            class="method-args">(p1)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Sets various <a href="../../OpenSSL.html">OpenSSL</a> options.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="options-3D-source">
+            <pre>static VALUE
+ossl_sslctx_set_options(VALUE self, VALUE options)
+{
+    SSL_CTX *ctx;
+
+    rb_check_frozen(self);
+    GetSSLCTX(self, ctx);
+
+    SSL_CTX_clear_options(ctx, SSL_CTX_get_options(ctx));
+
+    if (NIL_P(options)) {
+        SSL_CTX_set_options(ctx, SSL_OP_ALL);
+    } else {
+        SSL_CTX_set_options(ctx, NUM2LONG(options));
+    }
+
+    return self;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-security_level" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            security_level &rarr; Integer
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Returns the security level for the context.</p>
+
+<p>See also <a
+href="SSLContext.html#method-i-security_level-3D">#security_level=</a>.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="security_level-source">
+            <pre>static VALUE
+ossl_sslctx_get_security_level(VALUE self)
+{
+    SSL_CTX *ctx;
+
+    GetSSLCTX(self, ctx);
+
+#if defined(HAVE_SSL_CTX_GET_SECURITY_LEVEL)
+    return INT2FIX(SSL_CTX_get_security_level(ctx));
+#else
+    (void)ctx;
+    return INT2FIX(0);
+#endif
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-security_level-3D" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            security_level=(integer) &rarr; Integer
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Sets the security level for the context. <a
+href="../../OpenSSL.html">OpenSSL</a> limits parameters according to the
+level. The “parameters” include: ciphersuites, curves, key sizes,
+certificate signature algorithms, protocol version and so on. For example,
+level 1 rejects parameters offering below 80 bits of security, such as
+ciphersuites using MD5 for the MAC or RSA keys shorter than 1024 bits.</p>
+
+<p>Note that attempts to set such parameters with insufficient security are
+also blocked. You need to lower the level first.</p>
+
+<p>This feature is not supported in <a href="../../OpenSSL.html">OpenSSL</a>
+&lt; 1.1.0, and setting the level to other than 0 will raise
+NotImplementedError. Level 0 means everything is permitted, the same
+behavior as previous versions of <a href="../../OpenSSL.html">OpenSSL</a>.</p>
+
+<p>See the manpage of SSL_CTX_set_security_level(3) for details.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="security_level-3D-source">
+            <pre>static VALUE
+ossl_sslctx_set_security_level(VALUE self, VALUE value)
+{
+    SSL_CTX *ctx;
+
+    rb_check_frozen(self);
+    GetSSLCTX(self, ctx);
+
+#if defined(HAVE_SSL_CTX_GET_SECURITY_LEVEL)
+    SSL_CTX_set_security_level(ctx, NUM2INT(value));
+#else
+    (void)ctx;
+    if (NUM2INT(value) != 0)
+        ossl_raise(rb_eNotImpError, &quot;setting security level to other than 0 is &quot;
+                   &quot;not supported in this version of OpenSSL&quot;);
+#endif
+
+    return value;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-session_add" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            session_add(session) &rarr; true | false
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Adds <code>session</code> to the session cache</p>
+          
+          
+
+          
+          <div class="method-source-code" id="session_add-source">
+            <pre>static VALUE
+ossl_sslctx_session_add(VALUE self, VALUE arg)
+{
+    SSL_CTX *ctx;
+    SSL_SESSION *sess;
+
+    GetSSLCTX(self, ctx);
+    SafeGetSSLSession(arg, sess);
+
+    return SSL_CTX_add_session(ctx, sess) == 1 ? Qtrue : Qfalse;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-session_cache_mode" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            session_cache_mode &rarr; Integer
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>The current session cache mode.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="session_cache_mode-source">
+            <pre>static VALUE
+ossl_sslctx_get_session_cache_mode(VALUE self)
+{
+    SSL_CTX *ctx;
+
+    GetSSLCTX(self, ctx);
+
+    return LONG2NUM(SSL_CTX_get_session_cache_mode(ctx));
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-session_cache_mode-3D" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            session_cache_mode=(integer) &rarr; Integer
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Sets the <a href="../SSL.html">SSL</a> session cache mode.  Bitwise-or
+together the desired SESSION_CACHE_* constants to set.  See
+SSL_CTX_set_session_cache_mode(3) for details.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="session_cache_mode-3D-source">
+            <pre>static VALUE
+ossl_sslctx_set_session_cache_mode(VALUE self, VALUE arg)
+{
+    SSL_CTX *ctx;
+
+    GetSSLCTX(self, ctx);
+
+    SSL_CTX_set_session_cache_mode(ctx, NUM2LONG(arg));
+
+    return arg;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-session_cache_size" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            session_cache_size &rarr; Integer
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Returns the current session cache size.  Zero is used to represent an
+unlimited cache size.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="session_cache_size-source">
+            <pre>static VALUE
+ossl_sslctx_get_session_cache_size(VALUE self)
+{
+    SSL_CTX *ctx;
+
+    GetSSLCTX(self, ctx);
+
+    return LONG2NUM(SSL_CTX_sess_get_cache_size(ctx));
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-session_cache_size-3D" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            session_cache_size=(integer) &rarr; Integer
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Sets the session cache size.  Returns the previously valid session cache
+size.  Zero is used to represent an unlimited session cache size.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="session_cache_size-3D-source">
+            <pre>static VALUE
+ossl_sslctx_set_session_cache_size(VALUE self, VALUE arg)
+{
+    SSL_CTX *ctx;
+
+    GetSSLCTX(self, ctx);
+
+    SSL_CTX_sess_set_cache_size(ctx, NUM2LONG(arg));
+
+    return arg;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-session_cache_stats" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            session_cache_stats &rarr; Hash
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Returns a Hash containing the following keys:</p>
+<dl class="rdoc-list note-list"><dt>:accept
+<dd>
+<p>Number of started SSL/TLS handshakes in server mode</p>
+</dd><dt>:accept_good
+<dd>
+<p>Number of established SSL/TLS sessions in server mode</p>
+</dd><dt>:accept_renegotiate
+<dd>
+<p>Number of start renegotiations in server mode</p>
+</dd><dt>:cache_full
+<dd>
+<p>Number of sessions that were removed due to cache overflow</p>
+</dd><dt>:cache_hits
+<dd>
+<p>Number of successfully reused connections</p>
+</dd><dt>:cache_misses
+<dd>
+<p>Number of sessions proposed by clients that were not found in the cache</p>
+</dd><dt>:cache_num
+<dd>
+<p>Number of sessions in the internal session cache</p>
+</dd><dt>:cb_hits
+<dd>
+<p>Number of sessions retrieved from the external cache in server mode</p>
+</dd><dt>:connect
+<dd>
+<p>Number of started SSL/TLS handshakes in client mode</p>
+</dd><dt>:connect_good
+<dd>
+<p>Number of established SSL/TLS sessions in client mode</p>
+</dd><dt>:connect_renegotiate
+<dd>
+<p>Number of start renegotiations in client mode</p>
+</dd><dt>:timeouts
+<dd>
+<p>Number of sessions proposed by clients that were found in the cache but had
+expired due to timeouts</p>
+</dd></dl>
+          
+          
+
+          
+          <div class="method-source-code" id="session_cache_stats-source">
+            <pre>static VALUE
+ossl_sslctx_get_session_cache_stats(VALUE self)
+{
+    SSL_CTX *ctx;
+    VALUE hash;
+
+    GetSSLCTX(self, ctx);
+
+    hash = rb_hash_new();
+    rb_hash_aset(hash, ID2SYM(rb_intern(&quot;cache_num&quot;)), LONG2NUM(SSL_CTX_sess_number(ctx)));
+    rb_hash_aset(hash, ID2SYM(rb_intern(&quot;connect&quot;)), LONG2NUM(SSL_CTX_sess_connect(ctx)));
+    rb_hash_aset(hash, ID2SYM(rb_intern(&quot;connect_good&quot;)), LONG2NUM(SSL_CTX_sess_connect_good(ctx)));
+    rb_hash_aset(hash, ID2SYM(rb_intern(&quot;connect_renegotiate&quot;)), LONG2NUM(SSL_CTX_sess_connect_renegotiate(ctx)));
+    rb_hash_aset(hash, ID2SYM(rb_intern(&quot;accept&quot;)), LONG2NUM(SSL_CTX_sess_accept(ctx)));
+    rb_hash_aset(hash, ID2SYM(rb_intern(&quot;accept_good&quot;)), LONG2NUM(SSL_CTX_sess_accept_good(ctx)));
+    rb_hash_aset(hash, ID2SYM(rb_intern(&quot;accept_renegotiate&quot;)), LONG2NUM(SSL_CTX_sess_accept_renegotiate(ctx)));
+    rb_hash_aset(hash, ID2SYM(rb_intern(&quot;cache_hits&quot;)), LONG2NUM(SSL_CTX_sess_hits(ctx)));
+    rb_hash_aset(hash, ID2SYM(rb_intern(&quot;cb_hits&quot;)), LONG2NUM(SSL_CTX_sess_cb_hits(ctx)));
+    rb_hash_aset(hash, ID2SYM(rb_intern(&quot;cache_misses&quot;)), LONG2NUM(SSL_CTX_sess_misses(ctx)));
+    rb_hash_aset(hash, ID2SYM(rb_intern(&quot;cache_full&quot;)), LONG2NUM(SSL_CTX_sess_cache_full(ctx)));
+    rb_hash_aset(hash, ID2SYM(rb_intern(&quot;timeouts&quot;)), LONG2NUM(SSL_CTX_sess_timeouts(ctx)));
+
+    return hash;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-session_remove" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            session_remove(session) &rarr; true | false
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Removes <code>session</code> from the session cache</p>
+          
+          
+
+          
+          <div class="method-source-code" id="session_remove-source">
+            <pre>static VALUE
+ossl_sslctx_session_remove(VALUE self, VALUE arg)
+{
+    SSL_CTX *ctx;
+    SSL_SESSION *sess;
+
+    GetSSLCTX(self, ctx);
+    SafeGetSSLSession(arg, sess);
+
+    return SSL_CTX_remove_session(ctx, sess) == 1 ? Qtrue : Qfalse;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-set_params" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            set_params(params = {}) &rarr; params
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Sets saner defaults optimized for the use with HTTP-like protocols.</p>
+
+<p>If a Hash <code>params</code> is given, the parameters are overridden with
+it. The keys in <code>params</code> must be assignment methods on <a
+href="SSLContext.html">SSLContext</a>.</p>
+
+<p>If the <a href="SSLContext.html#attribute-i-verify_mode">#verify_mode</a>
+is not VERIFY_NONE and <a
+href="SSLContext.html#attribute-i-ca_file">#ca_file</a>, <a
+href="SSLContext.html#attribute-i-ca_path">#ca_path</a> and <a
+href="SSLContext.html#attribute-i-cert_store">#cert_store</a> are not set
+then the system default certificate store is used.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="set_params-source">
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 128</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">set_params</span>(<span class="ruby-identifier">params</span>={})
+  <span class="ruby-identifier">params</span> = <span class="ruby-constant">DEFAULT_PARAMS</span>.<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">params</span>)
+  <span class="ruby-identifier">params</span>.<span class="ruby-identifier">each</span>{<span class="ruby-operator">|</span><span class="ruby-identifier">name</span>, <span class="ruby-identifier">value</span><span class="ruby-operator">|</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">__send__</span>(<span class="ruby-node">&quot;#{name}=&quot;</span>, <span class="ruby-identifier">value</span>) }
+  <span class="ruby-keyword">if</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">verify_mode</span> <span class="ruby-operator">!=</span> <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">VERIFY_NONE</span>
+    <span class="ruby-keyword">unless</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">ca_file</span> <span class="ruby-keyword">or</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">ca_path</span> <span class="ruby-keyword">or</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">cert_store</span>
+      <span class="ruby-keyword">self</span>.<span class="ruby-identifier">cert_store</span> = <span class="ruby-constant">DEFAULT_CERT_STORE</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-identifier">params</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-setup" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            setup &rarr; Qtrue # first time
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            setup &rarr; nil # thereafter
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>This method is called automatically when a new <a
+href="SSLSocket.html">SSLSocket</a> is created. However, it is not
+thread-safe and must be called before creating <a
+href="SSLSocket.html">SSLSocket</a> objects in a multi-threaded program.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="setup-source">
+            <pre>static VALUE
+ossl_sslctx_setup(VALUE self)
+{
+    SSL_CTX *ctx;
+    X509 *cert = NULL, *client_ca = NULL;
+    EVP_PKEY *key = NULL;
+    char *ca_path = NULL, *ca_file = NULL;
+    int verify_mode;
+    long i;
+    VALUE val;
+
+    if(OBJ_FROZEN(self)) return Qnil;
+    GetSSLCTX(self, ctx);
+
+#if !defined(OPENSSL_NO_DH)
+    SSL_CTX_set_tmp_dh_callback(ctx, ossl_tmp_dh_callback);
+#endif
+
+#if !defined(OPENSSL_NO_EC)
+    /* We added SSLContext#tmp_ecdh_callback= in Ruby 2.3.0,
+     * but SSL_CTX_set_tmp_ecdh_callback() was removed in OpenSSL 1.1.0. */
+    if (RTEST(ossl_sslctx_get_tmp_ecdh_cb(self))) {
+# if defined(HAVE_SSL_CTX_SET_TMP_ECDH_CALLBACK)
+        rb_warn(&quot;#tmp_ecdh_callback= is deprecated; use #ecdh_curves= instead&quot;);
+        SSL_CTX_set_tmp_ecdh_callback(ctx, ossl_tmp_ecdh_callback);
+#  if defined(HAVE_SSL_CTX_SET_ECDH_AUTO)
+        /* tmp_ecdh_callback and ecdh_auto conflict; OpenSSL ignores
+         * tmp_ecdh_callback. So disable ecdh_auto. */
+        if (!SSL_CTX_set_ecdh_auto(ctx, 0))
+            ossl_raise(eSSLError, &quot;SSL_CTX_set_ecdh_auto&quot;);
+#  endif
+# else
+        ossl_raise(eSSLError, &quot;OpenSSL does not support tmp_ecdh_callback; &quot;
+                   &quot;use #ecdh_curves= instead&quot;);
+# endif
+    }
+#endif /* OPENSSL_NO_EC */
+
+    val = ossl_sslctx_get_cert_store(self);
+    if (!NIL_P(val)) {
+        X509_STORE *store = GetX509StorePtr(val); /* NO NEED TO DUP */
+        SSL_CTX_set_cert_store(ctx, store);
+#if !defined(HAVE_X509_STORE_UP_REF)
+        /*
+         * WORKAROUND:
+         *   X509_STORE can count references, but
+         *   X509_STORE_free() doesn&#39;t care it.
+         *   So we won&#39;t increment it but mark it by ex_data.
+         */
+        SSL_CTX_set_ex_data(ctx, ossl_ssl_ex_store_p, (void *)1);
+#else /* Fixed in OpenSSL 1.0.2; bff9ce4db38b (master), 5b4b9ce976fc (1.0.2) */
+        X509_STORE_up_ref(store);
+#endif
+    }
+
+    val = ossl_sslctx_get_extra_cert(self);
+    if(!NIL_P(val)){
+        rb_block_call(val, rb_intern(&quot;each&quot;), 0, 0, ossl_sslctx_add_extra_chain_cert_i, self);
+    }
+
+    /* private key may be bundled in certificate file. */
+    val = ossl_sslctx_get_cert(self);
+    cert = NIL_P(val) ? NULL : GetX509CertPtr(val); /* NO DUP NEEDED */
+    val = ossl_sslctx_get_key(self);
+    key = NIL_P(val) ? NULL : GetPrivPKeyPtr(val); /* NO DUP NEEDED */
+    if (cert &amp;&amp; key) {
+        if (!SSL_CTX_use_certificate(ctx, cert)) {
+            /* Adds a ref =&gt; Safe to FREE */
+            ossl_raise(eSSLError, &quot;SSL_CTX_use_certificate&quot;);
+        }
+        if (!SSL_CTX_use_PrivateKey(ctx, key)) {
+            /* Adds a ref =&gt; Safe to FREE */
+            ossl_raise(eSSLError, &quot;SSL_CTX_use_PrivateKey&quot;);
+        }
+        if (!SSL_CTX_check_private_key(ctx)) {
+            ossl_raise(eSSLError, &quot;SSL_CTX_check_private_key&quot;);
+        }
+    }
+
+    val = ossl_sslctx_get_client_ca(self);
+    if(!NIL_P(val)){
+        if (RB_TYPE_P(val, T_ARRAY)) {
+            for(i = 0; i &lt; RARRAY_LEN(val); i++){
+                client_ca = GetX509CertPtr(RARRAY_AREF(val, i));
+                if (!SSL_CTX_add_client_CA(ctx, client_ca)){
+                    /* Copies X509_NAME =&gt; FREE it. */
+                    ossl_raise(eSSLError, &quot;SSL_CTX_add_client_CA&quot;);
+                }
+            }
+        }
+        else{
+            client_ca = GetX509CertPtr(val); /* NO DUP NEEDED. */
+            if (!SSL_CTX_add_client_CA(ctx, client_ca)){
+                /* Copies X509_NAME =&gt; FREE it. */
+                ossl_raise(eSSLError, &quot;SSL_CTX_add_client_CA&quot;);
+            }
+        }
+    }
+
+    val = ossl_sslctx_get_ca_file(self);
+    ca_file = NIL_P(val) ? NULL : StringValueCStr(val);
+    val = ossl_sslctx_get_ca_path(self);
+    ca_path = NIL_P(val) ? NULL : StringValueCStr(val);
+    if(ca_file || ca_path){
+        if (!SSL_CTX_load_verify_locations(ctx, ca_file, ca_path))
+            rb_warning(&quot;can&#39;t set verify locations&quot;);
+    }
+
+    val = ossl_sslctx_get_verify_mode(self);
+    verify_mode = NIL_P(val) ? SSL_VERIFY_NONE : NUM2INT(val);
+    SSL_CTX_set_verify(ctx, verify_mode, ossl_ssl_verify_callback);
+    if (RTEST(ossl_sslctx_get_client_cert_cb(self)))
+        SSL_CTX_set_client_cert_cb(ctx, ossl_client_cert_cb);
+
+    val = ossl_sslctx_get_timeout(self);
+    if(!NIL_P(val)) SSL_CTX_set_timeout(ctx, NUM2LONG(val));
+
+    val = ossl_sslctx_get_verify_dep(self);
+    if(!NIL_P(val)) SSL_CTX_set_verify_depth(ctx, NUM2INT(val));
+
+#ifdef HAVE_SSL_CTX_SET_NEXT_PROTO_SELECT_CB
+    val = rb_iv_get(self, &quot;@npn_protocols&quot;);
+    if (!NIL_P(val)) {
+        VALUE encoded = ssl_encode_npn_protocols(val);
+        SSL_CTX_set_next_protos_advertised_cb(ctx, ssl_npn_advertise_cb, (void *)encoded);
+        OSSL_Debug(&quot;SSL NPN advertise callback added&quot;);
+    }
+    if (RTEST(rb_iv_get(self, &quot;@npn_select_cb&quot;))) {
+        SSL_CTX_set_next_proto_select_cb(ctx, ssl_npn_select_cb, (void *) self);
+        OSSL_Debug(&quot;SSL NPN select callback added&quot;);
+    }
+#endif
+
+#ifdef HAVE_SSL_CTX_SET_ALPN_SELECT_CB
+    val = rb_iv_get(self, &quot;@alpn_protocols&quot;);
+    if (!NIL_P(val)) {
+        VALUE rprotos = ssl_encode_npn_protocols(val);
+        SSL_CTX_set_alpn_protos(ctx, (unsigned char *)RSTRING_PTR(rprotos), RSTRING_LENINT(rprotos));
+        OSSL_Debug(&quot;SSL ALPN values added&quot;);
+    }
+    if (RTEST(rb_iv_get(self, &quot;@alpn_select_cb&quot;))) {
+        SSL_CTX_set_alpn_select_cb(ctx, ssl_alpn_select_cb, (void *) self);
+        OSSL_Debug(&quot;SSL ALPN select callback added&quot;);
+    }
+#endif
+
+    rb_obj_freeze(self);
+
+    val = ossl_sslctx_get_sess_id_ctx(self);
+    if (!NIL_P(val)){
+        StringValue(val);
+        if (!SSL_CTX_set_session_id_context(ctx, (unsigned char *)RSTRING_PTR(val),
+                                            RSTRING_LENINT(val))){
+            ossl_raise(eSSLError, &quot;SSL_CTX_set_session_id_context&quot;);
+        }
+    }
+
+    if (RTEST(rb_iv_get(self, &quot;@session_get_cb&quot;))) {
+        SSL_CTX_sess_set_get_cb(ctx, ossl_sslctx_session_get_cb);
+        OSSL_Debug(&quot;SSL SESSION get callback added&quot;);
+    }
+    if (RTEST(rb_iv_get(self, &quot;@session_new_cb&quot;))) {
+        SSL_CTX_sess_set_new_cb(ctx, ossl_sslctx_session_new_cb);
+        OSSL_Debug(&quot;SSL SESSION new callback added&quot;);
+    }
+    if (RTEST(rb_iv_get(self, &quot;@session_remove_cb&quot;))) {
+        SSL_CTX_sess_set_remove_cb(ctx, ossl_sslctx_session_remove_cb);
+        OSSL_Debug(&quot;SSL SESSION remove callback added&quot;);
+    }
+
+#ifdef HAVE_SSL_SET_TLSEXT_HOST_NAME
+    val = rb_iv_get(self, &quot;@servername_cb&quot;);
+    if (!NIL_P(val)) {
+        SSL_CTX_set_tlsext_servername_callback(ctx, ssl_servername_cb);
+        OSSL_Debug(&quot;SSL TLSEXT servername callback added&quot;);
+    }
+#endif
+
+    return Qtrue;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-ssl_version-3D" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            ssl_version = :TLSv1
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            ssl_version = &quot;SSLv23_client&quot;
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>You can get a list of valid versions with OpenSSL::SSL::SSLContext::METHODS</p>
+          
+          
+
+          
+          <div class="method-source-code" id="ssl_version-3D-source">
+            <pre>static VALUE
+ossl_sslctx_set_ssl_version(VALUE self, VALUE ssl_method)
+{
+    SSL_CTX *ctx;
+    const char *s;
+    VALUE m = ssl_method;
+    int i;
+
+    GetSSLCTX(self, ctx);
+    if (RB_TYPE_P(ssl_method, T_SYMBOL))
+        m = rb_sym2str(ssl_method);
+    s = StringValueCStr(m);
+    for (i = 0; i &lt; numberof(ossl_ssl_method_tab); i++) {
+        if (strcmp(ossl_ssl_method_tab[i].name, s) == 0) {
+#if defined(HAVE_SSL_CTX_SET_MIN_PROTO_VERSION)
+            int version = ossl_ssl_method_tab[i].version;
+#endif
+            SSL_METHOD *method = ossl_ssl_method_tab[i].func();
+
+            if (SSL_CTX_set_ssl_version(ctx, method) != 1)
+                ossl_raise(eSSLError, &quot;SSL_CTX_set_ssl_version&quot;);
+
+#if defined(HAVE_SSL_CTX_SET_MIN_PROTO_VERSION)
+            if (!SSL_CTX_set_min_proto_version(ctx, version))
+                ossl_raise(eSSLError, &quot;SSL_CTX_set_min_proto_version&quot;);
+            if (!SSL_CTX_set_max_proto_version(ctx, version))
+                ossl_raise(eSSLError, &quot;SSL_CTX_set_max_proto_version&quot;);
+#endif
+            return ssl_method;
+        }
+    }
+
+    ossl_raise(rb_eArgError, &quot;unknown SSL method `%&quot;PRIsVALUE&quot;&#39;.&quot;, m);
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.2.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

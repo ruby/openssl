@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="UTF-8">
+
+<title>class OpenSSL::PKCS7 - RDoc Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "../";
+</script>
+
+<script src="../js/jquery.js"></script>
+<script src="../js/darkfish.js"></script>
+
+<link href="../css/fonts.css" rel="stylesheet">
+<link href="../css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="class">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="../index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="../table_of_contents.html#pages">Pages</a>
+    <a href="../table_of_contents.html#classes">Classes</a>
+    <a href="../table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    <div id="parent-class-section" class="nav-section">
+  <h3>Parent</h3>
+
+  
+  <p class="link">Object
+  
+</div>
+
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-c-encrypt">::encrypt</a>
+    
+    <li ><a href="#method-c-new">::new</a>
+    
+    <li ><a href="#method-c-read_smime">::read_smime</a>
+    
+    <li ><a href="#method-c-sign">::sign</a>
+    
+    <li ><a href="#method-c-write_smime">::write_smime</a>
+    
+    <li ><a href="#method-i-add_certificate">#add_certificate</a>
+    
+    <li ><a href="#method-i-add_crl">#add_crl</a>
+    
+    <li ><a href="#method-i-add_data">#add_data</a>
+    
+    <li ><a href="#method-i-add_recipient">#add_recipient</a>
+    
+    <li ><a href="#method-i-add_signer">#add_signer</a>
+    
+    <li ><a href="#method-i-certificates">#certificates</a>
+    
+    <li ><a href="#method-i-certificates-3D">#certificates=</a>
+    
+    <li ><a href="#method-i-cipher-3D">#cipher=</a>
+    
+    <li ><a href="#method-i-crls">#crls</a>
+    
+    <li ><a href="#method-i-crls-3D">#crls=</a>
+    
+    <li ><a href="#method-i-data-3D">#data=</a>
+    
+    <li ><a href="#method-i-decrypt">#decrypt</a>
+    
+    <li ><a href="#method-i-detached">#detached</a>
+    
+    <li ><a href="#method-i-detached-3D">#detached=</a>
+    
+    <li ><a href="#method-i-detached-3F">#detached?</a>
+    
+    <li ><a href="#method-i-recipients">#recipients</a>
+    
+    <li ><a href="#method-i-signers">#signers</a>
+    
+    <li ><a href="#method-i-to_der">#to_der</a>
+    
+    <li ><a href="#method-i-to_pem">#to_pem</a>
+    
+    <li ><a href="#method-i-to_s">#to_s</a>
+    
+    <li ><a href="#method-i-type">#type</a>
+    
+    <li ><a href="#method-i-type-3D">#type=</a>
+    
+    <li ><a href="#method-i-verify">#verify</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="class-OpenSSL::PKCS7">
+  <h1 id="class-OpenSSL::PKCS7" class="class">
+    class OpenSSL::PKCS7
+  </h1>
+
+  <section class="description">
+    
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+    <section class="constants-list">
+      <header>
+        <h3>Constants</h3>
+      </header>
+      <dl>
+      
+        <dt id="Signer">Signer
+        
+        <dd>
+        
+      
+      </dl>
+    </section>
+    
+
+    
+    <section class="attribute-method-details" class="method-section">
+      <header>
+        <h3>Attributes</h3>
+      </header>
+
+      
+      <div id="attribute-i-data" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">data</span><span
+            class="attribute-access-type">[R]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-error_string" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">error_string</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+    </section>
+    
+
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-encrypt" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            encrypt(certs, data, [, cipher [, flags]]) &rarr; pkcs7
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="encrypt-source">
+            <pre>static VALUE
+ossl_pkcs7_s_encrypt(int argc, VALUE *argv, VALUE klass)
+{
+    VALUE certs, data, cipher, flags;
+    STACK_OF(X509) *x509s;
+    BIO *in;
+    const EVP_CIPHER *ciph;
+    int flg, status = 0;
+    VALUE ret;
+    PKCS7 *p7;
+
+    rb_scan_args(argc, argv, &quot;22&quot;, &amp;certs, &amp;data, &amp;cipher, &amp;flags);
+    if(NIL_P(cipher)){
+#if !defined(OPENSSL_NO_RC2)
+        ciph = EVP_rc2_40_cbc();
+#elif !defined(OPENSSL_NO_DES)
+        ciph = EVP_des_ede3_cbc();
+#elif !defined(OPENSSL_NO_RC2)
+        ciph = EVP_rc2_40_cbc();
+#elif !defined(OPENSSL_NO_AES)
+        ciph = EVP_EVP_aes_128_cbc();
+#else
+        ossl_raise(ePKCS7Error, &quot;Must specify cipher&quot;);
+#endif
+
+    }
+    else ciph = GetCipherPtr(cipher); /* NO NEED TO DUP */
+    flg = NIL_P(flags) ? 0 : NUM2INT(flags);
+    ret = NewPKCS7(cPKCS7);
+    in = ossl_obj2bio(data);
+    x509s = ossl_protect_x509_ary2sk(certs, &amp;status);
+    if(status){
+        BIO_free(in);
+        rb_jump_tag(status);
+    }
+    if(!(p7 = PKCS7_encrypt(x509s, in, (EVP_CIPHER*)ciph, flg))){
+        BIO_free(in);
+        sk_X509_pop_free(x509s, X509_free);
+        ossl_raise(ePKCS7Error, NULL);
+    }
+    BIO_free(in);
+    SetPKCS7(ret, p7);
+    ossl_pkcs7_set_data(ret, data);
+    sk_X509_pop_free(x509s, X509_free);
+
+    return ret;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-new" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            new &rarr; pkcs7
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            new(string) &rarr; pkcs7
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Many methods in this class aren&#39;t documented.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="new-source">
+            <pre>static VALUE
+ossl_pkcs7_initialize(int argc, VALUE *argv, VALUE self)
+{
+    PKCS7 *p7, *pkcs = DATA_PTR(self);
+    BIO *in;
+    VALUE arg;
+
+    if(rb_scan_args(argc, argv, &quot;01&quot;, &amp;arg) == 0)
+        return self;
+    arg = ossl_to_der_if_possible(arg);
+    in = ossl_obj2bio(arg);
+    p7 = PEM_read_bio_PKCS7(in, &amp;pkcs, NULL, NULL);
+    if (!p7) {
+        OSSL_BIO_reset(in);
+        p7 = d2i_PKCS7_bio(in, &amp;pkcs);
+        if (!p7) {
+            BIO_free(in);
+            PKCS7_free(pkcs);
+            DATA_PTR(self) = NULL;
+            ossl_raise(rb_eArgError, &quot;Could not parse the PKCS7&quot;);
+        }
+    }
+    DATA_PTR(self) = pkcs;
+    BIO_free(in);
+    ossl_pkcs7_set_data(self, Qnil);
+    ossl_pkcs7_set_err_string(self, Qnil);
+
+    return self;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-read_smime" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            read_smime(string) &rarr; pkcs7
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="read_smime-source">
+            <pre>static VALUE
+ossl_pkcs7_s_read_smime(VALUE klass, VALUE arg)
+{
+    BIO *in, *out;
+    PKCS7 *pkcs7;
+    VALUE ret, data;
+
+    ret = NewPKCS7(cPKCS7);
+    in = ossl_obj2bio(arg);
+    out = NULL;
+    pkcs7 = SMIME_read_PKCS7(in, &amp;out);
+    BIO_free(in);
+    if(!pkcs7) ossl_raise(ePKCS7Error, NULL);
+    data = out ? ossl_membio2str(out) : Qnil;
+    SetPKCS7(ret, pkcs7);
+    ossl_pkcs7_set_data(ret, data);
+    ossl_pkcs7_set_err_string(ret, Qnil);
+
+    return ret;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-sign" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            sign(cert, key, data, [, certs [, flags]]) &rarr; pkcs7
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="sign-source">
+            <pre>static VALUE
+ossl_pkcs7_s_sign(int argc, VALUE *argv, VALUE klass)
+{
+    VALUE cert, key, data, certs, flags;
+    X509 *x509;
+    EVP_PKEY *pkey;
+    BIO *in;
+    STACK_OF(X509) *x509s;
+    int flg, status = 0;
+    PKCS7 *pkcs7;
+    VALUE ret;
+
+    rb_scan_args(argc, argv, &quot;32&quot;, &amp;cert, &amp;key, &amp;data, &amp;certs, &amp;flags);
+    x509 = GetX509CertPtr(cert); /* NO NEED TO DUP */
+    pkey = GetPrivPKeyPtr(key); /* NO NEED TO DUP */
+    flg = NIL_P(flags) ? 0 : NUM2INT(flags);
+    ret = NewPKCS7(cPKCS7);
+    in = ossl_obj2bio(data);
+    if(NIL_P(certs)) x509s = NULL;
+    else{
+        x509s = ossl_protect_x509_ary2sk(certs, &amp;status);
+        if(status){
+            BIO_free(in);
+            rb_jump_tag(status);
+        }
+    }
+    if(!(pkcs7 = PKCS7_sign(x509, pkey, x509s, in, flg))){
+        BIO_free(in);
+        sk_X509_pop_free(x509s, X509_free);
+        ossl_raise(ePKCS7Error, NULL);
+    }
+    SetPKCS7(ret, pkcs7);
+    ossl_pkcs7_set_data(ret, data);
+    ossl_pkcs7_set_err_string(ret, Qnil);
+    BIO_free(in);
+    sk_X509_pop_free(x509s, X509_free);
+
+    return ret;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-write_smime" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            write_smime(pkcs7 [, data [, flags]]) &rarr; string
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="write_smime-source">
+            <pre>static VALUE
+ossl_pkcs7_s_write_smime(int argc, VALUE *argv, VALUE klass)
+{
+    VALUE pkcs7, data, flags;
+    BIO *out, *in;
+    PKCS7 *p7;
+    VALUE str;
+    int flg;
+
+    rb_scan_args(argc, argv, &quot;12&quot;, &amp;pkcs7, &amp;data, &amp;flags);
+    flg = NIL_P(flags) ? 0 : NUM2INT(flags);
+    if(NIL_P(data)) data = ossl_pkcs7_get_data(pkcs7);
+    SafeGetPKCS7(pkcs7, p7);
+    if(!NIL_P(data) &amp;&amp; PKCS7_is_detached(p7))
+        flg |= PKCS7_DETACHED;
+    in = NIL_P(data) ? NULL : ossl_obj2bio(data);
+    if(!(out = BIO_new(BIO_s_mem()))){
+        BIO_free(in);
+        ossl_raise(ePKCS7Error, NULL);
+    }
+    if(!SMIME_write_PKCS7(out, p7, in, flg)){
+        BIO_free(out);
+        BIO_free(in);
+        ossl_raise(ePKCS7Error, NULL);
+    }
+    BIO_free(in);
+    str = ossl_membio2str(out);
+
+    return str;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-add_certificate" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">add_certificate</span><span
+            class="method-args">(p1)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="add_certificate-source">
+            <pre>static VALUE
+ossl_pkcs7_add_certificate(VALUE self, VALUE cert)
+{
+    PKCS7 *pkcs7;
+    X509 *x509;
+
+    GetPKCS7(self, pkcs7);
+    x509 = GetX509CertPtr(cert);  /* NO NEED TO DUP */
+    if (!PKCS7_add_certificate(pkcs7, x509)){
+        ossl_raise(ePKCS7Error, NULL);
+    }
+
+    return self;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-add_crl" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">add_crl</span><span
+            class="method-args">(p1)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="add_crl-source">
+            <pre>static VALUE
+ossl_pkcs7_add_crl(VALUE self, VALUE crl)
+{
+    PKCS7 *pkcs7;
+    X509_CRL *x509crl;
+
+    GetPKCS7(self, pkcs7); /* NO DUP needed! */
+    x509crl = GetX509CRLPtr(crl);
+    if (!PKCS7_add_crl(pkcs7, x509crl)) {
+        ossl_raise(ePKCS7Error, NULL);
+    }
+
+    return self;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-add_data" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">add_data</span><span
+            class="method-args">(p1)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="add_data-source">
+            <pre>static VALUE
+ossl_pkcs7_add_data(VALUE self, VALUE data)
+{
+    PKCS7 *pkcs7;
+    BIO *out, *in;
+    char buf[4096];
+    int len;
+
+    GetPKCS7(self, pkcs7);
+    if(PKCS7_type_is_signed(pkcs7)){
+        if(!PKCS7_content_new(pkcs7, NID_pkcs7_data))
+            ossl_raise(ePKCS7Error, NULL);
+    }
+    in = ossl_obj2bio(data);
+    if(!(out = PKCS7_dataInit(pkcs7, NULL))) goto err;
+    for(;;){
+        if((len = BIO_read(in, buf, sizeof(buf))) &lt;= 0)
+            break;
+        if(BIO_write(out, buf, len) != len)
+            goto err;
+    }
+    if(!PKCS7_dataFinal(pkcs7, out)) goto err;
+    ossl_pkcs7_set_data(self, Qnil);
+
+ err:
+    BIO_free_all(out);
+    BIO_free(in);
+    if(ERR_peek_error()){
+        ossl_raise(ePKCS7Error, NULL);
+    }
+
+    return data;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+        <div class="aliases">
+          Also aliased as: <a href="PKCS7.html#method-i-data-3D">data=</a>
+        </div>
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-add_recipient" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">add_recipient</span><span
+            class="method-args">(p1)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="add_recipient-source">
+            <pre>static VALUE
+ossl_pkcs7_add_recipient(VALUE self, VALUE recip)
+{
+    PKCS7 *pkcs7;
+    PKCS7_RECIP_INFO *ri;
+
+    ri = DupPKCS7RecipientPtr(recip); /* NEED TO DUP */
+    GetPKCS7(self, pkcs7);
+    if (!PKCS7_add_recipient_info(pkcs7, ri)) {
+        PKCS7_RECIP_INFO_free(ri);
+        ossl_raise(ePKCS7Error, &quot;Could not add recipient.&quot;);
+    }
+
+    return self;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-add_signer" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">add_signer</span><span
+            class="method-args">(p1)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="add_signer-source">
+            <pre>static VALUE
+ossl_pkcs7_add_signer(VALUE self, VALUE signer)
+{
+    PKCS7 *pkcs7;
+    PKCS7_SIGNER_INFO *p7si;
+
+    p7si = DupPKCS7SignerPtr(signer); /* NEED TO DUP */
+    GetPKCS7(self, pkcs7);
+    if (!PKCS7_add_signer(pkcs7, p7si)) {
+        PKCS7_SIGNER_INFO_free(p7si);
+        ossl_raise(ePKCS7Error, &quot;Could not add signer.&quot;);
+    }
+    if (PKCS7_type_is_signed(pkcs7)){
+        PKCS7_add_signed_attribute(p7si, NID_pkcs9_contentType,
+                                   V_ASN1_OBJECT, OBJ_nid2obj(NID_pkcs7_data));
+    }
+
+    return self;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-certificates" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">certificates</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="certificates-source">
+            <pre>static VALUE
+ossl_pkcs7_get_certificates(VALUE self)
+{
+    return ossl_x509_sk2ary(pkcs7_get_certs(self));
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-certificates-3D" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">certificates=</span><span
+            class="method-args">(p1)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="certificates-3D-source">
+            <pre>static VALUE
+ossl_pkcs7_set_certificates(VALUE self, VALUE ary)
+{
+    STACK_OF(X509) *certs;
+    X509 *cert;
+
+    certs = pkcs7_get_certs(self);
+    while((cert = sk_X509_pop(certs))) X509_free(cert);
+    rb_block_call(ary, rb_intern(&quot;each&quot;), 0, 0, ossl_pkcs7_set_certs_i, self);
+
+    return ary;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-cipher-3D" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">cipher=</span><span
+            class="method-args">(p1)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="cipher-3D-source">
+            <pre>static VALUE
+ossl_pkcs7_set_cipher(VALUE self, VALUE cipher)
+{
+    PKCS7 *pkcs7;
+
+    GetPKCS7(self, pkcs7);
+    if (!PKCS7_set_cipher(pkcs7, GetCipherPtr(cipher))) {
+        ossl_raise(ePKCS7Error, NULL);
+    }
+
+    return cipher;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-crls" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">crls</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="crls-source">
+            <pre>static VALUE
+ossl_pkcs7_get_crls(VALUE self)
+{
+    return ossl_x509crl_sk2ary(pkcs7_get_crls(self));
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-crls-3D" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">crls=</span><span
+            class="method-args">(p1)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="crls-3D-source">
+            <pre>static VALUE
+ossl_pkcs7_set_crls(VALUE self, VALUE ary)
+{
+    STACK_OF(X509_CRL) *crls;
+    X509_CRL *crl;
+
+    crls = pkcs7_get_crls(self);
+    while((crl = sk_X509_CRL_pop(crls))) X509_CRL_free(crl);
+    rb_block_call(ary, rb_intern(&quot;each&quot;), 0, 0, ossl_pkcs7_set_crls_i, self);
+
+    return ary;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-data-3D" class="method-detail method-alias">
+        
+        <div class="method-heading">
+          <span class="method-name">data=</span><span
+            class="method-args">(p1)</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+
+        
+        <div class="aliases">
+          Alias for: <a href="PKCS7.html#method-i-add_data">add_data</a>
+        </div>
+        
+      </div>
+
+    
+      <div id="method-i-decrypt" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">decrypt</span><span
+            class="method-args">(p1, p2, p3 = v3)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="decrypt-source">
+            <pre>static VALUE
+ossl_pkcs7_decrypt(int argc, VALUE *argv, VALUE self)
+{
+    VALUE pkey, cert, flags;
+    EVP_PKEY *key;
+    X509 *x509;
+    int flg;
+    PKCS7 *p7;
+    BIO *out;
+    VALUE str;
+
+    rb_scan_args(argc, argv, &quot;21&quot;, &amp;pkey, &amp;cert, &amp;flags);
+    key = GetPrivPKeyPtr(pkey); /* NO NEED TO DUP */
+    x509 = GetX509CertPtr(cert); /* NO NEED TO DUP */
+    flg = NIL_P(flags) ? 0 : NUM2INT(flags);
+    GetPKCS7(self, p7);
+    if(!(out = BIO_new(BIO_s_mem())))
+        ossl_raise(ePKCS7Error, NULL);
+    if(!PKCS7_decrypt(p7, key, x509, out, flg)){
+        BIO_free(out);
+        ossl_raise(ePKCS7Error, NULL);
+    }
+    str = ossl_membio2str(out); /* out will be free */
+
+    return str;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-detached" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">detached</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="detached-source">
+            <pre>static VALUE
+ossl_pkcs7_get_detached(VALUE self)
+{
+    PKCS7 *p7;
+    GetPKCS7(self, p7);
+    return PKCS7_get_detached(p7) ? Qtrue : Qfalse;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-detached-3D" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">detached=</span><span
+            class="method-args">(p1)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="detached-3D-source">
+            <pre>static VALUE
+ossl_pkcs7_set_detached(VALUE self, VALUE flag)
+{
+    PKCS7 *p7;
+
+    GetPKCS7(self, p7);
+    if(flag != Qtrue &amp;&amp; flag != Qfalse)
+        ossl_raise(ePKCS7Error, &quot;must specify a boolean&quot;);
+    if(!PKCS7_set_detached(p7, flag == Qtrue ? 1 : 0))
+        ossl_raise(ePKCS7Error, NULL);
+
+    return flag;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-detached-3F" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">detached?</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="detached-3F-source">
+            <pre>static VALUE
+ossl_pkcs7_detached_p(VALUE self)
+{
+    PKCS7 *p7;
+    GetPKCS7(self, p7);
+    return PKCS7_is_detached(p7) ? Qtrue : Qfalse;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-recipients" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">recipients</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="recipients-source">
+            <pre>static VALUE
+ossl_pkcs7_get_recipient(VALUE self)
+{
+    PKCS7 *pkcs7;
+    STACK_OF(PKCS7_RECIP_INFO) *sk;
+    PKCS7_RECIP_INFO *si;
+    int num, i;
+    VALUE ary;
+
+    GetPKCS7(self, pkcs7);
+    if (PKCS7_type_is_enveloped(pkcs7))
+        sk = pkcs7-&gt;d.enveloped-&gt;recipientinfo;
+    else if (PKCS7_type_is_signedAndEnveloped(pkcs7))
+        sk = pkcs7-&gt;d.signed_and_enveloped-&gt;recipientinfo;
+    else sk = NULL;
+    if (!sk) return rb_ary_new();
+    if ((num = sk_PKCS7_RECIP_INFO_num(sk)) &lt; 0) {
+        ossl_raise(ePKCS7Error, &quot;Negative number of recipient!&quot;);
+    }
+    ary = rb_ary_new2(num);
+    for (i=0; i&lt;num; i++) {
+        si = sk_PKCS7_RECIP_INFO_value(sk, i);
+        rb_ary_push(ary, ossl_pkcs7ri_new(si));
+    }
+
+    return ary;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-signers" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">signers</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="signers-source">
+            <pre>static VALUE
+ossl_pkcs7_get_signer(VALUE self)
+{
+    PKCS7 *pkcs7;
+    STACK_OF(PKCS7_SIGNER_INFO) *sk;
+    PKCS7_SIGNER_INFO *si;
+    int num, i;
+    VALUE ary;
+
+    GetPKCS7(self, pkcs7);
+    if (!(sk = PKCS7_get_signer_info(pkcs7))) {
+        OSSL_Debug(&quot;OpenSSL::PKCS7#get_signer_info == NULL!&quot;);
+        return rb_ary_new();
+    }
+    if ((num = sk_PKCS7_SIGNER_INFO_num(sk)) &lt; 0) {
+        ossl_raise(ePKCS7Error, &quot;Negative number of signers!&quot;);
+    }
+    ary = rb_ary_new2(num);
+    for (i=0; i&lt;num; i++) {
+        si = sk_PKCS7_SIGNER_INFO_value(sk, i);
+        rb_ary_push(ary, ossl_pkcs7si_new(si));
+    }
+
+    return ary;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-to_der" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">to_der</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="to_der-source">
+            <pre>static VALUE
+ossl_pkcs7_to_der(VALUE self)
+{
+    PKCS7 *pkcs7;
+    VALUE str;
+    long len;
+    unsigned char *p;
+
+    GetPKCS7(self, pkcs7);
+    if((len = i2d_PKCS7(pkcs7, NULL)) &lt;= 0)
+        ossl_raise(ePKCS7Error, NULL);
+    str = rb_str_new(0, len);
+    p = (unsigned char *)RSTRING_PTR(str);
+    if(i2d_PKCS7(pkcs7, &amp;p) &lt;= 0)
+        ossl_raise(ePKCS7Error, NULL);
+    ossl_str_adjust(str, p);
+
+    return str;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-to_pem" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">to_pem</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="to_pem-source">
+            <pre>static VALUE
+ossl_pkcs7_to_pem(VALUE self)
+{
+    PKCS7 *pkcs7;
+    BIO *out;
+    VALUE str;
+
+    GetPKCS7(self, pkcs7);
+    if (!(out = BIO_new(BIO_s_mem()))) {
+        ossl_raise(ePKCS7Error, NULL);
+    }
+    if (!PEM_write_bio_PKCS7(out, pkcs7)) {
+        BIO_free(out);
+        ossl_raise(ePKCS7Error, NULL);
+    }
+    str = ossl_membio2str(out);
+
+    return str;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+        <div class="aliases">
+          Also aliased as: <a href="PKCS7.html#method-i-to_s">to_s</a>
+        </div>
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-to_s" class="method-detail method-alias">
+        
+        <div class="method-heading">
+          <span class="method-name">to_s</span><span
+            class="method-args">()</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+
+        
+        <div class="aliases">
+          Alias for: <a href="PKCS7.html#method-i-to_pem">to_pem</a>
+        </div>
+        
+      </div>
+
+    
+      <div id="method-i-type" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            type &rarr; string or nil
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="type-source">
+            <pre>static VALUE
+ossl_pkcs7_get_type(VALUE self)
+{
+    PKCS7 *p7;
+
+    GetPKCS7(self, p7);
+    if(PKCS7_type_is_signed(p7))
+        return ID2SYM(rb_intern(&quot;signed&quot;));
+    if(PKCS7_type_is_encrypted(p7))
+        return ID2SYM(rb_intern(&quot;encrypted&quot;));
+    if(PKCS7_type_is_enveloped(p7))
+        return ID2SYM(rb_intern(&quot;enveloped&quot;));
+    if(PKCS7_type_is_signedAndEnveloped(p7))
+        return ID2SYM(rb_intern(&quot;signedAndEnveloped&quot;));
+    if(PKCS7_type_is_data(p7))
+        return ID2SYM(rb_intern(&quot;data&quot;));
+    return Qnil;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-type-3D" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            type = type &rarr; type
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="type-3D-source">
+            <pre>static VALUE
+ossl_pkcs7_set_type(VALUE self, VALUE type)
+{
+    PKCS7 *p7;
+
+    GetPKCS7(self, p7);
+    if(!PKCS7_set_type(p7, ossl_pkcs7_sym2typeid(type)))
+        ossl_raise(ePKCS7Error, NULL);
+
+    return type;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-verify" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">verify</span><span
+            class="method-args">(p1, p2, p3 = v3, p4 = v4)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="verify-source">
+            <pre>static VALUE
+ossl_pkcs7_verify(int argc, VALUE *argv, VALUE self)
+{
+    VALUE certs, store, indata, flags;
+    STACK_OF(X509) *x509s;
+    X509_STORE *x509st;
+    int flg, ok, status = 0;
+    BIO *in, *out;
+    PKCS7 *p7;
+    VALUE data;
+    const char *msg;
+
+    GetPKCS7(self, p7);
+    rb_scan_args(argc, argv, &quot;22&quot;, &amp;certs, &amp;store, &amp;indata, &amp;flags);
+    x509st = GetX509StorePtr(store);
+    flg = NIL_P(flags) ? 0 : NUM2INT(flags);
+    if(NIL_P(indata)) indata = ossl_pkcs7_get_data(self);
+    in = NIL_P(indata) ? NULL : ossl_obj2bio(indata);
+    if(NIL_P(certs)) x509s = NULL;
+    else{
+        x509s = ossl_protect_x509_ary2sk(certs, &amp;status);
+        if(status){
+            BIO_free(in);
+            rb_jump_tag(status);
+        }
+    }
+    if(!(out = BIO_new(BIO_s_mem()))){
+        BIO_free(in);
+        sk_X509_pop_free(x509s, X509_free);
+        ossl_raise(ePKCS7Error, NULL);
+    }
+    ok = PKCS7_verify(p7, x509s, x509st, in, out, flg);
+    BIO_free(in);
+    sk_X509_pop_free(x509s, X509_free);
+    if (ok &lt; 0) ossl_raise(ePKCS7Error, &quot;PKCS7_verify&quot;);
+    msg = ERR_reason_error_string(ERR_get_error());
+    ossl_pkcs7_set_err_string(self, msg ? rb_str_new2(msg) : Qnil);
+    ossl_clear_error();
+    data = ossl_membio2str(out);
+    ossl_pkcs7_set_data(self, data);
+
+    return (ok == 1) ? Qtrue : Qfalse;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.2.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

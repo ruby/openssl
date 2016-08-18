@@ -1,0 +1,1956 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="UTF-8">
+
+<title>class OpenSSL::BN - RDoc Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "../";
+</script>
+
+<script src="../js/jquery.js"></script>
+<script src="../js/darkfish.js"></script>
+
+<link href="../css/fonts.css" rel="stylesheet">
+<link href="../css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="class">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="../index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="../table_of_contents.html#pages">Pages</a>
+    <a href="../table_of_contents.html#classes">Classes</a>
+    <a href="../table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    <div id="parent-class-section" class="nav-section">
+  <h3>Parent</h3>
+
+  
+  <p class="link">Object
+  
+</div>
+
+    <div id="includes-section" class="nav-section">
+  <h3>Included Modules</h3>
+
+  <ul class="link-list">
+  
+  
+    <li><span class="include">Comparable</span>
+  
+  
+  </ul>
+</div>
+
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-c-generate_prime">::generate_prime</a>
+    
+    <li ><a href="#method-c-new">::new</a>
+    
+    <li ><a href="#method-i-25">#%</a>
+    
+    <li ><a href="#method-i-2A">#*</a>
+    
+    <li ><a href="#method-i-2A-2A">#**</a>
+    
+    <li ><a href="#method-i-2B">#+</a>
+    
+    <li ><a href="#method-i-2D">#-</a>
+    
+    <li ><a href="#method-i-2F">#/</a>
+    
+    <li ><a href="#method-i-3C-3C">#&lt;&lt;</a>
+    
+    <li ><a href="#method-i-3C-3D-3E">#&lt;=&gt;</a>
+    
+    <li ><a href="#method-i-3D-3D">#==</a>
+    
+    <li ><a href="#method-i-3D-3D-3D">#===</a>
+    
+    <li ><a href="#method-i-3E-3E">#&gt;&gt;</a>
+    
+    <li ><a href="#method-i-bit_set-3F">#bit_set?</a>
+    
+    <li ><a href="#method-i-clear_bit-21">#clear_bit!</a>
+    
+    <li ><a href="#method-i-cmp">#cmp</a>
+    
+    <li ><a href="#method-i-coerce">#coerce</a>
+    
+    <li ><a href="#method-i-copy">#copy</a>
+    
+    <li ><a href="#method-i-eql-3F">#eql?</a>
+    
+    <li ><a href="#method-i-gcd">#gcd</a>
+    
+    <li ><a href="#method-i-hash">#hash</a>
+    
+    <li ><a href="#method-i-lshift-21">#lshift!</a>
+    
+    <li ><a href="#method-i-mod_add">#mod_add</a>
+    
+    <li ><a href="#method-i-mod_exp">#mod_exp</a>
+    
+    <li ><a href="#method-i-mod_inverse">#mod_inverse</a>
+    
+    <li ><a href="#method-i-mod_mul">#mod_mul</a>
+    
+    <li ><a href="#method-i-mod_sqr">#mod_sqr</a>
+    
+    <li ><a href="#method-i-mod_sub">#mod_sub</a>
+    
+    <li ><a href="#method-i-num_bits">#num_bits</a>
+    
+    <li ><a href="#method-i-num_bytes">#num_bytes</a>
+    
+    <li ><a href="#method-i-odd-3F">#odd?</a>
+    
+    <li ><a href="#method-i-one-3F">#one?</a>
+    
+    <li ><a href="#method-i-pretty_print">#pretty_print</a>
+    
+    <li ><a href="#method-i-prime-3F">#prime?</a>
+    
+    <li ><a href="#method-i-prime_fasttest-3F">#prime_fasttest?</a>
+    
+    <li ><a href="#method-i-rshift-21">#rshift!</a>
+    
+    <li ><a href="#method-i-set_bit-21">#set_bit!</a>
+    
+    <li ><a href="#method-i-sqr">#sqr</a>
+    
+    <li ><a href="#method-i-to_bn">#to_bn</a>
+    
+    <li ><a href="#method-i-to_i">#to_i</a>
+    
+    <li ><a href="#method-i-to_int">#to_int</a>
+    
+    <li ><a href="#method-i-to_s">#to_s</a>
+    
+    <li ><a href="#method-i-ucmp">#ucmp</a>
+    
+    <li ><a href="#method-i-zero-3F">#zero?</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="class-OpenSSL::BN">
+  <h1 id="class-OpenSSL::BN" class="class">
+    class OpenSSL::BN
+  </h1>
+
+  <section class="description">
+    
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-generate_prime" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            generate_prime(bits, [, safe [, add [, rem]]]) &rarr; bn
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Generates a random prime number of bit length <code>bits</code>. If
+<code>safe</code> is true, generates a safe prime. If <code>add</code> is
+specified, generates a prime that fulfills condition <code>p % add =
+rem</code>.</p>
+
+<h3 id="method-c-generate_prime-label-Parameters">Parameters<span><a href="#method-c-generate_prime-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
+<ul><li>
+<p><code>bits</code> - integer</p>
+</li><li>
+<p><code>safe</code> - boolean</p>
+</li><li>
+<p><code>add</code> - <a href="BN.html">BN</a></p>
+</li><li>
+<p><code>rem</code> - <a href="BN.html">BN</a></p>
+</li></ul>
+          
+          
+
+          
+          <div class="method-source-code" id="generate_prime-source">
+            <pre>static VALUE
+ossl_bn_s_generate_prime(int argc, VALUE *argv, VALUE klass)
+{
+    BIGNUM *add = NULL, *rem = NULL, *result;
+    int safe = 1, num;
+    VALUE vnum, vsafe, vadd, vrem, obj;
+
+    rb_scan_args(argc, argv, &quot;13&quot;, &amp;vnum, &amp;vsafe, &amp;vadd, &amp;vrem);
+
+    num = NUM2INT(vnum);
+
+    if (vsafe == Qfalse) {
+        safe = 0;
+    }
+    if (!NIL_P(vadd)) {
+        add = GetBNPtr(vadd);
+        rem = NIL_P(vrem) ? NULL : GetBNPtr(vrem);
+    }
+    obj = NewBN(klass);
+    if (!(result = BN_new())) {
+        ossl_raise(eBNError, NULL);
+    }
+    if (!BN_generate_prime_ex(result, num, safe, add, rem, NULL)) {
+        BN_free(result);
+        ossl_raise(eBNError, NULL);
+    }
+    SetBN(obj, result);
+
+    return obj;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-new" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            OpenSSL::BN.new &rarr; aBN
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            OpenSSL::BN.new(bn) &rarr; aBN
+          </span>
+          
+        </div>
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            OpenSSL::BN.new(integer) &rarr; aBN
+          </span>
+          
+        </div>
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            OpenSSL::BN.new(string) &rarr; aBN
+          </span>
+          
+        </div>
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            OpenSSL::BN.new(string, 0 | 2 | 10 | 16) &rarr; aBN
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Construct a new <a href="../OpenSSL.html">OpenSSL</a> BigNum object.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="new-source">
+            <pre>static VALUE
+ossl_bn_initialize(int argc, VALUE *argv, VALUE self)
+{
+    BIGNUM *bn;
+    VALUE str, bs;
+    int base = 10;
+
+    if (rb_scan_args(argc, argv, &quot;11&quot;, &amp;str, &amp;bs) == 2) {
+        base = NUM2INT(bs);
+    }
+
+    if (RB_TYPE_P(str, T_FIXNUM)) {
+        long i;
+        unsigned char bin[sizeof(long)];
+        long n = FIX2LONG(str);
+        unsigned long un = labs(n);
+
+        for (i = sizeof(long) - 1; 0 &lt;= i; i--) {
+            bin[i] = un&amp;0xff;
+            un &gt;&gt;= 8;
+        }
+
+        GetBN(self, bn);
+        if (!BN_bin2bn(bin, sizeof(bin), bn)) {
+            ossl_raise(eBNError, NULL);
+        }
+        if (n &lt; 0) BN_set_negative(bn, 1);
+        return self;
+    }
+    else if (RB_TYPE_P(str, T_BIGNUM)) {
+        size_t len = rb_absint_size(str, NULL);
+        unsigned char *bin;
+        VALUE buf;
+        int sign;
+
+        if (INT_MAX &lt; len) {
+            rb_raise(eBNError, &quot;bignum too long&quot;);
+        }
+        bin = (unsigned char*)ALLOCV_N(unsigned char, buf, len);
+        sign = rb_integer_pack(str, bin, len, 1, 0, INTEGER_PACK_BIG_ENDIAN);
+
+        GetBN(self, bn);
+        if (!BN_bin2bn(bin, (int)len, bn)) {
+            ALLOCV_END(buf);
+            ossl_raise(eBNError, NULL);
+        }
+        ALLOCV_END(buf);
+        if (sign &lt; 0) BN_set_negative(bn, 1);
+        return self;
+    }
+    if (RTEST(rb_obj_is_kind_of(str, cBN))) {
+        BIGNUM *other;
+
+        GetBN(self, bn);
+        GetBN(str, other); /* Safe - we checked kind_of? above */
+        if (!BN_copy(bn, other)) {
+            ossl_raise(eBNError, NULL);
+        }
+        return self;
+    }
+
+    GetBN(self, bn);
+    switch (base) {
+    case 0:
+        if (!BN_mpi2bn((unsigned char *)StringValuePtr(str), RSTRING_LENINT(str), bn)) {
+            ossl_raise(eBNError, NULL);
+        }
+        break;
+    case 2:
+        if (!BN_bin2bn((unsigned char *)StringValuePtr(str), RSTRING_LENINT(str), bn)) {
+            ossl_raise(eBNError, NULL);
+        }
+        break;
+    case 10:
+        if (!BN_dec2bn(&amp;bn, StringValueCStr(str))) {
+            ossl_raise(eBNError, NULL);
+        }
+        break;
+    case 16:
+        if (!BN_hex2bn(&amp;bn, StringValueCStr(str))) {
+            ossl_raise(eBNError, NULL);
+        }
+        break;
+    default:
+        ossl_raise(rb_eArgError, &quot;invalid radix %d&quot;, base);
+    }
+    return self;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-25" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            bn % bn2 &rarr; aBN
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-2A" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            bn * bn2 &rarr; aBN
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-2A-2A" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            bn ** bn2 &rarr; aBN
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-2B" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            bn + bn2 &rarr; aBN
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-2D" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            bn - bn2 &rarr; aBN
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-2F" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            bn1 / bn2 &rarr; [result, remainder]
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Division of <a href="BN.html">OpenSSL::BN</a> instances</p>
+          
+          
+
+          
+          <div class="method-source-code" id="2F-source">
+            <pre>static VALUE
+ossl_bn_div(VALUE self, VALUE other)
+{
+    BIGNUM *bn1, *bn2 = GetBNPtr(other), *r1, *r2;
+    VALUE obj1, obj2;
+
+    GetBN(self, bn1);
+
+    obj1 = NewBN(CLASS_OF(self));
+    obj2 = NewBN(CLASS_OF(self));
+    if (!(r1 = BN_new())) {
+        ossl_raise(eBNError, NULL);
+    }
+    if (!(r2 = BN_new())) {
+        BN_free(r1);
+        ossl_raise(eBNError, NULL);
+    }
+    if (!BN_div(r1, r2, bn1, bn2, ossl_bn_ctx)) {
+        BN_free(r1);
+        BN_free(r2);
+        ossl_raise(eBNError, NULL);
+    }
+    SetBN(obj1, r1);
+    SetBN(obj2, r2);
+
+    return rb_ary_new3(2, obj1, obj2);
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-3C-3C" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            bn &lt;&lt; bits &rarr; aBN
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-3C-3D-3E" class="method-detail method-alias">
+        
+        <div class="method-heading">
+          <span class="method-name">&lt;=&gt;</span><span
+            class="method-args">(p1)</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+
+        
+        <div class="aliases">
+          Alias for: <a href="BN.html#method-i-cmp">cmp</a>
+        </div>
+        
+      </div>
+
+    
+      <div id="method-i-3D-3D" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            bn == obj &rarr; true or false
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Returns <code>true</code> only if <code>obj</code> has the same value as
+<code>bn</code>. Contrast this with <a
+href="BN.html#method-i-eql-3F">#eql?</a>, which requires obj to be <a
+href="BN.html">OpenSSL::BN</a>.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="3D-3D-source">
+            <pre>static VALUE
+ossl_bn_eq(VALUE self, VALUE other)
+{
+    BIGNUM *bn1, *bn2;
+
+    GetBN(self, bn1);
+    /* BNPtr may raise, so we can&#39;t use here */
+    bn2 = try_convert_to_bnptr(other);
+
+    if (bn2 &amp;&amp; !BN_cmp(bn1, bn2)) {
+        return Qtrue;
+    }
+    return Qfalse;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+        <div class="aliases">
+          Also aliased as: <a href="BN.html#method-i-3D-3D-3D">===</a>
+        </div>
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-3D-3D-3D" class="method-detail method-alias">
+        
+        <div class="method-heading">
+          <span class="method-name">===</span><span
+            class="method-args">(p1)</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+
+        
+        <div class="aliases">
+          Alias for: <a href="BN.html#method-i-3D-3D">==</a>
+        </div>
+        
+      </div>
+
+    
+      <div id="method-i-3E-3E" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            bn &gt;&gt; bits &rarr; aBN
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-bit_set-3F" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            bit_set?(bit) &rarr; true | false
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Returns boolean of whether <code>bit</code> is set. Bitwise operations for
+openssl BIGNUMs.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="bit_set-3F-source">
+            <pre>static VALUE
+ossl_bn_is_bit_set(VALUE self, VALUE bit)
+{
+    int b;
+    BIGNUM *bn;
+
+    b = NUM2INT(bit);
+    GetBN(self, bn);
+    if (BN_is_bit_set(bn, b)) {
+        return Qtrue;
+    }
+    return Qfalse;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-clear_bit-21" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            clear_bit!(bit) &rarr; self
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-cmp" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            cmp(bn2) &rarr; integer
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+        <div class="aliases">
+          Also aliased as: <a href="BN.html#method-i-3C-3D-3E">&lt;=&gt;</a>
+        </div>
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-coerce" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">coerce</span><span
+            class="method-args">(p1)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="coerce-source">
+            <pre>static VALUE
+ossl_bn_coerce(VALUE self, VALUE other)
+{
+    switch(TYPE(other)) {
+    case T_STRING:
+        self = ossl_bn_to_s(0, NULL, self);
+        break;
+    case T_FIXNUM:
+    case T_BIGNUM:
+        self = ossl_bn_to_i(self);
+        break;
+    default:
+        if (!RTEST(rb_obj_is_kind_of(other, cBN))) {
+            ossl_raise(rb_eTypeError, &quot;Don&#39;t know how to coerce&quot;);
+        }
+    }
+    return rb_assoc_new(other, self);
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-copy" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">copy</span><span
+            class="method-args">(p1)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="copy-source">
+            <pre>static VALUE
+ossl_bn_copy(VALUE self, VALUE other)
+{
+    BIGNUM *bn1, *bn2;
+
+    rb_check_frozen(self);
+
+    if (self == other) return self;
+
+    GetBN(self, bn1);
+    bn2 = GetBNPtr(other);
+
+    if (!BN_copy(bn1, bn2)) {
+        ossl_raise(eBNError, NULL);
+    }
+    return self;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-eql-3F" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            eql?(obj) &rarr; true or false
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Returns <code>true</code> only if <em>obj</em> is a
+<code>OpenSSL::BN</code> with the same value as <em>big</em>. Contrast this
+with OpenSSL::BN#==, which performs type conversions.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="eql-3F-source">
+            <pre>static VALUE
+ossl_bn_eql(VALUE self, VALUE other)
+{
+    BIGNUM *bn1, *bn2;
+
+    if (!rb_obj_is_kind_of(other, cBN))
+        return Qfalse;
+    GetBN(self, bn1);
+    GetBN(other, bn2);
+
+    return BN_cmp(bn1, bn2) ? Qfalse : Qtrue;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-gcd" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            gcd(bn2) &rarr; aBN
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-hash" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            hash &rarr; Integer
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Returns a hash code for this object.</p>
+
+<p>See also Object#hash.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="hash-source">
+            <pre>static VALUE
+ossl_bn_hash(VALUE self)
+{
+    BIGNUM *bn;
+    VALUE hash;
+    unsigned char *buf;
+    int len;
+
+    GetBN(self, bn);
+    len = BN_num_bytes(bn);
+    buf = xmalloc(len);
+    if (BN_bn2bin(bn, buf) != len) {
+        xfree(buf);
+        ossl_raise(eBNError, NULL);
+    }
+
+    hash = INT2FIX(rb_memhash(buf, len));
+    xfree(buf);
+
+    return hash;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-lshift-21" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            lshift!(bits) &rarr; self
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-mod_add" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            mod_add(bn1, bn2) &rarr; aBN
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-mod_exp" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            mod_exp(bn1, bn2) &rarr; aBN
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-mod_inverse" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            mod_inverse(bn2) &rarr; aBN
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-mod_mul" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            mod_mul(bn1, bn2) &rarr; aBN
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-mod_sqr" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            mod_sqr(bn2) &rarr; aBN
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-mod_sub" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            mod_sub(bn1, bn2) &rarr; aBN
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-num_bits" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            num_bits &rarr; integer
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-num_bytes" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            num_bytes &rarr; integer
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-odd-3F" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            odd? &rarr; true | false
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-one-3F" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            one? &rarr; true | false
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-pretty_print" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">pretty_print</span><span
+            class="method-args">(q)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="pretty_print-source">
+            <pre><span class="ruby-comment"># File lib/openssl/bn.rb, line 20</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">pretty_print</span>(<span class="ruby-identifier">q</span>)
+  <span class="ruby-identifier">q</span>.<span class="ruby-identifier">object_group</span>(<span class="ruby-keyword">self</span>) {
+    <span class="ruby-identifier">q</span>.<span class="ruby-identifier">text</span> <span class="ruby-string">&#39; &#39;</span>
+    <span class="ruby-identifier">q</span>.<span class="ruby-identifier">text</span> <span class="ruby-identifier">to_i</span>.<span class="ruby-identifier">to_s</span>
+  }
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-prime-3F" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            prime? &rarr; true | false
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            prime?(checks) &rarr; true | false
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Performs a Miller-Rabin probabilistic primality test with
+<code>checks</code> iterations. If <code>nchecks</code> is not specified, a
+number of iterations is used that yields a false positive rate of at most
+2^-80 for random input.</p>
+
+<h3 id="method-i-prime-3F-label-Parameters">Parameters<span><a href="#method-i-prime-3F-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
+<ul><li>
+<p><code>checks</code> - integer</p>
+</li></ul>
+          
+          
+
+          
+          <div class="method-source-code" id="prime-3F-source">
+            <pre>static VALUE
+ossl_bn_is_prime(int argc, VALUE *argv, VALUE self)
+{
+    BIGNUM *bn;
+    VALUE vchecks;
+    int checks = BN_prime_checks;
+
+    if (rb_scan_args(argc, argv, &quot;01&quot;, &amp;vchecks) == 1) {
+        checks = NUM2INT(vchecks);
+    }
+    GetBN(self, bn);
+    switch (BN_is_prime_ex(bn, checks, ossl_bn_ctx, NULL)) {
+    case 1:
+        return Qtrue;
+    case 0:
+        return Qfalse;
+    default:
+        ossl_raise(eBNError, NULL);
+    }
+    /* not reachable */
+    return Qnil;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-prime_fasttest-3F" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            prime_fasttest? &rarr; true | false
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            prime_fasttest?(checks) &rarr; true | false
+          </span>
+          
+        </div>
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            prime_fasttest?(checks, trial_div) &rarr; true | false
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Performs a Miller-Rabin primality test. This is same as <a
+href="BN.html#method-i-prime-3F">prime?</a> except this first attempts
+trial divisions with some small primes.</p>
+
+<h3 id="method-i-prime_fasttest-3F-label-Parameters">Parameters<span><a href="#method-i-prime_fasttest-3F-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
+<ul><li>
+<p><code>checks</code> - integer</p>
+</li><li>
+<p><code>trial_div</code> - boolean</p>
+</li></ul>
+          
+          
+
+          
+          <div class="method-source-code" id="prime_fasttest-3F-source">
+            <pre>static VALUE
+ossl_bn_is_prime_fasttest(int argc, VALUE *argv, VALUE self)
+{
+    BIGNUM *bn;
+    VALUE vchecks, vtrivdiv;
+    int checks = BN_prime_checks, do_trial_division = 1;
+
+    rb_scan_args(argc, argv, &quot;02&quot;, &amp;vchecks, &amp;vtrivdiv);
+
+    if (!NIL_P(vchecks)) {
+        checks = NUM2INT(vchecks);
+    }
+    GetBN(self, bn);
+    /* handle true/false */
+    if (vtrivdiv == Qfalse) {
+        do_trial_division = 0;
+    }
+    switch (BN_is_prime_fasttest_ex(bn, checks, ossl_bn_ctx, do_trial_division, NULL)) {
+    case 1:
+        return Qtrue;
+    case 0:
+        return Qfalse;
+    default:
+        ossl_raise(eBNError, NULL);
+    }
+    /* not reachable */
+    return Qnil;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-rshift-21" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            rshift!(bits) &rarr; self
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-set_bit-21" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            set_bit!(bit) &rarr; self
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-sqr" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            sqr &rarr; aBN
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-to_bn" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">to_bn</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="to_bn-source">
+            <pre>static VALUE
+ossl_bn_to_bn(VALUE self)
+{
+    return self;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-to_i" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            to_i &rarr; integer
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="to_i-source">
+            <pre>static VALUE
+ossl_bn_to_i(VALUE self)
+{
+    BIGNUM *bn;
+    char *txt;
+    VALUE num;
+
+    GetBN(self, bn);
+
+    if (!(txt = BN_bn2hex(bn))) {
+        ossl_raise(eBNError, NULL);
+    }
+    num = rb_cstr_to_inum(txt, 16, Qtrue);
+    OPENSSL_free(txt);
+
+    return num;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+        <div class="aliases">
+          Also aliased as: <a href="BN.html#method-i-to_int">to_int</a>
+        </div>
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-to_int" class="method-detail method-alias">
+        
+        <div class="method-heading">
+          <span class="method-name">to_int</span><span
+            class="method-args">()</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+
+        
+        <div class="aliases">
+          Alias for: <a href="BN.html#method-i-to_i">to_i</a>
+        </div>
+        
+      </div>
+
+    
+      <div id="method-i-to_s" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            to_s &rarr; string
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            to_s(base) &rarr; string
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <h3 id="method-i-to_s-label-Parameters">Parameters<span><a href="#method-i-to_s-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
+<ul><li>
+<p><code>base</code> - integer Valid values:</p>
+<ul><li>
+<p>0 - MPI</p>
+</li><li>
+<p>2 - binary</p>
+</li><li>
+<p>10 - the default</p>
+</li><li>
+<p>16 - hex</p>
+</li></ul>
+</li></ul>
+          
+          
+
+          
+          <div class="method-source-code" id="to_s-source">
+            <pre>static VALUE
+ossl_bn_to_s(int argc, VALUE *argv, VALUE self)
+{
+    BIGNUM *bn;
+    VALUE str, bs;
+    int base = 10, len;
+    char *buf;
+
+    if (rb_scan_args(argc, argv, &quot;01&quot;, &amp;bs) == 1) {
+        base = NUM2INT(bs);
+    }
+    GetBN(self, bn);
+    switch (base) {
+    case 0:
+        len = BN_bn2mpi(bn, NULL);
+        str = rb_str_new(0, len);
+        if (BN_bn2mpi(bn, (unsigned char *)RSTRING_PTR(str)) != len)
+            ossl_raise(eBNError, NULL);
+        break;
+    case 2:
+        len = BN_num_bytes(bn);
+        str = rb_str_new(0, len);
+        if (BN_bn2bin(bn, (unsigned char *)RSTRING_PTR(str)) != len)
+            ossl_raise(eBNError, NULL);
+        break;
+    case 10:
+        if (!(buf = BN_bn2dec(bn))) ossl_raise(eBNError, NULL);
+        str = ossl_buf2str(buf, rb_long2int(strlen(buf)));
+        break;
+    case 16:
+        if (!(buf = BN_bn2hex(bn))) ossl_raise(eBNError, NULL);
+        str = ossl_buf2str(buf, rb_long2int(strlen(buf)));
+        break;
+    default:
+        ossl_raise(rb_eArgError, &quot;invalid radix %d&quot;, base);
+    }
+
+    return str;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-ucmp" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            ucmp(bn2) &rarr; integer
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-zero-3F" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            zero? &rarr; true | false
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.2.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

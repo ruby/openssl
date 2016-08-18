@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="UTF-8">
+
+<title>module OpenSSL::Random - RDoc Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "../";
+</script>
+
+<script src="../js/jquery.js"></script>
+<script src="../js/darkfish.js"></script>
+
+<link href="../css/fonts.css" rel="stylesheet">
+<link href="../css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="module">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="../index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="../table_of_contents.html#pages">Pages</a>
+    <a href="../table_of_contents.html#classes">Classes</a>
+    <a href="../table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-c-egd">::egd</a>
+    
+    <li ><a href="#method-c-egd_bytes">::egd_bytes</a>
+    
+    <li ><a href="#method-c-load_random_file">::load_random_file</a>
+    
+    <li ><a href="#method-c-pseudo_bytes">::pseudo_bytes</a>
+    
+    <li ><a href="#method-c-random_add">::random_add</a>
+    
+    <li ><a href="#method-c-random_bytes">::random_bytes</a>
+    
+    <li ><a href="#method-c-seed">::seed</a>
+    
+    <li ><a href="#method-c-status-3F">::status?</a>
+    
+    <li ><a href="#method-c-write_random_file">::write_random_file</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="module-OpenSSL::Random">
+  <h1 id="module-OpenSSL::Random" class="module">
+    module OpenSSL::Random
+  </h1>
+
+  <section class="description">
+    
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-egd" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            egd(filename) &rarr; true
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Same as <a href="Random.html#method-c-egd_bytes">::egd_bytes</a> but
+queries 255 bytes by default.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="egd-source">
+            <pre>static VALUE
+ossl_rand_egd(VALUE self, VALUE filename)
+{
+    rb_check_safe_obj(filename);
+
+    if (RAND_egd(StringValueCStr(filename)) == -1) {
+        ossl_raise(eRandomError, NULL);
+    }
+    return Qtrue;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-egd_bytes" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            egd_bytes(filename, length) &rarr; true
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Queries the entropy gathering daemon EGD on socket path given by
+<code>filename</code>.</p>
+
+<p>Fetches <code>length</code> number of bytes and uses ::add to seed the <a
+href="../OpenSSL.html">OpenSSL</a> built-in PRNG.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="egd_bytes-source">
+            <pre>static VALUE
+ossl_rand_egd_bytes(VALUE self, VALUE filename, VALUE len)
+{
+    int n = NUM2INT(len);
+
+    rb_check_safe_obj(filename);
+
+    if (RAND_egd_bytes(StringValueCStr(filename), n) == -1) {
+        ossl_raise(eRandomError, NULL);
+    }
+    return Qtrue;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-load_random_file" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            load_random_file(filename) &rarr; true
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Reads bytes from <code>filename</code> and adds them to the PRNG.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="load_random_file-source">
+            <pre>static VALUE
+ossl_rand_load_file(VALUE self, VALUE filename)
+{
+    rb_check_safe_obj(filename);
+
+    if(!RAND_load_file(StringValueCStr(filename), -1)) {
+        ossl_raise(eRandomError, NULL);
+    }
+    return Qtrue;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-pseudo_bytes" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            pseudo_bytes(length) &rarr; string
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Generates <code>string</code> with <code>length</code> number of
+pseudo-random bytes.</p>
+
+<p>Pseudo-random byte sequences generated by <a
+href="Random.html#method-c-pseudo_bytes">::pseudo_bytes</a> will be unique
+if they are of sufficient length, but are not necessarily unpredictable.</p>
+
+<pre>Example:
+
+  OpenSSL::Random.pseudo_bytes(12)
+  =&gt; &quot;...&quot;</pre>
+          
+          
+
+          
+          <div class="method-source-code" id="pseudo_bytes-source">
+            <pre>static VALUE
+ossl_rand_pseudo_bytes(VALUE self, VALUE len)
+{
+    VALUE str;
+    int n = NUM2INT(len);
+
+    str = rb_str_new(0, n);
+    if (RAND_pseudo_bytes((unsigned char *)RSTRING_PTR(str), n) &lt; 1) {
+        ossl_raise(eRandomError, NULL);
+    }
+
+    return str;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-random_add" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            add(str, entropy) &rarr; self
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Mixes the bytes from <code>str</code> into the Pseudo <a
+href="Random.html">Random</a> Number Generator(PRNG) state.</p>
+
+<p>Thus, if the data from <code>str</code> are unpredictable to an adversary,
+this increases the uncertainty about the state and makes the PRNG output
+less predictable.</p>
+
+<p>The <code>entropy</code> argument is (the lower bound of) an estimate of
+how much randomness is contained in <code>str</code>, measured in bytes.</p>
+
+<pre>Example:
+
+  pid = $$
+  now = Time.now
+  ary = [now.to_i, now.nsec, 1000, pid]
+  OpenSSL::Random.add(ary.join(&quot;&quot;).to_s, 0.0)
+  OpenSSL::Random.seed(ary.join(&quot;&quot;).to_s)</pre>
+          
+          
+
+          
+          <div class="method-source-code" id="random_add-source">
+            <pre>static VALUE
+ossl_rand_add(VALUE self, VALUE str, VALUE entropy)
+{
+    StringValue(str);
+    RAND_add(RSTRING_PTR(str), RSTRING_LENINT(str), NUM2DBL(entropy));
+
+    return self;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-random_bytes" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            random_bytes(length) &rarr; string
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Generates <code>string</code> with <code>length</code> number of
+cryptographically strong pseudo-random bytes.</p>
+
+<pre>Example:
+
+  OpenSSL::Random.random_bytes(12)
+  =&gt; &quot;...&quot;</pre>
+          
+          
+
+          
+          <div class="method-source-code" id="random_bytes-source">
+            <pre>static VALUE
+ossl_rand_bytes(VALUE self, VALUE len)
+{
+    VALUE str;
+    int n = NUM2INT(len);
+    int ret;
+
+    str = rb_str_new(0, n);
+    ret = RAND_bytes((unsigned char *)RSTRING_PTR(str), n);
+    if (ret == 0) {
+        ossl_raise(eRandomError, &quot;RAND_bytes&quot;);
+    } else if (ret == -1) {
+        ossl_raise(eRandomError, &quot;RAND_bytes is not supported&quot;);
+    }
+
+    return str;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-seed" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            seed(str) &rarr; str
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p><a href="Random.html#method-c-seed">::seed</a> is equivalent to ::add where
+<code>entropy</code> is length of <code>str</code>.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="seed-source">
+            <pre>static VALUE
+ossl_rand_seed(VALUE self, VALUE str)
+{
+    StringValue(str);
+    RAND_seed(RSTRING_PTR(str), RSTRING_LENINT(str));
+
+    return str;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-status-3F" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            status? &rarr; true | false
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Return true if the PRNG has been seeded with enough data, false otherwise.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="status-3F-source">
+            <pre>static VALUE
+ossl_rand_status(VALUE self)
+{
+    return RAND_status() ? Qtrue : Qfalse;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-write_random_file" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            write_random_file(filename) &rarr; true
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Writes a number of random generated bytes (currently 1024) to
+<code>filename</code> which can be used to initialize the PRNG by calling
+<a href="Random.html#method-c-load_random_file">::load_random_file</a> in a
+later session.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="write_random_file-source">
+            <pre>static VALUE
+ossl_rand_write_file(VALUE self, VALUE filename)
+{
+    rb_check_safe_obj(filename);
+
+    if (RAND_write_file(StringValueCStr(filename)) == -1) {
+        ossl_raise(eRandomError, NULL);
+    }
+    return Qtrue;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.2.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

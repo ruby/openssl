@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="UTF-8">
+
+<title>class OpenSSL::Digest - RDoc Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "../";
+</script>
+
+<script src="../js/jquery.js"></script>
+<script src="../js/darkfish.js"></script>
+
+<link href="../css/fonts.css" rel="stylesheet">
+<link href="../css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="class">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="../index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="../table_of_contents.html#pages">Pages</a>
+    <a href="../table_of_contents.html#classes">Classes</a>
+    <a href="../table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+<div class="nav-section">
+  <h3>Table of Contents</h3>
+
+  <ul class="link-list" role="directory">
+    <li><a href="#class-OpenSSL::Digest-label-Mapping+between+Digest+class+and+sn-2Fln">Mapping between Digest class and sn/ln</a>
+    <li><a href="#class-OpenSSL::Digest-label-MD2">MD2</a>
+    <li><a href="#class-OpenSSL::Digest-label-MD4">MD4</a>
+    <li><a href="#class-OpenSSL::Digest-label-MD5">MD5</a>
+    <li><a href="#class-OpenSSL::Digest-label-SHA">SHA</a>
+    <li><a href="#class-OpenSSL::Digest-label-SHA-1">SHA-1</a>
+    <li><a href="#class-OpenSSL::Digest-label-SHA-224">SHA-224</a>
+    <li><a href="#class-OpenSSL::Digest-label-SHA-256">SHA-256</a>
+    <li><a href="#class-OpenSSL::Digest-label-SHA-384">SHA-384</a>
+    <li><a href="#class-OpenSSL::Digest-label-SHA-512">SHA-512</a>
+    <li><a href="#class-OpenSSL::Digest-label-Hashing+a+file">Hashing a file</a>
+    <li><a href="#class-OpenSSL::Digest-label-Hashing+several+pieces+of+data+at+once">Hashing several pieces of data at once</a>
+    <li><a href="#class-OpenSSL::Digest-label-Reuse+a+Digest+instance">Reuse a Digest instance</a>
+  </ul>
+</div>
+
+
+  <div id="class-metadata">
+    
+    <div id="parent-class-section" class="nav-section">
+  <h3>Parent</h3>
+
+  
+  <p class="link">Digest::Class
+  
+</div>
+
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li class="calls-super" ><a href="#method-c-digest">::digest</a>
+    
+    <li ><a href="#method-c-new">::new</a>
+    
+    <li ><a href="#method-i-3C-3C">#&lt;&lt;</a>
+    
+    <li ><a href="#method-i-block_length">#block_length</a>
+    
+    <li ><a href="#method-i-digest_length">#digest_length</a>
+    
+    <li ><a href="#method-i-name">#name</a>
+    
+    <li ><a href="#method-i-reset">#reset</a>
+    
+    <li ><a href="#method-i-update">#update</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="class-OpenSSL::Digest">
+  <h1 id="class-OpenSSL::Digest" class="class">
+    class OpenSSL::Digest
+  </h1>
+
+  <section class="description">
+    
+<p><a href="Digest.html">OpenSSL::Digest</a> allows you to compute message
+digests (sometimes interchangeably called “hashes”) of arbitrary data that
+are cryptographically secure, i.e. a <a href="Digest.html">Digest</a>
+implements a secure one-way function.</p>
+
+<p>One-way functions offer some useful properties. E.g. given two distinct
+inputs the probability that both yield the same output is highly unlikely.
+Combined with the fact that every message digest algorithm has a
+fixed-length output of just a few bytes, digests are often used to create
+unique identifiers for arbitrary data. A common example is the creation of
+a unique id for binary documents that are stored in a database.</p>
+
+<p>Another useful characteristic of one-way functions (and thus the name) is
+that given a digest there is no indication about the original data that
+produced it, i.e. the only way to identify the original input is to
+“brute-force” through every possible combination of inputs.</p>
+
+<p>These characteristics make one-way functions also ideal companions for
+public key signature algorithms: instead of signing an entire document,
+first a hash of the document is produced with a considerably faster message
+digest algorithm and only the few bytes of its output need to be signed
+using the slower public key algorithm. To validate the integrity of a
+signed document, it suffices to re-compute the hash and verify that it is
+equal to that in the signature.</p>
+
+<p>Among the supported message digest algorithms are:</p>
+<ul><li>
+<p>SHA, SHA1, SHA224, SHA256, SHA384 and SHA512</p>
+</li><li>
+<p>MD2, MD4, MDC2 and MD5</p>
+</li><li>
+<p>RIPEMD160</p>
+</li><li>
+<p>DSS, DSS1 (Pseudo algorithms to be used for DSA signatures. DSS is equal to
+SHA and DSS1 is equal to SHA1)</p>
+</li></ul>
+
+<p>For each of these algorithms, there is a sub-class of <a
+href="Digest.html">Digest</a> that can be instantiated as simply as e.g.</p>
+
+<pre class="ruby"><span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span><span class="ruby-operator">::</span><span class="ruby-constant">SHA1</span>.<span class="ruby-identifier">new</span>
+</pre>
+
+<h3 id="class-OpenSSL::Digest-label-Mapping+between+Digest+class+and+sn-2Fln">Mapping between <a href="Digest.html">Digest</a> class and sn/ln<span><a href="#class-OpenSSL::Digest-label-Mapping+between+Digest+class+and+sn-2Fln">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>The sn (short names) and ln (long names) are defined in
+&lt;openssl/object.h&gt; and &lt;openssl/obj_mac.h&gt;. They are textual
+representations of ASN.1 OBJECT IDENTIFIERs. Each supported digest
+algorithm has an OBJECT IDENTIFIER associated to it and those again have
+short/long names assigned to them. E.g. the OBJECT IDENTIFIER for SHA-1 is
+1.3.14.3.2.26 and its sn is “SHA1” and its ln is “sha1”.</p>
+
+<h4 id="class-OpenSSL::Digest-label-MD2">MD2<span><a href="#class-OpenSSL::Digest-label-MD2">&para;</a> <a href="#top">&uarr;</a></span></h4>
+<ul><li>
+<p>sn: MD2</p>
+</li><li>
+<p>ln: md2</p>
+</li></ul>
+
+<h4 id="class-OpenSSL::Digest-label-MD4">MD4<span><a href="#class-OpenSSL::Digest-label-MD4">&para;</a> <a href="#top">&uarr;</a></span></h4>
+<ul><li>
+<p>sn: MD4</p>
+</li><li>
+<p>ln: md4</p>
+</li></ul>
+
+<h4 id="class-OpenSSL::Digest-label-MD5">MD5<span><a href="#class-OpenSSL::Digest-label-MD5">&para;</a> <a href="#top">&uarr;</a></span></h4>
+<ul><li>
+<p>sn: MD5</p>
+</li><li>
+<p>ln: md5</p>
+</li></ul>
+
+<h4 id="class-OpenSSL::Digest-label-SHA">SHA<span><a href="#class-OpenSSL::Digest-label-SHA">&para;</a> <a href="#top">&uarr;</a></span></h4>
+<ul><li>
+<p>sn: SHA</p>
+</li><li>
+<p>ln: SHA</p>
+</li></ul>
+
+<h4 id="class-OpenSSL::Digest-label-SHA-1">SHA-1<span><a href="#class-OpenSSL::Digest-label-SHA-1">&para;</a> <a href="#top">&uarr;</a></span></h4>
+<ul><li>
+<p>sn: SHA1</p>
+</li><li>
+<p>ln: sha1</p>
+</li></ul>
+
+<h4 id="class-OpenSSL::Digest-label-SHA-224">SHA-224<span><a href="#class-OpenSSL::Digest-label-SHA-224">&para;</a> <a href="#top">&uarr;</a></span></h4>
+<ul><li>
+<p>sn: SHA224</p>
+</li><li>
+<p>ln: sha224</p>
+</li></ul>
+
+<h4 id="class-OpenSSL::Digest-label-SHA-256">SHA-256<span><a href="#class-OpenSSL::Digest-label-SHA-256">&para;</a> <a href="#top">&uarr;</a></span></h4>
+<ul><li>
+<p>sn: SHA256</p>
+</li><li>
+<p>ln: sha256</p>
+</li></ul>
+
+<h4 id="class-OpenSSL::Digest-label-SHA-384">SHA-384<span><a href="#class-OpenSSL::Digest-label-SHA-384">&para;</a> <a href="#top">&uarr;</a></span></h4>
+<ul><li>
+<p>sn: SHA384</p>
+</li><li>
+<p>ln: sha384</p>
+</li></ul>
+
+<h4 id="class-OpenSSL::Digest-label-SHA-512">SHA-512<span><a href="#class-OpenSSL::Digest-label-SHA-512">&para;</a> <a href="#top">&uarr;</a></span></h4>
+<ul><li>
+<p>sn: SHA512</p>
+</li><li>
+<p>ln: sha512</p>
+</li></ul>
+
+<p>“Breaking” a message digest algorithm means defying its one-way function
+characteristics, i.e. producing a collision or finding a way to get to the
+original data by means that are more efficient than brute-forcing etc. Most
+of the supported digest algorithms can be considered broken in this sense,
+even the very popular MD5 and SHA1 algorithms. Should security be your
+highest concern, then you should probably rely on SHA224, SHA256, SHA384 or
+SHA512.</p>
+
+<h3 id="class-OpenSSL::Digest-label-Hashing+a+file">Hashing a file<span><a href="#class-OpenSSL::Digest-label-Hashing+a+file">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby"><span class="ruby-identifier">data</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span>(<span class="ruby-string">&#39;document&#39;</span>)
+<span class="ruby-identifier">sha256</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span><span class="ruby-operator">::</span><span class="ruby-constant">SHA256</span>.<span class="ruby-identifier">new</span>
+<span class="ruby-identifier">digest</span> = <span class="ruby-identifier">sha256</span>.<span class="ruby-identifier">digest</span>(<span class="ruby-identifier">data</span>)
+</pre>
+
+<h3 id="class-OpenSSL::Digest-label-Hashing+several+pieces+of+data+at+once">Hashing several pieces of data at once<span><a href="#class-OpenSSL::Digest-label-Hashing+several+pieces+of+data+at+once">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby"><span class="ruby-identifier">data1</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span>(<span class="ruby-string">&#39;file1&#39;</span>)
+<span class="ruby-identifier">data2</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span>(<span class="ruby-string">&#39;file2&#39;</span>)
+<span class="ruby-identifier">data3</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span>(<span class="ruby-string">&#39;file3&#39;</span>)
+<span class="ruby-identifier">sha256</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span><span class="ruby-operator">::</span><span class="ruby-constant">SHA256</span>.<span class="ruby-identifier">new</span>
+<span class="ruby-identifier">sha256</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">data1</span>
+<span class="ruby-identifier">sha256</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">data2</span>
+<span class="ruby-identifier">sha256</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">data3</span>
+<span class="ruby-identifier">digest</span> = <span class="ruby-identifier">sha256</span>.<span class="ruby-identifier">digest</span>
+</pre>
+
+<h3 id="class-OpenSSL::Digest-label-Reuse+a+Digest+instance">Reuse a <a href="Digest.html">Digest</a> instance<span><a href="#class-OpenSSL::Digest-label-Reuse+a+Digest+instance">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby"><span class="ruby-identifier">data1</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span>(<span class="ruby-string">&#39;file1&#39;</span>)
+<span class="ruby-identifier">sha256</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span><span class="ruby-operator">::</span><span class="ruby-constant">SHA256</span>.<span class="ruby-identifier">new</span>
+<span class="ruby-identifier">digest1</span> = <span class="ruby-identifier">sha256</span>.<span class="ruby-identifier">digest</span>(<span class="ruby-identifier">data1</span>)
+
+<span class="ruby-identifier">data2</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span>(<span class="ruby-string">&#39;file2&#39;</span>)
+<span class="ruby-identifier">sha256</span>.<span class="ruby-identifier">reset</span>
+<span class="ruby-identifier">digest2</span> = <span class="ruby-identifier">sha256</span>.<span class="ruby-identifier">digest</span>(<span class="ruby-identifier">data2</span>)
+</pre>
+
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-digest" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">digest</span><span
+            class="method-args">(name, data)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Return the <code>data</code> hash computed with <code>name</code> <a
+href="Digest.html">Digest</a>. <code>name</code> is either the long name or
+short name of a supported digest algorithm.</p>
+
+<h3 id="method-c-digest-label-Examples">Examples<span><a href="#method-c-digest-label-Examples">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby"><span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">digest</span>(<span class="ruby-string">&quot;SHA256&quot;</span>, <span class="ruby-string">&quot;abc&quot;</span>)
+</pre>
+
+<p>which is equivalent to:</p>
+
+<pre class="ruby"><span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span><span class="ruby-operator">::</span><span class="ruby-constant">SHA256</span>.<span class="ruby-identifier">digest</span>(<span class="ruby-string">&quot;abc&quot;</span>)
+</pre>
+          
+          
+            <div class="method-calls-super">
+              Calls superclass method
+              
+            </div>
+          
+
+          
+          <div class="method-source-code" id="digest-source">
+            <pre><span class="ruby-comment"># File lib/openssl/digest.rb, line 37</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">digest</span>(<span class="ruby-identifier">name</span>, <span class="ruby-identifier">data</span>)
+  <span class="ruby-keyword">super</span>(<span class="ruby-identifier">data</span>, <span class="ruby-identifier">name</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-new" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            new(string [, data]) &rarr; Digest
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Creates a <a href="Digest.html">Digest</a> instance based on
+<code>string</code>, which is either the ln (long name) or sn (short name)
+of a supported digest algorithm. If <code>data</code> (a
+<code>String</code>) is given, it is used as the initial input to the <a
+href="Digest.html">Digest</a> instance, i.e.</p>
+
+<pre class="ruby"><span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;sha256&#39;</span>, <span class="ruby-string">&#39;digestdata&#39;</span>)
+</pre>
+
+<p>is equal to</p>
+
+<pre class="ruby"><span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;sha256&#39;</span>)
+<span class="ruby-identifier">digest</span>.<span class="ruby-identifier">update</span>(<span class="ruby-string">&#39;digestdata&#39;</span>)
+</pre>
+
+<h3 id="method-c-new-label-Example">Example<span><a href="#method-c-new-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby"><span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;sha1&#39;</span>)
+</pre>
+          
+          
+
+          
+          <div class="method-source-code" id="new-source">
+            <pre>static VALUE
+ossl_digest_initialize(int argc, VALUE *argv, VALUE self)
+{
+    EVP_MD_CTX *ctx;
+    const EVP_MD *md;
+    VALUE type, data;
+
+    rb_scan_args(argc, argv, &quot;11&quot;, &amp;type, &amp;data);
+    md = GetDigestPtr(type);
+    if (!NIL_P(data)) StringValue(data);
+
+    GetDigest(self, ctx);
+    if (EVP_DigestInit_ex(ctx, md, NULL) != 1) {
+        ossl_raise(eDigestError, &quot;Digest initialization failed.&quot;);
+    }
+
+    if (!NIL_P(data)) return ossl_digest_update(self, data);
+    return self;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-3C-3C" class="method-detail method-alias">
+        
+        <div class="method-heading">
+          <span class="method-name">&lt;&lt;</span><span
+            class="method-args">(p1)</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+
+        
+        <div class="aliases">
+          Alias for: <a href="Digest.html#method-i-update">update</a>
+        </div>
+        
+      </div>
+
+    
+      <div id="method-i-block_length" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            block_length &rarr; integer
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Returns the block length of the digest algorithm, i.e. the length in bytes
+of an individual block. Most modern algorithms partition a message to be
+digested into a sequence of fix-sized blocks that are processed
+consecutively.</p>
+
+<h3 id="method-i-block_length-label-Example">Example<span><a href="#method-i-block_length-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby"><span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span><span class="ruby-operator">::</span><span class="ruby-constant">SHA1</span>.<span class="ruby-identifier">new</span>
+<span class="ruby-identifier">puts</span> <span class="ruby-identifier">digest</span>.<span class="ruby-identifier">block_length</span> <span class="ruby-comment"># =&gt; 64</span>
+</pre>
+          
+          
+
+          
+          <div class="method-source-code" id="block_length-source">
+            <pre>static VALUE
+ossl_digest_block_length(VALUE self)
+{
+    EVP_MD_CTX *ctx;
+
+    GetDigest(self, ctx);
+
+    return INT2NUM(EVP_MD_CTX_block_size(ctx));
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-digest_length" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            digest_length &rarr; integer
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Returns the output size of the digest, i.e. the length in bytes of the
+final message digest result.</p>
+
+<h3 id="method-i-digest_length-label-Example">Example<span><a href="#method-i-digest_length-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby"><span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span><span class="ruby-operator">::</span><span class="ruby-constant">SHA1</span>.<span class="ruby-identifier">new</span>
+<span class="ruby-identifier">puts</span> <span class="ruby-identifier">digest</span>.<span class="ruby-identifier">digest_length</span> <span class="ruby-comment"># =&gt; 20</span>
+</pre>
+          
+          
+
+          
+          <div class="method-source-code" id="digest_length-source">
+            <pre>static VALUE
+ossl_digest_size(VALUE self)
+{
+    EVP_MD_CTX *ctx;
+
+    GetDigest(self, ctx);
+
+    return INT2NUM(EVP_MD_CTX_size(ctx));
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-name" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            name &rarr; string
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Returns the sn of this <a href="Digest.html">Digest</a> instance.</p>
+
+<h3 id="method-i-name-label-Example">Example<span><a href="#method-i-name-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby"><span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span><span class="ruby-operator">::</span><span class="ruby-constant">SHA512</span>.<span class="ruby-identifier">new</span>
+<span class="ruby-identifier">puts</span> <span class="ruby-identifier">digest</span>.<span class="ruby-identifier">name</span> <span class="ruby-comment"># =&gt; SHA512</span>
+</pre>
+          
+          
+
+          
+          <div class="method-source-code" id="name-source">
+            <pre>static VALUE
+ossl_digest_name(VALUE self)
+{
+    EVP_MD_CTX *ctx;
+
+    GetDigest(self, ctx);
+
+    return rb_str_new2(EVP_MD_name(EVP_MD_CTX_md(ctx)));
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-reset" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            reset &rarr; self
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Resets the <a href="Digest.html">Digest</a> in the sense that any <a
+href="Digest.html#method-i-update">#update</a> that has been performed is
+abandoned and the <a href="Digest.html">Digest</a> is set to its initial
+state again.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="reset-source">
+            <pre>static VALUE
+ossl_digest_reset(VALUE self)
+{
+    EVP_MD_CTX *ctx;
+
+    GetDigest(self, ctx);
+    if (EVP_DigestInit_ex(ctx, EVP_MD_CTX_md(ctx), NULL) != 1) {
+        ossl_raise(eDigestError, &quot;Digest initialization failed.&quot;);
+    }
+
+    return self;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-update" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            update(string) &rarr; aString
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Not every message digest can be computed in one single pass. If a message
+digest is to be computed from several subsequent sources, then each may be
+passed individually to the <a href="Digest.html">Digest</a> instance.</p>
+
+<h3 id="method-i-update-label-Example">Example<span><a href="#method-i-update-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby"><span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span><span class="ruby-operator">::</span><span class="ruby-constant">SHA256</span>.<span class="ruby-identifier">new</span>
+<span class="ruby-identifier">digest</span>.<span class="ruby-identifier">update</span>(<span class="ruby-string">&#39;First input&#39;</span>)
+<span class="ruby-identifier">digest</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-string">&#39;Second input&#39;</span> <span class="ruby-comment"># equivalent to digest.update(&#39;Second input&#39;)</span>
+<span class="ruby-identifier">result</span> = <span class="ruby-identifier">digest</span>.<span class="ruby-identifier">digest</span>
+</pre>
+          
+          
+
+          
+          <div class="method-source-code" id="update-source">
+            <pre>VALUE
+ossl_digest_update(VALUE self, VALUE data)
+{
+    EVP_MD_CTX *ctx;
+
+    StringValue(data);
+    GetDigest(self, ctx);
+
+    if (!EVP_DigestUpdate(ctx, RSTRING_PTR(data), RSTRING_LEN(data)))
+        ossl_raise(eDigestError, &quot;EVP_DigestUpdate&quot;);
+
+    return self;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+        <div class="aliases">
+          Also aliased as: <a href="Digest.html#method-i-3C-3C">&lt;&lt;</a>
+        </div>
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.2.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

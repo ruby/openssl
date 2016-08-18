@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="UTF-8">
+
+<title>class OpenSSL::OCSP::BasicResponse - RDoc Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "../../";
+</script>
+
+<script src="../../js/jquery.js"></script>
+<script src="../../js/darkfish.js"></script>
+
+<link href="../../css/fonts.css" rel="stylesheet">
+<link href="../../css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="class">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="../../index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="../../table_of_contents.html#pages">Pages</a>
+    <a href="../../table_of_contents.html#classes">Classes</a>
+    <a href="../../table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    <div id="parent-class-section" class="nav-section">
+  <h3>Parent</h3>
+
+  
+  <p class="link">Object
+  
+</div>
+
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-c-new">::new</a>
+    
+    <li ><a href="#method-i-add_nonce">#add_nonce</a>
+    
+    <li ><a href="#method-i-add_status">#add_status</a>
+    
+    <li ><a href="#method-i-copy_nonce">#copy_nonce</a>
+    
+    <li ><a href="#method-i-find_response">#find_response</a>
+    
+    <li ><a href="#method-i-responses">#responses</a>
+    
+    <li ><a href="#method-i-sign">#sign</a>
+    
+    <li ><a href="#method-i-status">#status</a>
+    
+    <li ><a href="#method-i-to_der">#to_der</a>
+    
+    <li ><a href="#method-i-verify">#verify</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="class-OpenSSL::OCSP::BasicResponse">
+  <h1 id="class-OpenSSL::OCSP::BasicResponse" class="class">
+    class OpenSSL::OCSP::BasicResponse
+  </h1>
+
+  <section class="description">
+    
+<p>An <a href="BasicResponse.html">OpenSSL::OCSP::BasicResponse</a> contains
+the status of a certificate check which is created from an <a
+href="Request.html">OpenSSL::OCSP::Request</a>.  A <a
+href="BasicResponse.html">BasicResponse</a> is more detailed than a <a
+href="Response.html">Response</a>.</p>
+
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-new" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            OpenSSL::OCSP::BasicResponse.new(der_string = nil) &rarr; basic_response
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Creates a new <a href="BasicResponse.html">BasicResponse</a>. If
+<code>der_string</code> is given, decodes <code>der_string</code> as DER.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="new-source">
+            <pre>static VALUE
+ossl_ocspbres_initialize(int argc, VALUE *argv, VALUE self)
+{
+    VALUE arg;
+    OCSP_BASICRESP *res, *res_new;
+    const unsigned char *p;
+
+    rb_scan_args(argc, argv, &quot;01&quot;, &amp;arg);
+    if (!NIL_P(arg)) {
+        GetOCSPBasicRes(self, res);
+        arg = ossl_to_der_if_possible(arg);
+        StringValue(arg);
+        p = (unsigned char *)RSTRING_PTR(arg);
+        res_new = d2i_OCSP_BASICRESP(NULL, &amp;p, RSTRING_LEN(arg));
+        if (!res_new)
+            ossl_raise(eOCSPError, &quot;d2i_OCSP_BASICRESP&quot;);
+        SetOCSPBasicRes(self, res_new);
+        OCSP_BASICRESP_free(res);
+    }
+
+    return self;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-add_nonce" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            add_nonce(nonce = nil)
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Adds <code>nonce</code> to this response.  If no nonce was provided a
+random nonce will be added.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="add_nonce-source">
+            <pre>static VALUE
+ossl_ocspbres_add_nonce(int argc, VALUE *argv, VALUE self)
+{
+    OCSP_BASICRESP *bs;
+    VALUE val;
+    int ret;
+
+    rb_scan_args(argc, argv, &quot;01&quot;, &amp;val);
+    if(NIL_P(val)) {
+        GetOCSPBasicRes(self, bs);
+        ret = OCSP_basic_add1_nonce(bs, NULL, -1);
+    }
+    else{
+        StringValue(val);
+        GetOCSPBasicRes(self, bs);
+        ret = OCSP_basic_add1_nonce(bs, (unsigned char *)RSTRING_PTR(val), RSTRING_LENINT(val));
+    }
+    if(!ret) ossl_raise(eOCSPError, NULL);
+
+    return self;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-add_status" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            add_status(certificate_id, status, reason, revocation_time, this_update, next_update, extensions) &rarr; basic_response
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Adds a certificate status for <code>certificate_id</code>.
+<code>status</code> is the status, and must be one of these:</p>
+<ul><li>
+<p>OpenSSL::OCSP::V_CERTSTATUS_GOOD</p>
+</li><li>
+<p>OpenSSL::OCSP::V_CERTSTATUS_REVOKED</p>
+</li><li>
+<p>OpenSSL::OCSP::V_CERTSTATUS_UNKNOWN</p>
+</li></ul>
+
+<p><code>reason</code> and <code>revocation_time</code> can be given only when
+<code>status</code> is OpenSSL::OCSP::V_CERTSTATUS_REVOKED.
+<code>reason</code> describes the reason for the revocation, and must be
+one of OpenSSL::OCSP::REVOKED_STATUS_* constants.
+<code>revocation_time</code> is the time when the certificate is revoked.</p>
+
+<p><code>this_update</code> and <code>next_update</code> indicate the time at
+which ths status is verified to be correct and the time at or before which
+newer information will be available, respectively. <code>next_update</code>
+is optional.</p>
+
+<p><code>extensions</code> is an Array of <a
+href="../X509/Extension.html">OpenSSL::X509::Extension</a> to be included
+in the <a href="SingleResponse.html">SingleResponse</a>. This is also
+optional.</p>
+
+<p>Note that the times, <code>revocation_time</code>, <code>this_update</code>
+and <code>next_update</code> can be specified in either of <a
+href="../../Integer.html">Integer</a> or Time object. If they are <a
+href="../../Integer.html">Integer</a>, it is treated as the relative
+seconds from the current time.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="add_status-source">
+            <pre>static VALUE
+ossl_ocspbres_add_status(VALUE self, VALUE cid, VALUE status,
+                         VALUE reason, VALUE revtime,
+                         VALUE thisupd, VALUE nextupd, VALUE ext)
+{
+    OCSP_BASICRESP *bs;
+    OCSP_SINGLERESP *single;
+    OCSP_CERTID *id;
+    ASN1_TIME *ths = NULL, *nxt = NULL, *rev = NULL;
+    int st, rsn = 0, error = 0, rstatus = 0;
+    long i;
+    VALUE tmp;
+
+    GetOCSPBasicRes(self, bs);
+    SafeGetOCSPCertId(cid, id);
+    st = NUM2INT(status);
+    if (!NIL_P(ext)) { /* All ext&#39;s members must be X509::Extension */
+        ext = rb_check_array_type(ext);
+        for (i = 0; i &lt; RARRAY_LEN(ext); i++)
+            OSSL_Check_Kind(RARRAY_AREF(ext, i), cX509Ext);
+    }
+
+    if (st == V_OCSP_CERTSTATUS_REVOKED) {
+        rsn = NUM2INT(reason);
+        tmp = rb_protect(add_status_convert_time, revtime, &amp;rstatus);
+        if (rstatus) goto err;
+        rev = (ASN1_TIME *)tmp;
+    }
+
+    tmp = rb_protect(add_status_convert_time, thisupd, &amp;rstatus);
+    if (rstatus) goto err;
+    ths = (ASN1_TIME *)tmp;
+
+    if (!NIL_P(nextupd)) {
+        tmp = rb_protect(add_status_convert_time, nextupd, &amp;rstatus);
+        if (rstatus) goto err;
+        nxt = (ASN1_TIME *)tmp;
+    }
+
+    if(!(single = OCSP_basic_add1_status(bs, id, st, rsn, rev, ths, nxt))){
+        error = 1;
+        goto err;
+    }
+
+    if(!NIL_P(ext)){
+        X509_EXTENSION *x509ext;
+
+        for(i = 0; i &lt; RARRAY_LEN(ext); i++){
+            x509ext = GetX509ExtPtr(RARRAY_AREF(ext, i));
+            if(!OCSP_SINGLERESP_add_ext(single, x509ext, -1)){
+                error = 1;
+                goto err;
+            }
+        }
+    }
+
+ err:
+    ASN1_TIME_free(ths);
+    ASN1_TIME_free(nxt);
+    ASN1_TIME_free(rev);
+    if(error) ossl_raise(eOCSPError, NULL);
+    if(rstatus) rb_jump_tag(rstatus);
+
+    return self;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-copy_nonce" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            copy_nonce(request) &rarr; Integer
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Copies the nonce from <code>request</code> into this response.  Returns 1
+on success and 0 on failure.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="copy_nonce-source">
+            <pre>static VALUE
+ossl_ocspbres_copy_nonce(VALUE self, VALUE request)
+{
+    OCSP_BASICRESP *bs;
+    OCSP_REQUEST *req;
+    int ret;
+
+    GetOCSPBasicRes(self, bs);
+    SafeGetOCSPReq(request, req);
+    ret = OCSP_copy_nonce(bs, req);
+
+    return INT2NUM(ret);
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-find_response" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            find_response(certificate_id) &rarr; SingleResponse | nil
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Returns a <a href="SingleResponse.html">SingleResponse</a> whose CertId
+matches with <code>certificate_id</code>, or nil if this <a
+href="BasicResponse.html">BasicResponse</a> does not contain it.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="find_response-source">
+            <pre>static VALUE
+ossl_ocspbres_find_response(VALUE self, VALUE target)
+{
+    OCSP_BASICRESP *bs;
+    OCSP_SINGLERESP *sres, *sres_new;
+    OCSP_CERTID *id;
+    int n;
+
+    SafeGetOCSPCertId(target, id);
+    GetOCSPBasicRes(self, bs);
+
+    if ((n = OCSP_resp_find(bs, id, -1)) == -1)
+        return Qnil;
+
+    sres = OCSP_resp_get0(bs, n);
+    sres_new = ASN1_item_dup(ASN1_ITEM_rptr(OCSP_SINGLERESP), sres);
+    if (!sres_new)
+        ossl_raise(eOCSPError, &quot;ASN1_item_dup&quot;);
+
+    return ossl_ocspsres_new(sres_new);
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-responses" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            responses &rarr; Array of SingleResponse
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Returns an Array of <a href="SingleResponse.html">SingleResponse</a> for
+this <a href="BasicResponse.html">BasicResponse</a>.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="responses-source">
+            <pre>static VALUE
+ossl_ocspbres_get_responses(VALUE self)
+{
+    OCSP_BASICRESP *bs;
+    VALUE ret;
+    int count, i;
+
+    GetOCSPBasicRes(self, bs);
+    count = OCSP_resp_count(bs);
+    ret = rb_ary_new2(count);
+
+    for (i = 0; i &lt; count; i++) {
+        OCSP_SINGLERESP *sres, *sres_new;
+
+        sres = OCSP_resp_get0(bs, i);
+        sres_new = ASN1_item_dup(ASN1_ITEM_rptr(OCSP_SINGLERESP), sres);
+        if (!sres_new)
+            ossl_raise(eOCSPError, &quot;ASN1_item_dup&quot;);
+
+        rb_ary_push(ret, ossl_ocspsres_new(sres_new));
+    }
+
+    return ret;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-sign" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            sign(cert, key, certs = nil, flags = 0, digest = nil) &rarr; self
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Signs this <a href="../OCSP.html">OCSP</a> response using the
+<code>cert</code>, <code>key</code> and optional <code>digest</code>. This
+behaves in the similar way as <a
+href="Request.html#method-i-sign">OpenSSL::OCSP::Request#sign</a>.</p>
+
+<p><code>flags</code> can include:</p>
+<dl class="rdoc-list note-list"><dt>OpenSSL::OCSP::NOCERTS
+<dd>
+<p>don&#39;t include certificates</p>
+</dd><dt>OpenSSL::OCSP::NOTIME
+<dd>
+<p>don&#39;t set producedAt</p>
+</dd><dt>OpenSSL::OCSP::RESPID_KEY
+<dd>
+<p>use signer&#39;s public key hash as responderID</p>
+</dd></dl>
+          
+          
+
+          
+          <div class="method-source-code" id="sign-source">
+            <pre>static VALUE
+ossl_ocspbres_sign(int argc, VALUE *argv, VALUE self)
+{
+    VALUE signer_cert, signer_key, certs, flags, digest;
+    OCSP_BASICRESP *bs;
+    X509 *signer;
+    EVP_PKEY *key;
+    STACK_OF(X509) *x509s = NULL;
+    unsigned long flg = 0;
+    const EVP_MD *md;
+    int ret;
+
+    rb_scan_args(argc, argv, &quot;23&quot;, &amp;signer_cert, &amp;signer_key, &amp;certs, &amp;flags, &amp;digest);
+    GetOCSPBasicRes(self, bs);
+    signer = GetX509CertPtr(signer_cert);
+    key = GetPrivPKeyPtr(signer_key);
+    if (!NIL_P(flags))
+        flg = NUM2INT(flags);
+    if (NIL_P(digest))
+        md = EVP_sha1();
+    else
+        md = GetDigestPtr(digest);
+    if (NIL_P(certs))
+        flg |= OCSP_NOCERTS;
+    else
+        x509s = ossl_x509_ary2sk(certs);
+
+    ret = OCSP_basic_sign(bs, signer, key, md, x509s, flg);
+    sk_X509_pop_free(x509s, X509_free);
+    if (!ret) ossl_raise(eOCSPError, NULL);
+
+    return self;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-status" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            status &rarr; statuses
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Returns an Array of statuses for this response.  Each status contains a <a
+href="CertificateId.html">CertificateId</a>, the status (0 for good, 1 for
+revoked, 2 for unknown), the reason for the status, the revocation time,
+the time of this update, the time for the next update and a list of
+OpenSSL::X509::Extensions.</p>
+
+<p>This should be superseded by <a
+href="BasicResponse.html#method-i-responses">#responses</a> and <a
+href="BasicResponse.html#method-i-find_response">find_response</a> that
+return <a href="SingleResponse.html">SingleResponse</a>.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="status-source">
+            <pre>static VALUE
+ossl_ocspbres_get_status(VALUE self)
+{
+    OCSP_BASICRESP *bs;
+    OCSP_SINGLERESP *single;
+    OCSP_CERTID *cid;
+    ASN1_TIME *revtime, *thisupd, *nextupd;
+    int status, reason;
+    X509_EXTENSION *x509ext;
+    VALUE ret, ary, ext;
+    int count, ext_count, i, j;
+
+    GetOCSPBasicRes(self, bs);
+    ret = rb_ary_new();
+    count = OCSP_resp_count(bs);
+    for(i = 0; i &lt; count; i++){
+        single = OCSP_resp_get0(bs, i);
+        if(!single) continue;
+
+        revtime = thisupd = nextupd = NULL;
+        status = OCSP_single_get0_status(single, &amp;reason, &amp;revtime,
+                                         &amp;thisupd, &amp;nextupd);
+        if(status &lt; 0) continue;
+        if(!(cid = OCSP_CERTID_dup(OCSP_SINGLERESP_get0_id(single))))
+            ossl_raise(eOCSPError, NULL);
+        ary = rb_ary_new();
+        rb_ary_push(ary, ossl_ocspcertid_new(cid));
+        rb_ary_push(ary, INT2NUM(status));
+        rb_ary_push(ary, INT2NUM(reason));
+        rb_ary_push(ary, revtime ? asn1time_to_time(revtime) : Qnil);
+        rb_ary_push(ary, thisupd ? asn1time_to_time(thisupd) : Qnil);
+        rb_ary_push(ary, nextupd ? asn1time_to_time(nextupd) : Qnil);
+        ext = rb_ary_new();
+        ext_count = OCSP_SINGLERESP_get_ext_count(single);
+        for(j = 0; j &lt; ext_count; j++){
+            x509ext = OCSP_SINGLERESP_get_ext(single, j);
+            rb_ary_push(ext, ossl_x509ext_new(x509ext));
+        }
+        rb_ary_push(ary, ext);
+        rb_ary_push(ret, ary);
+    }
+
+    return ret;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-to_der" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            to_der &rarr; String
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Encodes this basic response into a DER-encoded string.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="to_der-source">
+            <pre>static VALUE
+ossl_ocspbres_to_der(VALUE self)
+{
+    OCSP_BASICRESP *res;
+    VALUE str;
+    long len;
+    unsigned char *p;
+
+    GetOCSPBasicRes(self, res);
+    if ((len = i2d_OCSP_BASICRESP(res, NULL)) &lt;= 0)
+        ossl_raise(eOCSPError, NULL);
+    str = rb_str_new(0, len);
+    p = (unsigned char *)RSTRING_PTR(str);
+    if (i2d_OCSP_BASICRESP(res, &amp;p) &lt;= 0)
+        ossl_raise(eOCSPError, NULL);
+    ossl_str_adjust(str, p);
+
+    return str;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-verify" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            verify(certificates, store, flags = 0) &rarr; true or false
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Verifies the signature of the response using the given
+<code>certificates</code> and <code>store</code>. This works in the similar
+way as <a
+href="Request.html#method-i-verify">OpenSSL::OCSP::Request#verify</a>.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="verify-source">
+            <pre>static VALUE
+ossl_ocspbres_verify(int argc, VALUE *argv, VALUE self)
+{
+    VALUE certs, store, flags;
+    OCSP_BASICRESP *bs;
+    STACK_OF(X509) *x509s;
+    X509_STORE *x509st;
+    int flg, result;
+
+    rb_scan_args(argc, argv, &quot;21&quot;, &amp;certs, &amp;store, &amp;flags);
+    GetOCSPBasicRes(self, bs);
+    x509st = GetX509StorePtr(store);
+    flg = NIL_P(flags) ? 0 : NUM2INT(flags);
+    x509s = ossl_x509_ary2sk(certs);
+#if (OPENSSL_VERSION_NUMBER &lt; 0x1000202fL) || defined(LIBRESSL_VERSION_NUMBER)
+    /*
+     * OpenSSL had a bug that it doesn&#39;t use the certificates in x509s for
+     * verifying the chain. This can be a problem when the response is signed by
+     * a certificate issued by an intermediate CA.
+     *
+     *       root_ca
+     *         |
+     *   intermediate_ca
+     *         |-------------|
+     *     end_entity    ocsp_signer
+     *
+     * When the certificate hierarchy is like this, and the response contains
+     * only ocsp_signer certificate, the following code wrongly fails.
+     *
+     *   store = OpenSSL::X509::Store.new; store.add_cert(root_ca)
+     *   basic_response.verify([intermediate_ca], store)
+     *
+     * So add the certificates in x509s to the embedded certificates list first.
+     *
+     * This is fixed in OpenSSL 0.9.8zg, 1.0.0s, 1.0.1n, 1.0.2b. But it still
+     * exists in LibreSSL 2.1.10, 2.2.9, 2.3.6, 2.4.1.
+     */
+    if (!(flg &amp; (OCSP_NOCHAIN | OCSP_NOVERIFY)) &amp;&amp;
+        sk_X509_num(x509s) &amp;&amp; sk_X509_num(bs-&gt;certs)) {
+        int i;
+
+        bs = ASN1_item_dup(ASN1_ITEM_rptr(OCSP_BASICRESP), bs);
+        if (!bs) {
+            sk_X509_pop_free(x509s, X509_free);
+            ossl_raise(eOCSPError, &quot;ASN1_item_dup&quot;);
+        }
+
+        for (i = 0; i &lt; sk_X509_num(x509s); i++) {
+            if (!OCSP_basic_add1_cert(bs, sk_X509_value(x509s, i))) {
+                sk_X509_pop_free(x509s, X509_free);
+                OCSP_BASICRESP_free(bs);
+                ossl_raise(eOCSPError, &quot;OCSP_basic_add1_cert&quot;);
+            }
+        }
+        result = OCSP_basic_verify(bs, x509s, x509st, flg);
+        OCSP_BASICRESP_free(bs);
+    }
+    else {
+        result = OCSP_basic_verify(bs, x509s, x509st, flg);
+    }
+#else
+    result = OCSP_basic_verify(bs, x509s, x509st, flg);
+#endif
+    sk_X509_pop_free(x509s, X509_free);
+    if (!result)
+        ossl_clear_error();
+
+    return result &gt; 0 ? Qtrue : Qfalse;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.2.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

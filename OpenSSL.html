@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="UTF-8">
+
+<title>module OpenSSL - RDoc Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="module">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+<div class="nav-section">
+  <h3>Table of Contents</h3>
+
+  <ul class="link-list" role="directory">
+    <li><a href="#module-OpenSSL-label-Install">Install</a>
+    <li><a href="#module-OpenSSL-label-Examples">Examples</a>
+    <li><a href="#module-OpenSSL-label-Keys">Keys</a>
+    <li><a href="#module-OpenSSL-label-Creating+a+Key">Creating a Key</a>
+    <li><a href="#module-OpenSSL-label-Exporting+a+Key">Exporting a Key</a>
+    <li><a href="#module-OpenSSL-label-Loading+a+Key">Loading a Key</a>
+    <li><a href="#module-OpenSSL-label-Loading+an+Encrypted+Key">Loading an Encrypted Key</a>
+    <li><a href="#module-OpenSSL-label-RSA+Encryption">RSA Encryption</a>
+    <li><a href="#module-OpenSSL-label-Encryption+-26+Decryption">Encryption &amp; Decryption</a>
+    <li><a href="#module-OpenSSL-label-Signatures">Signatures</a>
+    <li><a href="#module-OpenSSL-label-PBKDF2+Password-based+Encryption">PBKDF2 Password-based Encryption</a>
+    <li><a href="#module-OpenSSL-label-Encryption">Encryption</a>
+    <li><a href="#module-OpenSSL-label-Decryption">Decryption</a>
+    <li><a href="#module-OpenSSL-label-PKCS+-235+Password-based+Encryption">PKCS #5 Password-based Encryption</a>
+    <li><a href="#module-OpenSSL-label-Encryption">Encryption</a>
+    <li><a href="#module-OpenSSL-label-Decryption">Decryption</a>
+    <li><a href="#module-OpenSSL-label-X509+Certificates">X509 Certificates</a>
+    <li><a href="#module-OpenSSL-label-Creating+a+Certificate">Creating a Certificate</a>
+    <li><a href="#module-OpenSSL-label-Certificate+Extensions">Certificate Extensions</a>
+    <li><a href="#module-OpenSSL-label-Signing+a+Certificate">Signing a Certificate</a>
+    <li><a href="#module-OpenSSL-label-Loading+a+Certificate">Loading a Certificate</a>
+    <li><a href="#module-OpenSSL-label-Verifying+a+Certificate">Verifying a Certificate</a>
+    <li><a href="#module-OpenSSL-label-Certificate+Authority">Certificate Authority</a>
+    <li><a href="#module-OpenSSL-label-CA+Key">CA Key</a>
+    <li><a href="#module-OpenSSL-label-CA+Certificate">CA Certificate</a>
+    <li><a href="#module-OpenSSL-label-Certificate+Signing+Request">Certificate Signing Request</a>
+    <li><a href="#module-OpenSSL-label-Creating+a+Certificate+from+a+CSR">Creating a Certificate from a CSR</a>
+    <li><a href="#module-OpenSSL-label-SSL+and+TLS+Connections">SSL and TLS Connections</a>
+    <li><a href="#module-OpenSSL-label-SSL+Server">SSL Server</a>
+    <li><a href="#module-OpenSSL-label-SSL+client">SSL client</a>
+    <li><a href="#module-OpenSSL-label-Peer+Verification">Peer Verification</a>
+  </ul>
+</div>
+
+
+  <div id="class-metadata">
+    
+    
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-c-Digest">::Digest</a>
+    
+    <li ><a href="#method-c-debug">::debug</a>
+    
+    <li ><a href="#method-c-debug-3D">::debug=</a>
+    
+    <li ><a href="#method-c-errors">::errors</a>
+    
+    <li ><a href="#method-c-fips_mode-3D">::fips_mode=</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="module-OpenSSL">
+  <h1 id="module-OpenSSL" class="module">
+    module OpenSSL
+  </h1>
+
+  <section class="description">
+    
+<p><a href="OpenSSL.html">OpenSSL</a> provides <a
+href="OpenSSL/SSL.html">SSL</a>, TLS and general purpose cryptography.  It
+wraps the <a href="http://www.openssl.org/">OpenSSL</a> library.</p>
+
+<h1 id="module-OpenSSL-label-Install">Install<span><a href="#module-OpenSSL-label-Install">&para;</a> <a href="#top">&uarr;</a></span></h1>
+
+<p><a href="OpenSSL.html">OpenSSL</a> comes bundled with the Standard Library
+of Ruby.</p>
+
+<p>This means the <a href="OpenSSL.html">OpenSSL</a> extension is compiled
+with Ruby and packaged on build. During compile time, Ruby will need to
+link against the <a href="OpenSSL.html">OpenSSL</a> library on your system.
+However, you cannot use openssl provided by Apple to build standard library
+openssl.</p>
+
+<p>If you use OSX, you should install another openssl and run “`./configure
+–with-openssl-dir=/path/to/another-openssl“`. For Homebrew user, run `brew
+install openssl` and then “`./configure –with-openssl-dir=`brew –prefix
+openssl` “`.</p>
+
+<h1 id="module-OpenSSL-label-Examples">Examples<span><a href="#module-OpenSSL-label-Examples">&para;</a> <a href="#top">&uarr;</a></span></h1>
+
+<p>All examples assume you have loaded <a href="OpenSSL.html">OpenSSL</a>
+with:</p>
+
+<pre class="ruby"><span class="ruby-identifier">require</span> <span class="ruby-string">&#39;openssl&#39;</span>
+</pre>
+
+<p>These examples build atop each other.  For example the key created in the
+next is used in throughout these examples.</p>
+
+<h2 id="module-OpenSSL-label-Keys">Keys<span><a href="#module-OpenSSL-label-Keys">&para;</a> <a href="#top">&uarr;</a></span></h2>
+
+<h3 id="module-OpenSSL-label-Creating+a+Key">Creating a Key<span><a href="#module-OpenSSL-label-Creating+a+Key">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>This example creates a 2048 bit RSA keypair and writes it to the current
+directory.</p>
+
+<pre class="ruby"><span class="ruby-identifier">key</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">RSA</span>.<span class="ruby-identifier">new</span> <span class="ruby-value">2048</span>
+
+<span class="ruby-identifier">open</span> <span class="ruby-string">&#39;private_key.pem&#39;</span>, <span class="ruby-string">&#39;w&#39;</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">io</span><span class="ruby-operator">|</span> <span class="ruby-identifier">io</span>.<span class="ruby-identifier">write</span> <span class="ruby-identifier">key</span>.<span class="ruby-identifier">to_pem</span> <span class="ruby-keyword">end</span>
+<span class="ruby-identifier">open</span> <span class="ruby-string">&#39;public_key.pem&#39;</span>, <span class="ruby-string">&#39;w&#39;</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">io</span><span class="ruby-operator">|</span> <span class="ruby-identifier">io</span>.<span class="ruby-identifier">write</span> <span class="ruby-identifier">key</span>.<span class="ruby-identifier">public_key</span>.<span class="ruby-identifier">to_pem</span> <span class="ruby-keyword">end</span>
+</pre>
+
+<h3 id="module-OpenSSL-label-Exporting+a+Key">Exporting a Key<span><a href="#module-OpenSSL-label-Exporting+a+Key">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>Keys saved to disk without encryption are not secure as anyone who gets
+ahold of the key may use it unless it is encrypted.  In order to securely
+export a key you may export it with a pass phrase.</p>
+
+<pre class="ruby"><span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">new</span> <span class="ruby-string">&#39;AES-128-CBC&#39;</span>
+<span class="ruby-identifier">pass_phrase</span> = <span class="ruby-string">&#39;my secure pass phrase goes here&#39;</span>
+
+<span class="ruby-identifier">key_secure</span> = <span class="ruby-identifier">key</span>.<span class="ruby-identifier">export</span> <span class="ruby-identifier">cipher</span>, <span class="ruby-identifier">pass_phrase</span>
+
+<span class="ruby-identifier">open</span> <span class="ruby-string">&#39;private.secure.pem&#39;</span>, <span class="ruby-string">&#39;w&#39;</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">io</span><span class="ruby-operator">|</span>
+  <span class="ruby-identifier">io</span>.<span class="ruby-identifier">write</span> <span class="ruby-identifier">key_secure</span>
+<span class="ruby-keyword">end</span>
+</pre>
+
+<p><a href="OpenSSL/Cipher.html#method-c-ciphers">OpenSSL::Cipher.ciphers</a>
+returns a list of available ciphers.</p>
+
+<h3 id="module-OpenSSL-label-Loading+a+Key">Loading a Key<span><a href="#module-OpenSSL-label-Loading+a+Key">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>A key can also be loaded from a file.</p>
+
+<pre class="ruby"><span class="ruby-identifier">key2</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">RSA</span>.<span class="ruby-identifier">new</span> <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span> <span class="ruby-string">&#39;private_key.pem&#39;</span>
+<span class="ruby-identifier">key2</span>.<span class="ruby-identifier">public?</span> <span class="ruby-comment"># =&gt; true</span>
+<span class="ruby-identifier">key2</span>.<span class="ruby-identifier">private?</span> <span class="ruby-comment"># =&gt; true</span>
+</pre>
+
+<p>or</p>
+
+<pre class="ruby"><span class="ruby-identifier">key3</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">RSA</span>.<span class="ruby-identifier">new</span> <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span> <span class="ruby-string">&#39;public_key.pem&#39;</span>
+<span class="ruby-identifier">key3</span>.<span class="ruby-identifier">public?</span> <span class="ruby-comment"># =&gt; true</span>
+<span class="ruby-identifier">key3</span>.<span class="ruby-identifier">private?</span> <span class="ruby-comment"># =&gt; false</span>
+</pre>
+
+<h3 id="module-OpenSSL-label-Loading+an+Encrypted+Key">Loading an Encrypted Key<span><a href="#module-OpenSSL-label-Loading+an+Encrypted+Key">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p><a href="OpenSSL.html">OpenSSL</a> will prompt you for your pass phrase
+when loading an encrypted key. If you will not be able to type in the pass
+phrase you may provide it when loading the key:</p>
+
+<pre class="ruby"><span class="ruby-identifier">key4_pem</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span> <span class="ruby-string">&#39;private.secure.pem&#39;</span>
+<span class="ruby-identifier">pass_phrase</span> = <span class="ruby-string">&#39;my secure pass phrase goes here&#39;</span>
+<span class="ruby-identifier">key4</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">RSA</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">key4_pem</span>, <span class="ruby-identifier">pass_phrase</span>
+</pre>
+
+<h2 id="module-OpenSSL-label-RSA+Encryption">RSA Encryption<span><a href="#module-OpenSSL-label-RSA+Encryption">&para;</a> <a href="#top">&uarr;</a></span></h2>
+
+<p>RSA provides encryption and decryption using the public and private keys.
+You can use a variety of padding methods depending upon the intended use of
+encrypted data.</p>
+
+<h3 id="module-OpenSSL-label-Encryption+-26+Decryption">Encryption &amp; Decryption<span><a href="#module-OpenSSL-label-Encryption+-26+Decryption">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>Asymmetric public/private key encryption is slow and victim to attack in
+cases where it is used without padding or directly to encrypt larger chunks
+of data. Typical use cases for RSA encryption involve “wrapping” a
+symmetric key with the public key of the recipient who would “unwrap” that
+symmetric key again using their private key. The following illustrates a
+simplified example of such a key transport scheme. It shouldn&#39;t be used
+in practice, though, standardized protocols should always be preferred.</p>
+
+<pre class="ruby"><span class="ruby-identifier">wrapped_key</span> = <span class="ruby-identifier">key</span>.<span class="ruby-identifier">public_encrypt</span> <span class="ruby-identifier">key</span>
+</pre>
+
+<p>A symmetric key encrypted with the public key can only be decrypted with
+the corresponding private key of the recipient.</p>
+
+<pre class="ruby"><span class="ruby-identifier">original_key</span> = <span class="ruby-identifier">key</span>.<span class="ruby-identifier">private_decrypt</span> <span class="ruby-identifier">wrapped_key</span>
+</pre>
+
+<p>By default PKCS#1 padding will be used, but it is also possible to use
+other forms of padding, see <a href="OpenSSL/PKey/RSA.html">PKey::RSA</a>
+for further details.</p>
+
+<h3 id="module-OpenSSL-label-Signatures">Signatures<span><a href="#module-OpenSSL-label-Signatures">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>Using “private_encrypt” to encrypt some data with the private key is
+equivalent to applying a digital signature to the data. A verifying party
+may validate the signature by comparing the result of decrypting the
+signature with “public_decrypt” to the original data. However, <a
+href="OpenSSL/PKey.html">OpenSSL::PKey</a> already has methods “sign” and
+“verify” that handle digital signatures in a standardized way -
+“private_encrypt” and “public_decrypt” shouldn&#39;t be used in practice.</p>
+
+<p>To sign a document, a cryptographically secure hash of the document is
+computed first, which is then signed using the private key.</p>
+
+<pre class="ruby"><span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span><span class="ruby-operator">::</span><span class="ruby-constant">SHA256</span>.<span class="ruby-identifier">new</span>
+<span class="ruby-identifier">signature</span> = <span class="ruby-identifier">key</span>.<span class="ruby-identifier">sign</span> <span class="ruby-identifier">digest</span>, <span class="ruby-identifier">document</span>
+</pre>
+
+<p>To validate the signature, again a hash of the document is computed and the
+signature is decrypted using the public key. The result is then compared to
+the hash just computed, if they are equal the signature was valid.</p>
+
+<pre class="ruby"><span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span><span class="ruby-operator">::</span><span class="ruby-constant">SHA256</span>.<span class="ruby-identifier">new</span>
+<span class="ruby-keyword">if</span> <span class="ruby-identifier">key</span>.<span class="ruby-identifier">verify</span> <span class="ruby-identifier">digest</span>, <span class="ruby-identifier">signature</span>, <span class="ruby-identifier">document</span>
+  <span class="ruby-identifier">puts</span> <span class="ruby-string">&#39;Valid&#39;</span>
+<span class="ruby-keyword">else</span>
+  <span class="ruby-identifier">puts</span> <span class="ruby-string">&#39;Invalid&#39;</span>
+<span class="ruby-keyword">end</span>
+</pre>
+
+<h2 id="module-OpenSSL-label-PBKDF2+Password-based+Encryption">PBKDF2 Password-based Encryption<span><a href="#module-OpenSSL-label-PBKDF2+Password-based+Encryption">&para;</a> <a href="#top">&uarr;</a></span></h2>
+
+<p>If supported by the underlying <a href="OpenSSL.html">OpenSSL</a> version
+used, Password-based Encryption should use the features of <a
+href="OpenSSL/PKCS5.html">PKCS5</a>. If not supported or if required by
+legacy applications, the older, less secure methods specified in RFC 2898
+are also supported (see below).</p>
+
+<p><a href="OpenSSL/PKCS5.html">PKCS5</a> supports PBKDF2 as it was specified
+in PKCS#5 <a href="http://www.rsa.com/rsalabs/node.asp?id=2127">v2.0</a>.
+It still uses a password, a salt, and additionally a number of iterations
+that will slow the key derivation process down. The slower this is, the
+more work it requires being able to brute-force the resulting key.</p>
+
+<h3 id="module-OpenSSL-label-Encryption">Encryption<span><a href="#module-OpenSSL-label-Encryption">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>The strategy is to first instantiate a <a
+href="OpenSSL/Cipher.html">Cipher</a> for encryption, and then to generate
+a random IV plus a key derived from the password using PBKDF2. PKCS #5 v2.0
+recommends at least 8 bytes for the salt, the number of iterations largely
+depends on the hardware being used.</p>
+
+<pre>cipher = OpenSSL::Cipher.new &#39;AES-128-CBC&#39;
+cipher.encrypt
+iv = cipher.random_iv
+
+pwd = &#39;some hopefully not to easily guessable password&#39;
+salt = OpenSSL::Random.random_bytes 16
+iter = 20000
+key_len = cipher.key_len
+digest = OpenSSL::Digest::SHA256.new
+
+key = OpenSSL::PKCS5.pbkdf2_hmac(pwd, salt, iter, key_len, digest)
+cipher.key = key
+
+Now encrypt the data:
+
+encrypted = cipher.update document
+encrypted &lt;&lt; cipher.final</pre>
+
+<h3 id="module-OpenSSL-label-Decryption">Decryption<span><a href="#module-OpenSSL-label-Decryption">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>Use the same steps as before to derive the symmetric AES key, this time
+setting the <a href="OpenSSL/Cipher.html">Cipher</a> up for decryption.</p>
+
+<pre>cipher = OpenSSL::Cipher.new &#39;AES-128-CBC&#39;
+cipher.decrypt
+cipher.iv = iv # the one generated with #random_iv
+
+pwd = &#39;some hopefully not to easily guessable password&#39;
+salt = ... # the one generated above
+iter = 20000
+key_len = cipher.key_len
+digest = OpenSSL::Digest::SHA256.new
+
+key = OpenSSL::PKCS5.pbkdf2_hmac(pwd, salt, iter, key_len, digest)
+cipher.key = key
+
+Now decrypt the data:
+
+decrypted = cipher.update encrypted
+decrypted &lt;&lt; cipher.final</pre>
+
+<h2 id="module-OpenSSL-label-PKCS+-235+Password-based+Encryption">PKCS #5 Password-based Encryption<span><a href="#module-OpenSSL-label-PKCS+-235+Password-based+Encryption">&para;</a> <a href="#top">&uarr;</a></span></h2>
+
+<p>PKCS #5 is a password-based encryption standard documented at <a
+href="http://www.ietf.org/rfc/rfc2898.txt">RFC2898</a>.  It allows a short
+password or passphrase to be used to create a secure encryption key. If
+possible, PBKDF2 as described above should be used if the circumstances
+allow it.</p>
+
+<p>PKCS #5 uses a <a href="OpenSSL/Cipher.html">Cipher</a>, a pass phrase and
+a salt to generate an encryption key.</p>
+
+<pre class="ruby"><span class="ruby-identifier">pass_phrase</span> = <span class="ruby-string">&#39;my secure pass phrase goes here&#39;</span>
+<span class="ruby-identifier">salt</span> = <span class="ruby-string">&#39;8 octets&#39;</span>
+</pre>
+
+<h3 id="module-OpenSSL-label-Encryption">Encryption<span><a href="#module-OpenSSL-label-Encryption">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>First set up the cipher for encryption</p>
+
+<pre class="ruby"><span class="ruby-identifier">encryptor</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">new</span> <span class="ruby-string">&#39;AES-128-CBC&#39;</span>
+<span class="ruby-identifier">encryptor</span>.<span class="ruby-identifier">encrypt</span>
+<span class="ruby-identifier">encryptor</span>.<span class="ruby-identifier">pkcs5_keyivgen</span> <span class="ruby-identifier">pass_phrase</span>, <span class="ruby-identifier">salt</span>
+</pre>
+
+<p>Then pass the data you want to encrypt through</p>
+
+<pre class="ruby"><span class="ruby-identifier">encrypted</span> = <span class="ruby-identifier">encryptor</span>.<span class="ruby-identifier">update</span> <span class="ruby-string">&#39;top secret document&#39;</span>
+<span class="ruby-identifier">encrypted</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">encryptor</span>.<span class="ruby-identifier">final</span>
+</pre>
+
+<h3 id="module-OpenSSL-label-Decryption">Decryption<span><a href="#module-OpenSSL-label-Decryption">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>Use a new <a href="OpenSSL/Cipher.html">Cipher</a> instance set up for
+decryption</p>
+
+<pre class="ruby"><span class="ruby-identifier">decryptor</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">new</span> <span class="ruby-string">&#39;AES-128-CBC&#39;</span>
+<span class="ruby-identifier">decryptor</span>.<span class="ruby-identifier">decrypt</span>
+<span class="ruby-identifier">decryptor</span>.<span class="ruby-identifier">pkcs5_keyivgen</span> <span class="ruby-identifier">pass_phrase</span>, <span class="ruby-identifier">salt</span>
+</pre>
+
+<p>Then pass the data you want to decrypt through</p>
+
+<pre class="ruby"><span class="ruby-identifier">plain</span> = <span class="ruby-identifier">decryptor</span>.<span class="ruby-identifier">update</span> <span class="ruby-identifier">encrypted</span>
+<span class="ruby-identifier">plain</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">decryptor</span>.<span class="ruby-identifier">final</span>
+</pre>
+
+<h2 id="module-OpenSSL-label-X509+Certificates"><a href="OpenSSL/X509.html">X509</a> Certificates<span><a href="#module-OpenSSL-label-X509+Certificates">&para;</a> <a href="#top">&uarr;</a></span></h2>
+
+<h3 id="module-OpenSSL-label-Creating+a+Certificate">Creating a Certificate<span><a href="#module-OpenSSL-label-Creating+a+Certificate">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>This example creates a self-signed certificate using an RSA key and a SHA1
+signature.</p>
+
+<pre class="ruby"><span class="ruby-identifier">key</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">RSA</span>.<span class="ruby-identifier">new</span> <span class="ruby-value">2048</span>
+<span class="ruby-identifier">name</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">Name</span>.<span class="ruby-identifier">parse</span> <span class="ruby-string">&#39;CN=nobody/DC=example&#39;</span>
+
+<span class="ruby-identifier">cert</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">Certificate</span>.<span class="ruby-identifier">new</span>
+<span class="ruby-identifier">cert</span>.<span class="ruby-identifier">version</span> = <span class="ruby-value">2</span>
+<span class="ruby-identifier">cert</span>.<span class="ruby-identifier">serial</span> = <span class="ruby-value">0</span>
+<span class="ruby-identifier">cert</span>.<span class="ruby-identifier">not_before</span> = <span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span>
+<span class="ruby-identifier">cert</span>.<span class="ruby-identifier">not_after</span> = <span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span> <span class="ruby-operator">+</span> <span class="ruby-value">3600</span>
+
+<span class="ruby-identifier">cert</span>.<span class="ruby-identifier">public_key</span> = <span class="ruby-identifier">key</span>.<span class="ruby-identifier">public_key</span>
+<span class="ruby-identifier">cert</span>.<span class="ruby-identifier">subject</span> = <span class="ruby-identifier">name</span>
+</pre>
+
+<h3 id="module-OpenSSL-label-Certificate+Extensions">Certificate Extensions<span><a href="#module-OpenSSL-label-Certificate+Extensions">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>You can add extensions to the certificate with
+OpenSSL::SSL::ExtensionFactory to indicate the purpose of the certificate.</p>
+
+<pre class="ruby"><span class="ruby-identifier">extension_factory</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">ExtensionFactory</span>.<span class="ruby-identifier">new</span> <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">cert</span>
+
+<span class="ruby-identifier">cert</span>.<span class="ruby-identifier">add_extension</span>    <span class="ruby-identifier">extension_factory</span>.<span class="ruby-identifier">create_extension</span>(<span class="ruby-string">&#39;basicConstraints&#39;</span>, <span class="ruby-string">&#39;CA:FALSE&#39;</span>, <span class="ruby-keyword">true</span>)
+
+<span class="ruby-identifier">cert</span>.<span class="ruby-identifier">add_extension</span>    <span class="ruby-identifier">extension_factory</span>.<span class="ruby-identifier">create_extension</span>(
+    <span class="ruby-string">&#39;keyUsage&#39;</span>, <span class="ruby-string">&#39;keyEncipherment,dataEncipherment,digitalSignature&#39;</span>)
+
+<span class="ruby-identifier">cert</span>.<span class="ruby-identifier">add_extension</span>    <span class="ruby-identifier">extension_factory</span>.<span class="ruby-identifier">create_extension</span>(<span class="ruby-string">&#39;subjectKeyIdentifier&#39;</span>, <span class="ruby-string">&#39;hash&#39;</span>)
+</pre>
+
+<p>The list of supported extensions (and in some cases their possible values)
+can be derived from the “objects.h” file in the <a
+href="OpenSSL.html">OpenSSL</a> source code.</p>
+
+<h3 id="module-OpenSSL-label-Signing+a+Certificate">Signing a Certificate<span><a href="#module-OpenSSL-label-Signing+a+Certificate">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>To sign a certificate set the issuer and use <a
+href="OpenSSL/X509/Certificate.html#method-i-sign">OpenSSL::X509::Certificate#sign</a>
+with a digest algorithm.  This creates a self-signed cert because we&#39;re
+using the same name and key to sign the certificate as was used to create
+the certificate.</p>
+
+<pre class="ruby"><span class="ruby-identifier">cert</span>.<span class="ruby-identifier">issuer</span> = <span class="ruby-identifier">name</span>
+<span class="ruby-identifier">cert</span>.<span class="ruby-identifier">sign</span> <span class="ruby-identifier">key</span>, <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span><span class="ruby-operator">::</span><span class="ruby-constant">SHA1</span>.<span class="ruby-identifier">new</span>
+
+<span class="ruby-identifier">open</span> <span class="ruby-string">&#39;certificate.pem&#39;</span>, <span class="ruby-string">&#39;w&#39;</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">io</span><span class="ruby-operator">|</span> <span class="ruby-identifier">io</span>.<span class="ruby-identifier">write</span> <span class="ruby-identifier">cert</span>.<span class="ruby-identifier">to_pem</span> <span class="ruby-keyword">end</span>
+</pre>
+
+<h3 id="module-OpenSSL-label-Loading+a+Certificate">Loading a Certificate<span><a href="#module-OpenSSL-label-Loading+a+Certificate">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>Like a key, a cert can also be loaded from a file.</p>
+
+<pre class="ruby"><span class="ruby-identifier">cert2</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">Certificate</span>.<span class="ruby-identifier">new</span> <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span> <span class="ruby-string">&#39;certificate.pem&#39;</span>
+</pre>
+
+<h3 id="module-OpenSSL-label-Verifying+a+Certificate">Verifying a Certificate<span><a href="#module-OpenSSL-label-Verifying+a+Certificate">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>Certificate#verify will return true when a certificate was signed with the
+given public key.</p>
+
+<pre class="ruby"><span class="ruby-identifier">raise</span> <span class="ruby-string">&#39;certificate can not be verified&#39;</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">cert2</span>.<span class="ruby-identifier">verify</span> <span class="ruby-identifier">key</span>
+</pre>
+
+<h2 id="module-OpenSSL-label-Certificate+Authority">Certificate Authority<span><a href="#module-OpenSSL-label-Certificate+Authority">&para;</a> <a href="#top">&uarr;</a></span></h2>
+
+<p>A certificate authority (CA) is a trusted third party that allows you to
+verify the ownership of unknown certificates.  The CA issues key signatures
+that indicate it trusts the user of that key.  A user encountering the key
+can verify the signature by using the CA&#39;s public key.</p>
+
+<h3 id="module-OpenSSL-label-CA+Key">CA Key<span><a href="#module-OpenSSL-label-CA+Key">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>CA keys are valuable, so we encrypt and save it to disk and make sure it is
+not readable by other users.</p>
+
+<pre class="ruby"><span class="ruby-identifier">ca_key</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">RSA</span>.<span class="ruby-identifier">new</span> <span class="ruby-value">2048</span>
+<span class="ruby-identifier">pass_phrase</span> = <span class="ruby-string">&#39;my secure pass phrase goes here&#39;</span>
+
+<span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">new</span> <span class="ruby-string">&#39;AES-128-CBC&#39;</span>
+
+<span class="ruby-identifier">open</span> <span class="ruby-string">&#39;ca_key.pem&#39;</span>, <span class="ruby-string">&#39;w&#39;</span>, <span class="ruby-value">0400</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">io</span><span class="ruby-operator">|</span>
+  <span class="ruby-identifier">io</span>.<span class="ruby-identifier">write</span> <span class="ruby-identifier">ca_key</span>.<span class="ruby-identifier">export</span>(<span class="ruby-identifier">cipher</span>, <span class="ruby-identifier">pass_phrase</span>)
+<span class="ruby-keyword">end</span>
+</pre>
+
+<h3 id="module-OpenSSL-label-CA+Certificate">CA Certificate<span><a href="#module-OpenSSL-label-CA+Certificate">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>A CA certificate is created the same way we created a certificate above,
+but with different extensions.</p>
+
+<pre class="ruby"><span class="ruby-identifier">ca_name</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">Name</span>.<span class="ruby-identifier">parse</span> <span class="ruby-string">&#39;CN=ca/DC=example&#39;</span>
+
+<span class="ruby-identifier">ca_cert</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">Certificate</span>.<span class="ruby-identifier">new</span>
+<span class="ruby-identifier">ca_cert</span>.<span class="ruby-identifier">serial</span> = <span class="ruby-value">0</span>
+<span class="ruby-identifier">ca_cert</span>.<span class="ruby-identifier">version</span> = <span class="ruby-value">2</span>
+<span class="ruby-identifier">ca_cert</span>.<span class="ruby-identifier">not_before</span> = <span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span>
+<span class="ruby-identifier">ca_cert</span>.<span class="ruby-identifier">not_after</span> = <span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span> <span class="ruby-operator">+</span> <span class="ruby-value">86400</span>
+
+<span class="ruby-identifier">ca_cert</span>.<span class="ruby-identifier">public_key</span> = <span class="ruby-identifier">ca_key</span>.<span class="ruby-identifier">public_key</span>
+<span class="ruby-identifier">ca_cert</span>.<span class="ruby-identifier">subject</span> = <span class="ruby-identifier">ca_name</span>
+<span class="ruby-identifier">ca_cert</span>.<span class="ruby-identifier">issuer</span> = <span class="ruby-identifier">ca_name</span>
+
+<span class="ruby-identifier">extension_factory</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">ExtensionFactory</span>.<span class="ruby-identifier">new</span>
+<span class="ruby-identifier">extension_factory</span>.<span class="ruby-identifier">subject_certificate</span> = <span class="ruby-identifier">ca_cert</span>
+<span class="ruby-identifier">extension_factory</span>.<span class="ruby-identifier">issuer_certificate</span> = <span class="ruby-identifier">ca_cert</span>
+
+<span class="ruby-identifier">ca_cert</span>.<span class="ruby-identifier">add_extension</span>    <span class="ruby-identifier">extension_factory</span>.<span class="ruby-identifier">create_extension</span>(<span class="ruby-string">&#39;subjectKeyIdentifier&#39;</span>, <span class="ruby-string">&#39;hash&#39;</span>)
+</pre>
+
+<p>This extension indicates the CA&#39;s key may be used as a CA.</p>
+
+<pre class="ruby"><span class="ruby-identifier">ca_cert</span>.<span class="ruby-identifier">add_extension</span>    <span class="ruby-identifier">extension_factory</span>.<span class="ruby-identifier">create_extension</span>(<span class="ruby-string">&#39;basicConstraints&#39;</span>, <span class="ruby-string">&#39;CA:TRUE&#39;</span>, <span class="ruby-keyword">true</span>)
+</pre>
+
+<p>This extension indicates the CA&#39;s key may be used to verify signatures
+on both certificates and certificate revocations.</p>
+
+<pre class="ruby"><span class="ruby-identifier">ca_cert</span>.<span class="ruby-identifier">add_extension</span>    <span class="ruby-identifier">extension_factory</span>.<span class="ruby-identifier">create_extension</span>(
+    <span class="ruby-string">&#39;keyUsage&#39;</span>, <span class="ruby-string">&#39;cRLSign,keyCertSign&#39;</span>, <span class="ruby-keyword">true</span>)
+</pre>
+
+<p>Root CA certificates are self-signed.</p>
+
+<pre class="ruby"><span class="ruby-identifier">ca_cert</span>.<span class="ruby-identifier">sign</span> <span class="ruby-identifier">ca_key</span>, <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span><span class="ruby-operator">::</span><span class="ruby-constant">SHA1</span>.<span class="ruby-identifier">new</span>
+</pre>
+
+<p>The CA certificate is saved to disk so it may be distributed to all the
+users of the keys this CA will sign.</p>
+
+<pre class="ruby"><span class="ruby-identifier">open</span> <span class="ruby-string">&#39;ca_cert.pem&#39;</span>, <span class="ruby-string">&#39;w&#39;</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">io</span><span class="ruby-operator">|</span>
+  <span class="ruby-identifier">io</span>.<span class="ruby-identifier">write</span> <span class="ruby-identifier">ca_cert</span>.<span class="ruby-identifier">to_pem</span>
+<span class="ruby-keyword">end</span>
+</pre>
+
+<h3 id="module-OpenSSL-label-Certificate+Signing+Request">Certificate Signing Request<span><a href="#module-OpenSSL-label-Certificate+Signing+Request">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>The CA signs keys through a Certificate Signing Request (CSR).  The CSR
+contains the information necessary to identify the key.</p>
+
+<pre class="ruby"><span class="ruby-identifier">csr</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">Request</span>.<span class="ruby-identifier">new</span>
+<span class="ruby-identifier">csr</span>.<span class="ruby-identifier">version</span> = <span class="ruby-value">0</span>
+<span class="ruby-identifier">csr</span>.<span class="ruby-identifier">subject</span> = <span class="ruby-identifier">name</span>
+<span class="ruby-identifier">csr</span>.<span class="ruby-identifier">public_key</span> = <span class="ruby-identifier">key</span>.<span class="ruby-identifier">public_key</span>
+<span class="ruby-identifier">csr</span>.<span class="ruby-identifier">sign</span> <span class="ruby-identifier">key</span>, <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span><span class="ruby-operator">::</span><span class="ruby-constant">SHA1</span>.<span class="ruby-identifier">new</span>
+</pre>
+
+<p>A CSR is saved to disk and sent to the CA for signing.</p>
+
+<pre class="ruby"><span class="ruby-identifier">open</span> <span class="ruby-string">&#39;csr.pem&#39;</span>, <span class="ruby-string">&#39;w&#39;</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">io</span><span class="ruby-operator">|</span>
+  <span class="ruby-identifier">io</span>.<span class="ruby-identifier">write</span> <span class="ruby-identifier">csr</span>.<span class="ruby-identifier">to_pem</span>
+<span class="ruby-keyword">end</span>
+</pre>
+
+<h3 id="module-OpenSSL-label-Creating+a+Certificate+from+a+CSR">Creating a Certificate from a CSR<span><a href="#module-OpenSSL-label-Creating+a+Certificate+from+a+CSR">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>Upon receiving a CSR the CA will verify it before signing it.  A minimal
+verification would be to check the CSR&#39;s signature.</p>
+
+<pre class="ruby"><span class="ruby-identifier">csr</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">Request</span>.<span class="ruby-identifier">new</span> <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span> <span class="ruby-string">&#39;csr.pem&#39;</span>
+
+<span class="ruby-identifier">raise</span> <span class="ruby-string">&#39;CSR can not be verified&#39;</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">csr</span>.<span class="ruby-identifier">verify</span> <span class="ruby-identifier">csr</span>.<span class="ruby-identifier">public_key</span>
+</pre>
+
+<p>After verification a certificate is created, marked for various usages,
+signed with the CA key and returned to the requester.</p>
+
+<pre class="ruby"><span class="ruby-identifier">csr_cert</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">Certificate</span>.<span class="ruby-identifier">new</span>
+<span class="ruby-identifier">csr_cert</span>.<span class="ruby-identifier">serial</span> = <span class="ruby-value">0</span>
+<span class="ruby-identifier">csr_cert</span>.<span class="ruby-identifier">version</span> = <span class="ruby-value">2</span>
+<span class="ruby-identifier">csr_cert</span>.<span class="ruby-identifier">not_before</span> = <span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span>
+<span class="ruby-identifier">csr_cert</span>.<span class="ruby-identifier">not_after</span> = <span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span> <span class="ruby-operator">+</span> <span class="ruby-value">600</span>
+
+<span class="ruby-identifier">csr_cert</span>.<span class="ruby-identifier">subject</span> = <span class="ruby-identifier">csr</span>.<span class="ruby-identifier">subject</span>
+<span class="ruby-identifier">csr_cert</span>.<span class="ruby-identifier">public_key</span> = <span class="ruby-identifier">csr</span>.<span class="ruby-identifier">public_key</span>
+<span class="ruby-identifier">csr_cert</span>.<span class="ruby-identifier">issuer</span> = <span class="ruby-identifier">ca_cert</span>.<span class="ruby-identifier">subject</span>
+
+<span class="ruby-identifier">extension_factory</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">ExtensionFactory</span>.<span class="ruby-identifier">new</span>
+<span class="ruby-identifier">extension_factory</span>.<span class="ruby-identifier">subject_certificate</span> = <span class="ruby-identifier">csr_cert</span>
+<span class="ruby-identifier">extension_factory</span>.<span class="ruby-identifier">issuer_certificate</span> = <span class="ruby-identifier">ca_cert</span>
+
+<span class="ruby-identifier">csr_cert</span>.<span class="ruby-identifier">add_extension</span>    <span class="ruby-identifier">extension_factory</span>.<span class="ruby-identifier">create_extension</span>(<span class="ruby-string">&#39;basicConstraints&#39;</span>, <span class="ruby-string">&#39;CA:FALSE&#39;</span>)
+
+<span class="ruby-identifier">csr_cert</span>.<span class="ruby-identifier">add_extension</span>    <span class="ruby-identifier">extension_factory</span>.<span class="ruby-identifier">create_extension</span>(
+    <span class="ruby-string">&#39;keyUsage&#39;</span>, <span class="ruby-string">&#39;keyEncipherment,dataEncipherment,digitalSignature&#39;</span>)
+
+<span class="ruby-identifier">csr_cert</span>.<span class="ruby-identifier">add_extension</span>    <span class="ruby-identifier">extension_factory</span>.<span class="ruby-identifier">create_extension</span>(<span class="ruby-string">&#39;subjectKeyIdentifier&#39;</span>, <span class="ruby-string">&#39;hash&#39;</span>)
+
+<span class="ruby-identifier">csr_cert</span>.<span class="ruby-identifier">sign</span> <span class="ruby-identifier">ca_key</span>, <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span><span class="ruby-operator">::</span><span class="ruby-constant">SHA1</span>.<span class="ruby-identifier">new</span>
+
+<span class="ruby-identifier">open</span> <span class="ruby-string">&#39;csr_cert.pem&#39;</span>, <span class="ruby-string">&#39;w&#39;</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">io</span><span class="ruby-operator">|</span>
+  <span class="ruby-identifier">io</span>.<span class="ruby-identifier">write</span> <span class="ruby-identifier">csr_cert</span>.<span class="ruby-identifier">to_pem</span>
+<span class="ruby-keyword">end</span>
+</pre>
+
+<h2 id="module-OpenSSL-label-SSL+and+TLS+Connections"><a href="OpenSSL/SSL.html">SSL</a> and TLS Connections<span><a href="#module-OpenSSL-label-SSL+and+TLS+Connections">&para;</a> <a href="#top">&uarr;</a></span></h2>
+
+<p>Using our created key and certificate we can create an <a
+href="OpenSSL/SSL.html">SSL</a> or TLS connection. An SSLContext is used to
+set up an <a href="OpenSSL/SSL.html">SSL</a> session.</p>
+
+<pre class="ruby"><span class="ruby-identifier">context</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSLContext</span>.<span class="ruby-identifier">new</span>
+</pre>
+
+<h3 id="module-OpenSSL-label-SSL+Server"><a href="OpenSSL/SSL.html">SSL</a> Server<span><a href="#module-OpenSSL-label-SSL+Server">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>An <a href="OpenSSL/SSL.html">SSL</a> server requires the certificate and
+private key to communicate securely with its clients:</p>
+
+<pre class="ruby"><span class="ruby-identifier">context</span>.<span class="ruby-identifier">cert</span> = <span class="ruby-identifier">cert</span>
+<span class="ruby-identifier">context</span>.<span class="ruby-identifier">key</span> = <span class="ruby-identifier">key</span>
+</pre>
+
+<p>Then create an SSLServer with a TCP server socket and the context.  Use the
+SSLServer like an ordinary TCP server.</p>
+
+<pre class="ruby"><span class="ruby-identifier">require</span> <span class="ruby-string">&#39;socket&#39;</span>
+
+<span class="ruby-identifier">tcp_server</span> = <span class="ruby-constant">TCPServer</span>.<span class="ruby-identifier">new</span> <span class="ruby-value">5000</span>
+<span class="ruby-identifier">ssl_server</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSLServer</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">tcp_server</span>, <span class="ruby-identifier">context</span>
+
+<span class="ruby-identifier">loop</span> <span class="ruby-keyword">do</span>
+  <span class="ruby-identifier">ssl_connection</span> = <span class="ruby-identifier">ssl_server</span>.<span class="ruby-identifier">accept</span>
+
+  <span class="ruby-identifier">data</span> = <span class="ruby-identifier">connection</span>.<span class="ruby-identifier">gets</span>
+
+  <span class="ruby-identifier">response</span> = <span class="ruby-node">&quot;I got #{data.dump}&quot;</span>
+  <span class="ruby-identifier">puts</span> <span class="ruby-identifier">response</span>
+
+  <span class="ruby-identifier">connection</span>.<span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;I got #{data.dump}&quot;</span>
+  <span class="ruby-identifier">connection</span>.<span class="ruby-identifier">close</span>
+<span class="ruby-keyword">end</span>
+</pre>
+
+<h3 id="module-OpenSSL-label-SSL+client"><a href="OpenSSL/SSL.html">SSL</a> client<span><a href="#module-OpenSSL-label-SSL+client">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>An <a href="OpenSSL/SSL.html">SSL</a> client is created with a TCP socket
+and the context. SSLSocket#connect must be called to initiate the <a
+href="OpenSSL/SSL.html">SSL</a> handshake and start encryption.  A key and
+certificate are not required for the client socket.</p>
+
+<p>Note that SSLSocket#close doesn&#39;t close the underlying socket by
+default. Set SSLSocket#sync_close to true if you want.</p>
+
+<pre class="ruby"><span class="ruby-identifier">require</span> <span class="ruby-string">&#39;socket&#39;</span>
+
+<span class="ruby-identifier">tcp_socket</span> = <span class="ruby-constant">TCPSocket</span>.<span class="ruby-identifier">new</span> <span class="ruby-string">&#39;localhost&#39;</span>, <span class="ruby-value">5000</span>
+<span class="ruby-identifier">ssl_client</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSLSocket</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">tcp_socket</span>, <span class="ruby-identifier">context</span>
+<span class="ruby-identifier">ssl_client</span>.<span class="ruby-identifier">sync_close</span> = <span class="ruby-keyword">true</span>
+<span class="ruby-identifier">ssl_client</span>.<span class="ruby-identifier">connect</span>
+
+<span class="ruby-identifier">ssl_client</span>.<span class="ruby-identifier">puts</span> <span class="ruby-string">&quot;hello server!&quot;</span>
+<span class="ruby-identifier">puts</span> <span class="ruby-identifier">ssl_client</span>.<span class="ruby-identifier">gets</span>
+
+<span class="ruby-identifier">ssl_client</span>.<span class="ruby-identifier">close</span> <span class="ruby-comment"># shutdown the TLS connection and close tcp_socket</span>
+</pre>
+
+<h3 id="module-OpenSSL-label-Peer+Verification">Peer Verification<span><a href="#module-OpenSSL-label-Peer+Verification">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>An unverified <a href="OpenSSL/SSL.html">SSL</a> connection does not
+provide much security.  For enhanced security the client or server can
+verify the certificate of its peer.</p>
+
+<p>The client can be modified to verify the server&#39;s certificate against
+the certificate authority&#39;s certificate:</p>
+
+<pre class="ruby"><span class="ruby-identifier">context</span>.<span class="ruby-identifier">ca_file</span> = <span class="ruby-string">&#39;ca_cert.pem&#39;</span>
+<span class="ruby-identifier">context</span>.<span class="ruby-identifier">verify_mode</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">VERIFY_PEER</span>
+
+<span class="ruby-identifier">require</span> <span class="ruby-string">&#39;socket&#39;</span>
+
+<span class="ruby-identifier">tcp_socket</span> = <span class="ruby-constant">TCPSocket</span>.<span class="ruby-identifier">new</span> <span class="ruby-string">&#39;localhost&#39;</span>, <span class="ruby-value">5000</span>
+<span class="ruby-identifier">ssl_client</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSLSocket</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">tcp_socket</span>, <span class="ruby-identifier">context</span>
+<span class="ruby-identifier">ssl_client</span>.<span class="ruby-identifier">connect</span>
+
+<span class="ruby-identifier">ssl_client</span>.<span class="ruby-identifier">puts</span> <span class="ruby-string">&quot;hello server!&quot;</span>
+<span class="ruby-identifier">puts</span> <span class="ruby-identifier">ssl_client</span>.<span class="ruby-identifier">gets</span>
+</pre>
+
+<p>If the server certificate is invalid or <code>context.ca_file</code> is not
+set when verifying peers an <a
+href="OpenSSL/SSL/SSLError.html">OpenSSL::SSL::SSLError</a> will be raised.</p>
+
+<p>frozen_string_literal: false</p>
+
+<p>frozen_string_literal: false</p>
+
+<p>frozen_string_literal: false</p>
+
+<p>frozen_string_literal: false</p>
+
+<p>frozen_string_literal: false</p>
+
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+    <section class="constants-list">
+      <header>
+        <h3>Constants</h3>
+      </header>
+      <dl>
+      
+        <dt id="OPENSSL_FIPS">OPENSSL_FIPS
+        
+        <dd><p>Boolean indicating whether <a href="OpenSSL.html">OpenSSL</a> is
+FIPS-enabled or not</p>
+        
+      
+        <dt id="OPENSSL_LIBRARY_VERSION">OPENSSL_LIBRARY_VERSION
+        
+        <dd><p>Version of <a href="OpenSSL.html">OpenSSL</a> the ruby <a
+href="OpenSSL.html">OpenSSL</a> extension is running with</p>
+        
+      
+        <dt id="OPENSSL_VERSION">OPENSSL_VERSION
+        
+        <dd><p>Version of <a href="OpenSSL.html">OpenSSL</a> the ruby <a
+href="OpenSSL.html">OpenSSL</a> extension was built with</p>
+        
+      
+        <dt id="OPENSSL_VERSION_NUMBER">OPENSSL_VERSION_NUMBER
+        
+        <dd><p>Version number of <a href="OpenSSL.html">OpenSSL</a> the ruby <a
+href="OpenSSL.html">OpenSSL</a> extension was built with (base 16)</p>
+        
+      
+        <dt id="VERSION">VERSION
+        
+        <dd><p><a href="OpenSSL.html">OpenSSL</a> ruby extension version</p>
+        
+      
+      </dl>
+    </section>
+    
+
+    
+
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-Digest" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">Digest</span><span
+            class="method-args">(name)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Returns a <a href="OpenSSL/Digest.html">Digest</a> subclass by
+<code>name</code>.</p>
+
+<pre class="ruby"><span class="ruby-identifier">require</span> <span class="ruby-string">&#39;openssl&#39;</span>
+
+<span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>(<span class="ruby-string">&quot;MD5&quot;</span>)
+<span class="ruby-comment"># =&gt; OpenSSL::Digest::MD5</span>
+
+<span class="ruby-constant">Digest</span>(<span class="ruby-string">&quot;Foo&quot;</span>)
+<span class="ruby-comment"># =&gt; NameError: wrong constant name Foo</span>
+</pre>
+          
+          
+
+          
+          <div class="method-source-code" id="Digest-source">
+            <pre><span class="ruby-comment"># File lib/openssl/digest.rb, line 72</span>
+<span class="ruby-keyword">def</span> <span class="ruby-constant">Digest</span>(<span class="ruby-identifier">name</span>)
+  <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">const_get</span>(<span class="ruby-identifier">name</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-debug" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            debug &rarr; true | false
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="debug-source">
+            <pre>static VALUE
+ossl_debug_get(VALUE self)
+{
+    return dOSSL;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-debug-3D" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            debug = boolean &rarr; boolean
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Turns on or off debug mode. With debug mode, all erros added to the <a
+href="OpenSSL.html">OpenSSL</a> error queue will be printed to stderr.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="debug-3D-source">
+            <pre>static VALUE
+ossl_debug_set(VALUE self, VALUE val)
+{
+    dOSSL = RTEST(val) ? Qtrue : Qfalse;
+
+    return val;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-errors" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            errors &rarr; [String...]
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>See any remaining errors held in queue.</p>
+
+<p>Any errors you see here are probably due to a bug in ruby&#39;s <a
+href="OpenSSL.html">OpenSSL</a> implementation.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="errors-source">
+            <pre>VALUE
+ossl_get_errors(void)
+{
+    VALUE ary;
+    long e;
+
+    ary = rb_ary_new();
+    while ((e = ERR_get_error()) != 0){
+        rb_ary_push(ary, rb_str_new2(ERR_error_string(e, NULL)));
+    }
+
+    return ary;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-fips_mode-3D" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            fips_mode = boolean &rarr; boolean
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Turns FIPS mode on or off. Turning on FIPS mode will obviously only have an
+effect for FIPS-capable installations of the <a
+href="OpenSSL.html">OpenSSL</a> library. Trying to do so otherwise will
+result in an error.</p>
+
+<h3 id="method-c-fips_mode-3D-label-Examples">Examples<span><a href="#method-c-fips_mode-3D-label-Examples">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby"><span class="ruby-constant">OpenSSL</span>.<span class="ruby-identifier">fips_mode</span> = <span class="ruby-keyword">true</span>   <span class="ruby-comment"># turn FIPS mode on</span>
+<span class="ruby-constant">OpenSSL</span>.<span class="ruby-identifier">fips_mode</span> = <span class="ruby-keyword">false</span>  <span class="ruby-comment"># and off again</span>
+</pre>
+          
+          
+
+          
+          <div class="method-source-code" id="fips_mode-3D-source">
+            <pre>static VALUE
+ossl_fips_mode_set(VALUE self, VALUE enabled)
+{
+
+#ifdef OPENSSL_FIPS
+    if (RTEST(enabled)) {
+        int mode = FIPS_mode();
+        if(!mode &amp;&amp; !FIPS_mode_set(1)) /* turning on twice leads to an error */
+            ossl_raise(eOSSLError, &quot;Turning on FIPS mode failed&quot;);
+    } else {
+        if(!FIPS_mode_set(0)) /* turning off twice is OK */
+            ossl_raise(eOSSLError, &quot;Turning off FIPS mode failed&quot;);
+    }
+    return enabled;
+#else
+    if (RTEST(enabled))
+        ossl_raise(eOSSLError, &quot;This version of OpenSSL does not support FIPS mode&quot;);
+    return enabled;
+#endif
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.2.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="UTF-8">
+
+<title>class OpenSSL::X509::Name - RDoc Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "../../";
+</script>
+
+<script src="../../js/jquery.js"></script>
+<script src="../../js/darkfish.js"></script>
+
+<link href="../../css/fonts.css" rel="stylesheet">
+<link href="../../css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="class">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="../../index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="../../table_of_contents.html#pages">Pages</a>
+    <a href="../../table_of_contents.html#classes">Classes</a>
+    <a href="../../table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    <div id="parent-class-section" class="nav-section">
+  <h3>Parent</h3>
+
+  
+  <p class="link">Object
+  
+</div>
+
+    <div id="includes-section" class="nav-section">
+  <h3>Included Modules</h3>
+
+  <ul class="link-list">
+  
+  
+    <li><span class="include">Comparable</span>
+  
+  
+  </ul>
+</div>
+
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-c-new">::new</a>
+    
+    <li ><a href="#method-c-parse">::parse</a>
+    
+    <li ><a href="#method-c-parse_openssl">::parse_openssl</a>
+    
+    <li ><a href="#method-c-parse_rfc2253">::parse_rfc2253</a>
+    
+    <li ><a href="#method-i-3C-3D-3E">#&lt;=&gt;</a>
+    
+    <li ><a href="#method-i-add_entry">#add_entry</a>
+    
+    <li ><a href="#method-i-cmp">#cmp</a>
+    
+    <li ><a href="#method-i-eql-3F">#eql?</a>
+    
+    <li ><a href="#method-i-hash">#hash</a>
+    
+    <li ><a href="#method-i-hash_old">#hash_old</a>
+    
+    <li ><a href="#method-i-pretty_print">#pretty_print</a>
+    
+    <li ><a href="#method-i-to_a">#to_a</a>
+    
+    <li ><a href="#method-i-to_der">#to_der</a>
+    
+    <li ><a href="#method-i-to_s">#to_s</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="class-OpenSSL::X509::Name">
+  <h1 id="class-OpenSSL::X509::Name" class="class">
+    class OpenSSL::X509::Name
+  </h1>
+
+  <section class="description">
+    
+<p>An X.509 name represents a hostname, email address or other entity
+associated with a public key.</p>
+
+<p>You can create a <a href="Name.html">Name</a> by parsing a distinguished
+name String or by supplying the distinguished name as an Array.</p>
+
+<pre class="ruby"><span class="ruby-identifier">name</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">Name</span>.<span class="ruby-identifier">parse</span> <span class="ruby-string">&#39;CN=nobody/DC=example&#39;</span>
+
+<span class="ruby-identifier">name</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">Name</span>.<span class="ruby-identifier">new</span> [[<span class="ruby-string">&#39;CN&#39;</span>, <span class="ruby-string">&#39;nobody&#39;</span>], [<span class="ruby-string">&#39;DC&#39;</span>, <span class="ruby-string">&#39;example&#39;</span>]]
+</pre>
+
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+    <section class="constants-list">
+      <header>
+        <h3>Constants</h3>
+      </header>
+      <dl>
+      
+        <dt id="COMPAT">COMPAT
+        
+        <dd><p>A flag for <a href="Name.html#method-i-to_s">to_s</a>.</p>
+
+<p>Breaks the name returned into multiple lines if longer than 80 characters.</p>
+        
+      
+        <dt id="DEFAULT_OBJECT_TYPE">DEFAULT_OBJECT_TYPE
+        
+        <dd><p>The default object type for name entries.</p>
+        
+      
+        <dt id="MULTILINE">MULTILINE
+        
+        <dd><p>A flag for <a href="Name.html#method-i-to_s">to_s</a>.</p>
+
+<p>Returns a multiline format.</p>
+        
+      
+        <dt id="OBJECT_TYPE_TEMPLATE">OBJECT_TYPE_TEMPLATE
+        
+        <dd><p>The default object type template for name entries.</p>
+        
+      
+        <dt id="ONELINE">ONELINE
+        
+        <dd><p>A flag for <a href="Name.html#method-i-to_s">to_s</a>.</p>
+
+<p>Returns a more readable format than <a
+href="Name.html#RFC2253">RFC2253</a>.</p>
+        
+      
+        <dt id="RFC2253">RFC2253
+        
+        <dd><p>A flag for <a href="Name.html#method-i-to_s">to_s</a>.</p>
+
+<p>Returns an <a href="Name.html#RFC2253">RFC2253</a> format name.</p>
+        
+      
+      </dl>
+    </section>
+    
+
+    
+
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-new" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            X509::Name.new                               &rarr; name
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            X509::Name.new(der)                          &rarr; name
+          </span>
+          
+        </div>
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            X509::Name.new(distinguished_name)           &rarr; name
+          </span>
+          
+        </div>
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            X509::Name.new(distinguished_name, template) &rarr; name
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Creates a new <a href="Name.html">Name</a>.</p>
+
+<p>A name may be created from a DER encoded string <code>der</code>, an Array
+representing a <code>distinguished_name</code> or a
+<code>distinguished_name</code> along with a <code>template</code>.</p>
+
+<pre class="ruby"><span class="ruby-identifier">name</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">Name</span>.<span class="ruby-identifier">new</span> [[<span class="ruby-string">&#39;CN&#39;</span>, <span class="ruby-string">&#39;nobody&#39;</span>], [<span class="ruby-string">&#39;DC&#39;</span>, <span class="ruby-string">&#39;example&#39;</span>]]
+
+<span class="ruby-identifier">name</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">Name</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">name</span>.<span class="ruby-identifier">to_der</span>
+</pre>
+
+<p>See <a href="Name.html#method-i-add_entry">#add_entry</a> for a description
+of the <code>distinguished_name</code> Array&#39;s contents</p>
+          
+          
+
+          
+          <div class="method-source-code" id="new-source">
+            <pre>static VALUE
+ossl_x509name_initialize(int argc, VALUE *argv, VALUE self)
+{
+    X509_NAME *name;
+    VALUE arg, template;
+
+    GetX509Name(self, name);
+    if (rb_scan_args(argc, argv, &quot;02&quot;, &amp;arg, &amp;template) == 0) {
+        return self;
+    }
+    else {
+        VALUE tmp = rb_check_array_type(arg);
+        if (!NIL_P(tmp)) {
+            VALUE args;
+            if(NIL_P(template)) template = OBJECT_TYPE_TEMPLATE;
+            args = rb_ary_new3(2, self, template);
+            rb_block_call(tmp, rb_intern(&quot;each&quot;), 0, 0, ossl_x509name_init_i, args);
+        }
+        else{
+            const unsigned char *p;
+            VALUE str = ossl_to_der_if_possible(arg);
+            X509_NAME *x;
+            StringValue(str);
+            p = (unsigned char *)RSTRING_PTR(str);
+            x = d2i_X509_NAME(&amp;name, &amp;p, RSTRING_LEN(str));
+            DATA_PTR(self) = name;
+            if(!x){
+                ossl_raise(eX509NameError, NULL);
+            }
+        }
+    }
+
+    return self;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-parse" class="method-detail method-alias">
+        
+        <div class="method-heading">
+          <span class="method-name">parse</span><span
+            class="method-args">(str, template=OBJECT_TYPE_TEMPLATE)</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+
+        
+        <div class="aliases">
+          Alias for: <a href="Name.html#method-c-parse_openssl">parse_openssl</a>
+        </div>
+        
+      </div>
+
+    
+      <div id="method-c-parse_openssl" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">parse_openssl</span><span
+            class="method-args">(str, template=OBJECT_TYPE_TEMPLATE)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="parse_openssl-source">
+            <pre><span class="ruby-comment"># File lib/openssl/x509.rb, line 141</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">parse_openssl</span>(<span class="ruby-identifier">str</span>, <span class="ruby-identifier">template</span>=<span class="ruby-constant">OBJECT_TYPE_TEMPLATE</span>)
+  <span class="ruby-identifier">ary</span> = <span class="ruby-identifier">str</span>.<span class="ruby-identifier">scan</span>(<span class="ruby-regexp">/\s*([^\/,]+)\s*/</span>).<span class="ruby-identifier">collect</span>{<span class="ruby-operator">|</span><span class="ruby-identifier">i</span><span class="ruby-operator">|</span> <span class="ruby-identifier">i</span>[<span class="ruby-value">0</span>].<span class="ruby-identifier">split</span>(<span class="ruby-string">&quot;=&quot;</span>, <span class="ruby-value">2</span>) }
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">ary</span>, <span class="ruby-identifier">template</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+        <div class="aliases">
+          Also aliased as: <a href="Name.html#method-c-parse">parse</a>
+        </div>
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-parse_rfc2253" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">parse_rfc2253</span><span
+            class="method-args">(str, template=OBJECT_TYPE_TEMPLATE)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="parse_rfc2253-source">
+            <pre><span class="ruby-comment"># File lib/openssl/x509.rb, line 136</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">parse_rfc2253</span>(<span class="ruby-identifier">str</span>, <span class="ruby-identifier">template</span>=<span class="ruby-constant">OBJECT_TYPE_TEMPLATE</span>)
+  <span class="ruby-identifier">ary</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">Name</span><span class="ruby-operator">::</span><span class="ruby-constant">RFC2253DN</span>.<span class="ruby-identifier">scan</span>(<span class="ruby-identifier">str</span>)
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">ary</span>, <span class="ruby-identifier">template</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-3C-3D-3E" class="method-detail method-alias">
+        
+        <div class="method-heading">
+          <span class="method-name">&lt;=&gt;</span><span
+            class="method-args">(p1)</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+        </div>
+
+        
+
+        
+        <div class="aliases">
+          Alias for: <a href="Name.html#method-i-cmp">cmp</a>
+        </div>
+        
+      </div>
+
+    
+      <div id="method-i-add_entry" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            add_entry(oid, value [, type]) &rarr; self
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Adds a new entry with the given <code>oid</code> and <code>value</code> to
+this name.  The <code>oid</code> is an object identifier defined in ASN.1. 
+Some common OIDs are:</p>
+<dl class="rdoc-list note-list"><dt>C
+<dd>
+<p>Country <a href="Name.html">Name</a></p>
+</dd><dt>CN
+<dd>
+<p>Common <a href="Name.html">Name</a></p>
+</dd><dt>DC
+<dd>
+<p>Domain Component</p>
+</dd><dt>O
+<dd>
+<p>Organization <a href="Name.html">Name</a></p>
+</dd><dt>OU
+<dd>
+<p>Organizational Unit <a href="Name.html">Name</a></p>
+</dd><dt>ST
+<dd>
+<p>State or Province <a href="Name.html">Name</a></p>
+</dd></dl>
+          
+          
+
+          
+          <div class="method-source-code" id="add_entry-source">
+            <pre>static
+VALUE ossl_x509name_add_entry(int argc, VALUE *argv, VALUE self)
+{
+    X509_NAME *name;
+    VALUE oid, value, type;
+    const char *oid_name;
+
+    rb_scan_args(argc, argv, &quot;21&quot;, &amp;oid, &amp;value, &amp;type);
+    oid_name = StringValueCStr(oid);
+    StringValue(value);
+    if(NIL_P(type)) type = rb_aref(OBJECT_TYPE_TEMPLATE, oid);
+    GetX509Name(self, name);
+    if (!X509_NAME_add_entry_by_txt(name, oid_name, NUM2INT(type),
+                (const unsigned char *)RSTRING_PTR(value), RSTRING_LENINT(value), -1, 0)) {
+        ossl_raise(eX509NameError, NULL);
+    }
+
+    return self;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-cmp" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            cmp other &rarr; integer
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            &lt;=&gt; other &rarr; integer
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Compares this <a href="Name.html">Name</a> with <code>other</code> and
+returns 0 if they are the same and -1 or +1 if they are greater or less
+than each other respectively.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="cmp-source">
+            <pre>static VALUE
+ossl_x509name_cmp(VALUE self, VALUE other)
+{
+    int result;
+
+    result = ossl_x509name_cmp0(self, other);
+    if (result &lt; 0) return INT2FIX(-1);
+    if (result &gt; 1) return INT2FIX(1);
+
+    return INT2FIX(0);
+}</pre>
+          </div>
+          
+        </div>
+
+        
+        <div class="aliases">
+          Also aliased as: <a href="Name.html#method-i-3C-3D-3E">&lt;=&gt;</a>
+        </div>
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-eql-3F" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            eql? other &rarr; boolean
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Returns true if <code>name</code> and <code>other</code> refer to the same
+hash key.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="eql-3F-source">
+            <pre>static VALUE
+ossl_x509name_eql(VALUE self, VALUE other)
+{
+    int result;
+
+    if(CLASS_OF(other) != cX509Name) return Qfalse;
+    result = ossl_x509name_cmp0(self, other);
+
+    return (result == 0) ? Qtrue : Qfalse;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-hash" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            hash &rarr; integer
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>The hash value returned is suitable for use as a certificate&#39;s filename
+in a CA path.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="hash-source">
+            <pre>static VALUE
+ossl_x509name_hash(VALUE self)
+{
+    X509_NAME *name;
+    unsigned long hash;
+
+    GetX509Name(self, name);
+
+    hash = X509_NAME_hash(name);
+
+    return ULONG2NUM(hash);
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-hash_old" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            hash_old &rarr; integer
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Returns an MD5 based hash used in <a href="../../OpenSSL.html">OpenSSL</a>
+0.9.X.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="hash_old-source">
+            <pre>static VALUE
+ossl_x509name_hash_old(VALUE self)
+{
+    X509_NAME *name;
+    unsigned long hash;
+
+    GetX509Name(self, name);
+
+    hash = X509_NAME_hash_old(name);
+
+    return ULONG2NUM(hash);
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-pretty_print" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">pretty_print</span><span
+            class="method-args">(q)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="pretty_print-source">
+            <pre><span class="ruby-comment"># File lib/openssl/x509.rb, line 149</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">pretty_print</span>(<span class="ruby-identifier">q</span>)
+  <span class="ruby-identifier">q</span>.<span class="ruby-identifier">object_group</span>(<span class="ruby-keyword">self</span>) {
+    <span class="ruby-identifier">q</span>.<span class="ruby-identifier">text</span> <span class="ruby-string">&#39; &#39;</span>
+    <span class="ruby-identifier">q</span>.<span class="ruby-identifier">text</span> <span class="ruby-identifier">to_s</span>(<span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">Name</span><span class="ruby-operator">::</span><span class="ruby-constant">RFC2253</span>)
+  }
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-to_a" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            to_a &rarr; [[name, data, type], ...]
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Returns an Array representation of the distinguished name suitable for
+passing to <a href="Name.html#method-c-new">::new</a></p>
+          
+          
+
+          
+          <div class="method-source-code" id="to_a-source">
+            <pre>static VALUE
+ossl_x509name_to_a(VALUE self)
+{
+    X509_NAME *name;
+    X509_NAME_ENTRY *entry;
+    int i,entries,nid;
+    char long_name[512];
+    const char *short_name;
+    VALUE ary, vname, ret;
+    ASN1_STRING *value;
+
+    GetX509Name(self, name);
+    entries = X509_NAME_entry_count(name);
+    if (entries &lt; 0) {
+        OSSL_Debug(&quot;name entries &lt; 0!&quot;);
+        return rb_ary_new();
+    }
+    ret = rb_ary_new2(entries);
+    for (i=0; i&lt;entries; i++) {
+        if (!(entry = X509_NAME_get_entry(name, i))) {
+            ossl_raise(eX509NameError, NULL);
+        }
+        if (!i2t_ASN1_OBJECT(long_name, sizeof(long_name),
+                             X509_NAME_ENTRY_get_object(entry))) {
+            ossl_raise(eX509NameError, NULL);
+        }
+        nid = OBJ_ln2nid(long_name);
+        if (nid == NID_undef) {
+            vname = rb_str_new2((const char *) &amp;long_name);
+        } else {
+            short_name = OBJ_nid2sn(nid);
+            vname = rb_str_new2(short_name); /*do not free*/
+        }
+        value = X509_NAME_ENTRY_get_data(entry);
+        ary = rb_ary_new3(3,
+                          vname,
+                          rb_str_new((const char *)value-&gt;data, value-&gt;length),
+                          INT2FIX(value-&gt;type));
+        rb_ary_push(ret, ary);
+    }
+    return ret;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-to_der" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            to_der &rarr; string
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Converts the name to DER encoding</p>
+          
+          
+
+          
+          <div class="method-source-code" id="to_der-source">
+            <pre>static VALUE
+ossl_x509name_to_der(VALUE self)
+{
+    X509_NAME *name;
+    VALUE str;
+    long len;
+    unsigned char *p;
+
+    GetX509Name(self, name);
+    if((len = i2d_X509_NAME(name, NULL)) &lt;= 0)
+        ossl_raise(eX509NameError, NULL);
+    str = rb_str_new(0, len);
+    p = (unsigned char *)RSTRING_PTR(str);
+    if(i2d_X509_NAME(name, &amp;p) &lt;= 0)
+        ossl_raise(eX509NameError, NULL);
+    ossl_str_adjust(str, p);
+
+    return str;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-to_s" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            to_s &rarr; string
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            to_s(flags) &rarr; string
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Returns this name as a Distinguished <a href="Name.html">Name</a> string. 
+<code>flags</code> may be one of:</p>
+<ul><li>
+<p>OpenSSL::X509::Name::COMPAT</p>
+</li><li>
+<p>OpenSSL::X509::Name::RFC2253</p>
+</li><li>
+<p>OpenSSL::X509::Name::ONELINE</p>
+</li><li>
+<p>OpenSSL::X509::Name::MULTILINE</p>
+</li></ul>
+          
+          
+
+          
+          <div class="method-source-code" id="to_s-source">
+            <pre>static VALUE
+ossl_x509name_to_s(int argc, VALUE *argv, VALUE self)
+{
+    X509_NAME *name;
+    VALUE flag, str;
+    BIO *out;
+    unsigned long iflag;
+
+    rb_scan_args(argc, argv, &quot;01&quot;, &amp;flag);
+    if (NIL_P(flag))
+        return ossl_x509name_to_s_old(self);
+    else iflag = NUM2ULONG(flag);
+    if (!(out = BIO_new(BIO_s_mem())))
+        ossl_raise(eX509NameError, NULL);
+    GetX509Name(self, name);
+    if (!X509_NAME_print_ex(out, name, 0, iflag)){
+        BIO_free(out);
+        ossl_raise(eX509NameError, NULL);
+    }
+    str = ossl_membio2str(out);
+
+    return str;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.2.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

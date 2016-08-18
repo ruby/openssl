@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="UTF-8">
+
+<title>class OpenSSL::Cipher - RDoc Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "../";
+</script>
+
+<script src="../js/jquery.js"></script>
+<script src="../js/darkfish.js"></script>
+
+<link href="../css/fonts.css" rel="stylesheet">
+<link href="../css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="class">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="../index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="../table_of_contents.html#pages">Pages</a>
+    <a href="../table_of_contents.html#classes">Classes</a>
+    <a href="../table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+<div class="nav-section">
+  <h3>Table of Contents</h3>
+
+  <ul class="link-list" role="directory">
+    <li><a href="#class-OpenSSL::Cipher-label-Listing+all+supported+algorithms">Listing all supported algorithms</a>
+    <li><a href="#class-OpenSSL::Cipher-label-Instantiating+a+Cipher">Instantiating a Cipher</a>
+    <li><a href="#class-OpenSSL::Cipher-label-Choosing+either+encryption+or+decryption+mode">Choosing either encryption or decryption mode</a>
+    <li><a href="#class-OpenSSL::Cipher-label-Choosing+a+key">Choosing a key</a>
+    <li><a href="#class-OpenSSL::Cipher-label-Choosing+an+IV">Choosing an IV</a>
+    <li><a href="#class-OpenSSL::Cipher-label-Calling+Cipher-23final">Calling Cipher#final</a>
+    <li><a href="#class-OpenSSL::Cipher-label-Encrypting+and+decrypting+some+data">Encrypting and decrypting some data</a>
+    <li><a href="#class-OpenSSL::Cipher-label-Authenticated+Encryption+and+Associated+Data+-28AEAD-29">Authenticated Encryption and Associated Data (AEAD)</a>
+  </ul>
+</div>
+
+
+  <div id="class-metadata">
+    
+    <div id="parent-class-section" class="nav-section">
+  <h3>Parent</h3>
+
+  
+  <p class="link">Object
+  
+</div>
+
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-c-ciphers">::ciphers</a>
+    
+    <li ><a href="#method-c-new">::new</a>
+    
+    <li ><a href="#method-i-auth_data-3D">#auth_data=</a>
+    
+    <li ><a href="#method-i-auth_tag">#auth_tag</a>
+    
+    <li ><a href="#method-i-auth_tag-3D">#auth_tag=</a>
+    
+    <li ><a href="#method-i-authenticated-3F">#authenticated?</a>
+    
+    <li ><a href="#method-i-decrypt">#decrypt</a>
+    
+    <li ><a href="#method-i-encrypt">#encrypt</a>
+    
+    <li ><a href="#method-i-final">#final</a>
+    
+    <li ><a href="#method-i-iv-3D">#iv=</a>
+    
+    <li ><a href="#method-i-iv_len">#iv_len</a>
+    
+    <li ><a href="#method-i-iv_len-3D">#iv_len=</a>
+    
+    <li ><a href="#method-i-key-3D">#key=</a>
+    
+    <li ><a href="#method-i-key_len-3D">#key_len=</a>
+    
+    <li ><a href="#method-i-name">#name</a>
+    
+    <li ><a href="#method-i-padding-3D">#padding=</a>
+    
+    <li ><a href="#method-i-pkcs5_keyivgen">#pkcs5_keyivgen</a>
+    
+    <li ><a href="#method-i-random_iv">#random_iv</a>
+    
+    <li ><a href="#method-i-random_key">#random_key</a>
+    
+    <li ><a href="#method-i-reset">#reset</a>
+    
+    <li ><a href="#method-i-update">#update</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="class-OpenSSL::Cipher">
+  <h1 id="class-OpenSSL::Cipher" class="class">
+    class OpenSSL::Cipher
+  </h1>
+
+  <section class="description">
+    
+<p>Provides symmetric algorithms for encryption and decryption. The algorithms
+that are available depend on the particular version of <a
+href="../OpenSSL.html">OpenSSL</a> that is installed.</p>
+
+<h3 id="class-OpenSSL::Cipher-label-Listing+all+supported+algorithms">Listing all supported algorithms<span><a href="#class-OpenSSL::Cipher-label-Listing+all+supported+algorithms">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>A list of supported algorithms can be obtained by</p>
+
+<pre class="ruby"><span class="ruby-identifier">puts</span> <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">ciphers</span>
+</pre>
+
+<h3 id="class-OpenSSL::Cipher-label-Instantiating+a+Cipher">Instantiating a <a href="Cipher/Cipher.html">Cipher</a><span><a href="#class-OpenSSL::Cipher-label-Instantiating+a+Cipher">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>There are several ways to create a <a href="Cipher/Cipher.html">Cipher</a>
+instance. Generally, a <a href="Cipher/Cipher.html">Cipher</a> algorithm is
+categorized by its name, the key length in bits and the cipher mode to be
+used. The most generic way to create a <a
+href="Cipher/Cipher.html">Cipher</a> is the following</p>
+
+<pre class="ruby"><span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;&lt;name&gt;-&lt;key length&gt;-&lt;mode&gt;&#39;</span>)
+</pre>
+
+<p>That is, a string consisting of the hyphenated concatenation of the
+individual components name, key length and mode. Either all uppercase or
+all lowercase strings may be used, for example:</p>
+
+<pre class="ruby"><span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;AES-128-CBC&#39;</span>)
+</pre>
+
+<p>For each algorithm supported, there is a class defined under the <a
+href="Cipher/Cipher.html">Cipher</a> class that goes by the name of the
+cipher, e.g. to obtain an instance of AES, you could also use</p>
+
+<pre class="ruby"><span class="ruby-comment"># these are equivalent</span>
+<span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span><span class="ruby-operator">::</span><span class="ruby-constant">AES</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">128</span>, :<span class="ruby-constant">CBC</span>)
+<span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span><span class="ruby-operator">::</span><span class="ruby-constant">AES</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">128</span>, <span class="ruby-string">&#39;CBC&#39;</span>)
+<span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span><span class="ruby-operator">::</span><span class="ruby-constant">AES</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;128-CBC&#39;</span>)
+</pre>
+
+<p>Finally, due to its wide-spread use, there are also extra classes defined
+for the different key sizes of AES</p>
+
+<pre class="ruby"><span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span><span class="ruby-operator">::</span><span class="ruby-constant">AES128</span>.<span class="ruby-identifier">new</span>(:<span class="ruby-constant">CBC</span>)
+<span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span><span class="ruby-operator">::</span><span class="ruby-constant">AES192</span>.<span class="ruby-identifier">new</span>(:<span class="ruby-constant">CBC</span>)
+<span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span><span class="ruby-operator">::</span><span class="ruby-constant">AES256</span>.<span class="ruby-identifier">new</span>(:<span class="ruby-constant">CBC</span>)
+</pre>
+
+<h3 id="class-OpenSSL::Cipher-label-Choosing+either+encryption+or+decryption+mode">Choosing either encryption or decryption mode<span><a href="#class-OpenSSL::Cipher-label-Choosing+either+encryption+or+decryption+mode">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>Encryption and decryption are often very similar operations for symmetric
+algorithms, this is reflected by not having to choose different classes for
+either operation, both can be done using the same class. Still, after
+obtaining a <a href="Cipher/Cipher.html">Cipher</a> instance, we need to
+tell the instance what it is that we intend to do with it, so we need to
+call either</p>
+
+<pre class="ruby"><span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">encrypt</span>
+</pre>
+
+<p>or</p>
+
+<pre class="ruby"><span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">decrypt</span>
+</pre>
+
+<p>on the <a href="Cipher/Cipher.html">Cipher</a> instance. This should be the
+first call after creating the instance, otherwise configuration that has
+already been set could get lost in the process.</p>
+
+<h3 id="class-OpenSSL::Cipher-label-Choosing+a+key">Choosing a key<span><a href="#class-OpenSSL::Cipher-label-Choosing+a+key">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>Symmetric encryption requires a key that is the same for the encrypting and
+for the decrypting party and after initial key establishment should be kept
+as private information. There are a lot of ways to create insecure keys,
+the most notable is to simply take a password as the key without processing
+the password further. A simple and secure way to create a key for a
+particular <a href="Cipher/Cipher.html">Cipher</a> is</p>
+
+<pre class="ruby"><span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">AES256</span>.<span class="ruby-identifier">new</span>(:<span class="ruby-constant">CFB</span>)
+<span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">encrypt</span>
+<span class="ruby-identifier">key</span> = <span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">random_key</span> <span class="ruby-comment"># also sets the generated key on the Cipher</span>
+</pre>
+
+<p>If you absolutely need to use passwords as encryption keys, you should use
+Password-Based Key Derivation Function 2 (PBKDF2) by generating the key
+with the help of the functionality provided by <a
+href="PKCS5.html#method-c-pbkdf2_hmac_sha1">OpenSSL::PKCS5.pbkdf2_hmac_sha1</a>
+or <a
+href="PKCS5.html#method-c-pbkdf2_hmac">OpenSSL::PKCS5.pbkdf2_hmac</a>.</p>
+
+<p>Although there is <a
+href="Cipher.html#method-i-pkcs5_keyivgen">#pkcs5_keyivgen</a>, its use is
+deprecated and it should only be used in legacy applications because it
+does not use the newer PKCS#5 v2 algorithms.</p>
+
+<h3 id="class-OpenSSL::Cipher-label-Choosing+an+IV">Choosing an IV<span><a href="#class-OpenSSL::Cipher-label-Choosing+an+IV">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>The cipher modes CBC, CFB, OFB and CTR all need an “initialization vector”,
+or short, IV. ECB mode is the only mode that does not require an IV, but
+there is almost no legitimate use case for this mode because of the fact
+that it does not sufficiently hide plaintext patterns. Therefore</p>
+
+<p><strong>You should never use ECB mode unless you are absolutely sure that
+you absolutely need it</strong></p>
+
+<p>Because of this, you will end up with a mode that explicitly requires an IV
+in any case. Note that for backwards compatibility reasons, setting an IV
+is not explicitly mandated by the <a href="Cipher/Cipher.html">Cipher</a>
+API. If not set, <a href="../OpenSSL.html">OpenSSL</a> itself defaults to
+an all-zeroes IV (“\0”, not the character). Although the IV can be seen as
+public information, i.e. it may be transmitted in public once generated, it
+should still stay unpredictable to prevent certain kinds of attacks.
+Therefore, ideally</p>
+
+<p><strong>Always create a secure random IV for every encryption of your <a
+href="Cipher/Cipher.html">Cipher</a></strong></p>
+
+<p>A new, random IV should be created for every encryption of data. Think of
+the IV as a nonce (number used once) - it&#39;s public but random and
+unpredictable. A secure random IV can be created as follows</p>
+
+<pre>cipher = ...
+cipher.encrypt
+key = cipher.random_key
+iv = cipher.random_iv # also sets the generated IV on the Cipher</pre>
+
+<p>Although the key is generally a random value, too, it is a bad choice as an
+IV. There are elaborate ways how an attacker can take advantage of such an
+IV. As a general rule of thumb, exposing the key directly or indirectly
+should be avoided at all cost and exceptions only be made with good reason.</p>
+
+<h3 id="class-OpenSSL::Cipher-label-Calling+Cipher-23final">Calling <a href="Cipher.html#method-i-final">#final</a><span><a href="#class-OpenSSL::Cipher-label-Calling+Cipher-23final">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>ECB (which should not be used) and CBC are both block-based modes. This
+means that unlike for the other streaming-based modes, they operate on
+fixed-size blocks of data, and therefore they require a “finalization” step
+to produce or correctly decrypt the last block of data by appropriately
+handling some form of padding. Therefore it is essential to add the output
+of <a href="Cipher.html#method-i-final">#final</a> to your
+encryption/decryption buffer or you will end up with decryption errors or
+truncated data.</p>
+
+<p>Although this is not really necessary for streaming-mode ciphers, it is
+still recommended to apply the same pattern of adding the output of <a
+href="Cipher.html#method-i-final">#final</a> there as well - it also
+enables you to switch between modes more easily in the future.</p>
+
+<h3 id="class-OpenSSL::Cipher-label-Encrypting+and+decrypting+some+data">Encrypting and decrypting some data<span><a href="#class-OpenSSL::Cipher-label-Encrypting+and+decrypting+some+data">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre>data = &quot;Very, very confidential data&quot;
+
+cipher = OpenSSL::Cipher::AES.new(128, :CBC)
+cipher.encrypt
+key = cipher.random_key
+iv = cipher.random_iv
+
+encrypted = cipher.update(data) + cipher.final
+...
+decipher = OpenSSL::Cipher::AES.new(128, :CBC)
+decipher.decrypt
+decipher.key = key
+decipher.iv = iv
+
+plain = decipher.update(encrypted) + decipher.final
+
+puts data == plain #=&gt; true</pre>
+
+<h3 id="class-OpenSSL::Cipher-label-Authenticated+Encryption+and+Associated+Data+-28AEAD-29">Authenticated Encryption and Associated Data (AEAD)<span><a href="#class-OpenSSL::Cipher-label-Authenticated+Encryption+and+Associated+Data+-28AEAD-29">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>If the <a href="../OpenSSL.html">OpenSSL</a> version used supports it, an
+Authenticated Encryption mode (such as GCM or CCM) should always be
+preferred over any unauthenticated mode. Currently, <a
+href="../OpenSSL.html">OpenSSL</a> supports AE only in combination with
+Associated Data (AEAD) where additional associated data is included in the
+encryption process to compute a tag at the end of the encryption. This tag
+will also be used in the decryption process and by verifying its validity,
+the authenticity of a given ciphertext is established.</p>
+
+<p>This is superior to unauthenticated modes in that it allows to detect if
+somebody effectively changed the ciphertext after it had been encrypted.
+This prevents malicious modifications of the ciphertext that could
+otherwise be exploited to modify ciphertexts in ways beneficial to
+potential attackers.</p>
+
+<p>If no associated data is needed for encryption and later decryption, the <a
+href="../OpenSSL.html">OpenSSL</a> library still requires a value to be set
+- “” may be used in case none is available.</p>
+
+<p>An example using the GCM (Galois/Counter Mode). You have 16 bytes
+<code>key</code>, 12 bytes (96 bits) <code>nonce</code> and the associated
+data <code>auth_data</code>. Be sure not to reuse the <code>key</code> and
+<code>nonce</code> pair. Reusing an nonce ruins the security gurantees of
+GCM mode.</p>
+
+<pre class="ruby"><span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span><span class="ruby-operator">::</span><span class="ruby-constant">AES</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">128</span>, :<span class="ruby-constant">GCM</span>).<span class="ruby-identifier">encrypt</span>
+<span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">key</span> = <span class="ruby-identifier">key</span>
+<span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">iv</span> = <span class="ruby-identifier">nonce</span>
+<span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">auth_data</span> = <span class="ruby-identifier">auth_data</span>
+
+<span class="ruby-identifier">encrypted</span> = <span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">update</span>(<span class="ruby-identifier">data</span>) <span class="ruby-operator">+</span> <span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">final</span>
+<span class="ruby-identifier">tag</span> = <span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">auth_tag</span> <span class="ruby-comment"># produces 16 bytes tag by default</span>
+</pre>
+
+<p>Now you are the receiver. You know the <code>key</code> and
+<code>nonce</code>, and have received <code>encrypted</code> and
+<code>tag</code> through an untrusted network. Note that GCM accepts an
+arbitrary length tag between 1 and 16 bytes. You may additionally need to
+check that the received tag has the correct length, or you allow attackers
+to forge a valid single byte tag for the tampered ciphertext with a
+probability of 1/256.</p>
+
+<pre class="ruby"><span class="ruby-identifier">raise</span> <span class="ruby-string">&quot;tag is truncated!&quot;</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">bytesize</span> <span class="ruby-operator">==</span> <span class="ruby-value">16</span>
+<span class="ruby-identifier">decipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span><span class="ruby-operator">::</span><span class="ruby-constant">AES</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">128</span>, :<span class="ruby-constant">GCM</span>).<span class="ruby-identifier">decrypt</span>
+<span class="ruby-identifier">decipher</span>.<span class="ruby-identifier">key</span> = <span class="ruby-identifier">key</span>
+<span class="ruby-identifier">decipher</span>.<span class="ruby-identifier">iv</span> = <span class="ruby-identifier">nonce</span>
+<span class="ruby-identifier">decipher</span>.<span class="ruby-identifier">auth_tag</span> = <span class="ruby-identifier">tag</span>
+<span class="ruby-identifier">decipher</span>.<span class="ruby-identifier">auth_data</span> = <span class="ruby-identifier">auth_data</span>
+
+<span class="ruby-identifier">decrypted</span> = <span class="ruby-identifier">decipher</span>.<span class="ruby-identifier">update</span>(<span class="ruby-identifier">encrypted</span>) <span class="ruby-operator">+</span> <span class="ruby-identifier">decipher</span>.<span class="ruby-identifier">final</span>
+
+<span class="ruby-identifier">puts</span> <span class="ruby-identifier">data</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">decrypted</span> <span class="ruby-comment">#=&gt; true</span>
+</pre>
+
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-ciphers" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            OpenSSL::Cipher.ciphers &rarr; array[string...]
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Returns the names of all available ciphers in an array.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="ciphers-source">
+            <pre>static VALUE
+ossl_s_ciphers(VALUE self)
+{
+    VALUE ary;
+
+    ary = rb_ary_new();
+    OBJ_NAME_do_all_sorted(OBJ_NAME_TYPE_CIPHER_METH,
+                    (void(*)(const OBJ_NAME*,void*))add_cipher_name_to_ary,
+                    (void*)ary);
+
+    return ary;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-new" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            new(string) &rarr; cipher
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>The string must contain a valid cipher name like “AES-128-CBC” or “3DES”.</p>
+
+<p>A list of cipher names is available by calling <a
+href="Cipher.html#method-c-ciphers">::ciphers</a>.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="new-source">
+            <pre>static VALUE
+ossl_cipher_initialize(VALUE self, VALUE str)
+{
+    EVP_CIPHER_CTX *ctx;
+    const EVP_CIPHER *cipher;
+    char *name;
+    unsigned char dummy_key[EVP_MAX_KEY_LENGTH] = { 0 };
+
+    name = StringValueCStr(str);
+    GetCipherInit(self, ctx);
+    if (ctx) {
+        ossl_raise(rb_eRuntimeError, &quot;Cipher already inititalized!&quot;);
+    }
+    AllocCipher(self, ctx);
+    if (!(cipher = EVP_get_cipherbyname(name))) {
+        ossl_raise(rb_eRuntimeError, &quot;unsupported cipher algorithm (%&quot;PRIsVALUE&quot;)&quot;, str);
+    }
+    /*
+     * EVP_CipherInit_ex() allows to specify NULL to key and IV, however some
+     * ciphers don&#39;t handle well (OpenSSL&#39;s bug). [Bug #2768]
+     *
+     * The EVP which has EVP_CIPH_RAND_KEY flag (such as DES3) allows
+     * uninitialized key, but other EVPs (such as AES) does not allow it.
+     * Calling EVP_CipherUpdate() without initializing key causes SEGV so we
+     * set the data filled with &quot;\0&quot; as the key by default.
+     */
+    if (EVP_CipherInit_ex(ctx, cipher, NULL, dummy_key, NULL, -1) != 1)
+        ossl_raise(eCipherError, NULL);
+
+    return self;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-auth_data-3D" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            auth_data = string &rarr; string
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Sets the cipher&#39;s additional authenticated data. This field must be set
+when using AEAD cipher modes such as GCM or CCM. If no associated data
+shall be used, this method must <strong>still</strong> be called with a
+value of “”. The contents of this field should be non-sensitive data which
+will be added to the ciphertext to generate the authentication tag which
+validates the contents of the ciphertext.</p>
+
+<p>The AAD must be set prior to encryption or decryption. In encryption mode,
+it must be set after calling <a
+href="Cipher.html#method-i-encrypt">#encrypt</a> and setting <a
+href="Cipher.html#method-i-key-3D">#key=</a> and <a
+href="Cipher.html#method-i-iv-3D">#iv=</a>. When decrypting, the
+authenticated data must be set after key, iv and especially
+<strong>after</strong> the authentication tag has been set. I.e. set it
+only after calling <a href="Cipher.html#method-i-decrypt">#decrypt</a>, <a
+href="Cipher.html#method-i-key-3D">#key=</a>, <a
+href="Cipher.html#method-i-iv-3D">#iv=</a> and <a
+href="Cipher.html#method-i-auth_tag-3D">#auth_tag=</a> first.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="auth_data-3D-source">
+            <pre>static VALUE
+ossl_cipher_set_auth_data(VALUE self, VALUE data)
+{
+    EVP_CIPHER_CTX *ctx;
+    unsigned char *in;
+    long in_len, out_len;
+
+    StringValue(data);
+
+    in = (unsigned char *) RSTRING_PTR(data);
+    in_len = RSTRING_LEN(data);
+
+    GetCipher(self, ctx);
+
+    if (!ossl_cipher_update_long(ctx, NULL, &amp;out_len, in, in_len))
+        ossl_raise(eCipherError, &quot;couldn&#39;t set additional authenticated data&quot;);
+
+    return data;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-auth_tag" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            auth_tag(tag_len = 16) &rarr; String
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Gets the authentication tag generated by Authenticated Encryption <a
+href="Cipher/Cipher.html">Cipher</a> modes (GCM for example). This tag may
+be stored along with the ciphertext, then set on the decryption cipher to
+authenticate the contents of the ciphertext against changes. If the
+optional integer parameter <code>tag_len</code> is given, the returned tag
+will be <code>tag_len</code> bytes long. If the parameter is omitted, the
+maximum length of 16 bytes will be returned. For maximum security, the
+default of 16 bytes should be chosen.</p>
+
+<p>The tag may only be retrieved after calling <a
+href="Cipher.html#method-i-final">#final</a>.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="auth_tag-source">
+            <pre>static VALUE
+ossl_cipher_get_auth_tag(int argc, VALUE *argv, VALUE self)
+{
+    VALUE vtag_len, ret;
+    EVP_CIPHER_CTX *ctx;
+    int tag_len = 16;
+
+    if (rb_scan_args(argc, argv, &quot;01&quot;, &amp;vtag_len) == 1)
+        tag_len = NUM2INT(vtag_len);
+
+    GetCipher(self, ctx);
+
+    if (!(EVP_CIPHER_CTX_flags(ctx) &amp; EVP_CIPH_FLAG_AEAD_CIPHER))
+        ossl_raise(eCipherError, &quot;authentication tag not supported by this cipher&quot;);
+
+    ret = rb_str_new(NULL, tag_len);
+    if (!EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_GET_TAG, tag_len, RSTRING_PTR(ret)))
+        ossl_raise(eCipherError, &quot;retrieving the authentication tag failed&quot;);
+
+    return ret;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-auth_tag-3D" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            auth_tag = string &rarr; string
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Sets the authentication tag to verify the contents of the ciphertext. The
+tag must be set after calling <a
+href="Cipher.html#method-i-decrypt">#decrypt</a>, <a
+href="Cipher.html#method-i-key-3D">#key=</a> and <a
+href="Cipher.html#method-i-iv-3D">#iv=</a>, but before assigning the
+associated authenticated data using <a
+href="Cipher.html#method-i-auth_data-3D">#auth_data=</a> and of course,
+before decrypting any of the ciphertext. After all decryption is performed,
+the tag is verified automatically in the call to <a
+href="Cipher.html#method-i-final">#final</a>.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="auth_tag-3D-source">
+            <pre>static VALUE
+ossl_cipher_set_auth_tag(VALUE self, VALUE vtag)
+{
+    EVP_CIPHER_CTX *ctx;
+    unsigned char *tag;
+    int tag_len;
+
+    StringValue(vtag);
+    tag = (unsigned char *) RSTRING_PTR(vtag);
+    tag_len = RSTRING_LENINT(vtag);
+
+    GetCipher(self, ctx);
+    if (!(EVP_CIPHER_CTX_flags(ctx) &amp; EVP_CIPH_FLAG_AEAD_CIPHER))
+        ossl_raise(eCipherError, &quot;authentication tag not supported by this cipher&quot;);
+
+    if (!EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_SET_TAG, tag_len, tag))
+        ossl_raise(eCipherError, &quot;unable to set AEAD tag&quot;);
+
+    return vtag;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-authenticated-3F" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            authenticated? &rarr; boolean
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Indicated whether this <a href="Cipher/Cipher.html">Cipher</a> instance
+uses an Authenticated Encryption mode.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="authenticated-3F-source">
+            <pre>static VALUE
+ossl_cipher_is_authenticated(VALUE self)
+{
+    EVP_CIPHER_CTX *ctx;
+
+    GetCipher(self, ctx);
+
+    return (EVP_CIPHER_CTX_flags(ctx) &amp; EVP_CIPH_FLAG_AEAD_CIPHER) ? Qtrue : Qfalse;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-decrypt" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            decrypt &rarr; self
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Initializes the <a href="Cipher/Cipher.html">Cipher</a> for decryption.</p>
+
+<p>Make sure to call <a href="Cipher.html#method-i-encrypt">#encrypt</a> or <a
+href="Cipher.html#method-i-decrypt">#decrypt</a> before using any of the
+following methods:</p>
+<ul><li><dl class="rdoc-list label-list"><dt>key=, iv=, <a href="Cipher.html#method-i-random_key">#random_key</a>, <a href="Cipher.html#method-i-random_iv">#random_iv</a>, <a href="Cipher.html#method-i-pkcs5_keyivgen">#pkcs5_keyivgen</a>
+<dd></dd></dl>
+</li></ul>
+
+<p>Internally calls EVP_CipherInit_ex(ctx, NULL, NULL, NULL, NULL, 0).</p>
+          
+          
+
+          
+          <div class="method-source-code" id="decrypt-source">
+            <pre>static VALUE
+ossl_cipher_decrypt(int argc, VALUE *argv, VALUE self)
+{
+    return ossl_cipher_init(argc, argv, self, 0);
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-encrypt" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            encrypt &rarr; self
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Initializes the <a href="Cipher/Cipher.html">Cipher</a> for encryption.</p>
+
+<p>Make sure to call <a href="Cipher.html#method-i-encrypt">#encrypt</a> or <a
+href="Cipher.html#method-i-decrypt">#decrypt</a> before using any of the
+following methods:</p>
+<ul><li><dl class="rdoc-list label-list"><dt>key=, iv=, <a href="Cipher.html#method-i-random_key">#random_key</a>, <a href="Cipher.html#method-i-random_iv">#random_iv</a>, <a href="Cipher.html#method-i-pkcs5_keyivgen">#pkcs5_keyivgen</a>
+<dd></dd></dl>
+</li></ul>
+
+<p>Internally calls EVP_CipherInit_ex(ctx, NULL, NULL, NULL, NULL, 1).</p>
+          
+          
+
+          
+          <div class="method-source-code" id="encrypt-source">
+            <pre>static VALUE
+ossl_cipher_encrypt(int argc, VALUE *argv, VALUE self)
+{
+    return ossl_cipher_init(argc, argv, self, 1);
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-final" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            final &rarr; string
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Returns the remaining data held in the cipher object. Further calls to <a
+href="Cipher.html#method-i-update">#update</a> or <a
+href="Cipher.html#method-i-final">#final</a> will return garbage. This call
+should always be made as the last call of an encryption or decryption
+operation, after after having fed the entire plaintext or ciphertext to the
+<a href="Cipher/Cipher.html">Cipher</a> instance.</p>
+
+<p>If an authenticated cipher was used, a <a
+href="Cipher/CipherError.html">CipherError</a> is raised if the tag could
+not be authenticated successfully. Only call this method after setting the
+authentication tag and passing the entire contents of the ciphertext into
+the cipher.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="final-source">
+            <pre>static VALUE
+ossl_cipher_final(VALUE self)
+{
+    EVP_CIPHER_CTX *ctx;
+    int out_len;
+    VALUE str;
+
+    GetCipher(self, ctx);
+    str = rb_str_new(0, EVP_CIPHER_CTX_block_size(ctx));
+    if (!EVP_CipherFinal_ex(ctx, (unsigned char *)RSTRING_PTR(str), &amp;out_len))
+        ossl_raise(eCipherError, NULL);
+    assert(out_len &lt;= RSTRING_LEN(str));
+    rb_str_set_len(str, out_len);
+
+    return str;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-iv-3D" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            iv = string &rarr; string
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Sets the cipher IV. Please note that since you should never be using ECB
+mode, an IV is always explicitly required and should be set prior to
+encryption. The IV itself can be safely transmitted in public, but it
+should be unpredictable to prevent certain kinds of attacks. You may use <a
+href="Cipher.html#method-i-random_iv">#random_iv</a> to create a secure
+random IV.</p>
+
+<p>Only call this method after calling <a
+href="Cipher.html#method-i-encrypt">#encrypt</a> or <a
+href="Cipher.html#method-i-decrypt">#decrypt</a>.</p>
+
+<p>If not explicitly set, the <a href="../OpenSSL.html">OpenSSL</a> default of
+an all-zeroes (“\0”) IV is used.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="iv-3D-source">
+            <pre>static VALUE
+ossl_cipher_set_iv(VALUE self, VALUE iv)
+{
+    EVP_CIPHER_CTX *ctx;
+    int iv_len = 0;
+
+    StringValue(iv);
+    GetCipher(self, ctx);
+
+#if defined(HAVE_AUTHENTICATED_ENCRYPTION)
+    if (EVP_CIPHER_CTX_flags(ctx) &amp; EVP_CIPH_FLAG_AEAD_CIPHER)
+        iv_len = (int)(VALUE)EVP_CIPHER_CTX_get_app_data(ctx);
+#endif
+    if (!iv_len)
+        iv_len = EVP_CIPHER_CTX_iv_length(ctx);
+    if (RSTRING_LEN(iv) != iv_len)
+        ossl_raise(rb_eArgError, &quot;iv must be %d bytes&quot;, iv_len);
+
+    if (EVP_CipherInit_ex(ctx, NULL, NULL, NULL, (unsigned char *)RSTRING_PTR(iv), -1) != 1)
+        ossl_raise(eCipherError, NULL);
+
+    return iv;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-iv_len" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            iv_len &rarr; integer
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Returns the expected length in bytes for an IV for this <a
+href="Cipher/Cipher.html">Cipher</a>.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="iv_len-source">
+            <pre>static VALUE
+ossl_cipher_iv_length(VALUE self)
+{
+    EVP_CIPHER_CTX *ctx;
+    int len = 0;
+
+    GetCipher(self, ctx);
+#if defined(HAVE_AUTHENTICATED_ENCRYPTION)
+    if (EVP_CIPHER_CTX_flags(ctx) &amp; EVP_CIPH_FLAG_AEAD_CIPHER)
+        len = (int)(VALUE)EVP_CIPHER_CTX_get_app_data(ctx);
+#endif
+    if (!len)
+        len = EVP_CIPHER_CTX_iv_length(ctx);
+
+    return INT2NUM(len);
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-iv_len-3D" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            iv_len = integer &rarr; integer
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Sets the IV/nonce length of the <a href="Cipher/Cipher.html">Cipher</a>.
+Normally block ciphers don&#39;t allow changing the IV length, but some
+make use of IV for &#39;nonce&#39;. You may need this for interoperability
+with other applications.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="iv_len-3D-source">
+            <pre>static VALUE
+ossl_cipher_set_iv_length(VALUE self, VALUE iv_length)
+{
+    int len = NUM2INT(iv_length);
+    EVP_CIPHER_CTX *ctx;
+
+    GetCipher(self, ctx);
+    if (!(EVP_CIPHER_CTX_flags(ctx) &amp; EVP_CIPH_FLAG_AEAD_CIPHER))
+        ossl_raise(eCipherError, &quot;cipher does not support AEAD&quot;);
+
+    if (!EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_SET_IVLEN, len, NULL))
+        ossl_raise(eCipherError, &quot;unable to set IV length&quot;);
+
+    /*
+     * EVP_CIPHER_CTX_iv_length() returns the default length. So we need to save
+     * the length somewhere. Luckily currently we aren&#39;t using app_data.
+     */
+    EVP_CIPHER_CTX_set_app_data(ctx, (void *)(VALUE)len);
+
+    return iv_length;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-key-3D" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            key = string &rarr; string
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Sets the cipher key. To generate a key, you should either use a secure
+random byte string or, if the key is to be derived from a password, you
+should rely on PBKDF2 functionality provided by <a
+href="PKCS5.html">OpenSSL::PKCS5</a>. To generate a secure random-based
+key, <a href="Cipher.html#method-i-random_key">#random_key</a> may be used.</p>
+
+<p>Only call this method after calling <a
+href="Cipher.html#method-i-encrypt">#encrypt</a> or <a
+href="Cipher.html#method-i-decrypt">#decrypt</a>.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="key-3D-source">
+            <pre>static VALUE
+ossl_cipher_set_key(VALUE self, VALUE key)
+{
+    EVP_CIPHER_CTX *ctx;
+    int key_len;
+
+    StringValue(key);
+    GetCipher(self, ctx);
+
+    key_len = EVP_CIPHER_CTX_key_length(ctx);
+    if (RSTRING_LEN(key) != key_len)
+        ossl_raise(rb_eArgError, &quot;key must be %d bytes&quot;, key_len);
+
+    if (EVP_CipherInit_ex(ctx, NULL, NULL, (unsigned char *)RSTRING_PTR(key), NULL, -1) != 1)
+        ossl_raise(eCipherError, NULL);
+
+    return key;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-key_len-3D" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            key_len = integer &rarr; integer
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Sets the key length of the cipher.  If the cipher is a fixed length cipher
+then attempting to set the key length to any value other than the fixed
+value is an error.</p>
+
+<p>Under normal circumstances you do not need to call this method (and
+probably shouldn&#39;t).</p>
+
+<p>See EVP_CIPHER_CTX_set_key_length for further information.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="key_len-3D-source">
+            <pre>static VALUE
+ossl_cipher_set_key_length(VALUE self, VALUE key_length)
+{
+    int len = NUM2INT(key_length);
+    EVP_CIPHER_CTX *ctx;
+
+    GetCipher(self, ctx);
+    if (EVP_CIPHER_CTX_set_key_length(ctx, len) != 1)
+        ossl_raise(eCipherError, NULL);
+
+    return key_length;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-name" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            name &rarr; string
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Returns the name of the cipher which may differ slightly from the original
+name provided.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="name-source">
+            <pre>static VALUE
+ossl_cipher_name(VALUE self)
+{
+    EVP_CIPHER_CTX *ctx;
+
+    GetCipher(self, ctx);
+
+    return rb_str_new2(EVP_CIPHER_name(EVP_CIPHER_CTX_cipher(ctx)));
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-padding-3D" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            padding = integer &rarr; integer
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Enables or disables padding. By default encryption operations are padded
+using standard block padding and the padding is checked and removed when
+decrypting. If the pad parameter is zero then no padding is performed, the
+total amount of data encrypted or decrypted must then be a multiple of the
+block size or an error will occur.</p>
+
+<p>See EVP_CIPHER_CTX_set_padding for further information.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="padding-3D-source">
+            <pre>static VALUE
+ossl_cipher_set_padding(VALUE self, VALUE padding)
+{
+    EVP_CIPHER_CTX *ctx;
+    int pad = NUM2INT(padding);
+
+    GetCipher(self, ctx);
+    if (EVP_CIPHER_CTX_set_padding(ctx, pad) != 1)
+        ossl_raise(eCipherError, NULL);
+    return padding;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-pkcs5_keyivgen" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            pkcs5_keyivgen(pass [, salt [, iterations [, digest]]] ) &rarr; nil
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Generates and sets the key/IV based on a password.</p>
+
+<p>WARNING: This method is only <a href="PKCS5.html">PKCS5</a> v1.5 compliant
+when using RC2, RC4-40, or DES with MD5 or SHA1. Using anything else (like
+AES) will generate the key/iv using an <a
+href="../OpenSSL.html">OpenSSL</a> specific method. This method is
+deprecated and should no longer be used. Use a <a
+href="PKCS5.html">PKCS5</a> v2 key generation method from <a
+href="PKCS5.html">OpenSSL::PKCS5</a> instead.</p>
+
+<h3 id="method-i-pkcs5_keyivgen-label-Parameters">Parameters<span><a href="#method-i-pkcs5_keyivgen-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p><code>salt</code> must be an 8 byte string if provided.
+<code>iterations</code> is a integer with a default of 2048.
+<code>digest</code> is a <a href="Digest.html">Digest</a> object that
+defaults to &#39;MD5&#39;</p>
+
+<p>A minimum of 1000 iterations is recommended.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="pkcs5_keyivgen-source">
+            <pre>static VALUE
+ossl_cipher_pkcs5_keyivgen(int argc, VALUE *argv, VALUE self)
+{
+    EVP_CIPHER_CTX *ctx;
+    const EVP_MD *digest;
+    VALUE vpass, vsalt, viter, vdigest;
+    unsigned char key[EVP_MAX_KEY_LENGTH], iv[EVP_MAX_IV_LENGTH], *salt = NULL;
+    int iter;
+
+    rb_scan_args(argc, argv, &quot;13&quot;, &amp;vpass, &amp;vsalt, &amp;viter, &amp;vdigest);
+    StringValue(vpass);
+    if(!NIL_P(vsalt)){
+        StringValue(vsalt);
+        if(RSTRING_LEN(vsalt) != PKCS5_SALT_LEN)
+            ossl_raise(eCipherError, &quot;salt must be an 8-octet string&quot;);
+        salt = (unsigned char *)RSTRING_PTR(vsalt);
+    }
+    iter = NIL_P(viter) ? 2048 : NUM2INT(viter);
+    digest = NIL_P(vdigest) ? EVP_md5() : GetDigestPtr(vdigest);
+    GetCipher(self, ctx);
+    EVP_BytesToKey(EVP_CIPHER_CTX_cipher(ctx), digest, salt,
+                   (unsigned char *)RSTRING_PTR(vpass), RSTRING_LENINT(vpass), iter, key, iv);
+    if (EVP_CipherInit_ex(ctx, NULL, NULL, key, iv, -1) != 1)
+        ossl_raise(eCipherError, NULL);
+    OPENSSL_cleanse(key, sizeof key);
+    OPENSSL_cleanse(iv, sizeof iv);
+
+    return Qnil;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-random_iv" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">random_iv</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Generate, set, and return a random iv. You must call cipher.encrypt or
+cipher.decrypt before calling this method.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="random_iv-source">
+            <pre><span class="ruby-comment"># File lib/openssl/cipher.rb, line 46</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">random_iv</span>
+  <span class="ruby-identifier">str</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Random</span>.<span class="ruby-identifier">random_bytes</span>(<span class="ruby-keyword">self</span>.<span class="ruby-identifier">iv_len</span>)
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">iv</span> = <span class="ruby-identifier">str</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-identifier">str</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-random_key" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">random_key</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Generate, set, and return a random key. You must call cipher.encrypt or
+cipher.decrypt before calling this method.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="random_key-source">
+            <pre><span class="ruby-comment"># File lib/openssl/cipher.rb, line 38</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">random_key</span>
+  <span class="ruby-identifier">str</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Random</span>.<span class="ruby-identifier">random_bytes</span>(<span class="ruby-keyword">self</span>.<span class="ruby-identifier">key_len</span>)
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">key</span> = <span class="ruby-identifier">str</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-identifier">str</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-reset" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            reset &rarr; self
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Fully resets the internal state of the <a
+href="Cipher/Cipher.html">Cipher</a>. By using this, the same <a
+href="Cipher/Cipher.html">Cipher</a> instance may be used several times for
+encryption or decryption tasks.</p>
+
+<p>Internally calls EVP_CipherInit_ex(ctx, NULL, NULL, NULL, NULL, -1).</p>
+          
+          
+
+          
+          <div class="method-source-code" id="reset-source">
+            <pre>static VALUE
+ossl_cipher_reset(VALUE self)
+{
+    EVP_CIPHER_CTX *ctx;
+
+    GetCipher(self, ctx);
+    if (EVP_CipherInit_ex(ctx, NULL, NULL, NULL, NULL, -1) != 1)
+        ossl_raise(eCipherError, NULL);
+
+    return self;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-update" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            update(data [, buffer]) &rarr; string or buffer
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Encrypts data in a streaming fashion. Hand consecutive blocks of data to
+the <code>update</code> method in order to encrypt it. Returns the
+encrypted data chunk. When done, the output of <a
+href="Cipher.html#method-i-final">#final</a> should be additionally added
+to the result.</p>
+
+<h3 id="method-i-update-label-Parameters">Parameters<span><a href="#method-i-update-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p><code>data</code> is a nonempty string. <code>buffer</code> is an optional
+string to store the result.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="update-source">
+            <pre>static VALUE
+ossl_cipher_update(int argc, VALUE *argv, VALUE self)
+{
+    EVP_CIPHER_CTX *ctx;
+    unsigned char *in;
+    long in_len, out_len;
+    VALUE data, str;
+
+    rb_scan_args(argc, argv, &quot;11&quot;, &amp;data, &amp;str);
+
+    StringValue(data);
+    in = (unsigned char *)RSTRING_PTR(data);
+    if ((in_len = RSTRING_LEN(data)) == 0)
+        ossl_raise(rb_eArgError, &quot;data must not be empty&quot;);
+    GetCipher(self, ctx);
+    out_len = in_len+EVP_CIPHER_CTX_block_size(ctx);
+    if (out_len &lt;= 0) {
+        ossl_raise(rb_eRangeError,
+                   &quot;data too big to make output buffer: %ld bytes&quot;, in_len);
+    }
+
+    if (NIL_P(str)) {
+        str = rb_str_new(0, out_len);
+    } else {
+        StringValue(str);
+        rb_str_resize(str, out_len);
+    }
+
+    if (!ossl_cipher_update_long(ctx, (unsigned char *)RSTRING_PTR(str), &amp;out_len, in, in_len))
+        ossl_raise(eCipherError, NULL);
+    assert(out_len &lt; RSTRING_LEN(str));
+    rb_str_set_len(str, out_len);
+
+    return str;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.2.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+
