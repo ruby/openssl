@@ -958,9 +958,11 @@ Init_ossl_cipher(void)
      * could otherwise be exploited to modify ciphertexts in ways beneficial to
      * potential attackers.
      *
-     * If no associated data is needed for encryption and later decryption,
-     * the OpenSSL library still requires a value to be set - "" may be used in
-     * case none is available.
+     * An associated data is used where there is additional information, such as
+     * headers or some metadata, that must be also authenticated but not
+     * necessarily need to be encrypted. If no associated data is needed for
+     * encryption and later decryption, the OpenSSL library still requires a
+     * value to be set - "" may be used in case none is available.
      *
      * An example using the GCM (Galois/Counter Mode). You have 16 bytes +key+,
      * 12 bytes (96 bits) +nonce+ and the associated data +auth_data+. Be sure
@@ -975,9 +977,9 @@ Init_ossl_cipher(void)
      *   encrypted = cipher.update(data) + cipher.final
      *   tag = cipher.auth_tag # produces 16 bytes tag by default
      *
-     * Now you are the receiver. You know the +key+ and +nonce+, and have
-     * received +encrypted+ and +tag+ through an untrusted network. Note that
-     * GCM accepts an arbitrary length tag between 1 and 16 bytes. You may
+     * Now you are the receiver. You know the +key+ and have received +nonce+,
+     * +auth_data+, +encrypted+ and +tag+ through an untrusted network. Note
+     * that GCM accepts an arbitrary length tag between 1 and 16 bytes. You may
      * additionally need to check that the received tag has the correct length,
      * or you allow attackers to forge a valid single byte tag for the tampered
      * ciphertext with a probability of 1/256.
