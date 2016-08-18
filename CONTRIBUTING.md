@@ -36,7 +36,8 @@ Make sure that your branch does:
 
 ## Testing
 
-We have a test suite. You can run it with the following three commands:
+We have a test suite. Test cases are located under `test/` directory. You can
+run it with the following three commands:
 
 ```
 $ gem install rake-compiler test-unit
@@ -44,7 +45,24 @@ $ rake compile
 $ rake test
 ```
 
-Test cases are located under `test/` directory.
+You can also use Docker Compose to run tests. It can be used to check that your
+changes works correctly with various supported versions of Ruby and OpenSSL.
+
+First, you need to install Docker and Docker Compose in your computer. Then,
+running the following commands will work.
+
+```
+$ docker-compose build
+$ export RUBY_VERSION=ruby-2.3
+$ export OPENSSL_VERSION=openssl-1.0.2
+$ docker-compose run test
+
+# You may want an interactive shell for dubugging
+$ docker-compose run debug
+```
+
+The possible values for `RUBY_VERSION` and `OPENSSL_VERSION` can be found in
+`.travis.yml`.
 
 ## Relation with Ruby source tree
 
