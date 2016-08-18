@@ -1,18 +1,13 @@
 compile: &defaults
   build: .
-  volumes:
-    - .:/home/openssl/code:rw
   environment:
-    RUBY_VERSION: 2.2.3
+    RUBY_VERSION:
     OPENSSL_VERSION:
-    LIBRESSL_VERSION:
+    MDEBUG:
   command: rake compile
 test:
   <<: *defaults
-  command: rake test
-shell:
-  <<: *defaults
-  command: irb
+  command: rake compile test
 debug:
   <<: *defaults
   command: /bin/bash
