@@ -196,16 +196,14 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   def test_client_auth_failure
     vflag = OpenSSL::SSL::VERIFY_PEER|OpenSSL::SSL::VERIFY_FAIL_IF_NO_PEER_CERT
     start_server(vflag, true, :ignore_listener_error => true){|server, port|
-      assert_raise(OpenSSL::SSL::SSLError, Errno::ECONNRESET){
-        sock = TCPSocket.new("127.0.0.1", port)
-        ssl = OpenSSL::SSL::SSLSocket.new(sock)
-        ssl.sync_close = true
-        begin
-          ssl.connect
-        ensure
-          ssl.close
-        end
-      }
+      sock = TCPSocket.new("127.0.0.1", port)
+      ssl = OpenSSL::SSL::SSLSocket.new(sock)
+      ssl.sync_close = true
+      begin
+        assert_handshake_error { ssl.connect }
+      ensure
+        ssl.close
+      end
     }
   end
 
@@ -246,13 +244,11 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
         server_connect(port, ctx) { }
       }
 
-      assert_raise(OpenSSL::SSL::SSLError) {
-        ctx = OpenSSL::SSL::SSLContext.new
-        ctx.client_cert_cb = Proc.new{ |ssl|
-          [@cli_cert, @cli_key.public_key]
-        }
-        server_connect(port, ctx) { }
+      ctx = OpenSSL::SSL::SSLContext.new
+      ctx.client_cert_cb = Proc.new{ |ssl|
+        [@cli_cert, @cli_key.public_key]
       }
+      assert_handshake_error { server_connect(port, ctx) }
     end
   end
 
@@ -938,7 +934,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
           if expected_ok
             assert_nothing_raised { ssl.connect }
           else
-            assert_raise(OpenSSL::SSL::SSLError) { ssl.connect }
+            assert_handshake_error { ssl.connect }
           end
         ensure
           ssl.close if ssl
@@ -988,10 +984,6 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     }
   end
 
-  # different OpenSSL versions react differently when facing a SSL/TLS version
-  # that has been marked as forbidden, therefore either of these may be raised
-  HANDSHAKE_ERRORS = [OpenSSL::SSL::SSLError, Errno::ECONNRESET]
-
 if OpenSSL::SSL::SSLContext::METHODS.include?(:TLSv1) && OpenSSL::SSL::SSLContext::METHODS.include?(:SSLv3)
 
   def test_forbid_ssl_v3_for_client
@@ -999,7 +991,7 @@ if OpenSSL::SSL::SSLContext::METHODS.include?(:TLSv1) && OpenSSL::SSL::SSLContex
     start_server_version(:SSLv23, ctx_proc) { |server, port|
       ctx = OpenSSL::SSL::SSLContext.new
       ctx.ssl_version = :SSLv3
-      assert_raise(*HANDSHAKE_ERRORS) { server_connect(port, ctx) }
+      assert_handshake_error { server_connect(port, ctx) }
     }
   end
 
@@ -1007,7 +999,7 @@ if OpenSSL::SSL::SSLContext::METHODS.include?(:TLSv1) && OpenSSL::SSL::SSLContex
     start_server_version(:SSLv3) { |server, port|
       ctx = OpenSSL::SSL::SSLContext.new
       ctx.options = OpenSSL::SSL::OP_ALL | OpenSSL::SSL::OP_NO_SSLv3
-      assert_raise(*HANDSHAKE_ERRORS) { server_connect(port, ctx) }
+      assert_handshake_error { server_connect(port, ctx) }
     }
   end
 
@@ -1026,7 +1018,7 @@ if OpenSSL::SSL::SSLContext::METHODS.include? :TLSv1_1
     start_server_version(:SSLv23, ctx_proc) { |server, port|
       ctx = OpenSSL::SSL::SSLContext.new
       ctx.ssl_version = :TLSv1
-      assert_raise(*HANDSHAKE_ERRORS) { server_connect(port, ctx) }
+      assert_handshake_error { server_connect(port, ctx) }
     }
   end
 
@@ -1034,7 +1026,7 @@ if OpenSSL::SSL::SSLContext::METHODS.include? :TLSv1_1
     start_server_version(:TLSv1) { |server, port|
       ctx = OpenSSL::SSL::SSLContext.new
       ctx.options = OpenSSL::SSL::OP_ALL | OpenSSL::SSL::OP_NO_TLSv1
-      assert_raise(*HANDSHAKE_ERRORS) { server_connect(port, ctx) }
+      assert_handshake_error { server_connect(port, ctx) }
     }
   end
 
@@ -1055,7 +1047,7 @@ if OpenSSL::SSL::SSLContext::METHODS.include? :TLSv1_2
     start_server_version(:SSLv23, ctx_proc) { |server, port|
       ctx = OpenSSL::SSL::SSLContext.new
       ctx.ssl_version = :TLSv1_1
-      assert_raise(*HANDSHAKE_ERRORS) { server_connect(port, ctx) }
+      assert_handshake_error { server_connect(port, ctx) }
     }
   end if defined?(OpenSSL::SSL::OP_NO_TLSv1_1)
 
@@ -1063,7 +1055,7 @@ if OpenSSL::SSL::SSLContext::METHODS.include? :TLSv1_2
     start_server_version(:TLSv1_1) { |server, port|
       ctx = OpenSSL::SSL::SSLContext.new
       ctx.options = OpenSSL::SSL::OP_ALL | OpenSSL::SSL::OP_NO_TLSv1_1
-      assert_raise(*HANDSHAKE_ERRORS) { server_connect(port, ctx) }
+      assert_handshake_error { server_connect(port, ctx) }
     }
   end if defined?(OpenSSL::SSL::OP_NO_TLSv1_1)
 
@@ -1072,7 +1064,7 @@ if OpenSSL::SSL::SSLContext::METHODS.include? :TLSv1_2
     start_server_version(:SSLv23, ctx_proc) { |server, port|
       ctx = OpenSSL::SSL::SSLContext.new
       ctx.ssl_version = :TLSv1_2
-      assert_raise(*HANDSHAKE_ERRORS) { server_connect(port, ctx) }
+      assert_handshake_error { server_connect(port, ctx) }
     }
   end if defined?(OpenSSL::SSL::OP_NO_TLSv1_2)
 
@@ -1080,7 +1072,7 @@ if OpenSSL::SSL::SSLContext::METHODS.include? :TLSv1_2
     start_server_version(:TLSv1_2) { |server, port|
       ctx = OpenSSL::SSL::SSLContext.new
       ctx.options = OpenSSL::SSL::OP_ALL | OpenSSL::SSL::OP_NO_TLSv1_2
-      assert_raise(*HANDSHAKE_ERRORS) { server_connect(port, ctx) }
+      assert_handshake_error { server_connect(port, ctx) }
     }
   end if defined?(OpenSSL::SSL::OP_NO_TLSv1_2)
 
@@ -1116,16 +1108,31 @@ if OpenSSL::OPENSSL_VERSION_NUMBER >= 0x10002000
   end
 
   def test_alpn_protocol_selection_cancel
-    ctx_proc = Proc.new { |ctx|
-      ctx.alpn_select_cb = -> (protocols) { nil }
+    sock1, sock2 = socketpair
+
+    ctx1 = OpenSSL::SSL::SSLContext.new
+    ctx1.ciphers = "aNULL"
+    ctx1.security_level = 0
+    ctx1.alpn_select_cb = -> (protocols) { nil }
+    ssl1 = OpenSSL::SSL::SSLSocket.new(sock1, ctx1)
+
+    ctx2 = OpenSSL::SSL::SSLContext.new
+    ctx2.ciphers = "aNULL"
+    ctx2.security_level = 0
+    ctx2.alpn_protocols = ["http/1.1"]
+    ssl2 = OpenSSL::SSL::SSLSocket.new(sock2, ctx2)
+
+    t = Thread.new {
+      assert_handshake_error { ssl2.connect }
     }
-    assert_raise(MiniTest::Assertion) do # minitest/assertion comes from `assert_join_threads`
-      start_server_version(:SSLv23, ctx_proc) { |server, port|
-        ctx = OpenSSL::SSL::SSLContext.new
-        ctx.alpn_protocols = ["http/1.1"]
-        assert_raise(OpenSSL::SSL::SSLError) { server_connect(port, ctx) }
-      }
-    end
+    assert_raise(TypeError) { ssl1.accept }
+  ensure
+    sock1&.close
+    sock2&.close
+    ssl1&.close
+    ssl2&.close
+    t&.kill
+    t&.join
   end
 end
 
@@ -1183,7 +1190,7 @@ if OpenSSL::OPENSSL_VERSION_NUMBER > 0x10001000 &&
     start_server_version(:SSLv23, ctx_proc) { |server, port|
       ctx = OpenSSL::SSL::SSLContext.new
       ctx.npn_select_cb = -> (protocols) { protocols.first }
-      assert_raise(*HANDSHAKE_ERRORS) { server_connect(port, ctx) }
+      assert_handshake_error { server_connect(port, ctx) }
     }
   end
 
@@ -1192,7 +1199,7 @@ if OpenSSL::OPENSSL_VERSION_NUMBER > 0x10001000 &&
     start_server_version(:SSLv23, ctx_proc) { |server, port|
       ctx = OpenSSL::SSL::SSLContext.new
       ctx.npn_select_cb = -> (protocols) { "a" * 256 }
-      assert_raise(*HANDSHAKE_ERRORS) { server_connect(port, ctx) }
+      assert_handshake_error { server_connect(port, ctx) }
     }
   end
 
@@ -1345,6 +1352,14 @@ end
     elsif sock
       sock.close
     end
+  end
+
+  def assert_handshake_error
+    # different OpenSSL versions react differently when facing a SSL/TLS version
+    # that has been marked as forbidden, therefore either of these may be raised
+    assert_raise(OpenSSL::SSL::SSLError, Errno::ECONNRESET) {
+      yield
+    }
   end
 end
 

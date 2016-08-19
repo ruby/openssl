@@ -284,7 +284,7 @@ AQjjxMXhwULlmuR/K+WwlaZPiLIBYalLAZQ7ZbOPeVkJ8ePao0eLAgEC
             return
           end
           ssl = ssls.accept
-        rescue OpenSSL::SSL::SSLError
+        rescue OpenSSL::SSL::SSLError, Errno::ECONNRESET
           if ignore_listener_error
             retry
           else

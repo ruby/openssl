@@ -1,36 +1,10 @@
 # -*- coding: us-ascii -*-
-require "open3"
 require "timeout"
-require_relative "find_executable"
-
-unless defined?(MiniTest)
-  module MiniTest
-    Assertion = Test::Unit::AssertionFailedError
-  end
-end
+require "rbconfig"
 
 module EnvUtil
   def rubybin
-    if ruby = ENV["RUBY"]
-      return ruby
-    end
-    ruby = "ruby"
-    exeext = RbConfig::CONFIG["EXEEXT"]
-    rubyexe = (ruby + exeext if exeext and !exeext.empty?)
-    3.times do
-      if File.exist? ruby and File.executable? ruby and !File.directory? ruby
-        return File.expand_path(ruby)
-      end
-      if rubyexe and File.exist? rubyexe and File.executable? rubyexe
-        return File.expand_path(rubyexe)
-      end
-      ruby = File.join("..", ruby)
-    end
-    if defined?(RbConfig.ruby)
-      RbConfig.ruby
-    else
-      "ruby"
-    end
+    ENV["RUBY"] || RbConfig.ruby
   end
   module_function :rubybin
 
@@ -117,31 +91,6 @@ module EnvUtil
   end
   module_function :invoke_ruby
 
-  alias rubyexec invoke_ruby
-  class << self
-    alias rubyexec invoke_ruby
-  end
-
-  def verbose_warning
-    class << (stderr = "")
-      alias write <<
-    end
-    stderr, $stderr, verbose, $VERBOSE = $stderr, stderr, $VERBOSE, true
-    yield stderr
-    return $stderr
-  ensure
-    stderr, $stderr, $VERBOSE = $stderr, stderr, verbose
-  end
-  module_function :verbose_warning
-
-  def default_warning
-    verbose, $VERBOSE = $VERBOSE, false
-    yield
-  ensure
-    $VERBOSE = verbose
-  end
-  module_function :default_warning
-
   def suppress_warning
     verbose, $VERBOSE = $VERBOSE, nil
     yield
@@ -149,54 +98,6 @@ module EnvUtil
     $VERBOSE = verbose
   end
   module_function :suppress_warning
-
-  def under_gc_stress(stress = true)
-    stress, GC.stress = GC.stress, stress
-    yield
-  ensure
-    GC.stress = stress
-  end
-  module_function :under_gc_stress
-
-  def with_default_external(enc)
-    verbose, $VERBOSE = $VERBOSE, nil
-    origenc, Encoding.default_external = Encoding.default_external, enc
-    $VERBOSE = verbose
-    yield
-  ensure
-    verbose, $VERBOSE = $VERBOSE, nil
-    Encoding.default_external = origenc
-    $VERBOSE = verbose
-  end
-  module_function :with_default_external
-
-  def with_default_internal(enc)
-    verbose, $VERBOSE = $VERBOSE, nil
-    origenc, Encoding.default_internal = Encoding.default_internal, enc
-    $VERBOSE = verbose
-    yield
-  ensure
-    verbose, $VERBOSE = $VERBOSE, nil
-    Encoding.default_internal = origenc
-    $VERBOSE = verbose
-  end
-  module_function :with_default_internal
-
-  def labeled_module(name, &block)
-    Module.new do
-      singleton_class.class_eval {define_method(:to_s) {name}; alias inspect to_s}
-      class_eval(&block) if block
-    end
-  end
-  module_function :labeled_module
-
-  def labeled_class(name, superclass = Object, &block)
-    Class.new(superclass) do
-      singleton_class.class_eval {define_method(:to_s) {name}; alias inspect to_s}
-      class_eval(&block) if block
-    end
-  end
-  module_function :labeled_class
 
   if /darwin/ =~ RUBY_PLATFORM
     DIAGNOSTIC_REPORTS_PATH = File.expand_path("~/Library/Logs/DiagnosticReports")
@@ -230,65 +131,6 @@ end
 module Test
   module Unit
     module Assertions
-      public
-      def assert_valid_syntax(code, fname = caller_locations(1, 1)[0], mesg = fname.to_s, verbose: nil)
-        code = code.dup.force_encoding("ascii-8bit")
-        code.sub!(/\A(?:\xef\xbb\xbf)?(\s*\#.*$)*(\n)?/n) {
-          "#$&#{"\n" if $1 && !$2}BEGIN{throw tag, :ok}\n"
-        }
-        code.force_encoding(Encoding::UTF_8)
-        verbose, $VERBOSE = $VERBOSE, verbose
-        yield if defined?(yield)
-        case
-        when Array === fname
-          fname, line = *fname
-        when defined?(fname.path) && defined?(fname.lineno)
-          fname, line = fname.path, fname.lineno
-        else
-          line = 0
-        end
-        assert_nothing_raised(SyntaxError, mesg) do
-          assert_equal(:ok, catch {|tag| eval(code, binding, fname, line)}, mesg)
-        end
-      ensure
-        $VERBOSE = verbose
-      end
-
-      def assert_syntax_error(code, error, fname = caller_locations(1, 1)[0], mesg = fname.to_s)
-        code = code.dup.force_encoding("ascii-8bit")
-        code.sub!(/\A(?:\xef\xbb\xbf)?(\s*\#.*$)*(\n)?/n) {
-          "#$&#{"\n" if $1 && !$2}BEGIN{throw tag, :ng}\n"
-        }
-        code.force_encoding("us-ascii")
-        verbose, $VERBOSE = $VERBOSE, nil
-        yield if defined?(yield)
-        case
-        when Array === fname
-          fname, line = *fname
-        when defined?(fname.path) && defined?(fname.lineno)
-          fname, line = fname.path, fname.lineno
-        else
-          line = 0
-        end
-        e = assert_raise(SyntaxError, mesg) do
-          catch {|tag| eval(code, binding, fname, line)}
-        end
-        assert_match(error, e.message, mesg)
-      ensure
-        $VERBOSE = verbose
-      end
-
-      def assert_normal_exit(testsrc, message = '', child_env: nil, **opt)
-        assert_valid_syntax(testsrc, caller_locations(1, 1)[0])
-        if child_env
-          child_env = [child_env]
-        else
-          child_env = []
-        end
-        out, _, status = EnvUtil.invoke_ruby(child_env + %W'-W0', testsrc, true, :merge_to_stdout, **opt)
-        assert !status.signaled?, FailDesc[status, message, out]
-      end
-
       FailDesc = proc do |status, message = "", out = ""|
         pid = status.pid
         now = Time.now
@@ -319,42 +161,6 @@ module Test
           full_message
         end
         faildesc
-      end
-
-      def assert_in_out_err(args, test_stdin = "", test_stdout = [], test_stderr = [], message = nil, **opt)
-        stdout, stderr, status = EnvUtil.invoke_ruby(args, test_stdin, true, true, **opt)
-        if signo = status.termsig
-          sleep 0.1
-          EnvUtil.diagnostic_reports(Signal.signame(signo), EnvUtil.rubybin, status.pid, Time.now)
-        end
-        if block_given?
-          raise "test_stdout ignored, use block only or without block" if test_stdout != []
-          raise "test_stderr ignored, use block only or without block" if test_stderr != []
-          yield(stdout.lines.map {|l| l.chomp }, stderr.lines.map {|l| l.chomp }, status)
-        else
-          errs = []
-          [[test_stdout, stdout], [test_stderr, stderr]].each do |exp, act|
-            begin
-              if exp.is_a?(Regexp)
-                assert_match(exp, act, message)
-              else
-                assert_equal(exp, act.lines.map {|l| l.chomp }, message)
-              end
-            rescue MiniTest::Assertion => e
-              errs << e.message
-              message = nil
-            end
-          end
-          raise MiniTest::Assertion, errs.join("\n---\n") unless errs.empty?
-          status
-        end
-      end
-
-      def assert_ruby_status(args, test_stdin="", message=nil, **opt)
-        out, _, status = EnvUtil.invoke_ruby(args, test_stdin, true, :merge_to_stdout, **opt)
-        assert(!status.signaled?, FailDesc[status, message, out])
-        message ||= "ruby exit status is not success:"
-        assert(status.success?, "#{message} (#{status.inspect})")
       end
 
       ABORT_SIGNALS = Signal.list.values_at(*%w"ILL ABRT BUS SEGV")
@@ -413,135 +219,12 @@ eom
         raise marshal_error if marshal_error
       end
 
-      def assert_warning(pat, msg = nil)
-        stderr = EnvUtil.verbose_warning { yield }
-        msg = message(msg) {diff pat, stderr}
-        assert(pat === stderr, msg)
-      end
-
-      def assert_warn(*args)
-        assert_warning(*args) {$VERBOSE = false; yield}
-      end
-
-      case RUBY_PLATFORM
-      when /solaris2\.(?:9|[1-9][0-9])/i # Solaris 9, 10, 11,...
-        bits = [nil].pack('p').size == 8 ? 64 : 32
-        if ENV['LD_PRELOAD'].to_s.empty? &&
-            ENV["LD_PRELOAD_#{bits}"].to_s.empty? &&
-            (ENV['UMEM_OPTIONS'].to_s.empty? ||
-             ENV['UMEM_OPTIONS'] == 'backend=mmap') then
-          envs = {
-            'LD_PRELOAD' => 'libumem.so',
-            'UMEM_OPTIONS' => 'backend=mmap'
-          }
-          args = [
-            envs,
-            "--disable=gems",
-            "-v", "-",
-          ]
-          _, err, status = EnvUtil.invoke_ruby(args, "exit(0)", true, true)
-          if status.exitstatus == 0 && err.to_s.empty? then
-            NO_MEMORY_LEAK_ENVS = envs
-          end
-        end
-      end #case RUBY_PLATFORM
-
-      def assert_no_memory_leak(args, prepare, code, message=nil, limit: 1.5, rss: false, **opt)
-        require_relative 'memory_status'
-        token = "\e[7;1m#{$$.to_s}:#{Time.now.strftime('%s.%L')}:#{rand(0x10000).to_s(16)}:\e[m"
-        token_dump = token.dump
-        token_re = Regexp.quote(token)
-        envs = args.shift if Array === args and Hash === args.first
-        args = [
-          "-r", File.expand_path("../memory_status", __FILE__),
-          *args,
-          "-v", "-",
-        ]
-        if defined? NO_MEMORY_LEAK_ENVS then
-          envs ||= {}
-          newenvs = envs.merge(NO_MEMORY_LEAK_ENVS) { |_, _, _| break }
-          envs = newenvs if newenvs
-        end
-        args.unshift(envs) if envs
-        cmd = [
-          'END {STDERR.puts '"#{token_dump}"'"FINAL=#{Memory::Status.new}"}',
-          prepare,
-          'STDERR.puts('"#{token_dump}"'"START=#{$initial_status = Memory::Status.new}")',
-          '$initial_size = $initial_status.size',
-          code,
-          'GC.start',
-        ].join("\n")
-        _, err, status = EnvUtil.invoke_ruby(args, cmd, true, true, **opt)
-        before = err.sub!(/^#{token_re}START=(\{.*\})\n/, '') && Memory::Status.parse($1)
-        after = err.sub!(/^#{token_re}FINAL=(\{.*\})\n/, '') && Memory::Status.parse($1)
-        assert_equal([true, ""], [status.success?, err], message)
-        ([:size, (rss && :rss)] & after.members).each do |n|
-          b = before[n]
-          a = after[n]
-          next unless a > 0 and b > 0
-          assert_operator(a.fdiv(b), :<, limit, message(message) {"#{n}: #{b} => #{a}"})
-        end
-      rescue LoadError
-        pend
-      end
-
       def message msg = nil, ending = ".", &default
         proc {
           msg = msg.call.chomp(".") if Proc === msg
           custom_message = "#{msg}.\n" unless msg.nil? or msg.to_s.empty?
           "#{custom_message}#{default.call}#{ending}"
         }
-      end
-
-      def assert_is_minus_zero(f)
-        assert(1.0/f == -Float::INFINITY, "#{f} is not -0.0")
-      end
-
-      def assert_file
-        AssertFile
-      end
-
-      # pattern_list is an array which contains regexp and :*.
-      # :* means any sequence.
-      #
-      # pattern_list is anchored.
-      # Use [:*, regexp, :*] for non-anchored match.
-      def assert_pattern_list(pattern_list, actual, message=nil)
-        rest = actual
-        anchored = true
-        pattern_list.each_with_index {|pattern, i|
-          if pattern == :*
-            anchored = false
-          else
-            if anchored
-              match = /\A#{pattern}/.match(rest)
-            else
-              match = pattern.match(rest)
-            end
-            unless match
-              msg = message(msg) {
-                expect_msg = "Expected #{mu_pp pattern}\n"
-                if /\n[^\n]/ =~ rest
-                  actual_mesg = "to match\n"
-                  rest.scan(/.*\n+/) {
-                    actual_mesg << '  ' << $&.inspect << "+\n"
-                  }
-                  actual_mesg.sub!(/\+\n\z/, '')
-                else
-                  actual_mesg = "to match #{mu_pp rest}"
-                end
-                actual_mesg << "\nafter #{i} patterns with #{actual.length - rest.length} characters"
-                expect_msg + actual_mesg
-              }
-              assert false, msg
-            end
-            rest = match.post_match
-            anchored = true
-          end
-        }
-        if anchored
-          assert_equal("", rest)
-        end
       end
 
       # threads should respond to shift method.
@@ -571,7 +254,7 @@ eom
           if message
             msg = "#{message}\n#{msg}"
           end
-          raise MiniTest::Assertion, msg
+          raise Test::Unit::AssertionFailedError, msg
         end
         values
       end
@@ -608,12 +291,10 @@ eom
         end
 
         ex = m = nil
-        EnvUtil.with_default_internal(expected.encoding) do
-          ex = assert_raise(exception, msg || "Exception(#{exception}) with message matches to #{expected.inspect}") do
-            yield
-          end
-          m = ex.message
+        ex = assert_raise(exception, msg || "Exception(#{exception}) with message matches to #{expected.inspect}") do
+          yield
         end
+        m = ex.message
         msg = message(msg, "") {"Expected Exception(#{exception}) was raised, but the message doesn't match"}
 
         if assert == :assert_equal
@@ -625,47 +306,6 @@ eom
         end
         ex
       end
-
-      class << (AssertFile = Struct.new(:failure_message).new)
-        include Assertions
-        def assert_file_predicate(predicate, *args)
-          if /\Anot_/ =~ predicate
-            predicate = $'
-            neg = " not"
-          end
-          result = File.__send__(predicate, *args)
-          result = !result if neg
-          mesg = "Expected file " << args.shift.inspect
-          mesg << "#{neg} to be #{predicate}"
-          mesg << mu_pp(args).sub(/\A\[(.*)\]\z/m, '(\1)') unless args.empty?
-          mesg << " #{failure_message}" if failure_message
-          assert(result, mesg)
-        end
-        alias method_missing assert_file_predicate
-
-        def for(message)
-          clone.tap {|a| a.failure_message = message}
-        end
-      end
     end
-  end
-end
-
-begin
-  require 'rbconfig'
-rescue LoadError
-else
-  module RbConfig
-    @ruby = EnvUtil.rubybin
-    class << self
-      undef ruby if method_defined?(:ruby)
-      attr_reader :ruby
-    end
-    dir = File.dirname(ruby)
-    name = File.basename(ruby, CONFIG['EXEEXT'])
-    CONFIG['bindir'] = dir
-    CONFIG['ruby_install_name'] = name
-    CONFIG['RUBY_INSTALL_NAME'] = name
-    Gem::ConfigMap[:bindir] = dir if defined?(Gem::ConfigMap)
   end
 end
