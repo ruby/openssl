@@ -28,12 +28,12 @@ static VALUE ossl_ssl_session_alloc(VALUE klass)
 
 /*
  * call-seq:
- *    Session.new(SSLSocket | string) => session
+ *   Session.new(ssl_socket) -> Session
+ *   Session.new(string) -> Session
  *
- * === Parameters
- * +SSLSocket+ is an OpenSSL::SSL::SSLSocket
- * +string+ must be a DER or PEM encoded Session.
-*/
+ * Creates a new Session object from an instance of SSLSocket or DER/PEM encoded
+ * String.
+ */
 static VALUE ossl_ssl_session_initialize(VALUE self, VALUE arg1)
 {
 	SSL_SESSION *ctx = NULL;
@@ -118,9 +118,10 @@ int SSL_SESSION_cmp(const SSL_SESSION *a,const SSL_SESSION *b)
 
 /*
  * call-seq:
- *    session1 == session2 -> boolean
+ *   session1 == session2 -> boolean
  *
-*/
+ * Returns true if the two Session is the same, false if not.
+ */
 static VALUE ossl_ssl_session_eq(VALUE val1, VALUE val2)
 {
 	SSL_SESSION *ctx1, *ctx2;
@@ -138,9 +139,8 @@ static VALUE ossl_ssl_session_eq(VALUE val1, VALUE val2)
  * call-seq:
  *    session.time -> Time
  *
- * Gets start time of the session.
- *
-*/
+ * Returns the time at which the session was established.
+ */
 static VALUE ossl_ssl_session_get_time(VALUE self)
 {
 	SSL_SESSION *ctx;
@@ -158,11 +158,12 @@ static VALUE ossl_ssl_session_get_time(VALUE self)
 
 /*
  * call-seq:
- *    session.timeout -> integer
+ *    session.timeout -> Integer
  *
- * Gets how long until the session expires in seconds.
+ * Returns the timeout value set for the session, in seconds from the
+ * established time.
  *
-*/
+ */
 static VALUE ossl_ssl_session_get_timeout(VALUE self)
 {
 	SSL_SESSION *ctx;
@@ -177,12 +178,12 @@ static VALUE ossl_ssl_session_get_timeout(VALUE self)
 
 /*
  * call-seq:
- *    session.time=(Time) -> Time
- *    session.time=(integer) -> Time
+ *    session.time = time
+ *    session.time = integer
  *
  * Sets start time of the session. Time resolution is in seconds.
  *
-*/
+ */
 static VALUE ossl_ssl_session_set_time(VALUE self, VALUE time_v)
 {
 	SSL_SESSION *ctx;
@@ -199,11 +200,10 @@ static VALUE ossl_ssl_session_set_time(VALUE self, VALUE time_v)
 
 /*
  * call-seq:
- *    session.timeout=(integer) -> integer
+ *    session.timeout = integer
  *
  * Sets how long until the session expires in seconds.
- *
-*/
+ */
 static VALUE ossl_ssl_session_set_timeout(VALUE self, VALUE time_v)
 {
 	SSL_SESSION *ctx;
@@ -217,7 +217,7 @@ static VALUE ossl_ssl_session_set_timeout(VALUE self, VALUE time_v)
 
 /*
  * call-seq:
- *    session.id -> aString
+ *    session.id -> String
  *
  * Returns the Session ID.
 */
@@ -236,10 +236,10 @@ static VALUE ossl_ssl_session_get_id(VALUE self)
 
 /*
  * call-seq:
- *    session.to_der -> aString
+ *    session.to_der -> String
  *
  * Returns an ASN1 encoded String that contains the Session object.
-*/
+ */
 static VALUE ossl_ssl_session_to_der(VALUE self)
 {
 	SSL_SESSION *ctx;
@@ -265,7 +265,7 @@ static VALUE ossl_ssl_session_to_der(VALUE self)
  *    session.to_pem -> String
  *
  * Returns a PEM encoded String that contains the Session object.
-*/
+ */
 static VALUE ossl_ssl_session_to_pem(VALUE self)
 {
 	SSL_SESSION *ctx;
@@ -297,8 +297,8 @@ static VALUE ossl_ssl_session_to_pem(VALUE self)
  * call-seq:
  *    session.to_text -> String
  *
- * Shows everything in the Session object.
-*/
+ * Shows everything in the Session object. This is for diagnostic purposes.
+ */
 static VALUE ossl_ssl_session_to_text(VALUE self)
 {
 	SSL_SESSION *ctx;

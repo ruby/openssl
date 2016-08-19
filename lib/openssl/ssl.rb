@@ -16,6 +16,7 @@ require "io/nonblock"
 module OpenSSL
   module SSL
     class SSLContext
+      # :nodoc:
       DEFAULT_PARAMS = {
         :ssl_version => "SSLv23",
         :verify_mode => OpenSSL::SSL::VERIFY_PEER,
@@ -67,10 +68,12 @@ module OpenSSL
         )
       end
 
+      # :nodoc:
       DEFAULT_CERT_STORE = OpenSSL::X509::Store.new
       DEFAULT_CERT_STORE.set_default_paths
       DEFAULT_CERT_STORE.flags = OpenSSL::X509::V_FLAG_CRL_CHECK_ALL
 
+      # :nodoc:
       INIT_VARS = ["cert", "key", "client_ca", "ca_file", "ca_path",
         "timeout", "verify_mode", "verify_depth", "renegotiation_cb",
         "verify_callback", "cert_store", "extra_chain_cert",
@@ -259,13 +262,16 @@ module OpenSSL
         attr_reader :hostname
       end
 
-      attr_reader :io, :context
+      # The underlying IO object.
+      attr_reader :io
+      alias :to_io :io
+
+      # The SSLContext object used in this connection.
+      attr_reader :context
 
       # Whether to close the underlying socket as well, when the SSL/TLS
       # connection is shut down. This defaults to +false+.
       attr_accessor :sync_close
-
-      alias :to_io :io
 
       # call-seq:
       #    ssl.sysclose => nil
@@ -280,8 +286,10 @@ module OpenSSL
         io.close if sync_close
       end
 
-      ##
-      # Perform hostname verification after an SSL connection is established
+      # call-seq:
+      #   ssl.post_connection_check(hostname) -> true
+      #
+      # Perform hostname verification following RFC 6125.
       #
       # This method MUST be called after calling #connect to ensure that the
       # hostname of a remote peer has been verified.
@@ -289,7 +297,8 @@ module OpenSSL
         if peer_cert.nil?
           msg = "Peer verification enabled, but no certificate received."
           if using_anon_cipher?
-            msg += " Anonymous cipher suite #{cipher[0]} was negotiated. Anonymous suites must be disabled to use peer verification."
+            msg += " Anonymous cipher suite #{cipher[0]} was negotiated. " \
+                   "Anonymous suites must be disabled to use peer verification."
           end
           raise SSLError, msg
         end
@@ -300,6 +309,11 @@ module OpenSSL
         return true
       end
 
+      # call-seq:
+      #   ssl.session -> aSession
+      #
+      # Returns the SSLSession object currently used, or nil if the session is
+      # not established.
       def session
         SSL::Session.new(self)
       rescue SSL::Session::SessionError
