@@ -323,9 +323,12 @@ This prevents malicious modifications of the ciphertext that could
 otherwise be exploited to modify ciphertexts in ways beneficial to
 potential attackers.</p>
 
-<p>If no associated data is needed for encryption and later decryption, the <a
-href="../OpenSSL.html">OpenSSL</a> library still requires a value to be set
-- “” may be used in case none is available.</p>
+<p>An associated data is used where there is additional information, such as
+headers or some metadata, that must be also authenticated but not
+necessarily need to be encrypted. If no associated data is needed for
+encryption and later decryption, the <a href="../OpenSSL.html">OpenSSL</a>
+library still requires a value to be set - “” may be used in case none is
+available.</p>
 
 <p>An example using the GCM (Galois/Counter Mode). You have 16 bytes
 <code>key</code>, 12 bytes (96 bits) <code>nonce</code> and the associated
@@ -342,8 +345,8 @@ GCM mode.</p>
 <span class="ruby-identifier">tag</span> = <span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">auth_tag</span> <span class="ruby-comment"># produces 16 bytes tag by default</span>
 </pre>
 
-<p>Now you are the receiver. You know the <code>key</code> and
-<code>nonce</code>, and have received <code>encrypted</code> and
+<p>Now you are the receiver. You know the <code>key</code> and have received
+<code>nonce</code>, <code>auth_data</code>, <code>encrypted</code> and
 <code>tag</code> through an untrusted network. Note that GCM accepts an
 arbitrary length tag between 1 and 16 bytes. You may additionally need to
 check that the received tag has the correct length, or you allow attackers
