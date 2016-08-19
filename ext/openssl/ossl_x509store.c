@@ -155,6 +155,7 @@ ossl_x509store_set_vfy_cb(VALUE self, VALUE cb)
  * call-seq:
  *    X509::Store.new => store
  *
+ * Creates a new X509::Store.
  */
 static VALUE
 ossl_x509store_initialize(int argc, VALUE *argv, VALUE self)
@@ -179,6 +180,13 @@ ossl_x509store_initialize(int argc, VALUE *argv, VALUE self)
     return self;
 }
 
+/*
+ * call-seq:
+ *   store.flags = flag
+ *
+ * Sets +flag+ to the Store. +flag+ consists of zero or more of the constants
+ * defined in with name V_FLAG_* or'ed together.
+ */
 static VALUE
 ossl_x509store_set_flags(VALUE self, VALUE flags)
 {
@@ -191,6 +199,24 @@ ossl_x509store_set_flags(VALUE self, VALUE flags)
     return flags;
 }
 
+/*
+ * call-seq:
+ *   store.purpose = purpose
+ *
+ * Sets the store's purpose to +purpose+. If specified, the verifications on
+ * the store will check every untrusted certificate's extensions are consistent
+ * with the purpose. The purpose is specified by constants:
+ *
+ * * X509::PURPOSE_SSL_CLIENT
+ * * X509::PURPOSE_SSL_SERVER
+ * * X509::PURPOSE_NS_SSL_SERVER
+ * * X509::PURPOSE_SMIME_SIGN
+ * * X509::PURPOSE_SMIME_ENCRYPT
+ * * X509::PURPOSE_CRL_SIGN
+ * * X509::PURPOSE_ANY
+ * * X509::PURPOSE_OCSP_HELPER
+ * * X509::PURPOSE_TIMESTAMP_SIGN
+ */
 static VALUE
 ossl_x509store_set_purpose(VALUE self, VALUE purpose)
 {
@@ -203,6 +229,10 @@ ossl_x509store_set_purpose(VALUE self, VALUE purpose)
     return purpose;
 }
 
+/*
+ * call-seq:
+ *   store.trust = trust
+ */
 static VALUE
 ossl_x509store_set_trust(VALUE self, VALUE trust)
 {
@@ -215,6 +245,12 @@ ossl_x509store_set_trust(VALUE self, VALUE trust)
     return trust;
 }
 
+/*
+ * call-seq:
+ *   store.time = time
+ *
+ * Sets the time to be used in verifications.
+ */
 static VALUE
 ossl_x509store_set_time(VALUE self, VALUE time)
 {
@@ -224,13 +260,11 @@ ossl_x509store_set_time(VALUE self, VALUE time)
 
 /*
  * call-seq:
- *   store.add_file(file) -> store
- *
+ *   store.add_file(file) -> self
  *
  * Adds the certificates in +file+ to the certificate store.  The +file+ can
  * contain multiple PEM-encoded certificates.
  */
-
 static VALUE
 ossl_x509store_add_file(VALUE self, VALUE file)
 {
@@ -252,6 +286,12 @@ ossl_x509store_add_file(VALUE self, VALUE file)
     return self;
 }
 
+/*
+ * call-seq:
+ *   store.add_path(path) -> self
+ *
+ * Adds +path+ as the hash dir to be looked up by the store.
+ */
 static VALUE
 ossl_x509store_add_path(VALUE self, VALUE dir)
 {
@@ -277,11 +317,12 @@ ossl_x509store_add_path(VALUE self, VALUE dir)
  * call-seq:
  *   store.set_default_paths
  *
- * Adds the default certificates to the certificate store.  These certificates
- * are loaded from the default configuration directory which can usually be
+ * Configures +store+ to look up CA certificates from the system default
+ * certificate store as needed basis. The location of the store can usually be
  * determined by:
  *
- *   File.dirname OpenSSL::Config::DEFAULT_CONFIG_FILE
+ * * OpenSSL::X509::DEFAULT_CERT_FILE
+ * * OpenSSL::X509::DEFAULT_CERT_DIR
  */
 static VALUE
 ossl_x509store_set_default_paths(VALUE self)
@@ -302,7 +343,6 @@ ossl_x509store_set_default_paths(VALUE self)
  *
  * Adds the OpenSSL::X509::Certificate +cert+ to the certificate store.
  */
-
 static VALUE
 ossl_x509store_add_cert(VALUE self, VALUE arg)
 {
@@ -318,6 +358,12 @@ ossl_x509store_add_cert(VALUE self, VALUE arg)
     return self;
 }
 
+/*
+ * call-seq:
+ *   store.add_crl(crl) -> self
+ *
+ * Adds the OpenSSL::X509::CRL +crl+ to the store.
+ */
 static VALUE
 ossl_x509store_add_crl(VALUE self, VALUE arg)
 {
@@ -337,6 +383,21 @@ static VALUE ossl_x509stctx_get_err(VALUE);
 static VALUE ossl_x509stctx_get_err_string(VALUE);
 static VALUE ossl_x509stctx_get_chain(VALUE);
 
+/*
+ * call-seq:
+ *   store.verify(cert, chain = nil) -> true | false
+ *
+ * Performs a certificate verification on the OpenSSL::X509::Certificate +cert+.
+ *
+ * +chain+ can be an array of OpenSSL::X509::Certificate that is used to
+ * construct the certificate chain.
+ *
+ * If a block is given, it overrides the callback set by #verify_callback=.
+ *
+ * After finishing the verification, the error information can be retrieved by
+ * #error, #error_string, and the resuting complete certificate chain can be
+ * retrieved by #chain.
+ */
 static VALUE
 ossl_x509store_verify(int argc, VALUE *argv, VALUE self)
 {
@@ -426,6 +487,10 @@ static VALUE ossl_x509stctx_set_purpose(VALUE, VALUE);
 static VALUE ossl_x509stctx_set_trust(VALUE, VALUE);
 static VALUE ossl_x509stctx_set_time(VALUE, VALUE);
 
+/*
+ * call-seq:
+ *   StoreContext.new(store, cert = nil, chain = nil)
+ */
 static VALUE
 ossl_x509stctx_initialize(int argc, VALUE *argv, VALUE self)
 {
@@ -452,6 +517,10 @@ ossl_x509stctx_initialize(int argc, VALUE *argv, VALUE self)
     return self;
 }
 
+/*
+ * call-seq:
+ *   stctx.verify -> true | false
+ */
 static VALUE
 ossl_x509stctx_verify(VALUE self)
 {
@@ -472,6 +541,10 @@ ossl_x509stctx_verify(VALUE self)
     }
 }
 
+/*
+ * call-seq:
+ *   stctx.chain -> Array of X509::Certificate
+ */
 static VALUE
 ossl_x509stctx_get_chain(VALUE self)
 {
@@ -498,6 +571,10 @@ ossl_x509stctx_get_chain(VALUE self)
     return ary;
 }
 
+/*
+ * call-seq:
+ *   stctx.error -> Integer
+ */
 static VALUE
 ossl_x509stctx_get_err(VALUE self)
 {
@@ -508,6 +585,10 @@ ossl_x509stctx_get_err(VALUE self)
     return INT2FIX(X509_STORE_CTX_get_error(ctx));
 }
 
+/*
+ * call-seq:
+ *   stctx.error = error_code
+ */
 static VALUE
 ossl_x509stctx_set_error(VALUE self, VALUE err)
 {
@@ -519,6 +600,12 @@ ossl_x509stctx_set_error(VALUE self, VALUE err)
     return err;
 }
 
+/*
+ * call-seq:
+ *   stctx.error_string -> String
+ *
+ * Returns the error string corresponding to the error code retrieved by #error.
+ */
 static VALUE
 ossl_x509stctx_get_err_string(VALUE self)
 {
@@ -531,6 +618,10 @@ ossl_x509stctx_get_err_string(VALUE self)
     return rb_str_new2(X509_verify_cert_error_string(err));
 }
 
+/*
+ * call-seq:
+ *   stctx.error_depth -> Integer
+ */
 static VALUE
 ossl_x509stctx_get_err_depth(VALUE self)
 {
@@ -541,6 +632,10 @@ ossl_x509stctx_get_err_depth(VALUE self)
     return INT2FIX(X509_STORE_CTX_get_error_depth(ctx));
 }
 
+/*
+ * call-seq:
+ *   stctx.current_cert -> X509::Certificate
+ */
 static VALUE
 ossl_x509stctx_get_curr_cert(VALUE self)
 {
@@ -551,6 +646,10 @@ ossl_x509stctx_get_curr_cert(VALUE self)
     return ossl_x509_new(X509_STORE_CTX_get_current_cert(ctx));
 }
 
+/*
+ * call-seq:
+ *   stctx.current_crl -> X509::CRL
+ */
 static VALUE
 ossl_x509stctx_get_curr_crl(VALUE self)
 {
@@ -565,6 +664,12 @@ ossl_x509stctx_get_curr_crl(VALUE self)
     return ossl_x509crl_new(crl);
 }
 
+/*
+ * call-seq:
+ *   stctx.flags = flags
+ *
+ * Sets the verification flags to the context. See Store#flags=.
+ */
 static VALUE
 ossl_x509stctx_set_flags(VALUE self, VALUE flags)
 {
@@ -577,6 +682,12 @@ ossl_x509stctx_set_flags(VALUE self, VALUE flags)
     return flags;
 }
 
+/*
+ * call-seq:
+ *   stctx.purpose = purpose
+ *
+ * Sets the purpose of the context. See Store#purpose=.
+ */
 static VALUE
 ossl_x509stctx_set_purpose(VALUE self, VALUE purpose)
 {
@@ -589,6 +700,10 @@ ossl_x509stctx_set_purpose(VALUE self, VALUE purpose)
     return purpose;
 }
 
+/*
+ * call-seq:
+ *   stctx.trust = trust
+ */
 static VALUE
 ossl_x509stctx_set_trust(VALUE self, VALUE trust)
 {
@@ -603,7 +718,9 @@ ossl_x509stctx_set_trust(VALUE self, VALUE trust)
 
 /*
  * call-seq:
- *    storectx.time = time => time
+ *   stctx.time = time
+ *
+ * Sets the time used in the verification. If not set, the current time is used.
  */
 static VALUE
 ossl_x509stctx_set_time(VALUE self, VALUE time)
@@ -624,8 +741,6 @@ ossl_x509stctx_set_time(VALUE self, VALUE time)
 void
 Init_ossl_x509store(void)
 {
-    VALUE x509stctx;
-
 #if 0
     mOSSL = rb_define_module("OpenSSL");
     eOSSLError = rb_define_class_under(mOSSL, "OpenSSLError", rb_eStandardError);
@@ -646,11 +761,11 @@ Init_ossl_x509store(void)
      *
      * This will use your system's built-in certificates.
      *
-     * If your system does not have a default set of certificates you can
-     * obtain a set from Mozilla here: http://curl.haxx.se/docs/caextract.html
-     * (Note that this set does not have an HTTPS download option so you may
-     * wish to use the firefox-db2pem.sh script to extract the certificates
-     * from a local install to avoid man-in-the-middle attacks.)
+     * If your system does not have a default set of certificates you can obtain
+     * a set extracted from Mozilla CA certificate store by cURL maintainers
+     * here: https://curl.haxx.se/docs/caextract.html (You may wish to use the
+     * firefox-db2pem.sh script to extract the certificates from a local install
+     * to avoid man-in-the-middle attacks.)
      *
      * After downloading or generating a cacert.pem from the above link you
      * can create a certificate store from the pem file like this:
@@ -661,6 +776,7 @@ Init_ossl_x509store(void)
      * The certificate store can be used with an SSLSocket like this:
      *
      *   ssl_context = OpenSSL::SSL::SSLContext.new
+     *   ssl_context.verify_mode = OpenSSL::SSL::VERIFY_PEER
      *   ssl_context.cert_store = cert_store
      *
      *   tcp_socket = TCPSocket.open 'example.com', 443
@@ -669,9 +785,26 @@ Init_ossl_x509store(void)
      */
 
     cX509Store = rb_define_class_under(mX509, "Store", rb_cObject);
+    /*
+     * The callback for additional certificate verification. It is invoked for
+     * each untrusted certificate in the chain.
+     *
+     * The callback is invoked with two values, a boolean that indicates if the
+     * pre-verification by OpenSSL has succeeded or not, and the StoreContext in
+     * use. The callback must return either true or false.
+     */
     rb_attr(cX509Store, rb_intern("verify_callback"), 1, 0, Qfalse);
+    /*
+     * The error code set by the last call of #verify.
+     */
     rb_attr(cX509Store, rb_intern("error"), 1, 0, Qfalse);
+    /*
+     * The description for the error code set by the last call of #verify.
+     */
     rb_attr(cX509Store, rb_intern("error_string"), 1, 0, Qfalse);
+    /*
+     * The certificate chain constructed by the last call of #verify.
+     */
     rb_attr(cX509Store, rb_intern("chain"), 1, 0, Qfalse);
     rb_define_alloc_func(cX509Store, ossl_x509store_alloc);
     rb_define_method(cX509Store, "initialize",   ossl_x509store_initialize, -1);
@@ -688,22 +821,26 @@ Init_ossl_x509store(void)
     rb_define_method(cX509Store, "add_crl",      ossl_x509store_add_crl, 1);
     rb_define_method(cX509Store, "verify",       ossl_x509store_verify, -1);
 
-    cX509StoreContext = rb_define_class_under(mX509,"StoreContext",rb_cObject);
-    x509stctx = cX509StoreContext;
+    /*
+     * Document-class: OpenSSL::X509::StoreContext
+     *
+     * A StoreContext is used while validating a single certificate and holds
+     * the status involved.
+     */
+    cX509StoreContext = rb_define_class_under(mX509,"StoreContext", rb_cObject);
     rb_define_alloc_func(cX509StoreContext, ossl_x509stctx_alloc);
-    rb_define_method(x509stctx,"initialize",  ossl_x509stctx_initialize, -1);
-    rb_undef_method(x509stctx, "initialize_copy");
-    rb_define_method(x509stctx,"verify",      ossl_x509stctx_verify, 0);
-    rb_define_method(x509stctx,"chain",       ossl_x509stctx_get_chain,0);
-    rb_define_method(x509stctx,"error",       ossl_x509stctx_get_err, 0);
-    rb_define_method(x509stctx,"error=",      ossl_x509stctx_set_error, 1);
-    rb_define_method(x509stctx,"error_string",ossl_x509stctx_get_err_string,0);
-    rb_define_method(x509stctx,"error_depth", ossl_x509stctx_get_err_depth, 0);
-    rb_define_method(x509stctx,"current_cert",ossl_x509stctx_get_curr_cert, 0);
-    rb_define_method(x509stctx,"current_crl", ossl_x509stctx_get_curr_crl, 0);
-    rb_define_method(x509stctx,"flags=",      ossl_x509stctx_set_flags, 1);
-    rb_define_method(x509stctx,"purpose=",    ossl_x509stctx_set_purpose, 1);
-    rb_define_method(x509stctx,"trust=",      ossl_x509stctx_set_trust, 1);
-    rb_define_method(x509stctx,"time=",       ossl_x509stctx_set_time, 1);
-
+    rb_define_method(cX509StoreContext, "initialize", ossl_x509stctx_initialize, -1);
+    rb_undef_method(cX509StoreContext, "initialize_copy");
+    rb_define_method(cX509StoreContext, "verify", ossl_x509stctx_verify, 0);
+    rb_define_method(cX509StoreContext, "chain", ossl_x509stctx_get_chain,0);
+    rb_define_method(cX509StoreContext, "error", ossl_x509stctx_get_err, 0);
+    rb_define_method(cX509StoreContext, "error=", ossl_x509stctx_set_error, 1);
+    rb_define_method(cX509StoreContext, "error_string", ossl_x509stctx_get_err_string,0);
+    rb_define_method(cX509StoreContext, "error_depth", ossl_x509stctx_get_err_depth, 0);
+    rb_define_method(cX509StoreContext, "current_cert", ossl_x509stctx_get_curr_cert, 0);
+    rb_define_method(cX509StoreContext, "current_crl", ossl_x509stctx_get_curr_crl, 0);
+    rb_define_method(cX509StoreContext, "flags=", ossl_x509stctx_set_flags, 1);
+    rb_define_method(cX509StoreContext, "purpose=", ossl_x509stctx_set_purpose, 1);
+    rb_define_method(cX509StoreContext, "trust=", ossl_x509stctx_set_trust, 1);
+    rb_define_method(cX509StoreContext, "time=", ossl_x509stctx_set_time, 1);
 }
