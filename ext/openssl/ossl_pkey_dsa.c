@@ -191,7 +191,9 @@ ossl_dsa_s_generate(VALUE klass, VALUE size)
 
 /*
  *  call-seq:
- *    DSA.new([size | string [, pass]) -> dsa
+ *    DSA.new -> dsa
+ *    DSA.new(size) -> dsa
+ *    DSA.new(string [, pass]) -> dsa
  *
  * Creates a new DSA instance by reading an existing key from +string+.
  *
@@ -585,7 +587,21 @@ ossl_dsa_verify(VALUE self, VALUE digest, VALUE sig)
     return Qfalse;
 }
 
+/*
+ * Document-method: OpenSSL::PKey::DSA#set_pqg
+ * call-seq:
+ *   dsa.set_pqg(p, q, g) -> self
+ *
+ * Sets +p+, +q+, +g+ for the DSA instance.
+ */
 OSSL_PKEY_BN_DEF3(dsa, DSA, pqg, p, q, g)
+/*
+ * Document-method: OpenSSL::PKey::DSA#set_key
+ * call-seq:
+ *   dsa.set_key(pub_key, priv_key) -> self
+ *
+ * Sets +pub_key+ and +priv_key+ for the DSA instance. +priv_key+ may be nil.
+ */
 OSSL_PKEY_BN_DEF2(dsa, DSA, key, pub_key, priv_key)
 
 /*

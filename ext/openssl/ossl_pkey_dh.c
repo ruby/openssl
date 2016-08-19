@@ -175,8 +175,10 @@ ossl_dh_s_generate(int argc, VALUE *argv, VALUE klass)
 }
 
 /*
- *  call-seq:
- *     DH.new([size [, generator] | string]) -> dh
+ * call-seq:
+ *   DH.new -> dh
+ *   DH.new(string) -> dh
+ *   DH.new(size [, generator]) -> dh
  *
  * Either generates a DH instance from scratch or by reading already existing
  * DH parameters from +string+. Note that when reading a DH instance from
@@ -525,7 +527,7 @@ ossl_dh_generate_key(VALUE self)
  *
  * === Parameters
  * * +pub_bn+ is a OpenSSL::BN, *not* the DH instance returned by
- * DH#public_key as that contains the DH parameters only.
+ *   DH#public_key as that contains the DH parameters only.
  */
 static VALUE
 ossl_dh_compute_key(VALUE self, VALUE pub)
@@ -550,7 +552,21 @@ ossl_dh_compute_key(VALUE self, VALUE pub)
     return str;
 }
 
+/*
+ * Document-method: OpenSSL::PKey::DH#set_pqg
+ * call-seq:
+ *   dh.set_pqg(p, q, g) -> self
+ *
+ * Sets +p+, +q+, +g+ for the DH instance.
+ */
 OSSL_PKEY_BN_DEF3(dh, DH, pqg, p, q, g)
+/*
+ * Document-method: OpenSSL::PKey::DH#set_key
+ * call-seq:
+ *   dh.set_key(pub_key, priv_key) -> self
+ *
+ * Sets +pub_key+ and +priv_key+ for the DH instance. +priv_key+ may be nil.
+ */
 OSSL_PKEY_BN_DEF2(dh, DH, key, pub_key, priv_key)
 
 /*
