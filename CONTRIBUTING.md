@@ -80,6 +80,16 @@ $ docker-compose run debug
 All possible values for `RUBY_VERSION` and `OPENSSL_VERSION` can be found in
 [`.travis.yml`](https://github.com/ruby/openssl/tree/master/.travis.yml).
 
+**NOTE**: these commands must be run from the openssl repository root, in order
+to use the
+[`docker-compose.yml`](https://github.com/ruby/openssl/blob/master/docker-compose.yml)
+file we have provided.
+
+This Docker image is built using the
+[Dockerfile](https://github.com/ruby/openssl/tree/master/tool/ruby-openssl-docker)
+provided in the repository.
+
+
 ## Relation with Ruby source tree
 
 After Ruby 2.3, `ext/openssl` was converted into a "default gem", a library
