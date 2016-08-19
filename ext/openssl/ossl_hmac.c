@@ -352,6 +352,34 @@ Init_ossl_hmac(void)
     eOSSLError = rb_define_class_under(mOSSL, "OpenSSLError", rb_eStandardError);
 #endif
 
+    /*
+     * Document-class: OpenSSL::HMAC
+     *
+     * OpenSSL::HMAC allows computing Hash-based Message Authentication Code
+     * (HMAC). It is a type of message authentication code (MAC) involving a
+     * hash function in combination with a key. HMAC can be used to verify the
+     * integrity of a message as well as the authenticity.
+     *
+     * OpenSSL::HMAC has a similar interface to OpenSSL::Digest.
+     *
+     * === HMAC-SHA256 using one-shot interface
+     *
+     *   key = "key"
+     *   data = "message-to-be-authenticated"
+     *   mac = OpenSSL::HMAC.hexdigest("SHA256", key, data)
+     *   #=> "cddb0db23f469c8bf072b21fd837149bd6ace9ab771cceef14c9e517cc93282e"
+     *
+     * === HMAC-SHA256 using incremental interface
+     *
+     *   data1 = File.read("file1")
+     *   data2 = File.read("file2")
+     *   key = "key"
+     *   digest = OpenSSL::Digest::SHA256.new
+     *   hmac = OpenSSL::HMAC.new(key, digest)
+     *   hmac << data1
+     *   hmac << data2
+     *   mac = hmac.digest
+     */
     eHMACError = rb_define_class_under(mOSSL, "HMACError", eOSSLError);
 
     cHMAC = rb_define_class_under(mOSSL, "HMAC", rb_cObject);
