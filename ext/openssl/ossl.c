@@ -98,7 +98,7 @@ OSSL_IMPL_ARY2SK(x509, X509, cX509Cert, DupX509CertPtr)
 
 #define OSSL_IMPL_SK2ARY(name, type)	        \
 VALUE						\
-ossl_##name##_sk2ary(STACK_OF(type) *sk)	\
+ossl_##name##_sk2ary(const STACK_OF(type) *sk)	\
 {						\
     type *t;					\
     int i, num;					\

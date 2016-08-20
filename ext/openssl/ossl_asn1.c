@@ -28,7 +28,7 @@ static VALUE ossl_asn1eoc_initialize(VALUE self);
  * DATE conversion
  */
 VALUE
-asn1time_to_time(ASN1_TIME *time)
+asn1time_to_time(const ASN1_TIME *time)
 {
     struct tm tm;
     VALUE argv[6];
@@ -103,7 +103,7 @@ time_to_time_t(VALUE time)
  * STRING conversion
  */
 VALUE
-asn1str_to_str(ASN1_STRING *str)
+asn1str_to_str(const ASN1_STRING *str)
 {
     return rb_str_new((const char *)str->data, str->length);
 }
@@ -114,7 +114,7 @@ asn1str_to_str(ASN1_STRING *str)
  */
 #define DO_IT_VIA_RUBY 0
 VALUE
-asn1integer_to_num(ASN1_INTEGER *ai)
+asn1integer_to_num(const ASN1_INTEGER *ai)
 {
     BIGNUM *bn;
 #if DO_IT_VIA_RUBY
@@ -126,7 +126,8 @@ asn1integer_to_num(ASN1_INTEGER *ai)
 	ossl_raise(rb_eTypeError, "ASN1_INTEGER is NULL!");
     }
     if (ai->type == V_ASN1_ENUMERATED)
-	bn = ASN1_ENUMERATED_to_BN(ai, NULL);
+	/* const_cast: workaround for old OpenSSL */
+	bn = ASN1_ENUMERATED_to_BN((ASN1_ENUMERATED *)ai, NULL);
     else
 	bn = ASN1_INTEGER_to_BN(ai, NULL);
 
