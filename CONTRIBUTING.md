@@ -36,8 +36,12 @@ Make sure that your branch does:
 
 ## Testing
 
-We have a test suite. Test cases are located under `test/` directory. You can
-run it with the following three commands:
+We have a test suite!
+
+Test cases are located under the
+[`test/`](https://github.com/ruby/openssl/tree/master/test) directory.
+
+You can run it with the following three commands:
 
 ```
 $ gem install rake-compiler test-unit
@@ -45,11 +49,23 @@ $ rake compile
 $ rake test
 ```
 
-You can also use Docker Compose to run tests. It can be used to check that your
-changes works correctly with various supported versions of Ruby and OpenSSL.
+### Docker
 
-First, you need to install Docker and Docker Compose in your computer. Then,
-running the following commands will work.
+You can also use Docker Compose to run tests. It can be used to check that your
+changes work correctly with various supported versions of Ruby and OpenSSL.
+
+First, you need to install [Docker](https://www.docker.com/products/docker) and
+[Docker Compose](https://www.docker.com/products/docker-compose) on your
+computer.
+
+If you're on MacOS or Windows, we recommended to use the official [Docker
+Toolbox](https://www.docker.com/products/docker-toolbox). On Linux, follow the
+instructions for your package manager. For further information, please check
+the [official documentation](https://docs.docker.com/).
+
+Once you have Docker and Docker Compose, running the following commands will
+build the container and execute the openssl tests. In this example, we will use
+Ruby version 2.3 with OpenSSL version 1.0.2.
 
 ```
 $ docker-compose build
@@ -61,8 +77,18 @@ $ docker-compose run test
 $ docker-compose run debug
 ```
 
-The possible values for `RUBY_VERSION` and `OPENSSL_VERSION` can be found in
-`.travis.yml`.
+All possible values for `RUBY_VERSION` and `OPENSSL_VERSION` can be found in
+[`.travis.yml`](https://github.com/ruby/openssl/tree/master/.travis.yml).
+
+**NOTE**: these commands must be run from the openssl repository root, in order
+to use the
+[`docker-compose.yml`](https://github.com/ruby/openssl/blob/master/docker-compose.yml)
+file we have provided.
+
+This Docker image is built using the
+[Dockerfile](https://github.com/ruby/openssl/tree/master/tool/ruby-openssl-docker)
+provided in the repository.
+
 
 ## Relation with Ruby source tree
 
