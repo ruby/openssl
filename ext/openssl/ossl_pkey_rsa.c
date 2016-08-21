@@ -656,8 +656,31 @@ ossl_rsa_blinding_off(VALUE self)
 }
  */
 
+/*
+ * Document-method: OpenSSL::PKey::RSA#set_key
+ * call-seq:
+ *   rsa.set_key(n, e, d) -> self
+ *
+ * Sets +n+, +e+, +d+ for the RSA instance.
+ */
 OSSL_PKEY_BN_DEF3(rsa, RSA, key, n, e, d)
+/*
+ * Document-method: OpenSSL::PKey::RSA#set_factors
+ * call-seq:
+ *   rsa.set_factors(p, q) -> self
+ *
+ * Sets +p+, +q+ for the RSA instance.
+ */
 OSSL_PKEY_BN_DEF2(rsa, RSA, factors, p, q)
+/*
+ * Document-method: OpenSSL::PKey::RSA#set_crt_params
+ * call-seq:
+ *   rsa.set_crt_params(dmp1, dmq1, iqmp) -> self
+ *
+ * Sets +dmp1+, +dmq1+, +iqmp+ for the RSA instance. They are calculated by
+ * <tt>d mod (p - 1)</tt>, <tt>d mod (q - 1)</tt> and <tt>q^(-1) mod p</tt>
+ * respectively.
+ */
 OSSL_PKEY_BN_DEF3(rsa, RSA, crt_params, dmp1, dmq1, iqmp)
 
 /*

@@ -33,20 +33,28 @@ module OpenSSL
       const_set("AES#{keylen}", klass)
     }
 
-    # Generate, set, and return a random key.
-    # You must call cipher.encrypt or cipher.decrypt before calling this method.
+    # call-seq:
+    #   cipher.random_key -> key
+    #
+    # Generate a random key with OpenSSL::Random.random_bytes and sets it to
+    # the cipher, and returns it.
+    #
+    # You must call #encrypt or #decrypt before calling this method.
     def random_key
       str = OpenSSL::Random.random_bytes(self.key_len)
       self.key = str
-      return str
     end
 
-    # Generate, set, and return a random iv.
-    # You must call cipher.encrypt or cipher.decrypt before calling this method.
+    # call-seq:
+    #   cipher.random_iv -> iv
+    #
+    # Generate a random IV with OpenSSL::Random.random_bytes and sets it to the
+    # cipher, and returns it.
+    #
+    # You must call #encrypt or #decrypt before calling this method.
     def random_iv
       str = OpenSSL::Random.random_bytes(self.iv_len)
       self.iv = str
-      return str
     end
 
     # Deprecated.

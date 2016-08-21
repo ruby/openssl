@@ -180,6 +180,9 @@ ossl_sslctx_s_alloc(VALUE klass)
  *    ctx.ssl_version = :TLSv1
  *    ctx.ssl_version = "SSLv23_client"
  *
+ * Sets the SSL/TLS protocol version for the context. This forces connections to
+ * use only the specified protocol version.
+ *
  * You can get a list of valid versions with OpenSSL::SSL::SSLContext::METHODS
  */
 static VALUE
@@ -945,7 +948,7 @@ ossl_ssl_cipher_to_ary(const SSL_CIPHER *cipher)
  * call-seq:
  *    ctx.ciphers => [[name, version, bits, alg_bits], ...]
  *
- * The list of ciphers configured for this context.
+ * The list of cipher suites configured for this context.
  */
 static VALUE
 ossl_sslctx_get_ciphers(VALUE self)
@@ -981,11 +984,9 @@ ossl_sslctx_get_ciphers(VALUE self)
  *    ctx.ciphers = [name, ...]
  *    ctx.ciphers = [[name, version, bits, alg_bits], ...]
  *
- * Sets the list of available ciphers for this context.  Note in a server
+ * Sets the list of available cipher suites for this context.  Note in a server
  * context some ciphers require the appropriate certificates.  For example, an
- * RSA cipher can only be chosen when an RSA certificate is available.
- *
- * See also OpenSSL::Cipher and OpenSSL::Cipher::ciphers
+ * RSA cipher suite can only be chosen when an RSA certificate is available.
  */
 static VALUE
 ossl_sslctx_set_ciphers(VALUE self, VALUE v)
@@ -1133,7 +1134,7 @@ ossl_sslctx_get_security_level(VALUE self)
 
 /*
  * call-seq:
- *    ctx.security_level=(integer) -> Integer
+ *    ctx.security_level = integer
  *
  * Sets the security level for the context. OpenSSL limits parameters according
  * to the level. The "parameters" include: ciphersuites, curves, key sizes,
@@ -1174,7 +1175,7 @@ ossl_sslctx_set_security_level(VALUE self, VALUE value)
  *  call-seq:
  *     ctx.session_add(session) -> true | false
  *
- * Adds +session+ to the session cache
+ * Adds +session+ to the session cache.
  */
 static VALUE
 ossl_sslctx_session_add(VALUE self, VALUE arg)
@@ -1192,7 +1193,7 @@ ossl_sslctx_session_add(VALUE self, VALUE arg)
  *  call-seq:
  *     ctx.session_remove(session) -> true | false
  *
- * Removes +session+ from the session cache
+ * Removes +session+ from the session cache.
  */
 static VALUE
 ossl_sslctx_session_remove(VALUE self, VALUE arg)
@@ -1410,7 +1411,7 @@ ossl_ssl_s_alloc(VALUE klass)
  *    SSLSocket.new(io) => aSSLSocket
  *    SSLSocket.new(io, ctx) => aSSLSocket
  *
- * Creates a new SSL socket from +io+ which must be a real ruby object (not an
+ * Creates a new SSL socket from +io+ which must be a real IO object (not an
  * IO-like object that responds to read/write).
  *
  * If +ctx+ is provided the SSL Sockets initial params will be taken from
@@ -1986,7 +1987,8 @@ ossl_ssl_get_cipher(VALUE self)
  * call-seq:
  *    ssl.state => string
  *
- * A description of the current connection state.
+ * A description of the current connection state. This is for diagnostic
+ * purposes only.
  */
 static VALUE
 ossl_ssl_get_state(VALUE self)
@@ -2008,7 +2010,7 @@ ossl_ssl_get_state(VALUE self)
  * call-seq:
  *    ssl.pending => Integer
  *
- * The number of bytes that are immediately available for reading
+ * The number of bytes that are immediately available for reading.
  */
 static VALUE
 ossl_ssl_pending(VALUE self)
@@ -2057,6 +2059,7 @@ ossl_ssl_set_session(VALUE self, VALUE arg1)
     return arg1;
 }
 
+#ifdef HAVE_SSL_SET_TLSEXT_HOST_NAME
 /*
  * call-seq:
  *    ssl.hostname = hostname -> hostname
@@ -2064,7 +2067,6 @@ ossl_ssl_set_session(VALUE self, VALUE arg1)
  * Sets the server hostname used for SNI. This needs to be set before
  * SSLSocket#connect.
  */
-#ifdef HAVE_SSL_SET_TLSEXT_HOST_NAME
 static VALUE
 ossl_ssl_set_hostname(VALUE self, VALUE arg)
 {
@@ -2131,7 +2133,7 @@ ossl_ssl_get_client_ca_list(VALUE self)
 # ifdef HAVE_SSL_CTX_SET_NEXT_PROTO_SELECT_CB
 /*
  * call-seq:
- *    ssl.npn_protocol => String
+ *    ssl.npn_protocol => String | nil
  *
  * Returns the protocol string that was finally selected by the client
  * during the handshake.
@@ -2156,9 +2158,9 @@ ossl_ssl_npn_protocol(VALUE self)
 # ifdef HAVE_SSL_CTX_SET_ALPN_SELECT_CB
 /*
  * call-seq:
- *    ssl.alpn_protocol => String
+ *    ssl.alpn_protocol => String | nil
  *
- * Returns the ALPN protocol string that was finally selected by the client
+ * Returns the ALPN protocol string that was finally selected by the server
  * during the handshake.
  */
 static VALUE
@@ -2183,7 +2185,7 @@ ossl_ssl_alpn_protocol(VALUE self)
  * call-seq:
  *    ssl.tmp_key => PKey or nil
  *
- * Returns the ephemeral key used in case of forward secrecy cipher
+ * Returns the ephemeral key used in case of forward secrecy cipher.
  */
 static VALUE
 ossl_ssl_tmp_key(VALUE self)
@@ -2257,11 +2259,6 @@ Init_ossl_ssl(void)
      *
      * All attributes must be set before creating an SSLSocket as the
      * SSLContext will be frozen afterward.
-     *
-     * The following attributes are available but don't show up in rdoc:
-     * * ssl_version, cert, key, client_ca, ca_file, ca_path, timeout,
-     * * verify_mode, verify_depth client_cert_cb, tmp_dh_callback,
-     * * session_id_context, session_add_cb, session_new_cb, session_remove_cb
      */
     cSSLContext = rb_define_class_under(mSSL, "SSLContext", rb_cObject);
     rb_define_alloc_func(cSSLContext, ossl_sslctx_s_alloc);
@@ -2295,7 +2292,7 @@ Init_ossl_ssl(void)
     rb_attr(cSSLContext, rb_intern("ca_path"), 1, 1, Qfalse);
 
     /*
-     * Maximum session lifetime.
+     * Maximum session lifetime in seconds.
      */
     rb_attr(cSSLContext, rb_intern("timeout"), 1, 1, Qfalse);
 
@@ -2304,6 +2301,11 @@ Init_ossl_ssl(void)
      *
      * Valid modes are VERIFY_NONE, VERIFY_PEER, VERIFY_CLIENT_ONCE,
      * VERIFY_FAIL_IF_NO_PEER_CERT and defined on OpenSSL::SSL
+     *
+     * The default mode is VERIFY_NONE, which does not perform any verification
+     * at all.
+     *
+     * See SSL_CTX_set_verify(3) for details.
      */
     rb_attr(cSSLContext, rb_intern("verify_mode"), 1, 1, Qfalse);
 
@@ -2335,7 +2337,7 @@ Init_ossl_ssl(void)
     rb_attr(cSSLContext, rb_intern("verify_hostname"), 1, 1, Qfalse);
 
     /*
-     * An OpenSSL::X509::Store used for certificate verification
+     * An OpenSSL::X509::Store used for certificate verification.
      */
     rb_attr(cSSLContext, rb_intern("cert_store"), 1, 1, Qfalse);
 
@@ -2459,7 +2461,7 @@ Init_ossl_ssl(void)
      * === Example
      *
      *   ctx.npn_select_cb = lambda do |protocols|
-     *     #inspect the protocols and select one
+     *     # inspect the protocols and select one
      *     protocols.first
      *   end
      */
@@ -2469,10 +2471,10 @@ Init_ossl_ssl(void)
 #ifdef HAVE_SSL_CTX_SET_ALPN_SELECT_CB
     /*
      * An Enumerable of Strings. Each String represents a protocol to be
-     * advertised as the list of supported protocols for Application-Layer Protocol
-     * Negotiation. Supported in OpenSSL 1.0.1 and higher. Has no effect
-     * on the client side. If not set explicitly, the NPN extension will
-     * not be sent by the server in the handshake.
+     * advertised as the list of supported protocols for Application-Layer
+     * Protocol Negotiation. Supported in OpenSSL 1.0.2 and higher. Has no
+     * effect on the server side. If not set explicitly, the ALPN extension will
+     * not be included in the handshake.
      *
      * === Example
      *
@@ -2482,16 +2484,16 @@ Init_ossl_ssl(void)
     /*
      * A callback invoked on the server side when the server needs to select
      * a protocol from the list sent by the client. Supported in OpenSSL 1.0.2
-     * and higher. The server MUST select a protocol of those advertised by
+     * and higher. The callback must return a protocol of those advertised by
      * the client. If none is acceptable, raising an error in the callback
      * will cause the handshake to fail. Not setting this callback explicitly
-     * means not supporting the ALPN extension on the client - any protocols
-     * advertised by the server will be ignored.
+     * means not supporting the ALPN extension on the server - any protocols
+     * advertised by the client will be ignored.
      *
      * === Example
      *
      *   ctx.alpn_select_cb = lambda do |protocols|
-     *     #inspect the protocols and select one
+     *     # inspect the protocols and select one
      *     protocols.first
      *   end
      */
@@ -2577,10 +2579,6 @@ Init_ossl_ssl(void)
 
     /*
      * Document-class: OpenSSL::SSL::SSLSocket
-     *
-     * The following attributes are available but don't show up in rdoc.
-     * * io, context, sync_close
-     *
      */
     cSSLSocket = rb_define_class_under(mSSL, "SSLSocket", rb_cObject);
 #ifdef OPENSSL_NO_SOCK

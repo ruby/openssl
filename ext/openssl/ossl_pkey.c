@@ -123,13 +123,16 @@ ossl_pkey_new_from_file(VALUE filename)
 
 /*
  *  call-seq:
- *     OpenSSL::PKey.read(string [, pwd ] ) -> PKey
- *     OpenSSL::PKey.read(file [, pwd ]) -> PKey
+ *     OpenSSL::PKey.read(string [, pwd ]) -> PKey
+ *     OpenSSL::PKey.read(io [, pwd ]) -> PKey
+ *
+ * Reads a DER or PEM encoded string from +string+ or +io+ and returns an
+ * instance of the appropriate PKey class.
  *
  * === Parameters
  * * +string+ is a DER- or PEM-encoded string containing an arbitrary private
  *   or public key.
- * * +file+ is an instance of +File+ containing a DER- or PEM-encoded
+ * * +io+ is an instance of +IO+ containing a DER- or PEM-encoded
  *   arbitrary private or public key.
  * * +pwd+ is an optional password in case +string+ or +file+ is an encrypted
  *   PEM resource.

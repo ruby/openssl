@@ -248,7 +248,7 @@ ossl_cipher_init(int argc, VALUE *argv, VALUE self, int mode)
  *
  *  Make sure to call Cipher#encrypt or Cipher#decrypt before using any of the
  *  following methods:
- *  * [key=, iv=, random_key, random_iv, pkcs5_keyivgen]
+ *  * [#key=, #iv=, #random_key, #random_iv, #pkcs5_keyivgen]
  *
  *  Internally calls EVP_CipherInit_ex(ctx, NULL, NULL, NULL, NULL, 1).
  */
@@ -266,7 +266,7 @@ ossl_cipher_encrypt(int argc, VALUE *argv, VALUE self)
  *
  *  Make sure to call Cipher#encrypt or Cipher#decrypt before using any of the
  *  following methods:
- *  * [key=, iv=, random_key, random_iv, pkcs5_keyivgen]
+ *  * [#key=, #iv=, #random_key, #random_iv, #pkcs5_keyivgen]
  *
  *  Internally calls EVP_CipherInit_ex(ctx, NULL, NULL, NULL, NULL, 0).
  */
@@ -278,20 +278,20 @@ ossl_cipher_decrypt(int argc, VALUE *argv, VALUE self)
 
 /*
  *  call-seq:
- *     cipher.pkcs5_keyivgen(pass [, salt [, iterations [, digest]]] ) -> nil
+ *     cipher.pkcs5_keyivgen(pass, salt = nil, iterations = 2048, digest = "MD5") -> nil
  *
  *  Generates and sets the key/IV based on a password.
  *
- *  WARNING: This method is only PKCS5 v1.5 compliant when using RC2, RC4-40,
+ *  *WARNING*: This method is only PKCS5 v1.5 compliant when using RC2, RC4-40,
  *  or DES with MD5 or SHA1. Using anything else (like AES) will generate the
  *  key/iv using an OpenSSL specific method. This method is deprecated and
  *  should no longer be used. Use a PKCS5 v2 key generation method from
  *  OpenSSL::PKCS5 instead.
  *
  *  === Parameters
- *  +salt+ must be an 8 byte string if provided.
- *  +iterations+ is a integer with a default of 2048.
- *  +digest+ is a Digest object that defaults to 'MD5'
+ *  * +salt+ must be an 8 byte string if provided.
+ *  * +iterations+ is a integer with a default of 2048.
+ *  * +digest+ is a Digest object that defaults to 'MD5'
  *
  *  A minimum of 1000 iterations is recommended.
  *
@@ -360,9 +360,8 @@ ossl_cipher_update_long(EVP_CIPHER_CTX *ctx, unsigned char *out, long *out_len_p
  *  data chunk. When done, the output of Cipher#final should be additionally
  *  added to the result.
  *
- *  === Parameters
- *  +data+ is a nonempty string.
- *  +buffer+ is an optional string to store the result.
+ *  If +buffer+ is given, the encryption/decryption result will be written to
+ *  it. +buffer+ will be resized automatically.
  */
 static VALUE
 ossl_cipher_update(int argc, VALUE *argv, VALUE self)
@@ -726,22 +725,21 @@ ossl_cipher_set_padding(VALUE self, VALUE padding)
     return padding;
 }
 
-#define CIPHER_0ARG_INT(func)					\
-    static VALUE						\
-    ossl_cipher_##func(VALUE self)				\
-    {								\
-	EVP_CIPHER_CTX *ctx;					\
-	GetCipher(self, ctx);					\
-	return INT2NUM(EVP_CIPHER_##func(EVP_CIPHER_CTX_cipher(ctx)));	\
-    }
-
 /*
  *  call-seq:
  *     cipher.key_len -> integer
  *
  *  Returns the key length in bytes of the Cipher.
  */
-CIPHER_0ARG_INT(key_length)
+static VALUE
+ossl_cipher_key_length(VALUE self)
+{
+    EVP_CIPHER_CTX *ctx;
+
+    GetCipher(self, ctx);
+
+    return INT2NUM(EVP_CIPHER_CTX_key_length(ctx));
+}
 
 /*
  *  call-seq:
@@ -772,7 +770,15 @@ ossl_cipher_iv_length(VALUE self)
  *
  *  Returns the size in bytes of the blocks on which this Cipher operates on.
  */
-CIPHER_0ARG_INT(block_size)
+static VALUE
+ossl_cipher_block_size(VALUE self)
+{
+    EVP_CIPHER_CTX *ctx;
+
+    GetCipher(self, ctx);
+
+    return INT2NUM(EVP_CIPHER_CTX_block_size(ctx));
+}
 
 /*
  * INIT

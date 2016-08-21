@@ -213,17 +213,16 @@ ossl_ec_key_s_generate(VALUE klass, VALUE arg)
     return obj;
 }
 
-/*  call-seq:
- *     OpenSSL::PKey::EC.new()
- *     OpenSSL::PKey::EC.new(ec_key)
- *     OpenSSL::PKey::EC.new(ec_group)
- *     OpenSSL::PKey::EC.new("secp112r1")
- *     OpenSSL::PKey::EC.new(pem_string)
- *     OpenSSL::PKey::EC.new(pem_string [, pwd])
- *     OpenSSL::PKey::EC.new(der_string)
+/*
+ * call-seq:
+ *   OpenSSL::PKey::EC.new
+ *   OpenSSL::PKey::EC.new(ec_key)
+ *   OpenSSL::PKey::EC.new(ec_group)
+ *   OpenSSL::PKey::EC.new("secp112r1")
+ *   OpenSSL::PKey::EC.new(pem_string [, pwd])
+ *   OpenSSL::PKey::EC.new(der_string)
  *
- *  See the OpenSSL documentation for:
- *     EC_KEY_*
+ * Creates a new EC object from given arguments.
  */
 static VALUE ossl_ec_key_initialize(int argc, VALUE *argv, VALUE self)
 {
@@ -803,21 +802,26 @@ static VALUE ossl_ec_group_alloc(VALUE klass)
     return obj;
 }
 
-/*  call-seq:
- *     OpenSSL::PKey::EC::Group.new("secp112r1")
- *     OpenSSL::PKey::EC::Group.new(ec_group)
- *     OpenSSL::PKey::EC::Group.new(pem_string)
- *     OpenSSL::PKey::EC::Group.new(der_string)
- *     OpenSSL::PKey::EC::Group.new(pem_file)
- *     OpenSSL::PKey::EC::Group.new(der_file)
- *     OpenSSL::PKey::EC::Group.new(:GFp_simple)
- *     OpenSSL::PKey::EC::Group.new(:GFp_mult)
- *     OpenSSL::PKey::EC::Group.new(:GFp_nist)
- *     OpenSSL::PKey::EC::Group.new(:GF2m_simple)
- *     OpenSSL::PKey::EC::Group.new(:GFp, bignum_p, bignum_a, bignum_b)
- *     OpenSSL::PKey::EC::Group.new(:GF2m, bignum_p, bignum_a, bignum_b)
+/*
+ * call-seq:
+ *   OpenSSL::PKey::EC::Group.new(ec_group)
+ *   OpenSSL::PKey::EC::Group.new(pem_or_der_encoded)
+ *   OpenSSL::PKey::EC::Group.new(ec_method)
+ *   OpenSSL::PKey::EC::Group.new(:GFp, bignum_p, bignum_a, bignum_b)
+ *   OpenSSL::PKey::EC::Group.new(:GF2m, bignum_p, bignum_a, bignum_b)
  *
- *  See the OpenSSL documentation for EC_GROUP_*
+ * Creates a new EC::Group object.
+ *
+ * +ec_method+ is a symbol that represents an EC_METHOD. Currently the following
+ * are supported:
+ *
+ * * :GFp_simple
+ * * :GFp_mont
+ * * :GFp_nist
+ * * :GF2m_simple
+ *
+ * If the first argument is :GFp or :GF2m, creates a new curve with given
+ * parameters.
  */
 static VALUE ossl_ec_group_initialize(int argc, VALUE *argv, VALUE self)
 {
@@ -945,10 +949,13 @@ ossl_ec_group_initialize_copy(VALUE self, VALUE other)
     return self;
 }
 
-/*  call-seq:
- *     group1.eql?(group2)   => true | false
- *     group1 == group2   => true | false
+/* 
+ * call-seq:
+ *   group1.eql?(group2)   => true | false
+ *   group1 == group2   => true | false
  *
+ * Returns true if the two groups use the same curve and have the same
+ * parameters, false otherwise.
  */
 static VALUE ossl_ec_group_eql(VALUE a, VALUE b)
 {
@@ -963,10 +970,13 @@ static VALUE ossl_ec_group_eql(VALUE a, VALUE b)
     return Qtrue;
 }
 
-/*  call-seq:
- *     group.generator   => ec_point
+/* 
+ * call-seq:
+ *   group.generator   => ec_point
  *
- *  See the OpenSSL documentation for EC_GROUP_get0_generator()
+ * Returns the generator of the group.
+ *
+ * See the OpenSSL documentation for EC_GROUP_get0_generator()
  */
 static VALUE ossl_ec_group_get_generator(VALUE self)
 {
@@ -980,10 +990,14 @@ static VALUE ossl_ec_group_get_generator(VALUE self)
     return point_obj;
 }
 
-/*  call-seq:
- *     group.set_generator(generator, order, cofactor)   => self
+/*
+ * call-seq:
+ *   group.set_generator(generator, order, cofactor)   => self
  *
- *  See the OpenSSL documentation for EC_GROUP_set_generator()
+ * Sets the curve parameters. +generator+ must be an instance of EC::Point that
+ * is on the curve. +order+ and +cofactor+ are integers.
+ *
+ * See the OpenSSL documentation for EC_GROUP_set_generator()
  */
 static VALUE ossl_ec_group_set_generator(VALUE self, VALUE generator, VALUE order, VALUE cofactor)
 {
@@ -1002,10 +1016,13 @@ static VALUE ossl_ec_group_set_generator(VALUE self, VALUE generator, VALUE orde
     return self;
 }
 
-/*  call-seq:
- *     group.get_order   => order_bn
+/*
+ * call-seq:
+ *   group.get_order   => order_bn
  *
- *  See the OpenSSL documentation for EC_GROUP_get_order()
+ * Returns the order of the group.
+ *
+ * See the OpenSSL documentation for EC_GROUP_get_order()
  */
 static VALUE ossl_ec_group_get_order(VALUE self)
 {
@@ -1024,10 +1041,13 @@ static VALUE ossl_ec_group_get_order(VALUE self)
     return bn_obj;
 }
 
-/*  call-seq:
- *     group.get_cofactor   => cofactor_bn
+/*
+ * call-seq:
+ *   group.get_cofactor   => cofactor_bn
  *
- *  See the OpenSSL documentation for EC_GROUP_get_cofactor()
+ * Returns the cofactor of the group.
+ *
+ * See the OpenSSL documentation for EC_GROUP_get_cofactor()
  */
 static VALUE ossl_ec_group_get_cofactor(VALUE self)
 {
@@ -1046,10 +1066,13 @@ static VALUE ossl_ec_group_get_cofactor(VALUE self)
     return bn_obj;
 }
 
-/*  call-seq:
- *     group.curve_name  => String
+/*
+ * call-seq:
+ *   group.curve_name  => String
  *
- *  See the OpenSSL documentation for EC_GROUP_get_curve_name()
+ * Returns the curve name (sn).
+ *
+ * See the OpenSSL documentation for EC_GROUP_get_curve_name()
  */
 static VALUE ossl_ec_group_get_curve_name(VALUE self)
 {
@@ -1066,10 +1089,14 @@ static VALUE ossl_ec_group_get_curve_name(VALUE self)
     return rb_str_new2(OBJ_nid2sn(nid));
 }
 
-/*  call-seq:
- *     EC.builtin_curves => [[name, comment], ...]
+/*
+ * call-seq:
+ *   EC.builtin_curves => [[sn, comment], ...]
  *
- *  See the OpenSSL documentation for EC_builtin_curves()
+ * Obtains a list of all predefined curves by the OpenSSL. Curve names are
+ * returned as sn.
+ *
+ * See the OpenSSL documentation for EC_get_builtin_curves().
  */
 static VALUE ossl_s_builtin_curves(VALUE self)
 {
@@ -1099,10 +1126,13 @@ static VALUE ossl_s_builtin_curves(VALUE self)
     return ret;
 }
 
-/*  call-seq:
- *     group.asn1_flag  => Fixnum
+/* 
+ * call-seq:
+ *   group.asn1_flag -> Integer
  *
- *  See the OpenSSL documentation for EC_GROUP_get_asn1_flag()
+ * Returns the flags set on the group.
+ *
+ * See also #asn1_flag=.
  */
 static VALUE ossl_ec_group_get_asn1_flag(VALUE self)
 {
@@ -1116,10 +1146,19 @@ static VALUE ossl_ec_group_get_asn1_flag(VALUE self)
     return INT2FIX(flag);
 }
 
-/*  call-seq:
- *     group.asn1_flag = Fixnum   => Fixnum
+/*
+ * call-seq:
+ *   group.asn1_flag = flags
  *
- *  See the OpenSSL documentation for EC_GROUP_set_asn1_flag()
+ * Sets flags on the group. The flag value is used to determine how to encode
+ * the group: encode explicit parameters or named curve using an OID.
+ *
+ * The flag value can be either of:
+ *
+ * * EC::NAMED_CURVE
+ * * EC::EXPLICIT_CURVE
+ *
+ * See the OpenSSL documentation for EC_GROUP_set_asn1_flag().
  */
 static VALUE ossl_ec_group_set_asn1_flag(VALUE self, VALUE flag_v)
 {
@@ -1132,10 +1171,13 @@ static VALUE ossl_ec_group_set_asn1_flag(VALUE self, VALUE flag_v)
     return flag_v;
 }
 
-/*  call-seq:
- *     group.point_conversion_form  => :uncompressed | :compressed | :hybrid
+/*
+ * call-seq:
+ *   group.point_conversion_form -> Symbol
  *
- *  See the OpenSSL documentation for EC_GROUP_get_point_conversion_form()
+ * Returns the form how EC::Point data is encoded as ASN.1.
+ *
+ * See also #point_conversion_form=.
  */
 static VALUE ossl_ec_group_get_point_conversion_form(VALUE self)
 {
@@ -1157,10 +1199,24 @@ static VALUE ossl_ec_group_get_point_conversion_form(VALUE self)
    return ID2SYM(ret);
 }
 
-/*  call-seq:
- *     group.point_conversion_form = form => form
+/*
+ * call-seq:
+ *   group.point_conversion_form = form
  *
- *  See the OpenSSL documentation for EC_GROUP_set_point_conversion_form()
+ * Sets the form how EC::Point data is encoded as ASN.1 as defined in X9.62.
+ *
+ * +format+ can be one of these:
+ *
+ * :compressed::
+ *   Encoded as z||x, where z is an octet indicating which solution of the
+ *   equation y is. z will be 0x02 or 0x03.
+ * :uncompressed::
+ *   Encoded as z||x||y, where z is an octet 0x04.
+ * :hybrid::
+ *   Encodes as z||x||y, where z is an octet indicating which solution of the
+ *   equation y is. z will be 0x06 or 0x07.
+ *
+ * See the OpenSSL documentation for EC_GROUP_set_point_conversion_form()
  */
 static VALUE ossl_ec_group_set_point_conversion_form(VALUE self, VALUE form_v)
 {
@@ -1185,10 +1241,11 @@ static VALUE ossl_ec_group_set_point_conversion_form(VALUE self, VALUE form_v)
     return form_v;
 }
 
-/*  call-seq:
- *     group.seed   => String or nil
+/*
+ * call-seq:
+ *   group.seed   => String or nil
  *
- *  See the OpenSSL documentation for EC_GROUP_get0_seed()
+ * See the OpenSSL documentation for EC_GROUP_get0_seed()
  */
 static VALUE ossl_ec_group_get_seed(VALUE self)
 {
@@ -1205,10 +1262,11 @@ static VALUE ossl_ec_group_get_seed(VALUE self)
     return rb_str_new((const char *)EC_GROUP_get0_seed(group), seed_len);
 }
 
-/*  call-seq:
- *     group.seed = seed  => seed
+/*
+ * call-seq:
+ *   group.seed = seed  => seed
  *
- *  See the OpenSSL documentation for EC_GROUP_set_seed()
+ * See the OpenSSL documentation for EC_GROUP_set_seed()
  */
 static VALUE ossl_ec_group_set_seed(VALUE self, VALUE seed)
 {
@@ -1225,10 +1283,11 @@ static VALUE ossl_ec_group_set_seed(VALUE self, VALUE seed)
 
 /* get/set curve GFp, GF2m */
 
-/*  call-seq:
- *     group.degree   => Fixnum
+/*
+ * call-seq:
+ *   group.degree   => Fixnum
  *
- *  See the OpenSSL documentation for EC_GROUP_get_degree()
+ * See the OpenSSL documentation for EC_GROUP_get_degree()
  */
 static VALUE ossl_ec_group_get_degree(VALUE self)
 {
@@ -1273,8 +1332,9 @@ static VALUE ossl_ec_group_to_string(VALUE self, int format)
     return str;
 }
 
-/*  call-seq:
- *     group.to_pem   => String
+/*
+ * call-seq:
+ *   group.to_pem   => String
  *
  *  See the OpenSSL documentation for PEM_write_bio_ECPKParameters()
  */
@@ -1283,20 +1343,22 @@ static VALUE ossl_ec_group_to_pem(VALUE self)
     return ossl_ec_group_to_string(self, EXPORT_PEM);
 }
 
-/*  call-seq:
- *     group.to_der   => String
+/*
+ * call-seq:
+ *   group.to_der   => String
  *
- *  See the OpenSSL documentation for i2d_ECPKParameters_bio()
+ * See the OpenSSL documentation for i2d_ECPKParameters_bio()
  */
 static VALUE ossl_ec_group_to_der(VALUE self)
 {
     return ossl_ec_group_to_string(self, EXPORT_DER);
 }
 
-/*  call-seq:
- *     group.to_text   => String
+/*
+ * call-seq:
+ *   group.to_text   => String
  *
- *  See the OpenSSL documentation for ECPKParameters_print()
+ * See the OpenSSL documentation for ECPKParameters_print()
  */
 static VALUE ossl_ec_group_to_text(VALUE self)
 {
@@ -1345,12 +1407,12 @@ static VALUE ossl_ec_point_alloc(VALUE klass)
 }
 
 /*
- *  call-seq:
- *     OpenSSL::PKey::EC::Point.new(point)
- *     OpenSSL::PKey::EC::Point.new(group)
- *     OpenSSL::PKey::EC::Point.new(group, bn)
+ * call-seq:
+ *   OpenSSL::PKey::EC::Point.new(point)
+ *   OpenSSL::PKey::EC::Point.new(group)
+ *   OpenSSL::PKey::EC::Point.new(group, bn)
  *
- *  See the OpenSSL documentation for EC_POINT_*
+ * See the OpenSSL documentation for EC_POINT_*
  */
 static VALUE ossl_ec_point_initialize(int argc, VALUE *argv, VALUE self)
 {
@@ -1449,10 +1511,9 @@ ossl_ec_point_initialize_copy(VALUE self, VALUE other)
 }
 
 /*
- *  call-seq:
- *     point1.eql?(point2) => true | false
- *     point1 == point2 => true | false
- *
+ * call-seq:
+ *   point1.eql?(point2) => true | false
+ *   point1 == point2 => true | false
  */
 static VALUE ossl_ec_point_eql(VALUE a, VALUE b)
 {
@@ -1475,9 +1536,8 @@ static VALUE ossl_ec_point_eql(VALUE a, VALUE b)
 }
 
 /*
- *  call-seq:
- *     point.infinity? => true | false
- *
+ * call-seq:
+ *   point.infinity? => true | false
  */
 static VALUE ossl_ec_point_is_at_infinity(VALUE self)
 {
@@ -1498,9 +1558,8 @@ static VALUE ossl_ec_point_is_at_infinity(VALUE self)
 }
 
 /*
- *  call-seq:
- *     point.on_curve? => true | false
- *
+ * call-seq:
+ *   point.on_curve? => true | false
  */
 static VALUE ossl_ec_point_is_on_curve(VALUE self)
 {
@@ -1521,9 +1580,8 @@ static VALUE ossl_ec_point_is_on_curve(VALUE self)
 }
 
 /*
- *  call-seq:
- *     point.make_affine! => self
- *
+ * call-seq:
+ *   point.make_affine! => self
  */
 static VALUE ossl_ec_point_make_affine(VALUE self)
 {
@@ -1541,9 +1599,8 @@ static VALUE ossl_ec_point_make_affine(VALUE self)
 }
 
 /*
- *  call-seq:
- *     point.invert! => self
- *
+ * call-seq:
+ *   point.invert! => self
  */
 static VALUE ossl_ec_point_invert(VALUE self)
 {
@@ -1561,9 +1618,8 @@ static VALUE ossl_ec_point_invert(VALUE self)
 }
 
 /*
- *  call-seq:
- *     point.set_to_infinity! => self
- *
+ * call-seq:
+ *   point.set_to_infinity! => self
  */
 static VALUE ossl_ec_point_set_to_infinity(VALUE self)
 {
@@ -1581,8 +1637,8 @@ static VALUE ossl_ec_point_set_to_infinity(VALUE self)
 }
 
 /*
- *  call-seq:
- *     point.to_bn   => OpenSSL::BN
+ * call-seq:
+ *   point.to_bn   => OpenSSL::BN
  *
  *  See the OpenSSL documentation for EC_POINT_point2bn()
  */
@@ -1610,9 +1666,9 @@ static VALUE ossl_ec_point_to_bn(VALUE self)
 }
 
 /*
- *  call-seq:
- *     point.mul(bn1 [, bn2]) => point
- *     point.mul(bns, points [, bn2]) => point
+ * call-seq:
+ *   point.mul(bn1 [, bn2]) => point
+ *   point.mul(bns, points [, bn2]) => point
  *
  * Performs elliptic curve point multiplication.
  *
@@ -1702,6 +1758,21 @@ void Init_ossl_ec(void)
 
     eECError = rb_define_class_under(mPKey, "ECError", ePKeyError);
 
+    /*
+     * Document-class: OpenSSL::PKey::EC
+     *
+     * OpenSSL::PKey::EC provides access to Elliptic Curve Digital Signature
+     * Algorithm (ECDSA) and Elliptic Curve Diffie-Hellman (ECDH).
+     *
+     * === Key exchange
+     *   ec1 = OpenSSL::PKey::EC.generate("prime256v1")
+     *   ec2 = OpenSSL::PKey::EC.generate("prime256v1")
+     *   # ec1 and ec2 have own private key respectively
+     *   shared_key1 = ec1.dh_compute_key(ec2.public_key)
+     *   shared_key2 = ec2.dh_compute_key(ec1.public_key)
+     *
+     *   p shared_key1 == shared_key2 #=> true
+     */
     cEC = rb_define_class_under(mPKey, "EC", cPKey);
     cEC_GROUP = rb_define_class_under(cEC, "Group", rb_cObject);
     cEC_POINT = rb_define_class_under(cEC, "Point", rb_cObject);
@@ -1719,7 +1790,10 @@ void Init_ossl_ec(void)
     ID_compressed = rb_intern("compressed");
     ID_hybrid = rb_intern("hybrid");
 
-    rb_define_const(cEC, "NAMED_CURVE", ULONG2NUM(OPENSSL_EC_NAMED_CURVE));
+    rb_define_const(cEC, "NAMED_CURVE", INT2NUM(OPENSSL_EC_NAMED_CURVE));
+#if defined(OPENSSL_EC_EXPLICIT_CURVE)
+    rb_define_const(cEC, "EXPLICIT_CURVE", INT2NUM(OPENSSL_EC_EXPLICIT_CURVE));
+#endif
 
     rb_define_singleton_method(cEC, "builtin_curves", ossl_s_builtin_curves, 0);
 
