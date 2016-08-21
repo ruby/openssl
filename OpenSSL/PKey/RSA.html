@@ -96,6 +96,12 @@
     
     <li ><a href="#method-i-public_key">#public_key</a>
     
+    <li ><a href="#method-i-set_crt_params">#set_crt_params</a>
+    
+    <li ><a href="#method-i-set_factors">#set_factors</a>
+    
+    <li ><a href="#method-i-set_key">#set_key</a>
+    
     <li ><a href="#method-i-to_der">#to_der</a>
     
     <li ><a href="#method-i-to_pem">#to_pem</a>
@@ -945,6 +951,92 @@ ossl_rsa_to_public_key(VALUE self)
     return obj;
 }</pre>
           </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-set_crt_params" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            set_crt_params(dmp1, dmq1, iqmp) &rarr; self
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Sets <code>dmp1</code>, <code>dmq1</code>, <code>iqmp</code> for the <a
+href="RSA.html">RSA</a> instance. They are calculated by <code>d mod (p -
+1)</code>, <code>d mod (q - 1)</code> and <code>q^(-1) mod p</code>
+respectively.</p>
+          
+          
+
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-set_factors" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            set_factors(p, q) &rarr; self
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Sets <code>p</code>, <code>q</code> for the <a href="RSA.html">RSA</a>
+instance.</p>
+          
+          
+
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-set_key" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            set_key(n, e, d) &rarr; self
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Sets <code>n</code>, <code>e</code>, <code>d</code> for the <a
+href="RSA.html">RSA</a> instance.</p>
+          
+          
+
           
         </div>
 

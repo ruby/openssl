@@ -145,7 +145,7 @@
         
         <div class="method-heading">
           <span class="method-callseq">
-            OpenSSL::PKey::EC::Group.new(&quot;secp112r1&quot;)
+            OpenSSL::PKey::EC::Group.new(ec_group)
           </span>
           
           <span class="method-click-advice">click to toggle source</span>
@@ -154,63 +154,14 @@
         
         <div class="method-heading">
           <span class="method-callseq">
-            OpenSSL::PKey::EC::Group.new(ec_group)
+            OpenSSL::PKey::EC::Group.new(pem_or_der_encoded)
           </span>
           
         </div>
         
         <div class="method-heading">
           <span class="method-callseq">
-            OpenSSL::PKey::EC::Group.new(pem_string)
-          </span>
-          
-        </div>
-        
-        <div class="method-heading">
-          <span class="method-callseq">
-            OpenSSL::PKey::EC::Group.new(der_string)
-          </span>
-          
-        </div>
-        
-        <div class="method-heading">
-          <span class="method-callseq">
-            OpenSSL::PKey::EC::Group.new(pem_file)
-          </span>
-          
-        </div>
-        
-        <div class="method-heading">
-          <span class="method-callseq">
-            OpenSSL::PKey::EC::Group.new(der_file)
-          </span>
-          
-        </div>
-        
-        <div class="method-heading">
-          <span class="method-callseq">
-            OpenSSL::PKey::EC::Group.new(:GFp_simple)
-          </span>
-          
-        </div>
-        
-        <div class="method-heading">
-          <span class="method-callseq">
-            OpenSSL::PKey::EC::Group.new(:GFp_mult)
-          </span>
-          
-        </div>
-        
-        <div class="method-heading">
-          <span class="method-callseq">
-            OpenSSL::PKey::EC::Group.new(:GFp_nist)
-          </span>
-          
-        </div>
-        
-        <div class="method-heading">
-          <span class="method-callseq">
-            OpenSSL::PKey::EC::Group.new(:GF2m_simple)
+            OpenSSL::PKey::EC::Group.new(ec_method)
           </span>
           
         </div>
@@ -233,8 +184,22 @@
 
         <div class="method-description">
           
-          <p>See the <a href="../../../OpenSSL.html">OpenSSL</a> documentation for
-EC_GROUP_*</p>
+          <p>Creates a new <a href="Group.html">EC::Group</a> object.</p>
+
+<p><code>ec_method</code> is a symbol that represents an EC_METHOD. Currently
+the following are supported:</p>
+<ul><li>
+<p>:GFp_simple</p>
+</li><li>
+<p>:GFp_mont</p>
+</li><li>
+<p>:GFp_nist</p>
+</li><li>
+<p>:GF2m_simple</p>
+</li></ul>
+
+<p>If the first argument is :GFp or :GF2m, creates a new curve with given
+parameters.</p>
           
           
 
@@ -396,7 +361,7 @@ EC_GROUP_*</p>
         
         <div class="method-heading">
           <span class="method-callseq">
-            asn1_flag  &rarr; Fixnum
+            asn1_flag &rarr; Integer
           </span>
           
           <span class="method-click-advice">click to toggle source</span>
@@ -407,8 +372,9 @@ EC_GROUP_*</p>
 
         <div class="method-description">
           
-          <p>See the <a href="../../../OpenSSL.html">OpenSSL</a> documentation for
-EC_GROUP_get_asn1_flag()</p>
+          <p>Returns the flags set on the group.</p>
+
+<p>See also <a href="Group.html#method-i-asn1_flag-3D">asn1_flag=</a>.</p>
           
           
 
@@ -440,7 +406,7 @@ EC_GROUP_get_asn1_flag()</p>
         
         <div class="method-heading">
           <span class="method-callseq">
-            asn1_flag = Fixnum   &rarr; Fixnum
+            asn1_flag = flags
           </span>
           
           <span class="method-click-advice">click to toggle source</span>
@@ -451,8 +417,18 @@ EC_GROUP_get_asn1_flag()</p>
 
         <div class="method-description">
           
-          <p>See the <a href="../../../OpenSSL.html">OpenSSL</a> documentation for
-EC_GROUP_set_asn1_flag()</p>
+          <p>Sets flags on the group. The flag value is used to determine how to encode
+the group: encode explicit parameters or named curve using an OID.</p>
+
+<p>The flag value can be either of:</p>
+<ul><li>
+<p>EC::NAMED_CURVE</p>
+</li><li>
+<p>EC::EXPLICIT_CURVE</p>
+</li></ul>
+
+<p>See the <a href="../../../OpenSSL.html">OpenSSL</a> documentation for
+EC_GROUP_set_asn1_flag().</p>
           
           
 
@@ -494,7 +470,9 @@ EC_GROUP_set_asn1_flag()</p>
 
         <div class="method-description">
           
-          <p>See the <a href="../../../OpenSSL.html">OpenSSL</a> documentation for
+          <p>Returns the cofactor of the group.</p>
+
+<p>See the <a href="../../../OpenSSL.html">OpenSSL</a> documentation for
 EC_GROUP_get_cofactor()</p>
           
           
@@ -543,7 +521,9 @@ EC_GROUP_get_cofactor()</p>
 
         <div class="method-description">
           
-          <p>See the <a href="../../../OpenSSL.html">OpenSSL</a> documentation for
+          <p>Returns the curve name (sn).</p>
+
+<p>See the <a href="../../../OpenSSL.html">OpenSSL</a> documentation for
 EC_GROUP_get_curve_name()</p>
           
           
@@ -638,7 +618,8 @@ EC_GROUP_get_degree()</p>
 
         <div class="method-description">
           
-          
+          <p>Returns true if the two groups use the same curve and have the same
+parameters, false otherwise.</p>
           
           
 
@@ -686,7 +667,9 @@ EC_GROUP_get_degree()</p>
 
         <div class="method-description">
           
-          <p>See the <a href="../../../OpenSSL.html">OpenSSL</a> documentation for
+          <p>Returns the generator of the group.</p>
+
+<p>See the <a href="../../../OpenSSL.html">OpenSSL</a> documentation for
 EC_GROUP_get0_generator()</p>
           
           
@@ -730,7 +713,9 @@ EC_GROUP_get0_generator()</p>
 
         <div class="method-description">
           
-          <p>See the <a href="../../../OpenSSL.html">OpenSSL</a> documentation for
+          <p>Returns the order of the group.</p>
+
+<p>See the <a href="../../../OpenSSL.html">OpenSSL</a> documentation for
 EC_GROUP_get_order()</p>
           
           
@@ -768,7 +753,7 @@ EC_GROUP_get_order()</p>
         
         <div class="method-heading">
           <span class="method-callseq">
-            point_conversion_form  &rarr; :uncompressed | :compressed | :hybrid
+            point_conversion_form &rarr; Symbol
           </span>
           
           <span class="method-click-advice">click to toggle source</span>
@@ -779,8 +764,11 @@ EC_GROUP_get_order()</p>
 
         <div class="method-description">
           
-          <p>See the <a href="../../../OpenSSL.html">OpenSSL</a> documentation for
-EC_GROUP_get_point_conversion_form()</p>
+          <p>Returns the form how <a href="Point.html">EC::Point</a> data is encoded as
+ASN.1.</p>
+
+<p>See also <a
+href="Group.html#method-i-point_conversion_form-3D">point_conversion_form=</a>.</p>
           
           
 
@@ -820,7 +808,7 @@ EC_GROUP_get_point_conversion_form()</p>
         
         <div class="method-heading">
           <span class="method-callseq">
-            point_conversion_form = form &rarr; form
+            point_conversion_form = form
           </span>
           
           <span class="method-click-advice">click to toggle source</span>
@@ -831,7 +819,24 @@ EC_GROUP_get_point_conversion_form()</p>
 
         <div class="method-description">
           
-          <p>See the <a href="../../../OpenSSL.html">OpenSSL</a> documentation for
+          <p>Sets the form how <a href="Point.html">EC::Point</a> data is encoded as
+ASN.1 as defined in X9.62.</p>
+
+<p><code>format</code> can be one of these:</p>
+<dl class="rdoc-list note-list"><dt>:compressed
+<dd>
+<p>Encoded as z||x, where z is an octet indicating which solution of the
+equation y is. z will be 0x02 or 0x03.</p>
+</dd><dt>:uncompressed
+<dd>
+<p>Encoded as z||x||y, where z is an octet 0x04.</p>
+</dd><dt>:hybrid
+<dd>
+<p>Encodes as z||x||y, where z is an octet indicating which solution of the
+equation y is. z will be 0x06 or 0x07.</p>
+</dd></dl>
+
+<p>See the <a href="../../../OpenSSL.html">OpenSSL</a> documentation for
 EC_GROUP_set_point_conversion_form()</p>
           
           
@@ -978,7 +983,11 @@ EC_GROUP_set_seed()</p>
 
         <div class="method-description">
           
-          <p>See the <a href="../../../OpenSSL.html">OpenSSL</a> documentation for
+          <p>Sets the curve parameters. <code>generator</code> must be an instance of <a
+href="Point.html">EC::Point</a> that is on the curve. <code>order</code>
+and <code>cofactor</code> are integers.</p>
+
+<p>See the <a href="../../../OpenSSL.html">OpenSSL</a> documentation for
 EC_GROUP_set_generator()</p>
           
           

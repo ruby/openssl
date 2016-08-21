@@ -84,6 +84,10 @@
     
     <li ><a href="#method-i-public_key">#public_key</a>
     
+    <li ><a href="#method-i-set_key">#set_key</a>
+    
+    <li ><a href="#method-i-set_pqg">#set_pqg</a>
+    
     <li ><a href="#method-i-syssign">#syssign</a>
     
     <li ><a href="#method-i-sysverify">#sysverify</a>
@@ -197,10 +201,24 @@ ossl_dsa_s_generate(VALUE klass, VALUE size)
         
         <div class="method-heading">
           <span class="method-callseq">
-            new([size | string [, pass]) &rarr; dsa
+            new &rarr; dsa
           </span>
           
           <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            new(size) &rarr; dsa
+          </span>
+          
+        </div>
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            new(string [, pass]) &rarr; dsa
+          </span>
           
         </div>
         
@@ -593,6 +611,62 @@ ossl_dsa_to_public_key(VALUE self)
     return obj;
 }</pre>
           </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-set_key" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            set_key(pub_key, priv_key) &rarr; self
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Sets <code>pub_key</code> and <code>priv_key</code> for the <a
+href="DSA.html">DSA</a> instance. <code>priv_key</code> may be nil.</p>
+          
+          
+
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-set_pqg" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            set_pqg(p, q, g) &rarr; self
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Sets <code>p</code>, <code>q</code>, <code>g</code> for the <a
+href="DSA.html">DSA</a> instance.</p>
+          
+          
+
           
         </div>
 

@@ -229,9 +229,19 @@
   </li>
   <li class="class">
     <a href="OpenSSL/HMAC.html">OpenSSL::HMAC</a>
+
+    <ul>
+      <li><a href="OpenSSL/HMAC.html#label-HMAC-SHA256+using+one-shot+interface">HMAC-SHA256 using one-shot interface</a>
+      <li><a href="OpenSSL/HMAC.html#label-HMAC-SHA256+using+incremental+interface">HMAC-SHA256 using incremental interface</a>
+    </ul>
   </li>
   <li class="class">
     <a href="OpenSSL/HMACError.html">OpenSSL::HMACError</a>
+
+    <ul>
+      <li><a href="OpenSSL/HMACError.html#label-HMAC-SHA256+using+one-shot+interface">HMAC-SHA256 using one-shot interface</a>
+      <li><a href="OpenSSL/HMACError.html#label-HMAC-SHA256+using+incremental+interface">HMAC-SHA256 using incremental interface</a>
+    </ul>
   </li>
   <li class="module">
     <a href="OpenSSL/Netscape.html">OpenSSL::Netscape</a>
@@ -335,6 +345,10 @@
   </li>
   <li class="class">
     <a href="OpenSSL/PKey/EC.html">OpenSSL::PKey::EC</a>
+
+    <ul>
+      <li><a href="OpenSSL/PKey/EC.html#label-Key+exchange">Key exchange</a>
+    </ul>
   </li>
   <li class="class">
     <a href="OpenSSL/PKey/EC/Group.html">OpenSSL::PKey::EC::Group</a>
@@ -734,11 +748,6 @@
     <span class="container">OpenSSL::PKey::RSA</span>
 
   <li class="method">
-    <a href="OpenSSL/SSL/SSLContext.html#method-c-new">::new</a>
-    &mdash;
-    <span class="container">OpenSSL::SSL::SSLContext</span>
-
-  <li class="method">
     <a href="OpenSSL/SSL/SSLSocket.html#method-c-new">::new</a>
     &mdash;
     <span class="container">OpenSSL::SSL::SSLSocket</span>
@@ -792,6 +801,11 @@
     <a href="OpenSSL/X509/Store.html#method-c-new">::new</a>
     &mdash;
     <span class="container">OpenSSL::X509::Store</span>
+
+  <li class="method">
+    <a href="OpenSSL/X509/StoreContext.html#method-c-new">::new</a>
+    &mdash;
+    <span class="container">OpenSSL::X509::StoreContext</span>
 
   <li class="method">
     <a href="OpenSSL/SSL/SSLServer.html#method-c-new">::new</a>
@@ -1194,6 +1208,11 @@
     <span class="container">OpenSSL::Digest</span>
 
   <li class="method">
+    <a href="OpenSSL/Cipher.html#method-i-block_size">#block_size</a>
+    &mdash;
+    <span class="container">OpenSSL::Cipher</span>
+
+  <li class="method">
     <a href="OpenSSL/SSL/SSLSocket.html#method-i-cert">#cert</a>
     &mdash;
     <span class="container">OpenSSL::SSL::SSLSocket</span>
@@ -1222,6 +1241,11 @@
     <a href="OpenSSL/PKCS7.html#method-i-certificates-3D">#certificates=</a>
     &mdash;
     <span class="container">OpenSSL::PKCS7</span>
+
+  <li class="method">
+    <a href="OpenSSL/X509/StoreContext.html#method-i-chain">#chain</a>
+    &mdash;
+    <span class="container">OpenSSL::X509::StoreContext</span>
 
   <li class="method">
     <a href="OpenSSL/Netscape/SPKI.html#method-i-challenge">#challenge</a>
@@ -1424,6 +1448,16 @@
     <span class="container">OpenSSL::Engine</span>
 
   <li class="method">
+    <a href="OpenSSL/X509/StoreContext.html#method-i-current_cert">#current_cert</a>
+    &mdash;
+    <span class="container">OpenSSL::X509::StoreContext</span>
+
+  <li class="method">
+    <a href="OpenSSL/X509/StoreContext.html#method-i-current_crl">#current_crl</a>
+    &mdash;
+    <span class="container">OpenSSL::X509::StoreContext</span>
+
+  <li class="method">
     <a href="OpenSSL/PKey/EC/Group.html#method-i-curve_name">#curve_name</a>
     &mdash;
     <span class="container">OpenSSL::PKey::EC::Group</span>
@@ -1569,6 +1603,26 @@
     <span class="container">OpenSSL::X509::Name</span>
 
   <li class="method">
+    <a href="OpenSSL/X509/StoreContext.html#method-i-error">#error</a>
+    &mdash;
+    <span class="container">OpenSSL::X509::StoreContext</span>
+
+  <li class="method">
+    <a href="OpenSSL/X509/StoreContext.html#method-i-error-3D">#error=</a>
+    &mdash;
+    <span class="container">OpenSSL::X509::StoreContext</span>
+
+  <li class="method">
+    <a href="OpenSSL/X509/StoreContext.html#method-i-error_depth">#error_depth</a>
+    &mdash;
+    <span class="container">OpenSSL::X509::StoreContext</span>
+
+  <li class="method">
+    <a href="OpenSSL/X509/StoreContext.html#method-i-error_string">#error_string</a>
+    &mdash;
+    <span class="container">OpenSSL::X509::StoreContext</span>
+
+  <li class="method">
     <a href="OpenSSL/X509/Name/RFC2253DN.html#method-i-expand_hexstring">#expand_hexstring</a>
     &mdash;
     <span class="container">OpenSSL::X509::Name::RFC2253DN</span>
@@ -1662,6 +1716,11 @@
     <a href="OpenSSL/X509/Store.html#method-i-flags-3D">#flags=</a>
     &mdash;
     <span class="container">OpenSSL::X509::Store</span>
+
+  <li class="method">
+    <a href="OpenSSL/X509/StoreContext.html#method-i-flags-3D">#flags=</a>
+    &mdash;
+    <span class="container">OpenSSL::X509::StoreContext</span>
 
   <li class="method">
     <a href="OpenSSL/Buffering.html#method-i-flush">#flush</a>
@@ -1860,6 +1919,11 @@
 
   <li class="method">
     <a href="OpenSSL/Cipher.html#method-i-key-3D">#key=</a>
+    &mdash;
+    <span class="container">OpenSSL::Cipher</span>
+
+  <li class="method">
+    <a href="OpenSSL/Cipher.html#method-i-key_len">#key_len</a>
     &mdash;
     <span class="container">OpenSSL::Cipher</span>
 
@@ -2314,6 +2378,11 @@
     <span class="container">OpenSSL::X509::Store</span>
 
   <li class="method">
+    <a href="OpenSSL/X509/StoreContext.html#method-i-purpose-3D">#purpose=</a>
+    &mdash;
+    <span class="container">OpenSSL::X509::StoreContext</span>
+
+  <li class="method">
     <a href="OpenSSL/Buffering.html#method-i-puts">#puts</a>
     &mdash;
     <span class="container">OpenSSL::Buffering</span>
@@ -2529,6 +2598,11 @@
     <span class="container">OpenSSL::BN</span>
 
   <li class="method">
+    <a href="OpenSSL/PKey/RSA.html#method-i-set_crt_params">#set_crt_params</a>
+    &mdash;
+    <span class="container">OpenSSL::PKey::RSA</span>
+
+  <li class="method">
     <a href="OpenSSL/Engine.html#method-i-set_default">#set_default</a>
     &mdash;
     <span class="container">OpenSSL::Engine</span>
@@ -2539,14 +2613,39 @@
     <span class="container">OpenSSL::X509::Store</span>
 
   <li class="method">
+    <a href="OpenSSL/PKey/RSA.html#method-i-set_factors">#set_factors</a>
+    &mdash;
+    <span class="container">OpenSSL::PKey::RSA</span>
+
+  <li class="method">
     <a href="OpenSSL/PKey/EC/Group.html#method-i-set_generator">#set_generator</a>
     &mdash;
     <span class="container">OpenSSL::PKey::EC::Group</span>
 
   <li class="method">
-    <a href="OpenSSL/SSL/SSLContext.html#method-i-set_params">#set_params</a>
+    <a href="OpenSSL/PKey/DH.html#method-i-set_key">#set_key</a>
     &mdash;
-    <span class="container">OpenSSL::SSL::SSLContext</span>
+    <span class="container">OpenSSL::PKey::DH</span>
+
+  <li class="method">
+    <a href="OpenSSL/PKey/DSA.html#method-i-set_key">#set_key</a>
+    &mdash;
+    <span class="container">OpenSSL::PKey::DSA</span>
+
+  <li class="method">
+    <a href="OpenSSL/PKey/RSA.html#method-i-set_key">#set_key</a>
+    &mdash;
+    <span class="container">OpenSSL::PKey::RSA</span>
+
+  <li class="method">
+    <a href="OpenSSL/PKey/DH.html#method-i-set_pqg">#set_pqg</a>
+    &mdash;
+    <span class="container">OpenSSL::PKey::DH</span>
+
+  <li class="method">
+    <a href="OpenSSL/PKey/DSA.html#method-i-set_pqg">#set_pqg</a>
+    &mdash;
+    <span class="container">OpenSSL::PKey::DSA</span>
 
   <li class="method">
     <a href="OpenSSL/PKey/EC/Point.html#method-i-set_to_infinity-21">#set_to_infinity!</a>
@@ -2757,6 +2856,11 @@
     <a href="OpenSSL/X509/Store.html#method-i-time-3D">#time=</a>
     &mdash;
     <span class="container">OpenSSL::X509::Store</span>
+
+  <li class="method">
+    <a href="OpenSSL/X509/StoreContext.html#method-i-time-3D">#time=</a>
+    &mdash;
+    <span class="container">OpenSSL::X509::StoreContext</span>
 
   <li class="method">
     <a href="OpenSSL/SSL/Session.html#method-i-timeout">#timeout</a>
@@ -3109,6 +3213,11 @@
     <span class="container">OpenSSL::X509::Store</span>
 
   <li class="method">
+    <a href="OpenSSL/X509/StoreContext.html#method-i-trust-3D">#trust=</a>
+    &mdash;
+    <span class="container">OpenSSL::X509::StoreContext</span>
+
+  <li class="method">
     <a href="OpenSSL/PKCS7.html#method-i-type">#type</a>
     &mdash;
     <span class="container">OpenSSL::PKCS7</span>
@@ -3207,6 +3316,11 @@
     <a href="OpenSSL/X509/Store.html#method-i-verify">#verify</a>
     &mdash;
     <span class="container">OpenSSL::X509::Store</span>
+
+  <li class="method">
+    <a href="OpenSSL/X509/StoreContext.html#method-i-verify">#verify</a>
+    &mdash;
+    <span class="container">OpenSSL::X509::StoreContext</span>
 
   <li class="method">
     <a href="OpenSSL/X509/Store.html#method-i-verify_callback-3D">#verify_callback=</a>

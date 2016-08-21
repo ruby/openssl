@@ -129,6 +129,21 @@
 
   <section class="description">
     
+<p><a href="EC.html">OpenSSL::PKey::EC</a> provides access to Elliptic Curve
+Digital Signature Algorithm (ECDSA) and Elliptic Curve Diffie-Hellman
+(ECDH).</p>
+
+<h3 id="class-OpenSSL::PKey::EC-label-Key+exchange">Key exchange<span><a href="#class-OpenSSL::PKey::EC-label-Key+exchange">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby"><span class="ruby-identifier">ec1</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">EC</span>.<span class="ruby-identifier">generate</span>(<span class="ruby-string">&quot;prime256v1&quot;</span>)
+<span class="ruby-identifier">ec2</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">EC</span>.<span class="ruby-identifier">generate</span>(<span class="ruby-string">&quot;prime256v1&quot;</span>)
+<span class="ruby-comment"># ec1 and ec2 have own private key respectively</span>
+<span class="ruby-identifier">shared_key1</span> = <span class="ruby-identifier">ec1</span>.<span class="ruby-identifier">dh_compute_key</span>(<span class="ruby-identifier">ec2</span>.<span class="ruby-identifier">public_key</span>)
+<span class="ruby-identifier">shared_key2</span> = <span class="ruby-identifier">ec2</span>.<span class="ruby-identifier">dh_compute_key</span>(<span class="ruby-identifier">ec1</span>.<span class="ruby-identifier">public_key</span>)
+
+<span class="ruby-identifier">p</span> <span class="ruby-identifier">shared_key1</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">shared_key2</span> <span class="ruby-comment">#=&gt; true</span>
+</pre>
+
   </section>
 
   
@@ -145,6 +160,11 @@
         <h3>Constants</h3>
       </header>
       <dl>
+      
+        <dt id="EXPLICIT_CURVE">EXPLICIT_CURVE
+        
+        <dd>
+        
       
         <dt id="NAMED_CURVE">NAMED_CURVE
         
@@ -169,7 +189,7 @@
         
         <div class="method-heading">
           <span class="method-callseq">
-            builtin_curves &rarr; [[name, comment], ...]
+            builtin_curves &rarr; [[sn, comment], ...]
           </span>
           
           <span class="method-click-advice">click to toggle source</span>
@@ -180,8 +200,11 @@
 
         <div class="method-description">
           
-          <p>See the <a href="../../OpenSSL.html">OpenSSL</a> documentation for
-EC_builtin_curves()</p>
+          <p>Obtains a list of all predefined curves by the <a
+href="../../OpenSSL.html">OpenSSL</a>. Curve names are returned as sn.</p>
+
+<p>See the <a href="../../OpenSSL.html">OpenSSL</a> documentation for
+EC_get_builtin_curves().</p>
           
           
 
@@ -288,7 +311,7 @@ ossl_ec_key_s_generate(VALUE klass, VALUE arg)
         
         <div class="method-heading">
           <span class="method-callseq">
-            OpenSSL::PKey::EC.new()
+            OpenSSL::PKey::EC.new
           </span>
           
           <span class="method-click-advice">click to toggle source</span>
@@ -318,13 +341,6 @@ ossl_ec_key_s_generate(VALUE klass, VALUE arg)
         
         <div class="method-heading">
           <span class="method-callseq">
-            OpenSSL::PKey::EC.new(pem_string)
-          </span>
-          
-        </div>
-        
-        <div class="method-heading">
-          <span class="method-callseq">
             OpenSSL::PKey::EC.new(pem_string [, pwd])
           </span>
           
@@ -341,9 +357,7 @@ ossl_ec_key_s_generate(VALUE klass, VALUE arg)
 
         <div class="method-description">
           
-          <p>See the <a href="../../OpenSSL.html">OpenSSL</a> documentation for:</p>
-
-<pre>EC_KEY_*</pre>
+          <p>Creates a new <a href="EC.html">EC</a> object from given arguments.</p>
           
           
 

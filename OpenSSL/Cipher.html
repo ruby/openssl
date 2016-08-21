@@ -97,6 +97,8 @@
     
     <li ><a href="#method-i-authenticated-3F">#authenticated?</a>
     
+    <li ><a href="#method-i-block_size">#block_size</a>
+    
     <li ><a href="#method-i-decrypt">#decrypt</a>
     
     <li ><a href="#method-i-encrypt">#encrypt</a>
@@ -110,6 +112,8 @@
     <li ><a href="#method-i-iv_len-3D">#iv_len=</a>
     
     <li ><a href="#method-i-key-3D">#key=</a>
+    
+    <li ><a href="#method-i-key_len">#key_len</a>
     
     <li ><a href="#method-i-key_len-3D">#key_len=</a>
     
@@ -738,6 +742,48 @@ ossl_cipher_is_authenticated(VALUE self)
       </div>
 
     
+      <div id="method-i-block_size" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            block_size &rarr; integer
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Returns the size in bytes of the blocks on which this <a
+href="Cipher/Cipher.html">Cipher</a> operates on.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="block_size-source">
+            <pre>static VALUE
+ossl_cipher_block_size(VALUE self)
+{
+    EVP_CIPHER_CTX *ctx;
+
+    GetCipher(self, ctx);
+
+    return INT2NUM(EVP_CIPHER_CTX_block_size(ctx));
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
       <div id="method-i-decrypt" class="method-detail ">
         
         
@@ -759,7 +805,7 @@ ossl_cipher_is_authenticated(VALUE self)
 <p>Make sure to call <a href="Cipher.html#method-i-encrypt">#encrypt</a> or <a
 href="Cipher.html#method-i-decrypt">#decrypt</a> before using any of the
 following methods:</p>
-<ul><li><dl class="rdoc-list label-list"><dt>key=, iv=, <a href="Cipher.html#method-i-random_key">#random_key</a>, <a href="Cipher.html#method-i-random_iv">#random_iv</a>, <a href="Cipher.html#method-i-pkcs5_keyivgen">#pkcs5_keyivgen</a>
+<ul><li><dl class="rdoc-list label-list"><dt><a href="Cipher.html#method-i-key-3D">key=</a>, <a href="Cipher.html#method-i-iv-3D">iv=</a>, <a href="Cipher.html#method-i-random_key">random_key</a>, <a href="Cipher.html#method-i-random_iv">random_iv</a>, <a href="Cipher.html#method-i-pkcs5_keyivgen">pkcs5_keyivgen</a>
 <dd></dd></dl>
 </li></ul>
 
@@ -805,7 +851,7 @@ ossl_cipher_decrypt(int argc, VALUE *argv, VALUE self)
 <p>Make sure to call <a href="Cipher.html#method-i-encrypt">#encrypt</a> or <a
 href="Cipher.html#method-i-decrypt">#decrypt</a> before using any of the
 following methods:</p>
-<ul><li><dl class="rdoc-list label-list"><dt>key=, iv=, <a href="Cipher.html#method-i-random_key">#random_key</a>, <a href="Cipher.html#method-i-random_iv">#random_iv</a>, <a href="Cipher.html#method-i-pkcs5_keyivgen">#pkcs5_keyivgen</a>
+<ul><li><dl class="rdoc-list label-list"><dt><a href="Cipher.html#method-i-key-3D">key=</a>, <a href="Cipher.html#method-i-iv-3D">iv=</a>, <a href="Cipher.html#method-i-random_key">random_key</a>, <a href="Cipher.html#method-i-random_iv">random_iv</a>, <a href="Cipher.html#method-i-pkcs5_keyivgen">pkcs5_keyivgen</a>
 <dd></dd></dl>
 </li></ul>
 
@@ -1119,6 +1165,48 @@ ossl_cipher_set_key(VALUE self, VALUE key)
       </div>
 
     
+      <div id="method-i-key_len" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            key_len &rarr; integer
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Returns the key length in bytes of the <a
+href="Cipher/Cipher.html">Cipher</a>.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="key_len-source">
+            <pre>static VALUE
+ossl_cipher_key_length(VALUE self)
+{
+    EVP_CIPHER_CTX *ctx;
+
+    GetCipher(self, ctx);
+
+    return INT2NUM(EVP_CIPHER_CTX_key_length(ctx));
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
       <div id="method-i-key_len-3D" class="method-detail ">
         
         
@@ -1266,7 +1354,7 @@ ossl_cipher_set_padding(VALUE self, VALUE padding)
         
         <div class="method-heading">
           <span class="method-callseq">
-            pkcs5_keyivgen(pass [, salt [, iterations [, digest]]] ) &rarr; nil
+            pkcs5_keyivgen(pass, salt = nil, iterations = 2048, digest = &quot;MD5&quot;) &rarr; nil
           </span>
           
           <span class="method-click-advice">click to toggle source</span>
@@ -1279,20 +1367,23 @@ ossl_cipher_set_padding(VALUE self, VALUE padding)
           
           <p>Generates and sets the key/IV based on a password.</p>
 
-<p>WARNING: This method is only <a href="PKCS5.html">PKCS5</a> v1.5 compliant
-when using RC2, RC4-40, or DES with MD5 or SHA1. Using anything else (like
-AES) will generate the key/iv using an <a
-href="../OpenSSL.html">OpenSSL</a> specific method. This method is
-deprecated and should no longer be used. Use a <a
+<p><strong>WARNING</strong>: This method is only <a
+href="PKCS5.html">PKCS5</a> v1.5 compliant when using RC2, RC4-40, or DES
+with MD5 or SHA1. Using anything else (like AES) will generate the key/iv
+using an <a href="../OpenSSL.html">OpenSSL</a> specific method. This method
+is deprecated and should no longer be used. Use a <a
 href="PKCS5.html">PKCS5</a> v2 key generation method from <a
 href="PKCS5.html">OpenSSL::PKCS5</a> instead.</p>
 
 <h3 id="method-i-pkcs5_keyivgen-label-Parameters">Parameters<span><a href="#method-i-pkcs5_keyivgen-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
-
-<p><code>salt</code> must be an 8 byte string if provided.
-<code>iterations</code> is a integer with a default of 2048.
-<code>digest</code> is a <a href="Digest.html">Digest</a> object that
+<ul><li>
+<p><code>salt</code> must be an 8 byte string if provided.</p>
+</li><li>
+<p><code>iterations</code> is a integer with a default of 2048.</p>
+</li><li>
+<p><code>digest</code> is a <a href="Digest.html">Digest</a> object that
 defaults to &#39;MD5&#39;</p>
+</li></ul>
 
 <p>A minimum of 1000 iterations is recommended.</p>
           
@@ -1341,29 +1432,35 @@ ossl_cipher_pkcs5_keyivgen(int argc, VALUE *argv, VALUE self)
     
       <div id="method-i-random_iv" class="method-detail ">
         
+        
         <div class="method-heading">
-          <span class="method-name">random_iv</span><span
-            class="method-args">()</span>
+          <span class="method-callseq">
+            random_iv &rarr; iv
+          </span>
           
           <span class="method-click-advice">click to toggle source</span>
           
         </div>
         
+        
 
         <div class="method-description">
           
-          <p>Generate, set, and return a random iv. You must call cipher.encrypt or
-cipher.decrypt before calling this method.</p>
+          <p>Generate a random IV with <a
+href="Random.html#method-c-random_bytes">OpenSSL::Random.random_bytes</a>
+and sets it to the cipher, and returns it.</p>
+
+<p>You must call <a href="Cipher.html#method-i-encrypt">encrypt</a> or <a
+href="Cipher.html#method-i-decrypt">decrypt</a> before calling this method.</p>
           
           
 
           
           <div class="method-source-code" id="random_iv-source">
-            <pre><span class="ruby-comment"># File lib/openssl/cipher.rb, line 46</span>
+            <pre><span class="ruby-comment"># File lib/openssl/cipher.rb, line 55</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">random_iv</span>
   <span class="ruby-identifier">str</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Random</span>.<span class="ruby-identifier">random_bytes</span>(<span class="ruby-keyword">self</span>.<span class="ruby-identifier">iv_len</span>)
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">iv</span> = <span class="ruby-identifier">str</span>
-  <span class="ruby-keyword">return</span> <span class="ruby-identifier">str</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -1377,29 +1474,35 @@ cipher.decrypt before calling this method.</p>
     
       <div id="method-i-random_key" class="method-detail ">
         
+        
         <div class="method-heading">
-          <span class="method-name">random_key</span><span
-            class="method-args">()</span>
+          <span class="method-callseq">
+            random_key &rarr; key
+          </span>
           
           <span class="method-click-advice">click to toggle source</span>
           
         </div>
         
+        
 
         <div class="method-description">
           
-          <p>Generate, set, and return a random key. You must call cipher.encrypt or
-cipher.decrypt before calling this method.</p>
+          <p>Generate a random key with <a
+href="Random.html#method-c-random_bytes">OpenSSL::Random.random_bytes</a>
+and sets it to the cipher, and returns it.</p>
+
+<p>You must call <a href="Cipher.html#method-i-encrypt">encrypt</a> or <a
+href="Cipher.html#method-i-decrypt">decrypt</a> before calling this method.</p>
           
           
 
           
           <div class="method-source-code" id="random_key-source">
-            <pre><span class="ruby-comment"># File lib/openssl/cipher.rb, line 38</span>
+            <pre><span class="ruby-comment"># File lib/openssl/cipher.rb, line 43</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">random_key</span>
   <span class="ruby-identifier">str</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Random</span>.<span class="ruby-identifier">random_bytes</span>(<span class="ruby-keyword">self</span>.<span class="ruby-identifier">key_len</span>)
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">key</span> = <span class="ruby-identifier">str</span>
-  <span class="ruby-keyword">return</span> <span class="ruby-identifier">str</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -1481,10 +1584,8 @@ encrypted data chunk. When done, the output of <a
 href="Cipher.html#method-i-final">#final</a> should be additionally added
 to the result.</p>
 
-<h3 id="method-i-update-label-Parameters">Parameters<span><a href="#method-i-update-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
-
-<p><code>data</code> is a nonempty string. <code>buffer</code> is an optional
-string to store the result.</p>
+<p>If <code>buffer</code> is given, the encryption/decryption result will be
+written to it. <code>buffer</code> will be resized automatically.</p>
           
           
 

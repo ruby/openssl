@@ -129,10 +129,17 @@
         
         <div class="method-heading">
           <span class="method-callseq">
-            new(SSLSocket | string) &rarr; session
+            new(ssl_socket) &rarr; Session
           </span>
           
           <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            new(string) &rarr; Session
+          </span>
           
         </div>
         
@@ -140,11 +147,8 @@
 
         <div class="method-description">
           
-          <h3 id="method-c-new-label-Parameters">Parameters<span><a href="#method-c-new-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
-
-<p><code>SSLSocket</code> is an <a
-href="SSLSocket.html">OpenSSL::SSL::SSLSocket</a> <code>string</code> must
-be a DER or PEM encoded <a href="Session.html">Session</a>.</p>
+          <p>Creates a new <a href="Session.html">Session</a> object from an instance of
+<a href="SSLSocket.html">SSLSocket</a> or DER/PEM encoded String.</p>
           
           
 
@@ -222,7 +226,8 @@ be a DER or PEM encoded <a href="Session.html">Session</a>.</p>
 
         <div class="method-description">
           
-          
+          <p>Returns true if the two <a href="Session.html">Session</a> is the same,
+false if not.</p>
           
           
 
@@ -255,7 +260,7 @@ be a DER or PEM encoded <a href="Session.html">Session</a>.</p>
         
         <div class="method-heading">
           <span class="method-callseq">
-            id &rarr; aString
+            id &rarr; String
           </span>
           
           <span class="method-click-advice">click to toggle source</span>
@@ -310,7 +315,7 @@ be a DER or PEM encoded <a href="Session.html">Session</a>.</p>
 
         <div class="method-description">
           
-          <p>Gets start time of the session.</p>
+          <p>Returns the time at which the session was established.</p>
           
           
 
@@ -345,7 +350,7 @@ be a DER or PEM encoded <a href="Session.html">Session</a>.</p>
         
         <div class="method-heading">
           <span class="method-callseq">
-            time=(Time) &rarr; Time
+            time = time
           </span>
           
           <span class="method-click-advice">click to toggle source</span>
@@ -354,7 +359,7 @@ be a DER or PEM encoded <a href="Session.html">Session</a>.</p>
         
         <div class="method-heading">
           <span class="method-callseq">
-            time=(integer) &rarr; Time
+            time = integer
           </span>
           
         </div>
@@ -397,7 +402,7 @@ be a DER or PEM encoded <a href="Session.html">Session</a>.</p>
         
         <div class="method-heading">
           <span class="method-callseq">
-            timeout &rarr; integer
+            timeout &rarr; Integer
           </span>
           
           <span class="method-click-advice">click to toggle source</span>
@@ -408,7 +413,8 @@ be a DER or PEM encoded <a href="Session.html">Session</a>.</p>
 
         <div class="method-description">
           
-          <p>Gets how long until the session expires in seconds.</p>
+          <p>Returns the timeout value set for the session, in seconds from the
+established time.</p>
           
           
 
@@ -440,7 +446,7 @@ be a DER or PEM encoded <a href="Session.html">Session</a>.</p>
         
         <div class="method-heading">
           <span class="method-callseq">
-            timeout=(integer) &rarr; integer
+            timeout = integer
           </span>
           
           <span class="method-click-advice">click to toggle source</span>
@@ -482,7 +488,7 @@ be a DER or PEM encoded <a href="Session.html">Session</a>.</p>
         
         <div class="method-heading">
           <span class="method-callseq">
-            to_der &rarr; aString
+            to_der &rarr; String
           </span>
           
           <span class="method-click-advice">click to toggle source</span>
@@ -603,7 +609,8 @@ href="Session.html">Session</a> object.</p>
 
         <div class="method-description">
           
-          <p>Shows everything in the <a href="Session.html">Session</a> object.</p>
+          <p>Shows everything in the <a href="Session.html">Session</a> object. This is
+for diagnostic purposes.</p>
           
           
 

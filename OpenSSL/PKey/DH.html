@@ -99,6 +99,10 @@
     
     <li ><a href="#method-i-public_key">#public_key</a>
     
+    <li ><a href="#method-i-set_key">#set_key</a>
+    
+    <li ><a href="#method-i-set_pqg">#set_pqg</a>
+    
     <li ><a href="#method-i-to_der">#to_der</a>
     
     <li ><a href="#method-i-to_pem">#to_pem</a>
@@ -165,25 +169,6 @@ href="DH.html#method-i-compute_key">#compute_key</a>.</p>
 
     
 
-    
-    <section class="constants-list">
-      <header>
-        <h3>Constants</h3>
-      </header>
-      <dl>
-      
-        <dt id="DEFAULT_1024">DEFAULT_1024
-        
-        <dd>
-        
-      
-        <dt id="DEFAULT_2048">DEFAULT_2048
-        
-        <dd>
-        
-      
-      </dl>
-    </section>
     
 
     
@@ -260,10 +245,24 @@ ossl_dh_s_generate(int argc, VALUE *argv, VALUE klass)
         
         <div class="method-heading">
           <span class="method-callseq">
-            new([size [, generator] | string]) &rarr; dh
+            new &rarr; dh
           </span>
           
           <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            new(string) &rarr; dh
+          </span>
+          
+        </div>
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            new(size [, generator]) &rarr; dh
+          </span>
           
         </div>
         
@@ -385,11 +384,10 @@ party&#39;s public value. See DH_compute_key() for further information.</p>
 <h3 id="method-i-compute_key-label-Parameters">Parameters<span><a href="#method-i-compute_key-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
 <ul><li>
 <p><code>pub_bn</code> is a <a href="../BN.html">OpenSSL::BN</a>,
-<strong>not</strong> the <a href="DH.html">DH</a> instance returned by</p>
+<strong>not</strong> the <a href="DH.html">DH</a> instance returned by <a
+href="DH.html#method-i-public_key">#public_key</a> as that contains the <a
+href="DH.html">DH</a> parameters only.</p>
 </li></ul>
-
-<p><a href="DH.html#method-i-public_key">#public_key</a> as that contains the
-<a href="DH.html">DH</a> parameters only.</p>
           
           
 
@@ -804,6 +802,62 @@ ossl_dh_to_public_key(VALUE self)
     return obj;
 }</pre>
           </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-set_key" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            set_key(pub_key, priv_key) &rarr; self
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Sets <code>pub_key</code> and <code>priv_key</code> for the <a
+href="DH.html">DH</a> instance. <code>priv_key</code> may be nil.</p>
+          
+          
+
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-set_pqg" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            set_pqg(p, q, g) &rarr; self
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Sets <code>p</code>, <code>q</code>, <code>g</code> for the <a
+href="DH.html">DH</a> instance.</p>
+          
+          
+
           
         </div>
 

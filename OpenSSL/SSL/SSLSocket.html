@@ -148,12 +148,6 @@
 
   <section class="description">
     
-<p>The following attributes are available but don&#39;t show up in rdoc.</p>
-<ul><li>
-<p>io, context, <a
-href="SSLSocket.html#attribute-i-sync_close">#sync_close</a></p>
-</li></ul>
-
   </section>
 
   
@@ -181,7 +175,8 @@ href="SSLSocket.html#attribute-i-sync_close">#sync_close</a></p>
 
         <div class="method-description">
         
-        
+        <p>The <a href="SSLContext.html">SSLContext</a> object used in this
+connection.</p>
         
         </div>
       </div>
@@ -194,7 +189,7 @@ href="SSLSocket.html#attribute-i-sync_close">#sync_close</a></p>
 
         <div class="method-description">
         
-        
+        <p>The underlying <a href="../../IO.html">IO</a> object.</p>
         
         </div>
       </div>
@@ -221,7 +216,7 @@ is shut down. This defaults to <code>false</code>.</p>
 
         <div class="method-description">
         
-        
+        <p>The underlying <a href="../../IO.html">IO</a> object.</p>
         
         </div>
       </div>
@@ -260,8 +255,8 @@ is shut down. This defaults to <code>false</code>.</p>
         <div class="method-description">
           
           <p>Creates a new <a href="../SSL.html">SSL</a> socket from <code>io</code>
-which must be a real ruby object (not an IO-like object that responds to
-read/write).</p>
+which must be a real <a href="../../IO.html">IO</a> object (not an IO-like
+object that responds to read/write).</p>
 
 <p>If <code>ctx</code> is provided the <a href="../SSL.html">SSL</a> Sockets
 initial params will be taken from the context.</p>
@@ -439,7 +434,7 @@ ossl_ssl_accept_nonblock(int argc, VALUE *argv, VALUE self)
         
         <div class="method-heading">
           <span class="method-callseq">
-            alpn_protocol &rarr; String
+            alpn_protocol &rarr; String | nil
           </span>
           
           <span class="method-click-advice">click to toggle source</span>
@@ -450,7 +445,7 @@ ossl_ssl_accept_nonblock(int argc, VALUE *argv, VALUE self)
 
         <div class="method-description">
           
-          <p>Returns the ALPN protocol string that was finally selected by the client
+          <p>Returns the ALPN protocol string that was finally selected by the server
 during the handshake.</p>
           
           
@@ -732,18 +727,22 @@ ossl_ssl_connect_nonblock(int argc, VALUE *argv, VALUE self)
     
       <div id="method-i-hostname-3D" class="method-detail ">
         
+        
         <div class="method-heading">
-          <span class="method-name">hostname=</span><span
-            class="method-args">(p1)</span>
+          <span class="method-callseq">
+            hostname = hostname &rarr; hostname
+          </span>
           
           <span class="method-click-advice">click to toggle source</span>
           
         </div>
         
+        
 
         <div class="method-description">
           
-          
+          <p>Sets the server hostname used for SNI. This needs to be set before <a
+href="SSLSocket.html#method-i-connect">#connect</a>.</p>
           
           
 
@@ -783,7 +782,7 @@ ossl_ssl_set_hostname(VALUE self, VALUE arg)
         
         <div class="method-heading">
           <span class="method-callseq">
-            npn_protocol &rarr; String
+            npn_protocol &rarr; String | nil
           </span>
           
           <span class="method-click-advice">click to toggle source</span>
@@ -948,7 +947,7 @@ ossl_ssl_get_peer_cert_chain(VALUE self)
 
         <div class="method-description">
           
-          <p>The number of bytes that are immediately available for reading</p>
+          <p>The number of bytes that are immediately available for reading.</p>
           
           
 
@@ -975,19 +974,21 @@ ossl_ssl_pending(VALUE self)
     
       <div id="method-i-post_connection_check" class="method-detail ">
         
+        
         <div class="method-heading">
-          <span class="method-name">post_connection_check</span><span
-            class="method-args">(hostname)</span>
+          <span class="method-callseq">
+            post_connection_check(hostname) &rarr; true
+          </span>
           
           <span class="method-click-advice">click to toggle source</span>
           
         </div>
         
+        
 
         <div class="method-description">
           
-          <p>Perform hostname verification after an <a href="../SSL.html">SSL</a>
-connection is established</p>
+          <p>Perform hostname verification following RFC 6125.</p>
 
 <p>This method MUST be called after calling <a
 href="SSLSocket.html#method-i-connect">connect</a> to ensure that the
@@ -997,12 +998,12 @@ hostname of a remote peer has been verified.</p>
 
           
           <div class="method-source-code" id="post_connection_check-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 288</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 296</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">post_connection_check</span>(<span class="ruby-identifier">hostname</span>)
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">peer_cert</span>.<span class="ruby-identifier">nil?</span>
     <span class="ruby-identifier">msg</span> = <span class="ruby-string">&quot;Peer verification enabled, but no certificate received.&quot;</span>
     <span class="ruby-keyword">if</span> <span class="ruby-identifier">using_anon_cipher?</span>
-      <span class="ruby-identifier">msg</span> <span class="ruby-operator">+=</span> <span class="ruby-node">&quot; Anonymous cipher suite #{cipher[0]} was negotiated. Anonymous suites must be disabled to use peer verification.&quot;</span>
+      <span class="ruby-identifier">msg</span> <span class="ruby-operator">+=</span> <span class="ruby-node">&quot; Anonymous cipher suite #{cipher[0]} was negotiated. &quot;</span>                     <span class="ruby-string">&quot;Anonymous suites must be disabled to use peer verification.&quot;</span>
     <span class="ruby-keyword">end</span>
     <span class="ruby-identifier">raise</span> <span class="ruby-constant">SSLError</span>, <span class="ruby-identifier">msg</span>
   <span class="ruby-keyword">end</span>
@@ -1024,24 +1025,28 @@ hostname of a remote peer has been verified.</p>
     
       <div id="method-i-session" class="method-detail ">
         
+        
         <div class="method-heading">
-          <span class="method-name">session</span><span
-            class="method-args">()</span>
+          <span class="method-callseq">
+            session &rarr; aSession
+          </span>
           
           <span class="method-click-advice">click to toggle source</span>
           
         </div>
         
+        
 
         <div class="method-description">
           
-          
+          <p>Returns the SSLSession object currently used, or nil if the session is not
+established.</p>
           
           
 
           
           <div class="method-source-code" id="session-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 303</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 317</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">session</span>
   <span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Session</span>.<span class="ruby-identifier">new</span>(<span class="ruby-keyword">self</span>)
 <span class="ruby-keyword">rescue</span> <span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Session</span><span class="ruby-operator">::</span><span class="ruby-constant">SessionError</span>
@@ -1203,7 +1208,8 @@ ossl_ssl_get_version(VALUE self)
 
         <div class="method-description">
           
-          <p>A description of the current connection state.</p>
+          <p>A description of the current connection state. This is for diagnostic
+purposes only.</p>
           
           
 
@@ -1261,7 +1267,7 @@ closed.</p>
 
           
           <div class="method-source-code" id="sysclose-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 277</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 283</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">sysclose</span>
   <span class="ruby-keyword">return</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">closed?</span>
   <span class="ruby-identifier">stop</span>
@@ -1376,7 +1382,7 @@ ossl_ssl_write(VALUE self, VALUE str)
 
         <div class="method-description">
           
-          <p>Returns the ephemeral key used in case of forward secrecy cipher</p>
+          <p>Returns the ephemeral key used in case of forward secrecy cipher.</p>
           
           
 

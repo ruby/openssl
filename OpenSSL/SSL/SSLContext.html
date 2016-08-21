@@ -70,8 +70,6 @@
 
   <ul class="link-list" role="directory">
     
-    <li ><a href="#method-c-new">::new</a>
-    
     <li ><a href="#method-i-ciphers">#ciphers</a>
     
     <li ><a href="#method-i-ciphers-3D">#ciphers=</a>
@@ -102,8 +100,6 @@
     
     <li ><a href="#method-i-session_remove">#session_remove</a>
     
-    <li ><a href="#method-i-set_params">#set_params</a>
-    
     <li ><a href="#method-i-setup">#setup</a>
     
     <li ><a href="#method-i-ssl_version-3D">#ssl_version=</a>
@@ -130,25 +126,6 @@ href="SSLSocket.html">SSLSocket</a>.</p>
 href="SSLSocket.html">SSLSocket</a> as the <a
 href="SSLContext.html">SSLContext</a> will be frozen afterward.</p>
 
-<p>The following attributes are available but don&#39;t show up in rdoc:</p>
-<ul><li>
-<p>ssl_version, cert, key, <a
-href="SSLContext.html#attribute-i-client_ca">#client_ca</a>, <a
-href="SSLContext.html#attribute-i-ca_file">#ca_file</a>, <a
-href="SSLContext.html#attribute-i-ca_path">#ca_path</a>, timeout,</p>
-</li><li>
-<p><a href="SSLContext.html#attribute-i-verify_mode">#verify_mode</a>, <a
-href="SSLContext.html#attribute-i-verify_depth">#verify_depth</a> <a
-href="SSLContext.html#attribute-i-client_cert_cb">#client_cert_cb</a>, <a
-href="SSLContext.html#attribute-i-tmp_dh_callback">#tmp_dh_callback</a>,</p>
-</li><li>
-<p><a
-href="SSLContext.html#attribute-i-session_id_context">#session_id_context</a>,
-session_add_cb, <a
-href="SSLContext.html#attribute-i-session_new_cb">#session_new_cb</a>, <a
-href="SSLContext.html#attribute-i-session_remove_cb">#session_remove_cb</a></p>
-</li></ul>
-
   </section>
 
   
@@ -165,21 +142,6 @@ href="SSLContext.html#attribute-i-session_remove_cb">#session_remove_cb</a></p>
         <h3>Constants</h3>
       </header>
       <dl>
-      
-        <dt id="DEFAULT_CERT_STORE">DEFAULT_CERT_STORE
-        
-        <dd>
-        
-      
-        <dt id="DEFAULT_PARAMS">DEFAULT_PARAMS
-        
-        <dd>
-        
-      
-        <dt id="INIT_VARS">INIT_VARS
-        
-        <dd>
-        
       
         <dt id="METHODS">METHODS
         
@@ -258,8 +220,8 @@ internal cache.</p>
         <p>An Enumerable of Strings. Each String represents a protocol to be
 advertised as the list of supported protocols for Application-Layer
 Protocol Negotiation. Supported in <a href="../../OpenSSL.html">OpenSSL</a>
-1.0.1 and higher. Has no effect on the client side. If not set explicitly,
-the NPN extension will not be sent by the server in the handshake.</p>
+1.0.2 and higher. Has no effect on the server side. If not set explicitly,
+the ALPN extension will not be included in the handshake.</p>
 
 <h3 id="attribute-i-alpn_protocols-label-Example">Example<span><a href="#attribute-i-alpn_protocols-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
@@ -279,16 +241,16 @@ the NPN extension will not be sent by the server in the handshake.</p>
         
         <p>A callback invoked on the server side when the server needs to select a
 protocol from the list sent by the client. Supported in <a
-href="../../OpenSSL.html">OpenSSL</a> 1.0.2 and higher. The server MUST
-select a protocol of those advertised by the client. If none is acceptable,
+href="../../OpenSSL.html">OpenSSL</a> 1.0.2 and higher. The callback must
+return a protocol of those advertised by the client. If none is acceptable,
 raising an error in the callback will cause the handshake to fail. Not
 setting this callback explicitly means not supporting the ALPN extension on
-the client - any protocols advertised by the server will be ignored.</p>
+the server - any protocols advertised by the client will be ignored.</p>
 
 <h3 id="attribute-i-alpn_select_cb-label-Example">Example<span><a href="#attribute-i-alpn_select_cb-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
 <pre class="ruby"><span class="ruby-identifier">ctx</span>.<span class="ruby-identifier">alpn_select_cb</span> = <span class="ruby-identifier">lambda</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">protocols</span><span class="ruby-operator">|</span>
-  <span class="ruby-comment">#inspect the protocols and select one</span>
+  <span class="ruby-comment"># inspect the protocols and select one</span>
   <span class="ruby-identifier">protocols</span>.<span class="ruby-identifier">first</span>
 <span class="ruby-keyword">end</span>
 </pre>
@@ -347,7 +309,7 @@ name&#39;s hash value.</p>
         <div class="method-description">
         
         <p>An <a href="../X509/Store.html">OpenSSL::X509::Store</a> used for
-certificate verification</p>
+certificate verification.</p>
         
         </div>
       </div>
@@ -453,7 +415,7 @@ the client - any protocols advertised by the server will be ignored.</p>
 <h3 id="attribute-i-npn_select_cb-label-Example">Example<span><a href="#attribute-i-npn_select_cb-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
 <pre class="ruby"><span class="ruby-identifier">ctx</span>.<span class="ruby-identifier">npn_select_cb</span> = <span class="ruby-identifier">lambda</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">protocols</span><span class="ruby-operator">|</span>
-  <span class="ruby-comment">#inspect the protocols and select one</span>
+  <span class="ruby-comment"># inspect the protocols and select one</span>
   <span class="ruby-identifier">protocols</span>.<span class="ruby-identifier">first</span>
 <span class="ruby-keyword">end</span>
 </pre>
@@ -566,7 +528,7 @@ and a <a href="Session.html">Session</a>.</p>
 
         <div class="method-description">
         
-        <p>Maximum session lifetime.</p>
+        <p>Maximum session lifetime in seconds.</p>
         
         </div>
       </div>
@@ -579,27 +541,7 @@ and a <a href="Session.html">Session</a>.</p>
 
         <div class="method-description">
         
-        <p>Maximum session lifetime.</p>
-        
-        </div>
-      </div>
-      
-      <div id="attribute-i-tmp_dh_callback" class="method-detail">
-        <div class="method-heading attribute-method-heading">
-          <span class="method-name">tmp_dh_callback</span><span
-            class="attribute-access-type">[RW]</span>
-        </div>
-
-        <div class="method-description">
-        
-        <p>A callback invoked when DH parameters are required.</p>
-
-<p>The callback is invoked with the <a href="Session.html">Session</a> for the
-key exchange, an flag indicating the use of an export cipher and the
-keylength required.</p>
-
-<p>The callback must return an <a href="../PKey/DH.html">OpenSSL::PKey::DH</a>
-instance of the correct key length.</p>
+        <p>Maximum session lifetime in seconds.</p>
         
         </div>
       </div>
@@ -692,6 +634,11 @@ href="SSLSocket.html#method-i-hostname-3D">OpenSSL::SSL::SSLSocket#hostname=</a>
 <p>Valid modes are VERIFY_NONE, VERIFY_PEER, VERIFY_CLIENT_ONCE,
 VERIFY_FAIL_IF_NO_PEER_CERT and defined on <a
 href="../SSL.html">OpenSSL::SSL</a></p>
+
+<p>The default mode is VERIFY_NONE, which does not perform any verification at
+all.</p>
+
+<p>See SSL_CTX_set_verify(3) for details.</p>
         
         </div>
       </div>
@@ -700,67 +647,6 @@ href="../SSL.html">OpenSSL::SSL</a></p>
     
 
     
-     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
-       <header>
-         <h3>Public Class Methods</h3>
-       </header>
-
-    
-      <div id="method-c-new" class="method-detail ">
-        
-        
-        <div class="method-heading">
-          <span class="method-callseq">
-            new &rarr; ctx
-          </span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-        <div class="method-heading">
-          <span class="method-callseq">
-            new(:TLSv1) &rarr; ctx
-          </span>
-          
-        </div>
-        
-        <div class="method-heading">
-          <span class="method-callseq">
-            new(&quot;SSLv23_client&quot;) &rarr; ctx
-          </span>
-          
-        </div>
-        
-        
-
-        <div class="method-description">
-          
-          <p>You can get a list of valid methods with OpenSSL::SSL::SSLContext::METHODS</p>
-          
-          
-
-          
-          <div class="method-source-code" id="new-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 109</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">version</span> = <span class="ruby-keyword">nil</span>)
-  <span class="ruby-constant">INIT_VARS</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">v</span><span class="ruby-operator">|</span> <span class="ruby-identifier">instance_variable_set</span> <span class="ruby-identifier">v</span>, <span class="ruby-keyword">nil</span> }
-  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">options</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">options</span> <span class="ruby-operator">|</span> <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">OP_ALL</span>
-  <span class="ruby-keyword">return</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">version</span>
-  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">ssl_version</span> = <span class="ruby-identifier">version</span>
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
-    </section>
-  
      <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Instance Methods</h3>
@@ -783,7 +669,7 @@ href="../SSL.html">OpenSSL::SSL</a></p>
 
         <div class="method-description">
           
-          <p>The list of ciphers configured for this context.</p>
+          <p>The list of cipher suites configured for this context.</p>
           
           
 
@@ -856,12 +742,10 @@ ossl_sslctx_get_ciphers(VALUE self)
 
         <div class="method-description">
           
-          <p>Sets the list of available ciphers for this context.  Note in a server
-context some ciphers require the appropriate certificates.  For example, an
-RSA cipher can only be chosen when an RSA certificate is available.</p>
-
-<p>See also <a href="../Cipher.html">OpenSSL::Cipher</a> and <a
-href="../Cipher.html#method-c-ciphers">OpenSSL::Cipher.ciphers</a></p>
+          <p>Sets the list of available cipher suites for this context.  Note in a
+server context some ciphers require the appropriate certificates.  For
+example, an RSA cipher suite can only be chosen when an RSA certificate is
+available.</p>
           
           
 
@@ -1216,7 +1100,7 @@ ossl_sslctx_get_security_level(VALUE self)
         
         <div class="method-heading">
           <span class="method-callseq">
-            security_level=(integer) &rarr; Integer
+            security_level = integer
           </span>
           
           <span class="method-click-advice">click to toggle source</span>
@@ -1293,7 +1177,7 @@ ossl_sslctx_set_security_level(VALUE self, VALUE value)
 
         <div class="method-description">
           
-          <p>Adds <code>session</code> to the session cache</p>
+          <p>Adds <code>session</code> to the session cache.</p>
           
           
 
@@ -1602,7 +1486,7 @@ ossl_sslctx_get_session_cache_stats(VALUE self)
 
         <div class="method-description">
           
-          <p>Removes <code>session</code> from the session cache</p>
+          <p>Removes <code>session</code> from the session cache.</p>
           
           
 
@@ -1619,60 +1503,6 @@ ossl_sslctx_session_remove(VALUE self, VALUE arg)
 
     return SSL_CTX_remove_session(ctx, sess) == 1 ? Qtrue : Qfalse;
 }</pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
-      <div id="method-i-set_params" class="method-detail ">
-        
-        
-        <div class="method-heading">
-          <span class="method-callseq">
-            set_params(params = {}) &rarr; params
-          </span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-        
-
-        <div class="method-description">
-          
-          <p>Sets saner defaults optimized for the use with HTTP-like protocols.</p>
-
-<p>If a Hash <code>params</code> is given, the parameters are overridden with
-it. The keys in <code>params</code> must be assignment methods on <a
-href="SSLContext.html">SSLContext</a>.</p>
-
-<p>If the <a href="SSLContext.html#attribute-i-verify_mode">#verify_mode</a>
-is not VERIFY_NONE and <a
-href="SSLContext.html#attribute-i-ca_file">#ca_file</a>, <a
-href="SSLContext.html#attribute-i-ca_path">#ca_path</a> and <a
-href="SSLContext.html#attribute-i-cert_store">#cert_store</a> are not set
-then the system default certificate store is used.</p>
-          
-          
-
-          
-          <div class="method-source-code" id="set_params-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 128</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">set_params</span>(<span class="ruby-identifier">params</span>={})
-  <span class="ruby-identifier">params</span> = <span class="ruby-constant">DEFAULT_PARAMS</span>.<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">params</span>)
-  <span class="ruby-identifier">params</span>.<span class="ruby-identifier">each</span>{<span class="ruby-operator">|</span><span class="ruby-identifier">name</span>, <span class="ruby-identifier">value</span><span class="ruby-operator">|</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">__send__</span>(<span class="ruby-node">&quot;#{name}=&quot;</span>, <span class="ruby-identifier">value</span>) }
-  <span class="ruby-keyword">if</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">verify_mode</span> <span class="ruby-operator">!=</span> <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">VERIFY_NONE</span>
-    <span class="ruby-keyword">unless</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">ca_file</span> <span class="ruby-keyword">or</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">ca_path</span> <span class="ruby-keyword">or</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">cert_store</span>
-      <span class="ruby-keyword">self</span>.<span class="ruby-identifier">cert_store</span> = <span class="ruby-constant">DEFAULT_CERT_STORE</span>
-    <span class="ruby-keyword">end</span>
-  <span class="ruby-keyword">end</span>
-  <span class="ruby-keyword">return</span> <span class="ruby-identifier">params</span>
-<span class="ruby-keyword">end</span></pre>
           </div>
           
         </div>
@@ -1928,7 +1758,10 @@ ossl_sslctx_setup(VALUE self)
 
         <div class="method-description">
           
-          <p>You can get a list of valid versions with OpenSSL::SSL::SSLContext::METHODS</p>
+          <p>Sets the SSL/TLS protocol version for the context. This forces connections
+to use only the specified protocol version.</p>
+
+<p>You can get a list of valid versions with OpenSSL::SSL::SSLContext::METHODS</p>
           
           
 

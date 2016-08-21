@@ -51,6 +51,15 @@
   </div>
 
   
+<div class="nav-section">
+  <h3>Table of Contents</h3>
+
+  <ul class="link-list" role="directory">
+    <li><a href="#class-OpenSSL::HMACError-label-HMAC-SHA256+using+one-shot+interface">HMAC-SHA256 using one-shot interface</a>
+    <li><a href="#class-OpenSSL::HMACError-label-HMAC-SHA256+using+incremental+interface">HMAC-SHA256 using incremental interface</a>
+  </ul>
+</div>
+
 
   <div id="class-metadata">
     
@@ -75,6 +84,37 @@
 
   <section class="description">
     
+<p>Document-class: <a href="HMAC.html">OpenSSL::HMAC</a></p>
+
+<p><a href="HMAC.html">OpenSSL::HMAC</a> allows computing Hash-based Message
+Authentication Code (HMAC). It is a type of message authentication code
+(MAC) involving a hash function in combination with a key. <a
+href="HMAC.html">HMAC</a> can be used to verify the integrity of a message
+as well as the authenticity.</p>
+
+<p><a href="HMAC.html">OpenSSL::HMAC</a> has a similar interface to <a
+href="Digest.html">OpenSSL::Digest</a>.</p>
+
+<h3 id="class-OpenSSL::HMACError-label-HMAC-SHA256+using+one-shot+interface">HMAC-SHA256 using one-shot interface<span><a href="#class-OpenSSL::HMACError-label-HMAC-SHA256+using+one-shot+interface">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby"><span class="ruby-identifier">key</span> = <span class="ruby-string">&quot;key&quot;</span>
+<span class="ruby-identifier">data</span> = <span class="ruby-string">&quot;message-to-be-authenticated&quot;</span>
+<span class="ruby-identifier">mac</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">HMAC</span>.<span class="ruby-identifier">hexdigest</span>(<span class="ruby-string">&quot;SHA256&quot;</span>, <span class="ruby-identifier">key</span>, <span class="ruby-identifier">data</span>)
+<span class="ruby-comment">#=&gt; &quot;cddb0db23f469c8bf072b21fd837149bd6ace9ab771cceef14c9e517cc93282e&quot;</span>
+</pre>
+
+<h3 id="class-OpenSSL::HMACError-label-HMAC-SHA256+using+incremental+interface">HMAC-SHA256 using incremental interface<span><a href="#class-OpenSSL::HMACError-label-HMAC-SHA256+using+incremental+interface">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby"><span class="ruby-identifier">data1</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span>(<span class="ruby-string">&quot;file1&quot;</span>)
+<span class="ruby-identifier">data2</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span>(<span class="ruby-string">&quot;file2&quot;</span>)
+<span class="ruby-identifier">key</span> = <span class="ruby-string">&quot;key&quot;</span>
+<span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span><span class="ruby-operator">::</span><span class="ruby-constant">SHA256</span>.<span class="ruby-identifier">new</span>
+<span class="ruby-identifier">hmac</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">HMAC</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">key</span>, <span class="ruby-identifier">digest</span>)
+<span class="ruby-identifier">hmac</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">data1</span>
+<span class="ruby-identifier">hmac</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">data2</span>
+<span class="ruby-identifier">mac</span> = <span class="ruby-identifier">hmac</span>.<span class="ruby-identifier">digest</span>
+</pre>
+
   </section>
 
   

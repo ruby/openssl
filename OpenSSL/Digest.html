@@ -361,9 +361,10 @@ short name of a supported digest algorithm.</p>
           
           <p>Creates a <a href="Digest.html">Digest</a> instance based on
 <code>string</code>, which is either the ln (long name) or sn (short name)
-of a supported digest algorithm. If <code>data</code> (a
-<code>String</code>) is given, it is used as the initial input to the <a
-href="Digest.html">Digest</a> instance, i.e.</p>
+of a supported digest algorithm.</p>
+
+<p>If <code>data</code> (a <code>String</code>) is given, it is used as the
+initial input to the <a href="Digest.html">Digest</a> instance, i.e.</p>
 
 <pre class="ruby"><span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;sha256&#39;</span>, <span class="ruby-string">&#39;digestdata&#39;</span>)
 </pre>
@@ -372,11 +373,6 @@ href="Digest.html">Digest</a> instance, i.e.</p>
 
 <pre class="ruby"><span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;sha256&#39;</span>)
 <span class="ruby-identifier">digest</span>.<span class="ruby-identifier">update</span>(<span class="ruby-string">&#39;digestdata&#39;</span>)
-</pre>
-
-<h3 id="method-c-new-label-Example">Example<span><a href="#method-c-new-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
-
-<pre class="ruby"><span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;sha1&#39;</span>)
 </pre>
           
           
@@ -562,7 +558,7 @@ ossl_digest_size(VALUE self)
 
         <div class="method-description">
           
-          <p>Returns the sn of this <a href="Digest.html">Digest</a> instance.</p>
+          <p>Returns the sn of this <a href="Digest.html">Digest</a> algorithm.</p>
 
 <h3 id="method-i-name-label-Example">Example<span><a href="#method-i-name-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
 

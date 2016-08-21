@@ -119,11 +119,11 @@ certificates used to verify peer certificates.</p>
 <p>This will use your system&#39;s built-in certificates.</p>
 
 <p>If your system does not have a default set of certificates you can obtain a
-set from Mozilla here: <a
-href="http://curl.haxx.se/docs/caextract.html">curl.haxx.se/docs/caextract.html</a>
-(Note that this set does not have an HTTPS download option so you may wish
-to use the firefox-db2pem.sh script to extract the certificates from a
-local install to avoid man-in-the-middle attacks.)</p>
+set extracted from Mozilla CA certificate store by cURL maintainers here:
+<a
+href="https://curl.haxx.se/docs/caextract.html">curl.haxx.se/docs/caextract.html</a>
+(You may wish to use the firefox-db2pem.sh script to extract the
+certificates from a local install to avoid man-in-the-middle attacks.)</p>
 
 <p>After downloading or generating a cacert.pem from the above link you can
 create a certificate store from the pem file like this:</p>
@@ -135,6 +135,7 @@ create a certificate store from the pem file like this:</p>
 <p>The certificate store can be used with an SSLSocket like this:</p>
 
 <pre class="ruby"><span class="ruby-identifier">ssl_context</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSLContext</span>.<span class="ruby-identifier">new</span>
+<span class="ruby-identifier">ssl_context</span>.<span class="ruby-identifier">verify_mode</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">VERIFY_PEER</span>
 <span class="ruby-identifier">ssl_context</span>.<span class="ruby-identifier">cert_store</span> = <span class="ruby-identifier">cert_store</span>
 
 <span class="ruby-identifier">tcp_socket</span> = <span class="ruby-constant">TCPSocket</span>.<span class="ruby-identifier">open</span> <span class="ruby-string">&#39;example.com&#39;</span>, <span class="ruby-value">443</span>
@@ -169,7 +170,8 @@ create a certificate store from the pem file like this:</p>
 
         <div class="method-description">
         
-        
+        <p>The certificate chain constructed by the last call of <a
+href="Store.html#method-i-verify">verify</a>.</p>
         
         </div>
       </div>
@@ -182,7 +184,8 @@ create a certificate store from the pem file like this:</p>
 
         <div class="method-description">
         
-        
+        <p>The error code set by the last call of <a
+href="Store.html#method-i-verify">verify</a>.</p>
         
         </div>
       </div>
@@ -195,7 +198,8 @@ create a certificate store from the pem file like this:</p>
 
         <div class="method-description">
         
-        
+        <p>The description for the error code set by the last call of <a
+href="Store.html#method-i-verify">verify</a>.</p>
         
         </div>
       </div>
@@ -208,7 +212,13 @@ create a certificate store from the pem file like this:</p>
 
         <div class="method-description">
         
-        
+        <p>The callback for additional certificate verification. It is invoked for
+each untrusted certificate in the chain.</p>
+
+<p>The callback is invoked with two values, a boolean that indicates if the
+pre-verification by <a href="../../OpenSSL.html">OpenSSL</a> has succeeded
+or not, and the <a href="StoreContext.html">StoreContext</a> in use. The
+callback must return either true or false.</p>
         
         </div>
       </div>
@@ -239,7 +249,7 @@ create a certificate store from the pem file like this:</p>
 
         <div class="method-description">
           
-          
+          <p>Creates a new <a href="Store.html">X509::Store</a>.</p>
           
           
 
@@ -334,18 +344,22 @@ ossl_x509store_add_cert(VALUE self, VALUE arg)
     
       <div id="method-i-add_crl" class="method-detail ">
         
+        
         <div class="method-heading">
-          <span class="method-name">add_crl</span><span
-            class="method-args">(p1)</span>
+          <span class="method-callseq">
+            add_crl(crl) &rarr; self
+          </span>
           
           <span class="method-click-advice">click to toggle source</span>
           
         </div>
         
+        
 
         <div class="method-description">
           
-          
+          <p>Adds the <a href="CRL.html">OpenSSL::X509::CRL</a> <code>crl</code> to the
+store.</p>
           
           
 
@@ -380,7 +394,7 @@ ossl_x509store_add_crl(VALUE self, VALUE arg)
         
         <div class="method-heading">
           <span class="method-callseq">
-            add_file(file) &rarr; store
+            add_file(file) &rarr; self
           </span>
           
           <span class="method-click-advice">click to toggle source</span>
@@ -430,18 +444,21 @@ ossl_x509store_add_file(VALUE self, VALUE file)
     
       <div id="method-i-add_path" class="method-detail ">
         
+        
         <div class="method-heading">
-          <span class="method-name">add_path</span><span
-            class="method-args">(p1)</span>
+          <span class="method-callseq">
+            add_path(path) &rarr; self
+          </span>
           
           <span class="method-click-advice">click to toggle source</span>
           
         </div>
         
+        
 
         <div class="method-description">
           
-          
+          <p>Adds <code>path</code> as the hash dir to be looked up by the store.</p>
           
           
 
@@ -479,18 +496,23 @@ ossl_x509store_add_path(VALUE self, VALUE dir)
     
       <div id="method-i-flags-3D" class="method-detail ">
         
+        
         <div class="method-heading">
-          <span class="method-name">flags=</span><span
-            class="method-args">(p1)</span>
+          <span class="method-callseq">
+            flags = flag
+          </span>
           
           <span class="method-click-advice">click to toggle source</span>
           
         </div>
         
+        
 
         <div class="method-description">
           
-          
+          <p>Sets <code>flag</code> to the <a href="Store.html">Store</a>.
+<code>flag</code> consists of zero or more of the constants defined in with
+name V_FLAG_* or&#39;ed together.</p>
           
           
 
@@ -519,18 +541,43 @@ ossl_x509store_set_flags(VALUE self, VALUE flags)
     
       <div id="method-i-purpose-3D" class="method-detail ">
         
+        
         <div class="method-heading">
-          <span class="method-name">purpose=</span><span
-            class="method-args">(p1)</span>
+          <span class="method-callseq">
+            purpose = purpose
+          </span>
           
           <span class="method-click-advice">click to toggle source</span>
           
         </div>
         
+        
 
         <div class="method-description">
           
-          
+          <p>Sets the store&#39;s purpose to <code>purpose</code>. If specified, the
+verifications on the store will check every untrusted certificate&#39;s
+extensions are consistent with the purpose. The purpose is specified by
+constants:</p>
+<ul><li>
+<p>X509::PURPOSE_SSL_CLIENT</p>
+</li><li>
+<p>X509::PURPOSE_SSL_SERVER</p>
+</li><li>
+<p>X509::PURPOSE_NS_SSL_SERVER</p>
+</li><li>
+<p>X509::PURPOSE_SMIME_SIGN</p>
+</li><li>
+<p>X509::PURPOSE_SMIME_ENCRYPT</p>
+</li><li>
+<p>X509::PURPOSE_CRL_SIGN</p>
+</li><li>
+<p>X509::PURPOSE_ANY</p>
+</li><li>
+<p>X509::PURPOSE_OCSP_HELPER</p>
+</li><li>
+<p>X509::PURPOSE_TIMESTAMP_SIGN</p>
+</li></ul>
           
           
 
@@ -573,12 +620,14 @@ ossl_x509store_set_purpose(VALUE self, VALUE purpose)
 
         <div class="method-description">
           
-          <p>Adds the default certificates to the certificate store.  These certificates
-are loaded from the default configuration directory which can usually be
-determined by:</p>
-
-<pre class="ruby"><span class="ruby-constant">File</span>.<span class="ruby-identifier">dirname</span> <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Config</span><span class="ruby-operator">::</span><span class="ruby-constant">DEFAULT_CONFIG_FILE</span>
-</pre>
+          <p>Configures <code>store</code> to look up CA certificates from the system
+default certificate store as needed basis. The location of the store can
+usually be determined by:</p>
+<ul><li>
+<p>OpenSSL::X509::DEFAULT_CERT_FILE</p>
+</li><li>
+<p>OpenSSL::X509::DEFAULT_CERT_DIR</p>
+</li></ul>
           
           
 
@@ -608,18 +657,21 @@ ossl_x509store_set_default_paths(VALUE self)
     
       <div id="method-i-time-3D" class="method-detail ">
         
+        
         <div class="method-heading">
-          <span class="method-name">time=</span><span
-            class="method-args">(p1)</span>
+          <span class="method-callseq">
+            time = time
+          </span>
           
           <span class="method-click-advice">click to toggle source</span>
           
         </div>
         
+        
 
         <div class="method-description">
           
-          
+          <p>Sets the time to be used in verifications.</p>
           
           
 
@@ -643,13 +695,16 @@ ossl_x509store_set_time(VALUE self, VALUE time)
     
       <div id="method-i-trust-3D" class="method-detail ">
         
+        
         <div class="method-heading">
-          <span class="method-name">trust=</span><span
-            class="method-args">(p1)</span>
+          <span class="method-callseq">
+            trust = trust
+          </span>
           
           <span class="method-click-advice">click to toggle source</span>
           
         </div>
+        
         
 
         <div class="method-description">
@@ -683,18 +738,35 @@ ossl_x509store_set_trust(VALUE self, VALUE trust)
     
       <div id="method-i-verify" class="method-detail ">
         
+        
         <div class="method-heading">
-          <span class="method-name">verify</span><span
-            class="method-args">(p1, p2 = v2)</span>
+          <span class="method-callseq">
+            verify(cert, chain = nil) &rarr; true | false
+          </span>
           
           <span class="method-click-advice">click to toggle source</span>
           
         </div>
         
+        
 
         <div class="method-description">
           
-          
+          <p>Performs a certificate verification on the <a
+href="Certificate.html">OpenSSL::X509::Certificate</a> <code>cert</code>.</p>
+
+<p><code>chain</code> can be an array of <a
+href="Certificate.html">OpenSSL::X509::Certificate</a> that is used to
+construct the certificate chain.</p>
+
+<p>If a block is given, it overrides the callback set by <a
+href="Store.html#method-i-verify_callback-3D">verify_callback=</a>.</p>
+
+<p>After finishing the verification, the error information can be retrieved by
+<a href="Store.html#attribute-i-error">error</a>, <a
+href="Store.html#attribute-i-error_string">error_string</a>, and the
+resuting complete certificate chain can be retrieved by <a
+href="Store.html#attribute-i-chain">chain</a>.</p>
           
           
 

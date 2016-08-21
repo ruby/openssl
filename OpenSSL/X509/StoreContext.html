@@ -70,7 +70,33 @@
 
   <ul class="link-list" role="directory">
     
+    <li ><a href="#method-c-new">::new</a>
+    
+    <li ><a href="#method-i-chain">#chain</a>
+    
     <li ><a href="#method-i-cleanup">#cleanup</a>
+    
+    <li ><a href="#method-i-current_cert">#current_cert</a>
+    
+    <li ><a href="#method-i-current_crl">#current_crl</a>
+    
+    <li ><a href="#method-i-error">#error</a>
+    
+    <li ><a href="#method-i-error-3D">#error=</a>
+    
+    <li ><a href="#method-i-error_depth">#error_depth</a>
+    
+    <li ><a href="#method-i-error_string">#error_string</a>
+    
+    <li ><a href="#method-i-flags-3D">#flags=</a>
+    
+    <li ><a href="#method-i-purpose-3D">#purpose=</a>
+    
+    <li ><a href="#method-i-time-3D">#time=</a>
+    
+    <li ><a href="#method-i-trust-3D">#trust=</a>
+    
+    <li ><a href="#method-i-verify">#verify</a>
     
   </ul>
 </div>
@@ -85,6 +111,9 @@
 
   <section class="description">
     
+<p>A <a href="StoreContext.html">StoreContext</a> is used while validating a
+single certificate and holds the status involved.</p>
+
   </section>
 
   
@@ -100,10 +129,132 @@
     
 
     
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-new" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            new(store, cert = nil, chain = nil)
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="new-source">
+            <pre>static VALUE
+ossl_x509stctx_initialize(int argc, VALUE *argv, VALUE self)
+{
+    VALUE store, cert, chain, t;
+    X509_STORE_CTX *ctx;
+    X509_STORE *x509st;
+    X509 *x509 = NULL;
+    STACK_OF(X509) *x509s = NULL;
+
+    rb_scan_args(argc, argv, &quot;12&quot;, &amp;store, &amp;cert, &amp;chain);
+    GetX509StCtx(self, ctx);
+    SafeGetX509Store(store, x509st);
+    if(!NIL_P(cert)) x509 = DupX509CertPtr(cert); /* NEED TO DUP */
+    if(!NIL_P(chain)) x509s = ossl_x509_ary2sk(chain);
+    if(X509_STORE_CTX_init(ctx, x509st, x509, x509s) != 1){
+        sk_X509_pop_free(x509s, X509_free);
+        ossl_raise(eX509StoreError, NULL);
+    }
+    if (!NIL_P(t = rb_iv_get(store, &quot;@time&quot;)))
+        ossl_x509stctx_set_time(self, t);
+    rb_iv_set(self, &quot;@verify_callback&quot;, rb_iv_get(store, &quot;@verify_callback&quot;));
+    rb_iv_set(self, &quot;@cert&quot;, cert);
+
+    return self;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
      <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Instance Methods</h3>
        </header>
+
+    
+      <div id="method-i-chain" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            chain &rarr; Array of X509::Certificate
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="chain-source">
+            <pre>static VALUE
+ossl_x509stctx_get_chain(VALUE self)
+{
+    X509_STORE_CTX *ctx;
+    STACK_OF(X509) *chain;
+    X509 *x509;
+    int i, num;
+    VALUE ary;
+
+    GetX509StCtx(self, ctx);
+    if((chain = X509_STORE_CTX_get0_chain(ctx)) == NULL){
+        return Qnil;
+    }
+    if((num = sk_X509_num(chain)) &lt; 0){
+        OSSL_Debug(&quot;certs in chain &lt; 0???&quot;);
+        return rb_ary_new();
+    }
+    ary = rb_ary_new2(num);
+    for(i = 0; i &lt; num; i++) {
+        x509 = sk_X509_value(chain, i);
+        rb_ary_push(ary, ossl_x509_new(x509));
+    }
+
+    return ary;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
 
     
       <div id="method-i-cleanup" class="method-detail ">
@@ -129,6 +280,487 @@
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">cleanup</span>
   <span class="ruby-identifier">warn</span> <span class="ruby-node">&quot;(#{caller.first}) OpenSSL::X509::StoreContext#cleanup is deprecated with no replacement&quot;</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">$VERBOSE</span>
 <span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-current_cert" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            current_cert &rarr; X509::Certificate
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="current_cert-source">
+            <pre>static VALUE
+ossl_x509stctx_get_curr_cert(VALUE self)
+{
+    X509_STORE_CTX *ctx;
+
+    GetX509StCtx(self, ctx);
+
+    return ossl_x509_new(X509_STORE_CTX_get_current_cert(ctx));
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-current_crl" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            current_crl &rarr; X509::CRL
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="current_crl-source">
+            <pre>static VALUE
+ossl_x509stctx_get_curr_crl(VALUE self)
+{
+    X509_STORE_CTX *ctx;
+    X509_CRL *crl;
+
+    GetX509StCtx(self, ctx);
+    crl = X509_STORE_CTX_get0_current_crl(ctx);
+    if (!crl)
+        return Qnil;
+
+    return ossl_x509crl_new(crl);
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-error" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            error &rarr; Integer
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="error-source">
+            <pre>static VALUE
+ossl_x509stctx_get_err(VALUE self)
+{
+    X509_STORE_CTX *ctx;
+
+    GetX509StCtx(self, ctx);
+
+    return INT2FIX(X509_STORE_CTX_get_error(ctx));
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-error-3D" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            error = error_code
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="error-3D-source">
+            <pre>static VALUE
+ossl_x509stctx_set_error(VALUE self, VALUE err)
+{
+    X509_STORE_CTX *ctx;
+
+    GetX509StCtx(self, ctx);
+    X509_STORE_CTX_set_error(ctx, NUM2INT(err));
+
+    return err;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-error_depth" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            error_depth &rarr; Integer
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="error_depth-source">
+            <pre>static VALUE
+ossl_x509stctx_get_err_depth(VALUE self)
+{
+    X509_STORE_CTX *ctx;
+
+    GetX509StCtx(self, ctx);
+
+    return INT2FIX(X509_STORE_CTX_get_error_depth(ctx));
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-error_string" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            error_string &rarr; String
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Returns the error string corresponding to the error code retrieved by <a
+href="StoreContext.html#method-i-error">error</a>.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="error_string-source">
+            <pre>static VALUE
+ossl_x509stctx_get_err_string(VALUE self)
+{
+    X509_STORE_CTX *ctx;
+    long err;
+
+    GetX509StCtx(self, ctx);
+    err = X509_STORE_CTX_get_error(ctx);
+
+    return rb_str_new2(X509_verify_cert_error_string(err));
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-flags-3D" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            flags = flags
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Sets the verification flags to the context. See <a
+href="Store.html#method-i-flags-3D">OpenSSL::X509::Store#flags=</a>.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="flags-3D-source">
+            <pre>static VALUE
+ossl_x509stctx_set_flags(VALUE self, VALUE flags)
+{
+    X509_STORE_CTX *store;
+    long f = NUM2LONG(flags);
+
+    GetX509StCtx(self, store);
+    X509_STORE_CTX_set_flags(store, f);
+
+    return flags;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-purpose-3D" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            purpose = purpose
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Sets the purpose of the context. See <a
+href="Store.html#method-i-purpose-3D">OpenSSL::X509::Store#purpose=</a>.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="purpose-3D-source">
+            <pre>static VALUE
+ossl_x509stctx_set_purpose(VALUE self, VALUE purpose)
+{
+    X509_STORE_CTX *store;
+    int p = NUM2INT(purpose);
+
+    GetX509StCtx(self, store);
+    X509_STORE_CTX_set_purpose(store, p);
+
+    return purpose;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-time-3D" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            time = time
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Sets the time used in the verification. If not set, the current time is
+used.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="time-3D-source">
+            <pre>static VALUE
+ossl_x509stctx_set_time(VALUE self, VALUE time)
+{
+    X509_STORE_CTX *store;
+    long t;
+
+    t = NUM2LONG(rb_Integer(time));
+    GetX509StCtx(self, store);
+    X509_STORE_CTX_set_time(store, 0, t);
+
+    return time;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-trust-3D" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            trust = trust
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="trust-3D-source">
+            <pre>static VALUE
+ossl_x509stctx_set_trust(VALUE self, VALUE trust)
+{
+    X509_STORE_CTX *store;
+    int t = NUM2INT(trust);
+
+    GetX509StCtx(self, store);
+    X509_STORE_CTX_set_trust(store, t);
+
+    return trust;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-verify" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            verify &rarr; true | false
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="verify-source">
+            <pre>static VALUE
+ossl_x509stctx_verify(VALUE self)
+{
+    X509_STORE_CTX *ctx;
+
+    GetX509StCtx(self, ctx);
+    X509_STORE_CTX_set_ex_data(ctx, ossl_store_ctx_ex_verify_cb_idx,
+                               (void *)rb_iv_get(self, &quot;@verify_callback&quot;));
+
+    switch (X509_verify_cert(ctx)) {
+      case 1:
+        return Qtrue;
+      case 0:
+        ossl_clear_error();
+        return Qfalse;
+      default:
+        ossl_raise(eX509CertError, NULL);
+    }
+}</pre>
           </div>
           
         </div>

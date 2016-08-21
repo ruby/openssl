@@ -271,10 +271,11 @@ pseudo-random bytes.</p>
 href="Random.html#method-c-pseudo_bytes">::pseudo_bytes</a> will be unique
 if they are of sufficient length, but are not necessarily unpredictable.</p>
 
-<pre>Example:
+<h3 id="method-c-pseudo_bytes-label-Example">Example<span><a href="#method-c-pseudo_bytes-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
-  OpenSSL::Random.pseudo_bytes(12)
-  =&gt; &quot;...&quot;</pre>
+<pre class="ruby"><span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Random</span>.<span class="ruby-identifier">pseudo_bytes</span>(<span class="ruby-value">12</span>)
+<span class="ruby-comment">#=&gt; &quot;...&quot;</span>
+</pre>
           
           
 
@@ -329,13 +330,14 @@ less predictable.</p>
 <p>The <code>entropy</code> argument is (the lower bound of) an estimate of
 how much randomness is contained in <code>str</code>, measured in bytes.</p>
 
-<pre>Example:
+<h3 id="method-c-random_add-label-Example">Example<span><a href="#method-c-random_add-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
-  pid = $$
-  now = Time.now
-  ary = [now.to_i, now.nsec, 1000, pid]
-  OpenSSL::Random.add(ary.join(&quot;&quot;).to_s, 0.0)
-  OpenSSL::Random.seed(ary.join(&quot;&quot;).to_s)</pre>
+<pre class="ruby"><span class="ruby-identifier">pid</span> = <span class="ruby-identifier">$$</span>
+<span class="ruby-identifier">now</span> = <span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span>
+<span class="ruby-identifier">ary</span> = [<span class="ruby-identifier">now</span>.<span class="ruby-identifier">to_i</span>, <span class="ruby-identifier">now</span>.<span class="ruby-identifier">nsec</span>, <span class="ruby-value">1000</span>, <span class="ruby-identifier">pid</span>]
+<span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Random</span>.<span class="ruby-identifier">add</span>(<span class="ruby-identifier">ary</span>.<span class="ruby-identifier">join</span>, <span class="ruby-value">0.0</span>)
+<span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Random</span>.<span class="ruby-identifier">seed</span>(<span class="ruby-identifier">ary</span>.<span class="ruby-identifier">join</span>)
+</pre>
           
           
 
@@ -378,10 +380,11 @@ ossl_rand_add(VALUE self, VALUE str, VALUE entropy)
           <p>Generates <code>string</code> with <code>length</code> number of
 cryptographically strong pseudo-random bytes.</p>
 
-<pre>Example:
+<h3 id="method-c-random_bytes-label-Example">Example<span><a href="#method-c-random_bytes-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
-  OpenSSL::Random.random_bytes(12)
-  =&gt; &quot;...&quot;</pre>
+<pre class="ruby"><span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Random</span>.<span class="ruby-identifier">random_bytes</span>(<span class="ruby-value">12</span>)
+<span class="ruby-comment">#=&gt; &quot;...&quot;</span>
+</pre>
           
           
 
