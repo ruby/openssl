@@ -229,8 +229,8 @@ ossl_rsa_initialize(int argc, VALUE *argv, VALUE self)
     if(rb_scan_args(argc, argv, "02", &arg, &pass) == 0) {
 	rsa = RSA_new();
     }
-    else if (FIXNUM_P(arg)) {
-	rsa = rsa_generate(FIX2INT(arg), NIL_P(pass) ? RSA_F4 : NUM2ULONG(pass));
+    else if (RB_INTEGER_TYPE_P(arg)) {
+	rsa = rsa_generate(NUM2INT(arg), NIL_P(pass) ? RSA_F4 : NUM2ULONG(pass));
 	if (!rsa) ossl_raise(eRSAError, NULL);
     }
     else {
@@ -686,7 +686,7 @@ OSSL_PKEY_BN_DEF3(rsa, RSA, crt_params, dmp1, dmq1, iqmp)
 /*
  * INIT
  */
-#define DefRSAConst(x) rb_define_const(cRSA, #x,INT2FIX(RSA_##x))
+#define DefRSAConst(x) rb_define_const(cRSA, #x, INT2NUM(RSA_##x))
 
 void
 Init_ossl_rsa(void)

@@ -212,11 +212,11 @@ ossl_dh_initialize(int argc, VALUE *argv, VALUE self)
     if(rb_scan_args(argc, argv, "02", &arg, &gen) == 0) {
       dh = DH_new();
     }
-    else if (FIXNUM_P(arg)) {
+    else if (RB_INTEGER_TYPE_P(arg)) {
 	if (!NIL_P(gen)) {
 	    g = NUM2INT(gen);
 	}
-	if (!(dh = dh_generate(FIX2INT(arg), g))) {
+	if (!(dh = dh_generate(NUM2INT(arg), g))) {
 	    ossl_raise(eDHError, NULL);
 	}
     }

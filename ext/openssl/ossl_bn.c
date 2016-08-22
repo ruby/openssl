@@ -76,24 +76,65 @@ ossl_bn_new(const BIGNUM *bn)
 }
 
 static BIGNUM *
+integer_to_bnptr(VALUE obj, BIGNUM *orig)
+{
+    BIGNUM *bn;
+
+    if (FIXNUM_P(obj)) {
+	long i;
+	unsigned char bin[sizeof(long)];
+	long n = FIX2LONG(obj);
+	unsigned long un = labs(n);
+
+	for (i = sizeof(long) - 1; 0 <= i; i--) {
+	    bin[i] = un & 0xff;
+	    un >>= 8;
+	}
+
+	bn = BN_bin2bn(bin, sizeof(bin), orig);
+	if (!bn)
+	    ossl_raise(eBNError, "BN_bin2bn");
+	if (n < 0)
+	    BN_set_negative(bn, 1);
+    }
+    else { /* assuming Bignum */
+	size_t len = rb_absint_size(obj, NULL);
+	unsigned char *bin;
+	VALUE buf;
+	int sign;
+
+	if (INT_MAX < len) {
+	    rb_raise(eBNError, "bignum too long");
+	}
+	bin = (unsigned char*)ALLOCV_N(unsigned char, buf, len);
+	sign = rb_integer_pack(obj, bin, len, 1, 0, INTEGER_PACK_BIG_ENDIAN);
+
+	bn = BN_bin2bn(bin, (int)len, orig);
+	ALLOCV_END(buf);
+	if (!bn)
+	    ossl_raise(eBNError, "BN_bin2bn");
+	if (sign < 0)
+	    BN_set_negative(bn, 1);
+    }
+
+    return bn;
+}
+
+static BIGNUM *
 try_convert_to_bnptr(VALUE obj)
 {
     BIGNUM *bn = NULL;
     VALUE newobj;
 
-    if (RTEST(rb_obj_is_kind_of(obj, cBN))) {
+    if (rb_obj_is_kind_of(obj, cBN)) {
 	GetBN(obj, bn);
-    } else switch (TYPE(obj)) {
-    case T_FIXNUM:
-    case T_BIGNUM:
-	obj = rb_String(obj);
-	newobj = NewBN(cBN);	/* GC bug */
-	if (!BN_dec2bn(&bn, StringValueCStr(obj))) {
-	    ossl_raise(eBNError, NULL);
-	}
-	SetBN(newobj, bn); /* Handle potencial mem leaks */
-	break;
     }
+    else if (RB_INTEGER_TYPE_P(obj)) {
+	newobj = NewBN(cBN); /* Handle potencial mem leaks */
+	bn = integer_to_bnptr(obj, NULL);
+	SetBN(newobj, bn);
+    }
+
     return bn;
 }
 
@@ -153,45 +194,13 @@ ossl_bn_initialize(int argc, VALUE *argv, VALUE self)
 	base = NUM2INT(bs);
     }
 
-    if (RB_TYPE_P(str, T_FIXNUM)) {
-	long i;
-	unsigned char bin[sizeof(long)];
-	long n = FIX2LONG(str);
-	unsigned long un = labs(n);
-
-	for (i = sizeof(long) - 1; 0 <= i; i--) {
-	    bin[i] = un&0xff;
-	    un >>= 8;
-	}
-
+    if (RB_INTEGER_TYPE_P(str)) {
 	GetBN(self, bn);
-	if (!BN_bin2bn(bin, sizeof(bin), bn)) {
-	    ossl_raise(eBNError, NULL);
-	}
-	if (n < 0) BN_set_negative(bn, 1);
+	integer_to_bnptr(str, bn);
+
 	return self;
     }
-    else if (RB_TYPE_P(str, T_BIGNUM)) {
-        size_t len = rb_absint_size(str, NULL);
-	unsigned char *bin;
-	VALUE buf;
-        int sign;
 
-        if (INT_MAX < len) {
-            rb_raise(eBNError, "bignum too long");
-        }
-        bin = (unsigned char*)ALLOCV_N(unsigned char, buf, len);
-        sign = rb_integer_pack(str, bin, len, 1, 0, INTEGER_PACK_BIG_ENDIAN);
-
-	GetBN(self, bn);
-	if (!BN_bin2bn(bin, (int)len, bn)) {
-	    ALLOCV_END(buf);
-	    ossl_raise(eBNError, NULL);
-	}
-	ALLOCV_END(buf);
-	if (sign < 0) BN_set_negative(bn, 1);
-	return self;
-    }
     if (RTEST(rb_obj_is_kind_of(str, cBN))) {
 	BIGNUM *other;
 
@@ -807,7 +816,7 @@ ossl_bn_s_generate_prime(int argc, VALUE *argv, VALUE klass)
     {						\
 	BIGNUM *bn;				\
 	GetBN(self, bn);			\
-	return INT2FIX(BN_##func(bn));		\
+	return INT2NUM(BN_##func(bn));		\
     }
 
 /*
@@ -848,7 +857,7 @@ ossl_bn_copy(VALUE self, VALUE other)
     {							\
 	BIGNUM *bn1, *bn2 = GetBNPtr(other);		\
 	GetBN(self, bn1);				\
-	return INT2FIX(BN_##func(bn1, bn2));		\
+	return INT2NUM(BN_##func(bn1, bn2));		\
     }
 
 /*

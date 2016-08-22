@@ -221,8 +221,8 @@ ossl_dsa_initialize(int argc, VALUE *argv, VALUE self)
     if(rb_scan_args(argc, argv, "02", &arg, &pass) == 0) {
         dsa = DSA_new();
     }
-    else if (FIXNUM_P(arg)) {
-	if (!(dsa = dsa_generate(FIX2INT(arg)))) {
+    else if (RB_INTEGER_TYPE_P(arg)) {
+	if (!(dsa = dsa_generate(NUM2INT(arg)))) {
 	    ossl_raise(eDSAError, NULL);
 	}
     }
