@@ -807,7 +807,7 @@ ossl_bn_s_generate_prime(int argc, VALUE *argv, VALUE klass)
     {						\
 	BIGNUM *bn;				\
 	GetBN(self, bn);			\
-	return INT2FIX(BN_##func(bn));		\
+	return INT2NUM(BN_##func(bn));		\
     }
 
 /*
@@ -848,7 +848,7 @@ ossl_bn_copy(VALUE self, VALUE other)
     {							\
 	BIGNUM *bn1, *bn2 = GetBNPtr(other);		\
 	GetBN(self, bn1);				\
-	return INT2FIX(BN_##func(bn1, bn2));		\
+	return INT2NUM(BN_##func(bn1, bn2));		\
     }
 
 /*

@@ -277,7 +277,7 @@ ossl_tmp_dh_callback(SSL *ssl, int is_export, int keylength)
 
     rb_ssl = (VALUE)SSL_get_ex_data(ssl, ossl_ssl_ex_ptr_idx);
 
-    args = rb_ary_new_from_args(3, rb_ssl, INT2FIX(is_export), INT2FIX(keylength));
+    args = rb_ary_new_from_args(3, rb_ssl, INT2NUM(is_export), INT2NUM(keylength));
 
     dh = rb_protect(ossl_call_tmp_dh_callback, args, NULL);
     if (!RTEST(dh)) return NULL;
@@ -311,7 +311,7 @@ ossl_tmp_ecdh_callback(SSL *ssl, int is_export, int keylength)
 
     rb_ssl = (VALUE)SSL_get_ex_data(ssl, ossl_ssl_ex_ptr_idx);
 
-    args = rb_ary_new_from_args(3, rb_ssl, INT2FIX(is_export), INT2FIX(keylength));
+    args = rb_ary_new_from_args(3, rb_ssl, INT2NUM(is_export), INT2NUM(keylength));
 
     ecdh = rb_protect(ossl_call_tmp_ecdh_callback, args, NULL);
     if (!RTEST(ecdh)) return NULL;
@@ -938,8 +938,8 @@ ossl_ssl_cipher_to_ary(const SSL_CIPHER *cipher)
     rb_ary_push(ary, rb_str_new2(SSL_CIPHER_get_name(cipher)));
     rb_ary_push(ary, rb_str_new2(SSL_CIPHER_get_version(cipher)));
     bits = SSL_CIPHER_get_bits(cipher, &alg_bits);
-    rb_ary_push(ary, INT2FIX(bits));
-    rb_ary_push(ary, INT2FIX(alg_bits));
+    rb_ary_push(ary, INT2NUM(bits));
+    rb_ary_push(ary, INT2NUM(alg_bits));
 
     return ary;
 }
@@ -1125,7 +1125,7 @@ ossl_sslctx_get_security_level(VALUE self)
     GetSSLCTX(self, ctx);
 
 #if defined(HAVE_SSL_CTX_GET_SECURITY_LEVEL)
-    return INT2FIX(SSL_CTX_get_security_level(ctx));
+    return INT2NUM(SSL_CTX_get_security_level(ctx));
 #else
     (void)ctx;
     return INT2FIX(0);
@@ -2104,7 +2104,7 @@ ossl_ssl_get_verify_result(VALUE self)
 
     GetSSL(self, ssl);
 
-    return INT2FIX(SSL_get_verify_result(ssl));
+    return INT2NUM(SSL_get_verify_result(ssl));
 }
 
 /*
@@ -2514,22 +2514,22 @@ Init_ossl_ssl(void)
     /*
      * No session caching for client or server
      */
-    rb_define_const(cSSLContext, "SESSION_CACHE_OFF", LONG2FIX(SSL_SESS_CACHE_OFF));
+    rb_define_const(cSSLContext, "SESSION_CACHE_OFF", LONG2NUM(SSL_SESS_CACHE_OFF));
 
     /*
      * Client sessions are added to the session cache
      */
-    rb_define_const(cSSLContext, "SESSION_CACHE_CLIENT", LONG2FIX(SSL_SESS_CACHE_CLIENT)); /* doesn't actually do anything in 0.9.8e */
+    rb_define_const(cSSLContext, "SESSION_CACHE_CLIENT", LONG2NUM(SSL_SESS_CACHE_CLIENT)); /* doesn't actually do anything in 0.9.8e */
 
     /*
      * Server sessions are added to the session cache
      */
-    rb_define_const(cSSLContext, "SESSION_CACHE_SERVER", LONG2FIX(SSL_SESS_CACHE_SERVER));
+    rb_define_const(cSSLContext, "SESSION_CACHE_SERVER", LONG2NUM(SSL_SESS_CACHE_SERVER));
 
     /*
      * Both client and server sessions are added to the session cache
      */
-    rb_define_const(cSSLContext, "SESSION_CACHE_BOTH", LONG2FIX(SSL_SESS_CACHE_BOTH)); /* no different than CACHE_SERVER in 0.9.8e */
+    rb_define_const(cSSLContext, "SESSION_CACHE_BOTH", LONG2NUM(SSL_SESS_CACHE_BOTH)); /* no different than CACHE_SERVER in 0.9.8e */
 
     /*
      * Normally the session cache is checked for expired sessions every 255
@@ -2537,7 +2537,7 @@ Init_ossl_ssl(void)
      * the automatic flushing may be disabled and #flush_sessions can be
      * called explicitly.
      */
-    rb_define_const(cSSLContext, "SESSION_CACHE_NO_AUTO_CLEAR", LONG2FIX(SSL_SESS_CACHE_NO_AUTO_CLEAR));
+    rb_define_const(cSSLContext, "SESSION_CACHE_NO_AUTO_CLEAR", LONG2NUM(SSL_SESS_CACHE_NO_AUTO_CLEAR));
 
     /*
      * Always perform external lookups of sessions even if they are in the
@@ -2545,18 +2545,18 @@ Init_ossl_ssl(void)
      *
      * This flag has no effect on clients
      */
-    rb_define_const(cSSLContext, "SESSION_CACHE_NO_INTERNAL_LOOKUP", LONG2FIX(SSL_SESS_CACHE_NO_INTERNAL_LOOKUP));
+    rb_define_const(cSSLContext, "SESSION_CACHE_NO_INTERNAL_LOOKUP", LONG2NUM(SSL_SESS_CACHE_NO_INTERNAL_LOOKUP));
 
     /*
      * Never automatically store sessions in the internal store.
      */
-    rb_define_const(cSSLContext, "SESSION_CACHE_NO_INTERNAL_STORE", LONG2FIX(SSL_SESS_CACHE_NO_INTERNAL_STORE));
+    rb_define_const(cSSLContext, "SESSION_CACHE_NO_INTERNAL_STORE", LONG2NUM(SSL_SESS_CACHE_NO_INTERNAL_STORE));
 
     /*
      * Enables both SESSION_CACHE_NO_INTERNAL_LOOKUP and
      * SESSION_CACHE_NO_INTERNAL_STORE.
      */
-    rb_define_const(cSSLContext, "SESSION_CACHE_NO_INTERNAL", LONG2FIX(SSL_SESS_CACHE_NO_INTERNAL));
+    rb_define_const(cSSLContext, "SESSION_CACHE_NO_INTERNAL", LONG2NUM(SSL_SESS_CACHE_NO_INTERNAL));
 
     rb_define_method(cSSLContext, "session_add",     ossl_sslctx_session_add, 1);
     rb_define_method(cSSLContext, "session_remove",     ossl_sslctx_session_remove, 1);

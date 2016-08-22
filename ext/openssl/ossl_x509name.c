@@ -326,10 +326,7 @@ ossl_x509name_to_a(VALUE self)
 	    vname = rb_str_new2(short_name); /*do not free*/
 	}
 	value = X509_NAME_ENTRY_get_data(entry);
-	ary = rb_ary_new3(3,
-			  vname,
-			  rb_str_new((const char *)value->data, value->length),
-			  INT2FIX(value->type));
+	ary = rb_ary_new3(3, vname, asn1str_to_str(value), INT2NUM(value->type));
 	rb_ary_push(ret, ary);
     }
     return ret;

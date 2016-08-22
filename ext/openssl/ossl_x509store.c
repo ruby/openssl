@@ -582,7 +582,7 @@ ossl_x509stctx_get_err(VALUE self)
 
     GetX509StCtx(self, ctx);
 
-    return INT2FIX(X509_STORE_CTX_get_error(ctx));
+    return INT2NUM(X509_STORE_CTX_get_error(ctx));
 }
 
 /*
@@ -629,7 +629,7 @@ ossl_x509stctx_get_err_depth(VALUE self)
 
     GetX509StCtx(self, ctx);
 
-    return INT2FIX(X509_STORE_CTX_get_error_depth(ctx));
+    return INT2NUM(X509_STORE_CTX_get_error_depth(ctx));
 }
 
 /*

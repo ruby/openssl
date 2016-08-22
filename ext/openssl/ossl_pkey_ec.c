@@ -1143,7 +1143,7 @@ static VALUE ossl_ec_group_get_asn1_flag(VALUE self)
 
     flag = EC_GROUP_get_asn1_flag(group);
 
-    return INT2FIX(flag);
+    return INT2NUM(flag);
 }
 
 /*
