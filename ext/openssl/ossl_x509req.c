@@ -47,26 +47,6 @@ static const rb_data_type_t ossl_x509req_type = {
 /*
  * Public functions
  */
-VALUE
-ossl_x509req_new(X509_REQ *req)
-{
-    X509_REQ *new;
-    VALUE obj;
-
-    obj = NewX509Req(cX509Req);
-    if (!req) {
-	new = X509_REQ_new();
-    } else {
-	new = X509_REQ_dup(req);
-    }
-    if (!new) {
-	ossl_raise(eX509ReqError, NULL);
-    }
-    SetX509Req(obj, new);
-
-    return obj;
-}
-
 X509_REQ *
 GetX509ReqPtr(VALUE obj)
 {
@@ -75,19 +55,6 @@ GetX509ReqPtr(VALUE obj)
     GetX509Req(obj, req);
 
     return req;
-}
-
-X509_REQ *
-DupX509ReqPtr(VALUE obj)
-{
-    X509_REQ *req, *new;
-
-    GetX509Req(obj, req);
-    if (!(new = X509_REQ_dup(req))) {
-	ossl_raise(eX509ReqError, NULL);
-    }
-
-    return new;
 }
 
 /*

@@ -67,40 +67,6 @@ ossl_x509_new(X509 *x509)
     return obj;
 }
 
-VALUE
-ossl_x509_new_from_file(VALUE filename)
-{
-    X509 *x509;
-    FILE *fp;
-    VALUE obj;
-
-    rb_check_safe_obj(filename);
-    obj = NewX509(cX509Cert);
-    if (!(fp = fopen(StringValueCStr(filename), "r"))) {
-	ossl_raise(eX509CertError, "%s", strerror(errno));
-    }
-    rb_fd_fix_cloexec(fileno(fp));
-    x509 = PEM_read_X509(fp, NULL, NULL, NULL);
-    /*
-     * prepare for DER...
-#if !defined(OPENSSL_NO_FP_API)
-    if (!x509) {
-    	(void)ERR_get_error();
-	rewind(fp);
-
-	x509 = d2i_X509_fp(fp, NULL);
-    }
-#endif
-    */
-    fclose(fp);
-    if (!x509) {
-	ossl_raise(eX509CertError, NULL);
-    }
-    SetX509(obj, x509);
-
-    return obj;
-}
-
 X509 *
 GetX509CertPtr(VALUE obj)
 {

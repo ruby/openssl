@@ -44,14 +44,6 @@ ossl_obj2bio(VALUE obj)
     return bio;
 }
 
-BIO *
-ossl_protect_obj2bio(VALUE obj, int *status)
-{
-     BIO *ret = NULL;
-     ret = (BIO*)rb_protect((VALUE (*)(VALUE))ossl_obj2bio, obj, status);
-     return ret;
-}
-
 VALUE
 ossl_membio2str(BIO *bio)
 {

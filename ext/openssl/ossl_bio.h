@@ -11,7 +11,6 @@
 #define _OSSL_BIO_H_
 
 BIO *ossl_obj2bio(VALUE);
-BIO *ossl_protect_obj2bio(VALUE,int*);
 VALUE ossl_membio2str(BIO*);
 
 #endif

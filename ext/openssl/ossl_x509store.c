@@ -122,34 +122,12 @@ static const rb_data_type_t ossl_x509store_type = {
 /*
  * Public functions
  */
-VALUE
-ossl_x509store_new(X509_STORE *store)
-{
-    VALUE obj;
-
-    obj = NewX509Store(cX509Store);
-    SetX509Store(obj, store);
-
-    return obj;
-}
-
 X509_STORE *
 GetX509StorePtr(VALUE obj)
 {
     X509_STORE *store;
 
     GetX509Store(obj, store);
-
-    return store;
-}
-
-X509_STORE *
-DupX509StorePtr(VALUE obj)
-{
-    X509_STORE *store;
-
-    GetX509Store(obj, store);
-    X509_STORE_up_ref(store);
 
     return store;
 }

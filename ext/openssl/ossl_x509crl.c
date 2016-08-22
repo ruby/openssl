@@ -57,17 +57,6 @@ GetX509CRLPtr(VALUE obj)
     return crl;
 }
 
-X509_CRL *
-DupX509CRLPtr(VALUE obj)
-{
-    X509_CRL *crl;
-
-    GetX509CRL(obj, crl);
-    X509_CRL_up_ref(crl);
-
-    return crl;
-}
-
 VALUE
 ossl_x509crl_new(X509_CRL *crl)
 {

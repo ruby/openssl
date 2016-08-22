@@ -250,7 +250,7 @@ VALUE eOSSLError;
 /*
  * Convert to DER string
  */
-ID ossl_s_to_der;
+static ID ossl_s_to_der;
 
 VALUE
 ossl_to_der(VALUE obj)

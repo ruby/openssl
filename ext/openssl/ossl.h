@@ -56,19 +56,6 @@ extern VALUE eOSSLError;
   }\
 } while (0)
 
-#define OSSL_Check_Instance(obj, klass) do {\
-  if (!rb_obj_is_instance_of((obj), (klass))) {\
-    ossl_raise(rb_eTypeError, "wrong argument (%"PRIsVALUE")! (Expected instance of %"PRIsVALUE")",\
-               rb_obj_class(obj), (klass));\
-  }\
-} while (0)
-
-#define OSSL_Check_Same_Class(obj1, obj2) do {\
-  if (!rb_obj_is_instance_of((obj1), rb_obj_class(obj2))) {\
-    ossl_raise(rb_eTypeError, "wrong argument type");\
-  }\
-} while (0)
-
 /*
  * Type conversions
  */
@@ -85,7 +72,6 @@ extern VALUE eOSSLError;
 /*
  * Data Conversion
  */
-STACK_OF(X509) *ossl_x509_ary2sk0(VALUE);
 STACK_OF(X509) *ossl_x509_ary2sk(VALUE);
 STACK_OF(X509) *ossl_protect_x509_ary2sk(VALUE,int*);
 VALUE ossl_x509_sk2ary(const STACK_OF(X509) *certs);
@@ -129,7 +115,6 @@ int ossl_pem_passwd_cb(char *, int, int, void *);
 /*
  * ERRor messages
  */
-#define OSSL_ErrMsg() ERR_reason_error_string(ERR_get_error())
 NORETURN(void ossl_raise(VALUE, const char *, ...));
 /* Clear OpenSSL error queue. If dOSSL is set, rb_warn() them. */
 void ossl_clear_error(void);
@@ -137,7 +122,6 @@ void ossl_clear_error(void);
 /*
  * String to DER String
  */
-extern ID ossl_s_to_der;
 VALUE ossl_to_der(VALUE);
 VALUE ossl_to_der_if_possible(VALUE);
 
@@ -155,20 +139,9 @@ extern VALUE dOSSL;
   } \
 } while (0)
 
-#define OSSL_Warning(fmt, ...) do { \
-  OSSL_Debug((fmt), ##__VA_ARGS__); \
-  rb_warning((fmt), ##__VA_ARGS__); \
-} while (0)
-
-#define OSSL_Warn(fmt, ...) do { \
-  OSSL_Debug((fmt), ##__VA_ARGS__); \
-  rb_warn((fmt), ##__VA_ARGS__); \
-} while (0)
 #else
 void ossl_debug(const char *, ...);
 #define OSSL_Debug ossl_debug
-#define OSSL_Warning rb_warning
-#define OSSL_Warn rb_warn
 #endif
 
 /*
