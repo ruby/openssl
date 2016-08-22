@@ -1698,11 +1698,11 @@ static VALUE ossl_ec_point_mul(int argc, VALUE *argv, VALUE self)
     Require_EC_POINT(result, point_result);
 
     rb_scan_args(argc, argv, "12", &arg1, &arg2, &arg3);
-    if (rb_obj_is_kind_of(arg1, cBN)) {
+    if (!RB_TYPE_P(arg1, T_ARRAY)) {
 	BIGNUM *bn = GetBNPtr(arg1);
-	if (argc >= 2)
-	    bn_g = GetBNPtr(arg2);
 
+	if (!NIL_P(arg2))
+	    bn_g = GetBNPtr(arg2);
 	if (EC_POINT_mul(group, point_result, bn_g, point_self, bn, ossl_bn_ctx) != 1)
 	    ossl_raise(eEC_POINT, NULL);
     } else {
@@ -1715,9 +1715,8 @@ static VALUE ossl_ec_point_mul(int argc, VALUE *argv, VALUE self)
 	const EC_POINT **points;
 	const BIGNUM **bignums;
 
-	if (!rb_obj_is_kind_of(arg1, rb_cArray) ||
-	    !rb_obj_is_kind_of(arg2, rb_cArray))
-	    ossl_raise(rb_eTypeError, "points must be array");
+	Check_Type(arg1, T_ARRAY);
+	Check_Type(arg2, T_ARRAY);
 	if (RARRAY_LEN(arg1) != RARRAY_LEN(arg2) + 1) /* arg2 must be 1 larger */
 	    ossl_raise(rb_eArgError, "bns must be 1 longer than points; see the documentation");
 
@@ -1731,7 +1730,7 @@ static VALUE ossl_ec_point_mul(int argc, VALUE *argv, VALUE self)
 	for (i = 0; i < num - 1; i++)
 	    SafeRequire_EC_POINT(RARRAY_AREF(arg2, i), points[i + 1]);
 
-	if (argc >= 3)
+	if (!NIL_P(arg3))
 	    bn_g = GetBNPtr(arg3);
 
 	if (EC_POINTs_mul(group, point_result, bn_g, num, points, bignums, ossl_bn_ctx) != 1) {
