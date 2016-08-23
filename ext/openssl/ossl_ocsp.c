@@ -1602,15 +1602,15 @@ ossl_ocspcid_get_issuer_name_hash(VALUE self)
 {
     OCSP_CERTID *id;
     ASN1_OCTET_STRING *name_hash;
-    char *hexbuf;
+    VALUE ret;
 
     GetOCSPCertId(self, id);
     OCSP_id_get0_info(&name_hash, NULL, NULL, NULL, id);
 
-    if (string2hex(name_hash->data, name_hash->length, &hexbuf, NULL) < 0)
-	ossl_raise(eOCSPError, "string2hex");
+    ret = rb_str_new(NULL, name_hash->length * 2);
+    ossl_bin2hex(name_hash->data, RSTRING_PTR(ret), name_hash->length);
 
-    return ossl_buf2str(hexbuf, name_hash->length * 2);
+    return ret;
 }
 
 /*
@@ -1625,15 +1625,15 @@ ossl_ocspcid_get_issuer_key_hash(VALUE self)
 {
     OCSP_CERTID *id;
     ASN1_OCTET_STRING *key_hash;
-    char *hexbuf;
+    VALUE ret;
 
     GetOCSPCertId(self, id);
     OCSP_id_get0_info(NULL, NULL, &key_hash, NULL, id);
 
-    if (string2hex(key_hash->data, key_hash->length, &hexbuf, NULL) < 0)
-	ossl_raise(eOCSPError, "string2hex");
+    ret = rb_str_new(NULL, key_hash->length * 2);
+    ossl_bin2hex(key_hash->data, RSTRING_PTR(ret), key_hash->length);
 
-    return ossl_buf2str(hexbuf, key_hash->length * 2);
+    return ret;
 }
 
 /*

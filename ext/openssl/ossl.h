@@ -97,11 +97,6 @@ extern VALUE eOSSLError;
 } while (0)
 
 /*
- * String to HEXString conversion
- */
-int string2hex(const unsigned char *, int, char **, int *);
-
-/*
  * Data Conversion
  */
 STACK_OF(X509) *ossl_x509_ary2sk0(VALUE);
@@ -118,6 +113,11 @@ do{\
     assert(newlen <= len);\
     rb_str_set_len((str), newlen);\
 }while(0)
+/*
+ * Convert binary string to hex string. The caller is responsible for
+ * ensuring out has (2 * len) bytes of capacity.
+ */
+void ossl_bin2hex(unsigned char *in, char *out, size_t len);
 
 /*
  * Our default PEM callback

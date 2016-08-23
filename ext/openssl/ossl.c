@@ -12,40 +12,6 @@
 #include <ruby/thread_native.h> /* for OpenSSL < 1.1.0 locks */
 
 /*
- * String to HEXString conversion
- */
-int
-string2hex(const unsigned char *buf, int buf_len, char **hexbuf, int *hexbuf_len)
-{
-    static const char hex[]="0123456789abcdef";
-    int i, len;
-
-    if (buf_len < 0 || buf_len > INT_MAX / 2) { /* PARANOIA? */
-	return -1;
-    }
-    len = 2 * buf_len;
-    if (!hexbuf) { /* if no buf, return calculated len */
-	if (hexbuf_len) {
-	    *hexbuf_len = len;
-	}
-	return len;
-    }
-    if (!(*hexbuf = OPENSSL_malloc(len + 1))) {
-	return -1;
-    }
-    for (i = 0; i < buf_len; i++) {
-	(*hexbuf)[2 * i] = hex[((unsigned char)buf[i]) >> 4];
-	(*hexbuf)[2 * i + 1] = hex[buf[i] & 0x0f];
-    }
-    (*hexbuf)[2 * i] = '\0';
-
-    if (hexbuf_len) {
-	*hexbuf_len = len;
-    }
-    return len;
-}
-
-/*
  * Data Conversion
  */
 #define OSSL_IMPL_ARY2SK(name, type, expected_class, dup)	\
@@ -143,6 +109,21 @@ ossl_buf2str(char *buf, int len)
     if(status) rb_jump_tag(status);
 
     return str;
+}
+
+void
+ossl_bin2hex(unsigned char *in, char *out, size_t inlen)
+{
+    const char *hex = "0123456789abcdef";
+    size_t i;
+
+    assert(inlen <= LONG_MAX / 2);
+    for (i = 0; i < inlen; i++) {
+	unsigned char p = in[i];
+
+	out[i * 2 + 0] = hex[p >> 4];
+	out[i * 2 + 1] = hex[p & 0x0f];
+    }
 }
 
 /*
