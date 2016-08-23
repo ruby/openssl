@@ -220,65 +220,6 @@ ossl_pem_passwd_cb(char *buf, int max_len, int flag, void *pwd_)
 }
 
 /*
- * Verify callback
- */
-int ossl_store_ctx_ex_verify_cb_idx;
-int ossl_store_ex_verify_cb_idx;
-
-struct ossl_verify_cb_args {
-    VALUE proc;
-    VALUE preverify_ok;
-    VALUE store_ctx;
-};
-
-static VALUE
-ossl_call_verify_cb_proc(struct ossl_verify_cb_args *args)
-{
-    return rb_funcall(args->proc, rb_intern("call"), 2,
-		      args->preverify_ok, args->store_ctx);
-}
-
-int
-ossl_verify_cb_call(VALUE proc, int ok, X509_STORE_CTX *ctx)
-{
-    VALUE rctx, ret;
-    struct ossl_verify_cb_args args;
-    int state;
-
-    if (NIL_P(proc))
-	return ok;
-
-    ret = Qfalse;
-    rctx = rb_protect((VALUE(*)(VALUE))ossl_x509stctx_new, (VALUE)ctx, &state);
-    if (state) {
-	rb_set_errinfo(Qnil);
-	rb_warn("StoreContext initialization failure");
-    }
-    else {
-	args.proc = proc;
-	args.preverify_ok = ok ? Qtrue : Qfalse;
-	args.store_ctx = rctx;
-	ret = rb_protect((VALUE(*)(VALUE))ossl_call_verify_cb_proc, (VALUE)&args, &state);
-	if (state) {
-	    rb_set_errinfo(Qnil);
-	    rb_warn("exception in verify_callback is ignored");
-	}
-	ossl_x509stctx_clear_ptr(rctx);
-    }
-    if (ret == Qtrue) {
-	X509_STORE_CTX_set_error(ctx, X509_V_OK);
-	ok = 1;
-    }
-    else {
-	if (X509_STORE_CTX_get_error(ctx) == X509_V_OK)
-	    X509_STORE_CTX_set_error(ctx, X509_V_ERR_CERT_REJECTED);
-	ok = 0;
-    }
-
-    return ok;
-}
-
-/*
  * main module
  */
 VALUE mOSSL;
@@ -1156,14 +1097,6 @@ Init_openssl(void)
     rb_define_module_function(mOSSL, "debug", ossl_debug_get, 0);
     rb_define_module_function(mOSSL, "debug=", ossl_debug_set, 1);
     rb_define_module_function(mOSSL, "errors", ossl_get_errors, 0);
-
-    /*
-     * Verify callback Proc index for ext-data
-     */
-    if ((ossl_store_ctx_ex_verify_cb_idx = X509_STORE_CTX_get_ex_new_index(0, (void *)"ossl_store_ctx_ex_verify_cb_idx", 0, 0, 0)) < 0)
-        ossl_raise(eOSSLError, "X509_STORE_CTX_get_ex_new_index");
-    if ((ossl_store_ex_verify_cb_idx = X509_STORE_get_ex_new_index(0, (void *)"ossl_store_ex_verify_cb_idx", 0, 0, 0)) < 0)
-        ossl_raise(eOSSLError, "X509_STORE_get_ex_new_index");
 
     /*
      * Get ID of to_der

@@ -121,14 +121,6 @@ NORETURN(void ossl_raise(VALUE, const char *, ...));
 void ossl_clear_error(void);
 
 /*
- * Verify callback
- */
-extern int ossl_store_ctx_ex_verify_cb_idx;
-extern int ossl_store_ex_verify_cb_idx;
-
-int ossl_verify_cb_call(VALUE, int, X509_STORE_CTX *);
-
-/*
  * String to DER String
  */
 extern ID ossl_s_to_der;
