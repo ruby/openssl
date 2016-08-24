@@ -270,9 +270,6 @@ static VALUE ossl_ssl_session_to_pem(VALUE self)
 {
 	SSL_SESSION *ctx;
 	BIO *out;
-	BUF_MEM *buf;
-	VALUE str;
-	int i;
 
 	GetSSLSession(self, ctx);
 
@@ -280,16 +277,13 @@ static VALUE ossl_ssl_session_to_pem(VALUE self)
 		ossl_raise(eSSLSession, "BIO_s_mem()");
 	}
 
-	if (!(i=PEM_write_bio_SSL_SESSION(out, ctx))) {
+	if (!PEM_write_bio_SSL_SESSION(out, ctx)) {
 		BIO_free(out);
 		ossl_raise(eSSLSession, "SSL_SESSION_print()");
 	}
 
-	BIO_get_mem_ptr(out, &buf);
-	str = rb_str_new(buf->data, buf->length);
-	BIO_free(out);
 
-	return str;
+	return ossl_membio2str(out);
 }
 
 
@@ -303,8 +297,6 @@ static VALUE ossl_ssl_session_to_text(VALUE self)
 {
 	SSL_SESSION *ctx;
 	BIO *out;
-	BUF_MEM *buf;
-	VALUE str;
 
 	GetSSLSession(self, ctx);
 
@@ -317,11 +309,7 @@ static VALUE ossl_ssl_session_to_text(VALUE self)
 		ossl_raise(eSSLSession, "SSL_SESSION_print()");
 	}
 
-	BIO_get_mem_ptr(out, &buf);
-	str = rb_str_new(buf->data, buf->length);
-	BIO_free(out);
-
-	return str;
+	return ossl_membio2str(out);
 }
 
 
