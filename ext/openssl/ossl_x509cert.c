@@ -456,10 +456,10 @@ static VALUE
 ossl_x509_get_not_before(VALUE self)
 {
     X509 *x509;
-    ASN1_UTCTIME *asn1time;
+    const ASN1_TIME *asn1time;
 
     GetX509(self, x509);
-    if (!(asn1time = X509_get_notBefore(x509))) { /* NO DUP - don't free! */
+    if (!(asn1time = X509_get0_notBefore(x509))) {
 	ossl_raise(eX509CertError, NULL);
     }
 
@@ -474,10 +474,15 @@ static VALUE
 ossl_x509_set_not_before(VALUE self, VALUE time)
 {
     X509 *x509;
+    ASN1_TIME *asn1time;
 
     GetX509(self, x509);
-    if (!ossl_x509_time_adjust(X509_get_notBefore(x509), time))
-	ossl_raise(eX509CertError, NULL);
+    asn1time = ossl_x509_time_adjust(NULL, time);
+    if (!X509_set_notBefore(x509, asn1time)) {
+	ASN1_TIME_free(asn1time);
+	ossl_raise(eX509CertError, "X509_set_notBefore");
+    }
+    ASN1_TIME_free(asn1time);
 
     return time;
 }
@@ -490,10 +495,10 @@ static VALUE
 ossl_x509_get_not_after(VALUE self)
 {
     X509 *x509;
-    ASN1_TIME *asn1time;
+    const ASN1_TIME *asn1time;
 
     GetX509(self, x509);
-    if (!(asn1time = X509_get_notAfter(x509))) { /* NO DUP - don't free! */
+    if (!(asn1time = X509_get0_notAfter(x509))) {
 	ossl_raise(eX509CertError, NULL);
     }
 
@@ -508,10 +513,15 @@ static VALUE
 ossl_x509_set_not_after(VALUE self, VALUE time)
 {
     X509 *x509;
+    ASN1_TIME *asn1time;
 
     GetX509(self, x509);
-    if (!ossl_x509_time_adjust(X509_get_notAfter(x509), time))
-	ossl_raise(eX509CertError, NULL);
+    asn1time = ossl_x509_time_adjust(NULL, time);
+    if (!X509_set_notAfter(x509, asn1time)) {
+	ASN1_TIME_free(asn1time);
+	ossl_raise(eX509CertError, "X509_set_notAfter");
+    }
+    ASN1_TIME_free(asn1time);
 
     return time;
 }

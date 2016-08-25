@@ -914,7 +914,7 @@ ossl_ocspbres_get_status(VALUE self)
 	status = OCSP_single_get0_status(single, &reason, &revtime,
 					 &thisupd, &nextupd);
 	if(status < 0) continue;
-	if(!(cid = OCSP_CERTID_dup(OCSP_SINGLERESP_get0_id(single))))
+	if(!(cid = OCSP_CERTID_dup((OCSP_CERTID *)OCSP_SINGLERESP_get0_id(single)))) /* FIXME */
 	    ossl_raise(eOCSPError, NULL);
 	ary = rb_ary_new();
 	rb_ary_push(ary, ossl_ocspcertid_new(cid));
@@ -1279,7 +1279,7 @@ ossl_ocspsres_get_certid(VALUE self)
     OCSP_CERTID *id;
 
     GetOCSPSingleRes(self, sres);
-    id = OCSP_CERTID_dup(OCSP_SINGLERESP_get0_id(sres));
+    id = OCSP_CERTID_dup((OCSP_CERTID *)OCSP_SINGLERESP_get0_id(sres)); /* FIXME */
 
     return ossl_ocspcertid_new(id);
 }

@@ -142,11 +142,15 @@ static VALUE
 ossl_x509revoked_set_serial(VALUE self, VALUE num)
 {
     X509_REVOKED *rev;
-    ASN1_INTEGER *ai;
+    ASN1_INTEGER *asn1int;
 
     GetX509Rev(self, rev);
-    ai = X509_REVOKED_get0_serialNumber(rev);
-    X509_REVOKED_set_serialNumber(rev, num_to_asn1integer(num, ai));
+    asn1int = num_to_asn1integer(num, NULL);
+    if (!X509_REVOKED_set_serialNumber(rev, asn1int)) {
+	ASN1_INTEGER_free(asn1int);
+	ossl_raise(eX509RevError, "X509_REVOKED_set_serialNumber");
+    }
+    ASN1_INTEGER_free(asn1int);
 
     return num;
 }
@@ -165,10 +169,15 @@ static VALUE
 ossl_x509revoked_set_time(VALUE self, VALUE time)
 {
     X509_REVOKED *rev;
+    ASN1_TIME *asn1time;
 
     GetX509Rev(self, rev);
-    if (!ossl_x509_time_adjust(X509_REVOKED_get0_revocationDate(rev), time))
-	ossl_raise(eX509RevError, NULL);
+    asn1time = ossl_x509_time_adjust(NULL, time);
+    if (!X509_REVOKED_set_revocationDate(rev, asn1time)) {
+	ASN1_TIME_free(asn1time);
+	ossl_raise(eX509RevError, "X509_REVOKED_set_revocationDate");
+    }
+    ASN1_TIME_free(asn1time);
 
     return time;
 }

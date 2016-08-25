@@ -302,7 +302,7 @@ static VALUE
 ossl_x509req_get_signature_algorithm(VALUE self)
 {
     X509_REQ *req;
-    X509_ALGOR *alg;
+    const X509_ALGOR *alg;
     BIO *out;
     BUF_MEM *buf;
     VALUE str;
@@ -312,7 +312,7 @@ ossl_x509req_get_signature_algorithm(VALUE self)
     if (!(out = BIO_new(BIO_s_mem()))) {
 	ossl_raise(eX509ReqError, NULL);
     }
-    X509_REQ_get0_signature(NULL, &alg, req);
+    X509_REQ_get0_signature(req, NULL, &alg);
     if (!i2a_ASN1_OBJECT(out, alg->algorithm)) {
 	BIO_free(out);
 	ossl_raise(eX509ReqError, NULL);
