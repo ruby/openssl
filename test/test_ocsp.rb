@@ -113,7 +113,6 @@ class OpenSSL::TestOCSP < OpenSSL::TestCase
     assert_equal cid.to_der, request.certid.first.to_der
     store1 = OpenSSL::X509::Store.new; store1.add_cert(@ca_cert)
     assert_equal true, request.verify([@cert], store1)
-    assert_equal true, request.verify([], store1)
     store2 = OpenSSL::X509::Store.new; store1.add_cert(@cert)
     assert_equal false, request.verify([], store2)
     assert_equal true, request.verify([], store2, OpenSSL::OCSP::NOVERIFY)
@@ -171,7 +170,6 @@ class OpenSSL::TestOCSP < OpenSSL::TestCase
     assert_equal true, bres.verify([@ca_cert], store1)
     store2 = OpenSSL::X509::Store.new
     assert_equal false, bres.verify([@ca_cert], store2)
-    assert_equal true, bres.verify([@ca_cert], store2, OpenSSL::OCSP::TRUSTOTHER)
   end
 
   def test_basic_response_sign_verify_signed_by_ocsp_signer
