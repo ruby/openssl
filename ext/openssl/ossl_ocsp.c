@@ -442,7 +442,7 @@ ossl_ocspreq_verify(int argc, VALUE *argv, VALUE self)
     x509s = ossl_x509_ary2sk(certs);
     result = OCSP_request_verify(req, x509s, x509st, flg);
     sk_X509_pop_free(x509s, X509_free);
-    if (!result)
+    if (result <= 0)
 	ossl_clear_error();
 
     return result > 0 ? Qtrue : Qfalse;
@@ -1120,7 +1120,7 @@ ossl_ocspbres_verify(int argc, VALUE *argv, VALUE self)
     result = OCSP_basic_verify(bs, x509s, x509st, flg);
 #endif
     sk_X509_pop_free(x509s, X509_free);
-    if (!result)
+    if (result <= 0)
 	ossl_clear_error();
 
     return result > 0 ? Qtrue : Qfalse;
