@@ -373,14 +373,16 @@ ossl_ocspreq_get_certid(VALUE self)
  *
  * Signs this OCSP request using +cert+, +key+ and optional +digest+. If
  * +digest+ is not specified, SHA-1 is used. +certs+ is an optional Array of
- * additional certificates that will be included in the request. If +certs+ is
- * not specified, flag OpenSSL::OCSP::NOCERTS is set. Pass an empty array to
- * include only the signer certificate.
+ * additional certificates which are included in the request in addition to
+ * the signer certificate. Note that if +certs+ is nil or not given, flag
+ * OpenSSL::OCSP::NOCERTS is enabled. Pass an empty array to include only the
+ * signer certificate.
  *
- * +flags+ can include:
- * OpenSSL::OCSP::NOCERTS::    don't include certificates
+ * +flags+ can be a bitwise OR of the following constants:
+ *
+ * OpenSSL::OCSP::NOCERTS::
+ *   Don't include any certificates in the request. +certs+ will be ignored.
  */
-
 static VALUE
 ossl_ocspreq_sign(int argc, VALUE *argv, VALUE self)
 {
@@ -404,7 +406,7 @@ ossl_ocspreq_sign(int argc, VALUE *argv, VALUE self)
     else
 	md = GetDigestPtr(digest);
     if (NIL_P(certs))
-	flags |= OCSP_NOCERTS;
+	flg |= OCSP_NOCERTS;
     else
 	x509s = ossl_x509_ary2sk(certs);
 
