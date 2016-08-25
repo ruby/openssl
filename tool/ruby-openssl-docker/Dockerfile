@@ -42,8 +42,8 @@ RUN curl -s https://www.openssl.org/source/openssl-1.0.2h.tar.gz | tar -C /build
       shared debug-linux-x86_64 && \
     make && make install_sw
 
-RUN curl -s https://www.openssl.org/source/openssl-1.1.0-pre6.tar.gz | tar -C /build/openssl -xzf - && \
-    cd /build/openssl/openssl-1.1.0-pre6 && \
+RUN curl -s https://www.openssl.org/source/openssl-1.1.0.tar.gz | tar -C /build/openssl -xzf - && \
+    cd /build/openssl/openssl-1.1.0 && \
     ./Configure \
       --prefix=/opt/openssl/openssl-1.1.0 \
       enable-crypto-mdebug enable-crypto-mdebug-backtrace \
