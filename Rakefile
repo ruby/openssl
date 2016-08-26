@@ -12,12 +12,6 @@ Rake::TestTask.new do |t|
   t.warning = true
 end
 
-Rake::ExtensionTask.new('test/mdebug') do |ext|
-  # hack to emit mdebug.so under ./test/
-  ext.ext_dir = 'test/mdebug'
-  ext.lib_dir = '.'
-end
-
 RDoc::Task.new do |rdoc|
   rdoc.main = "README.md"
   rdoc.rdoc_files.include("*.md", "lib/**/*.rb", "ext/**/*.c")

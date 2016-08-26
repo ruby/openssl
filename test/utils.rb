@@ -9,28 +9,6 @@ begin
 rescue LoadError
 end
 
-# Compile OpenSSL with crypto-mdebug and run this test suite with OSSL_MDEBUG=1
-# environment variable to enable memory leak check.
-if ENV["OSSL_MDEBUG"] == "1"
-  begin
-    require "mdebug"
-  rescue LoadError
-  end
-
-  if OpenSSL.respond_to?(:print_mem_leaks)
-    END {
-      # FIXME: maybe extract fixtures to file and load dynamically?
-      OpenSSL::TestUtils.constants.each do |v|
-        OpenSSL::TestUtils.send(:remove_const, v)
-      end
-      GC.start
-      OpenSSL.print_mem_leaks
-    }
-  else
-    warn "OpenSSL is not built with crypto-mdebug"
-  end
-end
-
 require "test/unit"
 require "digest/md5"
 require 'tempfile'
