@@ -32,7 +32,7 @@ Make sure that your branch does:
 * Have good commit messages
 * Follow Ruby's coding style ([DeveloperHowTo])
 * Pass the test suite successfully (see "Testing")
-* Add an entry to [History.rdoc] if necessary
+* Add an entry to [History.md] if necessary
 
 ## Testing
 
@@ -127,4 +127,4 @@ _Thanks for your contributions!_
 [HackerOne]: https://hackerone.com/ruby
 [Security]: https://www.ruby-lang.org/en/security/
 [pull request]: https://github.com/ruby/openssl/compare
-[History.rdoc]: https://github.com/ruby/openssl/tree/master/History.rdoc
+[History.md]: https://github.com/ruby/openssl/tree/master/History.md
