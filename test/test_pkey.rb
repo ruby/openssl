@@ -11,13 +11,13 @@ class OpenSSL::TestPKey < OpenSSL::PKeyTestCase
     },
     OpenSSL::PKey::DSA => {
       key: OpenSSL::TestUtils::TEST_KEY_DSA512,
-      digest: OpenSSL::Digest::SHA1,
+      digest: OpenSSL::TestUtils::DSA_SIGNATURE_DIGEST,
     },
   }
   if defined?(OpenSSL::PKey::EC)
     PKEYS[OpenSSL::PKey::EC] = {
       key: OpenSSL::TestUtils::TEST_KEY_EC_P256V1,
-      digest: OpenSSL::TestUtils::DSA_SIGNATURE_DIGEST,
+      digest: OpenSSL::Digest::SHA1,
     }
   end
 
