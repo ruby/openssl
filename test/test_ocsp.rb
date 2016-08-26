@@ -118,10 +118,20 @@ class OpenSSL::TestOCSP < OpenSSL::TestCase
     # without signer cert
     req = OpenSSL::OCSP::Request.new.add_certid(cid)
     req.sign(@cert, @cert_key, nil)
-    assert_equal true, req.verify([@cert], store)
     assert_equal false, req.verify([@cert2], store)
     assert_equal false, req.verify([], store) # no signer
     assert_equal false, req.verify([], store, OpenSSL::OCSP::NOVERIFY)
+
+    assert_equal true, req.verify([@cert], store, OpenSSL::OCSP::NOINTERN)
+    ret = req.verify([@cert], store)
+    if ret || OpenSSL::OPENSSL_VERSION =~ /OpenSSL/ && OpenSSL::OPENSSL_VERSION_NUMBER >= 0x10002000
+      assert_equal true, ret
+    else
+      # RT2560; OCSP_request_verify() does not find signer cert from 'certs' when
+      # OCSP_NOINTERN is not specified.
+      # fixed by OpenSSL 1.0.1j, 1.0.2 and LibreSSL 2.4.2
+      pend "RT2560: ocsp_req_find_signer"
+    end
   end
 
   def test_request_nonce
