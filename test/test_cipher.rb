@@ -284,6 +284,39 @@ class OpenSSL::TestCipher < OpenSSL::TestCase
 
   end
 
+  def test_aes_ocb_tag_len
+    pt = "You should all use Authenticated Encryption!"
+    cipher = OpenSSL::Cipher.new("aes-128-ocb").encrypt
+    cipher.auth_tag_len = 14
+    cipher.iv_len = 8
+    key = cipher.random_key
+    iv = cipher.random_iv
+    cipher.auth_data = "aad"
+    ct  = cipher.update(pt) + cipher.final
+    tag = cipher.auth_tag
+    assert_equal(14, tag.size)
+
+    decipher = OpenSSL::Cipher.new("aes-128-ocb").decrypt
+    decipher.auth_tag_len = 14
+    decipher.auth_tag = tag
+    decipher.iv_len = 8
+    decipher.key = key
+    decipher.iv = iv
+    decipher.auth_data = "aad"
+    assert_equal(pt, decipher.update(ct) + decipher.final)
+
+    decipher = OpenSSL::Cipher.new("aes-128-ocb").decrypt
+    decipher.auth_tag_len = 9
+    decipher.auth_tag = tag[0, 9]
+    decipher.iv_len = 8
+    decipher.key = key
+    decipher.iv = iv
+    decipher.auth_data = "aad"
+    assert_raise(OpenSSL::Cipher::CipherError) {
+      decipher.update(ct) + decipher.final
+    }
+  end if has_cipher?("aes-128-ocb")
+
   private
 
   def new_encryptor(algo)
