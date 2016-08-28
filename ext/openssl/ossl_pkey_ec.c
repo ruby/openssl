@@ -108,6 +108,8 @@ static ID ID_uncompressed;
 static ID ID_compressed;
 static ID ID_hybrid;
 
+static ID id_i_group, id_i_key;
+
 static VALUE ec_instance(VALUE klass, EC_KEY *ec)
 {
     EVP_PKEY *pkey;
@@ -279,7 +281,7 @@ static VALUE ossl_ec_key_initialize(int argc, VALUE *argv, VALUE self)
 	ossl_raise(eECError, "EVP_PKEY_assign_EC_KEY");
     }
 
-    rb_iv_set(self, "@group", Qnil);
+    rb_ivar_set(self, id_i_group, Qnil);
 
     return self;
 }
@@ -302,7 +304,7 @@ ossl_ec_key_initialize_copy(VALUE self, VALUE other)
 	EC_KEY_free(ec_new);
 	ossl_raise(eECError, "EVP_PKEY_assign_EC_KEY");
     }
-    rb_iv_set(self, "@group", Qnil); /* EC_KEY_dup() also copies the EC_GROUP */
+    rb_ivar_set(self, id_i_group, Qnil); /* EC_KEY_dup() also copies the EC_GROUP */
 
     return self;
 }
@@ -323,7 +325,7 @@ static VALUE ossl_ec_key_get_group(VALUE self)
 
     Require_EC_KEY(self, ec);
 
-    group_v = rb_iv_get(self, "@group");
+    group_v = rb_attr_get(self, id_i_group);
     if (!NIL_P(group_v))
         return group_v;
 
@@ -332,8 +334,8 @@ static VALUE ossl_ec_key_get_group(VALUE self)
         SafeGet_ec_group(group_v, ec_group);
         ec_group->group = group;
         ec_group->dont_free = 1;
-        rb_iv_set(group_v, "@key", self);
-        rb_iv_set(self, "@group", group_v);
+	rb_ivar_set(group_v, id_i_key, self);
+	rb_ivar_set(self, id_i_group, group_v);
         return group_v;
     }
 
@@ -365,17 +367,17 @@ static VALUE ossl_ec_key_set_group(VALUE self, VALUE group_v)
     Require_EC_KEY(self, ec);
     SafeRequire_EC_GROUP(group_v, group);
 
-    old_group_v = rb_iv_get(self, "@group");
+    old_group_v = rb_attr_get(self, id_i_group);
     if (!NIL_P(old_group_v)) {
         ossl_ec_group *old_ec_group;
         SafeGet_ec_group(old_group_v, old_ec_group);
 
         old_ec_group->group = NULL;
         old_ec_group->dont_free = 0;
-        rb_iv_set(old_group_v, "@key", Qnil);
+	rb_ivar_set(old_group_v, id_i_key, Qnil);
     }
 
-    rb_iv_set(self, "@group", Qnil);
+    rb_ivar_set(self, id_i_group, Qnil);
 
     if (EC_KEY_set_group(ec, group) != 1)
         ossl_raise(eECError, "EC_KEY_set_group");
@@ -445,7 +447,7 @@ static VALUE ossl_ec_point_dup(const EC_POINT *point, VALUE group_v)
     new_point->point = EC_POINT_dup(point, group);
     if (new_point->point == NULL)
         ossl_raise(eEC_POINT, "EC_POINT_dup");
-    rb_iv_set(obj, "@group", group_v);
+    rb_ivar_set(obj, id_i_group, group_v);
 
     return obj;
 }
@@ -944,7 +946,7 @@ ossl_ec_group_initialize_copy(VALUE self, VALUE other)
     if (!ec_group->group)
 	ossl_raise(eEC_GROUP, "EC_GROUP_dup");
 
-    rb_iv_set(self, "@key", Qnil);
+    rb_ivar_set(self, id_i_key, Qnil);
 
     return self;
 }
@@ -1431,7 +1433,7 @@ static VALUE ossl_ec_point_initialize(int argc, VALUE *argv, VALUE self)
         if (rb_obj_is_kind_of(arg1, cEC_POINT)) {
             const EC_POINT *arg_point;
 
-            group_v = rb_iv_get(arg1, "@group");
+	    group_v = rb_attr_get(arg1, id_i_group);
             SafeRequire_EC_GROUP(group_v, group);
             SafeRequire_EC_POINT(arg1, arg_point);
 
@@ -1480,7 +1482,7 @@ static VALUE ossl_ec_point_initialize(int argc, VALUE *argv, VALUE self)
 
     ec_point->point = point;
 
-    rb_iv_set(self, "@group", group_v);
+    rb_ivar_set(self, id_i_group, group_v);
 
     return self;
 }
@@ -1498,14 +1500,14 @@ ossl_ec_point_initialize_copy(VALUE self, VALUE other)
 	ossl_raise(eEC_POINT, "EC::Point already initialized");
     SafeRequire_EC_POINT(other, orig);
 
-    group_v = rb_obj_dup(rb_iv_get(other, "@group"));
+    group_v = rb_obj_dup(rb_attr_get(other, id_i_group));
     SafeRequire_EC_GROUP(group_v, group);
 
     ec_point->point = EC_POINT_dup(orig, group);
     if (!ec_point->point)
 	ossl_raise(eEC_POINT, "EC_POINT_dup");
-    rb_iv_set(self, "@key", Qnil);
-    rb_iv_set(self, "@group", group_v);
+    rb_ivar_set(self, id_i_key, Qnil);
+    rb_ivar_set(self, id_i_group, group_v);
 
     return self;
 }
@@ -1518,8 +1520,8 @@ ossl_ec_point_initialize_copy(VALUE self, VALUE other)
 static VALUE ossl_ec_point_eql(VALUE a, VALUE b)
 {
     EC_POINT *point1, *point2;
-    VALUE group_v1 = rb_iv_get(a, "@group");
-    VALUE group_v2 = rb_iv_get(b, "@group");
+    VALUE group_v1 = rb_attr_get(a, id_i_group);
+    VALUE group_v2 = rb_attr_get(b, id_i_group);
     const EC_GROUP *group;
 
     if (ossl_ec_group_eql(group_v1, group_v2) == Qfalse)
@@ -1542,7 +1544,7 @@ static VALUE ossl_ec_point_eql(VALUE a, VALUE b)
 static VALUE ossl_ec_point_is_at_infinity(VALUE self)
 {
     EC_POINT *point;
-    VALUE group_v = rb_iv_get(self, "@group");
+    VALUE group_v = rb_attr_get(self, id_i_group);
     const EC_GROUP *group;
 
     Require_EC_POINT(self, point);
@@ -1564,7 +1566,7 @@ static VALUE ossl_ec_point_is_at_infinity(VALUE self)
 static VALUE ossl_ec_point_is_on_curve(VALUE self)
 {
     EC_POINT *point;
-    VALUE group_v = rb_iv_get(self, "@group");
+    VALUE group_v = rb_attr_get(self, id_i_group);
     const EC_GROUP *group;
 
     Require_EC_POINT(self, point);
@@ -1586,7 +1588,7 @@ static VALUE ossl_ec_point_is_on_curve(VALUE self)
 static VALUE ossl_ec_point_make_affine(VALUE self)
 {
     EC_POINT *point;
-    VALUE group_v = rb_iv_get(self, "@group");
+    VALUE group_v = rb_attr_get(self, id_i_group);
     const EC_GROUP *group;
 
     Require_EC_POINT(self, point);
@@ -1605,7 +1607,7 @@ static VALUE ossl_ec_point_make_affine(VALUE self)
 static VALUE ossl_ec_point_invert(VALUE self)
 {
     EC_POINT *point;
-    VALUE group_v = rb_iv_get(self, "@group");
+    VALUE group_v = rb_attr_get(self, id_i_group);
     const EC_GROUP *group;
 
     Require_EC_POINT(self, point);
@@ -1624,7 +1626,7 @@ static VALUE ossl_ec_point_invert(VALUE self)
 static VALUE ossl_ec_point_set_to_infinity(VALUE self)
 {
     EC_POINT *point;
-    VALUE group_v = rb_iv_get(self, "@group");
+    VALUE group_v = rb_attr_get(self, id_i_group);
     const EC_GROUP *group;
 
     Require_EC_POINT(self, point);
@@ -1646,7 +1648,7 @@ static VALUE ossl_ec_point_to_bn(VALUE self)
 {
     EC_POINT *point;
     VALUE bn_obj;
-    VALUE group_v = rb_iv_get(self, "@group");
+    VALUE group_v = rb_attr_get(self, id_i_group);
     const EC_GROUP *group;
     point_conversion_form_t form;
     BIGNUM *bn;
@@ -1686,7 +1688,7 @@ static VALUE ossl_ec_point_mul(int argc, VALUE *argv, VALUE self)
 {
     EC_POINT *point_self, *point_result;
     const EC_GROUP *group;
-    VALUE group_v = rb_iv_get(self, "@group");
+    VALUE group_v = rb_attr_get(self, id_i_group);
     VALUE arg1, arg2, arg3, result;
     const BIGNUM *bn_g = NULL;
 
@@ -1885,6 +1887,9 @@ void Init_ossl_ec(void)
 
     rb_define_method(cEC_POINT, "to_bn", ossl_ec_point_to_bn, 0);
     rb_define_method(cEC_POINT, "mul", ossl_ec_point_mul, -1);
+
+    id_i_group = rb_intern("@group");
+    id_i_key = rb_intern("@key");
 }
 
 #else /* defined NO_EC */
