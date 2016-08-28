@@ -322,6 +322,16 @@ module OpenSSL::TestPairM
     }
   end
 
+  def test_partial_tls_record_read_nonblock
+    ssl_pair { |s1, s2|
+      # the beginning of a TLS record
+      s1.io.write("\x17")
+      # should raise a IO::WaitReadable since a full TLS record is not available
+      # for reading
+      assert_raise(IO::WaitReadable) { s2.read_nonblock(1) }
+    }
+  end
+
   def tcp_pair
     host = "127.0.0.1"
     serv = TCPServer.new(host, 0)
