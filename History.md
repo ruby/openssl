@@ -1,4 +1,4 @@
-Version x.y.z
+Version 2.0.0
 =============
 
 This is the first release of openssl gem, formerly a standard library of Ruby,
