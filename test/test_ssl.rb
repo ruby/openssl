@@ -1123,9 +1123,9 @@ if OpenSSL::OPENSSL_VERSION_NUMBER >= 0x10002000
     ssl2 = OpenSSL::SSL::SSLSocket.new(sock2, ctx2)
 
     t = Thread.new {
-      assert_handshake_error { ssl2.connect }
+      ssl2.connect_nonblock(exception: false)
     }
-    assert_raise(TypeError) { ssl1.accept }
+    assert_raise_with_message(TypeError, /nil/) { ssl1.accept }
     t.join
   ensure
     sock1&.close
