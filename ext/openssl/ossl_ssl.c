@@ -604,7 +604,8 @@ ssl_renegotiation_cb(const SSL *ssl)
     (void) rb_funcall(cb, rb_intern("call"), 1, ssl_obj);
 }
 
-#if defined(HAVE_SSL_CTX_SET_NEXT_PROTO_SELECT_CB) || defined(HAVE_SSL_CTX_SET_ALPN_SELECT_CB)
+#if defined(HAVE_SSL_CTX_SET_NEXT_PROTO_SELECT_CB) || \
+    defined(HAVE_SSL_CTX_SET_ALPN_SELECT_CB)
 static VALUE
 ssl_npn_encode_protocol_i(VALUE cur, VALUE encoded)
 {
@@ -627,14 +628,20 @@ ssl_encode_npn_protocols(VALUE protocols)
     return encoded;
 }
 
-static int
-ssl_npn_select_cb_common(VALUE cb, const unsigned char **out, unsigned char *outlen, const unsigned char *in, unsigned int inlen)
+struct npn_select_cb_common_args {
+    VALUE cb;
+    const unsigned char *in;
+    unsigned inlen;
+};
+
+static VALUE
+npn_select_cb_common_i(VALUE tmp)
 {
-    VALUE selected;
-    long len;
-    VALUE protocols = rb_ary_new();
+    struct npn_select_cb_common_args *args = (void *)tmp;
+    const unsigned char *in = args->in, *in_end = in + args->inlen;
     unsigned char l;
-    const unsigned char *in_end = in + inlen;
+    long len;
+    VALUE selected, protocols = rb_ary_new();
 
     /* assume OpenSSL verifies this format */
     /* The format is len_1|proto_1|...|len_n|proto_n */
@@ -644,21 +651,44 @@ ssl_npn_select_cb_common(VALUE cb, const unsigned char **out, unsigned char *out
 	in += l;
     }
 
-    selected = rb_funcall(cb, rb_intern("call"), 1, protocols);
+    selected = rb_funcall(args->cb, rb_intern("call"), 1, protocols);
     StringValue(selected);
     len = RSTRING_LEN(selected);
     if (len < 1 || len >= 256) {
 	ossl_raise(eSSLError, "Selected protocol name must have length 1..255");
     }
+
+    return selected;
+}
+
+static int
+ssl_npn_select_cb_common(SSL *ssl, VALUE cb, const unsigned char **out,
+			 unsigned char *outlen, const unsigned char *in,
+			 unsigned int inlen)
+{
+    VALUE selected;
+    int status;
+    struct npn_select_cb_common_args args = { cb, in, inlen };
+
+    selected = rb_protect(npn_select_cb_common_i, (VALUE)&args, &status);
+    if (status) {
+	VALUE ssl_obj = (VALUE)SSL_get_ex_data(ssl, ossl_ssl_ex_ptr_idx);
+
+	rb_ivar_set(ssl_obj, ID_callback_state, INT2NUM(status));
+	return SSL_TLSEXT_ERR_ALERT_FATAL;
+    }
+
     *out = (unsigned char *)RSTRING_PTR(selected);
-    *outlen = (unsigned char)len;
+    *outlen = (unsigned char)RSTRING_LEN(selected);
 
     return SSL_TLSEXT_ERR_OK;
 }
+#endif
 
 #ifdef HAVE_SSL_CTX_SET_NEXT_PROTO_SELECT_CB
 static int
-ssl_npn_advertise_cb(SSL *ssl, const unsigned char **out, unsigned int *outlen, void *arg)
+ssl_npn_advertise_cb(SSL *ssl, const unsigned char **out, unsigned int *outlen,
+		     void *arg)
 {
     VALUE protocols = (VALUE)arg;
 
@@ -669,30 +699,32 @@ ssl_npn_advertise_cb(SSL *ssl, const unsigned char **out, unsigned int *outlen, 
 }
 
 static int
-ssl_npn_select_cb(SSL *s, unsigned char **out, unsigned char *outlen, const unsigned char *in, unsigned int inlen, void *arg)
+ssl_npn_select_cb(SSL *ssl, unsigned char **out, unsigned char *outlen,
+		  const unsigned char *in, unsigned int inlen, void *arg)
 {
     VALUE sslctx_obj, cb;
 
     sslctx_obj = (VALUE) arg;
     cb = rb_iv_get(sslctx_obj, "@npn_select_cb");
 
-    return ssl_npn_select_cb_common(cb, (const unsigned char **)out, outlen, in, inlen);
+    return ssl_npn_select_cb_common(ssl, cb, (const unsigned char **)out,
+				    outlen, in, inlen);
 }
 #endif
 
 #ifdef HAVE_SSL_CTX_SET_ALPN_SELECT_CB
 static int
-ssl_alpn_select_cb(SSL *ssl, const unsigned char **out, unsigned char *outlen, const unsigned char *in, unsigned int inlen, void *arg)
+ssl_alpn_select_cb(SSL *ssl, const unsigned char **out, unsigned char *outlen,
+		   const unsigned char *in, unsigned int inlen, void *arg)
 {
     VALUE sslctx_obj, cb;
 
     sslctx_obj = (VALUE) arg;
     cb = rb_iv_get(sslctx_obj, "@alpn_select_cb");
 
-    return ssl_npn_select_cb_common(cb, out, outlen, in, inlen);
+    return ssl_npn_select_cb_common(ssl, cb, out, outlen, in, inlen);
 }
 #endif
-#endif /* HAVE_SSL_CTX_SET_NEXT_PROTO_SELECT_CB || HAVE_SSL_CTX_SET_ALPN_SELECT_CB */
 
 /* This function may serve as the entry point to support further callbacks. */
 static void

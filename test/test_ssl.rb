@@ -1126,6 +1126,7 @@ if OpenSSL::OPENSSL_VERSION_NUMBER >= 0x10002000
       assert_handshake_error { ssl2.connect }
     }
     assert_raise(TypeError) { ssl1.accept }
+    t.join
   ensure
     sock1&.close
     sock2&.close
