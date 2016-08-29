@@ -83,6 +83,8 @@ Notable changes
     OpenSSL::SSL::Context#set_params.
     [[GH ruby/openssl#60]](https://github.com/ruby/openssl/pull/60)
 
+  - Add ALPN support [[GH ruby/openssl#18]](https://github.com/ruby/openssl/pull/18)
+
 Removals
 --------
 
