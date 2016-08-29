@@ -916,7 +916,11 @@ ossl_sslctx_setup(VALUE self)
     val = rb_iv_get(self, "@alpn_protocols");
     if (!NIL_P(val)) {
 	VALUE rprotos = ssl_encode_npn_protocols(val);
-	SSL_CTX_set_alpn_protos(ctx, (unsigned char *)RSTRING_PTR(rprotos), RSTRING_LENINT(rprotos));
+
+	/* returns 0 on success */
+	if (SSL_CTX_set_alpn_protos(ctx, (unsigned char *)RSTRING_PTR(rprotos),
+				    RSTRING_LENINT(rprotos)))
+	    ossl_raise(eSSLError, "SSL_CTX_set_alpn_protos");
 	OSSL_Debug("SSL ALPN values added");
     }
     if (RTEST(rb_iv_get(self, "@alpn_select_cb"))) {
