@@ -43,7 +43,8 @@ Notable changes
 
 * OpenSSL::OCSP
 
-  - Accessor methods are added to OpenSSL::OCSP::CertificateId. [Feature #7181]
+  - Accessor methods are added to OpenSSL::OCSP::CertificateId.
+    [[Feature #7181]](https://bugs.ruby-lang.org/issues/7181)
 
   - OpenSSL::OCSP::Request and BasicResponse can be signed with non-SHA-1 hash
     algorithm. [[Feature #11552]](https://bugs.ruby-lang.org/issues/11552)
@@ -55,7 +56,8 @@ Notable changes
   - OpenSSL::OCSP::BasicResponse#add_status accepts absolute times. They used to
     accept only relative seconds from the current time.
 
-* OpenSSL::PKey::EC follows the general PKey interface. [[Bug #6567]]
+* OpenSSL::PKey::EC follows the general PKey interface.
+  [[Bug #6567]](https://bugs.ruby-lang.org/issues/6567)
 
 * OpenSSL::PKey.read raises OpenSSL::PKey::PKeyError instead of ArgumentError
   for consistency with OpenSSL::PKey::{DH,DSA,RSA,EC}#new.
