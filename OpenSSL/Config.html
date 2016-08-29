@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "../";
+  var index_rel_prefix = "../";
 </script>
 
 <script src="../js/jquery.js"></script>
@@ -121,7 +122,8 @@
 <p>Configuration for the openssl library.</p>
 
 <p>Many system&#39;s installation of openssl library will depend on your
-system configuration. See the value of OpenSSL::Config::DEFAULT_CONFIG_FILE
+system configuration. See the value of <a
+href="Config.html#DEFAULT_CONFIG_FILE">OpenSSL::Config::DEFAULT_CONFIG_FILE</a>
 for the location of the file for your host.</p>
 
 <p>See also <a
@@ -206,7 +208,7 @@ configured.</p>
 
           
           <div class="method-source-code" id="new-source">
-            <pre><span class="ruby-comment"># File lib/openssl/config.rb, line 246</span>
+            <pre><span class="ruby-comment"># File lib/openssl/config.rb, line 245</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">filename</span> = <span class="ruby-keyword">nil</span>)
   <span class="ruby-ivar">@data</span> = {}
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">filename</span>
@@ -250,7 +252,7 @@ using parse_config.</p>
 
           
           <div class="method-source-code" id="parse-source">
-            <pre><span class="ruby-comment"># File lib/openssl/config.rb, line 36</span>
+            <pre><span class="ruby-comment"># File lib/openssl/config.rb, line 35</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">parse</span>(<span class="ruby-identifier">string</span>)
   <span class="ruby-identifier">c</span> = <span class="ruby-identifier">new</span>()
   <span class="ruby-identifier">parse_config</span>(<span class="ruby-constant">StringIO</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">string</span>)).<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">section</span>, <span class="ruby-identifier">hash</span><span class="ruby-operator">|</span>
@@ -290,7 +292,7 @@ configuration data.</p>
 
           
           <div class="method-source-code" id="parse_config-source">
-            <pre><span class="ruby-comment"># File lib/openssl/config.rb, line 52</span>
+            <pre><span class="ruby-comment"># File lib/openssl/config.rb, line 51</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">parse_config</span>(<span class="ruby-identifier">io</span>)
   <span class="ruby-keyword">begin</span>
     <span class="ruby-identifier">parse_config_lines</span>(<span class="ruby-identifier">io</span>)
@@ -351,7 +353,7 @@ configuration data.</p>
 
           
           <div class="method-source-code" id="5B-5D-source">
-            <pre><span class="ruby-comment"># File lib/openssl/config.rb, line 340</span>
+            <pre><span class="ruby-comment"># File lib/openssl/config.rb, line 339</span>
 <span class="ruby-keyword">def</span> <span class="ruby-operator">[]</span>(<span class="ruby-identifier">section</span>)
   <span class="ruby-ivar">@data</span>[<span class="ruby-identifier">section</span>] <span class="ruby-operator">||</span> {}
 <span class="ruby-keyword">end</span></pre>
@@ -407,7 +409,7 @@ in <code>pairs</code> with the existing <code>section</code>. For example:</p>
 
           
           <div class="method-source-code" id="5B-5D-3D-source">
-            <pre><span class="ruby-comment"># File lib/openssl/config.rb, line 377</span>
+            <pre><span class="ruby-comment"># File lib/openssl/config.rb, line 376</span>
 <span class="ruby-keyword">def</span> <span class="ruby-operator">[]=</span>(<span class="ruby-identifier">section</span>, <span class="ruby-identifier">pairs</span>)
   <span class="ruby-identifier">check_modify</span>
   <span class="ruby-ivar">@data</span>[<span class="ruby-identifier">section</span>] <span class="ruby-operator">||=</span> {}
@@ -464,7 +466,7 @@ section to a new value:</p>
 
           
           <div class="method-source-code" id="add_value-source">
-            <pre><span class="ruby-comment"># File lib/openssl/config.rb, line 319</span>
+            <pre><span class="ruby-comment"># File lib/openssl/config.rb, line 318</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">add_value</span>(<span class="ruby-identifier">section</span>, <span class="ruby-identifier">key</span>, <span class="ruby-identifier">value</span>)
   <span class="ruby-identifier">check_modify</span>
   (<span class="ruby-ivar">@data</span>[<span class="ruby-identifier">section</span>] <span class="ruby-operator">||=</span> {})[<span class="ruby-identifier">key</span>] = <span class="ruby-identifier">value</span>
@@ -505,7 +507,7 @@ section to a new value:</p>
 
           
           <div class="method-source-code" id="each-source">
-            <pre><span class="ruby-comment"># File lib/openssl/config.rb, line 438</span>
+            <pre><span class="ruby-comment"># File lib/openssl/config.rb, line 437</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">each</span>
   <span class="ruby-ivar">@data</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">section</span>, <span class="ruby-identifier">hash</span><span class="ruby-operator">|</span>
     <span class="ruby-identifier">hash</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">key</span>, <span class="ruby-identifier">value</span><span class="ruby-operator">|</span>
@@ -558,7 +560,7 @@ section to a new value:</p>
 
           
           <div class="method-source-code" id="get_value-source">
-            <pre><span class="ruby-comment"># File lib/openssl/config.rb, line 274</span>
+            <pre><span class="ruby-comment"># File lib/openssl/config.rb, line 273</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">get_value</span>(<span class="ruby-identifier">section</span>, <span class="ruby-identifier">key</span>)
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">section</span>.<span class="ruby-identifier">nil?</span>
     <span class="ruby-identifier">raise</span> <span class="ruby-constant">TypeError</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;nil not allowed&#39;</span>)
@@ -596,7 +598,7 @@ name and its sections.</p>
 
           
           <div class="method-source-code" id="inspect-source">
-            <pre><span class="ruby-comment"># File lib/openssl/config.rb, line 449</span>
+            <pre><span class="ruby-comment"># File lib/openssl/config.rb, line 448</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">inspect</span>
   <span class="ruby-node">&quot;#&lt;#{self.class.name} sections=#{sections.inspect}&gt;&quot;</span>
 <span class="ruby-keyword">end</span></pre>
@@ -629,7 +631,7 @@ name and its sections.</p>
 
           
           <div class="method-source-code" id="sections-source">
-            <pre><span class="ruby-comment"># File lib/openssl/config.rb, line 387</span>
+            <pre><span class="ruby-comment"># File lib/openssl/config.rb, line 386</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">sections</span>
   <span class="ruby-ivar">@data</span>.<span class="ruby-identifier">keys</span>
 <span class="ruby-keyword">end</span></pre>
@@ -687,7 +689,7 @@ href="Config.html#method-i-to_s">to_s</a> and then parse it later:</p>
 
           
           <div class="method-source-code" id="to_s-source">
-            <pre><span class="ruby-comment"># File lib/openssl/config.rb, line 417</span>
+            <pre><span class="ruby-comment"># File lib/openssl/config.rb, line 416</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">to_s</span>
   <span class="ruby-identifier">ary</span> = []
   <span class="ruby-ivar">@data</span>.<span class="ruby-identifier">keys</span>.<span class="ruby-identifier">sort</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">section</span><span class="ruby-operator">|</span>
@@ -717,7 +719,7 @@ href="Config.html#method-i-to_s">to_s</a> and then parse it later:</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.2.
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.3.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "../";
+  var index_rel_prefix = "../";
 </script>
 
 <script src="../js/jquery.js"></script>
@@ -94,6 +95,8 @@
     <li ><a href="#method-i-auth_tag">#auth_tag</a>
     
     <li ><a href="#method-i-auth_tag-3D">#auth_tag=</a>
+    
+    <li ><a href="#method-i-auth_tag_len-3D">#auth_tag_len=</a>
     
     <li ><a href="#method-i-authenticated-3F">#authenticated?</a>
     
@@ -598,8 +601,9 @@ be stored along with the ciphertext, then set on the decryption cipher to
 authenticate the contents of the ciphertext against changes. If the
 optional integer parameter <code>tag_len</code> is given, the returned tag
 will be <code>tag_len</code> bytes long. If the parameter is omitted, the
-maximum length of 16 bytes will be returned. For maximum security, the
-default of 16 bytes should be chosen.</p>
+default length of 16 bytes or the length previously set by <a
+href="Cipher.html#method-i-auth_tag_len-3D">auth_tag_len=</a> will be used.
+For maximum security, the longest possible should be chosen.</p>
 
 <p>The tag may only be retrieved after calling <a
 href="Cipher.html#method-i-final">#final</a>.</p>
@@ -615,7 +619,10 @@ ossl_cipher_get_auth_tag(int argc, VALUE *argv, VALUE self)
     EVP_CIPHER_CTX *ctx;
     int tag_len = 16;
 
-    if (rb_scan_args(argc, argv, &quot;01&quot;, &amp;vtag_len) == 1)
+    rb_scan_args(argc, argv, &quot;01&quot;, &amp;vtag_len);
+    if (NIL_P(vtag_len))
+        vtag_len = rb_attr_get(self, id_auth_tag_len);
+    if (!NIL_P(vtag_len))
         tag_len = NUM2INT(vtag_len);
 
     GetCipher(self, ctx);
@@ -665,6 +672,9 @@ href="Cipher.html#method-i-auth_data-3D">#auth_data=</a> and of course,
 before decrypting any of the ciphertext. After all decryption is performed,
 the tag is verified automatically in the call to <a
 href="Cipher.html#method-i-final">#final</a>.</p>
+
+<p>For OCB mode, the tag length must be supplied with <a
+href="Cipher.html#method-i-auth_tag_len-3D">auth_tag_len=</a> beforehand.</p>
           
           
 
@@ -689,6 +699,61 @@ ossl_cipher_set_auth_tag(VALUE self, VALUE vtag)
         ossl_raise(eCipherError, &quot;unable to set AEAD tag&quot;);
 
     return vtag;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-auth_tag_len-3D" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            auth_tag_len = Integer &rarr; Integer
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Sets the length of the authentication tag to be generated or to be given
+for AEAD ciphers that requires it as in input parameter. Note that not all
+AEAD ciphers support this method.</p>
+
+<p>In OCB mode, the length must be supplied both when encrypting and when
+decrypting, and must be before specifying an IV.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="auth_tag_len-3D-source">
+            <pre>static VALUE
+ossl_cipher_set_auth_tag_len(VALUE self, VALUE vlen)
+{
+    int tag_len = NUM2INT(vlen);
+    EVP_CIPHER_CTX *ctx;
+
+    GetCipher(self, ctx);
+    if (!(EVP_CIPHER_CTX_flags(ctx) &amp; EVP_CIPH_FLAG_AEAD_CIPHER))
+        ossl_raise(eCipherError, &quot;AEAD not supported by this cipher&quot;);
+
+    if (!EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_SET_TAG, tag_len, NULL))
+        ossl_raise(eCipherError, &quot;unable to set authentication tag length&quot;);
+
+    /* for #auth_tag */
+    rb_ivar_set(self, id_auth_tag_len, INT2NUM(tag_len));
+
+    return vlen;
 }</pre>
           </div>
           
@@ -1457,7 +1522,7 @@ href="Cipher.html#method-i-decrypt">decrypt</a> before calling this method.</p>
 
           
           <div class="method-source-code" id="random_iv-source">
-            <pre><span class="ruby-comment"># File lib/openssl/cipher.rb, line 55</span>
+            <pre><span class="ruby-comment"># File lib/openssl/cipher.rb, line 54</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">random_iv</span>
   <span class="ruby-identifier">str</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Random</span>.<span class="ruby-identifier">random_bytes</span>(<span class="ruby-keyword">self</span>.<span class="ruby-identifier">iv_len</span>)
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">iv</span> = <span class="ruby-identifier">str</span>
@@ -1499,7 +1564,7 @@ href="Cipher.html#method-i-decrypt">decrypt</a> before calling this method.</p>
 
           
           <div class="method-source-code" id="random_key-source">
-            <pre><span class="ruby-comment"># File lib/openssl/cipher.rb, line 43</span>
+            <pre><span class="ruby-comment"># File lib/openssl/cipher.rb, line 42</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">random_key</span>
   <span class="ruby-identifier">str</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Random</span>.<span class="ruby-identifier">random_bytes</span>(<span class="ruby-keyword">self</span>.<span class="ruby-identifier">key_len</span>)
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">key</span> = <span class="ruby-identifier">str</span>
@@ -1644,7 +1709,7 @@ ossl_cipher_update(int argc, VALUE *argv, VALUE self)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.2.
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.3.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

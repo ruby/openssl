@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -56,8 +57,13 @@
 
   <ul class="link-list" role="directory">
     <li><a href="#label-Contributing+to+Ruby+OpenSSL">Contributing to Ruby OpenSSL</a>
-    <li><a href="#label-Features">Features</a>
-    <li><a href="#label-Bugs">Bugs</a>
+    <li><a href="#label-Bugs+and+feature+requests">Bugs and feature requests</a>
+    <li><a href="#label-Submitting+patches">Submitting patches</a>
+    <li><a href="#label-Testing">Testing</a>
+    <li><a href="#label-Docker">Docker</a>
+    <li><a href="#label-Relation+with+Ruby+source+tree">Relation with Ruby source tree</a>
+    <li><a href="#label-Release+policy">Release policy</a>
+    <li><a href="#label-Security">Security</a>
   </ul>
 </div>
 
@@ -69,6 +75,8 @@
   <ul class="link-list">
   
     <li><a href="./CONTRIBUTING_md.html">CONTRIBUTING</a>
+  
+    <li><a href="./History_md.html">History</a>
   
     <li><a href="./README_md.html">README</a>
   
@@ -82,47 +90,151 @@
 
 <h1 id="label-Contributing+to+Ruby+OpenSSL">Contributing to Ruby <a href="OpenSSL.html">OpenSSL</a><span><a href="#label-Contributing+to+Ruby+OpenSSL">&para;</a> <a href="#top">&uarr;</a></span></h1>
 
-<p>So you want to write a feature, fix a bug, or otherwise work on <a
+<p>Thank you for your interest in contributing to Ruby <a
+href="OpenSSL.html">OpenSSL</a>!</p>
+
+<p>This documentation provides an overview how you can contribute.</p>
+
+<h2 id="label-Bugs+and+feature+requests">Bugs and feature requests<span><a href="#label-Bugs+and+feature+requests">&para;</a> <a href="#top">&uarr;</a></span></h2>
+
+<p>Bugs and feature requests are tracked on <a
+href="https://github.com/ruby/openssl">GitHub</a>.</p>
+
+<p>If you think you found a bug, file a ticket on GitHub. Please DO NOT report
+security issues here, there is a separate procedure which is described on
+<a href="https://www.ruby-lang.org/en/security/">“Security at
+ruby-lang.org”</a>.</p>
+
+<p>When reporting a bug, please make sure you include the version of Ruby, the
+version of openssl gem, the version of the <a
+href="OpenSSL.html">OpenSSL</a> library, along with a sample file that
+illustrates the problem or link to repository or gem that is associated
+with the bug.</p>
+
+<p>There is a number of unresolved issues and feature requests for openssl
+that need review. Before submitting a new ticket, it is recommended to
+check <a href="https://github.com/ruby/openssl/issues">known issues</a> and
+<a
+href="https://bugs.ruby-lang.org/issues?utf8=%E2%9C%93&set_filter=1&f%5B%5D=status_id&op%5Bstatus_id%5D=o&f%5B%5D=assigned_to_id&op%5Bassigned_to_id%5D=%3D&v%5Bassigned_to_id%5D%5B%5D=7150&f%5B%5D=&c%5B%5D=project&c%5B%5D=tracker&c%5B%5D=status&c%5B%5D=subject&c%5B%5D=assigned_to&c%5B%5D=updated_on&group_by=&t%5B%5D=">bugs.ruby-lang.org</a>,
+the previous issue tracker.</p>
+
+<h2 id="label-Submitting+patches">Submitting patches<span><a href="#label-Submitting+patches">&para;</a> <a href="#top">&uarr;</a></span></h2>
+
+<p>Patches are also very welcome!</p>
+
+<p>Please submit a <a href="https://github.com/ruby/openssl/compare">pull
+request</a> with your changes.</p>
+
+<p>Make sure that your branch does:</p>
+<ul><li>
+<p>Have good commit messages</p>
+</li><li>
+<p>Follow Ruby&#39;s coding style (<a
+href="https://bugs.ruby-lang.org/projects/ruby/wiki/DeveloperHowto">DeveloperHowTo</a>)</p>
+</li><li>
+<p>Pass the test suite successfully (see “Testing”)</p>
+</li><li>
+<p>Add an entry to <a
+href="https://github.com/ruby/openssl/tree/master/History.md">History.md</a>
+if necessary</p>
+</li></ul>
+
+<h2 id="label-Testing">Testing<span><a href="#label-Testing">&para;</a> <a href="#top">&uarr;</a></span></h2>
+
+<p>We have a test suite!</p>
+
+<p>Test cases are located under the <a
+href="https://github.com/ruby/openssl/tree/master/test">test/</a>
+directory.</p>
+
+<p>You can run it with the following three commands:</p>
+
+<pre>$ gem install rake-compiler test-unit
+$ rake compile
+$ rake test</pre>
+
+<h3 id="label-Docker">Docker<span><a href="#label-Docker">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>You can also use Docker Compose to run tests. It can be used to check that
+your changes work correctly with various supported versions of Ruby and <a
 href="OpenSSL.html">OpenSSL</a>.</p>
 
-<h2 id="label-Features">Features<span><a href="#label-Features">&para;</a> <a href="#top">&uarr;</a></span></h2>
+<p>First, you need to install <a
+href="https://www.docker.com/products/docker">Docker</a> and <a
+href="https://www.docker.com/products/docker-compose">Docker Compose</a> on
+your computer.</p>
 
-<p>Feature development will take place under the <a
-href="https://github.com/ruby/openssl">gem source</a>.</p>
+<p>If you&#39;re on MacOS or Windows, we recommended to use the official <a
+href="https://www.docker.com/products/docker-toolbox">Docker Toolbox</a>.
+On Linux, follow the instructions for your package manager. For further
+information, please check the <a href="https://docs.docker.com/">official
+documentation</a>.</p>
 
-<p>Please submit a pull request with your changes. It is also recommended to
-check existing <a
-href="https://bugs.ruby-lang.org/projects/ruby-trunk/issues?utf8=✓&set_filter=1&f%5B%5D=status_id&op%5Bstatus_id%5D=o&f%5B%5D=assigned_to_id&op%5Bassigned_to_id%5D=*&f%5B%5D=category_id&op%5Bcategory_id%5D=%3D&v%5Bcategory_id%5D%5B%5D=71&f%5B%5D=tracker_id&op%5Btracker_id%5D=%3D&v%5Btracker_id%5D%5B%5D=2&f%5B%5D=&c%5B%5D=tracker&c%5B%5D=status&c%5B%5D=priority&c%5B%5D=subject&c%5B%5D=assigned_to&c%5B%5D=updated_on&group_by=">feature
-requests</a> on bugs.ruby-lang.org, the existing bug tracker for Ruby <a
-href="OpenSSL.html">OpenSSL</a>.</p>
+<p>Once you have Docker and Docker Compose, running the following commands
+will build the container and execute the openssl tests. In this example, we
+will use Ruby version 2.3 with <a href="OpenSSL.html">OpenSSL</a> version
+1.0.2.</p>
 
-<h2 id="label-Bugs">Bugs<span><a href="#label-Bugs">&para;</a> <a href="#top">&uarr;</a></span></h2>
+<pre>$ docker-compose build
+$ export RUBY_VERSION=ruby-2.3
+$ export OPENSSL_VERSION=openssl-1.0.2
+$ docker-compose run test
 
-<p>If you think you found a bug, file a ticket on the official <a
-href="https://bugs.ruby-lang.org/projects/ruby-trunk/issues/new">issue
-tracker</a>.</p>
+# You may want an interactive shell for dubugging
+$ docker-compose run debug</pre>
 
-<p>If your bug involves an error <a href="OpenSSL.html">OpenSSL</a> produced
-please include a sample file that illustrates the problem or link to the
-repository or gem that is associated with the bug.</p>
+<p>All possible values for <code>RUBY_VERSION</code> and
+<code>OPENSSL_VERSION</code> can be found in <a
+href="https://github.com/ruby/openssl/tree/master/.travis.yml">.travis.yml</a>.</p>
 
-<p>Please include steps to reproduce the issue.</p>
+<p><strong>NOTE</strong>: these commands must be run from the openssl
+repository root, in order to use the <a
+href="https://github.com/ruby/openssl/blob/master/docker-compose.yml">docker-compose.yml</a>
+file we have provided.</p>
 
-<p>Be sure to check for <a
-href="https://bugs.ruby-lang.org/projects/ruby-trunk/issues?utf8=✓&set_filter=1&f%5B%5D=status_id&op%5Bstatus_id%5D=o&f%5B%5D=assigned_to_id&op%5Bassigned_to_id%5D=*&f%5B%5D=category_id&op%5Bcategory_id%5D=%3D&v%5Bcategory_id%5D%5B%5D=71&f%5B%5D=tracker_id&op%5Btracker_id%5D=%3D&v%5Btracker_id%5D%5B%5D=1&f%5B%5D=&c%5B%5D=tracker&c%5B%5D=status&c%5B%5D=priority&c%5B%5D=subject&c%5B%5D=assigned_to&c%5B%5D=updated_on&group_by=">known
-issues</a> before submitting a new ticket.</p>
+<p>This Docker image is built using the <a
+href="https://github.com/ruby/openssl/tree/master/tool/ruby-openssl-docker">Dockerfile</a>
+provided in the repository.</p>
 
-<p>There are a number of <a
-href="https://bugs.ruby-lang.org/projects/ruby-trunk/issues?utf8=✓&set_filter=1&f%5B%5D=status_id&op%5Bstatus_id%5D=o&f%5B%5D=subject&op%5Bsubject%5D=%7E&v%5Bsubject%5D%5B%5D=openssl&f%5B%5D=assigned_to_id&op%5Bassigned_to_id%5D=%21*&f%5B%5D=&c%5B%5D=tracker&c%5B%5D=status&c%5B%5D=priority&c%5B%5D=subject&c%5B%5D=assigned_to&c%5B%5D=updated_on&group_by=">unassigned
-tickets</a> for openssl that need review, as always.. Thank you for your
-contributions!</p>
+<h2 id="label-Relation+with+Ruby+source+tree">Relation with Ruby source tree<span><a href="#label-Relation+with+Ruby+source+tree">&para;</a> <a href="#top">&uarr;</a></span></h2>
+
+<p>After Ruby 2.3, <code>ext/openssl</code> was converted into a “default
+gem”, a library which ships with standard Ruby builds but can be upgraded
+via RubyGems. This means the development of this gem has migrated to a <a
+href="https://github.com/ruby/openssl">separate repository</a> and will be
+released independently.</p>
+
+<p>The version included in the Ruby source tree (trunk branch) is synchronized
+with the latest release.</p>
+
+<h2 id="label-Release+policy">Release policy<span><a href="#label-Release+policy">&para;</a> <a href="#top">&uarr;</a></span></h2>
+
+<p>Bug fixes (including security fixes) will be made only for the version
+series included in a stable Ruby release.</p>
+
+<h2 id="label-Security">Security<span><a href="#label-Security">&para;</a> <a href="#top">&uarr;</a></span></h2>
+
+<p>If you discovered a security issue, please send us in private, using the
+security issue handling procedure for Ruby core.</p>
+
+<p>You can either use <a href="https://hackerone.com/ruby">HackerOne</a> or
+send an email to security@ruby-lang.org.</p>
+
+<p>Please see <a href="https://www.ruby-lang.org/en/security/">Security</a>
+page on ruby-lang.org website for details.</p>
+
+<p>Reported problems will be published after a fix is released.</p>
+
+<p><em>Thanks for your contributions!</em></p>
+
+<p><em>- The Ruby <a href="OpenSSL.html">OpenSSL</a> team</em></p>
 </main>
 
 
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.2.
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.3.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 
