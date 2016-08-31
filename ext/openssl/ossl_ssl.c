@@ -2246,7 +2246,7 @@ Init_ossl_ssl(void)
     rb_mWaitWritable = rb_define_module_under(rb_cIO, "WaitWritable");
 #endif
 
-    ID_callback_state = rb_intern("@callback_state");
+    ID_callback_state = rb_intern("callback_state");
 
     ossl_ssl_ex_vcb_idx = SSL_get_ex_new_index(0,(void *)"ossl_ssl_ex_vcb_idx",0,0,0);
     ossl_ssl_ex_store_p = SSL_get_ex_new_index(0,(void *)"ossl_ssl_ex_store_p",0,0,0);
