@@ -73,8 +73,6 @@ static VALUE eSSLErrorWaitWritable;
 #define ossl_ssl_set_ctx(o,v)        rb_iv_set((o),"@context",(v))
 #define ossl_ssl_set_sync_close(o,v) rb_iv_set((o),"@sync_close",(v))
 #define ossl_ssl_set_hostname_v(o,v) rb_iv_set((o),"@hostname",(v))
-#define ossl_ssl_set_tmp_dh(o,v)     rb_iv_set((o),"@tmp_dh",(v))
-#define ossl_ssl_set_tmp_ecdh(o,v)   rb_iv_set((o),"@tmp_ecdh",(v))
 
 static ID ID_callback_state;
 
@@ -281,7 +279,6 @@ ossl_tmp_dh_callback(SSL *ssl, int is_export, int keylength)
 
     dh = rb_protect(ossl_call_tmp_dh_callback, args, NULL);
     if (!RTEST(dh)) return NULL;
-    ossl_ssl_set_tmp_dh(rb_ssl, dh);
 
     return EVP_PKEY_get0_DH(GetPKeyPtr(dh));
 }
@@ -315,7 +312,6 @@ ossl_tmp_ecdh_callback(SSL *ssl, int is_export, int keylength)
 
     ecdh = rb_protect(ossl_call_tmp_ecdh_callback, args, NULL);
     if (!RTEST(ecdh)) return NULL;
-    ossl_ssl_set_tmp_ecdh(rb_ssl, ecdh);
 
     return EVP_PKEY_get0_EC_KEY(GetPKeyPtr(ecdh));
 }
