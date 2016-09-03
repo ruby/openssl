@@ -17,12 +17,6 @@
   mX509 = rb_define_module_under(mOSSL, "X509");
 #endif
 
-/*
-* OpenSSL has defined RFILE and Ruby has defined RFILE - so undef it!
-*/
-#if defined(RFILE) /*&& !defined(OSSL_DEBUG)*/
-#  undef RFILE
-#endif
 #include <ruby.h>
 #include <ruby/io.h>
 #include <ruby/thread.h>
