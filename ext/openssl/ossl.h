@@ -17,17 +17,12 @@
   mX509 = rb_define_module_under(mOSSL, "X509");
 #endif
 
+#include <assert.h>
 #include <ruby.h>
 #include <ruby/io.h>
 #include <ruby/thread.h>
 
 #include <openssl/opensslv.h>
-
-#ifdef HAVE_ASSERT_H
-#  include <assert.h>
-#else
-#  define assert(condition)
-#endif
 
 #if defined(_WIN32) && !defined(LIBRESSL_VERSION_NUMBER)
 #  include <openssl/e_os2.h>
