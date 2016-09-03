@@ -9,15 +9,6 @@
  */
 #include "ossl.h"
 
-#if defined(HAVE_SYS_TIME_H)
-#  include <sys/time.h>
-#elif !defined(NT) && !defined(_WIN32)
-struct timeval {
-    long tv_sec;	/* seconds */
-    long tv_usec;	/* and microseconds */
-};
-#endif
-
 static VALUE join_der(VALUE enumerable);
 static VALUE ossl_asn1_decode0(unsigned char **pp, long length, long *offset,
 			       int depth, int yield, long *num_read);
