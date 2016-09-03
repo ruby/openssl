@@ -11,10 +11,6 @@
  */
 #include "ossl.h"
 
-#if defined(HAVE_UNISTD_H)
-#  include <unistd.h> /* for read(), and write() */
-#endif
-
 #define numberof(ary) (int)(sizeof(ary)/sizeof((ary)[0]))
 
 #ifdef _WIN32
