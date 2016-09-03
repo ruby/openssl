@@ -12,26 +12,12 @@
 
 #include RUBY_EXTCONF_H
 
-#if 0
-  mOSSL = rb_define_module("OpenSSL");
-  mX509 = rb_define_module_under(mOSSL, "X509");
-#endif
-
 #include <assert.h>
+#include <errno.h>
 #include <ruby.h>
 #include <ruby/io.h>
 #include <ruby/thread.h>
-
 #include <openssl/opensslv.h>
-
-#if defined(_WIN32) && !defined(LIBRESSL_VERSION_NUMBER)
-#  include <openssl/e_os2.h>
-#  if !defined(OPENSSL_SYS_WIN32)
-#    define OPENSSL_SYS_WIN32 1
-#  endif
-#  include <winsock2.h>
-#endif
-#include <errno.h>
 #include <openssl/err.h>
 #include <openssl/asn1.h>
 #include <openssl/x509v3.h>
