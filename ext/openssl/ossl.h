@@ -47,9 +47,7 @@
 #include <openssl/rand.h>
 #include <openssl/conf.h>
 #include <openssl/conf_api.h>
-#if !defined(_WIN32)
-#  include <openssl/crypto.h>
-#endif
+#include <openssl/crypto.h>
 #if !defined(OPENSSL_NO_ENGINE)
 #  include <openssl/engine.h>
 #endif

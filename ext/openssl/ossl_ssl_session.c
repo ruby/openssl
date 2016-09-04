@@ -108,11 +108,7 @@ int SSL_SESSION_cmp(const SSL_SESSION *a,const SSL_SESSION *b)
     if (a_len != b_len)
 	return 1;
 
-#if defined(_WIN32)
-    return memcmp(a_sid, b_sid, a_len);
-#else
     return CRYPTO_memcmp(a_sid, b_sid, a_len);
-#endif
 }
 #endif
 
