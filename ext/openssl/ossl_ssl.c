@@ -1496,19 +1496,15 @@ ossl_ssl_setup(VALUE self)
 static void
 write_would_block(int nonblock)
 {
-    if (nonblock) {
-        VALUE exc = ossl_exc_new(eSSLErrorWaitWritable, "write would block");
-        rb_exc_raise(exc);
-    }
+    if (nonblock)
+	ossl_raise(eSSLErrorWaitWritable, "write would block");
 }
 
 static void
 read_would_block(int nonblock)
 {
-    if (nonblock) {
-        VALUE exc = ossl_exc_new(eSSLErrorWaitReadable, "read would block");
-        rb_exc_raise(exc);
-    }
+    if (nonblock)
+	ossl_raise(eSSLErrorWaitReadable, "read would block");
 }
 
 static int

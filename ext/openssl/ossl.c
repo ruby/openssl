@@ -356,17 +356,6 @@ ossl_raise(VALUE exc, const char *fmt, ...)
     rb_exc_raise(err);
 }
 
-VALUE
-ossl_exc_new(VALUE exc, const char *fmt, ...)
-{
-    va_list args;
-    VALUE err;
-    va_start(args, fmt);
-    err = ossl_make_error(exc, fmt, args);
-    va_end(args);
-    return err;
-}
-
 void
 ossl_clear_error(void)
 {
