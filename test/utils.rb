@@ -241,10 +241,6 @@ AQjjxMXhwULlmuR/K+WwlaZPiLIBYalLAZQ7ZbOPeVkJ8ePao0eLAgEC
 
     def readwrite_loop(ctx, ssl)
       while line = ssl.gets
-        if line =~ /^STARTTLS$/
-          ssl.accept
-          next
-        end
         ssl.write(line)
       end
     rescue OpenSSL::SSL::SSLError
@@ -335,13 +331,6 @@ AQjjxMXhwULlmuR/K+WwlaZPiLIBYalLAZQ7ZbOPeVkJ8ePao0eLAgEC
           assert_join_threads(threads)
         end
       }
-    end
-
-    def starttls(ssl)
-      ssl.puts("STARTTLS")
-      sleep 1   # When this line is eliminated, process on Cygwin blocks
-                # forever at ssl.connect. But I don't know why it does.
-      ssl.connect
     end
   end
 

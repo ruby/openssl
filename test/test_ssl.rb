@@ -288,25 +288,44 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   end
 
   def test_starttls
-    OpenSSL::TestUtils.silent do
-      start_server(start_immediately: false) { |server, port|
-        sock = TCPSocket.new("127.0.0.1", port)
-        ssl = OpenSSL::SSL::SSLSocket.new(sock)
-        ssl.sync_close = true
-        str = "x" * 1000 + "\n"
+    server_proc = -> (ctx, ssl) {
+      begin
+        while line = ssl.gets
+          if line =~ /^STARTTLS$/
+            ssl.write("x")
+            ssl.flush
+            ssl.accept
+            next
+          end
+          ssl.write(line)
+        end
+      rescue OpenSSL::SSL::SSLError
+      rescue IOError
+      ensure
+        ssl.close rescue nil
+      end
+    }
 
-        ITERATIONS.times{
-          ssl.puts(str)
-          assert_equal(str, ssl.gets)
-        }
-        starttls(ssl)
+    EnvUtil.suppress_warning do # read/write on not started session
+      start_server(start_immediately: false,
+                   server_proc: server_proc) { |server, port|
+        begin
+          sock = TCPSocket.new("127.0.0.1", port)
+          ssl = OpenSSL::SSL::SSLSocket.new(sock)
 
-        ITERATIONS.times{
-          ssl.puts(str)
-          assert_equal(str, ssl.gets)
-        }
+          ssl.puts "plaintext"
+          assert_equal "plaintext\n", ssl.gets
 
-        ssl.close
+          ssl.puts("STARTTLS")
+          ssl.read(1)
+          ssl.connect
+
+          ssl.puts "over-tls"
+          assert_equal "over-tls\n", ssl.gets
+        ensure
+          ssl&.close
+          sock&.close
+        end
       }
     end
   end
