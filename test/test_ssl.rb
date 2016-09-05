@@ -1295,6 +1295,123 @@ end
     end
   end
 
+  def test_dh_callback
+    called = false
+    ctx_proc = -> ctx {
+      ctx.ciphers = "DH:!NULL"
+      ctx.tmp_dh_callback = ->(*args) {
+        called = true
+        OpenSSL::TestUtils::TEST_KEY_DH1024
+      }
+    }
+    start_server(ctx_proc: ctx_proc) do |server, port|
+      server_connect(port) { |ssl|
+        assert called, "dh callback should be called"
+        if ssl.respond_to?(:tmp_key)
+          assert_equal OpenSSL::TestUtils::TEST_KEY_DH1024.to_der, ssl.tmp_key.to_der
+        end
+      }
+    end
+  end
+
+  def test_connect_works_when_setting_dh_callback_to_nil
+    ctx_proc = -> ctx {
+      ctx.ciphers = "DH:!NULL" # use DH
+      ctx.tmp_dh_callback = nil
+    }
+    start_server(ctx_proc: ctx_proc) do |server, port|
+      EnvUtil.suppress_warning { # uses default callback
+        assert_nothing_raised {
+          server_connect(port) { }
+        }
+      }
+    end
+  end
+
+  def test_ecdh_callback
+    return unless OpenSSL::SSL::SSLContext.instance_methods.include?(:tmp_ecdh_callback)
+    EnvUtil.suppress_warning do # tmp_ecdh_callback is deprecated (2016-05)
+      begin
+        called = false
+        ctx2 = OpenSSL::SSL::SSLContext.new
+        ctx2.ciphers = "ECDH"
+        # OpenSSL 1.1.0 doesn't have tmp_ecdh_callback so this shouldn't be required
+        ctx2.security_level = 0
+        ctx2.tmp_ecdh_callback = ->(*args) {
+          called = true
+          OpenSSL::PKey::EC.new "prime256v1"
+        }
+
+        sock1, sock2 = socketpair
+
+        s2 = OpenSSL::SSL::SSLSocket.new(sock2, ctx2)
+        ctx1 = OpenSSL::SSL::SSLContext.new
+        ctx1.ciphers = "ECDH"
+        ctx1.security_level = 0
+
+        s1 = OpenSSL::SSL::SSLSocket.new(sock1, ctx1)
+        th = Thread.new do
+          s1.connect
+        end
+
+        s2.accept
+        assert called, 'ecdh callback should be called'
+      rescue OpenSSL::SSL::SSLError => e
+        if e.message =~ /no cipher match/
+          pend "ECDH cipher not supported."
+        else
+          raise e
+        end
+      ensure
+        th.join if th
+        s1.close if s1
+        s2.close if s2
+        sock1.close if sock1
+        sock2.close if sock2
+      end
+    end
+  end
+
+  def test_ecdh_curves
+    ctx_proc = -> ctx {
+      begin
+        ctx.ciphers = "ECDH:!NULL"
+      rescue OpenSSL::SSL::SSLError
+        pend "ECDH is not enabled in this OpenSSL" if $!.message =~ /no cipher match/
+        raise
+      end
+      ctx.ecdh_curves = "P-384:P-521"
+    }
+    start_server(ctx_proc: ctx_proc, ignore_listener_error: true) do |server, port|
+      ctx = OpenSSL::SSL::SSLContext.new
+      ctx.ecdh_curves = "P-256:P-384" # disable P-521 for OpenSSL >= 1.0.2
+
+      server_connect(port, ctx) { |ssl|
+        assert ssl.cipher[0].start_with?("ECDH"), "ECDH should be used"
+        if ssl.respond_to?(:tmp_key)
+          assert_equal "secp384r1", ssl.tmp_key.group.curve_name
+        end
+      }
+
+      if OpenSSL::OPENSSL_VERSION_NUMBER >= 0x10002000 &&
+          !OpenSSL::OPENSSL_VERSION.include?("LibreSSL")
+        ctx = OpenSSL::SSL::SSLContext.new
+        ctx.ecdh_curves = "P-256"
+
+        assert_raise(OpenSSL::SSL::SSLError) {
+          server_connect(port, ctx) { }
+        }
+
+        ctx = OpenSSL::SSL::SSLContext.new
+        ctx.ecdh_curves = "P-521:P-384"
+
+        server_connect(port, ctx) { |ssl|
+          assert_equal "secp521r1", ssl.tmp_key.group.curve_name
+        }
+      end
+    end
+  end
+
   def test_security_level
     ctx = OpenSSL::SSL::SSLContext.new
     begin
