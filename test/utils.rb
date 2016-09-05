@@ -279,14 +279,12 @@ AQjjxMXhwULlmuR/K+WwlaZPiLIBYalLAZQ7ZbOPeVkJ8ePao0eLAgEC
 
     def start_server(verify_mode: OpenSSL::SSL::VERIFY_NONE, start_immediately: true,
                      ctx_proc: nil, server_proc: method(:readwrite_loop),
-                     use_anon_cipher: false, ignore_listener_error: false, &block)
+                     ignore_listener_error: false, &block)
       IO.pipe {|stop_pipe_r, stop_pipe_w|
         store = OpenSSL::X509::Store.new
         store.add_cert(@ca_cert)
         store.purpose = OpenSSL::X509::PURPOSE_SSL_CLIENT
         ctx = OpenSSL::SSL::SSLContext.new
-        ctx.ciphers = "ADH-AES256-GCM-SHA384" if use_anon_cipher
-        ctx.security_level = 0 if use_anon_cipher
         ctx.cert_store = store
         ctx.cert = @svr_cert
         ctx.key = @svr_key

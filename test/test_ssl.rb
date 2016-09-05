@@ -356,19 +356,22 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   end
 
   def test_post_connect_check_with_anon_ciphers
-    sslerr = OpenSSL::SSL::SSLError
+    ctx_proc = -> ctx {
+      ctx.ciphers = "aNULL"
+      ctx.security_level = 0
+    }
 
-    start_server(use_anon_cipher: true) { |server, port|
+    start_server(ctx_proc: ctx_proc) { |server, port|
       ctx = OpenSSL::SSL::SSLContext.new
       ctx.ciphers = "aNULL"
       ctx.security_level = 0
       server_connect(port, ctx) { |ssl|
-        assert_raise_with_message(sslerr, /anonymous cipher suite/i){
+        assert_raise_with_message(OpenSSL::SSL::SSLError, /anonymous cipher suite/i) {
           ssl.post_connection_check("localhost.localdomain")
         }
       }
     }
-  end if OpenSSL::ExtConfig::TLS_DH_anon_WITH_AES_256_GCM_SHA384
+  end
 
   def test_post_connection_check
     sslerr = OpenSSL::SSL::SSLError
