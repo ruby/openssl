@@ -52,110 +52,44 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     }
   end
 
-  def test_ssl_gets
+  def test_sysread_and_syswrite
     start_server { |server, port|
       server_connect(port) { |ssl|
-        ssl.write "abc\n"
-        IO.select [ssl]
+        str = "x" * 100 + "\n"
+        ssl.syswrite(str)
+        newstr = ssl.sysread(str.bytesize)
+        assert_equal(str, newstr)
 
-        line = ssl.gets
-
-        assert_equal "abc\n", line
-        assert_equal Encoding::BINARY, line.encoding
+        buf = ""
+        ssl.syswrite(str)
+        assert_same buf, ssl.sysread(str.size, buf)
+        assert_equal(str, newstr)
       }
     }
   end
 
-  def test_ssl_read_nonblock
+  def test_sync_close
     start_server { |server, port|
-      server_connect(port) { |ssl|
-        assert_raise(IO::WaitReadable) { ssl.read_nonblock(100) }
-        ssl.write("abc\n")
-        IO.select [ssl]
-        assert_equal('a', ssl.read_nonblock(1))
-        assert_equal("bc\n", ssl.read_nonblock(100))
-        assert_raise(IO::WaitReadable) { ssl.read_nonblock(100) }
-      }
-    }
-  end
+      begin
+        sock = TCPSocket.new("127.0.0.1", port)
+        ssl = OpenSSL::SSL::SSLSocket.new(sock)
+        ssl.connect
+        ssl.close
+        assert_not_predicate sock, :closed?
+      ensure
+        sock&.close
+      end
 
-  def test_ssl_sysread_blocking_error
-    start_server { |server, port|
-      server_connect(port) { |ssl|
-        ssl.write("abc\n")
-        assert_raise(TypeError) { ssl.sysread(4, exception: false) }
-        buf = ''
-        assert_raise(ArgumentError) { ssl.sysread(4, buf, exception: false) }
-        assert_equal '', buf
-        assert_equal buf.object_id, ssl.sysread(4, buf).object_id
-        assert_equal "abc\n", buf
-      }
-    }
-  end
-
-  def test_connect_and_close
-    start_server { |server, port|
-      sock = TCPSocket.new("127.0.0.1", port)
-      ssl = OpenSSL::SSL::SSLSocket.new(sock)
-      assert(ssl.connect)
-      ssl.close
-      assert(!sock.closed?)
-      sock.close
-
-      sock = TCPSocket.new("127.0.0.1", port)
-      ssl = OpenSSL::SSL::SSLSocket.new(sock)
-      ssl.sync_close = true  # !!
-      assert(ssl.connect)
-      ssl.close
-      assert(sock.closed?)
-    }
-  end
-
-  def test_read_and_write
-    start_server { |server, port|
-      server_connect(port) { |ssl|
-        # syswrite and sysread
-        ITERATIONS.times{|i|
-          str = "x" * 100 + "\n"
-          ssl.syswrite(str)
-          newstr = ''
-          newstr << ssl.sysread(str.size - newstr.size) until newstr.size == str.size
-          assert_equal(str, newstr)
-
-          str = "x" * i * 100 + "\n"
-          buf = ""
-          ssl.syswrite(str)
-          assert_equal(buf.object_id, ssl.sysread(str.size, buf).object_id)
-          newstr = buf
-          newstr << ssl.sysread(str.size - newstr.size) until newstr.size == str.size
-          assert_equal(str, newstr)
-        }
-
-        # puts and gets
-        ITERATIONS.times{
-          str = "x" * 100 + "\n"
-          ssl.puts(str)
-          assert_equal(str, ssl.gets)
-
-          str = "x" * 100
-          ssl.puts(str)
-          assert_equal(str, ssl.gets("\n", 100))
-          assert_equal("\n", ssl.gets)
-        }
-
-        # read and write
-        ITERATIONS.times{|i|
-          str = "x" * 100 + "\n"
-          ssl.write(str)
-          assert_equal(str, ssl.read(str.size))
-
-          str = "x" * i * 100 + "\n"
-          buf = ""
-          ssl.write(str)
-          assert_equal(buf.object_id, ssl.read(str.size, buf).object_id)
-          assert_equal(str, buf)
-        }
-      }
+      begin
+        sock = TCPSocket.new("127.0.0.1", port)
+        ssl = OpenSSL::SSL::SSLSocket.new(sock)
+        ssl.sync_close = true  # !!
+        ssl.connect
+        ssl.close
+        assert_predicate sock, :closed?
+      ensure
+        sock&.close
+      end
     }
   end
 

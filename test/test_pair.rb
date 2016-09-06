@@ -113,11 +113,25 @@ module OpenSSL::TestPairM
     }
   end
 
+  def test_gets
+    ssl_pair {|s1, s2|
+      s1 << "abc\n\n$def123ghi"
+      s1.close
+      ret = s2.gets
+      assert_equal Encoding::BINARY, ret.encoding
+      assert_equal "abc\n", ret
+      assert_equal "\n$", s2.gets("$")
+      assert_equal "def123", s2.gets(/\d+/)
+      assert_equal "ghi", s2.gets
+      assert_equal nil, s2.gets
+    }
+  end
+
   def test_gets_eof_limit
     ssl_pair {|s1, s2|
       s1.write("hello")
       s1.close # trigger EOF
-      assert_match "hello", s2.gets("\n", 6), "[ruby-core:70149] [Bug #11140]"
+      assert_match "hello", s2.gets("\n", 6), "[ruby-core:70149] [Bug #11400]"
     }
   end
 
