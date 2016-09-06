@@ -58,18 +58,36 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
                  ctx.options & OpenSSL::SSL::OP_NO_COMPRESSION)
   end if defined?(OpenSSL::SSL::OP_NO_COMPRESSION)
 
-  def test_ctx_setup_with_extra_chain_cert
-    ctx = OpenSSL::SSL::SSLContext.new
-    ctx.extra_chain_cert = [@ca_cert, @cli_cert]
-    assert_equal(ctx.setup, true)
-    assert_equal(ctx.setup, nil)
-  end
+  def test_ssl_with_server_cert
+    ctx_proc = -> ctx {
+      ctx.cert = @svr_cert
+      ctx.key = @svr_key
+      ctx.extra_chain_cert = [@ca_cert]
+    }
+    server_proc = -> (ctx, ssl) {
+      assert_equal @svr_cert.to_der, ssl.cert.to_der
+      assert_equal nil, ssl.peer_cert
 
-  def test_not_started_session
-    pend "non socket argument of SSLSocket.new is not supported on this platform" if /mswin|mingw/ =~ RUBY_PLATFORM
-    open(__FILE__) do |f|
-      assert_nil EnvUtil.suppress_warning { OpenSSL::SSL::SSLSocket.new(f).cert }
-    end
+      readwrite_loop(ctx, ssl)
+    }
+    start_server(ctx_proc: ctx_proc, server_proc: server_proc) { |server, port|
+      begin
+        sock = TCPSocket.new("127.0.0.1", port)
+        ctx = OpenSSL::SSL::SSLContext.new
+        ssl = OpenSSL::SSL::SSLSocket.new(sock, ctx)
+        ssl.connect
+
+        assert_equal sock, ssl.io
+        assert_equal nil, ssl.cert
+        assert_equal @svr_cert.to_der, ssl.peer_cert.to_der
+        assert_equal 2, ssl.peer_cert_chain.size
+        assert_equal @svr_cert.to_der, ssl.peer_cert_chain[0].to_der
+        assert_equal @ca_cert.to_der, ssl.peer_cert_chain[1].to_der
+      ensure
+        ssl&.close
+        sock&.close
+      end
+    }
   end
 
   def test_ssl_gets
