@@ -281,14 +281,10 @@ AQjjxMXhwULlmuR/K+WwlaZPiLIBYalLAZQ7ZbOPeVkJ8ePao0eLAgEC
       end
     end
 
-    def start_server(verify_mode, start_immediately, args = {}, &block)
+    def start_server(verify_mode: OpenSSL::SSL::VERIFY_NONE, start_immediately: true,
+                     ctx_proc: nil, server_proc: method(:readwrite_loop),
+                     use_anon_cipher: false, ignore_listener_error: false, &block)
       IO.pipe {|stop_pipe_r, stop_pipe_w|
-        ctx_proc = args[:ctx_proc]
-        server_proc = args[:server_proc]
-        ignore_listener_error = args.fetch(:ignore_listener_error, false)
-        use_anon_cipher = args.fetch(:use_anon_cipher, false)
-        server_proc ||= method(:readwrite_loop)
-
         store = OpenSSL::X509::Store.new
         store.add_cert(@ca_cert)
         store.purpose = OpenSSL::X509::PURPOSE_SSL_CLIENT
@@ -296,7 +292,6 @@ AQjjxMXhwULlmuR/K+WwlaZPiLIBYalLAZQ7ZbOPeVkJ8ePao0eLAgEC
         ctx.ciphers = "ADH-AES256-GCM-SHA384" if use_anon_cipher
         ctx.security_level = 0 if use_anon_cipher
         ctx.cert_store = store
-        #ctx.extra_chain_cert = [ ca_cert ]
         ctx.cert = @svr_cert
         ctx.key = @svr_key
         ctx.tmp_dh_callback = proc { OpenSSL::TestUtils::TEST_KEY_DH1024 }
