@@ -620,39 +620,52 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     end
   end
 
-  def test_servername_cb_sets_context_on_the_socket
-    hostname = 'example.org'
-
+  def test_tlsext_hostname
     ctx3 = OpenSSL::SSL::SSLContext.new
-    ctx3.ciphers = "aNULL"
+    ctx3.ciphers = "ADH"
     ctx3.tmp_dh_callback = proc { OpenSSL::TestUtils::TEST_KEY_DH1024 }
     ctx3.security_level = 0
+    assert_not_predicate ctx3, :frozen?
 
-    ctx2 = OpenSSL::SSL::SSLContext.new
-    ctx2.servername_cb = lambda { |args| ctx3 }
+    ctx_proc = -> ctx {
+      ctx.ciphers = "ALL:!aNULL"
+      ctx.servername_cb = proc { |ssl, servername|
+        case servername
+        when "foo.example.com"
+          ctx3
+        when "bar.example.com"
+          nil
+        else
+          raise "unknown hostname"
+        end
+      }
+    }
+    start_server(ctx_proc: ctx_proc) do |server, port|
+      ctx = OpenSSL::SSL::SSLContext.new
+      ctx.ciphers = "ALL"
+      ctx.security_level = 0
 
-    sock1, sock2 = socketpair
+      sock = TCPSocket.new("127.0.0.1", port)
+      begin
+        ssl = OpenSSL::SSL::SSLSocket.new(sock, ctx)
+        ssl.hostname = "foo.example.com"
+        ssl.connect
+        assert_match /^ADH-/, ssl.cipher[0], "the context returned by servername_cb is used"
+        assert_predicate ctx3, :frozen?
+      ensure
+        sock.close
+      end
 
-    s2 = OpenSSL::SSL::SSLSocket.new(sock2, ctx2)
-
-    ctx1 = OpenSSL::SSL::SSLContext.new
-    ctx1.ciphers = "aNULL"
-    ctx1.security_level = 0
-
-    s1 = OpenSSL::SSL::SSLSocket.new(sock1, ctx1)
-    s1.hostname = hostname
-    t = Thread.new { s1.connect }
-
-    assert_equal ctx2, s2.context
-    accepted = s2.accept
-    assert_equal ctx3, s2.context
-    assert t.value
-  ensure
-    s1.close if s1
-    s2.close if s2
-    sock1.close if sock1
-    sock2.close if sock2
-    accepted.close if accepted.respond_to?(:close)
+      sock = TCPSocket.new("127.0.0.1", port)
+      begin
+        ssl = OpenSSL::SSL::SSLSocket.new(sock, ctx)
+        ssl.hostname = "bar.example.com"
+        ssl.connect
+        assert_not_match /^A(EC)?DH-/, ssl.cipher[0], "the original context is used"
+      ensure
+        sock.close
+      end
+    end
   end
 
   def test_servername_cb_raises_an_exception_on_unknown_objects
@@ -688,148 +701,6 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   ensure
     sock1.close if sock1
     sock2.close if sock2
-  end
-
-  def test_servername_cb_calls_setup_on_returned_ctx
-    hostname = 'example.org'
-
-    ctx3 = OpenSSL::SSL::SSLContext.new
-    ctx3.ciphers = "aNULL"
-    ctx3.tmp_dh_callback = proc { OpenSSL::TestUtils::TEST_KEY_DH1024 }
-    ctx3.security_level = 0
-    assert_not_predicate ctx3, :frozen?
-
-    ctx2 = OpenSSL::SSL::SSLContext.new
-    ctx2.servername_cb = lambda { |args| ctx3 }
-
-    sock1, sock2 = socketpair
-
-    s2 = OpenSSL::SSL::SSLSocket.new(sock2, ctx2)
-
-    ctx1 = OpenSSL::SSL::SSLContext.new
-    ctx1.ciphers = "aNULL"
-    ctx1.security_level = 0
-
-    s1 = OpenSSL::SSL::SSLSocket.new(sock1, ctx1)
-    s1.hostname = hostname
-    t = Thread.new { s1.connect }
-
-    accepted = s2.accept
-    assert t.value
-    assert_predicate ctx3, :frozen?
-  ensure
-    s1.close if s1
-    s2.close if s2
-    sock1.close if sock1
-    sock2.close if sock2
-    accepted.close if accepted.respond_to?(:close)
-  end
-
-  def test_servername_cb_can_return_nil
-    hostname = 'example.org'
-
-    ctx2 = OpenSSL::SSL::SSLContext.new
-    ctx2.ciphers = "aNULL"
-    ctx2.tmp_dh_callback = proc { OpenSSL::TestUtils::TEST_KEY_DH1024 }
-    ctx2.security_level = 0
-    ctx2.servername_cb = lambda { |args| nil }
-
-    sock1, sock2 = socketpair
-
-    s2 = OpenSSL::SSL::SSLSocket.new(sock2, ctx2)
-
-    ctx1 = OpenSSL::SSL::SSLContext.new
-    ctx1.ciphers = "aNULL"
-    ctx1.security_level = 0
-
-    s1 = OpenSSL::SSL::SSLSocket.new(sock1, ctx1)
-    s1.hostname = hostname
-    t = Thread.new { s1.connect }
-
-    accepted = s2.accept
-    assert t.value
-  ensure
-    s1.close if s1
-    s2.close if s2
-    sock1.close if sock1
-    sock2.close if sock2
-    accepted.close if accepted.respond_to?(:close)
-  end
-
-  def test_servername_cb
-    lambda_called = nil
-    cb_socket = nil
-    hostname = 'example.org'
-
-    ctx2 = OpenSSL::SSL::SSLContext.new
-    ctx2.ciphers = "aNULL"
-    ctx2.tmp_dh_callback = proc { OpenSSL::TestUtils::TEST_KEY_DH1024 }
-    ctx2.security_level = 0
-    ctx2.servername_cb = lambda do |args|
-      cb_socket     = args[0]
-      lambda_called = args[1]
-      ctx2
-    end
-
-    sock1, sock2 = socketpair
-
-    s2 = OpenSSL::SSL::SSLSocket.new(sock2, ctx2)
-
-    ctx1 = OpenSSL::SSL::SSLContext.new
-    ctx1.ciphers = "aNULL"
-    ctx1.security_level = 0
-
-    s1 = OpenSSL::SSL::SSLSocket.new(sock1, ctx1)
-    s1.hostname = hostname
-    t = Thread.new { s1.connect }
-
-    accepted = s2.accept
-    assert t.value
-    assert_equal hostname, lambda_called
-    assert_equal s2, cb_socket
-  ensure
-    s1.close if s1
-    s2.close if s2
-    sock1.close if sock1
-    sock2.close if sock2
-    accepted.close if accepted.respond_to?(:close)
-  end
-
-  def test_tlsext_hostname
-    return unless OpenSSL::SSL::SSLSocket.instance_methods.include?(:hostname)
-
-    ctx_proc = Proc.new do |ctx, ssl|
-      foo_ctx = OpenSSL::SSL::SSLContext.new
-
-      ctx.servername_cb = Proc.new do |ssl2, hostname|
-        case hostname
-        when 'foo.example.com'
-          foo_ctx
-        when 'bar.example.com'
-          nil
-        else
-          raise "unknown hostname #{hostname.inspect}"
-        end
-      end
-    end
-
-    server_proc = Proc.new do |ctx, ssl|
-      readwrite_loop(ctx, ssl)
-    end
-
-    start_server(ctx_proc: ctx_proc, server_proc: server_proc) do |server, port|
-      2.times do |i|
-        ctx = OpenSSL::SSL::SSLContext.new
-        # disable RFC4507 support
-        ctx.options = OpenSSL::SSL::OP_NO_TICKET
-        server_connect(port, ctx) { |ssl|
-          ssl.hostname = (i & 1 == 0) ? 'foo.example.com' : 'bar.example.com'
-          str = "x" * 100 + "\n"
-          ssl.puts(str)
-          assert_equal(str, ssl.gets)
-        }
-      end
-    end
   end
 
   def test_verify_hostname_on_connect
