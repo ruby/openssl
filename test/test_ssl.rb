@@ -5,58 +5,20 @@ if defined?(OpenSSL::TestUtils)
 
 class OpenSSL::TestSSL < OpenSSL::SSLTestCase
 
-  def test_ctx_setup
+  def test_ctx_options
     ctx = OpenSSL::SSL::SSLContext.new
-    assert_equal(ctx.setup, true)
-    assert_equal(ctx.setup, nil)
-  end
 
-  def test_ctx_setup_invalid
-    m = OpenSSL::SSL::SSLContext::METHODS.first
-    assert_raise_with_message(ArgumentError, /null/) {
-      OpenSSL::SSL::SSLContext.new("#{m}\0")
-    }
-    assert_raise_with_message(ArgumentError, /\u{ff33 ff33 ff2c}/) {
-      OpenSSL::SSL::SSLContext.new("\u{ff33 ff33 ff2c}")
-    }
-  end
-
-  def test_options_defaults_to_OP_ALL_on
-    ctx = OpenSSL::SSL::SSLContext.new
-    assert_equal(OpenSSL::SSL::OP_ALL, (OpenSSL::SSL::OP_ALL & ctx.options))
-  end
-
-  def test_setting_twice
-    ctx = OpenSSL::SSL::SSLContext.new
+    assert (OpenSSL::SSL::OP_ALL & ctx.options) == OpenSSL::SSL::OP_ALL,
+           "OP_ALL is set by default"
     ctx.options = 4
-    assert_equal 4, (ctx.options & OpenSSL::SSL::OP_ALL)
-    ctx.options = OpenSSL::SSL::OP_ALL
-    assert_equal OpenSSL::SSL::OP_ALL, (ctx.options & OpenSSL::SSL::OP_ALL)
-  end
-
-  def test_options_setting_nil_means_all
-    ctx = OpenSSL::SSL::SSLContext.new
+    assert_equal 4, ctx.options
     ctx.options = nil
-    assert_equal(OpenSSL::SSL::OP_ALL, (OpenSSL::SSL::OP_ALL & ctx.options))
-  end
+    assert_equal OpenSSL::SSL::OP_ALL, ctx.options
 
-  def test_setting_options_raises_after_setup
-    ctx = OpenSSL::SSL::SSLContext.new
-    options = ctx.options
-    ctx.setup
-    assert_raise(RuntimeError) do
-      ctx.options = options
-    end
+    assert_equal true, ctx.setup
+    assert_predicate ctx, :frozen?
+    assert_equal nil, ctx.setup
   end
-
-  def test_ctx_setup_no_compression
-    ctx = OpenSSL::SSL::SSLContext.new
-    ctx.options = OpenSSL::SSL::OP_ALL | OpenSSL::SSL::OP_NO_COMPRESSION
-    assert_equal(ctx.setup, true)
-    assert_equal(ctx.setup, nil)
-    assert_equal(OpenSSL::SSL::OP_NO_COMPRESSION,
-                 ctx.options & OpenSSL::SSL::OP_NO_COMPRESSION)
-  end if defined?(OpenSSL::SSL::OP_NO_COMPRESSION)
 
   def test_ssl_with_server_cert
     ctx_proc = -> ctx {
@@ -447,13 +409,16 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   def test_sslctx_set_params
     ctx = OpenSSL::SSL::SSLContext.new
     ctx.set_params
-    assert_equal(OpenSSL::SSL::VERIFY_PEER, ctx.verify_mode)
-    ciphers = ctx.ciphers
-    ciphers_versions = ciphers.collect{|_, v, _, _| v }
-    ciphers_names = ciphers.collect{|v, _, _, _| v }
-    assert(ciphers_names.all?{|v| /A(EC)?DH/ !~ v })
-    assert(ciphers_names.all?{|v| /(RC4|MD5|EXP)/ !~ v })
-    assert(ciphers_versions.all?{|v| /SSLv2/ !~ v })
+
+    assert_equal OpenSSL::SSL::VERIFY_PEER, ctx.verify_mode
+    ciphers_names = ctx.ciphers.collect{|v, _, _, _| v }
+    assert ciphers_names.all?{|v| /A(EC)?DH/ !~ v }, "anon ciphers are disabled"
+    assert ciphers_names.all?{|v| /(RC4|MD5|EXP|DES)/ !~ v }, "weak ciphers are disabled"
+    assert_equal 0, ctx.options & OpenSSL::SSL::OP_DONT_INSERT_EMPTY_FRAGMENTS
+    if defined?(OpenSSL::SSL::OP_NO_COMPRESSION) # >= 1.0.0
+      assert_equal OpenSSL::SSL::OP_NO_COMPRESSION,
+                   ctx.options & OpenSSL::SSL::OP_NO_COMPRESSION
+    end
   end
 
   def test_post_connect_check_with_anon_ciphers
