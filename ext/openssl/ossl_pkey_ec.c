@@ -11,11 +11,6 @@ typedef struct {
 	int dont_free;
 } ossl_ec_group;
 
-typedef struct {
-	EC_POINT *point;
-	int dont_free;
-} ossl_ec_point;
-
 
 #define EXPORT_PEM 0
 #define EXPORT_DER 1
@@ -55,11 +50,9 @@ static const rb_data_type_t ossl_ec_point_type;
     GetECGroup(obj, group); \
 } while (0)
 
-#define GetECPoint(obj, p) do { \
-    ossl_ec_point *ec_point; \
-    TypedData_Get_Struct((obj), ossl_ec_point, &ossl_ec_point_type, ec_point); \
-    (p) = ec_point->point; \
-    if ((p) == NULL) \
+#define GetECPoint(obj, point) do { \
+    TypedData_Get_Struct(obj, EC_POINT, &ossl_ec_point_type, point); \
+    if ((point) == NULL) \
 	ossl_raise(eEC_POINT, "EC_POINT is not initialized"); \
 } while (0)
 #define SafeGetECPoint(obj, point) do { \
@@ -90,6 +83,9 @@ static ID ID_compressed;
 static ID ID_hybrid;
 
 static ID id_i_group, id_i_key;
+
+static VALUE ec_group_new(const EC_GROUP *group);
+static VALUE ec_point_new(const EC_POINT *point, const EC_GROUP *group);
 
 static VALUE ec_instance(VALUE klass, EC_KEY *ec)
 {
@@ -411,26 +407,6 @@ static VALUE ossl_ec_key_set_private_key(VALUE self, VALUE private_key)
     return private_key;
 }
 
-
-static VALUE ossl_ec_point_dup(const EC_POINT *point, VALUE group_v)
-{
-    VALUE obj;
-    const EC_GROUP *group;
-    ossl_ec_point *new_point;
-
-    obj = rb_obj_alloc(cEC_POINT);
-    TypedData_Get_Struct(obj, ossl_ec_point, &ossl_ec_point_type, new_point);
-
-    SafeGetECGroup(group_v, group);
-
-    new_point->point = EC_POINT_dup(point, group);
-    if (new_point->point == NULL)
-        ossl_raise(eEC_POINT, "EC_POINT_dup");
-    rb_ivar_set(obj, id_i_group, group_v);
-
-    return obj;
-}
-
 /*
  *  call-seq:
  *     key.public_key   => OpenSSL::PKey::EC::Point
@@ -441,18 +417,12 @@ static VALUE ossl_ec_key_get_public_key(VALUE self)
 {
     EC_KEY *ec;
     const EC_POINT *point;
-    VALUE group;
 
     GetEC(self, ec);
-
     if ((point = EC_KEY_get0_public_key(ec)) == NULL)
         return Qnil;
 
-    group = rb_funcall(self, rb_intern("group"), 0);
-    if (NIL_P(group))
-        ossl_raise(eECError, "EC_KEY_get0_get0_group (has public_key but no group???");
-
-    return ossl_ec_point_dup(point, group);
+    return ec_point_new(point, EC_KEY_get0_group(ec));
 }
 
 /*
@@ -785,6 +755,20 @@ static VALUE ossl_ec_group_alloc(VALUE klass)
     return obj;
 }
 
+static VALUE
+ec_group_new(const EC_GROUP *group)
+{
+    ossl_ec_group *ec_group;
+    VALUE obj;
+
+    obj = TypedData_Make_Struct(cEC_GROUP, ossl_ec_group, &ossl_ec_group_type, ec_group);
+    ec_group->group = EC_GROUP_dup(group);
+    if (!ec_group->group)
+	ossl_raise(eEC_GROUP, "EC_GROUP_dup");
+
+    return obj;
+}
+
 /*
  * call-seq:
  *   OpenSSL::PKey::EC::Group.new(ec_group)
@@ -963,14 +947,15 @@ static VALUE ossl_ec_group_eql(VALUE a, VALUE b)
  */
 static VALUE ossl_ec_group_get_generator(VALUE self)
 {
-    VALUE point_obj;
-    EC_GROUP *group = NULL;
+    EC_GROUP *group;
+    const EC_POINT *generator;
 
     GetECGroup(self, group);
+    generator = EC_GROUP_get0_generator(group);
+    if (!generator)
+	return Qnil;
 
-    point_obj = ossl_ec_point_dup(EC_GROUP_get0_generator(group), self);
-
-    return point_obj;
+    return ec_point_new(generator, group);
 }
 
 /*
@@ -1365,26 +1350,35 @@ static VALUE ossl_ec_group_to_text(VALUE self)
 static void
 ossl_ec_point_free(void *ptr)
 {
-    ossl_ec_point *ec_point = ptr;
-    if (!ec_point->dont_free && ec_point->point)
-        EC_POINT_clear_free(ec_point->point);
-    ruby_xfree(ec_point);
+    EC_POINT_clear_free(ptr);
 }
 
 static const rb_data_type_t ossl_ec_point_type = {
-    "OpenSSL/ec_point",
+    "OpenSSL/EC_POINT",
     {
 	0, ossl_ec_point_free,
     },
     0, 0, RUBY_TYPED_FREE_IMMEDIATELY,
 };
 
-static VALUE ossl_ec_point_alloc(VALUE klass)
+static VALUE
+ossl_ec_point_alloc(VALUE klass)
 {
-    ossl_ec_point *ec_point;
+    return TypedData_Wrap_Struct(klass, &ossl_ec_point_type, NULL);
+}
+
+static VALUE
+ec_point_new(const EC_POINT *point, const EC_GROUP *group)
+{
+    EC_POINT *point_new;
     VALUE obj;
 
-    obj = TypedData_Make_Struct(klass, ossl_ec_point, &ossl_ec_point_type, ec_point);
+    obj = TypedData_Wrap_Struct(cEC_POINT, &ossl_ec_point_type, NULL);
+    point_new = EC_POINT_dup(point, group);
+    if (!point_new)
+	ossl_raise(eEC_POINT, "EC_POINT_dup");
+    RTYPEDDATA_DATA(obj) = point_new;
+    rb_ivar_set(obj, id_i_group, ec_group_new(group));
 
     return obj;
 }
@@ -1399,14 +1393,13 @@ static VALUE ossl_ec_point_alloc(VALUE klass)
  */
 static VALUE ossl_ec_point_initialize(int argc, VALUE *argv, VALUE self)
 {
-    ossl_ec_point *ec_point;
-    EC_POINT *point = NULL;
+    EC_POINT *point;
     VALUE arg1, arg2;
     VALUE group_v = Qnil;
     const EC_GROUP *group = NULL;
 
-    TypedData_Get_Struct(self, ossl_ec_point, &ossl_ec_point_type, ec_point);
-    if (ec_point->point)
+    TypedData_Get_Struct(self, EC_POINT, &ossl_ec_point_type, point);
+    if (point)
         ossl_raise(eEC_POINT, "EC_POINT already initialized");
 
     switch (rb_scan_args(argc, argv, "11", &arg1, &arg2)) {
@@ -1461,8 +1454,7 @@ static VALUE ossl_ec_point_initialize(int argc, VALUE *argv, VALUE self)
     if (NIL_P(group_v))
         ossl_raise(rb_eRuntimeError, "missing group (internal error)");
 
-    ec_point->point = point;
-
+    RTYPEDDATA_DATA(self) = point;
     rb_ivar_set(self, id_i_group, group_v);
 
     return self;
@@ -1471,23 +1463,22 @@ static VALUE ossl_ec_point_initialize(int argc, VALUE *argv, VALUE self)
 static VALUE
 ossl_ec_point_initialize_copy(VALUE self, VALUE other)
 {
-    ossl_ec_point *ec_point;
-    EC_POINT *orig;
+    EC_POINT *point, *point_new;
     EC_GROUP *group;
     VALUE group_v;
 
-    TypedData_Get_Struct(self, ossl_ec_point, &ossl_ec_point_type, ec_point);
-    if (ec_point->point)
+    TypedData_Get_Struct(self, EC_POINT, &ossl_ec_point_type, point_new);
+    if (point_new)
 	ossl_raise(eEC_POINT, "EC::Point already initialized");
-    SafeGetECPoint(other, orig);
+    SafeGetECPoint(other, point);
 
     group_v = rb_obj_dup(rb_attr_get(other, id_i_group));
     SafeGetECGroup(group_v, group);
 
-    ec_point->point = EC_POINT_dup(orig, group);
-    if (!ec_point->point)
+    point_new = EC_POINT_dup(point, group);
+    if (!point_new)
 	ossl_raise(eEC_POINT, "EC_POINT_dup");
-    rb_ivar_set(self, id_i_key, Qnil);
+    RTYPEDDATA_DATA(self) = point_new;
     rb_ivar_set(self, id_i_group, group_v);
 
     return self;
