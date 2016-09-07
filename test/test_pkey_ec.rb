@@ -244,6 +244,10 @@ class OpenSSL::TestEC < OpenSSL::PKeyTestCase
       raise
     end
 
+    assert_equal 0x040603.to_bn, point.to_bn(:uncompressed)
+    assert_equal 0x0306.to_bn, point.to_bn(:compressed)
+    assert_equal 0x070603.to_bn, point.to_bn(:hybrid)
+
     assert_equal 0x040603.to_bn, point.to_bn
     assert_equal true, point.on_curve?
     point.invert! # 8.5
