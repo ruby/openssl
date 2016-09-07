@@ -56,13 +56,19 @@ Notable changes
   - OpenSSL::OCSP::BasicResponse#add_status accepts absolute times. They used to
     accept only relative seconds from the current time.
 
-* OpenSSL::PKey::EC follows the general PKey interface.
-  [[Bug #6567]](https://bugs.ruby-lang.org/issues/6567)
+* OpenSSL::PKey
 
-* OpenSSL::PKey.read raises OpenSSL::PKey::PKeyError instead of ArgumentError
-  for consistency with OpenSSL::PKey::{DH,DSA,RSA,EC}#new.
-  [[Bug #11774]](https://bugs.ruby-lang.org/issues/11774), 
-  [[GH ruby/openssl#55]](https://github.com/ruby/openssl/pull/55)
+  - OpenSSL::PKey::EC follows the general PKey interface.
+    [[Bug #6567]](https://bugs.ruby-lang.org/issues/6567)
+
+  - OpenSSL::PKey.read raises OpenSSL::PKey::PKeyError instead of ArgumentError
+    for consistency with OpenSSL::PKey::{DH,DSA,RSA,EC}#new.
+    [[Bug #11774]](https://bugs.ruby-lang.org/issues/11774), 
+    [[GH ruby/openssl#55]](https://github.com/ruby/openssl/pull/55)
+
+  - OpenSSL::PKey::EC::Group retrieved by OpenSSL::PKey::EC#group is no longer
+    linked with the EC key. Modifications to the EC::Group have no effect on the
+    key. [[GH ruby/openssl#71]](https://github.com/ruby/openssl/pull/71)
 
 * OpenSSL::SSL
 

@@ -6,12 +6,6 @@
 
 #if !defined(OPENSSL_NO_EC) && (OPENSSL_VERSION_NUMBER >= 0x0090802fL)
 
-typedef struct {
-	EC_GROUP *group;
-	int dont_free;
-} ossl_ec_group;
-
-
 #define EXPORT_PEM 0
 #define EXPORT_DER 1
 
@@ -34,15 +28,9 @@ static const rb_data_type_t ossl_ec_point_type;
     GetEC(obj, key); \
 } while (0)
 
-#define SafeGet_ec_group(obj, group) do { \
-    OSSL_Check_Kind((obj), cEC_GROUP); \
-    TypedData_Get_Struct((obj), ossl_ec_group, &ossl_ec_group_type, (group)); \
-} while(0)
-#define GetECGroup(obj, g) do { \
-    ossl_ec_group *ec_group; \
-    TypedData_Get_Struct((obj), ossl_ec_group, &ossl_ec_group_type, ec_group); \
-    (g) = ec_group->group; \
-    if ((g) == NULL) \
+#define GetECGroup(obj, group) do { \
+    TypedData_Get_Struct(obj, EC_GROUP, &ossl_ec_group_type, group); \
+    if ((group) == NULL) \
 	ossl_raise(eEC_GROUP, "EC_GROUP is not initialized"); \
 } while (0)
 #define SafeGetECGroup(obj, group) do { \
@@ -82,7 +70,7 @@ static ID ID_uncompressed;
 static ID ID_compressed;
 static ID ID_hybrid;
 
-static ID id_i_group, id_i_key;
+static ID id_i_group;
 
 static VALUE ec_group_new(const EC_GROUP *group);
 static VALUE ec_point_new(const EC_POINT *point, const EC_GROUP *group);
@@ -257,8 +245,6 @@ static VALUE ossl_ec_key_initialize(int argc, VALUE *argv, VALUE self)
 	ossl_raise(eECError, "EVP_PKEY_assign_EC_KEY");
     }
 
-    rb_ivar_set(self, id_i_group, Qnil);
-
     return self;
 }
 
@@ -280,80 +266,46 @@ ossl_ec_key_initialize_copy(VALUE self, VALUE other)
 	EC_KEY_free(ec_new);
 	ossl_raise(eECError, "EVP_PKEY_assign_EC_KEY");
     }
-    rb_ivar_set(self, id_i_group, Qnil); /* EC_KEY_dup() also copies the EC_GROUP */
 
     return self;
 }
 
 /*
- *  call-seq:
- *     key.group   => group
+ * call-seq:
+ *   key.group   => group
  *
- *  Returns a constant <code>OpenSSL::EC::Group</code> that is tied to the key.
- *  Modifying the returned group can make the key invalid.
+ * Returns the EC::Group that the key is associated with. Modifying the returned
+ * group does not affect +key+.
  */
-static VALUE ossl_ec_key_get_group(VALUE self)
+static VALUE
+ossl_ec_key_get_group(VALUE self)
 {
-    VALUE group_v;
     EC_KEY *ec;
-    ossl_ec_group *ec_group;
-    EC_GROUP *group;
+    const EC_GROUP *group;
 
     GetEC(self, ec);
+    group = EC_KEY_get0_group(ec);
+    if (!group)
+	return Qnil;
 
-    group_v = rb_attr_get(self, id_i_group);
-    if (!NIL_P(group_v))
-        return group_v;
-
-    if ((group = (EC_GROUP *)EC_KEY_get0_group(ec)) != NULL) {
-        group_v = rb_obj_alloc(cEC_GROUP);
-        SafeGet_ec_group(group_v, ec_group);
-        ec_group->group = group;
-        ec_group->dont_free = 1;
-	rb_ivar_set(group_v, id_i_key, self);
-	rb_ivar_set(self, id_i_group, group_v);
-        return group_v;
-    }
-
-    return Qnil;
+    return ec_group_new(group);
 }
 
 /*
- *  call-seq:
- *     key.group = group   => group
+ * call-seq:
+ *   key.group = group
  *
- *  Returns the same object passed, not the group object associated with the key.
- *  If you wish to access the group object tied to the key call key.group after setting
- *  the group.
- *
- *  Setting the group will immediately destroy any previously assigned group object.
- *  The group is internally copied by OpenSSL.  Modifying the original group after
- *  assignment will not effect the internal key structure.
- *  (your changes may be lost).  BE CAREFUL.
- *
- *  EC_KEY_set_group calls EC_GROUP_free(key->group) then EC_GROUP_dup(), not EC_GROUP_copy.
- *  This documentation is accurate for OpenSSL 0.9.8b.
+ * Sets the EC::Group for the key. The group structure is internally copied so
+ * modifition to +group+ after assigning to a key has no effect on the key.
  */
-static VALUE ossl_ec_key_set_group(VALUE self, VALUE group_v)
+static VALUE
+ossl_ec_key_set_group(VALUE self, VALUE group_v)
 {
-    VALUE old_group_v;
     EC_KEY *ec;
     EC_GROUP *group;
 
     GetEC(self, ec);
     SafeGetECGroup(group_v, group);
-
-    old_group_v = rb_attr_get(self, id_i_group);
-    if (!NIL_P(old_group_v)) {
-        ossl_ec_group *old_ec_group;
-        SafeGet_ec_group(old_group_v, old_ec_group);
-
-        old_ec_group->group = NULL;
-        old_ec_group->dont_free = 0;
-	rb_ivar_set(old_group_v, id_i_key, Qnil);
-    }
-
-    rb_ivar_set(self, id_i_group, Qnil);
 
     if (EC_KEY_set_group(ec, group) != 1)
         ossl_raise(eECError, "EC_KEY_set_group");
@@ -731,10 +683,7 @@ static VALUE ossl_ec_key_dsa_verify_asn1(VALUE self, VALUE data, VALUE sig)
 static void
 ossl_ec_group_free(void *ptr)
 {
-    ossl_ec_group *ec_group = ptr;
-    if (!ec_group->dont_free && ec_group->group)
-        EC_GROUP_clear_free(ec_group->group);
-    ruby_xfree(ec_group);
+    EC_GROUP_clear_free(ptr);
 }
 
 static const rb_data_type_t ossl_ec_group_type = {
@@ -745,26 +694,23 @@ static const rb_data_type_t ossl_ec_group_type = {
     0, 0, RUBY_TYPED_FREE_IMMEDIATELY,
 };
 
-static VALUE ossl_ec_group_alloc(VALUE klass)
+static VALUE
+ossl_ec_group_alloc(VALUE klass)
 {
-    ossl_ec_group *ec_group;
-    VALUE obj;
-
-    obj = TypedData_Make_Struct(klass, ossl_ec_group, &ossl_ec_group_type, ec_group);
-
-    return obj;
+    return TypedData_Wrap_Struct(klass, &ossl_ec_group_type, NULL);
 }
 
 static VALUE
 ec_group_new(const EC_GROUP *group)
 {
-    ossl_ec_group *ec_group;
     VALUE obj;
+    EC_GROUP *group_new;
 
-    obj = TypedData_Make_Struct(cEC_GROUP, ossl_ec_group, &ossl_ec_group_type, ec_group);
-    ec_group->group = EC_GROUP_dup(group);
-    if (!ec_group->group)
+    obj = ossl_ec_group_alloc(cEC_GROUP);
+    group_new = EC_GROUP_dup(group);
+    if (!group_new)
 	ossl_raise(eEC_GROUP, "EC_GROUP_dup");
+    RTYPEDDATA_DATA(obj) = group_new;
 
     return obj;
 }
@@ -793,11 +739,10 @@ ec_group_new(const EC_GROUP *group)
 static VALUE ossl_ec_group_initialize(int argc, VALUE *argv, VALUE self)
 {
     VALUE arg1, arg2, arg3, arg4;
-    ossl_ec_group *ec_group;
-    EC_GROUP *group = NULL;
+    EC_GROUP *group;
 
-    TypedData_Get_Struct(self, ossl_ec_group, &ossl_ec_group_type, ec_group);
-    if (ec_group->group != NULL)
+    TypedData_Get_Struct(self, EC_GROUP, &ossl_ec_group_type, group);
+    if (group)
         ossl_raise(rb_eRuntimeError, "EC_GROUP is already initialized");
 
     switch (rb_scan_args(argc, argv, "13", &arg1, &arg2, &arg3, &arg4)) {
@@ -890,8 +835,7 @@ static VALUE ossl_ec_group_initialize(int argc, VALUE *argv, VALUE self)
 
     if (group == NULL)
         ossl_raise(eEC_GROUP, "");
-
-    ec_group->group = group;
+    RTYPEDDATA_DATA(self) = group;
 
     return self;
 }
@@ -899,19 +843,17 @@ static VALUE ossl_ec_group_initialize(int argc, VALUE *argv, VALUE self)
 static VALUE
 ossl_ec_group_initialize_copy(VALUE self, VALUE other)
 {
-    ossl_ec_group *ec_group;
-    EC_GROUP *orig;
+    EC_GROUP *group, *group_new;
 
-    TypedData_Get_Struct(self, ossl_ec_group, &ossl_ec_group_type, ec_group);
-    if (ec_group->group)
+    TypedData_Get_Struct(self, EC_GROUP, &ossl_ec_group_type, group_new);
+    if (group_new)
 	ossl_raise(eEC_GROUP, "EC::Group already initialized");
-    SafeGetECGroup(other, orig);
+    SafeGetECGroup(other, group);
 
-    ec_group->group = EC_GROUP_dup(orig);
-    if (!ec_group->group)
+    group_new = EC_GROUP_dup(group);
+    if (!group_new)
 	ossl_raise(eEC_GROUP, "EC_GROUP_dup");
-
-    rb_ivar_set(self, id_i_key, Qnil);
+    RTYPEDDATA_DATA(self) = group_new;
 
     return self;
 }
@@ -1373,7 +1315,7 @@ ec_point_new(const EC_POINT *point, const EC_GROUP *group)
     EC_POINT *point_new;
     VALUE obj;
 
-    obj = TypedData_Wrap_Struct(cEC_POINT, &ossl_ec_point_type, NULL);
+    obj = ossl_ec_point_alloc(cEC_POINT);
     point_new = EC_POINT_dup(point, group);
     if (!point_new)
 	ossl_raise(eEC_POINT, "EC_POINT_dup");
@@ -1855,7 +1797,6 @@ void Init_ossl_ec(void)
     rb_define_method(cEC_POINT, "mul", ossl_ec_point_mul, -1);
 
     id_i_group = rb_intern("@group");
-    id_i_key = rb_intern("@key");
 }
 
 #else /* defined NO_EC */
