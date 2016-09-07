@@ -33,9 +33,9 @@ Notable changes
 
   - OpenSSL::Cipher#iv_len= is added. It allows changing IV (nonce) length if
     using AEAD ciphers.
-    [[Bug #8667]](https://bugs.ruby-lang.org/issues/8667), 
-    [[Bug #10420]](https://bugs.ruby-lang.org/issues/10420), 
-    [[GH ruby/ruby#569]](https://github.com/ruby/ruby/pull/569), 
+    [[Bug #8667]](https://bugs.ruby-lang.org/issues/8667),
+    [[Bug #10420]](https://bugs.ruby-lang.org/issues/10420),
+    [[GH ruby/ruby#569]](https://github.com/ruby/ruby/pull/569),
     [[GH ruby/openssl#58]](https://github.com/ruby/openssl/pull/58)
 
   - OpenSSL::Cipher#auth_tag_len= is added. This sets the authentication tag
@@ -63,7 +63,7 @@ Notable changes
 
   - OpenSSL::PKey.read raises OpenSSL::PKey::PKeyError instead of ArgumentError
     for consistency with OpenSSL::PKey::{DH,DSA,RSA,EC}#new.
-    [[Bug #11774]](https://bugs.ruby-lang.org/issues/11774), 
+    [[Bug #11774]](https://bugs.ruby-lang.org/issues/11774),
     [[GH ruby/openssl#55]](https://github.com/ruby/openssl/pull/55)
 
   - OpenSSL::PKey::EC::Group retrieved by OpenSSL::PKey::EC#group is no longer
@@ -100,7 +100,7 @@ Removals
 
   - OpenSSL::PKey::DH::DEFAULT_512 is removed. Hence servers no longer use
     512-bit DH group by default. It is considered too weak nowadays.
-    [[Bug #11968]](https://bugs.ruby-lang.org/issues/11968), 
+    [[Bug #11968]](https://bugs.ruby-lang.org/issues/11968),
     [[GH ruby/ruby#1196]](https://github.com/ruby/ruby/pull/1196)
 
   - RC4 cipher suites are removed from OpenSSL::SSL::SSLContext::DEFAULT_PARAMS.
