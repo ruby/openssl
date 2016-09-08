@@ -413,8 +413,8 @@ ossl_asn1cons_to_der(VALUE self)
     if (inf_length == Qtrue) {
         VALUE ary, example;
         constructed = 2;
-        if (CLASS_OF(self) == cASN1Sequence ||
-            CLASS_OF(self) == cASN1Set) {
+        if (rb_obj_class(self) == cASN1Sequence ||
+            rb_obj_class(self) == cASN1Set) {
             tag = ossl_asn1_default_tag(self);
         }
         else { /* must be a constructive encoding of a primitive value */
@@ -443,7 +443,7 @@ ossl_asn1cons_to_der(VALUE self)
         }
     }
     else {
-        if (CLASS_OF(self) == cASN1Constructive)
+        if (rb_obj_class(self) == cASN1Constructive)
             ossl_raise(eASN1Error, &quot;Constructive shall only be used with infinite length&quot;);
         tag = ossl_asn1_default_tag(self);
     }

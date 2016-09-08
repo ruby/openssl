@@ -997,7 +997,7 @@ hostname of a remote peer has been verified.</p>
 
           
           <div class="method-source-code" id="post_connection_check-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 283</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 279</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">post_connection_check</span>(<span class="ruby-identifier">hostname</span>)
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">peer_cert</span>.<span class="ruby-identifier">nil?</span>
     <span class="ruby-identifier">msg</span> = <span class="ruby-string">&quot;Peer verification enabled, but no certificate received.&quot;</span>
@@ -1045,7 +1045,7 @@ established.</p>
 
           
           <div class="method-source-code" id="session-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 304</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 300</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">session</span>
   <span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Session</span>.<span class="ruby-identifier">new</span>(<span class="ruby-keyword">self</span>)
 <span class="ruby-keyword">rescue</span> <span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Session</span><span class="ruby-operator">::</span><span class="ruby-constant">SessionError</span>
@@ -1266,7 +1266,7 @@ closed.</p>
 
           
           <div class="method-source-code" id="sysclose-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 270</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 266</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">sysclose</span>
   <span class="ruby-keyword">return</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">closed?</span>
   <span class="ruby-identifier">stop</span>

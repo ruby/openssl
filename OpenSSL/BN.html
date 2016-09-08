@@ -565,12 +565,13 @@ ossl_bn_initialize(int argc, VALUE *argv, VALUE self)
 ossl_bn_div(VALUE self, VALUE other)
 {
     BIGNUM *bn1, *bn2 = GetBNPtr(other), *r1, *r2;
-    VALUE obj1, obj2;
+    VALUE klass, obj1, obj2;
 
     GetBN(self, bn1);
 
-    obj1 = NewBN(CLASS_OF(self));
-    obj2 = NewBN(CLASS_OF(self));
+    klass = rb_obj_class(self);
+    obj1 = NewBN(klass);
+    obj2 = NewBN(klass);
     if (!(r1 = BN_new())) {
         ossl_raise(eBNError, NULL);
     }

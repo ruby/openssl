@@ -71,6 +71,8 @@
 
   <ul class="link-list" role="directory">
     
+    <li ><a href="#method-c-new">::new</a>
+    
     <li ><a href="#method-i-ciphers">#ciphers</a>
     
     <li ><a href="#method-i-ciphers-3D">#ciphers=</a>
@@ -100,6 +102,8 @@
     <li ><a href="#method-i-session_cache_stats">#session_cache_stats</a>
     
     <li ><a href="#method-i-session_remove">#session_remove</a>
+    
+    <li ><a href="#method-i-set_params">#set_params</a>
     
     <li ><a href="#method-i-setup">#setup</a>
     
@@ -457,6 +461,24 @@ feature:</p>
         </div>
       </div>
       
+      <div id="attribute-i-servername_cb" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">servername_cb</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        <p>A callback invoked at connect time to distinguish between multiple server
+names.</p>
+
+<p>The callback is invoked with an <a href="SSLSocket.html">SSLSocket</a> and
+a server name.  The callback must return an <a
+href="SSLContext.html">SSLContext</a> for the server name or nil.</p>
+        
+        </div>
+      </div>
+      
       <div id="attribute-i-session_get_cb" class="method-detail">
         <div class="method-heading attribute-method-heading">
           <span class="method-name">session_get_cb</span><span
@@ -543,6 +565,26 @@ and a <a href="Session.html">Session</a>.</p>
         <div class="method-description">
         
         <p>Maximum session lifetime in seconds.</p>
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-tmp_dh_callback" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">tmp_dh_callback</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        <p>A callback invoked when DH parameters are required.</p>
+
+<p>The callback is invoked with the <a href="Session.html">Session</a> for the
+key exchange, an flag indicating the use of an export cipher and the
+keylength required.</p>
+
+<p>The callback must return an <a href="../PKey/DH.html">OpenSSL::PKey::DH</a>
+instance of the correct key length.</p>
         
         </div>
       </div>
@@ -648,6 +690,66 @@ all.</p>
     
 
     
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-new" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            new &rarr; ctx
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            new(:TLSv1) &rarr; ctx
+          </span>
+          
+        </div>
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            new(&quot;SSLv23_client&quot;) &rarr; ctx
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>You can get a list of valid methods with <a
+href="SSLContext.html#METHODS">OpenSSL::SSL::SSLContext::METHODS</a></p>
+          
+          
+
+          
+          <div class="method-source-code" id="new-source">
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 97</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">version</span> = <span class="ruby-keyword">nil</span>)
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">options</span> <span class="ruby-operator">|=</span> <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">OP_ALL</span>
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">ssl_version</span> = <span class="ruby-identifier">version</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">version</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
      <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Instance Methods</h3>
@@ -1504,6 +1606,60 @@ ossl_sslctx_session_remove(VALUE self, VALUE arg)
 
     return SSL_CTX_remove_session(ctx, sess) == 1 ? Qtrue : Qfalse;
 }</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-set_params" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            set_params(params = {}) &rarr; params
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Sets saner defaults optimized for the use with HTTP-like protocols.</p>
+
+<p>If a Hash <code>params</code> is given, the parameters are overridden with
+it. The keys in <code>params</code> must be assignment methods on <a
+href="SSLContext.html">SSLContext</a>.</p>
+
+<p>If the <a href="SSLContext.html#attribute-i-verify_mode">#verify_mode</a>
+is not VERIFY_NONE and <a
+href="SSLContext.html#attribute-i-ca_file">#ca_file</a>, <a
+href="SSLContext.html#attribute-i-ca_path">#ca_path</a> and <a
+href="SSLContext.html#attribute-i-cert_store">#cert_store</a> are not set
+then the system default certificate store is used.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="set_params-source">
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 114</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">set_params</span>(<span class="ruby-identifier">params</span>={})
+  <span class="ruby-identifier">params</span> = <span class="ruby-constant">DEFAULT_PARAMS</span>.<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">params</span>)
+  <span class="ruby-identifier">params</span>.<span class="ruby-identifier">each</span>{<span class="ruby-operator">|</span><span class="ruby-identifier">name</span>, <span class="ruby-identifier">value</span><span class="ruby-operator">|</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">__send__</span>(<span class="ruby-node">&quot;#{name}=&quot;</span>, <span class="ruby-identifier">value</span>) }
+  <span class="ruby-keyword">if</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">verify_mode</span> <span class="ruby-operator">!=</span> <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">VERIFY_NONE</span>
+    <span class="ruby-keyword">unless</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">ca_file</span> <span class="ruby-keyword">or</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">ca_path</span> <span class="ruby-keyword">or</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">cert_store</span>
+      <span class="ruby-keyword">self</span>.<span class="ruby-identifier">cert_store</span> = <span class="ruby-constant">DEFAULT_CERT_STORE</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-identifier">params</span>
+<span class="ruby-keyword">end</span></pre>
           </div>
           
         </div>

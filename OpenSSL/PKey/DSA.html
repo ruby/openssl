@@ -604,7 +604,7 @@ ossl_dsa_to_public_key(VALUE self)
         (i2d_of_void *)i2d_DSAPublicKey, (d2i_of_void *)d2i_DSAPublicKey, (char *)(dsa))
     dsa = DSAPublicKey_dup(EVP_PKEY_get0_DSA(pkey));
 #undef DSAPublicKey_dup
-    obj = dsa_instance(CLASS_OF(self), dsa);
+    obj = dsa_instance(rb_obj_class(self), dsa);
     if (obj == Qfalse) {
         DSA_free(dsa);
         ossl_raise(eDSAError, NULL);

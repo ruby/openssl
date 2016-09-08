@@ -944,7 +944,7 @@ ossl_rsa_to_public_key(VALUE self)
     GetPKeyRSA(self, pkey);
     /* err check performed by rsa_instance */
     rsa = RSAPublicKey_dup(EVP_PKEY_get0_RSA(pkey));
-    obj = rsa_instance(CLASS_OF(self), rsa);
+    obj = rsa_instance(rb_obj_class(self), rsa);
     if (obj == Qfalse) {
         RSA_free(rsa);
         ossl_raise(eRSAError, NULL);
