@@ -341,15 +341,17 @@ ossl_pkcs12_initialize(int argc, VALUE *argv, VALUE self)
     if(!PKCS12_parse(pkcs, passphrase, &amp;key, &amp;x509, &amp;x509s))
         ossl_raise(ePKCS12Error, &quot;PKCS12_parse&quot;);
     ERR_pop_to_mark();
-    pkey = rb_protect((VALUE (*)(VALUE))ossl_pkey_new, (VALUE)key,
-                      &amp;st); /* NO DUP */
-    if(st) goto err;
-    cert = rb_protect((VALUE (*)(VALUE))ossl_x509_new, (VALUE)x509, &amp;st);
-    if(st) goto err;
-    if(x509s){
-        ca =
-            rb_protect((VALUE (*)(VALUE))ossl_x509_sk2ary, (VALUE)x509s, &amp;st);
-        if(st) goto err;
+    if (key) {
+        pkey = rb_protect((VALUE (*)(VALUE))ossl_pkey_new, (VALUE)key, &amp;st);
+        if (st) goto err;
+    }
+    if (x509) {
+        cert = rb_protect((VALUE (*)(VALUE))ossl_x509_new, (VALUE)x509, &amp;st);
+        if (st) goto err;
+    }
+    if (x509s) {
+        ca = rb_protect((VALUE (*)(VALUE))ossl_x509_sk2ary, (VALUE)x509s, &amp;st);
+        if (st) goto err;
     }
 
   err:

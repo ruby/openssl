@@ -185,14 +185,13 @@ EC_POINT_*</p>
           <div class="method-source-code" id="new-source">
             <pre>static VALUE ossl_ec_point_initialize(int argc, VALUE *argv, VALUE self)
 {
-    ossl_ec_point *ec_point;
-    EC_POINT *point = NULL;
+    EC_POINT *point;
     VALUE arg1, arg2;
     VALUE group_v = Qnil;
     const EC_GROUP *group = NULL;
 
-    TypedData_Get_Struct(self, ossl_ec_point, &amp;ossl_ec_point_type, ec_point);
-    if (ec_point-&gt;point)
+    TypedData_Get_Struct(self, EC_POINT, &amp;ossl_ec_point_type, point);
+    if (point)
         ossl_raise(eEC_POINT, &quot;EC_POINT already initialized&quot;);
 
     switch (rb_scan_args(argc, argv, &quot;11&quot;, &amp;arg1, &amp;arg2)) {
@@ -201,13 +200,13 @@ EC_POINT_*</p>
             const EC_POINT *arg_point;
 
             group_v = rb_attr_get(arg1, id_i_group);
-            SafeRequire_EC_GROUP(group_v, group);
-            SafeRequire_EC_POINT(arg1, arg_point);
+            SafeGetECGroup(group_v, group);
+            SafeGetECPoint(arg1, arg_point);
 
             point = EC_POINT_dup(arg_point, group);
         } else if (rb_obj_is_kind_of(arg1, cEC_GROUP)) {
             group_v = arg1;
-            SafeRequire_EC_GROUP(group_v, group);
+            SafeGetECGroup(group_v, group);
 
             point = EC_POINT_new(group);
         } else {
@@ -219,7 +218,7 @@ EC_POINT_*</p>
         if (!rb_obj_is_kind_of(arg1, cEC_GROUP))
             ossl_raise(rb_eArgError, &quot;1st argument must be OpenSSL::PKey::EC::Group&quot;);
         group_v = arg1;
-        SafeRequire_EC_GROUP(group_v, group);
+        SafeGetECGroup(group_v, group);
 
         if (rb_obj_is_kind_of(arg2, cBN)) {
             const BIGNUM *bn = GetBNPtr(arg2);
@@ -247,8 +246,7 @@ EC_POINT_*</p>
     if (NIL_P(group_v))
         ossl_raise(rb_eRuntimeError, &quot;missing group (internal error)&quot;);
 
-    ec_point-&gt;point = point;
-
+    RTYPEDDATA_DATA(self) = point;
     rb_ivar_set(self, id_i_group, group_v);
 
     return self;
@@ -338,9 +336,9 @@ EC_POINT_*</p>
     if (ossl_ec_group_eql(group_v1, group_v2) == Qfalse)
         return Qfalse;
 
-    Require_EC_POINT(a, point1);
-    SafeRequire_EC_POINT(b, point2);
-    SafeRequire_EC_GROUP(group_v1, group);
+    GetECPoint(a, point1);
+    SafeGetECPoint(b, point2);
+    SafeGetECGroup(group_v1, group);
 
     if (EC_POINT_cmp(group, point1, point2, ossl_bn_ctx) == 1)
         return Qfalse;
@@ -386,11 +384,10 @@ EC_POINT_*</p>
             <pre>static VALUE ossl_ec_point_is_at_infinity(VALUE self)
 {
     EC_POINT *point;
-    VALUE group_v = rb_attr_get(self, id_i_group);
     const EC_GROUP *group;
 
-    Require_EC_POINT(self, point);
-    SafeRequire_EC_GROUP(group_v, group);
+    GetECPoint(self, point);
+    GetECPointGroup(self, group);
 
     switch (EC_POINT_is_at_infinity(group, point)) {
     case 1: return Qtrue;
@@ -435,11 +432,10 @@ EC_POINT_*</p>
             <pre>static VALUE ossl_ec_point_invert(VALUE self)
 {
     EC_POINT *point;
-    VALUE group_v = rb_attr_get(self, id_i_group);
     const EC_GROUP *group;
 
-    Require_EC_POINT(self, point);
-    SafeRequire_EC_GROUP(group_v, group);
+    GetECPoint(self, point);
+    GetECPointGroup(self, group);
 
     if (EC_POINT_invert(group, point, ossl_bn_ctx) != 1)
         ossl_raise(cEC_POINT, &quot;EC_POINT_invert&quot;);
@@ -481,11 +477,10 @@ EC_POINT_*</p>
             <pre>static VALUE ossl_ec_point_make_affine(VALUE self)
 {
     EC_POINT *point;
-    VALUE group_v = rb_attr_get(self, id_i_group);
     const EC_GROUP *group;
 
-    Require_EC_POINT(self, point);
-    SafeRequire_EC_GROUP(group_v, group);
+    GetECPoint(self, point);
+    GetECPointGroup(self, group);
 
     if (EC_POINT_make_affine(group, point, ossl_bn_ctx) != 1)
         ossl_raise(cEC_POINT, &quot;EC_POINT_make_affine&quot;);
@@ -552,12 +547,12 @@ of <a href="Point.html">OpenSSL::PKey::EC::Point</a>. Please note that
     VALUE arg1, arg2, arg3, result;
     const BIGNUM *bn_g = NULL;
 
-    Require_EC_POINT(self, point_self);
-    SafeRequire_EC_GROUP(group_v, group);
+    GetECPoint(self, point_self);
+    SafeGetECGroup(group_v, group);
 
     result = rb_obj_alloc(cEC_POINT);
     ossl_ec_point_initialize(1, &amp;group_v, result);
-    Require_EC_POINT(result, point_result);
+    GetECPoint(result, point_result);
 
     rb_scan_args(argc, argv, &quot;12&quot;, &amp;arg1, &amp;arg2, &amp;arg3);
     if (!RB_TYPE_P(arg1, T_ARRAY)) {
@@ -590,7 +585,7 @@ of <a href="Point.html">OpenSSL::PKey::EC::Point</a>. Please note that
         points = ALLOCV_N(const EC_POINT *, tmp_p, num);
         points[0] = point_self; /* self */
         for (i = 0; i &lt; num - 1; i++)
-            SafeRequire_EC_POINT(RARRAY_AREF(arg2, i), points[i + 1]);
+            SafeGetECPoint(RARRAY_AREF(arg2, i), points[i + 1]);
 
         if (!NIL_P(arg3))
             bn_g = GetBNPtr(arg3);
@@ -642,11 +637,10 @@ of <a href="Point.html">OpenSSL::PKey::EC::Point</a>. Please note that
             <pre>static VALUE ossl_ec_point_is_on_curve(VALUE self)
 {
     EC_POINT *point;
-    VALUE group_v = rb_attr_get(self, id_i_group);
     const EC_GROUP *group;
 
-    Require_EC_POINT(self, point);
-    SafeRequire_EC_GROUP(group_v, group);
+    GetECPoint(self, point);
+    GetECPointGroup(self, group);
 
     switch (EC_POINT_is_on_curve(group, point, ossl_bn_ctx)) {
     case 1: return Qtrue;
@@ -691,11 +685,10 @@ of <a href="Point.html">OpenSSL::PKey::EC::Point</a>. Please note that
             <pre>static VALUE ossl_ec_point_set_to_infinity(VALUE self)
 {
     EC_POINT *point;
-    VALUE group_v = rb_attr_get(self, id_i_group);
     const EC_GROUP *group;
 
-    Require_EC_POINT(self, point);
-    SafeRequire_EC_GROUP(group_v, group);
+    GetECPoint(self, point);
+    GetECPointGroup(self, group);
 
     if (EC_POINT_set_to_infinity(group, point) != 1)
         ossl_raise(cEC_POINT, &quot;EC_POINT_set_to_infinity&quot;);
@@ -739,13 +732,12 @@ EC_POINT_point2bn()</p>
 {
     EC_POINT *point;
     VALUE bn_obj;
-    VALUE group_v = rb_attr_get(self, id_i_group);
     const EC_GROUP *group;
     point_conversion_form_t form;
     BIGNUM *bn;
 
-    Require_EC_POINT(self, point);
-    SafeRequire_EC_GROUP(group_v, group);
+    GetECPoint(self, point);
+    GetECPointGroup(self, group);
 
     form = EC_GROUP_get_point_conversion_form(group);
 

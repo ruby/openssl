@@ -178,7 +178,7 @@ href="SSLContext.html">OpenSSL::SSL::SSLContext</a>.</p>
 
           
           <div class="method-source-code" id="new-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 361</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 349</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">svr</span>, <span class="ruby-identifier">ctx</span>)
   <span class="ruby-ivar">@svr</span> = <span class="ruby-identifier">svr</span>
   <span class="ruby-ivar">@ctx</span> = <span class="ruby-identifier">ctx</span>
@@ -227,7 +227,7 @@ href="SSLContext.html">OpenSSL::SSL::SSLContext</a>.</p>
 
           
           <div class="method-source-code" id="accept-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 389</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 377</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">accept</span>
   <span class="ruby-comment"># Socket#accept returns [socket, addrinfo].</span>
   <span class="ruby-comment"># TCPServer#accept returns a socket.</span>
@@ -276,7 +276,7 @@ href="SSLContext.html">OpenSSL::SSL::SSLContext</a>.</p>
 
           
           <div class="method-source-code" id="close-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 410</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 398</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">close</span>
   <span class="ruby-ivar">@svr</span>.<span class="ruby-identifier">close</span>
 <span class="ruby-keyword">end</span></pre>
@@ -309,7 +309,7 @@ href="SSLContext.html">OpenSSL::SSL::SSLContext</a>.</p>
 
           
           <div class="method-source-code" id="listen-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 379</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 367</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">listen</span>(<span class="ruby-identifier">backlog</span>=<span class="ruby-value">5</span>)
   <span class="ruby-ivar">@svr</span>.<span class="ruby-identifier">listen</span>(<span class="ruby-identifier">backlog</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -342,7 +342,7 @@ href="SSLContext.html">OpenSSL::SSL::SSLContext</a>.</p>
 
           
           <div class="method-source-code" id="shutdown-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 384</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 372</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">shutdown</span>(<span class="ruby-identifier">how</span>=<span class="ruby-constant">Socket</span><span class="ruby-operator">::</span><span class="ruby-constant">SHUT_RDWR</span>)
   <span class="ruby-ivar">@svr</span>.<span class="ruby-identifier">shutdown</span>(<span class="ruby-identifier">how</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -376,7 +376,7 @@ when initialized.</p>
 
           
           <div class="method-source-code" id="to_io-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 374</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 362</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">to_io</span>
   <span class="ruby-ivar">@svr</span>
 <span class="ruby-keyword">end</span></pre>

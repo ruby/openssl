@@ -115,19 +115,24 @@ href="OpenSSL.html">OpenSSL</a> development team.</p>
 
 <h2 id="label-Notable+changes">Notable changes<span><a href="#label-Notable+changes">&para;</a> <a href="#top">&uarr;</a></span></h2>
 <ul><li>
-<p>Add support for <a href="OpenSSL.html">OpenSSL</a> 1.1.0. [Feature #12324]</p>
+<p>Add support for <a href="OpenSSL.html">OpenSSL</a> 1.1.0. <a
+href="https://bugs.ruby-lang.org/issues/12324">[Feature #12324]</a></p>
 </li><li>
 <p>Add support for LibreSSL</p>
 </li><li>
 <p><a href="OpenSSL/Cipher.html">OpenSSL::Cipher</a></p>
 </li><li>
 <p><a href="OpenSSL/Cipher.html#method-i-key-3D">OpenSSL::Cipher#key=</a> and
-iv= reject too long inputs. They used to truncate silently. [Bug #12561]</p>
+iv= reject too long inputs. They used to truncate silently. <a
+href="https://bugs.ruby-lang.org/issues/12561">[Bug #12561]</a></p>
 </li><li>
 <p><a
 href="OpenSSL/Cipher.html#method-i-iv_len-3D">OpenSSL::Cipher#iv_len=</a>
-is added. It allows changing IV (nonce) length if using AEAD ciphers. [Bug
-#8667] [Bug #10420] [GH ruby/ruby#569] [GH ruby/openssl#58]</p>
+is added. It allows changing IV (nonce) length if using AEAD ciphers. <a
+href="https://bugs.ruby-lang.org/issues/8667">[Bug #8667]</a>, <a
+href="https://bugs.ruby-lang.org/issues/10420">[Bug #10420]</a>, <a
+href="https://github.com/ruby/ruby/pull/569">[GH ruby/ruby#569]</a>, <a
+href="https://github.com/ruby/openssl/pull/58">[GH ruby/openssl#58]</a></p>
 </li><li>
 <p><a
 href="OpenSSL/Cipher.html#method-i-auth_tag_len-3D">OpenSSL::Cipher#auth_tag_len=</a>
@@ -137,11 +142,12 @@ AEAD cipher.</p>
 <p><a href="OpenSSL/OCSP.html">OpenSSL::OCSP</a></p>
 </li><li>
 <p>Accessor methods are added to <a
-href="OpenSSL/OCSP/CertificateId.html">OpenSSL::OCSP::CertificateId</a>.
-[Feature #7181]</p>
+href="OpenSSL/OCSP/CertificateId.html">OpenSSL::OCSP::CertificateId</a>. <a
+href="https://bugs.ruby-lang.org/issues/7181">[Feature #7181]</a></p>
 </li><li>
 <p><a href="OpenSSL/OCSP/Request.html">OpenSSL::OCSP::Request</a> and
-BasicResponse can be signed with non-SHA-1 hash algorithm. [Feature #11552]</p>
+BasicResponse can be signed with non-SHA-1 hash algorithm. <a
+href="https://bugs.ruby-lang.org/issues/11552">[Feature #11552]</a></p>
 </li><li>
 <p><a href="OpenSSL/OCSP/CertificateId.html">OpenSSL::OCSP::CertificateId</a>
 and BasicResponse can be encoded into DER.</p>
@@ -155,20 +161,33 @@ href="OpenSSL/OCSP/BasicResponse.html#method-i-add_status">OpenSSL::OCSP::BasicR
 accepts absolute times. They used to accept only relative seconds from the
 current time.</p>
 </li><li>
+<p><a href="OpenSSL/PKey.html">OpenSSL::PKey</a></p>
+</li><li>
 <p><a href="OpenSSL/PKey/EC.html">OpenSSL::PKey::EC</a> follows the general
-PKey interface. [Bug #6567]</p>
+PKey interface. <a href="https://bugs.ruby-lang.org/issues/6567">[Bug
+#6567]</a></p>
 </li><li>
 <p><a href="OpenSSL/PKey.html#method-c-read">OpenSSL::PKey.read</a> raises <a
 href="OpenSSL/PKey/PKeyError.html">OpenSSL::PKey::PKeyError</a> instead of
-ArgumentError  for consistency with OpenSSL::PKey::{DH,DSA,RSA,EC}#new. 
-[Bug #11774] [GH ruby/openssl#55]</p>
+ArgumentError for consistency with OpenSSL::PKey::<a
+href="https://bugs.ruby-lang.org/issues/11774">DH,DSA,RSA,EC}#new. {[Bug
+#11774]</a>, <a href="https://github.com/ruby/openssl/pull/55">[GH
+ruby/openssl#55]</a></p>
+</li><li>
+<p><a href="OpenSSL/PKey/EC/Group.html">OpenSSL::PKey::EC::Group</a> retrieved
+by <a
+href="OpenSSL/PKey/EC.html#method-i-group">OpenSSL::PKey::EC#group</a> is
+no longer linked with the EC key. Modifications to the EC::Group have no
+effect on the key. <a href="https://github.com/ruby/openssl/pull/71">[GH
+ruby/openssl#71]</a></p>
 </li><li>
 <p><a href="OpenSSL/SSL.html">OpenSSL::SSL</a></p>
 </li><li>
 <p><a
 href="OpenSSL/SSL/SSLSocket.html#method-i-tmp_key">OpenSSL::SSL::SSLSocket#tmp_key</a>
 is added. A client can call it after the connection is established to
-retrieve the ephemeral key. [GH ruby/ruby#1318]</p>
+retrieve the ephemeral key. <a
+href="https://github.com/ruby/ruby/pull/1318">[GH ruby/ruby#1318]</a></p>
 </li><li>
 <p>The automatic ephemeral ECDH curve selection is enabled by default when
 built with <a href="OpenSSL.html">OpenSSL</a> &gt;= 1.0.2 or LibreSSL.</p>
@@ -182,7 +201,8 @@ effective only when built with <a href="OpenSSL.html">OpenSSL</a> 1.1.0.</p>
 href="OpenSSL/SSL/SSLContext.html">OpenSSL::SSL::SSLContext</a>. When it is
 enabled, and the SNI hostname is also set, the hostname verification on the
 server certificate is automatically performed. It is now enabled by
-OpenSSL::SSL::Context#set_params. [GH ruby/openssl#60]</p>
+OpenSSL::SSL::Context#set_params. <a
+href="https://github.com/ruby/openssl/pull/60">[GH ruby/openssl#60]</a></p>
 </li></ul>
 
 <h2 id="label-Removals">Removals<span><a href="#label-Removals">&para;</a> <a href="#top">&uarr;</a></span></h2>
@@ -195,12 +215,13 @@ does nothing when built with <a href="OpenSSL.html">OpenSSL</a> 1.1.0.</p>
 <p><a href="OpenSSL/SSL.html">OpenSSL::SSL</a></p>
 </li><li>
 <p>OpenSSL::PKey::DH::DEFAULT_512 is removed. Hence servers no longer use
-512-bit DH group by default. It is considered too weak nowadays. [Bug
-#11968] [GH ruby/ruby#1196]</p>
+512-bit DH group by default. It is considered too weak nowadays. <a
+href="https://bugs.ruby-lang.org/issues/11968">[Bug #11968]</a>, <a
+href="https://github.com/ruby/ruby/pull/1196">[GH ruby/ruby#1196]</a></p>
 </li><li>
 <p>RC4 cipher suites are removed from
 OpenSSL::SSL::SSLContext::DEFAULT_PARAMS. RC4 is now considered to be weak.
-[GH ruby/openssl#50]</p>
+<a href="https://github.com/ruby/openssl/pull/50">[GH ruby/openssl#50]</a></p>
 </li></ul>
 
 <h2 id="label-Deprecations">Deprecations<span><a href="#label-Deprecations">&para;</a> <a href="#top">&uarr;</a></span></h2>

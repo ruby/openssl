@@ -209,11 +209,10 @@ parameters.</p>
             <pre>static VALUE ossl_ec_group_initialize(int argc, VALUE *argv, VALUE self)
 {
     VALUE arg1, arg2, arg3, arg4;
-    ossl_ec_group *ec_group;
-    EC_GROUP *group = NULL;
+    EC_GROUP *group;
 
-    TypedData_Get_Struct(self, ossl_ec_group, &amp;ossl_ec_group_type, ec_group);
-    if (ec_group-&gt;group != NULL)
+    TypedData_Get_Struct(self, EC_GROUP, &amp;ossl_ec_group_type, group);
+    if (group)
         ossl_raise(rb_eRuntimeError, &quot;EC_GROUP is already initialized&quot;);
 
     switch (rb_scan_args(argc, argv, &quot;13&quot;, &amp;arg1, &amp;arg2, &amp;arg3, &amp;arg4)) {
@@ -243,7 +242,7 @@ parameters.</p>
         } else if (rb_obj_is_kind_of(arg1, cEC_GROUP)) {
             const EC_GROUP *arg1_group;
 
-            SafeRequire_EC_GROUP(arg1, arg1_group);
+            SafeGetECGroup(arg1, arg1_group);
             if ((group = EC_GROUP_dup(arg1_group)) == NULL)
                 ossl_raise(eEC_GROUP, &quot;EC_GROUP_dup&quot;);
         } else {
@@ -306,8 +305,7 @@ parameters.</p>
 
     if (group == NULL)
         ossl_raise(eEC_GROUP, &quot;&quot;);
-
-    ec_group-&gt;group = group;
+    RTYPEDDATA_DATA(self) = group;
 
     return self;
 }</pre>
@@ -386,8 +384,7 @@ parameters.</p>
     EC_GROUP *group = NULL;
     int flag;
 
-    Require_EC_GROUP(self, group);
-
+    GetECGroup(self, group);
     flag = EC_GROUP_get_asn1_flag(group);
 
     return INT2NUM(flag);
@@ -439,8 +436,7 @@ EC_GROUP_set_asn1_flag().</p>
 {
     EC_GROUP *group = NULL;
 
-    Require_EC_GROUP(self, group);
-
+    GetECGroup(self, group);
     EC_GROUP_set_asn1_flag(group, NUM2INT(flag_v));
 
     return flag_v;
@@ -486,7 +482,7 @@ EC_GROUP_get_cofactor()</p>
     BIGNUM *bn;
     EC_GROUP *group = NULL;
 
-    Require_EC_GROUP(self, group);
+    GetECGroup(self, group);
 
     bn_obj = ossl_bn_new(NULL);
     bn = GetBNPtr(bn_obj);
@@ -536,7 +532,7 @@ EC_GROUP_get_curve_name()</p>
     EC_GROUP *group = NULL;
     int nid;
 
-    Get_EC_GROUP(self, group);
+    GetECGroup(self, group);
     if (group == NULL)
         return Qnil;
 
@@ -582,7 +578,7 @@ EC_GROUP_get_degree()</p>
 {
     EC_GROUP *group = NULL;
 
-    Require_EC_GROUP(self, group);
+    GetECGroup(self, group);
 
     return INT2NUM(EC_GROUP_get_degree(group));
 }</pre>
@@ -630,8 +626,8 @@ parameters, false otherwise.</p>
 {
     EC_GROUP *group1 = NULL, *group2 = NULL;
 
-    Require_EC_GROUP(a, group1);
-    SafeRequire_EC_GROUP(b, group2);
+    GetECGroup(a, group1);
+    SafeGetECGroup(b, group2);
 
     if (EC_GROUP_cmp(group1, group2, ossl_bn_ctx) == 1)
        return Qfalse;
@@ -679,14 +675,15 @@ EC_GROUP_get0_generator()</p>
           <div class="method-source-code" id="generator-source">
             <pre>static VALUE ossl_ec_group_get_generator(VALUE self)
 {
-    VALUE point_obj;
-    EC_GROUP *group = NULL;
+    EC_GROUP *group;
+    const EC_POINT *generator;
 
-    Require_EC_GROUP(self, group);
+    GetECGroup(self, group);
+    generator = EC_GROUP_get0_generator(group);
+    if (!generator)
+        return Qnil;
 
-    point_obj = ossl_ec_point_dup(EC_GROUP_get0_generator(group), self);
-
-    return point_obj;
+    return ec_point_new(generator, group);
 }</pre>
           </div>
           
@@ -729,7 +726,7 @@ EC_GROUP_get_order()</p>
     BIGNUM *bn;
     EC_GROUP *group = NULL;
 
-    Require_EC_GROUP(self, group);
+    GetECGroup(self, group);
 
     bn_obj = ossl_bn_new(NULL);
     bn = GetBNPtr(bn_obj);
@@ -781,8 +778,7 @@ href="Group.html#method-i-point_conversion_form-3D">point_conversion_form=</a>.<
     point_conversion_form_t form;
     VALUE ret;
 
-    Require_EC_GROUP(self, group);
-
+    GetECGroup(self, group);
     form = EC_GROUP_get_point_conversion_form(group);
 
     switch (form) {
@@ -850,7 +846,7 @@ EC_GROUP_set_point_conversion_form()</p>
     point_conversion_form_t form;
     ID form_id = SYM2ID(form_v);
 
-    Require_EC_GROUP(self, group);
+    GetECGroup(self, group);
 
     if (form_id == ID_uncompressed) {
         form = POINT_CONVERSION_UNCOMPRESSED;
@@ -904,8 +900,7 @@ EC_GROUP_get0_seed()</p>
     EC_GROUP *group = NULL;
     size_t seed_len;
 
-    Require_EC_GROUP(self, group);
-
+    GetECGroup(self, group);
     seed_len = EC_GROUP_get_seed_len(group);
 
     if (seed_len == 0)
@@ -950,7 +945,7 @@ EC_GROUP_set_seed()</p>
 {
     EC_GROUP *group = NULL;
 
-    Require_EC_GROUP(self, group);
+    GetECGroup(self, group);
     StringValue(seed);
 
     if (EC_GROUP_set_seed(group, (unsigned char *)RSTRING_PTR(seed), RSTRING_LEN(seed)) != (size_t)RSTRING_LEN(seed))
@@ -1001,8 +996,8 @@ EC_GROUP_set_generator()</p>
     const EC_POINT *point;
     const BIGNUM *o, *co;
 
-    Require_EC_GROUP(self, group);
-    SafeRequire_EC_POINT(generator, point);
+    GetECGroup(self, group);
+    SafeGetECPoint(generator, point);
     o = GetBNPtr(order);
     co = GetBNPtr(cofactor);
 
@@ -1124,7 +1119,7 @@ ECPKParameters_print()</p>
     BIO *out;
     VALUE str;
 
-    Require_EC_GROUP(self, group);
+    GetECGroup(self, group);
     if (!(out = BIO_new(BIO_s_mem()))) {
         ossl_raise(eEC_GROUP, &quot;BIO_new(BIO_s_mem())&quot;);
     }

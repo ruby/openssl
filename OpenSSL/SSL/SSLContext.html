@@ -1567,7 +1567,7 @@ ossl_sslctx_setup(VALUE self)
 #if !defined(OPENSSL_NO_EC)
     /* We added SSLContext#tmp_ecdh_callback= in Ruby 2.3.0,
      * but SSL_CTX_set_tmp_ecdh_callback() was removed in OpenSSL 1.1.0. */
-    if (RTEST(ossl_sslctx_get_tmp_ecdh_cb(self))) {
+    if (RTEST(rb_attr_get(self, id_i_tmp_ecdh_callback))) {
 # if defined(HAVE_SSL_CTX_SET_TMP_ECDH_CALLBACK)
         rb_warn(&quot;#tmp_ecdh_callback= is deprecated; use #ecdh_curves= instead&quot;);
         SSL_CTX_set_tmp_ecdh_callback(ctx, ossl_tmp_ecdh_callback);
@@ -1584,7 +1584,7 @@ ossl_sslctx_setup(VALUE self)
     }
 #endif /* OPENSSL_NO_EC */
 
-    val = ossl_sslctx_get_cert_store(self);
+    val = rb_attr_get(self, id_i_cert_store);
     if (!NIL_P(val)) {
         X509_STORE *store = GetX509StorePtr(val); /* NO NEED TO DUP */
         SSL_CTX_set_cert_store(ctx, store);
@@ -1601,15 +1601,15 @@ ossl_sslctx_setup(VALUE self)
 #endif
     }
 
-    val = ossl_sslctx_get_extra_cert(self);
+    val = rb_attr_get(self, id_i_extra_chain_cert);
     if(!NIL_P(val)){
         rb_block_call(val, rb_intern(&quot;each&quot;), 0, 0, ossl_sslctx_add_extra_chain_cert_i, self);
     }
 
     /* private key may be bundled in certificate file. */
-    val = ossl_sslctx_get_cert(self);
+    val = rb_attr_get(self, id_i_cert);
     cert = NIL_P(val) ? NULL : GetX509CertPtr(val); /* NO DUP NEEDED */
-    val = ossl_sslctx_get_key(self);
+    val = rb_attr_get(self, id_i_key);
     key = NIL_P(val) ? NULL : GetPrivPKeyPtr(val); /* NO DUP NEEDED */
     if (cert &amp;&amp; key) {
         if (!SSL_CTX_use_certificate(ctx, cert)) {
@@ -1625,7 +1625,7 @@ ossl_sslctx_setup(VALUE self)
         }
     }
 
-    val = ossl_sslctx_get_client_ca(self);
+    val = rb_attr_get(self, id_i_client_ca);
     if(!NIL_P(val)){
         if (RB_TYPE_P(val, T_ARRAY)) {
             for(i = 0; i &lt; RARRAY_LEN(val); i++){
@@ -1645,48 +1645,52 @@ ossl_sslctx_setup(VALUE self)
         }
     }
 
-    val = ossl_sslctx_get_ca_file(self);
+    val = rb_attr_get(self, id_i_ca_file);
     ca_file = NIL_P(val) ? NULL : StringValueCStr(val);
-    val = ossl_sslctx_get_ca_path(self);
+    val = rb_attr_get(self, id_i_ca_path);
     ca_path = NIL_P(val) ? NULL : StringValueCStr(val);
     if(ca_file || ca_path){
         if (!SSL_CTX_load_verify_locations(ctx, ca_file, ca_path))
             rb_warning(&quot;can&#39;t set verify locations&quot;);
     }
 
-    val = ossl_sslctx_get_verify_mode(self);
+    val = rb_attr_get(self, id_i_verify_mode);
     verify_mode = NIL_P(val) ? SSL_VERIFY_NONE : NUM2INT(val);
     SSL_CTX_set_verify(ctx, verify_mode, ossl_ssl_verify_callback);
-    if (RTEST(ossl_sslctx_get_client_cert_cb(self)))
+    if (RTEST(rb_attr_get(self, id_i_client_cert_cb)))
         SSL_CTX_set_client_cert_cb(ctx, ossl_client_cert_cb);
 
-    val = ossl_sslctx_get_timeout(self);
+    val = rb_attr_get(self, id_i_timeout);
     if(!NIL_P(val)) SSL_CTX_set_timeout(ctx, NUM2LONG(val));
 
-    val = ossl_sslctx_get_verify_dep(self);
+    val = rb_attr_get(self, id_i_verify_depth);
     if(!NIL_P(val)) SSL_CTX_set_verify_depth(ctx, NUM2INT(val));
 
 #ifdef HAVE_SSL_CTX_SET_NEXT_PROTO_SELECT_CB
-    val = rb_iv_get(self, &quot;@npn_protocols&quot;);
+    val = rb_attr_get(self, id_i_npn_protocols);
     if (!NIL_P(val)) {
         VALUE encoded = ssl_encode_npn_protocols(val);
         SSL_CTX_set_next_protos_advertised_cb(ctx, ssl_npn_advertise_cb, (void *)encoded);
         OSSL_Debug(&quot;SSL NPN advertise callback added&quot;);
     }
-    if (RTEST(rb_iv_get(self, &quot;@npn_select_cb&quot;))) {
+    if (RTEST(rb_attr_get(self, id_i_npn_select_cb))) {
         SSL_CTX_set_next_proto_select_cb(ctx, ssl_npn_select_cb, (void *) self);
         OSSL_Debug(&quot;SSL NPN select callback added&quot;);
     }
 #endif
 
 #ifdef HAVE_SSL_CTX_SET_ALPN_SELECT_CB
-    val = rb_iv_get(self, &quot;@alpn_protocols&quot;);
+    val = rb_attr_get(self, id_i_alpn_protocols);
     if (!NIL_P(val)) {
         VALUE rprotos = ssl_encode_npn_protocols(val);
-        SSL_CTX_set_alpn_protos(ctx, (unsigned char *)RSTRING_PTR(rprotos), RSTRING_LENINT(rprotos));
+
+        /* returns 0 on success */
+        if (SSL_CTX_set_alpn_protos(ctx, (unsigned char *)RSTRING_PTR(rprotos),
+                                    RSTRING_LENINT(rprotos)))
+            ossl_raise(eSSLError, &quot;SSL_CTX_set_alpn_protos&quot;);
         OSSL_Debug(&quot;SSL ALPN values added&quot;);
     }
-    if (RTEST(rb_iv_get(self, &quot;@alpn_select_cb&quot;))) {
+    if (RTEST(rb_attr_get(self, id_i_alpn_select_cb))) {
         SSL_CTX_set_alpn_select_cb(ctx, ssl_alpn_select_cb, (void *) self);
         OSSL_Debug(&quot;SSL ALPN select callback added&quot;);
     }
@@ -1694,7 +1698,7 @@ ossl_sslctx_setup(VALUE self)
 
     rb_obj_freeze(self);
 
-    val = ossl_sslctx_get_sess_id_ctx(self);
+    val = rb_attr_get(self, id_i_session_id_context);
     if (!NIL_P(val)){
         StringValue(val);
         if (!SSL_CTX_set_session_id_context(ctx, (unsigned char *)RSTRING_PTR(val),
@@ -1703,21 +1707,21 @@ ossl_sslctx_setup(VALUE self)
         }
     }
 
-    if (RTEST(rb_iv_get(self, &quot;@session_get_cb&quot;))) {
+    if (RTEST(rb_attr_get(self, id_i_session_get_cb))) {
         SSL_CTX_sess_set_get_cb(ctx, ossl_sslctx_session_get_cb);
         OSSL_Debug(&quot;SSL SESSION get callback added&quot;);
     }
-    if (RTEST(rb_iv_get(self, &quot;@session_new_cb&quot;))) {
+    if (RTEST(rb_attr_get(self, id_i_session_new_cb))) {
         SSL_CTX_sess_set_new_cb(ctx, ossl_sslctx_session_new_cb);
         OSSL_Debug(&quot;SSL SESSION new callback added&quot;);
     }
-    if (RTEST(rb_iv_get(self, &quot;@session_remove_cb&quot;))) {
+    if (RTEST(rb_attr_get(self, id_i_session_remove_cb))) {
         SSL_CTX_sess_set_remove_cb(ctx, ossl_sslctx_session_remove_cb);
         OSSL_Debug(&quot;SSL SESSION remove callback added&quot;);
     }
 
 #ifdef HAVE_SSL_SET_TLSEXT_HOST_NAME
-    val = rb_iv_get(self, &quot;@servername_cb&quot;);
+    val = rb_attr_get(self, id_i_servername_cb);
     if (!NIL_P(val)) {
         SSL_CTX_set_tlsext_servername_callback(ctx, ssl_servername_cb);
         OSSL_Debug(&quot;SSL TLSEXT servername callback added&quot;);

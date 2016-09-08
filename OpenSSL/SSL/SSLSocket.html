@@ -288,14 +288,12 @@ ossl_ssl_initialize(int argc, VALUE *argv, VALUE self)
         v_ctx = rb_funcall(cSSLContext, rb_intern(&quot;new&quot;), 0);
 
     GetSSLCTX(v_ctx, ctx);
-    ossl_ssl_set_ctx(self, v_ctx);
+    rb_ivar_set(self, id_i_context, v_ctx);
     ossl_sslctx_setup(v_ctx);
 
     if (rb_respond_to(io, rb_intern(&quot;nonblock=&quot;)))
         rb_funcall(io, rb_intern(&quot;nonblock=&quot;), 1, Qtrue);
-    ossl_ssl_set_io(self, io);
-
-    ossl_ssl_set_sync_close(self, Qfalse);
+    rb_ivar_set(self, id_i_io, io);
 
     ssl = SSL_new(ctx);
     if (!ssl)
@@ -304,7 +302,7 @@ ossl_ssl_initialize(int argc, VALUE *argv, VALUE self)
 
     SSL_set_ex_data(ssl, ossl_ssl_ex_ptr_idx, (void *)self);
     SSL_set_info_callback(ssl, ssl_info_cb);
-    verify_cb = ossl_sslctx_get_verify_cb(v_ctx);
+    verify_cb = rb_attr_get(v_ctx, id_i_verify_callback);
     SSL_set_ex_data(ssl, ossl_ssl_ex_vcb_idx, (void *)verify_cb);
 
     rb_call_super(0, NULL);
@@ -764,7 +762,7 @@ ossl_ssl_set_hostname(VALUE self, VALUE arg)
         ossl_raise(eSSLError, NULL);
 
     /* for SSLSocket#hostname */
-    ossl_ssl_set_hostname_v(self, arg);
+    rb_ivar_set(self, id_i_hostname, arg);
 
     return arg;
 }</pre>
@@ -999,7 +997,7 @@ hostname of a remote peer has been verified.</p>
 
           
           <div class="method-source-code" id="post_connection_check-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 295</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 283</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">post_connection_check</span>(<span class="ruby-identifier">hostname</span>)
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">peer_cert</span>.<span class="ruby-identifier">nil?</span>
     <span class="ruby-identifier">msg</span> = <span class="ruby-string">&quot;Peer verification enabled, but no certificate received.&quot;</span>
@@ -1047,7 +1045,7 @@ established.</p>
 
           
           <div class="method-source-code" id="session-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 316</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 304</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">session</span>
   <span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Session</span>.<span class="ruby-identifier">new</span>(<span class="ruby-keyword">self</span>)
 <span class="ruby-keyword">rescue</span> <span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Session</span><span class="ruby-operator">::</span><span class="ruby-constant">SessionError</span>
@@ -1268,7 +1266,7 @@ closed.</p>
 
           
           <div class="method-source-code" id="sysclose-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 282</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 270</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">sysclose</span>
   <span class="ruby-keyword">return</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">closed?</span>
   <span class="ruby-identifier">stop</span>
