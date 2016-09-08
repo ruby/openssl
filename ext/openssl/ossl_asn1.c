@@ -110,16 +110,11 @@ asn1str_to_str(const ASN1_STRING *str)
 
 /*
  * ASN1_INTEGER conversions
- * TODO: Make a decision what's the right way to do this.
  */
-#define DO_IT_VIA_RUBY 0
 VALUE
 asn1integer_to_num(const ASN1_INTEGER *ai)
 {
     BIGNUM *bn;
-#if DO_IT_VIA_RUBY
-    char *txt;
-#endif
     VALUE num;
 
     if (!ai) {
@@ -133,43 +128,12 @@ asn1integer_to_num(const ASN1_INTEGER *ai)
 
     if (!bn)
 	ossl_raise(eOSSLError, NULL);
-#if DO_IT_VIA_RUBY
-    if (!(txt = BN_bn2dec(bn))) {
-	BN_free(bn);
-	ossl_raise(eOSSLError, NULL);
-    }
-    num = rb_cstr_to_inum(txt, 10, Qtrue);
-    OPENSSL_free(txt);
-#else
     num = ossl_bn_new(bn);
-#endif
     BN_free(bn);
 
     return num;
 }
 
-#if DO_IT_VIA_RUBY
-ASN1_INTEGER *
-num_to_asn1integer(VALUE obj, ASN1_INTEGER *ai)
-{
-    BIGNUM *bn = NULL;
-
-    if (RTEST(rb_obj_is_kind_of(obj, cBN))) {
-	bn = GetBNPtr(obj);
-    } else {
-	obj = rb_String(obj);
-	if (!BN_dec2bn(&bn, StringValueCStr(obj))) {
-	    ossl_raise(eOSSLError, NULL);
-	}
-    }
-    if (!(ai = BN_to_ASN1_INTEGER(bn, ai))) {
-	BN_free(bn);
-	ossl_raise(eOSSLError, NULL);
-    }
-    BN_free(bn);
-    return ai;
-}
-#else
 ASN1_INTEGER *
 num_to_asn1integer(VALUE obj, ASN1_INTEGER *ai)
 {
@@ -185,7 +149,6 @@ num_to_asn1integer(VALUE obj, ASN1_INTEGER *ai)
 
     return ai;
 }
-#endif
 
 /********/
 /*
