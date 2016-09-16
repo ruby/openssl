@@ -7,8 +7,6 @@ set -e
 sha1_to_rev() { git show -s --format=format:%B $1 | tail -n1 | grep -Po '(?<=@)[0-9]+'; }
 rev_to_sha1() { git log --format=format:%H -n1 --grep '^git-svn-id: .*@'$2' ' $1; }
 
-MERGE_INTO=$(git rev-parse --abbrev-ref HEAD)
-
 echo "#### Step 0. Fetch Ruby trunk"
 git remote | grep '^ruby$' >/dev/null || git remote add ruby https://github.com/ruby/ruby.git
 git fetch ruby
@@ -62,7 +60,8 @@ echo "#### Step 1. Sync '$BRANCH_EXTRACT' with 'ruby/trunk'"
 		sed -ie "/^$graftpoint$/d" $(git rev-parse --git-common-dir)/info/grafts
 )
 
-LAST_SYNC_REV=$(git log --format=format:%B -n1 --grep '^Sync-with-trunk: r' | grep -Po '(?<=^Sync-with-trunk: r)[0-9]+$' | tail -n1)
+LASY_SYNC_COMMIT=$(git log --format=format:%H -n1 --grep '^Sync-with-trunk: r')
+LAST_SYNC_REV=$(git show --format=format:%B $LASY_SYNC_COMMIT | grep -Po '(?<=^Sync-with-trunk: r)[0-9]+$' | tail -n1)
 NEXT_SYNC_REV=$(sha1_to_rev $BRANCH_EXTRACT)
 
 [ "$LAST_SYNC_REV" = "$NEXT_SYNC_REV" ] && (
@@ -71,27 +70,23 @@ NEXT_SYNC_REV=$(sha1_to_rev $BRANCH_EXTRACT)
 )
 
 BRANCH_MERGE=sync/merge-r$NEXT_SYNC_REV
-echo "#### Step 2. Rebase '$BRANCH_EXTRACT' to apply to '$MERGE_INTO'"
+echo "#### Step 2. Rebase '$BRANCH_EXTRACT' on the last sync commit"
 [ "$(git branch --list $BRANCH_MERGE)" ] || git branch $BRANCH_MERGE $BRANCH_EXTRACT
 [ ! -d tmp/sync-merge ] && git worktree add tmp/sync-merge $BRANCH_MERGE
 (
 	cd tmp/sync-merge
 	git checkout $BRANCH_MERGE
 	git reset -q --hard $BRANCH_EXTRACT
-	git rebase --onto $MERGE_INTO $(rev_to_sha1 $BRANCH_EXTRACT $LAST_SYNC_REV) $BRANCH_MERGE || (
-		echo "Automerge failed. Resolve conflicts and continue merge in tmp/sync-merge."
-		echo -n "Press a key to continue."
-		read _tmp
-	)
+	git rebase --onto $LASY_SYNC_COMMIT $(rev_to_sha1 $BRANCH_EXTRACT $LAST_SYNC_REV) $BRANCH_MERGE
 )
 
-echo "#### Step 3. Merge '$BRANCH_MERGE' into '$MERGE_INTO'"
-git merge --no-ff --no-commit $BRANCH_MERGE
-(
+echo "#### Step 3. Merge '$BRANCH_MERGE' into '$(git rev-parse --abbrev-ref HEAD)'"
+commit_message=$(
+	commits=$(git log --oneline --format='%H %<(61,trunc)%s' $LASY_SYNC_COMMIT..$BRANCH_MERGE)
 	echo "Merge changes from Ruby trunk r$LAST_SYNC_REV..r$NEXT_SYNC_REV"
 	echo ""
-	echo "* ruby-trunk r$LAST_SYNC_REV..r$NEXT_SYNC_REV: ($(git rev-list --count HEAD..$BRANCH_MERGE) commits)"
-	git log --oneline --format='%H %<(61,trunc)%s' HEAD..$BRANCH_MERGE | while read line; do
+	echo "* ruby-trunk r$LAST_SYNC_REV..r$NEXT_SYNC_REV: ($(echo "$commits" | wc -l) commits)"
+	echo "$commits" | while read line; do
 		sha1=$(echo "$line" | cut -f1 -d' ')
 		cmsg=$(echo "$line" | cut -f2- -d' ')
 		echo "  (r$(sha1_to_rev $sha1)) $cmsg"
@@ -99,4 +94,12 @@ git merge --no-ff --no-commit $BRANCH_MERGE
 
 	echo ""
 	echo "Sync-with-trunk: r$NEXT_SYNC_REV"
-) | git commit -F-
+)
+if git merge --no-ff --no-commit $BRANCH_MERGE; then
+	git commit -m "$commit_message"
+else
+	echo "Merge failed; fix conflict and commit with message:"
+	echo ""
+	echo "$commit_message"
+	exit 1
+fi
