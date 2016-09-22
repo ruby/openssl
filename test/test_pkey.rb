@@ -44,6 +44,13 @@ class OpenSSL::TestPKey < OpenSSL::PKeyTestCase
       end
     end
   end
+
+  def test_verify_empty_rsa
+    rsa = OpenSSL::PKey::RSA.new
+    assert_raise(OpenSSL::PKey::PKeyError, "[Bug #12783]") {
+      rsa.verify("SHA1", "a", "b")
+    }
+  end
 end
 
 end

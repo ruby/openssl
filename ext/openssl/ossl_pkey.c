@@ -166,6 +166,45 @@ ossl_pkey_new_from_data(int argc, VALUE *argv, VALUE self)
     return ossl_pkey_new(pkey);
 }
 
+static void
+pkey_check_public_key(EVP_PKEY *pkey)
+{
+    void *ptr;
+    const BIGNUM *n, *e, *pubkey;
+
+    if (EVP_PKEY_missing_parameters(pkey))
+	ossl_raise(ePKeyError, "parameters missing");
+
+    ptr = EVP_PKEY_get0(pkey);
+    switch (EVP_PKEY_base_id(pkey)) {
+      case EVP_PKEY_RSA:
+	RSA_get0_key(ptr, &n, &e, NULL);
+	if (n && e)
+	    return;
+	break;
+      case EVP_PKEY_DSA:
+	DSA_get0_key(ptr, &pubkey, NULL);
+	if (pubkey)
+	    return;
+	break;
+      case EVP_PKEY_DH:
+	DH_get0_key(ptr, &pubkey, NULL);
+	if (pubkey)
+	    return;
+	break;
+#if !defined(OPENSSL_NO_EC)
+      case EVP_PKEY_EC:
+	if (EC_KEY_get0_public_key(ptr))
+	    return;
+	break;
+#endif
+      default:
+	/* unsupported type; assuming ok */
+	return;
+    }
+    ossl_raise(ePKeyError, "public key missing");
+}
+
 EVP_PKEY *
 GetPKeyPtr(VALUE obj)
 {
@@ -311,6 +350,7 @@ ossl_pkey_verify(VALUE self, VALUE digest, VALUE sig, VALUE data)
     int result;
 
     GetPKey(self, pkey);
+    pkey_check_public_key(pkey);
     md = GetDigestPtr(digest);
     StringValue(sig);
     StringValue(data);
