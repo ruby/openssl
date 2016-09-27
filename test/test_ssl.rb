@@ -656,7 +656,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
         ssl = OpenSSL::SSL::SSLSocket.new(sock, ctx)
         ssl.hostname = "foo.example.com"
         ssl.connect
-        assert_match /^ADH-/, ssl.cipher[0], "the context returned by servername_cb is used"
+        assert_match (/^ADH-/), ssl.cipher[0], "the context returned by servername_cb is used"
         assert_predicate ctx3, :frozen?
       ensure
         sock.close
@@ -667,7 +667,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
         ssl = OpenSSL::SSL::SSLSocket.new(sock, ctx)
         ssl.hostname = "bar.example.com"
         ssl.connect
-        assert_not_match /^A(EC)?DH-/, ssl.cipher[0], "the original context is used"
+        assert_not_match (/^A(EC)?DH-/), ssl.cipher[0], "the original context is used"
       ensure
         sock.close
       end
