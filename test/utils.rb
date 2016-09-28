@@ -10,7 +10,6 @@ rescue LoadError
 end
 
 require "test/unit"
-require "digest/md5"
 require 'tempfile'
 require "rbconfig"
 require "socket"
