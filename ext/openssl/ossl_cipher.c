@@ -502,9 +502,6 @@ ossl_cipher_set_key(VALUE self, VALUE key)
  *  Cipher#random_iv to create a secure random IV.
  *
  *  Only call this method after calling Cipher#encrypt or Cipher#decrypt.
- *
- *  If not explicitly set, the OpenSSL default of an all-zeroes ("\\0") IV is
- *  used.
  */
 static VALUE
 ossl_cipher_set_iv(VALUE self, VALUE iv)
@@ -939,12 +936,10 @@ Init_ossl_cipher(void)
      * you absolutely need it</b>
      *
      * Because of this, you will end up with a mode that explicitly requires
-     * an IV in any case. Note that for backwards compatibility reasons,
-     * setting an IV is not explicitly mandated by the Cipher API. If not
-     * set, OpenSSL itself defaults to an all-zeroes IV ("\\0", not the
-     * character). Although the IV can be seen as public information, i.e.
-     * it may be transmitted in public once generated, it should still stay
-     * unpredictable to prevent certain kinds of attacks. Therefore, ideally
+     * an IV in any case. Although the IV can be seen as public information,
+     * i.e. it may be transmitted in public once generated, it should still
+     * stay unpredictable to prevent certain kinds of attacks. Therefore,
+     * ideally
      *
      * <b>Always create a secure random IV for every encryption of your
      * Cipher</b>
