@@ -4,20 +4,18 @@ require_relative 'utils'
 if defined?(OpenSSL::TestUtils)
 
 class OpenSSL::TestCipher < OpenSSL::TestCase
-
-  @ciphers = OpenSSL::Cipher.ciphers
-
-  class << self
-
+  module Helper
     def has_cipher?(name)
+      @ciphers ||= OpenSSL::Cipher.ciphers
       @ciphers.include?(name)
     end
 
     def has_ciphers?(list)
       list.all? { |name| has_cipher?(name) }
     end
-
   end
+  include Helper
+  extend Helper
 
   def setup
     @c1 = OpenSSL::Cipher.new("DES-EDE3-CBC")
@@ -144,14 +142,16 @@ class OpenSSL::TestCipher < OpenSSL::TestCase
     end
   end
 
-  if has_ciphers?(['aes-128-gcm', 'aes-192-gcm', 'aes-256-gcm'])
-
-    def test_authenticated
+  def test_authenticated
+    if has_cipher?('aes-128-gcm')
       cipher = OpenSSL::Cipher.new('aes-128-gcm')
       assert_predicate(cipher, :authenticated?)
-      cipher = OpenSSL::Cipher.new('aes-128-cbc')
-      assert_not_predicate(cipher, :authenticated?)
     end
+    cipher = OpenSSL::Cipher.new('aes-128-cbc')
+    assert_not_predicate(cipher, :authenticated?)
+  end
+
+  if has_ciphers?(['aes-128-gcm', 'aes-192-gcm', 'aes-256-gcm'])
 
     def test_aes_gcm
       ['aes-128-gcm', 'aes-192-gcm', 'aes-256-gcm'].each do |algo|

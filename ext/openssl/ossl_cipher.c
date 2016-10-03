@@ -527,6 +527,27 @@ ossl_cipher_set_iv(VALUE self, VALUE iv)
     return iv;
 }
 
+/*
+ *  call-seq:
+ *     cipher.authenticated? -> true | false
+ *
+ *  Indicated whether this Cipher instance uses an Authenticated Encryption
+ *  mode.
+ */
+static VALUE
+ossl_cipher_is_authenticated(VALUE self)
+{
+    EVP_CIPHER_CTX *ctx;
+
+    GetCipher(self, ctx);
+
+#if defined(HAVE_AUTHENTICATED_ENCRYPTION)
+    return (EVP_CIPHER_CTX_flags(ctx) & EVP_CIPH_FLAG_AEAD_CIPHER) ? Qtrue : Qfalse;
+#else
+    return Qfalse;
+#endif
+}
+
 #ifdef HAVE_AUTHENTICATED_ENCRYPTION
 /*
  *  call-seq:
@@ -673,23 +694,6 @@ ossl_cipher_set_auth_tag_len(VALUE self, VALUE vlen)
 }
 
 /*
- *  call-seq:
- *     cipher.authenticated? -> boolean
- *
- *  Indicated whether this Cipher instance uses an Authenticated Encryption
- *  mode.
- */
-static VALUE
-ossl_cipher_is_authenticated(VALUE self)
-{
-    EVP_CIPHER_CTX *ctx;
-
-    GetCipher(self, ctx);
-
-    return (EVP_CIPHER_CTX_flags(ctx) & EVP_CIPH_FLAG_AEAD_CIPHER) ? Qtrue : Qfalse;
-}
-
-/*
  * call-seq:
  *   cipher.iv_len = integer -> integer
  *
@@ -723,7 +727,6 @@ ossl_cipher_set_iv_length(VALUE self, VALUE iv_length)
 #define ossl_cipher_get_auth_tag rb_f_notimplement
 #define ossl_cipher_set_auth_tag rb_f_notimplement
 #define ossl_cipher_set_auth_tag_len rb_f_notimplement
-#define ossl_cipher_is_authenticated rb_f_notimplement
 #define ossl_cipher_set_iv_length rb_f_notimplement
 #endif
 
