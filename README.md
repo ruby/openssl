@@ -48,14 +48,9 @@ gem "openssl"
 require "openssl"
 ```
 
-See the documentation on OpenSSL for more usage,
-and the official [OpenSSL library](http://www.openssl.org/).
+## Documentation
 
-## Getting Started
-
-1. `$ gem install rake-compiler test-unit`
-2. `$ rake compile`
-3. `$ rake test`
+See https://ruby.github.io/openssl/.
 
 ## Contributing
 
