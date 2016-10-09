@@ -70,6 +70,9 @@ Notable changes
     linked with the EC key. Modifications to the EC::Group have no effect on the
     key. [[GH ruby/openssl#71]](https://github.com/ruby/openssl/pull/71)
 
+  - OpenSSL::PKey::EC::Point#to_bn allows specifying the point conversion form
+    by the optional argument.
+
 * OpenSSL::SSL
 
   - OpenSSL::SSL::SSLSocket#tmp_key is added. A client can call it after the
