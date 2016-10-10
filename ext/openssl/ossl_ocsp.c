@@ -404,6 +404,9 @@ ossl_ocspreq_sign(int argc, VALUE *argv, VALUE self)
  * Verifies this request using the given _certificates_ and _store_.
  * _certificates_ is an array of OpenSSL::X509::Certificate, _store_ is an
  * OpenSSL::X509::Store.
+ *
+ * Note that +false+ is returned if the request does not have a signature.
+ * Use #signed? to check whether the request is signed or not.
  */
 
 static VALUE
@@ -450,6 +453,22 @@ ossl_ocspreq_to_der(VALUE self)
     ossl_str_adjust(str, p);
 
     return str;
+}
+
+/*
+ * call-seq:
+ *    request.signed? -> true or false
+ *
+ * Returns +true+ if the request is signed, +false+ otherwise. Note that the
+ * validity of the signature is *not* checked. Use #verify to verify that.
+ */
+static VALUE
+ossl_ocspreq_signed_p(VALUE self)
+{
+    OCSP_REQUEST *req;
+
+    GetOCSPReq(self, req);
+    return OCSP_request_is_signed(req) ? Qtrue : Qfalse;
 }
 
 /*
@@ -1809,6 +1828,7 @@ Init_ossl_ocsp(void)
     rb_define_method(cOCSPReq, "check_nonce", ossl_ocspreq_check_nonce, 1);
     rb_define_method(cOCSPReq, "add_certid", ossl_ocspreq_add_certid, 1);
     rb_define_method(cOCSPReq, "certid", ossl_ocspreq_get_certid, 0);
+    rb_define_method(cOCSPReq, "signed?", ossl_ocspreq_signed_p, 0);
     rb_define_method(cOCSPReq, "sign", ossl_ocspreq_sign, -1);
     rb_define_method(cOCSPReq, "verify", ossl_ocspreq_verify, -1);
     rb_define_method(cOCSPReq, "to_der", ossl_ocspreq_to_der, 0);

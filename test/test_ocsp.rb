@@ -128,6 +128,21 @@ class OpenSSL::TestOCSP < OpenSSL::TestCase
       # fixed by OpenSSL 1.0.1j, 1.0.2 and LibreSSL 2.4.2
       pend "RT2560: ocsp_req_find_signer"
     end
+
+    # not signed
+    req = OpenSSL::OCSP::Request.new.add_certid(cid)
+    assert_equal false, req.verify([], store)
+  end
+
+  def test_request_is_signed
+    cid = OpenSSL::OCSP::CertificateId.new(@cert, @ca_cert)
+    req = OpenSSL::OCSP::Request.new
+    req.add_certid(cid)
+    assert_equal false, req.signed?
+    assert_equal false, OpenSSL::OCSP::Request.new(req.to_der).signed?
+    req.sign(@cert, @cert_key, [])
+    assert_equal true, req.signed?
+    assert_equal true, OpenSSL::OCSP::Request.new(req.to_der).signed?
   end
 
   def test_request_nonce
