@@ -26,10 +26,6 @@ class OpenSSL::TestPKCS7 < OpenSSL::TestCase
     @ee2_cert = issue_cert(ee2, @rsa1024, 3, ee_exts, @ca_cert, @rsa2048)
   end
 
-  def issue_cert(*args)
-    OpenSSL::TestUtils.issue_cert(*args)
-  end
-
   def test_signed
     store = OpenSSL::X509::Store.new
     store.add_cert(@ca_cert)

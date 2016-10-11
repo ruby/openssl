@@ -196,6 +196,9 @@ AQjjxMXhwULlmuR/K+WwlaZPiLIBYalLAZQ7ZbOPeVkJ8ePao0eLAgEC
   end
 
   class OpenSSL::TestCase < Test::Unit::TestCase
+    include OpenSSL::TestUtils
+    extend OpenSSL::TestUtils
+
     def setup
       if ENV["OSSL_GC_STRESS"] == "1"
         GC.stress = true
@@ -234,14 +237,6 @@ AQjjxMXhwULlmuR/K+WwlaZPiLIBYalLAZQ7ZbOPeVkJ8ePao0eLAgEC
       @svr_cert = issue_cert(@svr, @svr_key, 2, ee_exts, @ca_cert, @ca_key)
       @cli_cert = issue_cert(@cli, @cli_key, 3, ee_exts, @ca_cert, @ca_key)
       @server = nil
-    end
-
-    def issue_cert(*arg)
-      OpenSSL::TestUtils.issue_cert(*arg)
-    end
-
-    def issue_crl(*arg)
-      OpenSSL::TestUtils.issue_crl(*arg)
     end
 
     def readwrite_loop(ctx, ssl)

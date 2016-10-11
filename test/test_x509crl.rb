@@ -13,14 +13,6 @@ class OpenSSL::TestX509CRL < OpenSSL::TestCase
     @ee2 = OpenSSL::X509::Name.parse("/DC=org/DC=ruby-lang/CN=EE2")
   end
 
-  def issue_crl(*args)
-    OpenSSL::TestUtils.issue_crl(*args)
-  end
-
-  def issue_cert(*args)
-    OpenSSL::TestUtils.issue_cert(*args)
-  end
-
   def test_basic
     now = Time.at(Time.now.to_i)
 

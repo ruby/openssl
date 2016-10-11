@@ -3,8 +3,6 @@ require_relative "utils"
 
 module OpenSSL
   class TestPKCS12 < OpenSSL::TestCase
-    include OpenSSL::TestUtils
-
     def setup
       super
       ca = OpenSSL::X509::Name.parse("/DC=org/DC=ruby-lang/CN=CA")

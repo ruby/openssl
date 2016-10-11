@@ -12,10 +12,6 @@ class OpenSSL::TestX509Certificate < OpenSSL::TestCase
     @ee1 = OpenSSL::X509::Name.parse("/DC=org/DC=ruby-lang/CN=EE1")
   end
 
-  def issue_cert(*args)
-    OpenSSL::TestUtils.issue_cert(*args)
-  end
-
   def test_serial
     [1, 2**32, 2**100].each{|s|
       cert = issue_cert(@ca, @rsa2048, s, [], nil, nil)

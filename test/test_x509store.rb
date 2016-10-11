@@ -24,14 +24,6 @@ class OpenSSL::TestX509Store < OpenSSL::TestCase
     ctx.verify
   end
 
-  def issue_cert(*args)
-    OpenSSL::TestUtils.issue_cert(*args)
-  end
-
-  def issue_crl(*args)
-    OpenSSL::TestUtils.issue_crl(*args)
-  end
-
   def test_verify
     # OpenSSL uses time(2) while Time.now uses clock_gettime(CLOCK_REALTIME),
     # and there may be difference.
