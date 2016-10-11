@@ -644,7 +644,7 @@ ossl_rsa_to_public_key(VALUE self)
  *   data = 'Sign me!'
  *   digest = OpenSSL::Digest::SHA256.new
  *   pkey = OpenSSL::PKey::RSA.new(2048)
- *   signature = pkey.sign(digest, data)
+ *   signature = pkey.sign_pss(digest, data)
  */
 static VALUE
 ossl_rsa_sign_pss(VALUE self, VALUE digest, VALUE data)
@@ -712,7 +712,7 @@ ossl_rsa_sign_pss(VALUE self, VALUE digest, VALUE data)
  *   pkey = OpenSSL::PKey::RSA.new(2048)
  *   signature = pkey.sign(digest, data)
  *   pub_key = pkey.public_key
- *   puts pub_key.verify(digest, signature, data) # => true
+ *   puts pub_key.verify_pss(digest, signature, data) # => true
  */
 static VALUE
 ossl_rsa_verify_pss(VALUE self, VALUE digest, VALUE signature, VALUE data)
