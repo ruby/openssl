@@ -436,20 +436,16 @@ class  OpenSSL::TestASN1 < OpenSSL::TestCase
 
   def test_basic_constructed
     octet_string = OpenSSL::ASN1::OctetString.new(B(%w{ AB CD }))
+    encode_test B(%w{ 20 00 }), OpenSSL::ASN1::Constructive.new([], 0)
+    encode_test B(%w{ 21 00 }), OpenSSL::ASN1::Constructive.new([], 1, nil, :UNIVERSAL)
+    encode_test B(%w{ A1 00 }), OpenSSL::ASN1::Constructive.new([], 1, nil, :CONTEXT_SPECIFIC)
+    encode_test B(%w{ 21 04 04 02 AB CD }), OpenSSL::ASN1::Constructive.new([octet_string], 1)
     obj = OpenSSL::ASN1::Constructive.new([
       octet_string,
       OpenSSL::ASN1::EndOfContent.new
     ], 1)
     obj.indefinite_length = true
     encode_decode_test B(%w{ 21 80 04 02 AB CD 00 00 }), obj
-  end
-
-  def test_cons_without_inf_length_forbidden
-    assert_raise(OpenSSL::ASN1::ASN1Error) do
-      val = OpenSSL::ASN1::OctetString.new('a')
-      cons = OpenSSL::ASN1::Constructive.new([val], OpenSSL::ASN1::OCTET_STRING, nil, :UNIVERSAL)
-      cons.to_der
-    end
   end
 
   def test_prim_explicit_tagging
@@ -517,15 +513,16 @@ class  OpenSSL::TestASN1 < OpenSSL::TestCase
     assert_equal(raw, OpenSSL::ASN1.decode(raw).to_der)
   end
 
-  def test_octet_string_indefinite_length_implicit_tagging
+  def test_octet_string_constructed_tagging
+    octets = [ OpenSSL::ASN1::OctetString.new('aaa') ]
+    cons = OpenSSL::ASN1::Constructive.new(octets, 0, :IMPLICIT)
+    encode_test B(%w{ A0 05 04 03 61 61 61 }), cons
+
     octets = [ OpenSSL::ASN1::OctetString.new('aaa'),
                OpenSSL::ASN1::EndOfContent.new() ]
     cons = OpenSSL::ASN1::Constructive.new(octets, 0, :IMPLICIT)
     cons.indefinite_length = true
-    expected = %w{ A0 80 04 03 61 61 61 00 00 }
-    raw = [expected.join('')].pack('H*')
-    assert_equal(raw, cons.to_der)
-    assert_equal(raw, OpenSSL::ASN1.decode(raw).to_der)
+    encode_test B(%w{ A0 80 04 03 61 61 61 00 00 }), cons
   end
 
   def test_recursive_octet_string_indefinite_length

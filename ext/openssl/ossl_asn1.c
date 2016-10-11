@@ -833,23 +833,10 @@ int_ossl_asn1_decode0_cons(unsigned char **pp, long max_len, long length,
 
     if (tc == sym_UNIVERSAL) {
 	VALUE args[4];
-	int not_sequence_or_set;
-
-	not_sequence_or_set = tag != V_ASN1_SEQUENCE && tag != V_ASN1_SET;
-
-	if (not_sequence_or_set) {
-	    if (indefinite) {
-		asn1data = rb_obj_alloc(cASN1Constructive);
-	    }
-	    else {
-		ossl_raise(eASN1Error, "invalid non-indefinite tag");
-		return Qnil;
-	    }
-	}
-	else {
-	    VALUE klass = *ossl_asn1_info[tag].klass;
-	    asn1data = rb_obj_alloc(klass);
-	}
+	if (tag == V_ASN1_SEQUENCE || tag == V_ASN1_SET)
+	    asn1data = rb_obj_alloc(*ossl_asn1_info[tag].klass);
+	else
+	    asn1data = rb_obj_alloc(cASN1Constructive);
 	args[0] = ary;
 	args[1] = INT2NUM(tag);
 	args[2] = Qnil;
@@ -1224,9 +1211,9 @@ ossl_asn1cons_to_der(VALUE self)
 	}
     }
     else {
-	if (rb_obj_class(self) == cASN1Constructive)
-	    ossl_raise(eASN1Error, "Constructive shall only be used with indefinite length");
 	tag = ossl_asn1_default_tag(self);
+	if (tag == -1) /* neither SEQUENCE nor SET */
+	    tag = ossl_asn1_tag(self);
     }
     explicit = ossl_asn1_is_explicit(self);
     value = join_der(ossl_asn1_get_value(self));
