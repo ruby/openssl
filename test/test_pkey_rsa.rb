@@ -7,6 +7,17 @@ if defined?(OpenSSL::TestUtils)
 class OpenSSL::TestPKeyRSA < OpenSSL::PKeyTestCase
   RSA1024 = OpenSSL::TestUtils::TEST_KEY_RSA1024
 
+  def test_sign_verify_pss
+    key = OpenSSL::PKey::RSA.new(512, 3)
+    digest = OpenSSL::Digest::SHA1.new
+    data = "Sign me!"
+    invalid_data = "Sign me?"
+
+    signature = key.sign_pss(digest, data)
+    assert_equal(true, key.verify_pss(digest, signature, data))
+    assert_equal(false, key.verify_pss(digest, signature, invalid_data))
+  end
+
   def test_padding
     key = OpenSSL::PKey::RSA.new(512, 3)
 

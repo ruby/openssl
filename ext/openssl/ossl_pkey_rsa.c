@@ -626,6 +626,153 @@ ossl_rsa_to_public_key(VALUE self)
     return obj;
 }
 
+#if (OPENSSL_VERSION_NUMBER >= 0x10000000)
+/*
+ * call-seq:
+ *    rsa.sign_pss -> String
+ *
+ * Probabilistic Signature Scheme for RSA sign().
+ *
+ * To sign the +String+ +data+, +digest+, an instance of OpenSSL::Digest, must
+ * be provided. The return value is again a +String+ containing the signature.
+ * A PKeyError is raised should errors occur.
+ * Any previous state of the +Digest+ instance is irrelevant to the signature
+ * outcome, the digest instance is reset to its initial state during the
+ * operation.
+ *
+ * == Example
+ *   data = 'Sign me!'
+ *   digest = OpenSSL::Digest::SHA256.new
+ *   pkey = OpenSSL::PKey::RSA.new(2048)
+ *   signature = pkey.sign(digest, data)
+ */
+static VALUE
+ossl_rsa_sign_pss(VALUE self, VALUE digest, VALUE data)
+{
+    EVP_PKEY *pkey;
+    EVP_PKEY_CTX *pkey_ctx;
+    const EVP_MD *md;
+    EVP_MD_CTX *md_ctx;
+    size_t buf_len;
+    VALUE signature;
+    int result;
+
+    pkey = GetPrivPKeyPtr(self);
+    md = GetDigestPtr(digest);
+    StringValue(data);
+    signature = rb_str_new(0, EVP_PKEY_size(pkey)+16);
+
+    md_ctx = EVP_MD_CTX_new();
+    if (!md_ctx)
+        ossl_raise(ePKeyError, "EVP_MD_CTX_new");
+
+    pkey_ctx = EVP_PKEY_CTX_new(pkey, NULL);
+    if (!pkey_ctx)
+        ossl_raise(ePKeyError, "EVP_PKEY_CTX_new");
+
+    if (EVP_DigestSignInit(md_ctx, &pkey_ctx, md, NULL, pkey) != 1)
+        ossl_raise(ePKeyError, "EVP_DigestSignInit");
+
+    EVP_PKEY_CTX_set_rsa_padding(pkey_ctx, RSA_PKCS1_PSS_PADDING);
+
+    if (EVP_DigestSignUpdate(md_ctx, RSTRING_PTR(data), RSTRING_LEN(data)) != 1)
+        ossl_raise(ePKeyError, "EVP_DigestSignUpdate");
+
+    result = EVP_DigestSignFinal(md_ctx, (unsigned char *)RSTRING_PTR(signature), &buf_len);
+
+    EVP_MD_CTX_destroy(md_ctx);
+
+    if (!result)
+	    ossl_raise(ePKeyError, NULL);
+
+    assert((long)buf_len <= RSTRING_LEN(signature));
+    rb_str_set_len(signature, buf_len);
+
+    return signature;
+}
+
+/*
+ *  call-seq:
+ *      pkey.verify_pss(digest, signature, data) -> String
+ *
+ * Probabilistic Signature Scheme for RSA verify().
+ *
+ * To verify the +String+ +signature+, +digest+, an instance of
+ * OpenSSL::Digest, must be provided to re-compute the message digest of the
+ * original +data+, also a +String+. The return value is +true+ if the
+ * signature is valid, +false+ otherwise. A PKeyError is raised should errors
+ * occur.
+ * Any previous state of the +Digest+ instance is irrelevant to the validation
+ * outcome, the digest instance is reset to its initial state during the
+ * operation.
+ *
+ * == Example
+ *   data = 'Sign me!'
+ *   digest = OpenSSL::Digest::SHA256.new
+ *   pkey = OpenSSL::PKey::RSA.new(2048)
+ *   signature = pkey.sign(digest, data)
+ *   pub_key = pkey.public_key
+ *   puts pub_key.verify(digest, signature, data) # => true
+ */
+static VALUE
+ossl_rsa_verify_pss(VALUE self, VALUE digest, VALUE signature, VALUE data)
+{
+    EVP_PKEY *pkey;
+    EVP_PKEY_CTX *pkey_ctx;
+    const EVP_MD *md;
+    EVP_MD_CTX *md_ctx;
+    int result;
+    void *pkey_ptr;
+    const BIGNUM *n, *e;
+
+    GetPKey(self, pkey);
+    md = GetDigestPtr(digest);
+    StringValue(signature);
+    StringValue(data);
+
+    if (EVP_PKEY_missing_parameters(pkey))
+        ossl_raise(ePKeyError, "parameters missing");
+
+    pkey_ptr = EVP_PKEY_get0(pkey);
+    if (EVP_PKEY_base_id(pkey) != EVP_PKEY_RSA)
+        ossl_raise(ePKeyError, "key must be RSA");
+
+    RSA_get0_key(pkey_ptr, &n, &e, NULL);
+    if (!(n && e))
+        ossl_raise(ePKeyError, "missing public RSA key");
+
+    md_ctx = EVP_MD_CTX_new();
+    if (!md_ctx)
+        ossl_raise(ePKeyError, "EVP_MD_CTX_new");
+
+    pkey_ctx = EVP_PKEY_CTX_new(pkey, NULL);
+    if (!pkey_ctx)
+        ossl_raise(ePKeyError, "EVP_PKEY_CTX_new");
+
+    if (EVP_DigestVerifyInit(md_ctx, &pkey_ctx, md, NULL, pkey) != 1)
+        ossl_raise(ePKeyError, "EVP_DigestVerifyInit");
+
+    EVP_PKEY_CTX_set_rsa_padding(pkey_ctx, RSA_PKCS1_PSS_PADDING);
+
+    if (EVP_DigestVerifyUpdate(md_ctx, RSTRING_PTR(data), RSTRING_LEN(data)) != 1)
+        ossl_raise(ePKeyError, "EVP_DigestVerifyUpdate");
+
+    result = EVP_DigestVerifyFinal(md_ctx, (unsigned char *)RSTRING_PTR(signature), RSTRING_LENINT(signature));
+    EVP_MD_CTX_destroy(md_ctx);
+
+    switch (result) {
+        case 0:
+	        ossl_clear_error();
+	        return Qfalse;
+        case 1:
+	        return Qtrue;
+        default:
+	        ossl_raise(ePKeyError, NULL);
+    }
+    return Qnil; /* dummy */
+}
+#endif
+
 /*
  * TODO: Test me
 
@@ -743,6 +890,9 @@ Init_ossl_rsa(void)
     rb_define_method(cRSA, "set_key", ossl_rsa_set_key, 3);
     rb_define_method(cRSA, "set_factors", ossl_rsa_set_factors, 2);
     rb_define_method(cRSA, "set_crt_params", ossl_rsa_set_crt_params, 3);
+
+    rb_define_method(cRSA, "sign_pss", ossl_rsa_sign_pss, 2);
+    rb_define_method(cRSA, "verify_pss", ossl_rsa_verify_pss, 3);
 
     rb_define_method(cRSA, "params", ossl_rsa_get_params, 0);
 
