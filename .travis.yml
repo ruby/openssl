@@ -25,4 +25,5 @@ matrix:
     - env: RUBY_VERSION=ruby-2.3 OPENSSL_VERSION=libressl-2.2
     - env: RUBY_VERSION=ruby-2.3 OPENSSL_VERSION=libressl-2.3
     - env: RUBY_VERSION=ruby-2.3 OPENSSL_VERSION=libressl-2.4
+    - env: RUBY_VERSION=ruby-2.3 OPENSSL_VERSION=libressl-2.5
   allow_failures:
