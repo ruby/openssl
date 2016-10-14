@@ -308,13 +308,18 @@ ossl_pkey_sign(VALUE self, VALUE digest, VALUE data)
     ctx = EVP_MD_CTX_new();
     if (!ctx)
 	ossl_raise(ePKeyError, "EVP_MD_CTX_new");
-    EVP_SignInit(ctx, md);
-    EVP_SignUpdate(ctx, RSTRING_PTR(data), RSTRING_LEN(data));
+    if (!EVP_SignInit_ex(ctx, md, NULL)) {
+	EVP_MD_CTX_free(ctx);
+	ossl_raise(ePKeyError, "EVP_SignInit_ex");
+    }
+    if (!EVP_SignUpdate(ctx, RSTRING_PTR(data), RSTRING_LEN(data))) {
+	EVP_MD_CTX_free(ctx);
+	ossl_raise(ePKeyError, "EVP_SignUpdate");
+    }
     result = EVP_SignFinal(ctx, (unsigned char *)RSTRING_PTR(str), &buf_len, pkey);
     EVP_MD_CTX_free(ctx);
     if (!result)
-	ossl_raise(ePKeyError, NULL);
-    assert((long)buf_len <= RSTRING_LEN(str));
+	ossl_raise(ePKeyError, "EVP_SignFinal");
     rb_str_set_len(str, buf_len);
 
     return str;
@@ -358,8 +363,14 @@ ossl_pkey_verify(VALUE self, VALUE digest, VALUE sig, VALUE data)
     ctx = EVP_MD_CTX_new();
     if (!ctx)
 	ossl_raise(ePKeyError, "EVP_MD_CTX_new");
-    EVP_VerifyInit(ctx, md);
-    EVP_VerifyUpdate(ctx, RSTRING_PTR(data), RSTRING_LEN(data));
+    if (!EVP_VerifyInit_ex(ctx, md, NULL)) {
+	EVP_MD_CTX_free(ctx);
+	ossl_raise(ePKeyError, "EVP_VerifyInit_ex");
+    }
+    if (!EVP_VerifyUpdate(ctx, RSTRING_PTR(data), RSTRING_LEN(data))) {
+	EVP_MD_CTX_free(ctx);
+	ossl_raise(ePKeyError, "EVP_VerifyUpdate");
+    }
     result = EVP_VerifyFinal(ctx, (unsigned char *)RSTRING_PTR(sig), RSTRING_LENINT(sig), pkey);
     EVP_MD_CTX_free(ctx);
     switch (result) {
@@ -369,9 +380,8 @@ ossl_pkey_verify(VALUE self, VALUE digest, VALUE sig, VALUE data)
     case 1:
 	return Qtrue;
     default:
-	ossl_raise(ePKeyError, NULL);
+	ossl_raise(ePKeyError, "EVP_VerifyFinal");
     }
-    return Qnil; /* dummy */
 }
 
 /*
