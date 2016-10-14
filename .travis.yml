@@ -21,8 +21,6 @@ matrix:
     - env: RUBY_VERSION=ruby-2.3 OPENSSL_VERSION=openssl-1.0.1 OSSL_MDEBUG=1
     - env: RUBY_VERSION=ruby-2.3 OPENSSL_VERSION=openssl-1.0.2 OSSL_MDEBUG=1
     - env: RUBY_VERSION=ruby-2.3 OPENSSL_VERSION=openssl-1.1.0 OSSL_MDEBUG=1
-    - env: RUBY_VERSION=ruby-2.3 OPENSSL_VERSION=libressl-2.1
-    - env: RUBY_VERSION=ruby-2.3 OPENSSL_VERSION=libressl-2.2
     - env: RUBY_VERSION=ruby-2.3 OPENSSL_VERSION=libressl-2.3
     - env: RUBY_VERSION=ruby-2.3 OPENSSL_VERSION=libressl-2.4
     - env: RUBY_VERSION=ruby-2.3 OPENSSL_VERSION=libressl-2.5
