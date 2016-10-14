@@ -643,11 +643,10 @@ static VALUE ossl_ec_key_dsa_sign_asn1(VALUE self, VALUE data)
     if (EC_KEY_get0_private_key(ec) == NULL)
 	ossl_raise(eECError, "Private EC key needed!");
 
-    str = rb_str_new(0, ECDSA_size(ec) + 16);
+    str = rb_str_new(0, ECDSA_size(ec));
     if (ECDSA_sign(0, (unsigned char *) RSTRING_PTR(data), RSTRING_LENINT(data), (unsigned char *) RSTRING_PTR(str), &buf_len, ec) != 1)
-         ossl_raise(eECError, "ECDSA_sign");
-
-    rb_str_resize(str, buf_len);
+	ossl_raise(eECError, "ECDSA_sign");
+    rb_str_set_len(str, buf_len);
 
     return str;
 }

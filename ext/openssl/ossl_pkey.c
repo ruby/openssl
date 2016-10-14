@@ -303,7 +303,7 @@ ossl_pkey_sign(VALUE self, VALUE digest, VALUE data)
     pkey = GetPrivPKeyPtr(self);
     md = GetDigestPtr(digest);
     StringValue(data);
-    str = rb_str_new(0, EVP_PKEY_size(pkey)+16);
+    str = rb_str_new(0, EVP_PKEY_size(pkey));
 
     ctx = EVP_MD_CTX_new();
     if (!ctx)

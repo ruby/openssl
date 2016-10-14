@@ -499,8 +499,6 @@ ossl_dsa_to_public_key(VALUE self)
     return obj;
 }
 
-#define ossl_dsa_buf_size(dsa) (DSA_size(dsa) + 16)
-
 /*
  *  call-seq:
  *    dsa.syssign(string) -> aString
@@ -535,7 +533,7 @@ ossl_dsa_sign(VALUE self, VALUE data)
     if (!DSA_PRIVATE(self, dsa))
 	ossl_raise(eDSAError, "Private DSA key needed!");
     StringValue(data);
-    str = rb_str_new(0, ossl_dsa_buf_size(dsa));
+    str = rb_str_new(0, DSA_size(dsa));
     if (!DSA_sign(0, (unsigned char *)RSTRING_PTR(data), RSTRING_LENINT(data),
 		  (unsigned char *)RSTRING_PTR(str),
 		  &buf_len, dsa)) { /* type is ignored (0) */
