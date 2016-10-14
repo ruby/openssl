@@ -141,19 +141,18 @@ static VALUE ossl_ssl_session_eq(VALUE val1, VALUE val2)
  *
  * Returns the time at which the session was established.
  */
-static VALUE ossl_ssl_session_get_time(VALUE self)
+static VALUE
+ossl_ssl_session_get_time(VALUE self)
 {
-	SSL_SESSION *ctx;
-	time_t t;
+    SSL_SESSION *ctx;
+    long t;
 
-	GetSSLSession(self, ctx);
+    GetSSLSession(self, ctx);
+    t = SSL_SESSION_get_time(ctx);
+    if (t == 0)
+	return Qnil;
 
-	t = SSL_SESSION_get_time(ctx);
-
-	if (t == 0)
-		return Qnil;
-
-	return rb_funcall(rb_cTime, rb_intern("at"), 1, TIMET2NUM(t));
+    return rb_funcall(rb_cTime, rb_intern("at"), 1, LONG2NUM(t));
 }
 
 /*
@@ -164,16 +163,16 @@ static VALUE ossl_ssl_session_get_time(VALUE self)
  * established time.
  *
  */
-static VALUE ossl_ssl_session_get_timeout(VALUE self)
+static VALUE
+ossl_ssl_session_get_timeout(VALUE self)
 {
-	SSL_SESSION *ctx;
-	time_t t;
+    SSL_SESSION *ctx;
+    long t;
 
-	GetSSLSession(self, ctx);
+    GetSSLSession(self, ctx);
+    t = SSL_SESSION_get_timeout(ctx);
 
-	t = SSL_SESSION_get_timeout(ctx);
-
-	return TIMET2NUM(t);
+    return LONG2NUM(t);
 }
 
 /*
