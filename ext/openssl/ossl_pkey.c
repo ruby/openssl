@@ -352,12 +352,13 @@ ossl_pkey_verify(VALUE self, VALUE digest, VALUE sig, VALUE data)
     EVP_PKEY *pkey;
     const EVP_MD *md;
     EVP_MD_CTX *ctx;
-    int result;
+    int siglen, result;
 
     GetPKey(self, pkey);
     pkey_check_public_key(pkey);
     md = GetDigestPtr(digest);
     StringValue(sig);
+    siglen = RSTRING_LENINT(sig);
     StringValue(data);
 
     ctx = EVP_MD_CTX_new();
@@ -371,7 +372,7 @@ ossl_pkey_verify(VALUE self, VALUE digest, VALUE sig, VALUE data)
 	EVP_MD_CTX_free(ctx);
 	ossl_raise(ePKeyError, "EVP_VerifyUpdate");
     }
-    result = EVP_VerifyFinal(ctx, (unsigned char *)RSTRING_PTR(sig), RSTRING_LENINT(sig), pkey);
+    result = EVP_VerifyFinal(ctx, (unsigned char *)RSTRING_PTR(sig), siglen, pkey);
     EVP_MD_CTX_free(ctx);
     switch (result) {
     case 0:
