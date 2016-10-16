@@ -370,12 +370,28 @@ void
 ossl_clear_error(void)
 {
     if (dOSSL == Qtrue) {
-	long e;
-	while ((e = ERR_get_error())) {
-	    rb_warn("error on stack: %s", ERR_error_string(e, NULL));
+	unsigned long e;
+	const char *file, *data, *errstr;
+	int line, flags;
+
+	while ((e = ERR_get_error_line_data(&file, &line, &data, &flags))) {
+	    errstr = ERR_error_string(e, NULL);
+	    if (!errstr)
+		errstr = "(null)";
+
+	    if (flags & ERR_TXT_STRING) {
+		if (!data)
+		    data = "(null)";
+		rb_warn("error on stack: %s (%s)", errstr, data);
+	    }
+	    else {
+		rb_warn("error on stack: %s", errstr);
+	    }
 	}
     }
-    ERR_clear_error();
+    else {
+	ERR_clear_error();
+    }
 }
 
 /*
