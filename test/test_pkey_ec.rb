@@ -73,6 +73,20 @@ class OpenSSL::TestEC < OpenSSL::PKeyTestCase
     assert_raise(OpenSSL::PKey::ECError) { key2.check_key }
   end
 
+  def test_sign_verify
+    data = "Sign me!"
+    signature = P256.sign("SHA1", data)
+    assert_equal true, P256.verify("SHA1", signature, data)
+
+    signature0 = (<<~'end;').unpack("m")[0]
+      MEQCIEOTY/hD7eI8a0qlzxkIt8LLZ8uwiaSfVbjX2dPAvN11AiAQdCYx56Fq
+      QdBp1B4sxJoA8jvODMMklMyBKVmudboA6A==
+    end;
+    assert_equal true, P256.verify("SHA256", signature0, data)
+    signature1 = signature0.succ
+    assert_equal false, P256.verify("SHA256", signature1, data)
+  end
+
   def test_dsa_sign_verify
     data1 = "foo"
     data2 = "bar"
