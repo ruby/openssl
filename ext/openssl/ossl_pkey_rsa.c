@@ -626,17 +626,22 @@ ossl_rsa_to_public_key(VALUE self)
     return obj;
 }
 
-#if (OPENSSL_VERSION_NUMBER >= 0x10000000)
+#if (OPENSSL_VERSION_NUMBER >= 0x1000100f)
 /*
  * call-seq:
- *    rsa.sign_pss(digest, data) -> String
+ *    rsa.sign_pss(digest, data, salt_len, hash_alg) -> String
  *
  * Probabilistic Signature Scheme for RSA sign().
  *
  * To sign the +String+ +data+, +digest+ must be provided.
  * +digest+ must be a OpenSSL::Digest instance or +String+ like "SHA1".
+ *
+ * The +Integer+ +salt_len+ should be the salt length to use.
+ *
+ * The +String+ +hash_alg+ should be the hash algorithm used in MGF.
+ *
  * The return value is again a +String+ containing the signature.
- * A PKeyError is raised should errors occur.
+ * A RSAError is raised should errors occur.
  * Any previous state of the +Digest+ instance is irrelevant to the signature
  * outcome, the digest instance is reset to its initial state during the
  * operation.
@@ -645,20 +650,24 @@ ossl_rsa_to_public_key(VALUE self)
  *   data = 'Sign me!'
  *   digest = OpenSSL::Digest::SHA256.new
  *   pkey = OpenSSL::PKey::RSA.new(2048)
- *   signature = pkey.sign_pss(digest, data)
+ *   signature = pkey.sign_pss(digest, data, 20, 'SHA256')
  */
 static VALUE
-ossl_rsa_sign_pss(VALUE self, VALUE digest, VALUE data)
+ossl_rsa_sign_pss(VALUE self, VALUE digest, VALUE data, VALUE saltlen, VALUE hash_alg)
 {
     EVP_PKEY *pkey;
     EVP_PKEY_CTX *pkey_ctx;
-    const EVP_MD *md;
+    const EVP_MD *md, *mgf1md;
     EVP_MD_CTX *md_ctx;
     size_t buf_len;
     VALUE signature;
 
+    if (!RB_INTEGER_TYPE_P(saltlen))
+	ossl_raise(eRSAError, "bad salt_len value");
+
     pkey = GetPrivPKeyPtr(self);
     md = GetDigestPtr(digest);
+    mgf1md = GetDigestPtr(hash_alg);
     StringValue(data);
     signature = rb_str_new(0, EVP_PKEY_size(pkey));
 
@@ -672,8 +681,11 @@ ossl_rsa_sign_pss(VALUE self, VALUE digest, VALUE data)
     if (EVP_PKEY_CTX_set_rsa_padding(pkey_ctx, RSA_PKCS1_PSS_PADDING) != 1)
 	goto err;
 
-    // EVP_PKEY_CTX_set_rsa_pss_saltlen
-    // 
+    if (EVP_PKEY_CTX_set_rsa_pss_saltlen(pkey_ctx, NUM2INT(saltlen)) != 1)
+	goto err;
+
+    if (EVP_PKEY_CTX_set_rsa_mgf1_md(pkey_ctx, mgf1md) != 1)
+	goto err;
 
     if (EVP_DigestSignUpdate(md_ctx, RSTRING_PTR(data), RSTRING_LEN(data)) != 1)
 	goto err;
@@ -693,13 +705,18 @@ ossl_rsa_sign_pss(VALUE self, VALUE digest, VALUE data)
 
 /*
  *  call-seq:
- *      pkey.verify_pss(digest, signature, data) -> String
+ *      pkey.verify_pss(digest, signature, data, salt_len, hash_alg) -> String
  *
  * Probabilistic Signature Scheme for RSA verify().
  *
  * To verify the +String+ +signature+, +digest+ and +data+ must be provided
  * to re-compute the message digest. See +sign_pss+ for details about
  * +digest+ and +data+.
+ *
+ * The +Integer+ +salt_len+ should be the salt length to use.
+ *
+ * The +String+ +hash_alg+ should be the hash algorithm used in MGF.
+ *
  * The return value is +true+ if the
  * signature is valid, +false+ otherwise. A PKeyError is raised should errors
  * occur.
@@ -711,16 +728,16 @@ ossl_rsa_sign_pss(VALUE self, VALUE digest, VALUE data)
  *   data = 'Sign me!'
  *   digest = OpenSSL::Digest::SHA256.new
  *   pkey = OpenSSL::PKey::RSA.new(2048)
- *   signature = pkey.sign(digest, data)
+ *   signature = pkey.sign_pss(digest, data, 20, 'SHA256')
  *   pub_key = pkey.public_key
- *   puts pub_key.verify_pss(digest, signature, data) # => true
+ *   puts pub_key.verify_pss(digest, signature, data, 20, 'SHA256') # => true
  */
 static VALUE
-ossl_rsa_verify_pss(VALUE self, VALUE digest, VALUE signature, VALUE data)
+ossl_rsa_verify_pss(VALUE self, VALUE digest, VALUE signature, VALUE data, VALUE saltlen, VALUE hash_alg)
 {
     EVP_PKEY *pkey;
     EVP_PKEY_CTX *pkey_ctx;
-    const EVP_MD *md;
+    const EVP_MD *md, *mgf1md;
     EVP_MD_CTX *md_ctx;
     int result;
     RSA *rsa;
@@ -728,6 +745,7 @@ ossl_rsa_verify_pss(VALUE self, VALUE digest, VALUE signature, VALUE data)
 
     GetPKeyRSA(self, pkey);
     md = GetDigestPtr(digest);
+    mgf1md = GetDigestPtr(hash_alg);
     StringValue(signature);
     StringValue(data);
 
@@ -746,12 +764,17 @@ ossl_rsa_verify_pss(VALUE self, VALUE digest, VALUE signature, VALUE data)
     if (EVP_PKEY_CTX_set_rsa_padding(pkey_ctx, RSA_PKCS1_PSS_PADDING) != 1)
 	goto err;
 
+    if (EVP_PKEY_CTX_set_rsa_pss_saltlen(pkey_ctx, NUM2INT(saltlen)) != 1)
+	goto err;
+
+    if (EVP_PKEY_CTX_set_rsa_mgf1_md(pkey_ctx, mgf1md) != 1)
+	goto err;
+
     if (EVP_DigestVerifyUpdate(md_ctx, RSTRING_PTR(data), RSTRING_LEN(data)) != 1)
 	goto err;
 
     result = EVP_DigestVerifyFinal(md_ctx, (unsigned char *)RSTRING_PTR(signature), RSTRING_LENINT(signature));
 
-    
     switch (result) {
         case 0:
 		ossl_clear_error();
@@ -876,9 +899,9 @@ Init_ossl_rsa(void)
     rb_define_method(cRSA, "public_decrypt", ossl_rsa_public_decrypt, -1);
     rb_define_method(cRSA, "private_encrypt", ossl_rsa_private_encrypt, -1);
     rb_define_method(cRSA, "private_decrypt", ossl_rsa_private_decrypt, -1);
-#if (OPENSSL_VERSION_NUMBER >= 0x10000000)
-    rb_define_method(cRSA, "sign_pss", ossl_rsa_sign_pss, 2);
-    rb_define_method(cRSA, "verify_pss", ossl_rsa_verify_pss, 3);
+#if (OPENSSL_VERSION_NUMBER >= 0x1000100f)
+    rb_define_method(cRSA, "sign_pss", ossl_rsa_sign_pss, 4);
+    rb_define_method(cRSA, "verify_pss", ossl_rsa_verify_pss, 5);
 #endif
 
     DEF_OSSL_PKEY_BN(cRSA, rsa, n);
