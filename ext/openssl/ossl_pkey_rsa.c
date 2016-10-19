@@ -656,9 +656,6 @@ ossl_rsa_sign_pss(VALUE self, VALUE digest, VALUE data)
     EVP_MD_CTX *md_ctx;
     size_t buf_len;
     VALUE signature;
-    int error;
-
-    error = 0;
 
     pkey = GetPrivPKeyPtr(self);
     md = GetDigestPtr(digest);
@@ -667,40 +664,31 @@ ossl_rsa_sign_pss(VALUE self, VALUE digest, VALUE data)
 
     md_ctx = EVP_MD_CTX_new();
     if (!md_ctx)
-        ossl_raise(ePKeyError, "EVP_MD_CTX_new");
+	ossl_raise(eRSAError, "EVP_MD_CTX_new");
 
-    pkey_ctx = EVP_PKEY_CTX_new(pkey, NULL);
-    if (!pkey_ctx) {
-        error = 1;
-        goto err;
-    }
+    if (EVP_DigestSignInit(md_ctx, &pkey_ctx, md, NULL, pkey) != 1)
+	goto err;
 
-    if (EVP_DigestSignInit(md_ctx, &pkey_ctx, md, NULL, pkey) != 1) {
-        error = 2;
-        goto err;
-    }
+    if (EVP_PKEY_CTX_set_rsa_padding(pkey_ctx, RSA_PKCS1_PSS_PADDING) != 1)
+	goto err;
 
-    EVP_PKEY_CTX_set_rsa_padding(pkey_ctx, RSA_PKCS1_PSS_PADDING);
+    // EVP_PKEY_CTX_set_rsa_pss_saltlen
+    // 
 
-    if (EVP_DigestSignUpdate(md_ctx, RSTRING_PTR(data), RSTRING_LEN(data)) != 1) {
-        error = 3;
-        goto err;
-    }
+    if (EVP_DigestSignUpdate(md_ctx, RSTRING_PTR(data), RSTRING_LEN(data)) != 1)
+	goto err;
 
-    if (EVP_DigestSignFinal(md_ctx, (unsigned char *)RSTRING_PTR(signature), &buf_len) != 1) {
-        error = 4;
-	    goto err;
-    }
+    if (EVP_DigestSignFinal(md_ctx, (unsigned char *)RSTRING_PTR(signature), &buf_len) != 1)
+	goto err;
 
     rb_str_set_len(signature, buf_len);
 
- err:
-    EVP_MD_CTX_destroy(md_ctx);
-    if (error) {
-        ossl_raise(ePKeyError, NULL);
-    }
-
+    EVP_MD_CTX_free(md_ctx);
     return signature;
+
+ err:
+    EVP_MD_CTX_free(md_ctx);
+    ossl_raise(eRSAError, NULL);
 }
 
 /*
@@ -734,62 +722,52 @@ ossl_rsa_verify_pss(VALUE self, VALUE digest, VALUE signature, VALUE data)
     EVP_PKEY_CTX *pkey_ctx;
     const EVP_MD *md;
     EVP_MD_CTX *md_ctx;
-    int result, error;
-    void *pkey_ptr;
-    const BIGNUM *n, *e;
-
-    error = 0;
+    int result;
+    RSA *rsa;
+    const BIGNUM *rsa_n;
 
     GetPKeyRSA(self, pkey);
     md = GetDigestPtr(digest);
     StringValue(signature);
     StringValue(data);
 
-    pkey_ptr = EVP_PKEY_get0(pkey);
-    RSA_get0_key(pkey_ptr, &n, &e, NULL);
-    if (!(n && e))
-        ossl_raise(ePKeyError, "missing public RSA key");
+    GetRSA(self, rsa);
+    RSA_get0_key(rsa, &rsa_n, NULL, NULL);
+    if (!rsa_n)
+	ossl_raise(eRSAError, "incomplete RSA");
 
     md_ctx = EVP_MD_CTX_new();
-    if (!md_ctx) {
-        ossl_raise(ePKeyError, "EVP_MD_CTX_new");
-    }
+    if (!md_ctx)
+	ossl_raise(eRSAError, "EVP_MD_CTX_new");
 
-    pkey_ctx = EVP_PKEY_CTX_new(pkey, NULL);
-    if (!pkey_ctx) {
-        error = 1;
-        goto err;
-    }
+    if (EVP_DigestVerifyInit(md_ctx, &pkey_ctx, md, NULL, pkey) != 1)
+	goto err;
 
-    if (EVP_DigestVerifyInit(md_ctx, &pkey_ctx, md, NULL, pkey) != 1) {
-        error = 2;
-        goto err;
-    }
+    if (EVP_PKEY_CTX_set_rsa_padding(pkey_ctx, RSA_PKCS1_PSS_PADDING) != 1)
+	goto err;
 
-    EVP_PKEY_CTX_set_rsa_padding(pkey_ctx, RSA_PKCS1_PSS_PADDING);
-
-    if (EVP_DigestVerifyUpdate(md_ctx, RSTRING_PTR(data), RSTRING_LEN(data)) != 1) {
-        error = 3;
-        goto err;
-    }
+    if (EVP_DigestVerifyUpdate(md_ctx, RSTRING_PTR(data), RSTRING_LEN(data)) != 1)
+	goto err;
 
     result = EVP_DigestVerifyFinal(md_ctx, (unsigned char *)RSTRING_PTR(signature), RSTRING_LENINT(signature));
 
- err:
-    EVP_MD_CTX_destroy(md_ctx);
-    if (error) {
-        ossl_raise(ePKeyError, NULL);
-    }
-
+    
     switch (result) {
         case 0:
-	        ossl_clear_error();
-	        return Qfalse;
+		ossl_clear_error();
+                EVP_MD_CTX_free(md_ctx);
+		return Qfalse;
         case 1:
-	        return Qtrue;
+                EVP_MD_CTX_free(md_ctx);
+		return Qtrue;
         default:
-	        ossl_raise(ePKeyError, NULL);
+		goto err;
     }
+
+ err:
+    EVP_MD_CTX_free(md_ctx);
+    ossl_raise(eRSAError, NULL);
+
 }
 #endif
 
