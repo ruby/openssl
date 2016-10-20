@@ -638,7 +638,8 @@ ossl_rsa_to_public_key(VALUE self)
  *
  * The +Integer+ +salt_len+ should be the salt length to use.
  *
- * The +String+ +hash_alg+ should be the hash algorithm used in MGF.
+ * The +String+ +hash_alg+ should be the hash algorithm used in MGF1
+ * (the currently supported mask generation function (MGF)).
  *
  * The return value is again a +String+ containing the signature.
  * A RSAError is raised should errors occur.
@@ -660,20 +661,20 @@ ossl_rsa_sign_pss(VALUE self, VALUE digest, VALUE data, VALUE saltlen, VALUE has
     const EVP_MD *md, *mgf1md;
     EVP_MD_CTX *md_ctx;
     size_t buf_len;
+    int salt_len;
     VALUE signature;
 
-    if (!RB_INTEGER_TYPE_P(saltlen))
-	ossl_raise(eRSAError, "bad salt_len value");
-
+    salt_len = NUM2INT(saltlen);
     pkey = GetPrivPKeyPtr(self);
     md = GetDigestPtr(digest);
     mgf1md = GetDigestPtr(hash_alg);
     StringValue(data);
     signature = rb_str_new(0, EVP_PKEY_size(pkey));
+    buf_len = EVP_PKEY_size(pkey);
 
     md_ctx = EVP_MD_CTX_new();
     if (!md_ctx)
-	ossl_raise(eRSAError, "EVP_MD_CTX_new");
+	goto err;
 
     if (EVP_DigestSignInit(md_ctx, &pkey_ctx, md, NULL, pkey) != 1)
 	goto err;
@@ -681,7 +682,7 @@ ossl_rsa_sign_pss(VALUE self, VALUE digest, VALUE data, VALUE saltlen, VALUE has
     if (EVP_PKEY_CTX_set_rsa_padding(pkey_ctx, RSA_PKCS1_PSS_PADDING) != 1)
 	goto err;
 
-    if (EVP_PKEY_CTX_set_rsa_pss_saltlen(pkey_ctx, NUM2INT(saltlen)) != 1)
+    if (EVP_PKEY_CTX_set_rsa_pss_saltlen(pkey_ctx, salt_len) != 1)
 	goto err;
 
     if (EVP_PKEY_CTX_set_rsa_mgf1_md(pkey_ctx, mgf1md) != 1)
@@ -715,7 +716,8 @@ ossl_rsa_sign_pss(VALUE self, VALUE digest, VALUE data, VALUE saltlen, VALUE has
  *
  * The +Integer+ +salt_len+ should be the salt length to use.
  *
- * The +String+ +hash_alg+ should be the hash algorithm used in MGF.
+ * The +String+ +hash_alg+ should be the hash algorithm used in MGF1
+ * (the currently supported mask generation function (MGF)).
  *
  * The return value is +true+ if the
  * signature is valid, +false+ otherwise. A PKeyError is raised should errors
@@ -739,10 +741,12 @@ ossl_rsa_verify_pss(VALUE self, VALUE digest, VALUE signature, VALUE data, VALUE
     EVP_PKEY_CTX *pkey_ctx;
     const EVP_MD *md, *mgf1md;
     EVP_MD_CTX *md_ctx;
-    int result;
+    int result, salt_len, sig_len;
     RSA *rsa;
     const BIGNUM *rsa_n;
 
+    salt_len = NUM2INT(saltlen);
+    sig_len = RSTRING_LENINT(signature);
     GetPKeyRSA(self, pkey);
     md = GetDigestPtr(digest);
     mgf1md = GetDigestPtr(hash_alg);
@@ -756,7 +760,7 @@ ossl_rsa_verify_pss(VALUE self, VALUE digest, VALUE signature, VALUE data, VALUE
 
     md_ctx = EVP_MD_CTX_new();
     if (!md_ctx)
-	ossl_raise(eRSAError, "EVP_MD_CTX_new");
+	goto err;
 
     if (EVP_DigestVerifyInit(md_ctx, &pkey_ctx, md, NULL, pkey) != 1)
 	goto err;
@@ -764,7 +768,7 @@ ossl_rsa_verify_pss(VALUE self, VALUE digest, VALUE signature, VALUE data, VALUE
     if (EVP_PKEY_CTX_set_rsa_padding(pkey_ctx, RSA_PKCS1_PSS_PADDING) != 1)
 	goto err;
 
-    if (EVP_PKEY_CTX_set_rsa_pss_saltlen(pkey_ctx, NUM2INT(saltlen)) != 1)
+    if (EVP_PKEY_CTX_set_rsa_pss_saltlen(pkey_ctx, salt_len) != 1)
 	goto err;
 
     if (EVP_PKEY_CTX_set_rsa_mgf1_md(pkey_ctx, mgf1md) != 1)
@@ -773,7 +777,7 @@ ossl_rsa_verify_pss(VALUE self, VALUE digest, VALUE signature, VALUE data, VALUE
     if (EVP_DigestVerifyUpdate(md_ctx, RSTRING_PTR(data), RSTRING_LEN(data)) != 1)
 	goto err;
 
-    result = EVP_DigestVerifyFinal(md_ctx, (unsigned char *)RSTRING_PTR(signature), RSTRING_LENINT(signature));
+    result = EVP_DigestVerifyFinal(md_ctx, (unsigned char *)RSTRING_PTR(signature), sig_len);
 
     switch (result) {
         case 0:
