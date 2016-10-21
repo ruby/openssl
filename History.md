@@ -17,7 +17,7 @@ Supported platforms
 
 * OpenSSL 1.0.0, 1.0.1, 1.0.2, 1.1.0
 * OpenSSL < 0.9.8 is no longer supported.
-* LibreSSL 2.1, 2.2, 2.3, 2.4
+* LibreSSL 2.3, 2.4, 2.5
 * Ruby 2.3, 2.4
 
 Notable changes

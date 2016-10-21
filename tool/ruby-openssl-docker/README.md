@@ -1,5 +1,6 @@
 # ruby-openssl-docker
 
-Supports OpenSSL 1.0.0t, 1.0.1q, 1.0.2e and LibreSSL 2.1.9, 2.2.5 and 2.3.1.
+Docker image for testing. The image contains various binaries of supported
+versions of OpenSSL, LibreSSL, and Ruby.
 
-Currently only Ruby 2.3.0 is supported.
+CONTRIBUTING.md on the top directory describes how to use the image.

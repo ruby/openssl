@@ -28,51 +28,45 @@ RUN curl -s https://www.openssl.org/source/openssl-1.0.0t.tar.gz | tar -C /build
       shared debug-linux-x86_64 && \
     make && make install_sw
 
-RUN curl -s https://www.openssl.org/source/openssl-1.0.1t.tar.gz | tar -C /build/openssl -xzf - && \
-    cd /build/openssl/openssl-1.0.1t && \
+RUN curl -s https://www.openssl.org/source/openssl-1.0.1u.tar.gz | tar -C /build/openssl -xzf - && \
+    cd /build/openssl/openssl-1.0.1u && \
     ./Configure \
       --openssldir=/opt/openssl/openssl-1.0.1 \
       shared debug-linux-x86_64 && \
     make && make install_sw
 
-RUN curl -s https://www.openssl.org/source/openssl-1.0.2h.tar.gz | tar -C /build/openssl -xzf - && \
-    cd /build/openssl/openssl-1.0.2h && \
+RUN curl -s https://www.openssl.org/source/openssl-1.0.2j.tar.gz | tar -C /build/openssl -xzf - && \
+    cd /build/openssl/openssl-1.0.2j && \
     ./Configure \
       --openssldir=/opt/openssl/openssl-1.0.2 \
       shared debug-linux-x86_64 && \
     make && make install_sw
 
-RUN curl -s https://www.openssl.org/source/openssl-1.1.0.tar.gz | tar -C /build/openssl -xzf - && \
-    cd /build/openssl/openssl-1.1.0 && \
+RUN curl -s https://www.openssl.org/source/openssl-1.1.0b.tar.gz | tar -C /build/openssl -xzf - && \
+    cd /build/openssl/openssl-1.1.0b && \
     ./Configure \
       --prefix=/opt/openssl/openssl-1.1.0 \
       enable-crypto-mdebug enable-crypto-mdebug-backtrace \
       debug-linux-x86_64 && \
     make && make install_sw
 
-# Supported libressl versions: 2.1, 2.2, 2.3, 2.4
-RUN curl -s http://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.1.10.tar.gz | tar -C /build/openssl -xzf -
-RUN cd /build/openssl/libressl-2.1.10 && \
-    ./configure \
-      --prefix=/opt/openssl/libressl-2.1 && \
-    make && make install
-
-RUN curl -s http://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.2.9.tar.gz | tar -C /build/openssl -xzf -
-RUN cd /build/openssl/libressl-2.2.9 && \
-    ./configure \
-      --prefix=/opt/openssl/libressl-2.2 && \
-    make && make install
-
-RUN curl -s http://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.3.7.tar.gz | tar -C /build/openssl -xzf -
-RUN cd /build/openssl/libressl-2.3.7 && \
+# Supported libressl versions: 2.3, 2.4, 2.5
+RUN curl -s http://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.3.8.tar.gz | tar -C /build/openssl -xzf -
+RUN cd /build/openssl/libressl-2.3.8 && \
     ./configure \
       --prefix=/opt/openssl/libressl-2.3 && \
     make && make install
 
-RUN curl -s http://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.4.2.tar.gz | tar -C /build/openssl -xzf -
-RUN cd /build/openssl/libressl-2.4.2 && \
+RUN curl -s http://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.4.3.tar.gz | tar -C /build/openssl -xzf -
+RUN cd /build/openssl/libressl-2.4.3 && \
     ./configure \
       --prefix=/opt/openssl/libressl-2.4 && \
+    make && make install
+
+RUN curl -s http://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.5.0.tar.gz | tar -C /build/openssl -xzf -
+RUN cd /build/openssl/libressl-2.5.0 && \
+    ./configure \
+      --prefix=/opt/openssl/libressl-2.5 && \
     make && make install
 
 # Supported Ruby versions: 2.3
