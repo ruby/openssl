@@ -149,7 +149,7 @@ ossl_pem_passwd_value(VALUE pass)
     /* PEM_BUFSIZE is currently used as the second argument of pem_password_cb,
      * that is +max_len+ of ossl_pem_passwd_cb() */
     if (RSTRING_LEN(pass) > PEM_BUFSIZE)
-	ossl_raise(eOSSLError, "password must be shorter than %d bytes", PEM_BUFSIZE);
+	ossl_raise(eOSSLError, "password must not be longer than %d bytes", PEM_BUFSIZE);
 
     return pass;
 }
@@ -209,7 +209,7 @@ ossl_pem_passwd_cb(char *buf, int max_len, int flag, void *pwd_)
 	    continue;
 	}
 	if (len > max_len) {
-	    rb_warning("password must be shorter than %d bytes", max_len);
+	    rb_warning("password must not be longer than %d bytes", max_len);
 	    continue;
 	}
 	memcpy(buf, RSTRING_PTR(pass), len);
