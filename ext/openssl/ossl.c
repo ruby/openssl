@@ -168,7 +168,8 @@ ossl_pem_passwd_cb0(VALUE flag)
 int
 ossl_pem_passwd_cb(char *buf, int max_len, int flag, void *pwd_)
 {
-    int len, status;
+    long len;
+    int status;
     VALUE rflag, pass = (VALUE)pwd_;
 
     if (RTEST(pass)) {
@@ -176,7 +177,7 @@ ossl_pem_passwd_cb(char *buf, int max_len, int flag, void *pwd_)
 	 * work because it does not allow NUL characters and truncates to 1024
 	 * bytes silently if the input is over 1024 bytes */
 	if (RB_TYPE_P(pass, T_STRING)) {
-	    len = RSTRING_LENINT(pass);
+	    len = RSTRING_LEN(pass);
 	    if (len >= OSSL_MIN_PWD_LEN && len <= max_len) {
 		memcpy(buf, RSTRING_PTR(pass), len);
 		return len;
@@ -203,7 +204,7 @@ ossl_pem_passwd_cb(char *buf, int max_len, int flag, void *pwd_)
 	    rb_set_errinfo(Qnil);
 	    return -1;
 	}
-	len = RSTRING_LENINT(pass);
+	len = RSTRING_LEN(pass);
 	if (len < OSSL_MIN_PWD_LEN) {
 	    rb_warning("password must be at least %d bytes", OSSL_MIN_PWD_LEN);
 	    continue;
@@ -215,7 +216,7 @@ ossl_pem_passwd_cb(char *buf, int max_len, int flag, void *pwd_)
 	memcpy(buf, RSTRING_PTR(pass), len);
 	break;
     }
-    return len;
+    return (int)len;
 }
 
 /*
