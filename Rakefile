@@ -1,11 +1,14 @@
-gem 'rake-compiler'
-
 require 'rake'
-require 'rake/extensiontask'
 require 'rake/testtask'
 require 'rdoc/task'
 
-Rake::ExtensionTask.new('openssl')
+begin
+  require 'rake/extensiontask'
+  Rake::ExtensionTask.new('openssl')
+rescue LoadError
+  warn "rake-compiler not installed. Run 'rake install_dependencies' to " \
+    "install testing dependency gems."
+end
 
 Rake::TestTask.new do |t|
   t.libs << 'test'
@@ -20,6 +23,20 @@ end
 task :test => :debug
 task :debug do
   ruby "-I./lib -ropenssl -ve'puts OpenSSL::OPENSSL_VERSION, OpenSSL::OPENSSL_LIBRARY_VERSION'"
+end
+
+task :install_dependencies do
+  if ENV["USE_HTTP_RUBYGEMS_ORG"] == "1"
+    Gem.sources.replace([Gem::Source.new("http://rubygems.org")])
+  end
+
+  Gem.configuration.verbose = false
+  gemspec = eval(File.read("openssl.gemspec"))
+  gemspec.development_dependencies.each do |dep|
+    print "Installing #{dep.name} (#{dep.requirement}) ... "
+    gem = Gem.install(dep.name, dep.requirement, force: true)
+    puts "#{gem[0].version}"
+  end
 end
 
 namespace :sync do
