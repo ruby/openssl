@@ -36,11 +36,6 @@ have_library("socket", "socket")
 have_header("assert.h")
 
 Logging::message "=== Checking for required stuff... ===\n"
-if $mingw
-  have_library("wsock32")
-  have_library("gdi32")
-end
-
 result = pkg_config("openssl") && have_header("openssl/ssl.h")
 unless result
   result = have_header("openssl/ssl.h")
