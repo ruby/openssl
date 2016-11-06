@@ -44,7 +44,7 @@ Test cases are located under the
 You can run it with the following three commands:
 
 ```
-$ gem install rake-compiler test-unit
+$ rake install_dependencies # installs rake-compiler, test-unit, ...
 $ rake compile
 $ rake test
 ```
