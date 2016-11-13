@@ -1706,11 +1706,21 @@ ossl_ssl_read_internal(int argc, VALUE *argv, VALUE self, int nonblock)
                 rb_io_wait_readable(FPTR_TO_FD(fptr));
 		continue;
 	    case SSL_ERROR_SYSCALL:
-		if(ERR_peek_error() == 0 && nread == 0) {
-		    if (no_exception_p(opts)) { return Qnil; }
-		    rb_eof_error();
+		if (!ERR_peek_error()) {
+		    /*
+		     * XXX: OpenSSL commit 4880672a9b41 (backported to 1.1.0c)
+		     * changed SSL_read() to return -1 on unexpected EOF because
+		     * it's not retryable, contrary to the manpage.
+		     * Remove this comment (and maybe fix the condition) when
+		     * the manpage or the implementation is fixed.
+		     */
+		    if (errno)
+			rb_sys_fail(0);
+		    else {
+			if (no_exception_p(opts)) { return Qnil; }
+			rb_eof_error();
+		    }
 		}
-		rb_sys_fail(0);
 	    default:
 		ossl_raise(eSSLError, "SSL_read");
 	    }
