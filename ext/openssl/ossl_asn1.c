@@ -182,6 +182,7 @@ VALUE cASN1Sequence, cASN1Set;                /* CONSTRUCTIVE      */
 static VALUE sym_IMPLICIT, sym_EXPLICIT;
 static VALUE sym_UNIVERSAL, sym_APPLICATION, sym_CONTEXT_SPECIFIC, sym_PRIVATE;
 static ID sivVALUE, sivTAG, sivTAG_CLASS, sivTAGGING, sivINFINITE_LENGTH, sivUNUSED_BITS;
+static ID id_each;
 
 /*
  * Ruby to ASN1 converters
@@ -696,7 +697,7 @@ static VALUE
 join_der(VALUE enumerable)
 {
     VALUE str = rb_str_new(0, 0);
-    rb_block_call(enumerable, rb_intern("each"), 0, 0, join_der_i, str);
+    rb_block_call(enumerable, id_each, 0, 0, join_der_i, str);
     return str;
 }
 
@@ -1284,7 +1285,8 @@ ossl_asn1cons_to_der(VALUE self)
 static VALUE
 ossl_asn1cons_each(VALUE self)
 {
-    rb_ary_each(ossl_asn1_get_value(self));
+    rb_funcall(ossl_asn1_get_value(self), id_each, 0);
+
     return self;
 }
 
@@ -1925,4 +1927,6 @@ do{\
     rb_hash_aset(class_tag_map, cASN1UniversalString, INT2NUM(V_ASN1_UNIVERSALSTRING));
     rb_hash_aset(class_tag_map, cASN1BMPString, INT2NUM(V_ASN1_BMPSTRING));
     rb_global_variable(&class_tag_map);
+
+    id_each = rb_intern_const("each");
 }
