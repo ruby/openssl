@@ -13,12 +13,37 @@ class OpenSSL::TestPKeyRSA < OpenSSL::PKeyTestCase
       digest = OpenSSL::Digest::SHA1.new
       salt_len = 20
       hash_alg = 'SHA1'
+      options = { salt_length: salt_len, mgf1_hash: hash_alg }
       data = "Sign me!"
       invalid_data = "Sign me?"
 
-      signature = key.sign_pss(digest, data, salt_len, hash_alg)
-      assert_equal(true, key.verify_pss(digest, signature, data, salt_len, hash_alg))
-      assert_equal(false, key.verify_pss(digest, signature, invalid_data, salt_len, hash_alg))
+      signature = key.sign_pss(digest, data, salt_length: salt_len, mgf1_hash: hash_alg)
+      assert_equal(true, key.verify_pss(digest, signature, data, salt_length: salt_len, mgf1_hash: hash_alg))
+      assert_equal(false, key.verify_pss(digest, signature, invalid_data, salt_length: salt_len, mgf1_hash: hash_alg))
+
+      signature = key.sign_ss(digest, data, salt_length: salt_len)
+      assert_equal(true, key.verify_pss(digest, signature, data, salt_length: salt_len))
+      assert_equal(false, key.verify_pss(digest, signature, invalid_data, salt_length: salt_len))
+
+      signature = key.sign_ss(digest, data, mgf1_hash: hash_alg)
+      assert_equal(true, key.verify_pss(digest, signature, data, mgf1_hash: hash_alg))
+      assert_equal(false, key.verify_pss(digest, signature, invalid_data, mgf1_hash: hash_alg))
+
+      signature = key.sign_ss(digest, data)
+      assert_equal(true, key.verify_pss(digest, signature, data))
+      assert_equal(false, key.verify_pss(digest, signature, invalid_data))
+
+      signature = key.sign_ss(digest, data, options)
+      assert_equal(true, key.verify_pss(digest, signature, data, options))
+      assert_equal(false, key.verify_pss(digest, signature, invalid_data, options))
+
+      signature = key.sign_ss(digest, data, salt_length: :digest_length)
+      assert_equal(true, key.verify_pss(digest, signature, data, salt_length: :digest_length))
+      assert_equal(false, key.verify_pss(digest, signature, invalid_data, salt_length: :digest_length))
+
+      signature = key.sign_ss(digest, data, salt_length: :max_length)
+      assert_equal(true, key.verify_pss(digest, signature, data, salt_length: :max_length))
+      assert_equal(false, key.verify_pss(digest, signature, invalid_data, salt_length: :max_length))
     end
   end
 
