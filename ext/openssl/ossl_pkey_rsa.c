@@ -629,16 +629,18 @@ ossl_rsa_to_public_key(VALUE self)
 #if (OPENSSL_VERSION_NUMBER >= 0x1000100f)
 /*
  * call-seq:
- *    rsa.sign_pss(digest, data, salt_len, hash_alg) -> String
+ *    rsa.sign_pss(digest, data, options) -> String
  *
  * Probabilistic Signature Scheme for RSA sign().
  *
  * To sign the +String+ +data+, +digest+ must be provided.
  * +digest+ must be a OpenSSL::Digest instance or +String+ like "SHA1".
  *
- * The +Integer+ +salt_len+ should be the salt length to use.
+ * The +Hash+ +options+ supports two key/value pairs:
  *
- * The +String+ +hash_alg+ should be the hash algorithm used in MGF1
+ * The +Integer+ +salt_length+ should be the salt length to use.
+ *
+ * The +String+ +mgf1_hash+ should be the hash algorithm used in MGF1
  * (the currently supported mask generation function (MGF)).
  *
  * The return value is again a +String+ containing the signature.
@@ -651,10 +653,10 @@ ossl_rsa_to_public_key(VALUE self)
  *   data = 'Sign me!'
  *   digest = OpenSSL::Digest::SHA256.new
  *   pkey = OpenSSL::PKey::RSA.new(2048)
- *   signature = pkey.sign_pss(digest, data, 20, 'SHA256')
+ *   signature = pkey.sign_pss(digest, data, salt_length: 20, mgf1_hash: 'SHA256')
  */
 static VALUE
-ossl_rsa_sign_pss(VALUE self, VALUE digest, VALUE data, VALUE saltlen, VALUE hash_alg)
+ossl_rsa_sign_pss(VALUE self, VALUE digest, VALUE data, VALUE saltlen, VALUE mgf1_hash)
 {
     EVP_PKEY *pkey;
     EVP_PKEY_CTX *pkey_ctx;
@@ -667,7 +669,7 @@ ossl_rsa_sign_pss(VALUE self, VALUE digest, VALUE data, VALUE saltlen, VALUE has
     salt_len = NUM2INT(saltlen);
     pkey = GetPrivPKeyPtr(self);
     md = GetDigestPtr(digest);
-    mgf1md = GetDigestPtr(hash_alg);
+    mgf1md = GetDigestPtr(mgf1_hash);
     StringValue(data);
     signature = rb_str_new(0, EVP_PKEY_size(pkey));
     buf_len = EVP_PKEY_size(pkey);
@@ -706,7 +708,7 @@ ossl_rsa_sign_pss(VALUE self, VALUE digest, VALUE data, VALUE saltlen, VALUE has
 
 /*
  *  call-seq:
- *      pkey.verify_pss(digest, signature, data, salt_len, hash_alg) -> String
+ *      pkey.verify_pss(digest, signature, data, options) -> String
  *
  * Probabilistic Signature Scheme for RSA verify().
  *
@@ -714,10 +716,14 @@ ossl_rsa_sign_pss(VALUE self, VALUE digest, VALUE data, VALUE saltlen, VALUE has
  * to re-compute the message digest. See +sign_pss+ for details about
  * +digest+ and +data+.
  *
- * The +Integer+ +salt_len+ should be the salt length to use.
+ * The +Hash+ +options+ supports two key/value pairs:
  *
- * The +String+ +hash_alg+ should be the hash algorithm used in MGF1
- * (the currently supported mask generation function (MGF)).
+ * The +Integer+ +salt_length+ should be the salt length to use. Must be the same value
+ * used in sign_pss().
+ *
+ * The +String+ +mgf1_hash+ should be the hash algorithm used in MGF1
+ * (the currently supported mask generation function (MGF)). Must be the same value
+ * used in sign_pss().
  *
  * The return value is +true+ if the
  * signature is valid, +false+ otherwise. A PKeyError is raised should errors
@@ -730,12 +736,12 @@ ossl_rsa_sign_pss(VALUE self, VALUE digest, VALUE data, VALUE saltlen, VALUE has
  *   data = 'Sign me!'
  *   digest = OpenSSL::Digest::SHA256.new
  *   pkey = OpenSSL::PKey::RSA.new(2048)
- *   signature = pkey.sign_pss(digest, data, 20, 'SHA256')
+ *   signature = pkey.sign_pss(digest, data, salt_length: 20, mgf1_hash: 'SHA256')
  *   pub_key = pkey.public_key
- *   puts pub_key.verify_pss(digest, signature, data, 20, 'SHA256') # => true
+ *   puts pub_key.verify_pss(digest, signature, data, salt_length: 20, mgf1_hash: 'SHA256') # => true
  */
 static VALUE
-ossl_rsa_verify_pss(VALUE self, VALUE digest, VALUE signature, VALUE data, VALUE saltlen, VALUE hash_alg)
+ossl_rsa_verify_pss(VALUE self, VALUE digest, VALUE signature, VALUE data, VALUE saltlen, VALUE mgf1_hash)
 {
     EVP_PKEY *pkey;
     EVP_PKEY_CTX *pkey_ctx;
@@ -749,7 +755,7 @@ ossl_rsa_verify_pss(VALUE self, VALUE digest, VALUE signature, VALUE data, VALUE
     sig_len = RSTRING_LENINT(signature);
     GetPKeyRSA(self, pkey);
     md = GetDigestPtr(digest);
-    mgf1md = GetDigestPtr(hash_alg);
+    mgf1md = GetDigestPtr(mgf1_hash);
     StringValue(signature);
     StringValue(data);
 
