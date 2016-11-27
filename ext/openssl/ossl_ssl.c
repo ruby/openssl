@@ -1373,24 +1373,6 @@ ssl_started(SSL *ssl)
 }
 
 static void
-ossl_ssl_shutdown(SSL *ssl)
-{
-    int i;
-
-    /* 4 is from SSL_smart_shutdown() of mod_ssl.c (v2.2.19) */
-    /* It says max 2x pending + 2x data = 4 */
-    for (i = 0; i < 4; ++i) {
-	/*
-	 * Ignore the case SSL_shutdown returns -1. Empty handshake_func
-	 * must not happen.
-	 */
-	if (SSL_shutdown(ssl) != 0)
-	    break;
-    }
-    ossl_clear_error();
-}
-
-static void
 ossl_ssl_free(void *ssl)
 {
     SSL_free(ssl);
@@ -1873,11 +1855,24 @@ static VALUE
 ossl_ssl_stop(VALUE self)
 {
     SSL *ssl;
+    int ret;
 
     GetSSL(self, ssl);
+    if (!ssl_started(ssl))
+	return Qnil;
+    ret = SSL_shutdown(ssl);
+    if (ret == 1) /* Have already received close_notify */
+	return Qnil;
+    if (ret == 0) /* Sent close_notify, but we don't wait for reply */
+	return Qnil;
 
-    ossl_ssl_shutdown(ssl);
-
+    /*
+     * XXX: Something happened. Possibly it failed because the underlying socket
+     * is not writable/readable, since it is in non-blocking mode. We should do
+     * some proper error handling using SSL_get_error() and maybe retry, but we
+     * can't block here. Give up for now.
+     */
+    ossl_clear_error();
     return Qnil;
 }
 
