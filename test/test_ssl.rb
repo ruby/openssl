@@ -1252,6 +1252,18 @@ end
     sock2.close
   end
 
+  def test_freeze_calls_setup
+    bug = "[ruby/openssl#85]"
+    start_server(ignore_listener_error: true) { |server, port|
+      ctx = OpenSSL::SSL::SSLContext.new
+      ctx.verify_mode = OpenSSL::SSL::VERIFY_PEER
+      ctx.freeze
+      assert_raise(OpenSSL::SSL::SSLError, bug) {
+        server_connect(port, ctx)
+      }
+    }
+  end
+
   private
 
   def start_server_version(version, ctx_proc = nil,

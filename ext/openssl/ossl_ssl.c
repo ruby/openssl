@@ -2543,6 +2543,7 @@ Init_ossl_ssl(void)
     rb_define_method(cSSLContext, "security_level=", ossl_sslctx_set_security_level, 1);
 
     rb_define_method(cSSLContext, "setup", ossl_sslctx_setup, 0);
+    rb_define_alias(cSSLContext, "freeze", "setup");
 
     /*
      * No session caching for client or server
