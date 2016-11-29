@@ -394,14 +394,12 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
       }
     }
 
-    now = Time.now
     exts = [
       ["keyUsage","keyEncipherment,digitalSignature",true],
       ["subjectAltName","DNS:localhost.localdomain",false],
       ["subjectAltName","IP:127.0.0.1",false],
     ]
-    @svr_cert = issue_cert(@svr, @svr_key, 4, now, now+1800, exts,
-                           @ca_cert, @ca_key, OpenSSL::Digest::SHA1.new)
+    @svr_cert = issue_cert(@svr, @svr_key, 4, exts, @ca_cert, @ca_key)
     start_server { |server, port|
       server_connect(port) { |ssl|
         assert(ssl.post_connection_check("localhost.localdomain"))
@@ -417,13 +415,11 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
       }
     }
 
-    now = Time.now
     exts = [
       ["keyUsage","keyEncipherment,digitalSignature",true],
       ["subjectAltName","DNS:*.localdomain",false],
     ]
-    @svr_cert = issue_cert(@svr, @svr_key, 5, now, now+1800, exts,
-                           @ca_cert, @ca_key, OpenSSL::Digest::SHA1.new)
+    @svr_cert = issue_cert(@svr, @svr_key, 5, exts, @ca_cert, @ca_key)
     start_server { |server, port|
       server_connect(port) { |ssl|
         assert(ssl.post_connection_check("localhost.localdomain"))
@@ -711,14 +707,12 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
 
   def test_verify_hostname_on_connect
     ctx_proc = proc { |ctx|
-      now = Time.now
       exts = [
         ["keyUsage", "keyEncipherment,digitalSignature", true],
         ["subjectAltName", "DNS:a.example.com,DNS:*.b.example.com," \
                            "DNS:c*.example.com,DNS:d.*.example.com"],
       ]
-      ctx.cert = issue_cert(@svr, @svr_key, 4, now, now+1800, exts,
-                            @ca_cert, @ca_key, OpenSSL::Digest::SHA1.new)
+      ctx.cert = issue_cert(@svr, @svr_key, 4, exts, @ca_cert, @ca_key)
       ctx.key = @svr_key
     }
 

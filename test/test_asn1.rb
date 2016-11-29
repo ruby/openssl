@@ -14,7 +14,7 @@ class  OpenSSL::TestASN1 < OpenSSL::TestCase
     ]
     dgst = OpenSSL::Digest::SHA1.new
     cert = OpenSSL::TestUtils.issue_cert(
-      subj, key, s, now, now+3600, exts, nil, nil, dgst)
+      subj, key, s, exts, nil, nil, digest: dgst, not_before: now, not_after: now+3600)
 
 
     asn1 = OpenSSL::ASN1.decode(cert)
