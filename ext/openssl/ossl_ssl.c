@@ -1710,16 +1710,16 @@ ossl_ssl_read_internal(int argc, VALUE *argv, VALUE self, int nonblock)
 		continue;
 	    case SSL_ERROR_SYSCALL:
 		if (!ERR_peek_error()) {
-		    /*
-		     * XXX: OpenSSL commit 4880672a9b41 (backported to 1.1.0c)
-		     * changed SSL_read() to return -1 on unexpected EOF because
-		     * it's not retryable, contrary to the manpage.
-		     * Remove this comment (and maybe fix the condition) when
-		     * the manpage or the implementation is fixed.
-		     */
 		    if (errno)
 			rb_sys_fail(0);
 		    else {
+			/*
+			 * The underlying BIO returned 0. This is actually a
+			 * protocol error. But unfortunately, not all
+			 * implementations cleanly shutdown the TLS connection
+			 * but just shutdown/close the TCP connection. So report
+			 * EOF for now...
+			 */
 			if (no_exception_p(opts)) { return Qnil; }
 			rb_eof_error();
 		    }
