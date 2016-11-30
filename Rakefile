@@ -58,6 +58,7 @@ namespace :sync do
       ["test/test_*", "test/openssl/"],
       ["lib/", "ext/openssl/lib/"],
       ["sample/", "sample/openssl/"],
+      ["History.md", "ext/openssl/"],
     ]
     paths.each do |src, dst|
       sh "#{rsync} #{src} #{trunk_path}/#{dst}"
