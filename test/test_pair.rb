@@ -1,8 +1,6 @@
 # frozen_string_literal: false
 require_relative 'utils'
 
-if defined?(OpenSSL::TestUtils)
-
 require 'socket'
 require_relative 'ut_eof'
 
@@ -488,6 +486,4 @@ end
 class OpenSSL::TestPairLowlevelSocket < OpenSSL::TestCase
   include OpenSSL::SSLPairLowlevelSocket
   include OpenSSL::TestPairM
-end
-
 end

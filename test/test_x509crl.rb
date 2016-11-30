@@ -1,8 +1,6 @@
 # frozen_string_literal: false
 require_relative "utils"
 
-if defined?(OpenSSL::TestUtils)
-
 class OpenSSL::TestX509CRL < OpenSSL::TestCase
   def setup
     super
@@ -196,7 +194,7 @@ class OpenSSL::TestX509CRL < OpenSSL::TestCase
 
     cert = issue_cert(@ca, @dsa512, 1, [], nil, nil)
     crl = issue_crl([], 1, Time.now, Time.now+1600, [],
-                    cert, @dsa512, OpenSSL::TestUtils::DSA_SIGNATURE_DIGEST.new)
+                    cert, @dsa512, OpenSSL::Digest::SHA1.new)
     assert_equal(false, crl_error_returns_false { crl.verify(@rsa1024) })
     assert_equal(false, crl_error_returns_false { crl.verify(@rsa2048) })
     assert_equal(false, crl.verify(@dsa256))
@@ -212,6 +210,4 @@ class OpenSSL::TestX509CRL < OpenSSL::TestCase
   rescue OpenSSL::X509::CRLError
     false
   end
-end
-
 end

@@ -51,31 +51,33 @@ static ID id_i_io, id_i_context, id_i_hostname;
  */
 static const struct {
     const char *name;
-    SSL_METHOD *(*func)(void); /* FIXME: constify when dropping 0.9.8 */
+    const SSL_METHOD *(*func)(void);
     int version;
 } ossl_ssl_method_tab[] = {
 #if defined(HAVE_SSL_CTX_SET_MIN_PROTO_VERSION)
 #define OSSL_SSL_METHOD_ENTRY(name, version) \
-    { #name,          (SSL_METHOD *(*)(void))TLS_method, version }, \
-    { #name"_server", (SSL_METHOD *(*)(void))TLS_server_method, version }, \
-    { #name"_client", (SSL_METHOD *(*)(void))TLS_client_method, version }
+    { #name,          TLS_method, version }, \
+    { #name"_server", TLS_server_method, version }, \
+    { #name"_client", TLS_client_method, version }
 #else
 #define OSSL_SSL_METHOD_ENTRY(name, version) \
-    { #name,          (SSL_METHOD *(*)(void))name##_method, version }, \
-    { #name"_server", (SSL_METHOD *(*)(void))name##_server_method, version }, \
-    { #name"_client", (SSL_METHOD *(*)(void))name##_client_method, version }
+    { #name,          name##_method, version }, \
+    { #name"_server", name##_server_method, version }, \
+    { #name"_client", name##_client_method, version }
 #endif
-#if defined(HAVE_SSLV2_METHOD)
+#if !defined(OPENSSL_NO_SSL2) && !defined(OPENSSL_NO_SSL2_METHOD) && defined(HAVE_SSLV2_METHOD)
     OSSL_SSL_METHOD_ENTRY(SSLv2, SSL2_VERSION),
 #endif
-#if defined(HAVE_SSLV3_METHOD)
+#if !defined(OPENSSL_NO_SSL3) && !defined(OPENSSL_NO_SSL3_METHOD) && defined(HAVE_SSLV3_METHOD)
     OSSL_SSL_METHOD_ENTRY(SSLv3, SSL3_VERSION),
 #endif
+#if !defined(OPENSSL_NO_TLS1) && !defined(OPENSSL_NO_TLS1_METHOD)
     OSSL_SSL_METHOD_ENTRY(TLSv1, TLS1_VERSION),
-#if defined(HAVE_TLSV1_1_METHOD)
+#endif
+#if !defined(OPENSSL_NO_TLS1_1) && !defined(OPENSSL_NO_TLS1_1_METHOD)
     OSSL_SSL_METHOD_ENTRY(TLSv1_1, TLS1_1_VERSION),
 #endif
-#if defined(HAVE_TLSV1_2_METHOD)
+#if !defined(OPENSSL_NO_TLS1_2) && !defined(OPENSSL_NO_TLS1_2_METHOD)
     OSSL_SSL_METHOD_ENTRY(TLSv1_2, TLS1_2_VERSION),
 #endif
     OSSL_SSL_METHOD_ENTRY(SSLv23, 0),
@@ -109,13 +111,11 @@ static VALUE
 ossl_sslctx_s_alloc(VALUE klass)
 {
     SSL_CTX *ctx;
-    long mode = SSL_MODE_ENABLE_PARTIAL_WRITE |
-	SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER;
+    long mode = 0 |
+	SSL_MODE_ENABLE_PARTIAL_WRITE |
+	SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER |
+	SSL_MODE_RELEASE_BUFFERS;
     VALUE obj;
-
-#ifdef SSL_MODE_RELEASE_BUFFERS
-    mode |= SSL_MODE_RELEASE_BUFFERS;
-#endif
 
     obj = TypedData_Wrap_Struct(klass, &ossl_sslctx_type, 0);
     ctx = SSL_CTX_new(SSLv23_method());
@@ -168,7 +168,7 @@ ossl_sslctx_set_ssl_version(VALUE self, VALUE ssl_method)
 #if defined(HAVE_SSL_CTX_SET_MIN_PROTO_VERSION)
 	    int version = ossl_ssl_method_tab[i].version;
 #endif
-	    SSL_METHOD *method = ossl_ssl_method_tab[i].func();
+	    const SSL_METHOD *method = ossl_ssl_method_tab[i].func();
 
 	    if (SSL_CTX_set_ssl_version(ctx, method) != 1)
 		ossl_raise(eSSLError, "SSL_CTX_set_ssl_version");
@@ -514,7 +514,6 @@ ossl_sslctx_add_extra_chain_cert_i(RB_BLOCK_CALL_FUNC_ARGLIST(i, arg))
 
 static VALUE ossl_sslctx_setup(VALUE self);
 
-#ifdef HAVE_SSL_SET_TLSEXT_HOST_NAME
 static VALUE
 ossl_call_servername_cb(VALUE ary)
 {
@@ -571,7 +570,6 @@ ssl_servername_cb(SSL *ssl, int *ad, void *arg)
 
     return SSL_TLSEXT_ERR_OK;
 }
-#endif
 
 static void
 ssl_renegotiation_cb(const SSL *ssl)
@@ -944,13 +942,11 @@ ossl_sslctx_setup(VALUE self)
 	OSSL_Debug("SSL SESSION remove callback added");
     }
 
-#ifdef HAVE_SSL_SET_TLSEXT_HOST_NAME
     val = rb_attr_get(self, id_i_servername_cb);
     if (!NIL_P(val)) {
         SSL_CTX_set_tlsext_servername_callback(ctx, ssl_servername_cb);
 	OSSL_Debug("SSL TLSEXT servername callback added");
     }
-#endif
 
     return Qtrue;
 }
@@ -2092,7 +2088,6 @@ ossl_ssl_set_session(VALUE self, VALUE arg1)
     return arg1;
 }
 
-#ifdef HAVE_SSL_SET_TLSEXT_HOST_NAME
 /*
  * call-seq:
  *    ssl.hostname = hostname -> hostname
@@ -2119,7 +2114,6 @@ ossl_ssl_set_hostname(VALUE self, VALUE arg)
 
     return arg;
 }
-#endif
 
 /*
  * call-seq:
@@ -2437,11 +2431,7 @@ Init_ossl_ssl(void)
      */
     rb_attr(cSSLContext, rb_intern("session_remove_cb"), 1, 1, Qfalse);
 
-#ifdef HAVE_SSL_SET_TLSEXT_HOST_NAME
     rb_define_const(mSSLExtConfig, "HAVE_TLSEXT_HOST_NAME", Qtrue);
-#else
-    rb_define_const(mSSLExtConfig, "HAVE_TLSEXT_HOST_NAME", Qfalse);
-#endif
 
 #ifdef TLS_DH_anon_WITH_AES_256_GCM_SHA384
     rb_define_const(mSSLExtConfig, "TLS_DH_anon_WITH_AES_256_GCM_SHA384", Qtrue);
@@ -2646,10 +2636,8 @@ Init_ossl_ssl(void)
     rb_define_method(cSSLSocket, "session=",    ossl_ssl_set_session, 1);
     rb_define_method(cSSLSocket, "verify_result", ossl_ssl_get_verify_result, 0);
     rb_define_method(cSSLSocket, "client_ca", ossl_ssl_get_client_ca_list, 0);
-#ifdef HAVE_SSL_SET_TLSEXT_HOST_NAME
     /* #hostname is defined in lib/openssl/ssl.rb */
     rb_define_method(cSSLSocket, "hostname=", ossl_ssl_set_hostname, 1);
-#endif
 # ifdef HAVE_SSL_GET_SERVER_TMP_KEY
     rb_define_method(cSSLSocket, "tmp_key", ossl_ssl_tmp_key, 0);
 # endif
@@ -2691,18 +2679,10 @@ Init_ossl_ssl(void)
     ossl_ssl_def_const(OP_NO_SSLv2);
     ossl_ssl_def_const(OP_NO_SSLv3);
     ossl_ssl_def_const(OP_NO_TLSv1);
-#if defined(SSL_OP_NO_TLSv1_1)
     ossl_ssl_def_const(OP_NO_TLSv1_1);
-#endif
-#if defined(SSL_OP_NO_TLSv1_2)
     ossl_ssl_def_const(OP_NO_TLSv1_2);
-#endif
-#if defined(SSL_OP_NO_TICKET)
     ossl_ssl_def_const(OP_NO_TICKET);
-#endif
-#if defined(SSL_OP_NO_COMPRESSION)
     ossl_ssl_def_const(OP_NO_COMPRESSION);
-#endif
     ossl_ssl_def_const(OP_PKCS1_CHECK_1);
     ossl_ssl_def_const(OP_PKCS1_CHECK_2);
     ossl_ssl_def_const(OP_NETSCAPE_CA_DN_BUG);

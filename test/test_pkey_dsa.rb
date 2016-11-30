@@ -2,8 +2,6 @@
 require_relative 'utils'
 require 'base64'
 
-if defined?(OpenSSL::TestUtils)
-
 class OpenSSL::TestPKeyDSA < OpenSSL::PKeyTestCase
   DSA512 = OpenSSL::TestUtils::TEST_KEY_DSA512
 
@@ -43,7 +41,6 @@ class OpenSSL::TestPKeyDSA < OpenSSL::PKeyTestCase
       assert_equal true, DSA512.verify(OpenSSL::Digest::DSS1.new, signature, data)
     end
 
-    return if OpenSSL::OPENSSL_VERSION_NUMBER <= 0x010000000
     signature = DSA512.sign("SHA1", data)
     assert_equal true, DSA512.verify("SHA1", signature, data)
 
@@ -195,6 +192,4 @@ fWLOqqkzFeRrYMDzUpl36XktY6Yq8EJYlW9pCMmBVNy/dQ==
   def assert_same_dsa(expected, key)
     check_component(expected, key, [:p, :q, :g, :pub_key, :priv_key])
   end
-end
-
 end

@@ -473,19 +473,11 @@ ossl_dyn_destroy_callback(struct CRYPTO_dynlock_value *l, const char *file, int 
     OPENSSL_free(l);
 }
 
-#ifdef HAVE_CRYPTO_THREADID_PTR
 static void ossl_threadid_func(CRYPTO_THREADID *id)
 {
     /* register native thread id */
     CRYPTO_THREADID_set_pointer(id, (void *)rb_nativethread_self());
 }
-#else
-static unsigned long ossl_thread_id(void)
-{
-    /* before OpenSSL 1.0, this is 'unsigned long' */
-    return (unsigned long)rb_nativethread_self();
-}
-#endif
 
 static void Init_ossl_locks(void)
 {
@@ -503,11 +495,7 @@ static void Init_ossl_locks(void)
 	rb_nativethread_lock_initialize(&ossl_locks[i]);
     }
 
-#ifdef HAVE_CRYPTO_THREADID_PTR
     CRYPTO_THREADID_set_callback(ossl_threadid_func);
-#else
-    CRYPTO_set_id_callback(ossl_thread_id);
-#endif
     CRYPTO_set_locking_callback(ossl_lock_callback);
     CRYPTO_set_dynlock_create_callback(ossl_dyn_create_callback);
     CRYPTO_set_dynlock_lock_callback(ossl_dyn_lock_callback);

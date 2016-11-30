@@ -1,8 +1,6 @@
 # frozen_string_literal: false
 require_relative "utils"
 
-if defined?(OpenSSL::TestUtils)
-
 module OpenSSL
   class TestPKCS12 < OpenSSL::TestCase
     include OpenSSL::TestUtils
@@ -310,6 +308,4 @@ Kw4DAhoFAAQUYAuwVtGD1TdgbFK4Yal2XBgwUR4ECEawsN3rNaa6AgIIAA==
     end
 
   end
-end
-
 end

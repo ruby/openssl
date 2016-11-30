@@ -17,7 +17,6 @@ script:
 matrix:
   fast_finish: true
   include:
-    - env: RUBY_VERSION=ruby-2.3 OPENSSL_VERSION=openssl-1.0.0 OSSL_MDEBUG=1
     - env: RUBY_VERSION=ruby-2.3 OPENSSL_VERSION=openssl-1.0.1 OSSL_MDEBUG=1
     - env: RUBY_VERSION=ruby-2.3 OPENSSL_VERSION=openssl-1.0.2 OSSL_MDEBUG=1
     - env: RUBY_VERSION=ruby-2.3 OPENSSL_VERSION=openssl-1.1.0 OSSL_MDEBUG=1

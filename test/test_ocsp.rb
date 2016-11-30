@@ -1,8 +1,6 @@
 # frozen_string_literal: false
 require_relative "utils"
 
-if defined?(OpenSSL::TestUtils)
-
 class OpenSSL::TestOCSP < OpenSSL::TestCase
   def setup
     super
@@ -293,6 +291,4 @@ class OpenSSL::TestOCSP < OpenSSL::TestCase
     res = OpenSSL::OCSP::Response.create(OpenSSL::OCSP::RESPONSE_STATUS_SUCCESSFUL, bres)
     assert_equal res.to_der, res.dup.to_der
   end
-end
-
 end

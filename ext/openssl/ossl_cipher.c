@@ -512,10 +512,8 @@ ossl_cipher_set_iv(VALUE self, VALUE iv)
     StringValue(iv);
     GetCipher(self, ctx);
 
-#if defined(HAVE_AUTHENTICATED_ENCRYPTION)
     if (EVP_CIPHER_CTX_flags(ctx) & EVP_CIPH_FLAG_AEAD_CIPHER)
 	iv_len = (int)(VALUE)EVP_CIPHER_CTX_get_app_data(ctx);
-#endif
     if (!iv_len)
 	iv_len = EVP_CIPHER_CTX_iv_length(ctx);
     if (RSTRING_LEN(iv) != iv_len)
@@ -541,14 +539,9 @@ ossl_cipher_is_authenticated(VALUE self)
 
     GetCipher(self, ctx);
 
-#if defined(HAVE_AUTHENTICATED_ENCRYPTION)
     return (EVP_CIPHER_CTX_flags(ctx) & EVP_CIPH_FLAG_AEAD_CIPHER) ? Qtrue : Qfalse;
-#else
-    return Qfalse;
-#endif
 }
 
-#ifdef HAVE_AUTHENTICATED_ENCRYPTION
 /*
  *  call-seq:
  *     cipher.auth_data = string -> string
@@ -722,13 +715,6 @@ ossl_cipher_set_iv_length(VALUE self, VALUE iv_length)
 
     return iv_length;
 }
-#else
-#define ossl_cipher_set_auth_data rb_f_notimplement
-#define ossl_cipher_get_auth_tag rb_f_notimplement
-#define ossl_cipher_set_auth_tag rb_f_notimplement
-#define ossl_cipher_set_auth_tag_len rb_f_notimplement
-#define ossl_cipher_set_iv_length rb_f_notimplement
-#endif
 
 /*
  *  call-seq:
@@ -806,10 +792,8 @@ ossl_cipher_iv_length(VALUE self)
     int len = 0;
 
     GetCipher(self, ctx);
-#if defined(HAVE_AUTHENTICATED_ENCRYPTION)
     if (EVP_CIPHER_CTX_flags(ctx) & EVP_CIPH_FLAG_AEAD_CIPHER)
 	len = (int)(VALUE)EVP_CIPHER_CTX_get_app_data(ctx);
-#endif
     if (!len)
 	len = EVP_CIPHER_CTX_iv_length(ctx);
 

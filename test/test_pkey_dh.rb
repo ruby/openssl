@@ -1,8 +1,6 @@
 # frozen_string_literal: false
 require_relative 'utils'
 
-if defined?(OpenSSL::TestUtils)
-
 class OpenSSL::TestPKeyDH < OpenSSL::PKeyTestCase
   DH1024 = OpenSSL::TestUtils::TEST_KEY_DH1024
 
@@ -115,6 +113,4 @@ class OpenSSL::TestPKeyDH < OpenSSL::PKeyTestCase
   def assert_same_dh(expected, key)
     check_component(expected, key, [:p, :q, :g, :pub_key, :priv_key])
   end
-end
-
 end

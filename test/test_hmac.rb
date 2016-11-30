@@ -37,4 +37,4 @@ class OpenSSL::TestHMAC < OpenSSL::TestCase
     second = h1.update("test").hexdigest
     assert_equal first, second
   end
-end if defined?(OpenSSL::TestUtils)
+end

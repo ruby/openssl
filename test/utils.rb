@@ -124,14 +124,10 @@ AQjjxMXhwULlmuR/K+WwlaZPiLIBYalLAZQ7ZbOPeVkJ8ePao0eLAgEC
   TEST_KEY_DH1024.set_key(OpenSSL::BN.new("556AF1598AE69899867CEBA9F29CE4862B884C2B43C9019EA0231908F6EFA785E3C462A6ECB16DF676866E997FFB72B487DC7967C58C3CA38CE974473BF19B2AA5DCBF102735572EBA6F353F6F0BBE7FF1DE1B07FE1381A355C275C33405004317F9491B5955F191F6615A63B30E55A027FB88A1A4B25608E09EEE68A7DF32D", 16),
                           OpenSSL::BN.new("48561834C67E65FFD2A9B47F41E5E78FDC95C387428FDB1E4B0188B64D1643C3A8D3455B945B7E8C4D166010C7C2CE23BFB9BEF43D0348FE7FA5284B0225E7FE1537546D114E3D8A4411B9B9351AB451E1A358F50ED61B1F00DA29336EEBBD649980AC86D76AF8BBB065298C2052672EEF3EF13AB47A15275FC2836F3AC74CEA", 16))
 
-  DSA_SIGNATURE_DIGEST = OpenSSL::OPENSSL_VERSION_NUMBER > 0x10000000 ?
-                         OpenSSL::Digest::SHA1 :
-                         OpenSSL::Digest::DSS1
-
   module_function
 
   def issue_cert(dn, key, serial, extensions, issuer, issuer_key,
-                 not_before: nil, not_after: nil, digest: nil)
+                 not_before: nil, not_after: nil, digest: "sha256")
     cert = OpenSSL::X509::Certificate.new
     issuer = cert unless issuer
     issuer_key = key unless issuer_key
@@ -149,7 +145,6 @@ AQjjxMXhwULlmuR/K+WwlaZPiLIBYalLAZQ7ZbOPeVkJ8ePao0eLAgEC
     extensions.each{|oid, value, critical|
       cert.add_extension(ef.create_extension(oid, value, critical))
     }
-    digest ||= OpenSSL::PKey::DSA === issuer_key ? DSA_SIGNATURE_DIGEST.new : "sha256"
     cert.sign(issuer_key, digest)
     cert
   end
@@ -375,6 +370,4 @@ AQjjxMXhwULlmuR/K+WwlaZPiLIBYalLAZQ7ZbOPeVkJ8ePao0eLAgEC
       end
     end
   end
-
-end if defined?(OpenSSL::OPENSSL_LIBRARY_VERSION) and
-  /\AOpenSSL +0\./ !~ OpenSSL::OPENSSL_LIBRARY_VERSION
+end

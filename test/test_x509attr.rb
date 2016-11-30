@@ -1,8 +1,6 @@
 # frozen_string_literal: false
 require_relative "utils"
 
-if defined?(OpenSSL::TestUtils)
-
 class OpenSSL::TestX509Attribute < OpenSSL::TestCase
   def test_new
     ef = OpenSSL::X509::ExtensionFactory.new
@@ -62,6 +60,4 @@ class OpenSSL::TestX509Attribute < OpenSSL::TestCase
     attr = OpenSSL::X509::Attribute.new("challengePassword", val)
     assert_equal(attr.to_der, attr.dup.to_der)
   end
-end
-
 end

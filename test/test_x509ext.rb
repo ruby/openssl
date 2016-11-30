@@ -1,8 +1,6 @@
 # frozen_string_literal: false
 require_relative 'utils'
 
-if defined?(OpenSSL::TestUtils)
-
 class OpenSSL::TestX509Extension < OpenSSL::TestCase
   def setup
     super
@@ -75,6 +73,4 @@ class OpenSSL::TestX509Extension < OpenSSL::TestCase
     assert_equal(@basic_constraints.to_der, ext.to_der)
     assert_equal(ext.to_der, ext.dup.to_der)
   end
-end
-
 end

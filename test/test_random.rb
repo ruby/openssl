@@ -12,4 +12,4 @@ class OpenSSL::TestRandom < OpenSSL::TestCase
     assert_equal("", OpenSSL::Random.pseudo_bytes(0))
     assert_equal(12, OpenSSL::Random.pseudo_bytes(12).bytesize)
   end if OpenSSL::Random.methods.include?(:pseudo_bytes)
-end if defined?(OpenSSL::TestCase)
+end

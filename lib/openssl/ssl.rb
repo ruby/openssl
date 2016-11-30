@@ -23,7 +23,7 @@ module OpenSSL
         :options => -> {
           opts = OpenSSL::SSL::OP_ALL
           opts &= ~OpenSSL::SSL::OP_DONT_INSERT_EMPTY_FRAGMENTS
-          opts |= OpenSSL::SSL::OP_NO_COMPRESSION if defined?(OpenSSL::SSL::OP_NO_COMPRESSION)
+          opts |= OpenSSL::SSL::OP_NO_COMPRESSION
           opts |= OpenSSL::SSL::OP_NO_SSLv2 | OpenSSL::SSL::OP_NO_SSLv3
           opts
         }.call
@@ -87,7 +87,7 @@ module OpenSSL
       #
       # The callback is invoked with an SSLSocket and a server name.  The
       # callback must return an SSLContext for the server name or nil.
-      attr_accessor :servername_cb if ExtConfig::HAVE_TLSEXT_HOST_NAME
+      attr_accessor :servername_cb
 
       # call-seq:
       #    SSLContext.new => ctx
@@ -242,9 +242,7 @@ module OpenSSL
       include Buffering
       include SocketForwarder
 
-      if ExtConfig::HAVE_TLSEXT_HOST_NAME
-        attr_reader :hostname
-      end
+      attr_reader :hostname
 
       # The underlying IO object.
       attr_reader :io

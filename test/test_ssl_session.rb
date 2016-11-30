@@ -1,8 +1,6 @@
 # frozen_string_literal: false
 require_relative "utils"
 
-if defined?(OpenSSL::TestUtils)
-
 class OpenSSL::TestSSLSession < OpenSSL::SSLTestCase
   def test_session_equals
     session = OpenSSL::SSL::Session.new <<-SESSION
@@ -150,7 +148,7 @@ __EOS__
 
   def test_session_exts_read
     assert(OpenSSL::SSL::Session.new(DUMMY_SESSION))
-  end if OpenSSL::OPENSSL_VERSION_NUMBER >= 0x009080bf
+  end
 
   def test_client_session
     last_session = nil
@@ -375,6 +373,4 @@ __EOS__
     sess_dup = sess_orig.dup
     assert_equal(sess_orig.to_der, sess_dup.to_der)
   end
-end
-
 end

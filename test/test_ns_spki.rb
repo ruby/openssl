@@ -1,8 +1,6 @@
 # frozen_string_literal: false
 require_relative 'utils'
 
-if defined?(OpenSSL::TestUtils)
-
 class OpenSSL::TestNSSPI < OpenSSL::TestCase
   def setup
     super
@@ -48,6 +46,4 @@ class OpenSSL::TestNSSPI < OpenSSL::TestCase
     assert_equal("MozillaIsMyFriend", spki.challenge)
     assert_equal(OpenSSL::PKey::RSA, spki.public_key.class)
   end
-end
-
 end

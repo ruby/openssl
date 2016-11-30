@@ -15,12 +15,9 @@
 module OpenSSL
   class Digest
 
-    alg = %w(MD2 MD4 MD5 MDC2 RIPEMD160 SHA1)
+    alg = %w(MD2 MD4 MD5 MDC2 RIPEMD160 SHA1 SHA224 SHA256 SHA384 SHA512)
     if OPENSSL_VERSION_NUMBER < 0x10100000
       alg += %w(DSS DSS1 SHA)
-    end
-    if OPENSSL_VERSION_NUMBER > 0x00908000
-      alg += %w(SHA224 SHA256 SHA384 SHA512)
     end
 
     # Return the +data+ hash computed with +name+ Digest. +name+ is either the

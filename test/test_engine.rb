@@ -96,4 +96,4 @@ class OpenSSL::TestEngine < OpenSSL::TestCase
     end
   end
 
-end if defined?(OpenSSL::TestUtils) && defined?(OpenSSL::Engine)
+end if defined?(OpenSSL::Engine)
