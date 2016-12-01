@@ -1,3 +1,26 @@
+Version 2.1.0
+=============
+
+Compatibility notes
+-------------------
+
+Supported platforms
+-------------------
+
+* OpenSSL 0.9.8, 1.0.0, 1.0.1, 1.0.2, 1.1.0
+* LibreSSL 2.3, 2.4, 2.5
+* Ruby 2.3, 2.4
+
+Notable changes
+---------------
+
+Removals
+--------
+
+Deprecations
+------------
+
+
 Version 2.0.0
 =============
 
