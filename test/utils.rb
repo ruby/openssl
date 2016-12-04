@@ -201,7 +201,16 @@ AQjjxMXhwULlmuR/K+WwlaZPiLIBYalLAZQ7ZbOPeVkJ8ePao0eLAgEC
   end
 
   class OpenSSL::TestCase < Test::Unit::TestCase
+    def setup
+      if ENV["OSSL_GC_STRESS"] == "1"
+        GC.stress = true
+      end
+    end
+
     def teardown
+      if ENV["OSSL_GC_STRESS"] == "1"
+        GC.stress = false
+      end
       # OpenSSL error stack must be empty
       assert_equal([], OpenSSL.errors)
     end
