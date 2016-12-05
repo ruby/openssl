@@ -45,6 +45,7 @@ echo "#### Step 1. Sync '$BRANCH_EXTRACT' with 'ruby/trunk'"
 		    sed "s:\text/openssl/lib:\tlib:" | \
 		    sed "s:\text/openssl/sample:\tsample/openssl:" | \
 		    sed "s:\tsample/openssl:\tsample:" | \
+		    sed "s:\text/openssl/History.md:\tHistory.md:" | \
 		    GIT_INDEX_FILE=$GIT_INDEX_FILE.new git update-index --index-info &&
 		mv "$GIT_INDEX_FILE.new" "$GIT_INDEX_FILE"
 		:
