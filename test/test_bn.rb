@@ -116,6 +116,13 @@ class OpenSSL::TestBN < OpenSSL::TestCase
     assert_raise(OpenSSL::BNError) { 1.to_bn / 0 }
   end
 
+  def test_unary_plus_minus
+    assert_equal(999, +@e1)
+    assert_equal(-999, +@e2)
+    assert_equal(-999, -@e1)
+    assert_equal(+999, -@e2)
+  end
+
   def test_mod
     assert_equal(1, 1.to_bn % 2)
     assert_equal(0, 2.to_bn % 1)

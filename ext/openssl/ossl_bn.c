@@ -856,6 +856,37 @@ ossl_bn_copy(VALUE self, VALUE other)
     return self;
 }
 
+/*
+ * call-seq:
+ *   +bn -> aBN
+ */
+static VALUE
+ossl_bn_uplus(VALUE self)
+{
+    return self;
+}
+
+/*
+ * call-seq:
+ *   -bn -> aBN
+ */
+static VALUE
+ossl_bn_uminus(VALUE self)
+{
+    VALUE obj;
+    BIGNUM *bn1, *bn2;
+
+    GetBN(self, bn1);
+    obj = NewBN(cBN);
+    bn2 = BN_dup(bn1);
+    if (!bn2)
+	ossl_raise(eBNError, "BN_dup");
+    SetBN(obj, bn2);
+    BN_set_negative(bn2, !BN_is_negative(bn2));
+
+    return obj;
+}
+
 #define BIGNUM_CMP(func)				\
     static VALUE					\
     ossl_bn_##func(VALUE self, VALUE other)		\
@@ -1067,6 +1098,9 @@ Init_ossl_bn(void)
     rb_define_method(cBN, "num_bytes", ossl_bn_num_bytes, 0);
     rb_define_method(cBN, "num_bits", ossl_bn_num_bits, 0);
     /* num_bits_word */
+
+    rb_define_method(cBN, "+@", ossl_bn_uplus, 0);
+    rb_define_method(cBN, "-@", ossl_bn_uminus, 0);
 
     rb_define_method(cBN, "+", ossl_bn_add, 1);
     rb_define_method(cBN, "-", ossl_bn_sub, 1);
