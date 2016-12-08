@@ -377,6 +377,21 @@ BIGNUM_BOOL1(is_one)
  */
 BIGNUM_BOOL1(is_odd)
 
+/*
+ * call-seq:
+ *   bn.negative? => true | false
+ */
+static VALUE
+ossl_bn_is_negative(VALUE self)
+{
+    BIGNUM *bn;
+
+    GetBN(self, bn);
+    if (BN_is_zero(bn))
+	return Qfalse;
+    return BN_is_negative(bn) ? Qtrue : Qfalse;
+}
+
 #define BIGNUM_1c(func)					\
     static VALUE					\
     ossl_bn_##func(VALUE self)				\
@@ -1135,6 +1150,7 @@ Init_ossl_bn(void)
     rb_define_method(cBN, "one?", ossl_bn_is_one, 0);
     /* is_word */
     rb_define_method(cBN, "odd?", ossl_bn_is_odd, 0);
+    rb_define_method(cBN, "negative?", ossl_bn_is_negative, 0);
 
     /* zero
      * one
