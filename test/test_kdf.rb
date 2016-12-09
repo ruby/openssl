@@ -1,7 +1,13 @@
 # frozen_string_literal: false
 require_relative 'utils'
 
-class OpenSSL::TestPKCS5 < OpenSSL::TestCase
+class OpenSSL::TestKDF < OpenSSL::TestCase
+
+  def test_pkcs5_pbkdf2_hmac_compatibility
+    expected = OpenSSL::KDF.pbkdf2_hmac("password", salt: "salt", iterations: 1, length: 20, hash: "sha1")
+    assert_equal(expected, OpenSSL::PKCS5.pbkdf2_hmac("password", "salt", 1, 20, "sha1"))
+    assert_equal(expected, OpenSSL::PKCS5.pbkdf2_hmac_sha1("password", "salt", 1, 20))
+  end
 
   def test_pbkdf2_hmac_sha1_rfc6070_c_1_len_20
     p ="password"
@@ -12,7 +18,7 @@ class OpenSSL::TestPKCS5 < OpenSSL::TestCase
               f3 a9 b5 24 af 60 12 06
               2f e0 37 a6 }
     expected = [raw.join('')].pack('H*')
-    value = OpenSSL::PKCS5.pbkdf2_hmac_sha1(p, s, c, dk_len)
+    value = OpenSSL::KDF.pbkdf2_hmac(p, salt: s, iterations: c, length: dk_len, hash: "sha1")
     assert_equal(expected, value)
   end
 
@@ -25,7 +31,7 @@ class OpenSSL::TestPKCS5 < OpenSSL::TestCase
               cd 1e d9 2a ce 1d 41 f0
               d8 de 89 57 }
     expected = [raw.join('')].pack('H*')
-    value = OpenSSL::PKCS5.pbkdf2_hmac_sha1(p, s, c, dk_len)
+    value = OpenSSL::KDF.pbkdf2_hmac(p, salt: s, iterations: c, length: dk_len, hash: "sha1")
     assert_equal(expected, value)
   end
 
@@ -38,7 +44,7 @@ class OpenSSL::TestPKCS5 < OpenSSL::TestCase
               be ad 49 d9 26 f7 21 d0
               65 a4 29 c1 }
     expected = [raw.join('')].pack('H*')
-    value = OpenSSL::PKCS5.pbkdf2_hmac_sha1(p, s, c, dk_len)
+    value = OpenSSL::KDF.pbkdf2_hmac(p, salt: s, iterations: c, length: dk_len, hash: "sha1")
     assert_equal(expected, value)
   end
 
@@ -52,7 +58,7 @@ class OpenSSL::TestPKCS5 < OpenSSL::TestCase
 #              e9 94 5b 3d 6b a2 15 8c
 #              26 34 e9 84 }
 #    expected = [raw.join('')].pack('H*')
-#    value = OpenSSL::PKCS5.pbkdf2_hmac_sha1(p, s, c, dk_len)
+#    value = OpenSSL::KDF.pbkdf2_hmac(p, salt: s, iterations: c, length: dk_len, hash: "sha1")
 #    assert_equal(expected, value)
 #  end
 
@@ -67,7 +73,7 @@ class OpenSSL::TestPKCS5 < OpenSSL::TestCase
               8b 29 1a 96 4c f2 f0 70
               38 }
     expected = [raw.join('')].pack('H*')
-    value = OpenSSL::PKCS5.pbkdf2_hmac_sha1(p, s, c, dk_len)
+    value = OpenSSL::KDF.pbkdf2_hmac(p, salt: s, iterations: c, length: dk_len, hash: "sha1")
     assert_equal(expected, value)
   end
 
@@ -79,7 +85,7 @@ class OpenSSL::TestPKCS5 < OpenSSL::TestCase
     raw = %w{ 56 fa 6a a7 55 48 09 9d
               cc 37 d7 f0 34 25 e0 c3 }
     expected = [raw.join('')].pack('H*')
-    value = OpenSSL::PKCS5.pbkdf2_hmac_sha1(p, s, c, dk_len)
+    value = OpenSSL::KDF.pbkdf2_hmac(p, salt: s, iterations: c, length: dk_len, hash: "sha1")
     assert_equal(expected, value)
   end
 
@@ -89,9 +95,8 @@ class OpenSSL::TestPKCS5 < OpenSSL::TestCase
     s = OpenSSL::Random.random_bytes(16)
     c = 20000
     dk_len = 32
-    digest = OpenSSL::Digest::SHA256.new
-    value1 = OpenSSL::PKCS5.pbkdf2_hmac(p, s, c, dk_len, digest)
-    value2 = OpenSSL::PKCS5.pbkdf2_hmac(p, s, c, dk_len, digest)
+    value1 = OpenSSL::KDF.pbkdf2_hmac(p, salt: s, iterations: c, length: dk_len, hash: "sha256")
+    value2 = OpenSSL::KDF.pbkdf2_hmac(p, salt: s, iterations: c, length: dk_len, hash: "sha256")
     assert_equal(value1, value2)
   end
 
