@@ -426,6 +426,9 @@ class  OpenSSL::TestASN1 < OpenSSL::TestCase
     ], 1, :APPLICATION)
     obj.indefinite_length = true
     encode_decode_test B(%w{ 61 80 C2 02 AB CD 00 00 }), obj
+    obj = OpenSSL::ASN1::ASN1Data.new(B(%w{ AB CD }), 1, :UNIVERSAL)
+    obj.indefinite_length = true
+    assert_raise(OpenSSL::ASN1::ASN1Error) { obj.to_der }
   end
 
   def test_basic_primitive

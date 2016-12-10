@@ -716,6 +716,8 @@ ossl_asn1data_to_der(VALUE self)
     tag_class = ossl_asn1_tag_class(self);
     inf_length = ossl_asn1_get_indefinite_length(self);
     if (inf_length == Qtrue) {
+	if (is_cons == 0)
+	    ossl_raise(eASN1Error, "indefinite form used for primitive encoding");
 	is_cons = 2;
     }
     if((length = ASN1_object_size(is_cons, RSTRING_LENINT(value), tag)) <= 0)
