@@ -685,10 +685,12 @@ ossl_bn_eq(VALUE self, VALUE other)
     BIGNUM *bn1, *bn2;
 
     GetBN(self, bn1);
-    /* BNPtr may raise, so we can&#39;t use here */
-    bn2 = try_convert_to_bnptr(other);
+    other = try_convert_to_bn(other);
+    if (NIL_P(other))
+        return Qfalse;
+    GetBN(other, bn2);
 
-    if (bn2 &amp;&amp; !BN_cmp(bn1, bn2)) {
+    if (!BN_cmp(bn1, bn2)) {
         return Qtrue;
     }
     return Qfalse;

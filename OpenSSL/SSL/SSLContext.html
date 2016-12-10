@@ -1856,6 +1856,7 @@ ossl_sslctx_setup(VALUE self)
     val = rb_attr_get(self, id_i_npn_protocols);
     if (!NIL_P(val)) {
         VALUE encoded = ssl_encode_npn_protocols(val);
+        rb_ivar_set(self, id_npn_protocols_encoded, encoded);
         SSL_CTX_set_next_protos_advertised_cb(ctx, ssl_npn_advertise_cb, (void *)encoded);
         OSSL_Debug(&quot;SSL NPN advertise callback added&quot;);
     }
