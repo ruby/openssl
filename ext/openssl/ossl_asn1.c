@@ -1109,6 +1109,8 @@ ossl_asn1_initialize(int argc, VALUE *argv, VALUE self)
     ossl_asn1_set_tagging(self, tagging);
     ossl_asn1_set_tag_class(self, tag_class);
     ossl_asn1_set_indefinite_length(self, Qfalse);
+    if (default_tag == V_ASN1_BIT_STRING)
+	rb_ivar_set(self, sivUNUSED_BITS, INT2FIX(0));
 
     return self;
 }

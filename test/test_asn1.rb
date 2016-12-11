@@ -255,12 +255,8 @@ class  OpenSSL::TestASN1 < OpenSSL::TestCase
   end
 
   def test_bitstring
-    obj = OpenSSL::ASN1::BitString.new(B(%w{}))
-    obj.unused_bits = 0
-    encode_decode_test B(%w{ 03 01 00 }), obj
-    obj = OpenSSL::ASN1::BitString.new(B(%w{ 01 }))
-    obj.unused_bits = 0
-    encode_decode_test B(%w{ 03 02 00 01 }), obj
+    encode_decode_test B(%w{ 03 01 00 }), OpenSSL::ASN1::BitString.new(B(%w{}))
+    encode_decode_test B(%w{ 03 02 00 01 }), OpenSSL::ASN1::BitString.new(B(%w{ 01 }))
     obj = OpenSSL::ASN1::BitString.new(B(%w{ F0 }))
     obj.unused_bits = 4
     encode_decode_test B(%w{ 03 02 04 F0 }), obj
