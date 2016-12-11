@@ -9,7 +9,6 @@
  */
 #include "ossl.h"
 
-static VALUE join_der(VALUE enumerable);
 static VALUE ossl_asn1_decode0(unsigned char **pp, long length, long *offset,
 			       int depth, int yield, long *num_read);
 static VALUE ossl_asn1_initialize(int argc, VALUE *argv, VALUE self);
@@ -596,20 +595,6 @@ ossl_asn1_tag(VALUE obj)
 }
 
 static int
-ossl_asn1_is_explicit(VALUE obj)
-{
-    VALUE s;
-
-    s = ossl_asn1_get_tagging(obj);
-    if (NIL_P(s) || s == sym_IMPLICIT)
-	return 0;
-    else if (s == sym_EXPLICIT)
-	return 1;
-    else
-	ossl_raise(eASN1Error, "invalid tag default");
-}
-
-static int
 ossl_asn1_tag_class(VALUE obj)
 {
     VALUE s;
@@ -670,22 +655,50 @@ ossl_asn1data_initialize(VALUE self, VALUE value, VALUE tag, VALUE tag_class)
 }
 
 static VALUE
-join_der_i(RB_BLOCK_CALL_FUNC_ARGLIST(i, str))
+to_der_internal(VALUE self, int constructed, int indef_len, VALUE body)
 {
-    i = ossl_to_der_if_possible(i);
-    StringValue(i);
-    rb_str_append(str, i);
-    return Qnil;
-}
+    int encoding = constructed ? indef_len ? 2 : 1 : 0;
+    int tag_class = ossl_asn1_tag_class(self);
+    int tag_number = ossl_asn1_tag(self);
+    int default_tag_number = ossl_asn1_default_tag(self);
+    int body_length, total_length;
+    VALUE str;
+    unsigned char *p;
 
-static VALUE
-join_der(VALUE enumerable)
-{
-    VALUE str = rb_str_new(0, 0);
-    rb_block_call(enumerable, id_each, 0, 0, join_der_i, str);
+    body_length = RSTRING_LENINT(body);
+    if (ossl_asn1_get_tagging(self) == sym_EXPLICIT) {
+	int inner_length, e_encoding = indef_len ? 2 : 1;
+
+	if (default_tag_number == -1)
+	    ossl_raise(eASN1Error, "explicit tagging of unknown tag");
+
+	inner_length = ASN1_object_size(encoding, body_length, default_tag_number);
+	total_length = ASN1_object_size(e_encoding, inner_length, tag_number);
+	str = rb_str_new(NULL, total_length);
+	p = (unsigned char *)RSTRING_PTR(str);
+	/* Put explicit tag */
+	ASN1_put_object(&p, e_encoding, inner_length, tag_number, tag_class);
+	/* Append inner object */
+	ASN1_put_object(&p, encoding, body_length, default_tag_number, V_ASN1_UNIVERSAL);
+	memcpy(p, RSTRING_PTR(body), body_length);
+	p += body_length;
+	if (indef_len)
+	    ASN1_put_eoc(&p); /* For wrapper object */
+    }
+    else {
+	total_length = ASN1_object_size(encoding, body_length, tag_number);
+	str = rb_str_new(NULL, total_length);
+	p = (unsigned char *)RSTRING_PTR(str);
+	ASN1_put_object(&p, encoding, body_length, tag_number, tag_class);
+	memcpy(p, RSTRING_PTR(body), body_length);
+	p += body_length;
+    }
+    ossl_str_adjust(str, p);
     return str;
 }
 
+static VALUE ossl_asn1prim_to_der(VALUE);
+static VALUE ossl_asn1cons_to_der(VALUE);
 /*
  * call-seq:
  *    asn1.to_der => DER-encoded String
@@ -698,36 +711,16 @@ join_der(VALUE enumerable)
 static VALUE
 ossl_asn1data_to_der(VALUE self)
 {
-    VALUE value, der, inf_length;
-    int tag, tag_class, is_cons = 0;
-    long length;
-    unsigned char *p;
+    VALUE value = ossl_asn1_get_value(self);
 
-    value = ossl_asn1_get_value(self);
-    if(rb_obj_is_kind_of(value, rb_cArray)){
-	is_cons = 1;
-	value = join_der(value);
+    if (rb_obj_is_kind_of(value, rb_cArray))
+	return ossl_asn1cons_to_der(self);
+    else {
+	if (RTEST(ossl_asn1_get_indefinite_length(self)))
+	    ossl_raise(eASN1Error, "indefinite length form cannot be used " \
+		       "with primitive encoding");
+	return ossl_asn1prim_to_der(self);
     }
-    StringValue(value);
-
-    tag = ossl_asn1_tag(self);
-    tag_class = ossl_asn1_tag_class(self);
-    inf_length = ossl_asn1_get_indefinite_length(self);
-    if (inf_length == Qtrue) {
-	if (is_cons == 0)
-	    ossl_raise(eASN1Error, "indefinite form used for primitive encoding");
-	is_cons = 2;
-    }
-    if((length = ASN1_object_size(is_cons, RSTRING_LENINT(value), tag)) <= 0)
-	ossl_raise(eASN1Error, NULL);
-    der = rb_str_new(0, length);
-    p = (unsigned char *)RSTRING_PTR(der);
-    ASN1_put_object(&p, is_cons, RSTRING_LENINT(value), tag, tag_class);
-    memcpy(p, RSTRING_PTR(value), RSTRING_LEN(value));
-    p += RSTRING_LEN(value);
-    ossl_str_adjust(der, p);
-
-    return der;
 }
 
 static VALUE
@@ -1115,6 +1108,12 @@ ossl_asn1eoc_initialize(VALUE self) {
     return self;
 }
 
+static VALUE
+ossl_asn1eoc_to_der(VALUE self)
+{
+    return rb_str_new("\0\0", 2);
+}
+
 /*
  * call-seq:
  *    asn1.to_der => DER-encoded String
@@ -1125,37 +1124,38 @@ static VALUE
 ossl_asn1prim_to_der(VALUE self)
 {
     ASN1_TYPE *asn1;
-    int tn, tc, explicit;
-    long len, reallen;
-    unsigned char *buf, *p;
+    long alllen, bodylen;
+    unsigned char *p0, *p1;
+    int j, tag, tc, state;
     VALUE str;
 
-    tn = ossl_asn1_tag(self);
-    tc = ossl_asn1_tag_class(self);
-    explicit = ossl_asn1_is_explicit(self);
+    if (ossl_asn1_default_tag(self) == -1) {
+	str = ossl_asn1_get_value(self);
+	return to_der_internal(self, 0, 0, StringValue(str));
+    }
+
     asn1 = ossl_asn1_get_asn1type(self);
-
-    len = ASN1_object_size(1, i2d_ASN1_TYPE(asn1, NULL), tn);
-    if(!(buf = OPENSSL_malloc(len))){
+    alllen = i2d_ASN1_TYPE(asn1, NULL);
+    if (alllen < 0) {
 	ASN1_TYPE_free(asn1);
-	ossl_raise(eASN1Error, "cannot alloc buffer");
+	ossl_raise(eASN1Error, "i2d_ASN1_TYPE");
     }
-    p = buf;
-    if (tc == V_ASN1_UNIVERSAL) {
-        i2d_ASN1_TYPE(asn1, &p);
-    } else if (explicit) {
-        ASN1_put_object(&p, 1, i2d_ASN1_TYPE(asn1, NULL), tn, tc);
-        i2d_ASN1_TYPE(asn1, &p);
-    } else {
-        i2d_ASN1_TYPE(asn1, &p);
-        *buf = tc | tn | (*buf & V_ASN1_CONSTRUCTED);
+    str = ossl_str_new(NULL, alllen, &state);
+    if (state) {
+	ASN1_TYPE_free(asn1);
+	rb_jump_tag(state);
     }
+    p0 = p1 = (unsigned char *)RSTRING_PTR(str);
+    i2d_ASN1_TYPE(asn1, &p0);
     ASN1_TYPE_free(asn1);
-    reallen = p - buf;
-    assert(reallen <= len);
-    str = ossl_buf2str((char *)buf, rb_long2int(reallen)); /* buf will be free in ossl_buf2str */
+    assert(p0 - p1 == alllen);
 
-    return str;
+    /* Strip header since to_der_internal() wants only the payload */
+    j = ASN1_get_object((const unsigned char **)&p1, &bodylen, &tag, &tc, alllen);
+    if (j & 0x80)
+	ossl_raise(eASN1Error, "ASN1_get_object"); /* should not happen */
+
+    return to_der_internal(self, 0, 0, rb_str_drop_bytes(str, alllen - bodylen));
 }
 
 /*
@@ -1167,59 +1167,22 @@ ossl_asn1prim_to_der(VALUE self)
 static VALUE
 ossl_asn1cons_to_der(VALUE self)
 {
-    int tn, tc, explicit, constructed, value_length;
-    unsigned char *p;
-    VALUE value, str, inf_length;
+    VALUE ary, str;
+    long i;
+    int indef_len;
 
-    tn = ossl_asn1_tag(self);
-    tc = ossl_asn1_tag_class(self);
-    inf_length = ossl_asn1_get_indefinite_length(self);
-    explicit = ossl_asn1_is_explicit(self);
-    value = join_der(ossl_asn1_get_value(self));
-    value_length = RSTRING_LENINT(value);
-    constructed = RTEST(inf_length) ? 2 : 1;
+    indef_len = RTEST(ossl_asn1_get_indefinite_length(self));
+    ary = rb_convert_type(ossl_asn1_get_value(self), T_ARRAY, "Array", "to_a");
+    str = rb_str_new(NULL, 0);
+    for (i = 0; i < RARRAY_LEN(ary); i++) {
+	VALUE item = RARRAY_AREF(ary, i);
 
-    if (explicit) {
-	int length, inner_length, default_tag;
-
-	default_tag = ossl_asn1_default_tag(self);
-	/*
-	 * non-universal tag class class && explicit tagging; this is not
-	 * possible because the inner tag number is unknown.
-	 */
-	if (default_tag == -1)
-	    ossl_raise(eASN1Error, "explicit tagging of unknown tag");
-
-	inner_length = ASN1_object_size(constructed, value_length, default_tag);
-	length = ASN1_object_size(constructed, inner_length, tn);
-	str = rb_str_new(0, length);
-	p = (unsigned char *)RSTRING_PTR(str);
-	ASN1_put_object(&p, constructed, inner_length, tn, tc);
-	ASN1_put_object(&p, constructed, value_length, default_tag, V_ASN1_UNIVERSAL);
-    }
-    else {
-	int length;
-
-	length = ASN1_object_size(constructed, value_length, tn);
-	str = rb_str_new(0, length);
-	p = (unsigned char *)RSTRING_PTR(str);
-	ASN1_put_object(&p, constructed, value_length, tn, tc);
+	item = ossl_to_der_if_possible(item);
+	StringValue(item);
+	rb_str_append(str, item);
     }
 
-    memcpy(p, RSTRING_PTR(value), value_length);
-    p += value_length;
-
-    /* In this case we need an additional EOC (one for the explicit part and
-     * one for the Constructive itself. The EOC for the Constructive is
-     * supplied by the user, but that for the "explicit wrapper" must be
-     * added here.
-     */
-    if (explicit && RTEST(inf_length)) {
-	ASN1_put_eoc(&p);
-    }
-    ossl_str_adjust(str, p);
-
-    return str;
+    return to_der_internal(self, 1, indef_len, str);
 }
 
 /*
@@ -1842,6 +1805,7 @@ do{\
     rb_attr(cASN1BitString, rb_intern("unused_bits"), 1, 1, 0);
 
     rb_define_method(cASN1EndOfContent, "initialize", ossl_asn1eoc_initialize, 0);
+    rb_define_method(cASN1EndOfContent, "to_der", ossl_asn1eoc_to_der, 0);
 
     class_tag_map = rb_hash_new();
     rb_hash_aset(class_tag_map, cASN1EndOfContent, INT2NUM(V_ASN1_EOC));

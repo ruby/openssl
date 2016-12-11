@@ -434,6 +434,12 @@ class  OpenSSL::TestASN1 < OpenSSL::TestCase
   end
 
   def test_basic_primitive
+    encode_test B(%w{ 00 00 }), OpenSSL::ASN1::Primitive.new(B(%w{}), 0)
+    encode_test B(%w{ 01 00 }), OpenSSL::ASN1::Primitive.new(B(%w{}), 1, nil, :UNIVERSAL)
+    encode_test B(%w{ 81 00 }), OpenSSL::ASN1::Primitive.new(B(%w{}), 1, nil, :CONTEXT_SPECIFIC)
+    encode_test B(%w{ 01 02 AB CD }), OpenSSL::ASN1::Primitive.new(B(%w{ AB CD }), 1)
+    assert_raise(TypeError) { OpenSSL::ASN1::Primitive.new([], 1).to_der }
+
     prim = OpenSSL::ASN1::Integer.new(50)
     assert_equal false, prim.indefinite_length
     assert_not_respond_to prim, :indefinite_length=
@@ -477,6 +483,11 @@ class  OpenSSL::TestASN1 < OpenSSL::TestCase
     assert_equal :APPLICATION, decoded.tag_class
     assert_equal 1, decoded.tag
     assert_equal B(%w{ 01 }), decoded.value
+
+    # Special behavior: Encoding universal types with non-default 'tag'
+    # attribute and nil tagging method.
+    int3 = OpenSSL::ASN1::Integer.new(1, 1)
+    encode_test B(%w{ 01 01 01 }), int3
   end
 
   def test_cons_explicit_tagging
@@ -505,6 +516,11 @@ class  OpenSSL::TestASN1 < OpenSSL::TestCase
     seq3 = OpenSSL::ASN1::Sequence.new(content3, 1, :IMPLICIT)
     seq3.indefinite_length = true
     encode_test B(%w{ A1 80 05 00 00 00 }), seq3
+
+    # Special behavior: Encoding universal types with non-default 'tag'
+    # attribute and nil tagging method.
+    seq4 = OpenSSL::ASN1::Sequence.new([], 1)
+    encode_test B(%w{ 21 00 }), seq4
   end
 
   def test_octet_string_constructed_tagging
