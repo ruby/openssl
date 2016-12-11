@@ -1167,79 +1167,54 @@ ossl_asn1prim_to_der(VALUE self)
 static VALUE
 ossl_asn1cons_to_der(VALUE self)
 {
-    int tag, tn, tc, explicit, constructed = 1;
-    int found_prim = 0, seq_len;
-    long length;
+    int tn, tc, explicit, constructed, value_length;
     unsigned char *p;
     VALUE value, str, inf_length;
 
     tn = ossl_asn1_tag(self);
     tc = ossl_asn1_tag_class(self);
     inf_length = ossl_asn1_get_indefinite_length(self);
-    if (inf_length == Qtrue) {
-	VALUE ary, example;
-	constructed = 2;
-	if (rb_obj_class(self) == cASN1Sequence ||
-	    rb_obj_class(self) == cASN1Set) {
-	    tag = ossl_asn1_default_tag(self);
-	}
-	else { /* must be a constructive encoding of a primitive value */
-	    ary = ossl_asn1_get_value(self);
-	    if (!rb_obj_is_kind_of(ary, rb_cArray))
-		ossl_raise(eASN1Error, "Constructive value must be an Array");
-	    /* Recursively descend until a primitive value is found.
-	    The overall value of the entire constructed encoding
-	    is of the type of the first primitive encoding to be
-	    found. */
-	    while (!found_prim){
-		example = rb_ary_entry(ary, 0);
-		if (rb_obj_is_kind_of(example, cASN1Primitive)){
-		    found_prim = 1;
-		}
-		else {
-		    /* example is another ASN1Constructive */
-		    if (!rb_obj_is_kind_of(example, cASN1Constructive)){
-			ossl_raise(eASN1Error, "invalid constructed encoding");
-			return Qnil; /* dummy */
-		    }
-		    ary = ossl_asn1_get_value(example);
-		}
-	    }
-	    tag = ossl_asn1_default_tag(example);
-	}
-    }
-    else {
-	tag = ossl_asn1_default_tag(self);
-	if (tag == -1) /* neither SEQUENCE nor SET */
-	    tag = ossl_asn1_tag(self);
-    }
     explicit = ossl_asn1_is_explicit(self);
     value = join_der(ossl_asn1_get_value(self));
+    value_length = RSTRING_LENINT(value);
+    constructed = RTEST(inf_length) ? 2 : 1;
 
-    seq_len = ASN1_object_size(constructed, RSTRING_LENINT(value), tag);
-    length = ASN1_object_size(constructed, seq_len, tn);
-    str = rb_str_new(0, length);
-    p = (unsigned char *)RSTRING_PTR(str);
-    if(tc == V_ASN1_UNIVERSAL)
-	ASN1_put_object(&p, constructed, RSTRING_LENINT(value), tn, tc);
-    else{
-	if(explicit){
-	    ASN1_put_object(&p, constructed, seq_len, tn, tc);
-	    ASN1_put_object(&p, constructed, RSTRING_LENINT(value), tag, V_ASN1_UNIVERSAL);
-	}
-	else{
-	    ASN1_put_object(&p, constructed, RSTRING_LENINT(value), tn, tc);
-	}
+    if (explicit) {
+	int length, inner_length, default_tag;
+
+	default_tag = ossl_asn1_default_tag(self);
+	/*
+	 * non-universal tag class class && explicit tagging; this is not
+	 * possible because the inner tag number is unknown.
+	 */
+	if (default_tag == -1)
+	    ossl_raise(eASN1Error, "explicit tagging of unknown tag");
+
+	inner_length = ASN1_object_size(constructed, value_length, default_tag);
+	length = ASN1_object_size(constructed, inner_length, tn);
+	str = rb_str_new(0, length);
+	p = (unsigned char *)RSTRING_PTR(str);
+	ASN1_put_object(&p, constructed, inner_length, tn, tc);
+	ASN1_put_object(&p, constructed, value_length, default_tag, V_ASN1_UNIVERSAL);
     }
-    memcpy(p, RSTRING_PTR(value), RSTRING_LEN(value));
-    p += RSTRING_LEN(value);
+    else {
+	int length;
+
+	length = ASN1_object_size(constructed, value_length, tn);
+	str = rb_str_new(0, length);
+	p = (unsigned char *)RSTRING_PTR(str);
+	ASN1_put_object(&p, constructed, value_length, tn, tc);
+    }
+
+    memcpy(p, RSTRING_PTR(value), value_length);
+    p += value_length;
 
     /* In this case we need an additional EOC (one for the explicit part and
      * one for the Constructive itself. The EOC for the Constructive is
      * supplied by the user, but that for the "explicit wrapper" must be
      * added here.
      */
-    if (explicit && inf_length == Qtrue) {
+    if (explicit && RTEST(inf_length)) {
 	ASN1_put_eoc(&p);
     }
     ossl_str_adjust(str, p);

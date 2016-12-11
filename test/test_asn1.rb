@@ -507,17 +507,6 @@ class  OpenSSL::TestASN1 < OpenSSL::TestCase
     encode_test B(%w{ A1 80 05 00 00 00 }), seq3
   end
 
-  def test_octet_string_indefinite_length_explicit_tagging
-    octets = [ OpenSSL::ASN1::OctetString.new('aaa'),
-               OpenSSL::ASN1::EndOfContent.new() ]
-    cons = OpenSSL::ASN1::Constructive.new(octets, 1, :EXPLICIT)
-    cons.indefinite_length = true
-    expected = %w{ A1 80 24 80 04 03 61 61 61 00 00 00 00 }
-    raw = [expected.join('')].pack('H*')
-    assert_equal(raw, cons.to_der)
-    assert_equal(raw, OpenSSL::ASN1.decode(raw).to_der)
-  end
-
   def test_octet_string_constructed_tagging
     octets = [ OpenSSL::ASN1::OctetString.new('aaa') ]
     cons = OpenSSL::ASN1::Constructive.new(octets, 0, :IMPLICIT)
