@@ -147,13 +147,13 @@ num_to_asn1integer(VALUE obj, ASN1_INTEGER *ai)
 #define ossl_asn1_get_tag(o)             rb_attr_get((o),sivTAG)
 #define ossl_asn1_get_tagging(o)         rb_attr_get((o),sivTAGGING)
 #define ossl_asn1_get_tag_class(o)       rb_attr_get((o),sivTAG_CLASS)
-#define ossl_asn1_get_infinite_length(o) rb_attr_get((o),sivINFINITE_LENGTH)
+#define ossl_asn1_get_indefinite_length(o) rb_attr_get((o),sivINDEFINITE_LENGTH)
 
 #define ossl_asn1_set_value(o,v)           rb_ivar_set((o),sivVALUE,(v))
 #define ossl_asn1_set_tag(o,v)             rb_ivar_set((o),sivTAG,(v))
 #define ossl_asn1_set_tagging(o,v)         rb_ivar_set((o),sivTAGGING,(v))
 #define ossl_asn1_set_tag_class(o,v)       rb_ivar_set((o),sivTAG_CLASS,(v))
-#define ossl_asn1_set_infinite_length(o,v) rb_ivar_set((o),sivINFINITE_LENGTH,(v))
+#define ossl_asn1_set_indefinite_length(o,v) rb_ivar_set((o),sivINDEFINITE_LENGTH,(v))
 
 VALUE mASN1;
 VALUE eASN1Error;
@@ -179,7 +179,7 @@ VALUE cASN1Sequence, cASN1Set;                /* CONSTRUCTIVE      */
 
 static VALUE sym_IMPLICIT, sym_EXPLICIT;
 static VALUE sym_UNIVERSAL, sym_APPLICATION, sym_CONTEXT_SPECIFIC, sym_PRIVATE;
-static ID sivVALUE, sivTAG, sivTAG_CLASS, sivTAGGING, sivINFINITE_LENGTH, sivUNUSED_BITS;
+static ID sivVALUE, sivTAG, sivTAG_CLASS, sivTAGGING, sivINDEFINITE_LENGTH, sivUNUSED_BITS;
 static ID id_each;
 
 /*
@@ -667,7 +667,7 @@ ossl_asn1data_initialize(VALUE self, VALUE value, VALUE tag, VALUE tag_class)
     ossl_asn1_set_tag(self, tag);
     ossl_asn1_set_value(self, value);
     ossl_asn1_set_tag_class(self, tag_class);
-    ossl_asn1_set_infinite_length(self, Qfalse);
+    ossl_asn1_set_indefinite_length(self, Qfalse);
 
     return self;
 }
@@ -694,9 +694,9 @@ join_der(VALUE enumerable)
  *    asn1.to_der => DER-encoded String
  *
  * Encodes this ASN1Data into a DER-encoded String value. The result is
- * DER-encoded except for the possibility of infinite length encodings.
- * Infinite length encodings are not allowed in strict DER, so strictly
- * speaking the result of such an encoding would be a BER-encoding.
+ * DER-encoded except for the possibility of indefinite length forms.
+ * Indefinite length forms are not allowed in strict DER, so strictly speaking
+ * the result of such an encoding would be a BER-encoding.
  */
 static VALUE
 ossl_asn1data_to_der(VALUE self)
@@ -715,7 +715,7 @@ ossl_asn1data_to_der(VALUE self)
 
     tag = ossl_asn1_tag(self);
     tag_class = ossl_asn1_tag_class(self);
-    inf_length = ossl_asn1_get_infinite_length(self);
+    inf_length = ossl_asn1_get_indefinite_length(self);
     if (inf_length == Qtrue) {
 	is_cons = 2;
     }
@@ -811,13 +811,13 @@ int_ossl_asn1_decode0_cons(unsigned char **pp, long max_len, long length,
 			   int tag, VALUE tc, long *num_read)
 {
     VALUE value, asn1data, ary;
-    int infinite;
+    int indefinite;
     long available_len, off = *offset;
 
-    infinite = (j == 0x21);
+    indefinite = (j == 0x21);
     ary = rb_ary_new();
 
-    available_len = infinite ? max_len : length;
+    available_len = indefinite ? max_len : length;
     while (available_len > 0) {
 	long inner_read = 0;
 	value = ossl_asn1_decode0(pp, available_len, &off, depth + 1, yield, &inner_read);
@@ -825,7 +825,7 @@ int_ossl_asn1_decode0_cons(unsigned char **pp, long max_len, long length,
 	available_len -= inner_read;
 	rb_ary_push(ary, value);
 
-	if (infinite &&
+	if (indefinite &&
 	    NUM2INT(ossl_asn1_get_tag(value)) == V_ASN1_EOC &&
 	    ossl_asn1_get_tag_class(value) == sym_UNIVERSAL) {
 	    break;
@@ -839,11 +839,11 @@ int_ossl_asn1_decode0_cons(unsigned char **pp, long max_len, long length,
 	not_sequence_or_set = tag != V_ASN1_SEQUENCE && tag != V_ASN1_SET;
 
 	if (not_sequence_or_set) {
-	    if (infinite) {
+	    if (indefinite) {
 		asn1data = rb_obj_alloc(cASN1Constructive);
 	    }
 	    else {
-		ossl_raise(eASN1Error, "invalid non-infinite tag");
+		ossl_raise(eASN1Error, "invalid non-indefinite tag");
 		return Qnil;
 	    }
 	}
@@ -862,10 +862,10 @@ int_ossl_asn1_decode0_cons(unsigned char **pp, long max_len, long length,
 	ossl_asn1data_initialize(asn1data, ary, INT2NUM(tag), tc);
     }
 
-    if (infinite)
-	ossl_asn1_set_infinite_length(asn1data, Qtrue);
+    if (indefinite)
+	ossl_asn1_set_indefinite_length(asn1data, Qtrue);
     else
-	ossl_asn1_set_infinite_length(asn1data, Qfalse);
+	ossl_asn1_set_indefinite_length(asn1data, Qfalse);
 
     *offset = off;
     return asn1data;
@@ -918,7 +918,8 @@ ossl_asn1_decode0(unsigned char **pp, long length, long *offset, int depth,
 	inner_read += hlen;
     }
     else {
-    	if ((j & 0x01) && (len == 0)) ossl_raise(eASN1Error, "Infinite length for primitive value");
+	if ((j & 0x01) && (len == 0))
+	    ossl_raise(eASN1Error, "indefinite length for primitive value");
 	asn1data = int_ossl_asn1_decode0_prim(pp, len, hlen, tag, tag_class, &inner_read);
 	off += hlen + len;
     }
@@ -1105,7 +1106,7 @@ ossl_asn1_initialize(int argc, VALUE *argv, VALUE self)
     ossl_asn1_set_value(self, value);
     ossl_asn1_set_tagging(self, tagging);
     ossl_asn1_set_tag_class(self, tag_class);
-    ossl_asn1_set_infinite_length(self, Qfalse);
+    ossl_asn1_set_indefinite_length(self, Qfalse);
 
     return self;
 }
@@ -1121,7 +1122,7 @@ ossl_asn1eoc_initialize(VALUE self) {
     ossl_asn1_set_value(self, value);
     ossl_asn1_set_tagging(self, tagging);
     ossl_asn1_set_tag_class(self, tag_class);
-    ossl_asn1_set_infinite_length(self, Qfalse);
+    ossl_asn1_set_indefinite_length(self, Qfalse);
     return self;
 }
 
@@ -1185,7 +1186,7 @@ ossl_asn1cons_to_der(VALUE self)
 
     tn = NUM2INT(ossl_asn1_get_tag(self));
     tc = ossl_asn1_tag_class(self);
-    inf_length = ossl_asn1_get_infinite_length(self);
+    inf_length = ossl_asn1_get_indefinite_length(self);
     if (inf_length == Qtrue) {
 	VALUE ary, example;
 	constructed = 2;
@@ -1220,7 +1221,7 @@ ossl_asn1cons_to_der(VALUE self)
     }
     else {
 	if (rb_obj_class(self) == cASN1Constructive)
-	    ossl_raise(eASN1Error, "Constructive shall only be used with infinite length");
+	    ossl_raise(eASN1Error, "Constructive shall only be used with indefinite length");
 	tag = ossl_asn1_default_tag(self);
     }
     explicit = ossl_asn1_is_explicit(self);
@@ -1414,7 +1415,7 @@ Init_ossl_asn1(void)
     sivTAG = rb_intern("@tag");
     sivTAGGING = rb_intern("@tagging");
     sivTAG_CLASS = rb_intern("@tag_class");
-    sivINFINITE_LENGTH = rb_intern("@infinite_length");
+    sivINDEFINITE_LENGTH = rb_intern("@indefinite_length");
     sivUNUSED_BITS = rb_intern("@unused_bits");
 
     /*
@@ -1453,11 +1454,8 @@ Init_ossl_asn1(void)
      *
      * Constructive is, as its name implies, the base class for all
      * constructed encodings, i.e. those that consist of several values,
-     * opposed to "primitive" encodings with just one single value.
-     * Primitive values that are encoded with "infinite length" are typically
-     * constructed (their values come in multiple chunks) and are therefore
-     * represented by instances of Constructive. The value of an Constructive
-     * is always an Array.
+     * opposed to "primitive" encodings with just one single value. The value of
+     * an Constructive is always an Array.
      *
      * ==== ASN1::Set and ASN1::Sequence
      *
@@ -1611,13 +1609,13 @@ Init_ossl_asn1(void)
      *   der = seq.to_der
      *   asn1 = OpenSSL::ASN1.decode(der)
      *   # pp asn1 => #<OpenSSL::ASN1::Sequence:0x87326e0
-     *   #              @infinite_length=false,
+     *   #              @indefinite_length=false,
      *   #              @tag=16,
      *   #              @tag_class=:UNIVERSAL,
      *   #              @tagging=nil,
      *   #              @value=
      *   #                [#<OpenSSL::ASN1::ASN1Data:0x87326f4
-     *   #                   @infinite_length=false,
+     *   #                   @indefinite_length=false,
      *   #                   @tag=0,
      *   #                   @tag_class=:CONTEXT_SPECIFIC,
      *   #                   @value="\x01">]>
@@ -1634,18 +1632,18 @@ Init_ossl_asn1(void)
      *   der = seq.to_der
      *   asn1 = OpenSSL::ASN1.decode(der)
      *   # pp asn1 => #<OpenSSL::ASN1::Sequence:0x87326e0
-     *   #              @infinite_length=false,
+     *   #              @indefinite_length=false,
      *   #              @tag=16,
      *   #              @tag_class=:UNIVERSAL,
      *   #              @tagging=nil,
      *   #              @value=
      *   #                [#<OpenSSL::ASN1::ASN1Data:0x87326f4
-     *   #                   @infinite_length=false,
+     *   #                   @indefinite_length=false,
      *   #                   @tag=0,
      *   #                   @tag_class=:CONTEXT_SPECIFIC,
      *   #                   @value=
      *   #                     [#<OpenSSL::ASN1::Integer:0x85bf308
-     *   #                        @infinite_length=false,
+     *   #                        @indefinite_length=false,
      *   #                        @tag=2,
      *   #                        @tag_class=:UNIVERSAL
      *   #                        @tagging=nil,
@@ -1670,33 +1668,35 @@ Init_ossl_asn1(void)
      */
     rb_attr(cASN1Data, rb_intern("tag_class"), 1, 1, 0);
     /*
-     * Never +nil+. A boolean value indicating whether the encoding was infinite
-     * length (in the case of parsing) or whether an infinite length encoding
-     * shall be used (in the encoding case).
-     * In DER, every value has a finite length associated with it. But in
-     * scenarios where large amounts of data need to be transferred it
-     * might be desirable to have some kind of streaming support available.
+     * Never +nil+. A boolean value indicating whether the encoding uses
+     * indefinite length (in the case of parsing) or whether an indefinite
+     * length form shall be used (in the encoding case).
+     * In DER, every value uses definite length form. But in scenarios where
+     * large amounts of data need to be transferred it might be desirable to
+     * have some kind of streaming support available.
      * For example, huge OCTET STRINGs are preferably sent in smaller-sized
      * chunks, each at a time.
      * This is possible in BER by setting the length bytes of an encoding
      * to zero and by this indicating that the following value will be
-     * sent in chunks. Infinite length encodings are always constructed.
+     * sent in chunks. Indefinite length encodings are always constructed.
      * The end of such a stream of chunks is indicated by sending a EOC
-     * (End of Content) tag. SETs and SEQUENCEs may use an infinite length
+     * (End of Content) tag. SETs and SEQUENCEs may use an indefinite length
      * encoding, but also primitive types such as e.g. OCTET STRINGS or
      * BIT STRINGS may leverage this functionality (cf. ITU-T X.690).
      */
-    rb_attr(cASN1Data, rb_intern("infinite_length"), 1, 1, 0);
+    rb_attr(cASN1Data, rb_intern("indefinite_length"), 1, 1, 0);
+    rb_define_alias(cASN1Data, "infinite_length", "indefinite_length");
+    rb_define_alias(cASN1Data, "infinite_length=", "indefinite_length=");
     rb_define_method(cASN1Data, "initialize", ossl_asn1data_initialize, 3);
     rb_define_method(cASN1Data, "to_der", ossl_asn1data_to_der, 0);
 
     /* Document-class: OpenSSL::ASN1::Primitive
      *
      * The parent class for all primitive encodings. Attributes are the same as
-     * for ASN1Data, with the addition of _tagging_
-     * Primitive values can never be infinite length encodings, thus it is not
-     * possible to set the _infinite_length_ attribute for Primitive and its
-     * sub-classes.
+     * for ASN1Data, with the addition of _tagging_.
+     * Primitive values can never be encoded with indefinite length form, thus
+     * it is not possible to set the _indefinite_length_ attribute for Primitive
+     * and its sub-classes.
      *
      * == Primitive sub-classes and their mapping to Ruby classes
      * * OpenSSL::ASN1::EndOfContent    <=> _value_ is always +nil+
@@ -1762,6 +1762,7 @@ Init_ossl_asn1(void)
      * OpenSSL::ASN1.decode.
      */
     rb_attr(cASN1Primitive, rb_intern("tagging"), 1, 1, Qtrue);
+    rb_undef_method(cASN1Primitive, "indefinite_length=");
     rb_undef_method(cASN1Primitive, "infinite_length=");
     rb_define_method(cASN1Primitive, "initialize", ossl_asn1_initialize, -1);
     rb_define_method(cASN1Primitive, "to_der", ossl_asn1prim_to_der, 0);
@@ -1792,41 +1793,6 @@ Init_ossl_asn1(void)
      *   int = OpenSSL::ASN1::Integer.new(1)
      *   str = OpenSSL::ASN1::PrintableString.new('abc')
      *   set = OpenSSL::ASN1::Set.new( [ int, str ] )
-     *
-     * == Infinite length primitive values
-     *
-     * The only case where Constructive is used directly is for infinite
-     * length encodings of primitive values. These encodings are always
-     * constructed, with the contents of the _value_ Array being either
-     * UNIVERSAL non-infinite length partial encodings of the actual value
-     * or again constructive encodings with infinite length (i.e. infinite
-     * length primitive encodings may be constructed recursively with another
-     * infinite length value within an already infinite length value). Each
-     * partial encoding must be of the same UNIVERSAL type as the overall
-     * encoding. The value of the overall encoding consists of the
-     * concatenation of each partial encoding taken in sequence. The _value_
-     * array of the outer infinite length value must end with a
-     * OpenSSL::ASN1::EndOfContent instance.
-     *
-     * Please note that it is not possible to encode Constructive without
-     * the _infinite_length_ attribute being set to +true+, use
-     * OpenSSL::ASN1::Sequence or OpenSSL::ASN1::Set in these cases instead.
-     *
-     * === Example - Infinite length OCTET STRING
-     *   partial1 = OpenSSL::ASN1::OctetString.new("\x01")
-     *   partial2 = OpenSSL::ASN1::OctetString.new("\x02")
-     *   inf_octets = OpenSSL::ASN1::Constructive.new( [ partial1,
-     *                                                   partial2,
-     *                                                   OpenSSL::ASN1::EndOfContent.new ],
-     *                                                 OpenSSL::ASN1::OCTET_STRING,
-     *                                                 nil,
-     *                                                 :UNIVERSAL )
-     *   # The real value of inf_octets is "\x01\x02", i.e. the concatenation
-     *   # of partial1 and partial2
-     *   inf_octets.infinite_length = true
-     *   der = inf_octets.to_der
-     *   asn1 = OpenSSL::ASN1.decode(der)
-     *   puts asn1.infinite_length # => true
      */
     cASN1Constructive = rb_define_class_under(mASN1,"Constructive", cASN1Data);
     rb_include_module(cASN1Constructive, rb_mEnumerable);

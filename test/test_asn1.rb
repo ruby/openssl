@@ -242,10 +242,10 @@ rEzBQ0F9dUyqQ9gyRg8KHhDfv9HzT1d/rnUZMkoombwYBRIUChGCYV0GnJcan2Zm
     assert_raise(OpenSSL::ASN1::ASN1Error) { OpenSSL::ASN1.decode_all(pem) }
   end
 
-  def test_primitive_cannot_set_infinite_length
+  def test_primitive_cannot_set_indefinite_length
     prim = OpenSSL::ASN1::Integer.new(50)
-    assert_equal false, prim.infinite_length
-    assert_not_respond_to prim, :infinite_length=
+    assert_equal false, prim.indefinite_length
+    assert_not_respond_to prim, :indefinite_length=
   end
 
   def test_decode_all
@@ -294,11 +294,11 @@ rEzBQ0F9dUyqQ9gyRg8KHhDfv9HzT1d/rnUZMkoombwYBRIUChGCYV0GnJcan2Zm
     raw = [expected.join('')].pack('H*')
     content = [OpenSSL::ASN1::OctetString.new("a"), OpenSSL::ASN1::EndOfContent.new]
     cons = OpenSSL::ASN1::Constructive.new(content, OpenSSL::ASN1::OCTET_STRING, nil, :UNIVERSAL)
-    cons.infinite_length = true
+    cons.indefinite_length = true
     assert_equal(nil, cons.tagging)
     assert_equal(raw, cons.to_der)
     asn1 = OpenSSL::ASN1.decode(raw)
-    assert(asn1.infinite_length)
+    assert(asn1.indefinite_length)
     assert_equal(raw, asn1.to_der)
   end
 
@@ -314,7 +314,7 @@ rEzBQ0F9dUyqQ9gyRg8KHhDfv9HzT1d/rnUZMkoombwYBRIUChGCYV0GnJcan2Zm
     assert_raise(OpenSSL::ASN1::ASN1Error) do
       val = OpenSSL::ASN1::OctetString.new('a')
       cons = OpenSSL::ASN1::Constructive.new(val, OpenSSL::ASN1::OCTET_STRING, nil, :UNIVERSAL)
-      cons.infinite_length = true
+      cons.indefinite_length = true
       cons.to_der
     end
   end
@@ -331,7 +331,7 @@ rEzBQ0F9dUyqQ9gyRg8KHhDfv9HzT1d/rnUZMkoombwYBRIUChGCYV0GnJcan2Zm
     assert_equal(0, inner_seq.value.size)
   end
 
-  def test_parse_tagged_0_infinite
+  def test_parse_tagged_0_indefinite
     expected = %w{ 30 80 02 01 01 80 01 02 00 00 }
     raw = [expected.join('')].pack('H*')
     asn1 = OpenSSL::ASN1.decode(raw)
@@ -344,33 +344,33 @@ rEzBQ0F9dUyqQ9gyRg8KHhDfv9HzT1d/rnUZMkoombwYBRIUChGCYV0GnJcan2Zm
     assert_equal(raw, asn1.to_der)
   end
 
-  def test_seq_infinite_length
+  def test_seq_indefinite_length
     content = [ OpenSSL::ASN1::Null.new(nil),
                 OpenSSL::ASN1::EndOfContent.new ]
     cons = OpenSSL::ASN1::Sequence.new(content)
-    cons.infinite_length = true
+    cons.indefinite_length = true
     expected = %w{ 30 80 05 00 00 00 }
     raw = [expected.join('')].pack('H*')
     assert_equal(raw, cons.to_der)
     assert_equal(raw, OpenSSL::ASN1.decode(raw).to_der)
   end
 
-  def test_set_infinite_length
+  def test_set_indefinite_length
     content = [ OpenSSL::ASN1::Null.new(nil),
                 OpenSSL::ASN1::EndOfContent.new() ]
     cons = OpenSSL::ASN1::Set.new(content)
-    cons.infinite_length = true
+    cons.indefinite_length = true
     expected = %w{ 31 80 05 00 00 00 }
     raw = [expected.join('')].pack('H*')
     assert_equal(raw, cons.to_der)
     assert_equal(raw, OpenSSL::ASN1.decode(raw).to_der)
   end
 
-  def test_octet_string_infinite_length
+  def test_octet_string_indefinite_length
     octets = [ OpenSSL::ASN1::OctetString.new('aaa'),
                OpenSSL::ASN1::EndOfContent.new() ]
     cons = OpenSSL::ASN1::Constructive.new(octets, OpenSSL::ASN1::OCTET_STRING, nil, :UNIVERSAL)
-    cons.infinite_length = true
+    cons.indefinite_length = true
     expected = %w{ 24 80 04 03 61 61 61 00 00 }
     raw = [expected.join('')].pack('H*')
     assert_equal(raw, cons.to_der)
@@ -418,7 +418,7 @@ rEzBQ0F9dUyqQ9gyRg8KHhDfv9HzT1d/rnUZMkoombwYBRIUChGCYV0GnJcan2Zm
     content = [ OpenSSL::ASN1::PrintableString.new('abc') ,
                 OpenSSL::ASN1::EndOfContent.new() ]
     seq = OpenSSL::ASN1::Sequence.new(content, 2, :EXPLICIT)
-    seq.infinite_length = true
+    seq.indefinite_length = true
     expected = %w{ A2 80 30 80 13 03 61 62 63 00 00 00 00 }
     raw = [expected.join('')].pack('H*')
     assert_equal(raw, seq.to_der)
@@ -438,61 +438,61 @@ rEzBQ0F9dUyqQ9gyRg8KHhDfv9HzT1d/rnUZMkoombwYBRIUChGCYV0GnJcan2Zm
     content = [ OpenSSL::ASN1::Null.new(nil),
                 OpenSSL::ASN1::EndOfContent.new() ]
     seq = OpenSSL::ASN1::Sequence.new(content, 1, :IMPLICIT)
-    seq.infinite_length = true
+    seq.indefinite_length = true
     expected = %w{ A1 80 05 00 00 00 }
     raw = [expected.join('')].pack('H*')
     assert_equal(raw, seq.to_der)
     assert_equal(raw, OpenSSL::ASN1.decode(raw).to_der)
   end
 
-  def test_octet_string_infinite_length_explicit_tagging
+  def test_octet_string_indefinite_length_explicit_tagging
     octets = [ OpenSSL::ASN1::OctetString.new('aaa'),
                OpenSSL::ASN1::EndOfContent.new() ]
     cons = OpenSSL::ASN1::Constructive.new(octets, 1, :EXPLICIT)
-    cons.infinite_length = true
+    cons.indefinite_length = true
     expected = %w{ A1 80 24 80 04 03 61 61 61 00 00 00 00 }
     raw = [expected.join('')].pack('H*')
     assert_equal(raw, cons.to_der)
     assert_equal(raw, OpenSSL::ASN1.decode(raw).to_der)
   end
 
-  def test_octet_string_infinite_length_implicit_tagging
+  def test_octet_string_indefinite_length_implicit_tagging
     octets = [ OpenSSL::ASN1::OctetString.new('aaa'),
                OpenSSL::ASN1::EndOfContent.new() ]
     cons = OpenSSL::ASN1::Constructive.new(octets, 0, :IMPLICIT)
-    cons.infinite_length = true
+    cons.indefinite_length = true
     expected = %w{ A0 80 04 03 61 61 61 00 00 }
     raw = [expected.join('')].pack('H*')
     assert_equal(raw, cons.to_der)
     assert_equal(raw, OpenSSL::ASN1.decode(raw).to_der)
   end
 
-  def test_recursive_octet_string_infinite_length
+  def test_recursive_octet_string_indefinite_length
     octets_sub1 = [ OpenSSL::ASN1::OctetString.new("\x01"),
                     OpenSSL::ASN1::EndOfContent.new() ]
     octets_sub2 = [ OpenSSL::ASN1::OctetString.new("\x02"),
                     OpenSSL::ASN1::EndOfContent.new() ]
     container1 = OpenSSL::ASN1::Constructive.new(octets_sub1, OpenSSL::ASN1::OCTET_STRING, nil, :UNIVERSAL)
-    container1.infinite_length = true
+    container1.indefinite_length = true
     container2 = OpenSSL::ASN1::Constructive.new(octets_sub2, OpenSSL::ASN1::OCTET_STRING, nil, :UNIVERSAL)
-    container2.infinite_length = true
+    container2.indefinite_length = true
     octets3 = OpenSSL::ASN1::OctetString.new("\x03")
 
     octets = [ container1, container2, octets3,
                OpenSSL::ASN1::EndOfContent.new() ]
     cons = OpenSSL::ASN1::Constructive.new(octets, OpenSSL::ASN1::OCTET_STRING, nil, :UNIVERSAL)
-    cons.infinite_length = true
+    cons.indefinite_length = true
     expected = %w{ 24 80 24 80 04 01 01 00 00 24 80 04 01 02 00 00 04 01 03 00 00 }
     raw = [expected.join('')].pack('H*')
     assert_equal(raw, cons.to_der)
     assert_equal(raw, OpenSSL::ASN1.decode(raw).to_der)
   end
 
-  def test_bit_string_infinite_length
+  def test_bit_string_indefinite_length
     content = [ OpenSSL::ASN1::BitString.new("\x01"),
                 OpenSSL::ASN1::EndOfContent.new() ]
     cons = OpenSSL::ASN1::Constructive.new(content, OpenSSL::ASN1::BIT_STRING, nil, :UNIVERSAL)
-    cons.infinite_length = true
+    cons.indefinite_length = true
     expected = %w{ 23 80 03 02 00 01 00 00 }
     raw = [expected.join('')].pack('H*')
     assert_equal(raw, cons.to_der)
@@ -514,33 +514,33 @@ rEzBQ0F9dUyqQ9gyRg8KHhDfv9HzT1d/rnUZMkoombwYBRIUChGCYV0GnJcan2Zm
     asn1 = OpenSSL::ASN1.decode(raw)
     assert_equal(OpenSSL::ASN1::Constructive, asn1.class)
     assert_universal(OpenSSL::ASN1::OCTET_STRING, asn1)
-    assert_equal(true, asn1.infinite_length)
+    assert_equal(true, asn1.indefinite_length)
     assert_equal(4, asn1.value.size)
     nested1 = asn1.value[0]
     assert_equal(OpenSSL::ASN1::Constructive, nested1.class)
     assert_universal(OpenSSL::ASN1::OCTET_STRING, nested1)
-    assert_equal(true, nested1.infinite_length)
+    assert_equal(true, nested1.indefinite_length)
     assert_equal(2, nested1.value.size)
     oct1 = nested1.value[0]
     assert_universal(OpenSSL::ASN1::OCTET_STRING, oct1)
-    assert_equal(false, oct1.infinite_length)
+    assert_equal(false, oct1.indefinite_length)
     assert_universal(OpenSSL::ASN1::EOC, nested1.value[1])
-    assert_equal(false, nested1.value[1].infinite_length)
+    assert_equal(false, nested1.value[1].indefinite_length)
     nested2 = asn1.value[1]
     assert_equal(OpenSSL::ASN1::Constructive, nested2.class)
     assert_universal(OpenSSL::ASN1::OCTET_STRING, nested2)
-    assert_equal(true, nested2.infinite_length)
+    assert_equal(true, nested2.indefinite_length)
     assert_equal(2, nested2.value.size)
     oct2 = nested2.value[0]
     assert_universal(OpenSSL::ASN1::OCTET_STRING, oct2)
-    assert_equal(false, oct2.infinite_length)
+    assert_equal(false, oct2.indefinite_length)
     assert_universal(OpenSSL::ASN1::EOC, nested2.value[1])
-    assert_equal(false, nested2.value[1].infinite_length)
+    assert_equal(false, nested2.value[1].indefinite_length)
     oct3 = asn1.value[2]
     assert_universal(OpenSSL::ASN1::OCTET_STRING, oct3)
-    assert_equal(false, oct3.infinite_length)
+    assert_equal(false, oct3.indefinite_length)
     assert_universal(OpenSSL::ASN1::EOC, asn1.value[3])
-    assert_equal(false, asn1.value[3].infinite_length)
+    assert_equal(false, asn1.value[3].indefinite_length)
   end
 
   def test_decode_constructed_overread
