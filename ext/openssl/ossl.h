@@ -92,6 +92,7 @@ VALUE ossl_x509_sk2ary(const STACK_OF(X509) *certs);
 VALUE ossl_x509crl_sk2ary(const STACK_OF(X509_CRL) *crl);
 VALUE ossl_x509name_sk2ary(const STACK_OF(X509_NAME) *names);
 VALUE ossl_buf2str(char *buf, int len);
+VALUE ossl_str_new(const char *, long, int *);
 #define ossl_str_adjust(str, p) \
 do{\
     long len = RSTRING_LEN(str);\

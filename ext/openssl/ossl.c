@@ -92,22 +92,40 @@ OSSL_IMPL_SK2ARY(x509crl, X509_CRL)
 OSSL_IMPL_SK2ARY(x509name, X509_NAME)
 
 static VALUE
-ossl_str_new(int size)
+ossl_str_new_i(VALUE size)
 {
-    return rb_str_new(0, size);
+    return rb_str_new(NULL, (long)size);
+}
+
+VALUE
+ossl_str_new(const char *ptr, long len, int *pstate)
+{
+    VALUE str;
+    int state;
+
+    str = rb_protect(ossl_str_new_i, len, &state);
+    if (pstate)
+	*pstate = state;
+    if (state) {
+	if (!pstate)
+	    rb_set_errinfo(Qnil);
+	return Qnil;
+    }
+    if (ptr)
+	memcpy(RSTRING_PTR(str), ptr, len);
+    return str;
 }
 
 VALUE
 ossl_buf2str(char *buf, int len)
 {
     VALUE str;
-    int status = 0;
+    int state;
 
-    str = rb_protect((VALUE (*)(VALUE))ossl_str_new, len, &status);
-    if(!NIL_P(str)) memcpy(RSTRING_PTR(str), buf, len);
+    str = ossl_str_new(buf, len, &state);
     OPENSSL_free(buf);
-    if(status) rb_jump_tag(status);
-
+    if (state)
+	rb_jump_tag(state);
     return str;
 }
 
