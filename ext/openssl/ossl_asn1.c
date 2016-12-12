@@ -24,7 +24,6 @@ asn1time_to_time(const ASN1_TIME *time)
     VALUE argv[6];
     int count;
 
-    if (!time || !time->data) return Qnil;
     memset(&tm, 0, sizeof(struct tm));
 
     switch (time->type) {

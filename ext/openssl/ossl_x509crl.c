@@ -208,10 +208,14 @@ static VALUE
 ossl_x509crl_get_last_update(VALUE self)
 {
     X509_CRL *crl;
+    const ASN1_TIME *time;
 
     GetX509CRL(self, crl);
+    time = X509_CRL_get0_lastUpdate(crl);
+    if (!time)
+	return Qnil;
 
-    return asn1time_to_time(X509_CRL_get0_lastUpdate(crl));
+    return asn1time_to_time(time);
 }
 
 static VALUE
@@ -235,10 +239,14 @@ static VALUE
 ossl_x509crl_get_next_update(VALUE self)
 {
     X509_CRL *crl;
+    const ASN1_TIME *time;
 
     GetX509CRL(self, crl);
+    time = X509_CRL_get0_nextUpdate(crl);
+    if (!time)
+	return Qnil;
 
-    return asn1time_to_time(X509_CRL_get0_nextUpdate(crl));
+    return asn1time_to_time(time);
 }
 
 static VALUE
