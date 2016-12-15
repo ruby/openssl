@@ -1347,6 +1347,28 @@ ossl_asn1obj_get_ln(VALUE self)
     return ret;
 }
 
+static VALUE
+asn1obj_get_oid_i(VALUE vobj)
+{
+    ASN1_OBJECT *a1obj = (void *)vobj;
+    VALUE str;
+    int len;
+
+    str = rb_usascii_str_new(NULL, 127);
+    len = OBJ_obj2txt(RSTRING_PTR(str), RSTRING_LENINT(str), a1obj, 1);
+    if (len <= 0 || len == INT_MAX)
+	ossl_raise(eASN1Error, "OBJ_obj2txt");
+    if (len > RSTRING_LEN(str)) {
+	/* +1 is for the \0 terminator added by OBJ_obj2txt() */
+	rb_str_resize(str, len + 1);
+	len = OBJ_obj2txt(RSTRING_PTR(str), len + 1, a1obj, 1);
+	if (len <= 0)
+	    ossl_raise(eASN1Error, "OBJ_obj2txt");
+    }
+    rb_str_set_len(str, len);
+    return str;
+}
+
 /*
  * call-seq:
  *    oid.oid -> string
@@ -1357,16 +1379,16 @@ ossl_asn1obj_get_ln(VALUE self)
 static VALUE
 ossl_asn1obj_get_oid(VALUE self)
 {
-    VALUE val;
+    VALUE str;
     ASN1_OBJECT *a1obj;
-    char buf[128];
+    int state;
 
-    val = ossl_asn1_get_value(self);
-    a1obj = obj_to_asn1obj(val);
-    OBJ_obj2txt(buf, sizeof(buf), a1obj, 1);
+    a1obj = obj_to_asn1obj(ossl_asn1_get_value(self));
+    str = rb_protect(asn1obj_get_oid_i, (VALUE)a1obj, &state);
     ASN1_OBJECT_free(a1obj);
-
-    return rb_str_new2(buf);
+    if (state)
+	rb_jump_tag(state);
+    return str;
 }
 
 #define OSSL_ASN1_IMPL_FACTORY_METHOD(klass) \
