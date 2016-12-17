@@ -21,6 +21,10 @@ EVP_CIPHER_CTX *EVP_CIPHER_CTX_new(void);
 void EVP_CIPHER_CTX_free(EVP_CIPHER_CTX *ctx);
 #endif
 
+#if !defined(HAVE_SSL_CTX_CLEAR_OPTIONS)
+#  define SSL_CTX_clear_options(ctx, op) ((ctx)->options &= ~(op))
+#endif
+
 /* added in 1.0.0 */
 #if !defined(HAVE_EVP_PKEY_BASE_ID)
 #  define EVP_PKEY_base_id(pkey) EVP_PKEY_type((pkey)->type)

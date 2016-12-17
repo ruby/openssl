@@ -81,6 +81,7 @@ engines.each { |name|
 # added in 0.9.8X
 have_func("EVP_CIPHER_CTX_new")
 have_func("EVP_CIPHER_CTX_free")
+OpenSSL.check_func_or_macro("SSL_CTX_clear_options", "openssl/ssl.h")
 
 # added in 1.0.0
 have_func("ASN1_TIME_adj")
