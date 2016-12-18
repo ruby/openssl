@@ -14,11 +14,13 @@
 
 /* added in 0.9.8X */
 #if !defined(HAVE_EVP_CIPHER_CTX_NEW)
-EVP_CIPHER_CTX *EVP_CIPHER_CTX_new(void);
+EVP_CIPHER_CTX *ossl_EVP_CIPHER_CTX_new(void);
+#  define EVP_CIPHER_CTX_new ossl_EVP_CIPHER_CTX_new
 #endif
 
 #if !defined(HAVE_EVP_CIPHER_CTX_FREE)
-void EVP_CIPHER_CTX_free(EVP_CIPHER_CTX *ctx);
+void ossl_EVP_CIPHER_CTX_free(EVP_CIPHER_CTX *);
+#  define EVP_CIPHER_CTX_free ossl_EVP_CIPHER_CTX_free
 #endif
 
 #if !defined(HAVE_SSL_CTX_CLEAR_OPTIONS)
@@ -31,11 +33,13 @@ void EVP_CIPHER_CTX_free(EVP_CIPHER_CTX *ctx);
 #endif
 
 #if !defined(HAVE_EVP_CIPHER_CTX_COPY)
-int EVP_CIPHER_CTX_copy(EVP_CIPHER_CTX *out, const EVP_CIPHER_CTX *in);
+int ossl_EVP_CIPHER_CTX_copy(EVP_CIPHER_CTX *, const EVP_CIPHER_CTX *);
+#  define EVP_CIPHER_CTX_copy ossl_EVP_CIPHER_CTX_copy
 #endif
 
 #if !defined(HAVE_HMAC_CTX_COPY)
-int HMAC_CTX_copy(HMAC_CTX *out, HMAC_CTX *in);
+int ossl_HMAC_CTX_copy(HMAC_CTX *out, HMAC_CTX *in);
+#  define HMAC_CTX_copy ossl_HMAC_CTX_copy
 #endif
 
 #if !defined(HAVE_X509_STORE_CTX_GET0_CURRENT_CRL)
@@ -58,7 +62,8 @@ int HMAC_CTX_copy(HMAC_CTX *out, HMAC_CTX *in);
 /* added in 1.0.2 */
 #if !defined(OPENSSL_NO_EC)
 #if !defined(HAVE_EC_CURVE_NIST2NID)
-int EC_curve_nist2nid(const char *);
+int ossl_EC_curve_nist2nid(const char *);
+#  define EC_curve_nist2nid ossl_EC_curve_nist2nid
 #endif
 #endif
 
@@ -97,11 +102,13 @@ int EC_curve_nist2nid(const char *);
 #endif
 
 #if !defined(HAVE_HMAC_CTX_NEW)
-HMAC_CTX *HMAC_CTX_new(void);
+HMAC_CTX *ossl_HMAC_CTX_new(void);
+#  define HMAC_CTX_new ossl_HMAC_CTX_new
 #endif
 
 #if !defined(HAVE_HMAC_CTX_FREE)
-void HMAC_CTX_free(HMAC_CTX *ctx);
+void ossl_HMAC_CTX_free(HMAC_CTX *);
+#  define HMAC_CTX_free ossl_HMAC_CTX_free
 #endif
 
 #if !defined(HAVE_X509_STORE_GET_EX_DATA)
@@ -118,11 +125,13 @@ void HMAC_CTX_free(HMAC_CTX *ctx);
 #endif
 
 #if !defined(HAVE_X509_CRL_GET0_SIGNATURE)
-void X509_CRL_get0_signature(const X509_CRL *, const ASN1_BIT_STRING **, const X509_ALGOR **);
+void ossl_X509_CRL_get0_signature(const X509_CRL *, const ASN1_BIT_STRING **, const X509_ALGOR **);
+#  define X509_CRL_get0_signature ossl_X509_CRL_get0_signature
 #endif
 
 #if !defined(HAVE_X509_REQ_GET0_SIGNATURE)
-void X509_REQ_get0_signature(const X509_REQ *, const ASN1_BIT_STRING **, const X509_ALGOR **);
+void ossl_X509_REQ_get0_signature(const X509_REQ *, const ASN1_BIT_STRING **, const X509_ALGOR **);
+#  define X509_REQ_get0_signature ossl_X509_REQ_get0_signature
 #endif
 
 #if !defined(HAVE_X509_REVOKED_GET0_SERIALNUMBER)
