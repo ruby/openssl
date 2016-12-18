@@ -144,6 +144,7 @@ OpenSSL.check_func_or_macro("SSL_CTX_set_tmp_ecdh_callback", "openssl/ssl.h") # 
 OpenSSL.check_func_or_macro("SSL_CTX_set_min_proto_version", "openssl/ssl.h")
 have_func("SSL_CTX_get_security_level")
 have_func("X509_get0_notBefore")
+have_func("SSL_SESSION_get_protocol_version")
 
 Logging::message "=== Checking done. ===\n"
 

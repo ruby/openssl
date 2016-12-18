@@ -258,4 +258,8 @@ IMPL_PKEY_GETTER(EC_KEY, ec)
 #  define X509_CRL_get0_nextUpdate(x) X509_CRL_get_nextUpdate(x)
 #endif
 
+#if !defined(HAVE_SSL_SESSION_GET_PROTOCOL_VERSION)
+#  define SSL_SESSION_get_protocol_version(s) ((s)->ssl_version)
+#endif
+
 #endif /* _OSSL_OPENSSL_MISSING_H_ */
