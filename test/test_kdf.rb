@@ -100,4 +100,40 @@ class OpenSSL::TestKDF < OpenSSL::TestCase
     assert_equal(value1, value2)
   end
 
+  def test_scrypt_rfc7914_first
+    pend "scrypt is not implemented" unless OpenSSL::KDF.respond_to?(:scrypt) # OpenSSL >= 1.1.0
+    pass = ""
+    salt = ""
+    n = 16
+    r = 1
+    p = 1
+    dklen = 64
+    expected = B(%w{ 77 d6 57 62 38 65 7b 20 3b 19 ca 42 c1 8a 04 97
+                     f1 6b 48 44 e3 07 4a e8 df df fa 3f ed e2 14 42
+                     fc d0 06 9d ed 09 48 f8 32 6a 75 3a 0f c8 1f 17
+                     e8 d3 e0 fb 2e 0d 36 28 cf 35 e2 0c 38 d1 89 06 })
+    assert_equal(expected, OpenSSL::KDF.scrypt(pass, salt: salt, N: n, r: r, p: p, length: dklen))
+  end
+
+  def test_scrypt_rfc7914_second
+    pend "scrypt is not implemented" unless OpenSSL::KDF.respond_to?(:scrypt) # OpenSSL >= 1.1.0
+    pass = "password"
+    salt = "NaCl"
+    n = 1024
+    r = 8
+    p = 16
+    dklen = 64
+    expected = B(%w{ fd ba be 1c 9d 34 72 00 78 56 e7 19 0d 01 e9 fe
+                     7c 6a d7 cb c8 23 78 30 e7 73 76 63 4b 37 31 62
+                     2e af 30 d9 2e 22 a3 88 6f f1 09 27 9d 98 30 da
+                     c7 27 af b9 4a 83 ee 6d 83 60 cb df a2 cc 06 40 })
+    assert_equal(expected, OpenSSL::KDF.scrypt(pass, salt: salt, N: n, r: r, p: p, length: dklen))
+  end
+
+  private
+
+  def B(ary)
+    [Array(ary).join].pack("H*")
+  end
+
 end

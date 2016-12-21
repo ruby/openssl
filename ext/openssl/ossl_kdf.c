@@ -64,6 +64,80 @@ kdf_pbkdf2_hmac(int argc, VALUE *argv, VALUE self)
     return str;
 }
 
+#if defined(HAVE_EVP_PBE_SCRYPT)
+/*
+ * call-seq:
+ *   KDF.scrypt(pass, salt:, N:, r:, p:, length:) -> aString
+ *
+ * Derives a key from _pass_ using given parameters with the scrypt
+ * password-based key derivation function. The result can be used for password
+ * storage.
+ *
+ * scrypt is designed to be memory-hard and more secure against brute-force
+ * attacks using custom hardwares than alternative KDFs such as PBKDF2 or
+ * bcrypt.
+ *
+ * The keyword arguments _N_, _r_ and _p_ can be used to tune scrypt. RFC 7914
+ * (published on 2016-08, https://tools.ietf.org/html/rfc7914#section-2) states
+ * that using values r=8 and p=1 appears to yield good results.
+ *
+ * See RFC 7914 (https://tools.ietf.org/html/rfc7914) for more information.
+ *
+ * === Parameters
+ * pass   :: Passphrase.
+ * salt   :: Salt.
+ * N      :: CPU/memory cost parameter. This must be a power of 2.
+ * r      :: Block size parameter.
+ * p      :: Parallelization parameter.
+ * length :: Length in octets of the derived key.
+ *
+ * === Example
+ *   pass = "password"
+ *   salt = SecureRandom.random_bytes(16)
+ *   dk = OpenSSL::KDF.scrypt(pass, salt: salt, N: 2**14, r: 8, p: 1, length: 32)
+ *   p dk #=> "\xDA\xE4\xE2...\x7F\xA1\x01T"
+ */
+static VALUE
+kdf_scrypt(int argc, VALUE *argv, VALUE self)
+{
+    VALUE pass, salt, opts, kwargs[5], str;
+    static ID kwargs_ids[5];
+    size_t len;
+    uint64_t N, r, p, maxmem;
+
+    if (!kwargs_ids[0]) {
+	kwargs_ids[0] = rb_intern_const("salt");
+	kwargs_ids[1] = rb_intern_const("N");
+	kwargs_ids[2] = rb_intern_const("r");
+	kwargs_ids[3] = rb_intern_const("p");
+	kwargs_ids[4] = rb_intern_const("length");
+    }
+    rb_scan_args(argc, argv, "1:", &pass, &opts);
+    rb_get_kwargs(opts, kwargs_ids, 5, 0, kwargs);
+
+    StringValue(pass);
+    salt = StringValue(kwargs[0]);
+    N = NUM2UINT64T(kwargs[1]);
+    r = NUM2UINT64T(kwargs[2]);
+    p = NUM2UINT64T(kwargs[3]);
+    len = NUM2LONG(kwargs[4]);
+    /*
+     * OpenSSL uses 32MB by default (if zero is specified), which is too small.
+     * Let's not limit memory consumption but just let malloc() fail inside
+     * OpenSSL. The amount is controllable by other parameters.
+     */
+    maxmem = SIZE_MAX;
+
+    str = rb_str_new(0, len);
+    if (!EVP_PBE_scrypt(RSTRING_PTR(pass), RSTRING_LEN(pass),
+			(unsigned char *)RSTRING_PTR(salt), RSTRING_LEN(salt),
+			N, r, p, maxmem, (unsigned char *)RSTRING_PTR(str), len))
+	ossl_raise(eKDF, "EVP_PBE_scrypt");
+
+    return str;
+}
+#endif
+
 void
 Init_ossl_kdf(void)
 {
@@ -87,6 +161,7 @@ Init_ossl_kdf(void)
      *
      * * PKCS #5 PBKDF2 (Password-Based Key Derivation Function 2) in
      *   combination with HMAC
+     * * scrypt
      *
      * == Examples
      * === Generating a 128 bit key for a Cipher (e.g. AES)
@@ -140,4 +215,7 @@ Init_ossl_kdf(void)
     eKDF = rb_define_class_under(mKDF, "KDFError", eOSSLError);
 
     rb_define_module_function(mKDF, "pbkdf2_hmac", kdf_pbkdf2_hmac, -1);
+#if defined(HAVE_EVP_PBE_SCRYPT)
+    rb_define_module_function(mKDF, "scrypt", kdf_scrypt, -1);
+#endif
 }
