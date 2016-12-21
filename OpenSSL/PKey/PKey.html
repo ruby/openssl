@@ -149,7 +149,7 @@ this method explicitly will raise a <code>NotImplementedError</code>.</p>
 ossl_pkey_initialize(VALUE self)
 {
     if (rb_obj_is_instance_of(self, cPKey)) {
-        ossl_raise(rb_eNotImpError, &quot;OpenSSL::PKey::PKey is an abstract class.&quot;);
+        ossl_raise(rb_eTypeError, &quot;OpenSSL::PKey::PKey can&#39;t be instantiated directly&quot;);
     }
     return self;
 }</pre>
