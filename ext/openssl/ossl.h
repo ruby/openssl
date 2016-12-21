@@ -70,6 +70,19 @@ extern VALUE eOSSLError;
 } while (0)
 
 /*
+ * Type conversions
+ */
+#if !defined(NUM2UINT64T) /* in case Ruby starts to provide */
+#  if SIZEOF_LONG == 8
+#    define NUM2UINT64T(x) ((uint64_t)NUM2ULONG(x))
+#  elif defined(HAVE_LONG_LONG) && SIZEOF_LONG_LONG == 8
+#    define NUM2UINT64T(x) ((uint64_t)NUM2ULL(x))
+#  else
+#    error "unknown platform; no 64-bit width integer"
+#  endif
+#endif
+
+/*
  * Data Conversion
  */
 STACK_OF(X509) *ossl_x509_ary2sk0(VALUE);
