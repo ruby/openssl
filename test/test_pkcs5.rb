@@ -93,6 +93,6 @@ class OpenSSL::TestPKCS5 < OpenSSL::TestCase
     value1 = OpenSSL::PKCS5.pbkdf2_hmac(p, s, c, dk_len, digest)
     value2 = OpenSSL::PKCS5.pbkdf2_hmac(p, s, c, dk_len, digest)
     assert_equal(value1, value2)
-  end if OpenSSL::PKCS5.respond_to?(:pbkdf2_hmac)
+  end
 
-end if defined?(OpenSSL::TestUtils)
+end

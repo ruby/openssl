@@ -2,8 +2,6 @@
 # frozen_string_literal: false
 require_relative 'utils'
 
-if defined?(OpenSSL::TestUtils)
-
 class OpenSSL::TestX509Name < OpenSSL::TestCase
   def setup
     super
@@ -306,7 +304,6 @@ class OpenSSL::TestX509Name < OpenSSL::TestCase
   end
 
   def test_add_entry_street
-    return if OpenSSL::OPENSSL_VERSION_NUMBER < 0x009080df # 0.9.8m
     # openssl/crypto/objects/obj_mac.h 1.83
     dn = [
       ["DC", "org"],
@@ -361,6 +358,4 @@ class OpenSSL::TestX509Name < OpenSSL::TestCase
     name = OpenSSL::X509::Name.parse("/CN=ruby-lang.org")
     assert_equal(name.to_der, name.dup.to_der)
   end
-end
-
 end

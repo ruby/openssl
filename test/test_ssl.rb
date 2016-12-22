@@ -1,8 +1,6 @@
 # frozen_string_literal: false
 require_relative "utils"
 
-if defined?(OpenSSL::TestUtils)
-
 class OpenSSL::TestSSL < OpenSSL::SSLTestCase
 
   def test_ctx_options
@@ -352,10 +350,8 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     assert ciphers_names.all?{|v| /A(EC)?DH/ !~ v }, "anon ciphers are disabled"
     assert ciphers_names.all?{|v| /(RC4|MD5|EXP|DES)/ !~ v }, "weak ciphers are disabled"
     assert_equal 0, ctx.options & OpenSSL::SSL::OP_DONT_INSERT_EMPTY_FRAGMENTS
-    if defined?(OpenSSL::SSL::OP_NO_COMPRESSION) # >= 1.0.0
-      assert_equal OpenSSL::SSL::OP_NO_COMPRESSION,
-                   ctx.options & OpenSSL::SSL::OP_NO_COMPRESSION
-    end
+    assert_equal OpenSSL::SSL::OP_NO_COMPRESSION,
+                 ctx.options & OpenSSL::SSL::OP_NO_COMPRESSION
   end
 
   def test_post_connect_check_with_anon_ciphers
@@ -845,7 +841,7 @@ if OpenSSL::SSL::SSLContext::METHODS.include? :TLSv1_2
       ctx.ssl_version = :TLSv1_2_client
       server_connect(port, ctx) { |ssl| assert_equal("TLSv1.2", ssl.ssl_version) }
     }
-  end if OpenSSL::OPENSSL_VERSION_NUMBER > 0x10001000
+  end
 
   def test_forbid_tls_v1_1_for_client
     ctx_proc = Proc.new { |ctx| ctx.options = OpenSSL::SSL::OP_ALL | OpenSSL::SSL::OP_NO_TLSv1_1 }
@@ -854,7 +850,7 @@ if OpenSSL::SSL::SSLContext::METHODS.include? :TLSv1_2
       ctx.ssl_version = :TLSv1_1
       assert_handshake_error { server_connect(port, ctx) }
     }
-  end if defined?(OpenSSL::SSL::OP_NO_TLSv1_1)
+  end
 
   def test_forbid_tls_v1_1_from_server
     start_server_version(:TLSv1_1) { |server, port|
@@ -862,7 +858,7 @@ if OpenSSL::SSL::SSLContext::METHODS.include? :TLSv1_2
       ctx.options = OpenSSL::SSL::OP_ALL | OpenSSL::SSL::OP_NO_TLSv1_1
       assert_handshake_error { server_connect(port, ctx) }
     }
-  end if defined?(OpenSSL::SSL::OP_NO_TLSv1_1)
+  end
 
   def test_forbid_tls_v1_2_for_client
     ctx_proc = Proc.new { |ctx| ctx.options = OpenSSL::SSL::OP_ALL | OpenSSL::SSL::OP_NO_TLSv1_2 }
@@ -871,7 +867,7 @@ if OpenSSL::SSL::SSLContext::METHODS.include? :TLSv1_2
       ctx.ssl_version = :TLSv1_2
       assert_handshake_error { server_connect(port, ctx) }
     }
-  end if defined?(OpenSSL::SSL::OP_NO_TLSv1_2)
+  end
 
   def test_forbid_tls_v1_2_from_server
     start_server_version(:TLSv1_2) { |server, port|
@@ -879,7 +875,7 @@ if OpenSSL::SSL::SSLContext::METHODS.include? :TLSv1_2
       ctx.options = OpenSSL::SSL::OP_ALL | OpenSSL::SSL::OP_NO_TLSv1_2
       assert_handshake_error { server_connect(port, ctx) }
     }
-  end if defined?(OpenSSL::SSL::OP_NO_TLSv1_2)
+  end
 
 end
 
@@ -942,8 +938,7 @@ if OpenSSL::OPENSSL_VERSION_NUMBER >= 0x10002000
   end
 end
 
-if OpenSSL::OPENSSL_VERSION_NUMBER > 0x10001000 &&
-	OpenSSL::SSL::SSLContext.method_defined?(:npn_select_cb)
+if OpenSSL::SSL::SSLContext.method_defined?(:npn_select_cb)
   # NPN may be disabled by OpenSSL configure option
 
   def test_npn_protocol_selection_ary
@@ -1295,6 +1290,4 @@ end
       yield
     }
   end
-end
-
 end

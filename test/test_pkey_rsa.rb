@@ -2,8 +2,6 @@
 require_relative 'utils'
 require 'base64'
 
-if defined?(OpenSSL::TestUtils)
-
 class OpenSSL::TestPKeyRSA < OpenSSL::PKeyTestCase
   RSA1024 = OpenSSL::TestUtils::TEST_KEY_RSA1024
 
@@ -254,6 +252,4 @@ class OpenSSL::TestPKeyRSA < OpenSSL::PKeyTestCase
   def assert_same_rsa(expected, key)
     check_component(expected, key, [:n, :e, :d, :p, :q, :dmp1, :dmq1, :iqmp])
   end
-end
-
 end

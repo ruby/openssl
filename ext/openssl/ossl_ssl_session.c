@@ -93,8 +93,8 @@ ossl_ssl_session_initialize_copy(VALUE self, VALUE other)
     return self;
 }
 
-#if !defined(HAVE_SSL_SESSION_CMP)
-int ossl_SSL_SESSION_cmp(const SSL_SESSION *a, const SSL_SESSION *b)
+static int
+ossl_SSL_SESSION_cmp(const SSL_SESSION *a, const SSL_SESSION *b)
 {
     unsigned int a_len;
     const unsigned char *a_sid = SSL_SESSION_get_id(a, &a_len);
@@ -108,8 +108,6 @@ int ossl_SSL_SESSION_cmp(const SSL_SESSION *a, const SSL_SESSION *b)
 
     return CRYPTO_memcmp(a_sid, b_sid, a_len);
 }
-#define SSL_SESSION_cmp(a, b) ossl_SSL_SESSION_cmp(a, b)
-#endif
 
 /*
  * call-seq:
@@ -124,7 +122,7 @@ static VALUE ossl_ssl_session_eq(VALUE val1, VALUE val2)
 	GetSSLSession(val1, ctx1);
 	SafeGetSSLSession(val2, ctx2);
 
-	switch (SSL_SESSION_cmp(ctx1, ctx2)) {
+	switch (ossl_SSL_SESSION_cmp(ctx1, ctx2)) {
 	case 0:		return Qtrue;
 	default:	return Qfalse;
 	}

@@ -1,8 +1,6 @@
 # frozen_string_literal: false
 require_relative 'utils'
 
-if defined?(OpenSSL::TestUtils)
-
 class OpenSSL::TestPKCS7 < OpenSSL::TestCase
   def setup
     super
@@ -284,6 +282,4 @@ END
     p7enc = OpenSSL::PKCS7.new(pki_msg.data)
     assert_equal(pki_message_content_pem, p7enc.to_pem)
   end
-end
-
 end

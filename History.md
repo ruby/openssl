@@ -4,10 +4,12 @@ Version 2.1.0
 Compatibility notes
 -------------------
 
+* Support for OpenSSL version 0.9.8 and 1.0.0 is completely removed.
+
 Supported platforms
 -------------------
 
-* OpenSSL 0.9.8, 1.0.0, 1.0.1, 1.0.2, 1.1.0
+* OpenSSL 1.0.1, 1.0.2, 1.1.0
 * LibreSSL 2.3, 2.4, 2.5
 * Ruby 2.3, 2.4
 

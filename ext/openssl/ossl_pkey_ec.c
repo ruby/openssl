@@ -4,7 +4,7 @@
 
 #include "ossl.h"
 
-#if !defined(OPENSSL_NO_EC) && (OPENSSL_VERSION_NUMBER >= 0x0090802fL)
+#if !defined(OPENSSL_NO_EC)
 
 #define EXPORT_PEM 0
 #define EXPORT_DER 1

@@ -1,8 +1,6 @@
 # frozen_string_literal: false
 require_relative 'utils'
 
-if defined?(OpenSSL::TestUtils)
-
 class OpenSSL::TestBN < OpenSSL::TestCase
   def test_new_str
     e1 = OpenSSL::BN.new(999.to_s(16), 16) # OpenSSL::BN.new(str, 16) must be most stable
@@ -56,6 +54,4 @@ class OpenSSL::TestBN < OpenSSL::TestCase
     assert_equal(bn1.hash, bn2.hash)
     assert_not_equal(bn3.hash, bn1.hash)
   end
-end
-
 end

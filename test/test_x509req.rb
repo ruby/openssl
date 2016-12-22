@@ -1,8 +1,6 @@
 # frozen_string_literal: false
 require_relative "utils"
 
-if defined?(OpenSSL::TestUtils)
-
 class OpenSSL::TestX509Request < OpenSSL::TestCase
   def setup
     super
@@ -28,7 +26,7 @@ class OpenSSL::TestX509Request < OpenSSL::TestCase
     req = OpenSSL::X509::Request.new(req.to_der)
     assert_equal(@rsa1024.public_key.to_der, req.public_key.to_der)
 
-    req = issue_csr(0, @dn, @dsa512, OpenSSL::TestUtils::DSA_SIGNATURE_DIGEST.new)
+    req = issue_csr(0, @dn, @dsa512, OpenSSL::Digest::SHA1.new)
     assert_equal(@dsa512.public_key.to_der, req.public_key.to_der)
     req = OpenSSL::X509::Request.new(req.to_der)
     assert_equal(@dsa512.public_key.to_der, req.public_key.to_der)
@@ -122,7 +120,7 @@ class OpenSSL::TestX509Request < OpenSSL::TestCase
   end
 
   def test_sign_and_verify_dsa
-    req = issue_csr(0, @dn, @dsa512, OpenSSL::TestUtils::DSA_SIGNATURE_DIGEST.new)
+    req = issue_csr(0, @dn, @dsa512, OpenSSL::Digest::SHA1.new)
     assert_equal(false, request_error_returns_false { req.verify(@rsa1024) })
     assert_equal(false, request_error_returns_false { req.verify(@rsa2048) })
     assert_equal(false, req.verify(@dsa256))
@@ -130,18 +128,6 @@ class OpenSSL::TestX509Request < OpenSSL::TestCase
     req.public_key = @rsa1024.public_key
     assert_equal(false, req.verify(@dsa512))
   end
-
-  def test_sign_and_verify_rsa_dss1
-    req = issue_csr(0, @dn, @rsa1024, OpenSSL::Digest::DSS1.new)
-    assert_equal(true,  req.verify(@rsa1024))
-    assert_equal(false, req.verify(@rsa2048))
-    assert_equal(false, request_error_returns_false { req.verify(@dsa256) })
-    assert_equal(false, request_error_returns_false { req.verify(@dsa512) })
-    req.version = 1
-    assert_equal(false, req.verify(@rsa1024))
-  rescue OpenSSL::X509::RequestError
-    pend
-  end if defined?(OpenSSL::Digest::DSS1)
 
   def test_sign_and_verify_dsa_md5
     assert_raise(OpenSSL::X509::RequestError){
@@ -160,6 +146,4 @@ class OpenSSL::TestX509Request < OpenSSL::TestCase
   rescue OpenSSL::X509::RequestError
     false
   end
-end
-
 end

@@ -92,7 +92,7 @@ pkey_new0(EVP_PKEY *pkey)
     case EVP_PKEY_DH:
 	return ossl_dh_new(pkey);
 #endif
-#if !defined(OPENSSL_NO_EC) && (OPENSSL_VERSION_NUMBER >= 0x0090802fL)
+#if !defined(OPENSSL_NO_EC)
     case EVP_PKEY_EC:
 	return ossl_ec_new(pkey);
 #endif

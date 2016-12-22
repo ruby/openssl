@@ -1,7 +1,7 @@
 # frozen_string_literal: false
 require_relative 'utils'
 
-if defined?(OpenSSL::TestUtils) && defined?(OpenSSL::PKey::EC)
+if defined?(OpenSSL::PKey::EC)
 
 class OpenSSL::TestEC < OpenSSL::PKeyTestCase
   P256 = OpenSSL::TestUtils::TEST_KEY_EC_P256V1
@@ -100,16 +100,9 @@ class OpenSSL::TestEC < OpenSSL::PKeyTestCase
     key = OpenSSL::PKey::EC.new("prime256v1").generate_key!
     size = key.group.order.num_bits / 8 + 1
     dgst = (1..size).to_a.pack('C*')
-    begin
-      sig = key.dsa_sign_asn1(dgst)
-      # dgst is auto-truncated according to FIPS186-3 after openssl-0.9.8m
-      assert(key.dsa_verify_asn1(dgst + "garbage", sig))
-    rescue OpenSSL::PKey::ECError => e
-      # just an exception for longer dgst before openssl-0.9.8m
-      assert_equal('ECDSA_sign: data too large for key size', e.message)
-      # no need to do following tests
-      return
-    end
+    sig = key.dsa_sign_asn1(dgst)
+    # dgst is auto-truncated according to FIPS186-3 after openssl-0.9.8m
+    assert(key.dsa_verify_asn1(dgst + "garbage", sig))
   end
 
   def test_dh_compute_key
