@@ -377,6 +377,21 @@ BIGNUM_BOOL1(is_one)
  */
 BIGNUM_BOOL1(is_odd)
 
+/*
+ * call-seq:
+ *   bn.negative? => true | false
+ */
+static VALUE
+ossl_bn_is_negative(VALUE self)
+{
+    BIGNUM *bn;
+
+    GetBN(self, bn);
+    if (BN_is_zero(bn))
+	return Qfalse;
+    return BN_is_negative(bn) ? Qtrue : Qfalse;
+}
+
 #define BIGNUM_1c(func)					\
     static VALUE					\
     ossl_bn_##func(VALUE self)				\
@@ -856,6 +871,37 @@ ossl_bn_copy(VALUE self, VALUE other)
     return self;
 }
 
+/*
+ * call-seq:
+ *   +bn -> aBN
+ */
+static VALUE
+ossl_bn_uplus(VALUE self)
+{
+    return self;
+}
+
+/*
+ * call-seq:
+ *   -bn -> aBN
+ */
+static VALUE
+ossl_bn_uminus(VALUE self)
+{
+    VALUE obj;
+    BIGNUM *bn1, *bn2;
+
+    GetBN(self, bn1);
+    obj = NewBN(cBN);
+    bn2 = BN_dup(bn1);
+    if (!bn2)
+	ossl_raise(eBNError, "BN_dup");
+    SetBN(obj, bn2);
+    BN_set_negative(bn2, !BN_is_negative(bn2));
+
+    return obj;
+}
+
 #define BIGNUM_CMP(func)				\
     static VALUE					\
     ossl_bn_##func(VALUE self, VALUE other)		\
@@ -1068,6 +1114,9 @@ Init_ossl_bn(void)
     rb_define_method(cBN, "num_bits", ossl_bn_num_bits, 0);
     /* num_bits_word */
 
+    rb_define_method(cBN, "+@", ossl_bn_uplus, 0);
+    rb_define_method(cBN, "-@", ossl_bn_uminus, 0);
+
     rb_define_method(cBN, "+", ossl_bn_add, 1);
     rb_define_method(cBN, "-", ossl_bn_sub, 1);
     rb_define_method(cBN, "*", ossl_bn_mul, 1);
@@ -1101,6 +1150,7 @@ Init_ossl_bn(void)
     rb_define_method(cBN, "one?", ossl_bn_is_one, 0);
     /* is_word */
     rb_define_method(cBN, "odd?", ossl_bn_is_odd, 0);
+    rb_define_method(cBN, "negative?", ossl_bn_is_negative, 0);
 
     /* zero
      * one
