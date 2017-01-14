@@ -339,10 +339,8 @@ class  OpenSSL::TestASN1 < OpenSSL::TestCase
       OpenSSL::ASN1::Sequence.new([]),
       OpenSSL::ASN1::OctetString.new(B(%w{ 00 }))
     ])
-    expected = OpenSSL::ASN1::Sequence.new([
-      OpenSSL::ASN1::OctetString.new(B(%w{ 00 })),
-      OpenSSL::ASN1::EndOfContent.new
-    ])
+
+    expected = OpenSSL::ASN1::Sequence.new([OpenSSL::ASN1::OctetString.new(B(%w{ 00 }))])
     expected.indefinite_length = true
     encode_decode_test B(%w{ 30 80 04 01 00 00 00 }), expected
 
@@ -354,6 +352,14 @@ class  OpenSSL::TestASN1 < OpenSSL::TestCase
     ])
     obj.indefinite_length = true
     assert_raise(OpenSSL::ASN1::ASN1Error) { obj.to_der }
+
+    # The last EOC in value is ignored if indefinite length form is used
+    expected = OpenSSL::ASN1::Sequence.new([
+      OpenSSL::ASN1::OctetString.new(B(%w{ 00 })),
+      OpenSSL::ASN1::EndOfContent.new
+    ])
+    expected.indefinite_length = true
+    encode_test B(%w{ 30 80 04 01 00 00 00 }), expected
   end
 
   def test_set
@@ -363,10 +369,7 @@ class  OpenSSL::TestASN1 < OpenSSL::TestCase
       OpenSSL::ASN1::Sequence.new([]),
       OpenSSL::ASN1::OctetString.new(B(%w{ 00 }))
     ])
-    expected = OpenSSL::ASN1::Set.new([
-      OpenSSL::ASN1::OctetString.new(B(%w{ 00 })),
-      OpenSSL::ASN1::EndOfContent.new
-    ])
+    expected = OpenSSL::ASN1::Set.new([OpenSSL::ASN1::OctetString.new(B(%w{ 00 }))])
     expected.indefinite_length = true
     encode_decode_test B(%w{ 31 80 04 01 00 00 00 }), expected
   end
@@ -431,12 +434,15 @@ class  OpenSSL::TestASN1 < OpenSSL::TestCase
     encode_decode_test B(%w{ 41 81 80 } + %w{ AB CD } * 64), OpenSSL::ASN1::ASN1Data.new(B(%w{ AB CD } * 64), 1, :APPLICATION)
     encode_decode_test B(%w{ 41 82 01 00 } + %w{ AB CD } * 128), OpenSSL::ASN1::ASN1Data.new(B(%w{ AB CD } * 128), 1, :APPLICATION)
     encode_decode_test B(%w{ 61 00 }), OpenSSL::ASN1::ASN1Data.new([], 1, :APPLICATION)
+    obj = OpenSSL::ASN1::ASN1Data.new([OpenSSL::ASN1::ASN1Data.new(B(%w{ AB CD }), 2, :PRIVATE)], 1, :APPLICATION)
+    obj.indefinite_length = true
+    encode_decode_test B(%w{ 61 80 C2 02 AB CD 00 00 }), obj
     obj = OpenSSL::ASN1::ASN1Data.new([
       OpenSSL::ASN1::ASN1Data.new(B(%w{ AB CD }), 2, :PRIVATE),
       OpenSSL::ASN1::EndOfContent.new
     ], 1, :APPLICATION)
     obj.indefinite_length = true
-    encode_decode_test B(%w{ 61 80 C2 02 AB CD 00 00 }), obj
+    encode_test B(%w{ 61 80 C2 02 AB CD 00 00 }), obj
     obj = OpenSSL::ASN1::ASN1Data.new(B(%w{ AB CD }), 1, :UNIVERSAL)
     obj.indefinite_length = true
     assert_raise(OpenSSL::ASN1::ASN1Error) { obj.to_der }
@@ -460,12 +466,12 @@ class  OpenSSL::TestASN1 < OpenSSL::TestCase
     encode_test B(%w{ 21 00 }), OpenSSL::ASN1::Constructive.new([], 1, nil, :UNIVERSAL)
     encode_test B(%w{ A1 00 }), OpenSSL::ASN1::Constructive.new([], 1, nil, :CONTEXT_SPECIFIC)
     encode_test B(%w{ 21 04 04 02 AB CD }), OpenSSL::ASN1::Constructive.new([octet_string], 1)
-    obj = OpenSSL::ASN1::Constructive.new([
-      octet_string,
-      OpenSSL::ASN1::EndOfContent.new
-    ], 1)
+    obj = OpenSSL::ASN1::Constructive.new([octet_string], 1)
     obj.indefinite_length = true
     encode_decode_test B(%w{ 21 80 04 02 AB CD 00 00 }), obj
+    obj = OpenSSL::ASN1::Constructive.new([octet_string, OpenSSL::ASN1::EndOfContent.new], 1)
+    obj.indefinite_length = true
+    encode_test B(%w{ 21 80 04 02 AB CD 00 00 }), obj
   end
 
   def test_prim_explicit_tagging
@@ -570,32 +576,26 @@ class  OpenSSL::TestASN1 < OpenSSL::TestCase
     assert_equal(OpenSSL::ASN1::Constructive, asn1.class)
     assert_universal(OpenSSL::ASN1::OCTET_STRING, asn1)
     assert_equal(true, asn1.indefinite_length)
-    assert_equal(4, asn1.value.size)
+    assert_equal(3, asn1.value.size)
     nested1 = asn1.value[0]
     assert_equal(OpenSSL::ASN1::Constructive, nested1.class)
     assert_universal(OpenSSL::ASN1::OCTET_STRING, nested1)
     assert_equal(true, nested1.indefinite_length)
-    assert_equal(2, nested1.value.size)
+    assert_equal(1, nested1.value.size)
     oct1 = nested1.value[0]
     assert_universal(OpenSSL::ASN1::OCTET_STRING, oct1)
     assert_equal(false, oct1.indefinite_length)
-    assert_universal(OpenSSL::ASN1::EOC, nested1.value[1])
-    assert_equal(false, nested1.value[1].indefinite_length)
     nested2 = asn1.value[1]
     assert_equal(OpenSSL::ASN1::Constructive, nested2.class)
     assert_universal(OpenSSL::ASN1::OCTET_STRING, nested2)
     assert_equal(true, nested2.indefinite_length)
-    assert_equal(2, nested2.value.size)
+    assert_equal(1, nested2.value.size)
     oct2 = nested2.value[0]
     assert_universal(OpenSSL::ASN1::OCTET_STRING, oct2)
     assert_equal(false, oct2.indefinite_length)
-    assert_universal(OpenSSL::ASN1::EOC, nested2.value[1])
-    assert_equal(false, nested2.value[1].indefinite_length)
     oct3 = asn1.value[2]
     assert_universal(OpenSSL::ASN1::OCTET_STRING, oct3)
     assert_equal(false, oct3.indefinite_length)
-    assert_universal(OpenSSL::ASN1::EOC, asn1.value[3])
-    assert_equal(false, asn1.value[3].indefinite_length)
   end
 
   def test_decode_constructed_overread

@@ -682,8 +682,10 @@ to_der_internal(VALUE self, int constructed, int indef_len, VALUE body)
 	ASN1_put_object(&p, encoding, body_length, default_tag_number, V_ASN1_UNIVERSAL);
 	memcpy(p, RSTRING_PTR(body), body_length);
 	p += body_length;
-	if (indef_len)
+	if (indef_len) {
+	    ASN1_put_eoc(&p); /* For inner object */
 	    ASN1_put_eoc(&p); /* For wrapper object */
+	}
     }
     else {
 	total_length = ASN1_object_size(encoding, body_length, tag_number);
@@ -692,8 +694,10 @@ to_der_internal(VALUE self, int constructed, int indef_len, VALUE body)
 	ASN1_put_object(&p, encoding, body_length, tag_number, tag_class);
 	memcpy(p, RSTRING_PTR(body), body_length);
 	p += body_length;
+	if (indef_len)
+	    ASN1_put_eoc(&p);
     }
-    ossl_str_adjust(str, p);
+    assert(p - (unsigned char *)RSTRING_PTR(str) == total_length);
     return str;
 }
 
@@ -815,13 +819,13 @@ int_ossl_asn1_decode0_cons(unsigned char **pp, long max_len, long length,
 	value = ossl_asn1_decode0(pp, available_len, &off, depth + 1, yield, &inner_read);
 	*num_read += inner_read;
 	available_len -= inner_read;
-	rb_ary_push(ary, value);
 
 	if (indefinite &&
 	    ossl_asn1_tag(value) == V_ASN1_EOC &&
 	    ossl_asn1_get_tag_class(value) == sym_UNIVERSAL) {
 	    break;
 	}
+	rb_ary_push(ary, value);
     }
 
     if (tc == sym_UNIVERSAL) {
@@ -1180,6 +1184,12 @@ ossl_asn1cons_to_der(VALUE self)
 	if (indef_len && rb_obj_is_kind_of(item, cASN1EndOfContent)) {
 	    if (i != RARRAY_LEN(ary) - 1)
 		ossl_raise(eASN1Error, "illegal EOC octets in value");
+
+	    /*
+	     * EOC is not really part of the content, but we required to add one
+	     * at the end in the past.
+	     */
+	    break;
 	}
 
 	item = ossl_to_der_if_possible(item);
