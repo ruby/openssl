@@ -271,6 +271,11 @@ class  OpenSSL::TestASN1 < OpenSSL::TestCase
     # assert_raise(OpenSSL::ASN1::ASN1Error) {
     #   OpenSSL::ASN1.decode(B(%w{ 03 01 04 }))
     # }
+    assert_raise(OpenSSL::ASN1::ASN1Error) {
+      obj = OpenSSL::ASN1::BitString.new(B(%w{ FF FF }))
+      obj.unused_bits = 8
+      obj.to_der
+    }
   end
 
   def test_string_basic

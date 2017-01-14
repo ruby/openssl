@@ -204,13 +204,15 @@ obj_to_asn1bstr(VALUE obj, long unused_bits)
 {
     ASN1_BIT_STRING *bstr;
 
-    if(unused_bits < 0) unused_bits = 0;
+    if (unused_bits < 0 || unused_bits > 7)
+	ossl_raise(eASN1Error, "unused_bits for a bitstring value must be in "\
+		   "the range 0 to 7");
     StringValue(obj);
     if(!(bstr = ASN1_BIT_STRING_new()))
 	ossl_raise(eASN1Error, NULL);
     ASN1_BIT_STRING_set(bstr, (unsigned char *)RSTRING_PTR(obj), RSTRING_LENINT(obj));
     bstr->flags &= ~(ASN1_STRING_FLAG_BITS_LEFT|0x07); /* clear */
-    bstr->flags |= ASN1_STRING_FLAG_BITS_LEFT|(unused_bits&0x07);
+    bstr->flags |= ASN1_STRING_FLAG_BITS_LEFT | unused_bits;
 
     return bstr;
 }
@@ -498,7 +500,7 @@ ossl_asn1_get_asn1type(VALUE obj)
     VALUE value, rflag;
     void *ptr;
     void (*free_func)();
-    int tag, flag;
+    int tag;
 
     tag = ossl_asn1_default_tag(obj);
     value = ossl_asn1_get_value(obj);
@@ -514,8 +516,7 @@ ossl_asn1_get_asn1type(VALUE obj)
 	break;
     case V_ASN1_BIT_STRING:
         rflag = rb_attr_get(obj, sivUNUSED_BITS);
-        flag = NIL_P(rflag) ? -1 : NUM2INT(rflag);
-	ptr = obj_to_asn1bstr(value, flag);
+	ptr = obj_to_asn1bstr(value, NUM2INT(rflag));
 	free_func = ASN1_BIT_STRING_free;
 	break;
     case V_ASN1_NULL:
