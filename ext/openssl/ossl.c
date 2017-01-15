@@ -426,6 +426,72 @@ ossl_fips_mode_set(VALUE self, VALUE enabled)
 #endif
 }
 
+#if defined(OSSL_DEBUG)
+#if !defined(LIBRESSL_VERSION_NUMBER) && \
+    (OPENSSL_VERSION_NUMBER >= 0x10100000 && !defined(OPENSSL_NO_CRYPTO_MDEBUG) || \
+     defined(CRYPTO_malloc_debug_init))
+/*
+ * call-seq:
+ *   OpenSSL.mem_check_start -> nil
+ *
+ * Calls CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_ON). Starts tracking memory
+ * allocations. See also OpenSSL.print_mem_leaks.
+ *
+ * This is available only when built with a capable OpenSSL and --enable-debug
+ * configure option.
+ */
+static VALUE
+mem_check_start(VALUE self)
+{
+	CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_ON);
+	return Qnil;
+}
+
+/*
+ * call-seq:
+ *   OpenSSL.print_mem_leaks -> true | false
+ *
+ * For debugging the Ruby/OpenSSL library. Calls CRYPTO_mem_leaks_fp(stderr).
+ * Prints detected memory leaks to standard error. This cleans the global state
+ * up thus you cannot use any methods of the library after calling this.
+ *
+ * Returns true if leaks detected, false otherwise.
+ *
+ * This is available only when built with a capable OpenSSL and --enable-debug
+ * configure option.
+ *
+ * === Example
+ *   OpenSSL.mem_check_start
+ *   NOT_GCED = OpenSSL::PKey::RSA.new(256)
+ *
+ *   END {
+ *     GC.start
+ *     OpenSSL.print_mem_leaks # will print the leakage
+ *   }
+ */
+static VALUE
+print_mem_leaks(VALUE self)
+{
+#if OPENSSL_VERSION_NUMBER >= 0x10100000
+    int ret;
+#endif
+
+    BN_CTX_free(ossl_bn_ctx);
+    ossl_bn_ctx = NULL;
+
+#if OPENSSL_VERSION_NUMBER >= 0x10100000
+    ret = CRYPTO_mem_leaks_fp(stderr);
+    if (ret < 0)
+	ossl_raise(eOSSLError, "CRYPTO_mem_leaks_fp");
+    return ret ? Qfalse : Qtrue;
+#else
+    CRYPTO_mem_leaks_fp(stderr);
+    return Qnil;
+#endif
+}
+#endif
+#endif
+
 #if !defined(HAVE_OPENSSL_110_THREADING_API)
 /**
  * Stores locks needed for OpenSSL thread safety
@@ -1114,4 +1180,40 @@ Init_openssl(void)
     Init_ossl_ocsp();
     Init_ossl_engine();
     Init_ossl_asn1();
+
+#if defined(OSSL_DEBUG)
+    /*
+     * For debugging Ruby/OpenSSL. Enable only when built with --enable-debug
+     */
+#if !defined(LIBRESSL_VERSION_NUMBER) && \
+    (OPENSSL_VERSION_NUMBER >= 0x10100000 && !defined(OPENSSL_NO_CRYPTO_MDEBUG) || \
+     defined(CRYPTO_malloc_debug_init))
+    rb_define_module_function(mOSSL, "mem_check_start", mem_check_start, 0);
+    rb_define_module_function(mOSSL, "print_mem_leaks", print_mem_leaks, 0);
+
+#if defined(CRYPTO_malloc_debug_init) /* <= 1.0.2 */
+    CRYPTO_malloc_debug_init();
+#endif
+
+#if defined(V_CRYPTO_MDEBUG_ALL) /* <= 1.0.2 */
+    CRYPTO_set_mem_debug_options(V_CRYPTO_MDEBUG_ALL);
+#endif
+
+#if OPENSSL_VERSION_NUMBER < 0x10100000 /* <= 1.0.2 */
+    {
+	int i;
+	/*
+	 * See crypto/ex_data.c; call def_get_class() immediately to avoid
+	 * allocations. 15 is the maximum number that is used as the class index
+	 * in OpenSSL 1.0.2.
+	 */
+	for (i = 0; i <= 15; i++) {
+	    if (CRYPTO_get_ex_new_index(i, 0, (void *)"ossl-mdebug-dummy", 0, 0, 0) < 0)
+		rb_raise(rb_eRuntimeError, "CRYPTO_get_ex_new_index for "
+			 "class index %d failed", i);
+	}
+    }
+#endif
+#endif
+#endif
 }
