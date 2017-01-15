@@ -1115,14 +1115,3 @@ Init_openssl(void)
     Init_ossl_engine();
     Init_ossl_asn1();
 }
-
-#if defined(OSSL_DEBUG)
-/*
- * Check if all symbols are OK with 'make LDSHARED=gcc all'
- */
-int
-main(int argc, char *argv[])
-{
-    return 0;
-}
-#endif /* OSSL_DEBUG */
