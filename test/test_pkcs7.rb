@@ -4,8 +4,8 @@ require_relative 'utils'
 class OpenSSL::TestPKCS7 < OpenSSL::TestCase
   def setup
     super
-    @rsa1024 = OpenSSL::TestUtils::TEST_KEY_RSA1024
-    @rsa2048 = OpenSSL::TestUtils::TEST_KEY_RSA2048
+    @rsa1024 = Fixtures.pkey("rsa1024")
+    @rsa2048 = Fixtures.pkey("rsa2048")
     ca = OpenSSL::X509::Name.parse("/DC=org/DC=ruby-lang/CN=CA")
     ee1 = OpenSSL::X509::Name.parse("/DC=org/DC=ruby-lang/CN=EE1")
     ee2 = OpenSSL::X509::Name.parse("/DC=org/DC=ruby-lang/CN=EE2")

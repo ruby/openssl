@@ -11,7 +11,7 @@ module OpenSSL::SSLPairM
     ctx = OpenSSL::SSL::SSLContext.new()
     ctx.ciphers = "ADH"
     ctx.security_level = 0
-    ctx.tmp_dh_callback = proc { OpenSSL::TestUtils::TEST_KEY_DH1024 }
+    ctx.tmp_dh_callback = proc { OpenSSL::TestUtils::Fixtures.pkey_dh("dh1024") }
     tcps = create_tcp_server(host, port)
     ssls = OpenSSL::SSL::SSLServer.new(tcps, ctx)
     return ssls
@@ -354,7 +354,7 @@ module OpenSSL::TestPairM
     ctx2 = OpenSSL::SSL::SSLContext.new
     ctx2.ciphers = "ADH"
     ctx2.security_level = 0
-    ctx2.tmp_dh_callback = proc { OpenSSL::TestUtils::TEST_KEY_DH1024 }
+    ctx2.tmp_dh_callback = proc { OpenSSL::TestUtils::Fixtures.pkey_dh("dh1024") }
 
     sock1, sock2 = tcp_pair
 
@@ -404,7 +404,7 @@ module OpenSSL::TestPairM
     ctx = OpenSSL::SSL::SSLContext.new()
     ctx.ciphers = "ADH"
     ctx.security_level = 0
-    ctx.tmp_dh_callback = proc { OpenSSL::TestUtils::TEST_KEY_DH1024 }
+    ctx.tmp_dh_callback = proc { OpenSSL::TestUtils::Fixtures.pkey_dh("dh1024") }
 
     sock1, sock2 = tcp_pair
 
