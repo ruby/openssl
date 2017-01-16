@@ -7,9 +7,9 @@ install:
   - 7z x -y -oC:\Ruby%ruby_version% openssl-1.0.1m-x64-windows.tar
   - ruby -S rake install_dependencies
 build_script:
-  - rake -rdevkit compile -- --with-openssl-dir=C:\Ruby%ruby_version%
+  - rake -rdevkit compile -- --with-openssl-dir=C:\Ruby%ruby_version% --enable-debug
 test_script:
-  - rake test
+  - rake test OSSL_MDEBUG=1
 deploy: off
 environment:
   matrix:
