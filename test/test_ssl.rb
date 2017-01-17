@@ -625,7 +625,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   def test_tlsext_hostname
     ctx3 = OpenSSL::SSL::SSLContext.new
     ctx3.ciphers = "ADH"
-    ctx3.tmp_dh_callback = proc { OpenSSL::TestUtils::TEST_KEY_DH1024 }
+    ctx3.tmp_dh_callback = proc { Fixtures.pkey_dh("dh1024") }
     ctx3.security_level = 0
     assert_not_predicate ctx3, :frozen?
 
@@ -675,7 +675,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
 
     ctx2 = OpenSSL::SSL::SSLContext.new
     ctx2.ciphers = "aNULL"
-    ctx2.tmp_dh_callback = proc { OpenSSL::TestUtils::TEST_KEY_DH1024 }
+    ctx2.tmp_dh_callback = proc { Fixtures.pkey_dh("dh1024") }
     ctx2.security_level = 0
     ctx2.servername_cb = lambda { |args| Object.new }
 
@@ -1051,7 +1051,7 @@ end
     # test it doesn't cause a segmentation fault
     ctx = OpenSSL::SSL::SSLContext.new
     ctx.ciphers = "aNULL"
-    ctx.tmp_dh_callback = proc { OpenSSL::TestUtils::TEST_KEY_DH1024 }
+    ctx.tmp_dh_callback = proc { Fixtures.pkey_dh("dh1024") }
     ctx.security_level = 0
 
     sock1, sock2 = socketpair
@@ -1106,14 +1106,14 @@ end
       ctx.ciphers = "DH:!NULL"
       ctx.tmp_dh_callback = ->(*args) {
         called = true
-        OpenSSL::TestUtils::TEST_KEY_DH1024
+        Fixtures.pkey_dh("dh1024")
       }
     }
     start_server(ctx_proc: ctx_proc) do |server, port|
       server_connect(port) { |ssl|
         assert called, "dh callback should be called"
         if ssl.respond_to?(:tmp_key)
-          assert_equal OpenSSL::TestUtils::TEST_KEY_DH1024.to_der, ssl.tmp_key.to_der
+          assert_equal Fixtures.pkey_dh("dh1024").to_der, ssl.tmp_key.to_der
         end
       }
     end
@@ -1226,10 +1226,10 @@ end
       return
     end
     assert_equal(1, ctx.security_level)
-    # assert_raise(OpenSSL::SSL::SSLError) { ctx.key = OpenSSL::TestUtils::TEST_KEY_DSA512 }
-    # ctx.key = OpenSSL::TestUtils::TEST_KEY_RSA1024
+    # assert_raise(OpenSSL::SSL::SSLError) { ctx.key = Fixtures.pkey("dsa512") }
+    # ctx.key = Fixtures.pkey("rsa1024")
     # ctx.security_level = 2
-    # assert_raise(OpenSSL::SSL::SSLError) { ctx.key = OpenSSL::TestUtils::TEST_KEY_RSA1024 }
+    # assert_raise(OpenSSL::SSL::SSLError) { ctx.key = Fixtures.pkey("rsa1024") }
     pend "FIXME: SSLContext#key= currently does not raise because SSL_CTX_use_certificate() is delayed"
   end
 

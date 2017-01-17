@@ -6,10 +6,10 @@ if defined?(OpenSSL::TestUtils)
 class OpenSSL::TestX509Store < OpenSSL::TestCase
   def setup
     super
-    @rsa1024 = OpenSSL::TestUtils::TEST_KEY_RSA1024
-    @rsa2048 = OpenSSL::TestUtils::TEST_KEY_RSA2048
-    @dsa256  = OpenSSL::TestUtils::TEST_KEY_DSA256
-    @dsa512  = OpenSSL::TestUtils::TEST_KEY_DSA512
+    @rsa1024 = Fixtures.pkey("rsa1024")
+    @rsa2048 = Fixtures.pkey("rsa2048")
+    @dsa256  = Fixtures.pkey("dsa256")
+    @dsa512  = Fixtures.pkey("dsa512")
     @ca1 = OpenSSL::X509::Name.parse("/DC=org/DC=ruby-lang/CN=CA1")
     @ca2 = OpenSSL::X509::Name.parse("/DC=org/DC=ruby-lang/CN=CA2")
     @ee1 = OpenSSL::X509::Name.parse("/DC=org/DC=ruby-lang/CN=EE1")
@@ -24,14 +24,6 @@ class OpenSSL::TestX509Store < OpenSSL::TestCase
       ctx.cleanup
     end
     ctx.verify
-  end
-
-  def issue_cert(*args)
-    OpenSSL::TestUtils.issue_cert(*args)
-  end
-
-  def issue_crl(*args)
-    OpenSSL::TestUtils.issue_crl(*args)
   end
 
   def test_add_file

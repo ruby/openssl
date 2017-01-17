@@ -9,6 +9,26 @@ begin
 rescue LoadError
 end
 
+# Compile OpenSSL with crypto-mdebug and run this test suite with OSSL_MDEBUG=1
+# environment variable to enable memory leak check.
+if ENV["OSSL_MDEBUG"] == "1"
+  if OpenSSL.respond_to?(:print_mem_leaks)
+    OpenSSL.mem_check_start
+
+    END {
+      GC.start
+      case OpenSSL.print_mem_leaks
+      when nil
+        warn "mdebug: check what is printed"
+      when true
+        raise "mdebug: memory leaks detected"
+      end
+    }
+  else
+    warn "OSSL_MDEBUG=1 is specified but OpenSSL is not built with crypto-mdebug"
+  end
+end
+
 require "test/unit"
 require 'tempfile'
 require "rbconfig"
@@ -16,113 +36,24 @@ require "socket"
 require "envutil"
 
 module OpenSSL::TestUtils
-  TEST_KEY_RSA1024 = OpenSSL::PKey::RSA.new <<-_end_of_pem_
------BEGIN RSA PRIVATE KEY-----
-MIICXgIBAAKBgQDLwsSw1ECnPtT+PkOgHhcGA71nwC2/nL85VBGnRqDxOqjVh7Cx
-aKPERYHsk4BPCkE3brtThPWc9kjHEQQ7uf9Y1rbCz0layNqHyywQEVLFmp1cpIt/
-Q3geLv8ZD9pihowKJDyMDiN6ArYUmZczvW4976MU3+l54E6lF/JfFEU5hwIDAQAB
-AoGBAKSl/MQarye1yOysqX6P8fDFQt68VvtXkNmlSiKOGuzyho0M+UVSFcs6k1L0
-maDE25AMZUiGzuWHyaU55d7RXDgeskDMakD1v6ZejYtxJkSXbETOTLDwUWTn618T
-gnb17tU1jktUtU67xK/08i/XodlgnQhs6VoHTuCh3Hu77O6RAkEA7+gxqBuZR572
-74/akiW/SuXm0SXPEviyO1MuSRwtI87B02D0qgV8D1UHRm4AhMnJ8MCs1809kMQE
-JiQUCrp9mQJBANlt2ngBO14us6NnhuAseFDTBzCHXwUUu1YKHpMMmxpnGqaldGgX
-sOZB3lgJsT9VlGf3YGYdkLTNVbogQKlKpB8CQQDiSwkb4vyQfDe8/NpU5Not0fII
-8jsDUCb+opWUTMmfbxWRR3FBNu8wnym/m19N4fFj8LqYzHX4KY0oVPu6qvJxAkEA
-wa5snNekFcqONLIE4G5cosrIrb74sqL8GbGb+KuTAprzj5z1K8Bm0UW9lTjVDjDi
-qRYgZfZSL+x1P/54+xTFSwJAY1FxA/N3QPCXCjPh5YqFxAMQs2VVYTfg+t0MEcJD
-dPMQD5JX6g5HKnHFg2mZtoXQrWmJSn7p8GJK8yNTopEErA==
------END RSA PRIVATE KEY-----
-  _end_of_pem_
+  module Fixtures
+    module_function
 
-  TEST_KEY_RSA2048 = OpenSSL::PKey::RSA.new <<-_end_of_pem_
------BEGIN RSA PRIVATE KEY-----
-MIIEpAIBAAKCAQEAuV9ht9J7k4NBs38jOXvvTKY9gW8nLICSno5EETR1cuF7i4pN
-s9I1QJGAFAX0BEO4KbzXmuOvfCpD3CU+Slp1enenfzq/t/e/1IRW0wkJUJUFQign
-4CtrkJL+P07yx18UjyPlBXb81ApEmAB5mrJVSrWmqbjs07JbuS4QQGGXLc+Su96D
-kYKmSNVjBiLxVVSpyZfAY3hD37d60uG+X8xdW5v68JkRFIhdGlb6JL8fllf/A/bl
-NwdJOhVr9mESHhwGjwfSeTDPfd8ZLE027E5lyAVX9KZYcU00mOX+fdxOSnGqS/8J
-DRh0EPHDL15RcJjV2J6vZjPb0rOYGDoMcH+94wIDAQABAoIBAAzsamqfYQAqwXTb
-I0CJtGg6msUgU7HVkOM+9d3hM2L791oGHV6xBAdpXW2H8LgvZHJ8eOeSghR8+dgq
-PIqAffo4x1Oma+FOg3A0fb0evyiACyrOk+EcBdbBeLo/LcvahBtqnDfiUMQTpy6V
-seSoFCwuN91TSCeGIsDpRjbG1vxZgtx+uI+oH5+ytqJOmfCksRDCkMglGkzyfcl0
-Xc5CUhIJ0my53xijEUQl19rtWdMnNnnkdbG8PT3LZlOta5Do86BElzUYka0C6dUc
-VsBDQ0Nup0P6rEQgy7tephHoRlUGTYamsajGJaAo1F3IQVIrRSuagi7+YpSpCqsW
-wORqorkCgYEA7RdX6MDVrbw7LePnhyuaqTiMK+055/R1TqhB1JvvxJ1CXk2rDL6G
-0TLHQ7oGofd5LYiemg4ZVtWdJe43BPZlVgT6lvL/iGo8JnrncB9Da6L7nrq/+Rvj
-XGjf1qODCK+LmreZWEsaLPURIoR/Ewwxb9J2zd0CaMjeTwafJo1CZvcCgYEAyCgb
-aqoWvUecX8VvARfuA593Lsi50t4MEArnOXXcd1RnXoZWhbx5rgO8/ATKfXr0BK/n
-h2GF9PfKzHFm/4V6e82OL7gu/kLy2u9bXN74vOvWFL5NOrOKPM7Kg+9I131kNYOw
-Ivnr/VtHE5s0dY7JChYWE1F3vArrOw3T00a4CXUCgYEA0SqY+dS2LvIzW4cHCe9k
-IQqsT0yYm5TFsUEr4sA3xcPfe4cV8sZb9k/QEGYb1+SWWZ+AHPV3UW5fl8kTbSNb
-v4ng8i8rVVQ0ANbJO9e5CUrepein2MPL0AkOATR8M7t7dGGpvYV0cFk8ZrFx0oId
-U0PgYDotF/iueBWlbsOM430CgYEAqYI95dFyPI5/AiSkY5queeb8+mQH62sdcCCr
-vd/w/CZA/K5sbAo4SoTj8dLk4evU6HtIa0DOP63y071eaxvRpTNqLUOgmLh+D6gS
-Cc7TfLuFrD+WDBatBd5jZ+SoHccVrLR/4L8jeodo5FPW05A+9gnKXEXsTxY4LOUC
-9bS4e1kCgYAqVXZh63JsMwoaxCYmQ66eJojKa47VNrOeIZDZvd2BPVf30glBOT41
-gBoDG3WMPZoQj9pb7uMcrnvs4APj2FIhMU8U15LcPAj59cD6S6rWnAxO8NFK7HQG
-4Jxg3JNNf8ErQoCHb1B3oVdXJkmbJkARoDpBKmTCgKtP8ADYLmVPQw==
------END RSA PRIVATE KEY-----
-  _end_of_pem_
+    def pkey(name)
+      OpenSSL::PKey.read(read_file("pkey", name))
+    end
 
-  TEST_KEY_DSA256 = OpenSSL::PKey::DSA.new <<-_end_of_pem_
------BEGIN DSA PRIVATE KEY-----
-MIH3AgEAAkEAhk2libbY2a8y2Pt21+YPYGZeW6wzaW2yfj5oiClXro9XMR7XWLkE
-9B7XxLNFCS2gmCCdMsMW1HulaHtLFQmB2wIVAM43JZrcgpu6ajZ01VkLc93gu/Ed
-AkAOhujZrrKV5CzBKutKLb0GVyVWmdC7InoNSMZEeGU72rT96IjM59YzoqmD0pGM
-3I1o4cGqg1D1DfM1rQlnN1eSAkBq6xXfEDwJ1mLNxF6q8Zm/ugFYWR5xcX/3wFiT
-b4+EjHP/DbNh9Vm5wcfnDBJ1zKvrMEf2xqngYdrV/3CiGJeKAhRvL57QvJZcQGvn
-ISNX5cMzFHRW3Q==
------END DSA PRIVATE KEY-----
-  _end_of_pem_
+    def pkey_dh(name)
+      # DH parameters can be read by OpenSSL::PKey.read atm
+      OpenSSL::PKey::DH.new(read_file("pkey", name))
+    end
 
-  TEST_KEY_DSA512 = OpenSSL::PKey::DSA.new <<-_end_of_pem_
------BEGIN DSA PRIVATE KEY-----
-MIH4AgEAAkEA5lB4GvEwjrsMlGDqGsxrbqeFRh6o9OWt6FgTYiEEHaOYhkIxv0Ok
-RZPDNwOG997mDjBnvDJ1i56OmS3MbTnovwIVAJgub/aDrSDB4DZGH7UyarcaGy6D
-AkB9HdFw/3td8K4l1FZHv7TCZeJ3ZLb7dF3TWoGUP003RCqoji3/lHdKoVdTQNuR
-S/m6DlCwhjRjiQ/lBRgCLCcaAkEAjN891JBjzpMj4bWgsACmMggFf57DS0Ti+5++
-Q1VB8qkJN7rA7/2HrCR3gTsWNb1YhAsnFsoeRscC+LxXoXi9OAIUBG98h4tilg6S
-55jreJD3Se3slps=
------END DSA PRIVATE KEY-----
-  _end_of_pem_
-
-  TEST_KEY_DSA1024 = OpenSSL::PKey::DSA.new <<-_end_of_pem_
------BEGIN DSA PRIVATE KEY-----
-MIIBugIBAAKBgQCH9aAoXvWWThIjkA6D+nI1F9ksF9iDq594rkiGNOT9sPDOdB+n
-D+qeeeeloRlj19ymCSADPI0ZLRgkchkAEnY2RnqnhHOjVf/roGgRbW+iQDMbQ9wa
-/pvc6/fAbsu1goE1hBYjm98/sZEeXavj8tR56IXnjF1b6Nx0+sgeUKFKEQIVAMiz
-4BJUFeTtddyM4uadBM7HKLPRAoGAZdLBSYNGiij7vAjesF5mGUKTIgPd+JKuBEDx
-OaBclsgfdoyoF/TMOkIty+PVlYD+//Vl2xnoUEIRaMXHwHfm0r2xUX++oeRaSScg
-YizJdUxe5jvBuBszGPRc/mGpb9YvP0sB+FL1KmuxYmdODfCe51zl8uM/CVhouJ3w
-DjmRGscCgYAuFlfC7p+e8huCKydfcv/beftqjewiOPpQ3u5uI6KPCtCJPpDhs3+4
-IihH2cPsAlqwGF4tlibW1+/z/OZ1AZinPK3y7b2jSJASEaPeEltVzB92hcd1khk2
-jTYcmSsV4VddplOPK9czytR/GbbibxsrhhgZUbd8LPbvIgaiadJ1PgIUBnJ/5vN2
-CVArsEzlPUCbohPvZnE=
------END DSA PRIVATE KEY-----
-  _end_of_pem_
-
-if defined?(OpenSSL::PKey::EC)
-
-  TEST_KEY_EC_P256V1 = OpenSSL::PKey::EC.new <<-_end_of_pem_
------BEGIN EC PRIVATE KEY-----
-MHcCAQEEIID49FDqcf1O1eO8saTgG70UbXQw9Fqwseliit2aWhH1oAoGCCqGSM49
-AwEHoUQDQgAEFglk2c+oVUIKQ64eZG9bhLNPWB7lSZ/ArK41eGy5wAzU/0G51Xtt
-CeBUl+MahZtn9fO1JKdF4qJmS39dXnpENg==
------END EC PRIVATE KEY-----
-  _end_of_pem_
-
-end
-
-  TEST_KEY_DH1024 = OpenSSL::PKey::DH.new <<-_end_of_pem_
------BEGIN DH PARAMETERS-----
-MIGHAoGBAKnKQ8MNK6nYZzLrrcuTsLxuiJGXoOO5gT+tljOTbHBuiktdMTITzIY0
-pFxIvjG05D7HoBZQfrR0c92NGWPkAiCkhQKB8JCbPVzwNLDy6DZ0pmofDKrEsYHG
-AQjjxMXhwULlmuR/K+WwlaZPiLIBYalLAZQ7ZbOPeVkJ8ePao0eLAgEC
------END DH PARAMETERS-----
-  _end_of_pem_
-
-  TEST_KEY_DH1024.set_key(OpenSSL::BN.new("556AF1598AE69899867CEBA9F29CE4862B884C2B43C9019EA0231908F6EFA785E3C462A6ECB16DF676866E997FFB72B487DC7967C58C3CA38CE974473BF19B2AA5DCBF102735572EBA6F353F6F0BBE7FF1DE1B07FE1381A355C275C33405004317F9491B5955F191F6615A63B30E55A027FB88A1A4B25608E09EEE68A7DF32D", 16),
-                          OpenSSL::BN.new("48561834C67E65FFD2A9B47F41E5E78FDC95C387428FDB1E4B0188B64D1643C3A8D3455B945B7E8C4D166010C7C2CE23BFB9BEF43D0348FE7FA5284B0225E7FE1537546D114E3D8A4411B9B9351AB451E1A358F50ED61B1F00DA29336EEBBD649980AC86D76AF8BBB065298C2052672EEF3EF13AB47A15275FC2836F3AC74CEA", 16))
+    def read_file(category, name)
+      @file_cache ||= {}
+      @file_cache[[category, name]] ||=
+        File.read(File.join(__dir__, "fixtures", category, name + ".pem"))
+    end
+  end
 
   DSA_SIGNATURE_DIGEST = OpenSSL::OPENSSL_VERSION_NUMBER > 0x10000000 ?
                          OpenSSL::Digest::SHA1 :
@@ -201,6 +132,9 @@ AQjjxMXhwULlmuR/K+WwlaZPiLIBYalLAZQ7ZbOPeVkJ8ePao0eLAgEC
   end
 
   class OpenSSL::TestCase < Test::Unit::TestCase
+    include OpenSSL::TestUtils
+    extend OpenSSL::TestUtils
+
     def setup
       if ENV["OSSL_GC_STRESS"] == "1"
         GC.stress = true
@@ -222,9 +156,9 @@ AQjjxMXhwULlmuR/K+WwlaZPiLIBYalLAZQ7ZbOPeVkJ8ePao0eLAgEC
 
     def setup
       super
-      @ca_key  = OpenSSL::TestUtils::TEST_KEY_RSA2048
-      @svr_key = OpenSSL::TestUtils::TEST_KEY_RSA1024
-      @cli_key = OpenSSL::TestUtils::TEST_KEY_DSA1024
+      @ca_key  = Fixtures.pkey("rsa2048")
+      @svr_key = Fixtures.pkey("rsa1024")
+      @cli_key = Fixtures.pkey("dsa1024")
       @ca  = OpenSSL::X509::Name.parse("/DC=org/DC=ruby-lang/CN=CA")
       @svr = OpenSSL::X509::Name.parse("/DC=org/DC=ruby-lang/CN=localhost")
       @cli = OpenSSL::X509::Name.parse("/DC=org/DC=ruby-lang/CN=localhost")
@@ -239,14 +173,6 @@ AQjjxMXhwULlmuR/K+WwlaZPiLIBYalLAZQ7ZbOPeVkJ8ePao0eLAgEC
       @svr_cert = issue_cert(@svr, @svr_key, 2, ee_exts, @ca_cert, @ca_key)
       @cli_cert = issue_cert(@cli, @cli_key, 3, ee_exts, @ca_cert, @ca_key)
       @server = nil
-    end
-
-    def issue_cert(*arg)
-      OpenSSL::TestUtils.issue_cert(*arg)
-    end
-
-    def issue_crl(*arg)
-      OpenSSL::TestUtils.issue_crl(*arg)
     end
 
     def readwrite_loop(ctx, ssl)
@@ -298,7 +224,7 @@ AQjjxMXhwULlmuR/K+WwlaZPiLIBYalLAZQ7ZbOPeVkJ8ePao0eLAgEC
         ctx.cert_store = store
         ctx.cert = @svr_cert
         ctx.key = @svr_key
-        ctx.tmp_dh_callback = proc { OpenSSL::TestUtils::TEST_KEY_DH1024 }
+        ctx.tmp_dh_callback = proc { Fixtures.pkey_dh("dh1024") }
         begin
           ctx.ecdh_curves = "P-256"
         rescue NotImplementedError
