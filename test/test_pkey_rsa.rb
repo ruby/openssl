@@ -5,6 +5,21 @@ require 'base64'
 class OpenSSL::TestPKeyRSA < OpenSSL::PKeyTestCase
   RSA1024 = OpenSSL::TestUtils::TEST_KEY_RSA1024
 
+  def test_sign_verify_pss
+    if OpenSSL::OPENSSL_VERSION_NUMBER > 0x1000100f
+      key = OpenSSL::PKey::RSA.new(512, 3)
+      digest = OpenSSL::Digest::SHA1.new
+      salt_len = 20
+      hash_alg = 'SHA1'
+      data = "Sign me!"
+      invalid_data = "Sign me?"
+
+      signature = key.sign_pss(digest, data, salt_len, hash_alg)
+      assert_equal(true, key.verify_pss(digest, signature, data, salt_len, hash_alg))
+      assert_equal(false, key.verify_pss(digest, signature, invalid_data, salt_len, hash_alg))
+    end
+  end
+
   def test_padding
     key = OpenSSL::PKey::RSA.new(512, 3)
 
