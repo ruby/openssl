@@ -749,6 +749,30 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     end
   end
 
+  def test_connect_certificate_verify_failed_exception_message
+    start_server(ignore_listener_error: true) { |server, port|
+      ctx = OpenSSL::SSL::SSLContext.new
+      ctx.set_params
+      assert_raise_with_message(OpenSSL::SSL::SSLError, /self signed/) {
+        server_connect(port, ctx)
+      }
+    }
+
+    ctx_proc = proc { |ctx|
+      ctx.cert = issue_cert(@svr, @svr_key, 30, [], @ca_cert, @ca_key,
+                            not_before: Time.now-100, not_after: Time.now-10)
+    }
+    start_server(ignore_listener_error: true, ctx_proc: ctx_proc) { |server, port|
+      store = OpenSSL::X509::Store.new
+      store.add_cert(@ca_cert)
+      ctx = OpenSSL::SSL::SSLContext.new
+      ctx.set_params(cert_store: store)
+      assert_raise_with_message(OpenSSL::SSL::SSLError, /expired/) {
+        server_connect(port, ctx)
+      }
+    }
+  end
+
   def test_multibyte_read_write
     #German a umlaut
     auml = [%w{ C3 A4 }.join('')].pack('H*')
