@@ -1177,6 +1177,11 @@ ossl_asn1cons_to_der(VALUE self)
     for (i = 0; i < RARRAY_LEN(ary); i++) {
 	VALUE item = RARRAY_AREF(ary, i);
 
+	if (indef_len && rb_obj_is_kind_of(item, cASN1EndOfContent)) {
+	    if (i != RARRAY_LEN(ary) - 1)
+		ossl_raise(eASN1Error, "illegal EOC octets in value");
+	}
+
 	item = ossl_to_der_if_possible(item);
 	StringValue(item);
 	rb_str_append(str, item);

@@ -345,6 +345,15 @@ class  OpenSSL::TestASN1 < OpenSSL::TestCase
     ])
     expected.indefinite_length = true
     encode_decode_test B(%w{ 30 80 04 01 00 00 00 }), expected
+
+    # OpenSSL::ASN1::EndOfContent can only be at the end
+    obj = OpenSSL::ASN1::Sequence.new([
+      OpenSSL::ASN1::EndOfContent.new,
+      OpenSSL::ASN1::OctetString.new(B(%w{ 00 })),
+      OpenSSL::ASN1::EndOfContent.new,
+    ])
+    obj.indefinite_length = true
+    assert_raise(OpenSSL::ASN1::ASN1Error) { obj.to_der }
   end
 
   def test_set
