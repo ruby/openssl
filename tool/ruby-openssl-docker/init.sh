@@ -2,12 +2,12 @@
 
 if [[ "$RUBY_VERSION" = "" ]]
 then
-  RUBY_VERSION=ruby-2.3
+  RUBY_VERSION=ruby-2.4
 fi
 
 if [[ "$OPENSSL_VERSION" = "" ]]
 then
-  OPENSSL_VERSION=openssl-1.0.2
+  OPENSSL_VERSION=openssl-1.1.0
 fi
 
 echo "Using Ruby ${RUBY_VERSION} with OpenSSL ${OPENSSL_VERSION}."
