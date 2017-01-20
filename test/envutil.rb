@@ -1,6 +1,7 @@
 # -*- coding: us-ascii -*-
 require "timeout"
 require "rbconfig"
+require "pp"
 
 module EnvUtil
   def rubybin
@@ -257,6 +258,10 @@ eom
           raise Test::Unit::AssertionFailedError, msg
         end
         values
+      end
+
+      def mu_pp(obj) #:nodoc:
+        obj.pretty_inspect.chomp
       end
 
       # :call-seq:
