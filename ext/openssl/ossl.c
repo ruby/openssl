@@ -260,18 +260,15 @@ static VALUE
 ossl_make_error(VALUE exc, const char *fmt, va_list args)
 {
     VALUE str = Qnil;
-    const char *msg;
-    long e;
+    unsigned long e;
 
-    e = ERR_peek_last_error();
     if (fmt) {
 	str = rb_vsprintf(fmt, args);
     }
+    e = ERR_peek_last_error();
     if (e) {
-	if (dOSSL == Qtrue) /* FULL INFO */
-	    msg = ERR_error_string(e, NULL);
-	else
-	    msg = ERR_reason_error_string(e);
+	const char *msg = ERR_reason_error_string(e);
+
 	if (NIL_P(str)) {
 	    if (msg) str = rb_str_new_cstr(msg);
 	}
@@ -279,8 +276,8 @@ ossl_make_error(VALUE exc, const char *fmt, va_list args)
 	    if (RSTRING_LEN(str)) rb_str_cat2(str, ": ");
 	    rb_str_cat2(str, msg ? msg : "(null)");
 	}
+	ossl_clear_error();
     }
-    ossl_clear_error();
 
     if (NIL_P(str)) str = rb_str_new(0, 0);
     return rb_exc_new3(exc, str);
