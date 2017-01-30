@@ -358,4 +358,10 @@ class OpenSSL::TestX509Name < OpenSSL::TestCase
     name = OpenSSL::X509::Name.parse("/CN=ruby-lang.org")
     assert_equal(name.to_der, name.dup.to_der)
   end
+
+  def test_eql
+    n1 = OpenSSL::X509::Name.new([['CN', 'ruby-lang.org']])
+    n2 = OpenSSL::X509::Name.new([['CN', 'ruby-lang.org']])
+    assert(n1.eql?(n2), "[Bug #13170]")
+  end
 end
