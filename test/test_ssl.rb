@@ -206,21 +206,16 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
 
   def test_starttls
     server_proc = -> (ctx, ssl) {
-      begin
-        while line = ssl.gets
-          if line =~ /^STARTTLS$/
-            ssl.write("x")
-            ssl.flush
-            ssl.accept
-            next
-          end
-          ssl.write(line)
+      while line = ssl.gets
+        if line =~ /^STARTTLS$/
+          ssl.write("x")
+          ssl.flush
+          ssl.accept
+          break
         end
-      rescue OpenSSL::SSL::SSLError
-      rescue IOError
-      ensure
-        ssl.close rescue nil
+        ssl.write(line)
       end
+      readwrite_loop(ctx, ssl)
     }
 
     EnvUtil.suppress_warning do # read/write on not started session
@@ -763,7 +758,6 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
         cmp.force_encoding(Encoding::UTF_8)
         assert_equal(str, cmp)
         assert_equal(num_written, raw_size)
-        ssl.close
       }
       start_server(server_proc: server_proc) { |port|
         server_connect(port) { |ssl|

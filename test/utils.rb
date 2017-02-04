@@ -176,10 +176,6 @@ class OpenSSL::SSLTestCase < OpenSSL::TestCase
     while line = ssl.gets
       ssl.write(line)
     end
-  rescue OpenSSL::SSL::SSLError
-  rescue IOError
-  ensure
-    ssl.close rescue nil
   end
 
   def server_loop(ctx, ssls, stop_pipe_r, ignore_listener_error, server_proc, threads)
@@ -191,7 +187,8 @@ class OpenSSL::SSLTestCase < OpenSSL::TestCase
           return
         end
         ssl = ssls.accept
-      rescue OpenSSL::SSL::SSLError, Errno::ECONNRESET
+      rescue OpenSSL::SSL::SSLError, IOError, Errno::EBADF, Errno::EINVAL,
+             Errno::ECONNABORTED, Errno::ENOTSOCK, Errno::ECONNRESET
         if ignore_listener_error
           retry
         else
@@ -200,13 +197,13 @@ class OpenSSL::SSLTestCase < OpenSSL::TestCase
       end
 
       th = Thread.start do
-        server_proc.call(ctx, ssl)
+        begin
+          server_proc.call(ctx, ssl)
+        ensure
+          ssl.close
+        end
       end
       threads << th
-    end
-  rescue Errno::EBADF, IOError, Errno::EINVAL, Errno::ECONNABORTED, Errno::ENOTSOCK, Errno::ECONNRESET
-    if !ignore_listener_error
-      raise
     end
   end
 
