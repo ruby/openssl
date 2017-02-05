@@ -49,7 +49,7 @@ static const rb_data_type_t ossl_cipher_type = {
  * PUBLIC
  */
 const EVP_CIPHER *
-GetCipherPtr(VALUE obj)
+ossl_evp_get_cipherbyname(VALUE obj)
 {
     if (rb_obj_is_kind_of(obj, cCipher)) {
 	EVP_CIPHER_CTX *ctx;

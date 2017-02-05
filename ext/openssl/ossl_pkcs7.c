@@ -319,7 +319,7 @@ ossl_pkcs7_s_encrypt(int argc, VALUE *argv, VALUE klass)
 #endif
 
     }
-    else ciph = GetCipherPtr(cipher); /* NO NEED TO DUP */
+    else ciph = ossl_evp_get_cipherbyname(cipher);
     flg = NIL_P(flags) ? 0 : NUM2INT(flags);
     ret = NewPKCS7(cPKCS7);
     in = ossl_obj2bio(data);
@@ -525,7 +525,7 @@ ossl_pkcs7_set_cipher(VALUE self, VALUE cipher)
     PKCS7 *pkcs7;
 
     GetPKCS7(self, pkcs7);
-    if (!PKCS7_set_cipher(pkcs7, GetCipherPtr(cipher))) {
+    if (!PKCS7_set_cipher(pkcs7, ossl_evp_get_cipherbyname(cipher))) {
 	ossl_raise(ePKCS7Error, NULL);
     }
 

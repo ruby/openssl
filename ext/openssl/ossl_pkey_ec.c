@@ -446,7 +446,7 @@ static VALUE ossl_ec_key_to_string(VALUE self, VALUE ciph, VALUE pass, int forma
         private = 1;
 
     if (!NIL_P(ciph)) {
-	cipher = GetCipherPtr(ciph);
+	cipher = ossl_evp_get_cipherbyname(ciph);
 	pass = ossl_pem_passwd_value(pass);
     }
 

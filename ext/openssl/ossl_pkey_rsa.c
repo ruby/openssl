@@ -350,7 +350,7 @@ ossl_rsa_export(int argc, VALUE *argv, VALUE self)
     rb_scan_args(argc, argv, "02", &cipher, &pass);
 
     if (!NIL_P(cipher)) {
-	ciph = GetCipherPtr(cipher);
+	ciph = ossl_evp_get_cipherbyname(cipher);
 	pass = ossl_pem_passwd_value(pass);
     }
     if (!(out = BIO_new(BIO_s_mem()))) {
