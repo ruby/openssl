@@ -27,7 +27,7 @@ Alternatively, you can install the gem with `bundler`:
 # Gemfile
 gem 'openssl'
 # or specify git master
-gem 'openssl', github: 'ruby/openssl'
+gem 'openssl', git: 'https://github.com/ruby/openssl'
 ```
 
 After doing `bundle install`, you should have the gem installed in your bundle.
