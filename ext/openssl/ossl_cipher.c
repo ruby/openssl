@@ -1007,7 +1007,7 @@ Init_ossl_cipher(void)
      * An example using the GCM (Galois/Counter Mode). You have 16 bytes +key+,
      * 12 bytes (96 bits) +nonce+ and the associated data +auth_data+. Be sure
      * not to reuse the +key+ and +nonce+ pair. Reusing an nonce ruins the
-     * security gurantees of GCM mode.
+     * security guarantees of GCM mode.
      *
      *   cipher = OpenSSL::Cipher::AES.new(128, :GCM).encrypt
      *   cipher.key = key
