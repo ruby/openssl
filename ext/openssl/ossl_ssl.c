@@ -381,13 +381,10 @@ ossl_sslctx_session_get_cb(SSL *ssl, unsigned char *buf, int len, int *copy)
 {
     VALUE ary, ssl_obj, ret_obj;
     SSL_SESSION *sess;
-    void *ptr;
     int state = 0;
 
     OSSL_Debug("SSL SESSION get callback entered");
-    if ((ptr = SSL_get_ex_data(ssl, ossl_ssl_ex_ptr_idx)) == NULL)
-    	return NULL;
-    ssl_obj = (VALUE)ptr;
+    ssl_obj = (VALUE)SSL_get_ex_data(ssl, ossl_ssl_ex_ptr_idx);
     ary = rb_ary_new2(2);
     rb_ary_push(ary, ssl_obj);
     rb_ary_push(ary, rb_str_new((const char *)buf, len));
@@ -425,14 +422,11 @@ static int
 ossl_sslctx_session_new_cb(SSL *ssl, SSL_SESSION *sess)
 {
     VALUE ary, ssl_obj, sess_obj;
-    void *ptr;
     int state = 0;
 
     OSSL_Debug("SSL SESSION new callback entered");
 
-    if ((ptr = SSL_get_ex_data(ssl, ossl_ssl_ex_ptr_idx)) == NULL)
-    	return 1;
-    ssl_obj = (VALUE)ptr;
+    ssl_obj = (VALUE)SSL_get_ex_data(ssl, ossl_ssl_ex_ptr_idx);
     sess_obj = rb_obj_alloc(cSSLSession);
     SSL_SESSION_up_ref(sess);
     DATA_PTR(sess_obj) = sess;
@@ -479,9 +473,7 @@ ossl_sslctx_session_remove_cb(SSL_CTX *ctx, SSL_SESSION *sess)
 
     OSSL_Debug("SSL SESSION remove callback entered");
 
-    if ((ptr = SSL_CTX_get_ex_data(ctx, ossl_sslctx_ex_ptr_idx)) == NULL)
-    	return;
-    sslctx_obj = (VALUE)ptr;
+    sslctx_obj = (VALUE)SSL_CTX_get_ex_data(ctx, ossl_sslctx_ex_ptr_idx);
     sess_obj = rb_obj_alloc(cSSLSession);
     SSL_SESSION_up_ref(sess);
     DATA_PTR(sess_obj) = sess;
@@ -551,16 +543,13 @@ static int
 ssl_servername_cb(SSL *ssl, int *ad, void *arg)
 {
     VALUE ary, ssl_obj;
-    void *ptr;
     int state = 0;
     const char *servername = SSL_get_servername(ssl, TLSEXT_NAMETYPE_host_name);
 
     if (!servername)
         return SSL_TLSEXT_ERR_OK;
 
-    if ((ptr = SSL_get_ex_data(ssl, ossl_ssl_ex_ptr_idx)) == NULL)
-    	return SSL_TLSEXT_ERR_ALERT_FATAL;
-    ssl_obj = (VALUE)ptr;
+    ssl_obj = (VALUE)SSL_get_ex_data(ssl, ossl_ssl_ex_ptr_idx);
     ary = rb_ary_new2(2);
     rb_ary_push(ary, ssl_obj);
     rb_ary_push(ary, rb_str_new2(servername));
@@ -578,12 +567,8 @@ static void
 ssl_renegotiation_cb(const SSL *ssl)
 {
     VALUE ssl_obj, sslctx_obj, cb;
-    void *ptr;
 
-    if ((ptr = SSL_get_ex_data(ssl, ossl_ssl_ex_ptr_idx)) == NULL)
-	ossl_raise(eSSLError, "SSL object could not be retrieved");
-    ssl_obj = (VALUE)ptr;
-
+    ssl_obj = (VALUE)SSL_get_ex_data(ssl, ossl_ssl_ex_ptr_idx);
     sslctx_obj = rb_attr_get(ssl_obj, id_i_context);
     cb = rb_attr_get(sslctx_obj, id_i_renegotiation_cb);
     if (NIL_P(cb)) return;
