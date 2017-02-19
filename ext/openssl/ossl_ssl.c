@@ -85,15 +85,18 @@ static const struct {
 };
 
 static int ossl_ssl_ex_vcb_idx;
-static int ossl_ssl_ex_store_p;
 static int ossl_ssl_ex_ptr_idx;
+static int ossl_sslctx_ex_ptr_idx;
+#if !defined(HAVE_X509_STORE_UP_REF)
+static int ossl_sslctx_ex_store_p;
+#endif
 
 static void
 ossl_sslctx_free(void *ptr)
 {
     SSL_CTX *ctx = ptr;
 #if !defined(HAVE_X509_STORE_UP_REF)
-    if(ctx && SSL_CTX_get_ex_data(ctx, ossl_ssl_ex_store_p)== (void*)1)
+    if (ctx && SSL_CTX_get_ex_data(ctx, ossl_sslctx_ex_store_p))
 	ctx->cert_store = NULL;
 #endif
     SSL_CTX_free(ctx);
@@ -124,7 +127,7 @@ ossl_sslctx_s_alloc(VALUE klass)
     }
     SSL_CTX_set_mode(ctx, mode);
     RTYPEDDATA_DATA(obj) = ctx;
-    SSL_CTX_set_ex_data(ctx, ossl_ssl_ex_ptr_idx, (void*)obj);
+    SSL_CTX_set_ex_data(ctx, ossl_sslctx_ex_ptr_idx, (void *)obj);
 
 #if !defined(OPENSSL_NO_EC) && defined(HAVE_SSL_CTX_SET_ECDH_AUTO)
     /* We use SSL_CTX_set1_curves_list() to specify the curve used in ECDH. It
@@ -476,7 +479,7 @@ ossl_sslctx_session_remove_cb(SSL_CTX *ctx, SSL_SESSION *sess)
 
     OSSL_Debug("SSL SESSION remove callback entered");
 
-    if ((ptr = SSL_CTX_get_ex_data(ctx, ossl_ssl_ex_ptr_idx)) == NULL)
+    if ((ptr = SSL_CTX_get_ex_data(ctx, ossl_sslctx_ex_ptr_idx)) == NULL)
     	return;
     sslctx_obj = (VALUE)ptr;
     sess_obj = rb_obj_alloc(cSSLSession);
@@ -816,7 +819,7 @@ ossl_sslctx_setup(VALUE self)
 	 *   X509_STORE_free() doesn't care it.
 	 *   So we won't increment it but mark it by ex_data.
 	 */
-        SSL_CTX_set_ex_data(ctx, ossl_ssl_ex_store_p, (void *)1);
+        SSL_CTX_set_ex_data(ctx, ossl_sslctx_ex_store_p, ctx);
 #else /* Fixed in OpenSSL 1.0.2; bff9ce4db38b (master), 5b4b9ce976fc (1.0.2) */
 	X509_STORE_up_ref(store);
 #endif
@@ -2265,9 +2268,20 @@ Init_ossl_ssl(void)
 
     ID_callback_state = rb_intern("callback_state");
 
-    ossl_ssl_ex_vcb_idx = SSL_get_ex_new_index(0,(void *)"ossl_ssl_ex_vcb_idx",0,0,0);
-    ossl_ssl_ex_store_p = SSL_get_ex_new_index(0,(void *)"ossl_ssl_ex_store_p",0,0,0);
-    ossl_ssl_ex_ptr_idx = SSL_get_ex_new_index(0,(void *)"ossl_ssl_ex_ptr_idx",0,0,0);
+    ossl_ssl_ex_vcb_idx = SSL_get_ex_new_index(0, (void *)"ossl_ssl_ex_vcb_idx", 0, 0, 0);
+    if (ossl_ssl_ex_vcb_idx < 0)
+	ossl_raise(rb_eRuntimeError, "SSL_get_ex_new_index");
+    ossl_ssl_ex_ptr_idx = SSL_get_ex_new_index(0, (void *)"ossl_ssl_ex_ptr_idx", 0, 0, 0);
+    if (ossl_ssl_ex_ptr_idx < 0)
+	ossl_raise(rb_eRuntimeError, "SSL_get_ex_new_index");
+    ossl_sslctx_ex_ptr_idx = SSL_CTX_get_ex_new_index(0, (void *)"ossl_sslctx_ex_ptr_idx", 0, 0, 0);
+    if (ossl_sslctx_ex_ptr_idx < 0)
+	ossl_raise(rb_eRuntimeError, "SSL_CTX_get_ex_new_index");
+#if !defined(HAVE_X509_STORE_UP_REF)
+    ossl_sslctx_ex_store_p = SSL_CTX_get_ex_new_index(0, (void *)"ossl_sslctx_ex_store_p", 0, 0, 0);
+    if (ossl_sslctx_ex_store_p < 0)
+	ossl_raise(rb_eRuntimeError, "SSL_CTX_get_ex_new_index");
+#endif
 
     /* Document-module: OpenSSL::SSL
      *
