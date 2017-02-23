@@ -1604,8 +1604,9 @@ ossl_ssl_connect(VALUE self)
  *
  * By specifying a keyword argument _exception_ to +false+, you can indicate
  * that connect_nonblock should not raise an IO::WaitReadable or
- * IO::WaitWritable exception, but return the symbol :wait_readable or
- * :wait_writable instead. At EOF, it will return nil instead of raising EOFError.
+ * IO::WaitWritable exception, but return the symbol +:wait_readable+ or
+ * +:wait_writable+ instead. At EOF, it will return +nil+ instead of raising
+ * EOFError.
  */
 static VALUE
 ossl_ssl_connect_nonblock(int argc, VALUE *argv, VALUE self)
@@ -1652,8 +1653,9 @@ ossl_ssl_accept(VALUE self)
  *
  * By specifying a keyword argument _exception_ to +false+, you can indicate
  * that accept_nonblock should not raise an IO::WaitReadable or
- * IO::WaitWritable exception, but return the symbol :wait_readable or
- * :wait_writable instead. At EOF, it will return nil instead of raising EOFError.
+ * IO::WaitWritable exception, but return the symbol +:wait_readable+ or
+ * +:wait_writable+ instead. At EOF, it will return +nil+ instead of raising
+ * EOFError.
  */
 static VALUE
 ossl_ssl_accept_nonblock(int argc, VALUE *argv, VALUE self)
