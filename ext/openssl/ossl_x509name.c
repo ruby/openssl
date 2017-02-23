@@ -135,15 +135,15 @@ ossl_x509name_init_i(RB_BLOCK_CALL_FUNC_ARGLIST(i, args))
  *
  * Creates a new Name.
  *
- * A name may be created from a DER encoded string +der+, an Array
- * representing a +distinguished_name+ or a +distinguished_name+ along with a
- * +template+.
+ * A name may be created from a DER encoded string _der_, an Array
+ * representing a _distinguished_name_ or a _distinguished_name_ along with a
+ * _template_.
  *
  *   name = OpenSSL::X509::Name.new [['CN', 'nobody'], ['DC', 'example']]
  *
  *   name = OpenSSL::X509::Name.new name.to_der
  *
- * See add_entry for a description of the +distinguished_name+ Array's
+ * See add_entry for a description of the _distinguished_name_ Array's
  * contents
  */
 static VALUE
@@ -204,7 +204,7 @@ ossl_x509name_initialize_copy(VALUE self, VALUE other)
  * call-seq:
  *    name.add_entry(oid, value [, type]) => self
  *
- * Adds a new entry with the given +oid+ and +value+ to this name.  The +oid+
+ * Adds a new entry with the given _oid_ and _value_ to this name.  The _oid_
  * is an object identifier defined in ASN.1.  Some common OIDs are:
  *
  * C::  Country Name
@@ -251,15 +251,19 @@ ossl_x509name_to_s_old(VALUE self)
 
 /*
  * call-seq:
- *    name.to_s => string
- *    name.to_s(flags) => string
+ *    name.to_s         -> string
+ *    name.to_s(format) -> string
  *
- * Returns this name as a Distinguished Name string.  +flags+ may be one of:
+ * Returns a String representation of the Distinguished Name. _format_ is
+ * one of:
  *
  * * OpenSSL::X509::Name::COMPAT
  * * OpenSSL::X509::Name::RFC2253
  * * OpenSSL::X509::Name::ONELINE
  * * OpenSSL::X509::Name::MULTILINE
+ *
+ * If _format_ is omitted, the largely broken and traditional OpenSSL format
+ * is used.
  */
 static VALUE
 ossl_x509name_to_s(int argc, VALUE *argv, VALUE self)
@@ -345,11 +349,11 @@ ossl_x509name_cmp0(VALUE self, VALUE other)
 
 /*
  * call-seq:
- *    name.cmp other => integer
- *    name.<=> other => integer
+ *    name.cmp(other) -> -1 | 0 | 1
+ *    name <=> other  -> -1 | 0 | 1
  *
- * Compares this Name with +other+ and returns 0 if they are the same and -1 or
- * +1 if they are greater or less than each other respectively.
+ * Compares this Name with _other_ and returns +0+ if they are the same and +-1+
+ * or ++1+ if they are greater or less than each other respectively.
  */
 static VALUE
 ossl_x509name_cmp(VALUE self, VALUE other)
@@ -365,9 +369,9 @@ ossl_x509name_cmp(VALUE self, VALUE other)
 
 /*
  * call-seq:
- *   name.eql? other => boolean
+ *   name.eql?(other) -> true | false
  *
- * Returns true if +name+ and +other+ refer to the same hash key.
+ * Returns true if _name_ and _other_ refer to the same hash key.
  */
 static VALUE
 ossl_x509name_eql(VALUE self, VALUE other)

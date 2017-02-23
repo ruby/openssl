@@ -106,15 +106,15 @@ VALUE ossl_digest_update(VALUE, VALUE);
  *  call-seq:
  *     Digest.new(string [, data]) -> Digest
  *
- * Creates a Digest instance based on +string+, which is either the ln
+ * Creates a Digest instance based on _string_, which is either the ln
  * (long name) or sn (short name) of a supported digest algorithm.
  *
- * If +data+ (a +String+) is given, it is used as the initial input to the
+ * If _data_ (a String) is given, it is used as the initial input to the
  * Digest instance, i.e.
  *
  *   digest = OpenSSL::Digest.new('sha256', 'digestdata')
  *
- * is equal to
+ * is equivalent to
  *
  *   digest = OpenSSL::Digest.new('sha256')
  *   digest.update('digestdata')

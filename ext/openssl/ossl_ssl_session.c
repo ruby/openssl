@@ -113,7 +113,7 @@ ossl_SSL_SESSION_cmp(const SSL_SESSION *a, const SSL_SESSION *b)
  * call-seq:
  *   session1 == session2 -> boolean
  *
- * Returns true if the two Session is the same, false if not.
+ * Returns +true+ if the two Session is the same, +false+ if not.
  */
 static VALUE ossl_ssl_session_eq(VALUE val1, VALUE val2)
 {
