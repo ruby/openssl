@@ -20,7 +20,7 @@ module OpenSSL
       alg += %w(DSS DSS1 SHA)
     end
 
-    # Return the +data+ hash computed with +name+ Digest. +name+ is either the
+    # Return the hash value computed with _name_ Digest. _name_ is either the
     # long name or short name of a supported digest algorithm.
     #
     # === Examples
@@ -56,7 +56,7 @@ module OpenSSL
 
   end # Digest
 
-  # Returns a Digest subclass by +name+.
+  # Returns a Digest subclass by _name_
   #
   #   require 'openssl'
   #

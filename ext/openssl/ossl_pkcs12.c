@@ -89,20 +89,20 @@ ossl_pkcs12_initialize_copy(VALUE self, VALUE other)
  *    PKCS12.create(pass, name, key, cert [, ca, [, key_pbe [, cert_pbe [, key_iter [, mac_iter [, keytype]]]]]])
  *
  * === Parameters
- * * +pass+ - string
- * * +name+ - A string describing the key.
- * * +key+ - Any PKey.
- * * +cert+ - A X509::Certificate.
+ * * _pass_ - string
+ * * _name_ - A string describing the key.
+ * * _key_ - Any PKey.
+ * * _cert_ - A X509::Certificate.
  *   * The public_key portion of the certificate must contain a valid public key.
  *   * The not_before and not_after fields must be filled in.
- * * +ca+ - An optional array of X509::Certificate's.
- * * +key_pbe+ - string
- * * +cert_pbe+ - string
- * * +key_iter+ - integer
- * * +mac_iter+ - integer
- * * +keytype+ - An integer representing an MSIE specific extension.
+ * * _ca_ - An optional array of X509::Certificate's.
+ * * _key_pbe_ - string
+ * * _cert_pbe_ - string
+ * * _key_iter_ - integer
+ * * _mac_iter_ - integer
+ * * _keytype_ - An integer representing an MSIE specific extension.
  *
- * Any optional arguments may be supplied as nil to preserve the OpenSSL defaults.
+ * Any optional arguments may be supplied as +nil+ to preserve the OpenSSL defaults.
  *
  * See the OpenSSL documentation for PKCS12_create().
  */
@@ -161,8 +161,8 @@ ossl_pkcs12_s_create(int argc, VALUE *argv, VALUE self)
  *    PKCS12.new(str, pass) -> pkcs12
  *
  * === Parameters
- * * +str+ - Must be a DER encoded PKCS12 string.
- * * +pass+ - string
+ * * _str_ - Must be a DER encoded PKCS12 string.
+ * * _pass_ - string
  */
 static VALUE
 ossl_pkcs12_initialize(int argc, VALUE *argv, VALUE self)

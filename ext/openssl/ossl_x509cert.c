@@ -586,7 +586,8 @@ ossl_x509_sign(VALUE self, VALUE key, VALUE digest)
  * call-seq:
  *    cert.verify(key) => true | false
  *
- * Checks that cert signature is made with PRIVversion of this PUBLIC 'key'
+ * Verifies the signature of the certificate, with the public key _key_. _key_
+ * must be an instance of OpenSSL::PKey.
  */
 static VALUE
 ossl_x509_verify(VALUE self, VALUE key)
@@ -610,9 +611,10 @@ ossl_x509_verify(VALUE self, VALUE key)
 
 /*
  * call-seq:
- *    cert.check_private_key(key)
+ *    cert.check_private_key(key) -> true | false
  *
- * Checks if 'key' is PRIV key for this cert
+ * Returns +true+ if _key_ is the corresponding private key to the Subject
+ * Public Key Information, +false+ otherwise.
  */
 static VALUE
 ossl_x509_check_private_key(VALUE self, VALUE key)

@@ -139,8 +139,8 @@ YoaOffgTf5qxiwkjnlVZQc3whgnEt9FpVMvQ9eknyeGB5KHfayAc3+hUAvI3/Cr3
       #
       # Sets saner defaults optimized for the use with HTTP-like protocols.
       #
-      # If a Hash +params+ is given, the parameters are overridden with it.
-      # The keys in +params+ must be assignment methods on SSLContext.
+      # If a Hash _params_ is given, the parameters are overridden with it.
+      # The keys in _params_ must be assignment methods on SSLContext.
       #
       # If the verify_mode is not VERIFY_NONE and ca_file, ca_path and
       # cert_store are not set then the system default certificate store is
@@ -372,8 +372,8 @@ YoaOffgTf5qxiwkjnlVZQc3whgnEt9FpVMvQ9eknyeGB5KHfayAc3+hUAvI3/Cr3
       attr_accessor :start_immediately
 
       # Creates a new instance of SSLServer.
-      # * +srv+ is an instance of TCPServer.
-      # * +ctx+ is an instance of OpenSSL::SSL::SSLContext.
+      # * _srv_ is an instance of TCPServer.
+      # * _ctx_ is an instance of OpenSSL::SSL::SSLContext.
       def initialize(svr, ctx)
         @svr = svr
         @ctx = ctx

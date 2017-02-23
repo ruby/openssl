@@ -275,7 +275,7 @@ ossl_ec_key_initialize_copy(VALUE self, VALUE other)
  *   key.group   => group
  *
  * Returns the EC::Group that the key is associated with. Modifying the returned
- * group does not affect +key+.
+ * group does not affect _key_.
  */
 static VALUE
 ossl_ec_key_get_group(VALUE self)
@@ -296,7 +296,7 @@ ossl_ec_key_get_group(VALUE self)
  *   key.group = group
  *
  * Sets the EC::Group for the key. The group structure is internally copied so
- * modifition to +group+ after assigning to a key has no effect on the key.
+ * modifition to _group_ after assigning to a key has no effect on the key.
  */
 static VALUE
 ossl_ec_key_set_group(VALUE self, VALUE group_v)
@@ -502,8 +502,8 @@ static VALUE ossl_ec_key_to_string(VALUE self, VALUE ciph, VALUE pass, int forma
  *     key.export([cipher, pass_phrase]) => String
  *     key.to_pem([cipher, pass_phrase]) => String
  *
- * Outputs the EC key in PEM encoding.  If +cipher+ and +pass_phrase+ are given
- * they will be used to encrypt the key.  +cipher+ must be an OpenSSL::Cipher
+ * Outputs the EC key in PEM encoding.  If _cipher_ and _pass_phrase_ are given
+ * they will be used to encrypt the key.  _cipher_ must be an OpenSSL::Cipher
  * instance. Note that encryption will only be effective for a private key,
  * public keys will always be encoded in plain text.
  */
@@ -724,7 +724,7 @@ ec_group_new(const EC_GROUP *group)
  *
  * Creates a new EC::Group object.
  *
- * +ec_method+ is a symbol that represents an EC_METHOD. Currently the following
+ * _ec_method_ is a symbol that represents an EC_METHOD. Currently the following
  * are supported:
  *
  * * :GFp_simple
@@ -862,8 +862,8 @@ ossl_ec_group_initialize_copy(VALUE self, VALUE other)
  *   group1.eql?(group2)   => true | false
  *   group1 == group2   => true | false
  *
- * Returns true if the two groups use the same curve and have the same
- * parameters, false otherwise.
+ * Returns +true+ if the two groups use the same curve and have the same
+ * parameters, +false+ otherwise.
  */
 static VALUE ossl_ec_group_eql(VALUE a, VALUE b)
 {
@@ -903,8 +903,8 @@ static VALUE ossl_ec_group_get_generator(VALUE self)
  * call-seq:
  *   group.set_generator(generator, order, cofactor)   => self
  *
- * Sets the curve parameters. +generator+ must be an instance of EC::Point that
- * is on the curve. +order+ and +cofactor+ are integers.
+ * Sets the curve parameters. _generator_ must be an instance of EC::Point that
+ * is on the curve. _order_ and _cofactor_ are integers.
  *
  * See the OpenSSL documentation for EC_GROUP_set_generator()
  */
@@ -1127,14 +1127,14 @@ parse_point_conversion_form_symbol(VALUE sym)
  *
  * Sets the form how EC::Point data is encoded as ASN.1 as defined in X9.62.
  *
- * +format+ can be one of these:
+ * _format_ can be one of these:
  *
- * :compressed::
+ * +:compressed+::
  *   Encoded as z||x, where z is an octet indicating which solution of the
  *   equation y is. z will be 0x02 or 0x03.
- * :uncompressed::
+ * +:uncompressed+::
  *   Encoded as z||x||y, where z is an octet 0x04.
- * :hybrid::
+ * +:hybrid+::
  *   Encodes as z||x||y, where z is an octet indicating which solution of the
  *   equation y is. z will be 0x06 or 0x07.
  *
@@ -1558,7 +1558,7 @@ static VALUE ossl_ec_point_set_to_infinity(VALUE self)
  *   point.to_bn(conversion_form = nil) => OpenSSL::BN
  *
  * Convert the EC point into an octet string and store in an OpenSSL::BN. If
- * +conversion_form+ is given, the point data is converted using the specified
+ * _conversion_form_ is given, the point data is converted using the specified
  * form. If not given, the default form set in the EC::Group object is used.
  *
  * See also EC::Point#point_conversion_form=.
@@ -1597,12 +1597,12 @@ ossl_ec_point_to_bn(int argc, VALUE *argv, VALUE self)
  * Performs elliptic curve point multiplication.
  *
  * The first form calculates <tt>bn1 * point + bn2 * G</tt>, where +G+ is the
- * generator of the group of +point+. +bn2+ may be ommitted, and in that case,
+ * generator of the group of _point_. _bn2_ may be ommitted, and in that case,
  * the result is just <tt>bn1 * point</tt>.
  *
  * The second form calculates <tt>bns[0] * point + bns[1] * points[0] + ...
- * + bns[-1] * points[-1] + bn2 * G</tt>. +bn2+ may be ommitted. +bns+ must be
- * an array of OpenSSL::BN. +points+ must be an array of
+ * + bns[-1] * points[-1] + bn2 * G</tt>. _bn2_ may be ommitted. _bns_ must be
+ * an array of OpenSSL::BN. _points_ must be an array of
  * OpenSSL::PKey::EC::Point. Please note that <tt>points[0]</tt> is not
  * multiplied by <tt>bns[0]</tt>, but <tt>bns[1]</tt>.
  */

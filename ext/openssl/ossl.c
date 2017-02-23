@@ -328,7 +328,8 @@ ossl_clear_error(void)
  *
  * See any remaining errors held in queue.
  *
- * Any errors you see here are probably due to a bug in ruby's OpenSSL implementation.
+ * Any errors you see here are probably due to a bug in Ruby's OpenSSL
+ * implementation.
  */
 VALUE
 ossl_get_errors(void)
@@ -452,7 +453,7 @@ mem_check_start(VALUE self)
  * Prints detected memory leaks to standard error. This cleans the global state
  * up thus you cannot use any methods of the library after calling this.
  *
- * Returns true if leaks detected, false otherwise.
+ * Returns +true+ if leaks detected, +false+ otherwise.
  *
  * This is available only when built with a capable OpenSSL and --enable-debug
  * configure option.
@@ -568,7 +569,7 @@ static void Init_ossl_locks(void)
 
 /*
  * OpenSSL provides SSL, TLS and general purpose cryptography.  It wraps the
- * OpenSSL[http://www.openssl.org/] library.
+ * OpenSSL[https://www.openssl.org/] library.
  *
  * = Examples
  *

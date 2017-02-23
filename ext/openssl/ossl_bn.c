@@ -176,8 +176,7 @@ ossl_bn_alloc(VALUE klass)
     return obj;
 }
 
-/* Document-method: OpenSSL::BN.new
- *
+/*
  * call-seq:
  *    OpenSSL::BN.new => aBN
  *    OpenSSL::BN.new(bn) => aBN
@@ -185,7 +184,7 @@ ossl_bn_alloc(VALUE klass)
  *    OpenSSL::BN.new(string) => aBN
  *    OpenSSL::BN.new(string, 0 | 2 | 10 | 16) => aBN
  *
- * Construct a new OpenSSL BigNum object.
+ * Construct a new OpenSSL BIGNUM object.
  */
 static VALUE
 ossl_bn_initialize(int argc, VALUE *argv, VALUE self)
@@ -250,7 +249,7 @@ ossl_bn_initialize(int argc, VALUE *argv, VALUE self)
  *    bn.to_s(base) => string
  *
  * === Parameters
- * * +base+ - integer
+ * * _base_ - Integer
  *   Valid values:
  *   * 0 - MPI
  *   * 2 - binary
@@ -513,7 +512,6 @@ BIGNUM_2c(mod_sqr)
 BIGNUM_2c(mod_inverse)
 
 /*
- * Document-method: OpenSSL::BN#/
  * call-seq:
  *    bn1 / bn2 => [result, remainder]
  *
@@ -629,12 +627,11 @@ BIGNUM_BIT(clear_bit)
  */
 BIGNUM_BIT(mask_bits)
 
-/* Document-method: OpenSSL::BN#bit_set?
+/*
  * call-seq:
  *   bn.bit_set?(bit) => true | false
  *
- * Returns boolean of whether +bit+ is set.
- * Bitwise operations for openssl BIGNUMs.
+ * Tests bit _bit_ in _bn_ and returns +true+ if set, +false+ if not set.
  */
 static VALUE
 ossl_bn_is_bit_set(VALUE self, VALUE bit)
@@ -789,15 +786,15 @@ BIGNUM_RAND_RANGE(pseudo_rand)
  * call-seq:
  *    BN.generate_prime(bits, [, safe [, add [, rem]]]) => bn
  *
- * Generates a random prime number of bit length +bits+. If +safe+ is true,
- * generates a safe prime. If +add+ is specified, generates a prime that
+ * Generates a random prime number of bit length _bits_. If _safe_ is set to
+ * +true+, generates a safe prime. If _add_ is specified, generates a prime that
  * fulfills condition <tt>p % add = rem</tt>.
  *
  * === Parameters
- * * +bits+ - integer
- * * +safe+ - boolean
- * * +add+ - BN
- * * +rem+ - BN
+ * * _bits_ - integer
+ * * _safe_ - boolean
+ * * _add_ - BN
+ * * _rem_ - BN
  */
 static VALUE
 ossl_bn_s_generate_prime(int argc, VALUE *argv, VALUE klass)
@@ -934,7 +931,7 @@ BIGNUM_CMP(ucmp)
  *  call-seq:
  *     bn == obj => true or false
  *
- *  Returns +true+ only if +obj+ has the same value as +bn+. Contrast this
+ *  Returns +true+ only if _obj_ has the same value as _bn_. Contrast this
  *  with OpenSSL::BN#eql?, which requires obj to be OpenSSL::BN.
  */
 static VALUE
@@ -959,7 +956,7 @@ ossl_bn_eq(VALUE self, VALUE other)
  *     bn.eql?(obj) => true or false
  *
  *  Returns <code>true</code> only if <i>obj</i> is a
- *  <code>OpenSSL::BN</code> with the same value as <i>big</i>. Contrast this
+ *  <code>OpenSSL::BN</code> with the same value as <i>bn</i>. Contrast this
  *  with OpenSSL::BN#==, which performs type conversions.
  */
 static VALUE
@@ -1010,12 +1007,12 @@ ossl_bn_hash(VALUE self)
  *    bn.prime? => true | false
  *    bn.prime?(checks) => true | false
  *
- * Performs a Miller-Rabin probabilistic primality test with +checks+
- * iterations. If +nchecks+ is not specified, a number of iterations is used
+ * Performs a Miller-Rabin probabilistic primality test with _checks_
+ * iterations. If _checks_ is not specified, a number of iterations is used
  * that yields a false positive rate of at most 2^-80 for random input.
  *
  * === Parameters
- * * +checks+ - integer
+ * * _checks_ - integer
  */
 static VALUE
 ossl_bn_is_prime(int argc, VALUE *argv, VALUE self)
@@ -1050,8 +1047,8 @@ ossl_bn_is_prime(int argc, VALUE *argv, VALUE self)
  * first attempts trial divisions with some small primes.
  *
  * === Parameters
- * * +checks+ - integer
- * * +trial_div+ - boolean
+ * * _checks_ - integer
+ * * _trial_div_ - boolean
  */
 static VALUE
 ossl_bn_is_prime_fasttest(int argc, VALUE *argv, VALUE self)

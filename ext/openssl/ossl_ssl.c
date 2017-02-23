@@ -1186,7 +1186,7 @@ ossl_sslctx_set_security_level(VALUE self, VALUE value)
  *  call-seq:
  *     ctx.session_add(session) -> true | false
  *
- * Adds +session+ to the session cache.
+ * Adds _session_ to the session cache.
  */
 static VALUE
 ossl_sslctx_session_add(VALUE self, VALUE arg)
@@ -1204,7 +1204,7 @@ ossl_sslctx_session_add(VALUE self, VALUE arg)
  *  call-seq:
  *     ctx.session_remove(session) -> true | false
  *
- * Removes +session+ from the session cache.
+ * Removes _session_ from the session cache.
  */
 static VALUE
 ossl_sslctx_session_remove(VALUE self, VALUE arg)
@@ -1340,9 +1340,9 @@ ossl_sslctx_get_session_cache_stats(VALUE self)
 
 /*
  *  call-seq:
- *     ctx.flush_sessions(time | nil) -> self
+ *     ctx.flush_sessions(time) -> self
  *
- * Removes sessions in the internal cache that have expired at +time+.
+ * Removes sessions in the internal cache that have expired at _time_.
  */
 static VALUE
 ossl_sslctx_flush_sessions(int argc, VALUE *argv, VALUE self)
@@ -1404,10 +1404,10 @@ ossl_ssl_s_alloc(VALUE klass)
  *    SSLSocket.new(io) => aSSLSocket
  *    SSLSocket.new(io, ctx) => aSSLSocket
  *
- * Creates a new SSL socket from +io+ which must be a real IO object (not an
+ * Creates a new SSL socket from _io_ which must be a real IO object (not an
  * IO-like object that responds to read/write).
  *
- * If +ctx+ is provided the SSL Sockets initial params will be taken from
+ * If _ctx_ is provided the SSL Sockets initial params will be taken from
  * the context.
  *
  * The OpenSSL::Buffering module provides additional IO methods.
@@ -1757,7 +1757,7 @@ ossl_ssl_read_internal(int argc, VALUE *argv, VALUE self, int nonblock)
  *    ssl.sysread(length) => string
  *    ssl.sysread(length, buffer) => buffer
  *
- * Reads +length+ bytes from the SSL connection.  If a pre-allocated +buffer+
+ * Reads _length_ bytes from the SSL connection.  If a pre-allocated _buffer_
  * is provided the data will be written into it.
  */
 static VALUE
@@ -1776,7 +1776,7 @@ ossl_ssl_read(int argc, VALUE *argv, VALUE self)
  * block.  If "exception: false" is passed, this method returns a symbol of
  * :wait_readable, :wait_writable, or nil, rather than raising an exception.
  *
- * Reads +length+ bytes from the SSL connection.  If a pre-allocated +buffer+
+ * Reads _length_ bytes from the SSL connection.  If a pre-allocated _buffer_
  * is provided the data will be written into it.
  */
 static VALUE
@@ -1846,7 +1846,7 @@ ossl_ssl_write_internal(VALUE self, VALUE str, VALUE opts)
  * call-seq:
  *    ssl.syswrite(string) => Integer
  *
- * Writes +string+ to the SSL connection.
+ * Writes _string_ to the SSL connection.
  */
 static VALUE
 ossl_ssl_write(VALUE self, VALUE str)
@@ -1858,7 +1858,7 @@ ossl_ssl_write(VALUE self, VALUE str)
  * call-seq:
  *    ssl.syswrite_nonblock(string) => Integer
  *
- * Writes +string+ to the SSL connection in a non-blocking manner.  Raises an
+ * Writes _string_ to the SSL connection in a non-blocking manner.  Raises an
  * SSLError if writing would block.
  */
 static VALUE
@@ -2063,7 +2063,7 @@ ossl_ssl_pending(VALUE self)
  * call-seq:
  *    ssl.session_reused? -> true | false
  *
- * Returns true if a reused session was negotiated during the handshake.
+ * Returns +true+ if a reused session was negotiated during the handshake.
  */
 static VALUE
 ossl_ssl_session_reused(VALUE self)
@@ -2282,7 +2282,7 @@ Init_ossl_ssl(void)
      * This module contains configuration information about the SSL extension,
      * for example if socket support is enabled, or the host name TLS extension
      * is enabled.  Constants in this module will always be defined, but contain
-     * `true` or `false` values depending on the configuration of your OpenSSL
+     * +true+ or +false+ values depending on the configuration of your OpenSSL
      * installation.
      */
     mSSLExtConfig = rb_define_module_under(mOSSL, "ExtConfig");
@@ -2366,12 +2366,12 @@ Init_ossl_ssl(void)
      * A callback for additional certificate verification.  The callback is
      * invoked for each certificate in the chain.
      *
-     * The callback is invoked with two values.  +preverify_ok+ indicates
-     * indicates if the verification was passed (true) or not (false).
-     * +store_context+ is an OpenSSL::X509::StoreContext containing the
+     * The callback is invoked with two values.  _preverify_ok_ indicates
+     * indicates if the verification was passed (+true+) or not (+false+).
+     * _store_context_ is an OpenSSL::X509::StoreContext containing the
      * context used for certificate verification.
      *
-     * If the callback returns false, the chain verification is immediately
+     * If the callback returns +false+, the chain verification is immediately
      * stopped and a bad_certificate alert is then sent.
      */
     rb_attr(cSSLContext, rb_intern("verify_callback"), 1, 1, Qfalse);
@@ -2438,7 +2438,7 @@ Init_ossl_ssl(void)
     /*
      * A callback invoked when a new session was negotiated.
      *
-     * The callback is invoked with an SSLSocket.  If false is returned the
+     * The callback is invoked with an SSLSocket.  If +false+ is returned the
      * session will be removed from the internal cache.
      */
     rb_attr(cSSLContext, rb_intern("session_new_cb"), 1, 1, Qfalse);

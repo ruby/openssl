@@ -218,7 +218,7 @@ ossl_ocspreq_initialize_copy(VALUE self, VALUE other)
  *   OpenSSL::OCSP::Request.new(request_der) -> request
  *
  * Creates a new OpenSSL::OCSP::Request.  The request may be created empty or
- * from a +request_der+ string.
+ * from a _request_der_ string.
  */
 
 static VALUE
@@ -248,7 +248,7 @@ ossl_ocspreq_initialize(int argc, VALUE *argv, VALUE self)
  * call-seq:
  *   request.add_nonce(nonce = nil) -> request
  *
- * Adds a +nonce+ to the OCSP request.  If no nonce is given a random one will
+ * Adds a _nonce_ to the OCSP request.  If no nonce is given a random one will
  * be generated.
  *
  * The nonce is used to prevent replay attacks but some servers do not support
@@ -281,7 +281,7 @@ ossl_ocspreq_add_nonce(int argc, VALUE *argv, VALUE self)
  * call-seq:
  *   request.check_nonce(response) -> result
  *
- * Checks the nonce validity for this request and +response+.
+ * Checks the nonce validity for this request and _response_.
  *
  * The return value is one of the following:
  *
@@ -291,7 +291,7 @@ ossl_ocspreq_add_nonce(int argc, VALUE *argv, VALUE self)
  *  2 :: nonces both absent.
  *  3 :: nonce present in response only.
  *
- * For most responses, clients can check +result+ > 0.  If a responder doesn't
+ * For most responses, clients can check _result_ > 0.  If a responder doesn't
  * handle nonces <code>result.nonzero?</code> may be necessary.  A result of
  * <code>0</code> is always an error.
  */
@@ -314,7 +314,7 @@ ossl_ocspreq_check_nonce(VALUE self, VALUE basic_resp)
  * call-seq:
  *   request.add_certid(certificate_id) -> request
  *
- * Adds +certificate_id+ to the request.
+ * Adds _certificate_id_ to the request.
  */
 
 static VALUE
@@ -371,17 +371,17 @@ ossl_ocspreq_get_certid(VALUE self)
  * call-seq:
  *   request.sign(cert, key, certs = nil, flags = 0, digest = nil) -> self
  *
- * Signs this OCSP request using +cert+, +key+ and optional +digest+. If
- * +digest+ is not specified, SHA-1 is used. +certs+ is an optional Array of
+ * Signs this OCSP request using _cert_, _key_ and optional _digest_. If
+ * _digest_ is not specified, SHA-1 is used. _certs_ is an optional Array of
  * additional certificates which are included in the request in addition to
- * the signer certificate. Note that if +certs+ is nil or not given, flag
+ * the signer certificate. Note that if _certs_ is +nil+ or not given, flag
  * OpenSSL::OCSP::NOCERTS is enabled. Pass an empty array to include only the
  * signer certificate.
  *
- * +flags+ can be a bitwise OR of the following constants:
+ * _flags_ is a bitwise OR of the following constants:
  *
  * OpenSSL::OCSP::NOCERTS::
- *   Don't include any certificates in the request. +certs+ will be ignored.
+ *   Don't include any certificates in the request. _certs_ will be ignored.
  */
 static VALUE
 ossl_ocspreq_sign(int argc, VALUE *argv, VALUE self)
@@ -421,8 +421,8 @@ ossl_ocspreq_sign(int argc, VALUE *argv, VALUE self)
  * call-seq:
  *   request.verify(certificates, store, flags = 0) -> true or false
  *
- * Verifies this request using the given +certificates+ and +store+.
- * +certificates+ is an array of OpenSSL::X509::Certificate, +store+ is an
+ * Verifies this request using the given _certificates_ and _store_.
+ * _certificates_ is an array of OpenSSL::X509::Certificate, _store_ is an
  * OpenSSL::X509::Store.
  */
 
@@ -479,7 +479,7 @@ ossl_ocspreq_to_der(VALUE self)
 /* call-seq:
  *   OpenSSL::OCSP::Response.create(status, basic_response = nil) -> response
  *
- * Creates an OpenSSL::OCSP::Response from +status+ and +basic_response+.
+ * Creates an OpenSSL::OCSP::Response from _status_ and _basic_response_.
  */
 
 static VALUE
@@ -539,7 +539,7 @@ ossl_ocspres_initialize_copy(VALUE self, VALUE other)
  *   OpenSSL::OCSP::Response.new(response_der) -> response
  *
  * Creates a new OpenSSL::OCSP::Response.  The response may be created empty or
- * from a +response_der+ string.
+ * from a _response_der_ string.
  */
 
 static VALUE
@@ -693,7 +693,7 @@ ossl_ocspbres_initialize_copy(VALUE self, VALUE other)
  * call-seq:
  *   OpenSSL::OCSP::BasicResponse.new(der_string = nil) -> basic_response
  *
- * Creates a new BasicResponse. If +der_string+ is given, decodes +der_string+
+ * Creates a new BasicResponse. If _der_string_ is given, decodes _der_string_
  * as DER.
  */
 
@@ -724,7 +724,7 @@ ossl_ocspbres_initialize(int argc, VALUE *argv, VALUE self)
  * call-seq:
  *   basic_response.copy_nonce(request) -> Integer
  *
- * Copies the nonce from +request+ into this response.  Returns 1 on success
+ * Copies the nonce from _request_ into this response.  Returns 1 on success
  * and 0 on failure.
  */
 
@@ -746,7 +746,7 @@ ossl_ocspbres_copy_nonce(VALUE self, VALUE request)
  * call-seq:
  *   basic_response.add_nonce(nonce = nil)
  *
- * Adds +nonce+ to this response.  If no nonce was provided a random nonce
+ * Adds _nonce_ to this response.  If no nonce was provided a random nonce
  * will be added.
  */
 
@@ -792,26 +792,26 @@ add_status_convert_time(VALUE obj)
  * call-seq:
  *   basic_response.add_status(certificate_id, status, reason, revocation_time, this_update, next_update, extensions) -> basic_response
  *
- * Adds a certificate status for +certificate_id+. +status+ is the status, and
+ * Adds a certificate status for _certificate_id_. _status_ is the status, and
  * must be one of these:
  *
  * - OpenSSL::OCSP::V_CERTSTATUS_GOOD
  * - OpenSSL::OCSP::V_CERTSTATUS_REVOKED
  * - OpenSSL::OCSP::V_CERTSTATUS_UNKNOWN
  *
- * +reason+ and +revocation_time+ can be given only when +status+ is
- * OpenSSL::OCSP::V_CERTSTATUS_REVOKED. +reason+ describes the reason for the
+ * _reason_ and _revocation_time_ can be given only when _status_ is
+ * OpenSSL::OCSP::V_CERTSTATUS_REVOKED. _reason_ describes the reason for the
  * revocation, and must be one of OpenSSL::OCSP::REVOKED_STATUS_* constants.
- * +revocation_time+ is the time when the certificate is revoked.
+ * _revocation_time_ is the time when the certificate is revoked.
  *
- * +this_update+ and +next_update+ indicate the time at which ths status is
+ * _this_update_ and _next_update_ indicate the time at which ths status is
  * verified to be correct and the time at or before which newer information
- * will be available, respectively. +next_update+ is optional.
+ * will be available, respectively. _next_update_ is optional.
  *
- * +extensions+ is an Array of OpenSSL::X509::Extension to be included in the
+ * _extensions_ is an Array of OpenSSL::X509::Extension to be included in the
  * SingleResponse. This is also optional.
  *
- * Note that the times, +revocation_time+, +this_update+ and +next_update+
+ * Note that the times, _revocation_time_, _this_update_ and _next_update_
  * can be specified in either of Integer or Time object. If they are Integer, it
  * is treated as the relative seconds from the current time.
  */
@@ -888,7 +888,7 @@ ossl_ocspbres_add_status(VALUE self, VALUE cid, VALUE status,
  * Returns an Array of statuses for this response.  Each status contains a
  * CertificateId, the status (0 for good, 1 for revoked, 2 for unknown), the
  * reason for the status, the revocation time, the time of this update, the time
- * for the next update and a list of OpenSSL::X509::Extensions.
+ * for the next update and a list of OpenSSL::X509::Extension.
  *
  * This should be superseded by BasicResponse#responses and #find_response that
  * return SingleResponse.
@@ -977,7 +977,7 @@ ossl_ocspbres_get_responses(VALUE self)
  * call-seq:
  *   basic_response.find_response(certificate_id) -> SingleResponse | nil
  *
- * Returns a SingleResponse whose CertId matches with +certificate_id+, or nil
+ * Returns a SingleResponse whose CertId matches with _certificate_id_, or +nil+
  * if this BasicResponse does not contain it.
  */
 static VALUE
@@ -1006,10 +1006,10 @@ ossl_ocspbres_find_response(VALUE self, VALUE target)
  * call-seq:
  *   basic_response.sign(cert, key, certs = nil, flags = 0, digest = nil) -> self
  *
- * Signs this OCSP response using the +cert+, +key+ and optional +digest+. This
+ * Signs this OCSP response using the _cert_, _key_ and optional _digest_. This
  * behaves in the similar way as OpenSSL::OCSP::Request#sign.
  *
- * +flags+ can include:
+ * _flags_ can include:
  * OpenSSL::OCSP::NOCERTS::    don't include certificates
  * OpenSSL::OCSP::NOTIME::     don't set producedAt
  * OpenSSL::OCSP::RESPID_KEY:: use signer's public key hash as responderID
@@ -1053,8 +1053,8 @@ ossl_ocspbres_sign(int argc, VALUE *argv, VALUE self)
  * call-seq:
  *   basic_response.verify(certificates, store, flags = 0) -> true or false
  *
- * Verifies the signature of the response using the given +certificates+ and
- * +store+. This works in the similar way as OpenSSL::OCSP::Request#verify.
+ * Verifies the signature of the response using the given _certificates_ and
+ * _store_. This works in the similar way as OpenSSL::OCSP::Request#verify.
  */
 static VALUE
 ossl_ocspbres_verify(int argc, VALUE *argv, VALUE self)
@@ -1184,7 +1184,7 @@ ossl_ocspsres_alloc(VALUE klass)
  * call-seq:
  *   OpenSSL::OCSP::SingleResponse.new(der_string) -> SingleResponse
  *
- * Creates a new SingleResponse from +der_string+.
+ * Creates a new SingleResponse from _der_string_.
  */
 static VALUE
 ossl_ocspsres_initialize(VALUE self, VALUE arg)
@@ -1235,10 +1235,10 @@ ossl_ocspsres_initialize_copy(VALUE self, VALUE other)
  *
  * It is possible that the OCSP request takes a few seconds or the time is not
  * accurate. To avoid rejecting a valid response, this method allows the times
- * to be within +nsec+ of the current time.
+ * to be within _nsec_ seconds of the current time.
  *
  * Some responders don't set the nextUpdate field. This may cause a very old
- * response to be considered valid. The +maxsec+ parameter can be used to limit
+ * response to be considered valid. The _maxsec_ parameter can be used to limit
  * the age of responses.
  */
 static VALUE
@@ -1485,14 +1485,13 @@ ossl_ocspcid_initialize_copy(VALUE self, VALUE other)
  *   OpenSSL::OCSP::CertificateId.new(subject, issuer, digest = nil) -> certificate_id
  *   OpenSSL::OCSP::CertificateId.new(der_string)                    -> certificate_id
  *
- * Creates a new OpenSSL::OCSP::CertificateId for the given +subject+ and
- * +issuer+ X509 certificates.  The +digest+ is used to compute the
- * certificate ID and must be an OpenSSL::Digest instance.
+ * Creates a new OpenSSL::OCSP::CertificateId for the given _subject_ and
+ * _issuer_ X509 certificates.  The _digest_ is a digest algorithm that is used
+ * to compute the hash values. This defaults to SHA-1.
  *
  * If only one argument is given, decodes it as DER representation of a
  * certificate ID.
  */
-
 static VALUE
 ossl_ocspcid_initialize(int argc, VALUE *argv, VALUE self)
 {
@@ -1534,7 +1533,7 @@ ossl_ocspcid_initialize(int argc, VALUE *argv, VALUE self)
  * call-seq:
  *   certificate_id.cmp(other) -> true or false
  *
- * Compares this certificate id with +other+ and returns true if they are the
+ * Compares this certificate id with _other_ and returns +true+ if they are the
  * same.
  */
 static VALUE
@@ -1554,7 +1553,7 @@ ossl_ocspcid_cmp(VALUE self, VALUE other)
  * call-seq:
  *   certificate_id.cmp_issuer(other) -> true or false
  *
- * Compares this certificate id's issuer with +other+ and returns true if
+ * Compares this certificate id's issuer with _other_ and returns +true+ if
  * they are the same.
  */
 

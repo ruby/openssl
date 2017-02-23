@@ -135,7 +135,7 @@ ossl_hmac_copy(VALUE self, VALUE other)
  *  call-seq:
  *     hmac.update(string) -> self
  *
- * Returns +self+ updated with the message to be authenticated.
+ * Returns _hmac_ updated with the message to be authenticated.
  * Can be called repeatedly with chunks of the message.
  *
  * === Example
@@ -234,7 +234,7 @@ ossl_hmac_hexdigest(VALUE self)
  *  call-seq:
  *     hmac.reset -> self
  *
- * Returns +self+ as it was when it was first initialized, with all processed
+ * Returns _hmac_ as it was when it was first initialized, with all processed
  * data cleared from it.
  *
  * === Example
@@ -264,16 +264,16 @@ ossl_hmac_reset(VALUE self)
  *  call-seq:
  *     HMAC.digest(digest, key, data) -> aString
  *
- * Returns the authentication code as a binary string. The +digest+ parameter
- * must be an instance of OpenSSL::Digest.
+ * Returns the authentication code as a binary string. The _digest_ parameter
+ * specifies the digest algorithm to use. This may be a String representing
+ * the algorithm name or an instance of OpenSSL::Digest.
  *
  * === Example
  *
  *	key = 'key'
  * 	data = 'The quick brown fox jumps over the lazy dog'
- * 	digest = OpenSSL::Digest.new('sha1')
  *
- * 	hmac = OpenSSL::HMAC.digest(digest, key, data)
+ * 	hmac = OpenSSL::HMAC.digest('sha1', key, data)
  * 	#=> "\xDE|\x9B\x85\xB8\xB7\x8A\xA6\xBC\x8Az6\xF7\n\x90p\x1C\x9D\xB4\xD9"
  *
  */
@@ -295,16 +295,16 @@ ossl_hmac_s_digest(VALUE klass, VALUE digest, VALUE key, VALUE data)
  *  call-seq:
  *     HMAC.hexdigest(digest, key, data) -> aString
  *
- * Returns the authentication code as a hex-encoded string. The +digest+
- * parameter must be an instance of OpenSSL::Digest.
+ * Returns the authentication code as a hex-encoded string. The _digest_
+ * parameter specifies the digest algorithm to use. This may be a String
+ * representing the algorithm name or an instance of OpenSSL::Digest.
  *
  * === Example
  *
  *	key = 'key'
  * 	data = 'The quick brown fox jumps over the lazy dog'
- * 	digest = OpenSSL::Digest.new('sha1')
  *
- * 	hmac = OpenSSL::HMAC.hexdigest(digest, key, data)
+ * 	hmac = OpenSSL::HMAC.hexdigest('sha1', key, data)
  * 	#=> "de7c9b85b8b78aa6bc8a7a36f70a90701c9db4d9"
  *
  */
