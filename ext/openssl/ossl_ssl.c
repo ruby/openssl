@@ -468,7 +468,6 @@ static void
 ossl_sslctx_session_remove_cb(SSL_CTX *ctx, SSL_SESSION *sess)
 {
     VALUE ary, sslctx_obj, sess_obj;
-    void *ptr;
     int state = 0;
 
     OSSL_Debug("SSL SESSION remove callback entered");
