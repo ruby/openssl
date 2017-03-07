@@ -296,7 +296,7 @@ ossl_ec_key_get_group(VALUE self)
  *   key.group = group
  *
  * Sets the EC::Group for the key. The group structure is internally copied so
- * modifition to +group+ after assigning to a key has no effect on the key.
+ * modification to +group+ after assigning to a key has no effect on the key.
  */
 static VALUE
 ossl_ec_key_set_group(VALUE self, VALUE group_v)

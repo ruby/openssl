@@ -23,7 +23,7 @@
 #define GetCipher(obj, ctx) do { \
     GetCipherInit((obj), (ctx)); \
     if (!(ctx)) { \
-	ossl_raise(rb_eRuntimeError, "Cipher not inititalized!"); \
+	ossl_raise(rb_eRuntimeError, "Cipher not initialized!"); \
     } \
 } while (0)
 #define SafeGetCipher(obj, ctx) do { \
@@ -122,7 +122,7 @@ ossl_cipher_initialize(VALUE self, VALUE str)
     name = StringValueCStr(str);
     GetCipherInit(self, ctx);
     if (ctx) {
-	ossl_raise(rb_eRuntimeError, "Cipher already inititalized!");
+	ossl_raise(rb_eRuntimeError, "Cipher already initialized!");
     }
     AllocCipher(self, ctx);
     if (!(cipher = EVP_get_cipherbyname(name))) {
