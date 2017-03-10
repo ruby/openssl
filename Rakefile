@@ -20,7 +20,7 @@ RDoc::Task.new do |rdoc|
   rdoc.rdoc_files.include("*.md", "lib/**/*.rb", "ext/**/*.c")
 end
 
-task :test => :debug
+task :test => [:compile, :debug]
 task :debug do
   ruby "-I./lib -ropenssl -ve'puts OpenSSL::OPENSSL_VERSION, OpenSSL::OPENSSL_LIBRARY_VERSION'"
 end
@@ -71,3 +71,5 @@ namespace :sync do
     puts "Don't forget to update ext/openssl/depend"
   end
 end
+
+task :default => :test
