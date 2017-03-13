@@ -43,13 +43,17 @@ unless result
     have_library("crypt32")
   end
 
-  result = have_header("openssl/ssl.h")
-  result &&= %w[crypto libeay32].any? {|lib| have_library(lib, "CRYPTO_malloc")}
+  result = %w[crypto libeay32].any? {|lib| have_library(lib, "CRYPTO_malloc")}
   result &&= %w[ssl ssleay32].any? {|lib| have_library(lib, "SSL_new")}
   unless result
-    Logging::message "=== Checking for required stuff failed. ===\n"
-    Logging::message "Makefile wasn't created. Fix the errors above.\n"
-    exit 1
+    raise "OpenSSL library could not be found. You might want to use " \
+      "--with-openssl-dir=<dir> option to specify the prefix where OpenSSL " \
+      "is installed."
+  end
+  unless have_header("openssl/ssl.h")
+    raise "OpenSSL library itself was found, but the necessary header files " \
+      "are missing. Installing \"development package\" of OpenSSL on your " \
+      "system might help."
   end
 end
 
