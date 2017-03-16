@@ -1,9 +1,9 @@
+# frozen_string_literal: false
 require_relative 'utils'
 
-if defined?(OpenSSL::TestUtils)
-
-class OpenSSL::TestNSSPI < Test::Unit::TestCase
+class OpenSSL::TestNSSPI < OpenSSL::TestCase
   def setup
+    super
     # This request data is adopt from the specification of
     # "Netscape Extensions for User Key Generation".
     # -- http://wp.netscape.com/eng/security/comm4-keygen.html
@@ -15,8 +15,8 @@ class OpenSSL::TestNSSPI < Test::Unit::TestCase
   end
 
   def test_build_data
-    key1 = OpenSSL::TestUtils::TEST_KEY_RSA1024
-    key2 = OpenSSL::TestUtils::TEST_KEY_RSA2048
+    key1 = Fixtures.pkey("rsa1024")
+    key2 = Fixtures.pkey("rsa2048")
     spki = OpenSSL::Netscape::SPKI.new
     spki.challenge = "RandomString"
     spki.public_key = key1.public_key
@@ -46,6 +46,4 @@ class OpenSSL::TestNSSPI < Test::Unit::TestCase
     assert_equal("MozillaIsMyFriend", spki.challenge)
     assert_equal(OpenSSL::PKey::RSA, spki.public_key.class)
   end
-end
-
 end

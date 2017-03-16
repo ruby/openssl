@@ -1,7 +1,9 @@
+# frozen_string_literal: false
 require_relative 'utils'
 
-class OpenSSL::TestConfig < Test::Unit::TestCase
+class OpenSSL::TestConfig < OpenSSL::TestCase
   def setup
+    super
     file = Tempfile.open("openssl.cnf")
     file << <<__EOD__
 HOME = .
@@ -17,6 +19,7 @@ __EOD__
   end
 
   def teardown
+    super
     @tmpfile.close!
   end
 
@@ -167,7 +170,7 @@ __EOC__
   end
 
   def test_value
-    # supress deprecation warnings
+    # suppress deprecation warnings
     OpenSSL::TestUtils.silent do
       assert_equal('CA_default', @it.value('ca', 'default_ca'))
       assert_equal(nil, @it.value('ca', 'no such key'))
@@ -294,4 +297,4 @@ __EOC__
     @it['newsection'] = {'a' => 'b'}
     assert_not_equal(@it.sections.sort, c.sections.sort)
   end
-end if defined?(OpenSSL::TestUtils)
+end

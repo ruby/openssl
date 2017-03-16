@@ -6,7 +6,6 @@
 VALUE mPKCS5;
 VALUE ePKCS5;
 
-#ifdef HAVE_PKCS5_PBKDF2_HMAC
 /*
  * call-seq:
  *    PKCS5.pbkdf2_hmac(pass, salt, iter, keylen, digest) => string
@@ -17,8 +16,6 @@ VALUE ePKCS5;
  * * +iter+ - integer - should be greater than 1000.  20000 is better.
  * * +keylen+ - integer
  * * +digest+ - a string or OpenSSL::Digest object.
- *
- * Available in OpenSSL 0.9.4.
  *
  * Digests other than SHA1 may not be supported by other cryptography libraries.
  */
@@ -43,12 +40,7 @@ ossl_pkcs5_pbkdf2_hmac(VALUE self, VALUE pass, VALUE salt, VALUE iter, VALUE key
 
     return str;
 }
-#else
-#define ossl_pkcs5_pbkdf2_hmac rb_f_notimplement
-#endif
 
-
-#ifdef HAVE_PKCS5_PBKDF2_HMAC_SHA1
 /*
  * call-seq:
  *    PKCS5.pbkdf2_hmac_sha1(pass, salt, iter, keylen) => string
@@ -61,7 +53,7 @@ ossl_pkcs5_pbkdf2_hmac(VALUE self, VALUE pass, VALUE salt, VALUE iter, VALUE key
  *
  * This method is available in almost any version of OpenSSL.
  *
- * Conforms to rfc2898.
+ * Conforms to RFC 2898.
  */
 static VALUE
 ossl_pkcs5_pbkdf2_hmac_sha1(VALUE self, VALUE pass, VALUE salt, VALUE iter, VALUE keylen)
@@ -81,21 +73,14 @@ ossl_pkcs5_pbkdf2_hmac_sha1(VALUE self, VALUE pass, VALUE salt, VALUE iter, VALU
 
     return str;
 }
-#else
-#define ossl_pkcs5_pbkdf2_hmac_sha1 rb_f_notimplement
-#endif
 
 void
 Init_ossl_pkcs5(void)
 {
-    /*
-     * Password-based Encryption
-     *
-     */
-
-    #if 0
-	mOSSL = rb_define_module("OpenSSL"); /* let rdoc know about mOSSL */
-    #endif
+#if 0
+    mOSSL = rb_define_module("OpenSSL");
+    eOSSLError = rb_define_class_under(mOSSL, "OpenSSLError", rb_eStandardError);
+#endif
 
     /* Document-class: OpenSSL::PKCS5
      *
@@ -107,8 +92,7 @@ Init_ossl_pkcs5(void)
      * slowed down artificially in order to render possible attacks infeasible.
      *
      * PKCS5 offers support for PBKDF2 with an OpenSSL::Digest::SHA1-based
-     * HMAC, or an arbitrary Digest if the underlying version of OpenSSL
-     * already supports it (>= 0.9.4).
+     * HMAC, or an arbitrary Digest.
      *
      * === Parameters
      * ==== Password

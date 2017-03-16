@@ -1,43 +1,66 @@
-# Openssl
+# OpenSSL for Ruby
 
 [![Build Status](https://travis-ci.org/ruby/openssl.svg?branch=master)](https://travis-ci.org/ruby/openssl)
+[![Build status](https://ci.appveyor.com/api/projects/status/b8djtmwo7l26f88y/branch/master?svg=true)](https://ci.appveyor.com/project/ruby/openssl/branch/master)
 
-OpenSSL provides SSL, TLS and general purpose cryptography.  It wraps the OpenSSL library.
+OpenSSL provides SSL, TLS and general purpose cryptography. It wraps the
+OpenSSL library.
 
 ## Installation
 
-Add this line to your application's Gemfile:
+The openssl gem is available at [rubygems.org](https://rubygems.org/gems/openssl).
+You can install with:
 
-```ruby
-gem 'openssl'
+```
+gem install openssl
 ```
 
-And then execute:
+You may need to specify the path where OpenSSL is installed.
 
-    $ bundle
+```
+gem install openssl -- --with-openssl-dir=/opt/openssl
+```
 
-Or install it yourself as:
+Alternatively, you can install the gem with `bundler`:
 
-    $ gem install openssl
+```ruby
+# Gemfile
+gem 'openssl'
+# or specify git master
+gem 'openssl', git: 'https://github.com/ruby/openssl'
+```
+
+After doing `bundle install`, you should have the gem installed in your bundle.
 
 ## Usage
 
-See the documentation on OpenSSL for more usage,
-and the official [openssl library](http://www.openssl.org/).
+Once installed, you can require "openssl" in your application.
+
+```ruby
+require "openssl"
+```
+
+**NOTE**: If you are using Ruby 2.3 (and not Bundler), you **must** activate
+the gem version of openssl, otherwise the default gem packaged with the Ruby
+installation will be used:
+
+```ruby
+gem "openssl"
+require "openssl"
+```
+
+## Documentation
+
+See https://ruby.github.io/openssl/.
 
 ## Contributing
 
-1. Fork it ( https://github.com/ruby/openssl/fork )
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create a new Pull Request
+Please read our [CONTRIBUTING.md] for instructions.
 
-## Updating from trunk
+## Security
 
-```
-~/code/openssl => cp ../ruby/ext/openssl/*.{c,h,rb} ext/openssl/.
-~/code/openssl => cp -R ../ruby/ext/openssl/lib/ lib/
-~/code/openssl => cp ../ruby/test/openssl/test_*.rb test/.
-~/code/openssl => cp ../ruby/test/openssl/utils.rb test/utils.rb
-```
+Security issues should be reported to ruby-core by following the process
+described on ["Security at ruby-lang.org"](https://www.ruby-lang.org/en/security/).
+
+
+[CONTRIBUTING.md]: https://github.com/ruby/openssl/tree/master/CONTRIBUTING.md

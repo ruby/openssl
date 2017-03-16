@@ -9,40 +9,7 @@
  */
 #include "ossl.h"
 #include <stdarg.h> /* for ossl_raise */
-
-/*
- * String to HEXString conversion
- */
-int
-string2hex(const unsigned char *buf, int buf_len, char **hexbuf, int *hexbuf_len)
-{
-    static const char hex[]="0123456789abcdef";
-    int i, len;
-
-    if (buf_len < 0 || buf_len > INT_MAX / 2) { /* PARANOIA? */
-	return -1;
-    }
-    len = 2 * buf_len;
-    if (!hexbuf) { /* if no buf, return calculated len */
-	if (hexbuf_len) {
-	    *hexbuf_len = len;
-	}
-	return len;
-    }
-    if (!(*hexbuf = OPENSSL_malloc(len + 1))) {
-	return -1;
-    }
-    for (i = 0; i < buf_len; i++) {
-	(*hexbuf)[2 * i] = hex[((unsigned char)buf[i]) >> 4];
-	(*hexbuf)[2 * i + 1] = hex[buf[i] & 0x0f];
-    }
-    (*hexbuf)[2 * i] = '\0';
-
-    if (hexbuf_len) {
-	*hexbuf_len = len;
-    }
-    return len;
-}
+#include <ruby/thread_native.h> /* for OpenSSL < 1.1.0 locks */
 
 /*
  * Data Conversion
@@ -77,7 +44,7 @@ STACK_OF(type) *						\
 ossl_protect_##name##_ary2sk(VALUE ary, int *status)		\
 {								\
     return (STACK_OF(type)*)rb_protect(				\
-	    (VALUE(*)_((VALUE)))ossl_##name##_ary2sk0,		\
+	    (VALUE (*)(VALUE))ossl_##name##_ary2sk0,		\
 	    ary,						\
 	    status);						\
 }								\
@@ -97,7 +64,7 @@ OSSL_IMPL_ARY2SK(x509, X509, cX509Cert, DupX509CertPtr)
 
 #define OSSL_IMPL_SK2ARY(name, type)	        \
 VALUE						\
-ossl_##name##_sk2ary(STACK_OF(type) *sk)	\
+ossl_##name##_sk2ary(const STACK_OF(type) *sk)	\
 {						\
     type *t;					\
     int i, num;					\
@@ -136,7 +103,7 @@ ossl_buf2str(char *buf, int len)
     VALUE str;
     int status = 0;
 
-    str = rb_protect((VALUE(*)_((VALUE)))ossl_str_new, len, &status);
+    str = rb_protect((VALUE (*)(VALUE))ossl_str_new, len, &status);
     if(!NIL_P(str)) memcpy(RSTRING_PTR(str), buf, len);
     OPENSSL_free(buf);
     if(status) rb_jump_tag(status);
@@ -144,9 +111,49 @@ ossl_buf2str(char *buf, int len)
     return str;
 }
 
+void
+ossl_bin2hex(unsigned char *in, char *out, size_t inlen)
+{
+    const char *hex = "0123456789abcdef";
+    size_t i;
+
+    assert(inlen <= LONG_MAX / 2);
+    for (i = 0; i < inlen; i++) {
+	unsigned char p = in[i];
+
+	out[i * 2 + 0] = hex[p >> 4];
+	out[i * 2 + 1] = hex[p & 0x0f];
+    }
+}
+
 /*
  * our default PEM callback
  */
+
+/*
+ * OpenSSL requires passwords for PEM-encoded files to be at least four
+ * characters long. See crypto/pem/pem_lib.c (as of 1.0.2h)
+ */
+#define OSSL_MIN_PWD_LEN 4
+
+VALUE
+ossl_pem_passwd_value(VALUE pass)
+{
+    if (NIL_P(pass))
+	return Qnil;
+
+    StringValue(pass);
+
+    if (RSTRING_LEN(pass) < OSSL_MIN_PWD_LEN)
+	ossl_raise(eOSSLError, "password must be at least %d bytes", OSSL_MIN_PWD_LEN);
+    /* PEM_BUFSIZE is currently used as the second argument of pem_password_cb,
+     * that is +max_len+ of ossl_pem_passwd_cb() */
+    if (RSTRING_LEN(pass) > PEM_BUFSIZE)
+	ossl_raise(eOSSLError, "password must not be longer than %d bytes", PEM_BUFSIZE);
+
+    return pass;
+}
+
 static VALUE
 ossl_pem_passwd_cb0(VALUE flag)
 {
@@ -159,13 +166,30 @@ ossl_pem_passwd_cb0(VALUE flag)
 }
 
 int
-ossl_pem_passwd_cb(char *buf, int max_len, int flag, void *pwd)
+ossl_pem_passwd_cb(char *buf, int max_len, int flag, void *pwd_)
 {
-    int len, status = 0;
-    VALUE rflag, pass;
+    long len;
+    int status;
+    VALUE rflag, pass = (VALUE)pwd_;
 
-    if (pwd || !rb_block_given_p())
-	return PEM_def_callback(buf, max_len, flag, pwd);
+    if (RTEST(pass)) {
+	/* PEM_def_callback(buf, max_len, flag, StringValueCStr(pass)) does not
+	 * work because it does not allow NUL characters and truncates to 1024
+	 * bytes silently if the input is over 1024 bytes */
+	if (RB_TYPE_P(pass, T_STRING)) {
+	    len = RSTRING_LEN(pass);
+	    if (len >= OSSL_MIN_PWD_LEN && len <= max_len) {
+		memcpy(buf, RSTRING_PTR(pass), len);
+		return (int)len;
+	    }
+	}
+	OSSL_Debug("passed data is not valid String???");
+	return -1;
+    }
+
+    if (!rb_block_given_p()) {
+	return PEM_def_callback(buf, max_len, flag, NULL);
+    }
 
     while (1) {
 	/*
@@ -180,77 +204,19 @@ ossl_pem_passwd_cb(char *buf, int max_len, int flag, void *pwd)
 	    rb_set_errinfo(Qnil);
 	    return -1;
 	}
-	len = RSTRING_LENINT(pass);
-	if (len < 4) { /* 4 is OpenSSL hardcoded limit */
-	    rb_warning("password must be longer than 4 bytes");
+	len = RSTRING_LEN(pass);
+	if (len < OSSL_MIN_PWD_LEN) {
+	    rb_warning("password must be at least %d bytes", OSSL_MIN_PWD_LEN);
 	    continue;
 	}
 	if (len > max_len) {
-	    rb_warning("password must be shorter then %d bytes", max_len-1);
+	    rb_warning("password must not be longer than %d bytes", max_len);
 	    continue;
 	}
 	memcpy(buf, RSTRING_PTR(pass), len);
 	break;
     }
-    return len;
-}
-
-/*
- * Verify callback
- */
-int ossl_verify_cb_idx;
-
-VALUE
-ossl_call_verify_cb_proc(struct ossl_verify_cb_args *args)
-{
-    return rb_funcall(args->proc, rb_intern("call"), 2,
-                      args->preverify_ok, args->store_ctx);
-}
-
-int
-ossl_verify_cb(int ok, X509_STORE_CTX *ctx)
-{
-    VALUE proc, rctx, ret;
-    struct ossl_verify_cb_args args;
-    int state = 0;
-
-    proc = (VALUE)X509_STORE_CTX_get_ex_data(ctx, ossl_verify_cb_idx);
-    if ((void*)proc == 0)
-	proc = (VALUE)X509_STORE_get_ex_data(ctx->ctx, ossl_verify_cb_idx);
-    if ((void*)proc == 0)
-	return ok;
-    if (!NIL_P(proc)) {
-	ret = Qfalse;
-	rctx = rb_protect((VALUE(*)(VALUE))ossl_x509stctx_new,
-			  (VALUE)ctx, &state);
-	if (state) {
-	    rb_set_errinfo(Qnil);
-	    rb_warn("StoreContext initialization failure");
-	}
-	else {
-	    args.proc = proc;
-	    args.preverify_ok = ok ? Qtrue : Qfalse;
-	    args.store_ctx = rctx;
-	    ret = rb_protect((VALUE(*)(VALUE))ossl_call_verify_cb_proc, (VALUE)&args, &state);
-	    if (state) {
-		rb_set_errinfo(Qnil);
-		rb_warn("exception in verify_callback is ignored");
-	    }
-	    ossl_x509stctx_clear_ptr(rctx);
-	}
-	if (ret == Qtrue) {
-	    X509_STORE_CTX_set_error(ctx, X509_V_OK);
-	    ok = 1;
-	}
-	else{
-	    if (X509_STORE_CTX_get_error(ctx) == X509_V_OK) {
-		X509_STORE_CTX_set_error(ctx, X509_V_ERR_CERT_REJECTED);
-	    }
-	    ok = 0;
-	}
-    }
-
-    return ok;
+    return (int)len;
 }
 
 /*
@@ -294,22 +260,15 @@ static VALUE
 ossl_make_error(VALUE exc, const char *fmt, va_list args)
 {
     VALUE str = Qnil;
-    const char *msg;
-    long e;
+    unsigned long e;
 
-#ifdef HAVE_ERR_PEEK_LAST_ERROR
-    e = ERR_peek_last_error();
-#else
-    e = ERR_peek_error();
-#endif
     if (fmt) {
 	str = rb_vsprintf(fmt, args);
     }
+    e = ERR_peek_last_error();
     if (e) {
-	if (dOSSL == Qtrue) /* FULL INFO */
-	    msg = ERR_error_string(e, NULL);
-	else
-	    msg = ERR_reason_error_string(e);
+	const char *msg = ERR_reason_error_string(e);
+
 	if (NIL_P(str)) {
 	    if (msg) str = rb_str_new_cstr(msg);
 	}
@@ -317,13 +276,8 @@ ossl_make_error(VALUE exc, const char *fmt, va_list args)
 	    if (RSTRING_LEN(str)) rb_str_cat2(str, ": ");
 	    rb_str_cat2(str, msg ? msg : "(null)");
 	}
+	ossl_clear_error();
     }
-    if (dOSSL == Qtrue){ /* show all errors on the stack */
-	while ((e = ERR_get_error()) != 0){
-	    rb_warn("error on stack: %s", ERR_error_string(e, NULL));
-	}
-    }
-    ERR_clear_error();
 
     if (NIL_P(str)) str = rb_str_new(0, 0);
     return rb_exc_new3(exc, str);
@@ -340,15 +294,32 @@ ossl_raise(VALUE exc, const char *fmt, ...)
     rb_exc_raise(err);
 }
 
-VALUE
-ossl_exc_new(VALUE exc, const char *fmt, ...)
+void
+ossl_clear_error(void)
 {
-    va_list args;
-    VALUE err;
-    va_start(args, fmt);
-    err = ossl_make_error(exc, fmt, args);
-    va_end(args);
-    return err;
+    if (dOSSL == Qtrue) {
+	unsigned long e;
+	const char *file, *data, *errstr;
+	int line, flags;
+
+	while ((e = ERR_get_error_line_data(&file, &line, &data, &flags))) {
+	    errstr = ERR_error_string(e, NULL);
+	    if (!errstr)
+		errstr = "(null)";
+
+	    if (flags & ERR_TXT_STRING) {
+		if (!data)
+		    data = "(null)";
+		rb_warn("error on stack: %s (%s)", errstr, data);
+	    }
+	    else {
+		rb_warn("error on stack: %s", errstr);
+	    }
+	}
+    }
+    else {
+	ERR_clear_error();
+    }
 }
 
 /*
@@ -357,7 +328,8 @@ ossl_exc_new(VALUE exc, const char *fmt, ...)
  *
  * See any remaining errors held in queue.
  *
- * Any errors you see here are probably due to a bug in ruby's OpenSSL implementation.
+ * Any errors you see here are probably due to a bug in Ruby's OpenSSL
+ * implementation.
  */
 VALUE
 ossl_get_errors(void)
@@ -408,24 +380,14 @@ ossl_debug_get(VALUE self)
  * call-seq:
  *   OpenSSL.debug = boolean -> boolean
  *
- * Turns on or off CRYPTO_MEM_CHECK.
- * Also shows some debugging message on stderr.
+ * Turns on or off debug mode. With debug mode, all erros added to the OpenSSL
+ * error queue will be printed to stderr.
  */
 static VALUE
 ossl_debug_set(VALUE self, VALUE val)
 {
-    VALUE old = dOSSL;
-    dOSSL = val;
+    dOSSL = RTEST(val) ? Qtrue : Qfalse;
 
-    if (old != dOSSL) {
-	if (dOSSL == Qtrue) {
-	    CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_ON);
-	    fprintf(stderr, "OSSL_DEBUG: IS NOW ON!\n");
-	} else if (old == Qtrue) {
-	    CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_OFF);
-	    fprintf(stderr, "OSSL_DEBUG: IS NOW OFF!\n");
-	}
-    }
     return val;
 }
 
@@ -438,15 +400,14 @@ ossl_debug_set(VALUE self, VALUE val)
  * so otherwise will result in an error.
  *
  * === Examples
- *
- * OpenSSL.fips_mode = true   # turn FIPS mode on
- * OpenSSL.fips_mode = false  # and off again
+ *   OpenSSL.fips_mode = true   # turn FIPS mode on
+ *   OpenSSL.fips_mode = false  # and off again
  */
 static VALUE
 ossl_fips_mode_set(VALUE self, VALUE enabled)
 {
 
-#ifdef HAVE_OPENSSL_FIPS
+#ifdef OPENSSL_FIPS
     if (RTEST(enabled)) {
 	int mode = FIPS_mode();
 	if(!mode && !FIPS_mode_set(1)) /* turning on twice leads to an error */
@@ -463,10 +424,76 @@ ossl_fips_mode_set(VALUE self, VALUE enabled)
 #endif
 }
 
+#if defined(OSSL_DEBUG)
+#if !defined(LIBRESSL_VERSION_NUMBER) && \
+    (OPENSSL_VERSION_NUMBER >= 0x10100000 && !defined(OPENSSL_NO_CRYPTO_MDEBUG) || \
+     defined(CRYPTO_malloc_debug_init))
+/*
+ * call-seq:
+ *   OpenSSL.mem_check_start -> nil
+ *
+ * Calls CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_ON). Starts tracking memory
+ * allocations. See also OpenSSL.print_mem_leaks.
+ *
+ * This is available only when built with a capable OpenSSL and --enable-debug
+ * configure option.
+ */
+static VALUE
+mem_check_start(VALUE self)
+{
+	CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_ON);
+	return Qnil;
+}
+
+/*
+ * call-seq:
+ *   OpenSSL.print_mem_leaks -> true | false
+ *
+ * For debugging the Ruby/OpenSSL library. Calls CRYPTO_mem_leaks_fp(stderr).
+ * Prints detected memory leaks to standard error. This cleans the global state
+ * up thus you cannot use any methods of the library after calling this.
+ *
+ * Returns +true+ if leaks detected, +false+ otherwise.
+ *
+ * This is available only when built with a capable OpenSSL and --enable-debug
+ * configure option.
+ *
+ * === Example
+ *   OpenSSL.mem_check_start
+ *   NOT_GCED = OpenSSL::PKey::RSA.new(256)
+ *
+ *   END {
+ *     GC.start
+ *     OpenSSL.print_mem_leaks # will print the leakage
+ *   }
+ */
+static VALUE
+print_mem_leaks(VALUE self)
+{
+#if OPENSSL_VERSION_NUMBER >= 0x10100000
+    int ret;
+#endif
+
+    BN_CTX_free(ossl_bn_ctx);
+    ossl_bn_ctx = NULL;
+
+#if OPENSSL_VERSION_NUMBER >= 0x10100000
+    ret = CRYPTO_mem_leaks_fp(stderr);
+    if (ret < 0)
+	ossl_raise(eOSSLError, "CRYPTO_mem_leaks_fp");
+    return ret ? Qfalse : Qtrue;
+#else
+    CRYPTO_mem_leaks_fp(stderr);
+    return Qnil;
+#endif
+}
+#endif
+#endif
+
+#if !defined(HAVE_OPENSSL_110_THREADING_API)
 /**
  * Stores locks needed for OpenSSL thread safety
  */
-#include "ruby/thread_native.h"
 static rb_nativethread_lock_t *ossl_locks;
 
 static void
@@ -510,19 +537,11 @@ ossl_dyn_destroy_callback(struct CRYPTO_dynlock_value *l, const char *file, int 
     OPENSSL_free(l);
 }
 
-#ifdef HAVE_CRYPTO_THREADID_PTR
 static void ossl_threadid_func(CRYPTO_THREADID *id)
 {
     /* register native thread id */
     CRYPTO_THREADID_set_pointer(id, (void *)rb_nativethread_self());
 }
-#else
-static unsigned long ossl_thread_id(void)
-{
-    /* before OpenSSL 1.0, this is 'unsigned long' */
-    return (unsigned long)rb_nativethread_self();
-}
-#endif
 
 static void Init_ossl_locks(void)
 {
@@ -540,34 +559,17 @@ static void Init_ossl_locks(void)
 	rb_nativethread_lock_initialize(&ossl_locks[i]);
     }
 
-#ifdef HAVE_CRYPTO_THREADID_PTR
     CRYPTO_THREADID_set_callback(ossl_threadid_func);
-#else
-    CRYPTO_set_id_callback(ossl_thread_id);
-#endif
     CRYPTO_set_locking_callback(ossl_lock_callback);
     CRYPTO_set_dynlock_create_callback(ossl_dyn_create_callback);
     CRYPTO_set_dynlock_lock_callback(ossl_dyn_lock_callback);
     CRYPTO_set_dynlock_destroy_callback(ossl_dyn_destroy_callback);
 }
+#endif /* !HAVE_OPENSSL_110_THREADING_API */
 
 /*
  * OpenSSL provides SSL, TLS and general purpose cryptography.  It wraps the
- * OpenSSL[http://www.openssl.org/] library.
- *
- * = Install
- *
- * OpenSSL comes bundled with the Standard Library of Ruby.
- *
- * This means the OpenSSL extension is compiled with Ruby and packaged on
- * build. During compile time, Ruby will need to link against the OpenSSL
- * library on your system. However, you cannot use openssl provided by Apple to
- * build standard library openssl.
- *
- * If you use OSX, you should install another openssl and run ```./configure
- * --with-openssl-dir=/path/to/another-openssl```. For Homebrew user, run `brew
- * install openssl` and then ```./configure --with-openssl-dir=`brew prefix
- * openssl` ```.
+ * OpenSSL[https://www.openssl.org/] library.
  *
  * = Examples
  *
@@ -613,10 +615,12 @@ static void Init_ossl_locks(void)
  *
  *   key2 = OpenSSL::PKey::RSA.new File.read 'private_key.pem'
  *   key2.public? # => true
+ *   key2.private? # => true
  *
  * or
  *
  *   key3 = OpenSSL::PKey::RSA.new File.read 'public_key.pem'
+ *   key3.public? # => true
  *   key3.private? # => false
  *
  * === Loading an Encrypted Key
@@ -626,6 +630,7 @@ static void Init_ossl_locks(void)
  * loading the key:
  *
  *   key4_pem = File.read 'private.secure.pem'
+ *   pass_phrase = 'my secure pass phrase goes here'
  *   key4 = OpenSSL::PKey::RSA.new key4_pem, pass_phrase
  *
  * == RSA Encryption
@@ -790,6 +795,7 @@ static void Init_ossl_locks(void)
  * This example creates a self-signed certificate using an RSA key and a SHA1
  * signature.
  *
+ *   key = OpenSSL::PKey::RSA.new 2048
  *   name = OpenSSL::X509::Name.parse 'CN=nobody/DC=example'
  *
  *   cert = OpenSSL::X509::Certificate.new
@@ -859,8 +865,9 @@ static void Init_ossl_locks(void)
  * not readable by other users.
  *
  *   ca_key = OpenSSL::PKey::RSA.new 2048
+ *   pass_phrase = 'my secure pass phrase goes here'
  *
- *   cipher = OpenSSL::Cipher::Cipher.new 'AES-128-CBC'
+ *   cipher = OpenSSL::Cipher.new 'AES-128-CBC'
  *
  *   open 'ca_key.pem', 'w', 0400 do |io|
  *     io.write ca_key.export(cipher, pass_phrase)
@@ -1013,14 +1020,20 @@ static void Init_ossl_locks(void)
  * SSLSocket#connect must be called to initiate the SSL handshake and start
  * encryption.  A key and certificate are not required for the client socket.
  *
+ * Note that SSLSocket#close doesn't close the underlying socket by default. Set
+ * SSLSocket#sync_close to true if you want.
+ *
  *   require 'socket'
  *
- *   tcp_client = TCPSocket.new 'localhost', 5000
- *   ssl_client = OpenSSL::SSL::SSLSocket.new client_socket, context
+ *   tcp_socket = TCPSocket.new 'localhost', 5000
+ *   ssl_client = OpenSSL::SSL::SSLSocket.new tcp_socket, context
+ *   ssl_client.sync_close = true
  *   ssl_client.connect
  *
  *   ssl_client.puts "hello server!"
  *   puts ssl_client.gets
+ *
+ *   ssl_client.close # shutdown the TLS connection and close tcp_socket
  *
  * === Peer Verification
  *
@@ -1035,8 +1048,8 @@ static void Init_ossl_locks(void)
  *
  *   require 'socket'
  *
- *   tcp_client = TCPSocket.new 'localhost', 5000
- *   ssl_client = OpenSSL::SSL::SSLSocket.new client_socket, context
+ *   tcp_socket = TCPSocket.new 'localhost', 5000
+ *   ssl_client = OpenSSL::SSL::SSLSocket.new tcp_socket, context
  *   ssl_client.connect
  *
  *   ssl_client.puts "hello server!"
@@ -1110,11 +1123,14 @@ Init_openssl(void)
     /*
      * Boolean indicating whether OpenSSL is FIPS-enabled or not
      */
-#ifdef HAVE_OPENSSL_FIPS
-    rb_define_const(mOSSL, "OPENSSL_FIPS", Qtrue);
+    rb_define_const(mOSSL, "OPENSSL_FIPS",
+#ifdef OPENSSL_FIPS
+		    Qtrue
 #else
-    rb_define_const(mOSSL, "OPENSSL_FIPS", Qfalse);
+		    Qfalse
 #endif
+		   );
+
     rb_define_module_function(mOSSL, "fips_mode=", ossl_fips_mode_set, 1);
 
     /*
@@ -1123,12 +1139,6 @@ Init_openssl(void)
      */
     eOSSLError = rb_define_class_under(mOSSL,"OpenSSLError",rb_eStandardError);
     rb_global_variable(&eOSSLError);
-
-    /*
-     * Verify callback Proc index for ext-data
-     */
-    if ((ossl_verify_cb_idx = X509_STORE_CTX_get_ex_new_index(0, (void *)"ossl_verify_cb_idx", 0, 0, 0)) < 0)
-        ossl_raise(eOSSLError, "X509_STORE_CTX_get_ex_new_index");
 
     /*
      * Init debug core
@@ -1145,7 +1155,9 @@ Init_openssl(void)
      */
     ossl_s_to_der = rb_intern("to_der");
 
+#if !defined(HAVE_OPENSSL_110_THREADING_API)
     Init_ossl_locks();
+#endif
 
     /*
      * Init components
@@ -1166,15 +1178,40 @@ Init_openssl(void)
     Init_ossl_ocsp();
     Init_ossl_engine();
     Init_ossl_asn1();
-}
 
 #if defined(OSSL_DEBUG)
-/*
- * Check if all symbols are OK with 'make LDSHARED=gcc all'
- */
-int
-main(int argc, char *argv[])
-{
-    return 0;
+    /*
+     * For debugging Ruby/OpenSSL. Enable only when built with --enable-debug
+     */
+#if !defined(LIBRESSL_VERSION_NUMBER) && \
+    (OPENSSL_VERSION_NUMBER >= 0x10100000 && !defined(OPENSSL_NO_CRYPTO_MDEBUG) || \
+     defined(CRYPTO_malloc_debug_init))
+    rb_define_module_function(mOSSL, "mem_check_start", mem_check_start, 0);
+    rb_define_module_function(mOSSL, "print_mem_leaks", print_mem_leaks, 0);
+
+#if defined(CRYPTO_malloc_debug_init) /* <= 1.0.2 */
+    CRYPTO_malloc_debug_init();
+#endif
+
+#if defined(V_CRYPTO_MDEBUG_ALL) /* <= 1.0.2 */
+    CRYPTO_set_mem_debug_options(V_CRYPTO_MDEBUG_ALL);
+#endif
+
+#if OPENSSL_VERSION_NUMBER < 0x10100000 /* <= 1.0.2 */
+    {
+	int i;
+	/*
+	 * See crypto/ex_data.c; call def_get_class() immediately to avoid
+	 * allocations. 15 is the maximum number that is used as the class index
+	 * in OpenSSL 1.0.2.
+	 */
+	for (i = 0; i <= 15; i++) {
+	    if (CRYPTO_get_ex_new_index(i, 0, (void *)"ossl-mdebug-dummy", 0, 0, 0) < 0)
+		rb_raise(rb_eRuntimeError, "CRYPTO_get_ex_new_index for "
+			 "class index %d failed", i);
+	}
+    }
+#endif
+#endif
+#endif
 }
-#endif /* OSSL_DEBUG */

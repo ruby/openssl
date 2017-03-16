@@ -1,20 +1,27 @@
 language: c
 sudo: required
 group: edge
+dist: trusty
 services:
   - docker
 before_install:
   - sudo apt-get -qq update
 install:
-  - sudo sh -c "curl -L https://github.com/docker/compose/releases/download/1.3.3/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose"
+  - sudo sh -c "curl -L https://github.com/docker/compose/releases/download/1.8.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose"
   - sudo chmod +x /usr/local/bin/docker-compose
 script:
+  - docker -v
+  - docker-compose -v
   - docker-compose build --no-cache
-  - docker-compose run compile
   - docker-compose run test
 matrix:
-  include:
-    - env: RUBY_VERSION=2.2.3 OPENSSL_VERSION=1.0.0s
-    - env: RUBY_VERSION=2.2.3 OPENSSL_VERSION=1.0.1p
-    - env: RUBY_VERSION=2.2.3 OPENSSL_VERSION=1.0.2d
   fast_finish: true
+  include:
+    - env: RUBY_VERSION=ruby-2.3 OPENSSL_VERSION=openssl-1.0.2
+    - env: RUBY_VERSION=ruby-2.4 OPENSSL_VERSION=openssl-1.0.1
+    - env: RUBY_VERSION=ruby-2.4 OPENSSL_VERSION=openssl-1.0.2
+    - env: RUBY_VERSION=ruby-2.4 OPENSSL_VERSION=openssl-1.1.0
+    - env: RUBY_VERSION=ruby-2.4 OPENSSL_VERSION=libressl-2.3
+    - env: RUBY_VERSION=ruby-2.4 OPENSSL_VERSION=libressl-2.4
+    - env: RUBY_VERSION=ruby-2.4 OPENSSL_VERSION=libressl-2.5
+  allow_failures:

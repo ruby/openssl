@@ -1,6 +1,7 @@
+# frozen_string_literal: false
 require_relative 'utils'
 
-class OpenSSL::TestPKCS5 < Test::Unit::TestCase
+class OpenSSL::TestPKCS5 < OpenSSL::TestCase
 
   def test_pbkdf2_hmac_sha1_rfc6070_c_1_len_20
     p ="password"
@@ -92,6 +93,6 @@ class OpenSSL::TestPKCS5 < Test::Unit::TestCase
     value1 = OpenSSL::PKCS5.pbkdf2_hmac(p, s, c, dk_len, digest)
     value2 = OpenSSL::PKCS5.pbkdf2_hmac(p, s, c, dk_len, digest)
     assert_equal(value1, value2)
-  end if OpenSSL::PKCS5.respond_to?(:pbkdf2_hmac)
+  end
 
-end if defined?(OpenSSL::TestUtils)
+end
