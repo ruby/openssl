@@ -356,6 +356,85 @@ class OpenSSL::TestPKeyRSA < OpenSSL::PKeyTestCase
     }
   end
 
+  def test_private_encoding
+    rsa1024 = Fixtures.pkey("rsa1024")
+    asn1 = OpenSSL::ASN1::Sequence([
+      OpenSSL::ASN1::Integer(0),
+      OpenSSL::ASN1::Sequence([
+        OpenSSL::ASN1::ObjectId("rsaEncryption"),
+        OpenSSL::ASN1::Null(nil)
+      ]),
+      OpenSSL::ASN1::OctetString(rsa1024.to_der)
+    ])
+    assert_equal asn1.to_der, rsa1024.private_to_der
+    assert_same_rsa rsa1024, OpenSSL::PKey.read(asn1.to_der)
+
+    pem = <<~EOF
+    -----BEGIN PRIVATE KEY-----
+    MIICeAIBADANBgkqhkiG9w0BAQEFAASCAmIwggJeAgEAAoGBAMvCxLDUQKc+1P4+
+    Q6AeFwYDvWfALb+cvzlUEadGoPE6qNWHsLFoo8RFgeyTgE8KQTduu1OE9Zz2SMcR
+    BDu5/1jWtsLPSVrI2ofLLBARUsWanVyki39DeB4u/xkP2mKGjAokPIwOI3oCthSZ
+    lzO9bj3voxTf6XngTqUX8l8URTmHAgMBAAECgYEApKX8xBqvJ7XI7Kypfo/x8MVC
+    3rxW+1eQ2aVKIo4a7PKGjQz5RVIVyzqTUvSZoMTbkAxlSIbO5YfJpTnl3tFcOB6y
+    QMxqQPW/pl6Ni3EmRJdsRM5MsPBRZOfrXxOCdvXu1TWOS1S1TrvEr/TyL9eh2WCd
+    CGzpWgdO4KHce7vs7pECQQDv6DGoG5lHnvbvj9qSJb9K5ebRJc8S+LI7Uy5JHC0j
+    zsHTYPSqBXwPVQdGbgCEycnwwKzXzT2QxAQmJBQKun2ZAkEA2W3aeAE7Xi6zo2eG
+    4Cx4UNMHMIdfBRS7VgoekwybGmcapqV0aBew5kHeWAmxP1WUZ/dgZh2QtM1VuiBA
+    qUqkHwJBAOJLCRvi/JB8N7z82lTk2i3R8gjyOwNQJv6ilZRMyZ9vFZFHcUE27zCf
+    Kb+bX03h8WPwupjMdfgpjShU+7qq8nECQQDBrmyc16QVyo40sgTgblyiysitvviy
+    ovwZsZv4q5MCmvOPnPUrwGbRRb2VONUOMOKpFiBl9lIv7HU//nj7FMVLAkBjUXED
+    83dA8JcKM+HlioXEAxCzZVVhN+D63QwRwkN08xAPklfqDkcqccWDaZm2hdCtaYlK
+    funwYkrzI1OikQSs
+    -----END PRIVATE KEY-----
+    EOF
+    assert_equal pem, rsa1024.private_to_pem
+    assert_same_rsa rsa1024, OpenSSL::PKey.read(pem)
+  end
+
+  def test_private_encoding_encrypted
+    rsa1024 = Fixtures.pkey("rsa1024")
+    encoded = rsa1024.private_to_der("aes-128-cbc", "abcdef")
+    asn1 = OpenSSL::ASN1.decode(encoded) # PKCS #8 EncryptedPrivateKeyInfo
+    assert_kind_of OpenSSL::ASN1::Sequence, asn1
+    assert_equal 2, asn1.value.size
+    assert_not_equal rsa1024.private_to_der, encoded
+    assert_same_rsa rsa1024, OpenSSL::PKey.read(encoded, "abcdef")
+    assert_same_rsa rsa1024, OpenSSL::PKey.read(encoded) { "abcdef" }
+    assert_raise(OpenSSL::PKey::PKeyError) { OpenSSL::PKey.read(encoded, "abcxyz") }
+
+    encoded = rsa1024.private_to_pem("aes-128-cbc", "abcdef")
+    assert_match (/BEGIN ENCRYPTED PRIVATE KEY/), encoded.lines[0]
+    assert_same_rsa rsa1024, OpenSSL::PKey.read(encoded, "abcdef")
+
+    # certtool --load-privkey=test/fixtures/pkey/rsa1024.pem --to-p8 --password=abcdef
+    pem = <<~EOF
+    -----BEGIN ENCRYPTED PRIVATE KEY-----
+    MIICojAcBgoqhkiG9w0BDAEDMA4ECLqajUdSNfzwAgIEkQSCAoCDWhxr1HUrKLXA
+    FsFGGQfPT0aKH4gZipaSXXQRl0KwifHwHoDtfo/mAkJVZMnUVOm1AQ4LTFS3EdTy
+    JUwICGEQHb7QAiokIRoi0K2yHhOxVO8qgbnWuisWpiT6Ru1jCqTs/wcqlqF7z2jM
+    oXDk/vuekKst1DDXDcHrzhDkwhCQWj6jt1r2Vwaryy0FyeqsWAgBDiK2LsnCgkGD
+    21uhNZ/iWMG6tvY9hB8MDdiBJ41YdSG/AKLulAxQ1ibJz0Tasu66TmwFvWhBlME+
+    QbqfgmkgWg5buu53SvDfCA47zXihclbtdfW+U3CJ9OJkx0535TVdZbuC1QgKXvG7
+    4iKGFRMWYJqZvZM3GL4xbC75AxjXZsdCfV81VjZxjeU6ung/NRzCuCUcmBOQzo1D
+    Vv6COwAa6ttQWM0Ti8oIQHdu5Qi+nuOEHDLxCxD962M37H99sEO5cESjmrGVxhEo
+    373L4+11geGSCajdp0yiAGnXQfwaKta8cL693bRObN+b1Y+vqtDKH26N9a4R3qgg
+    2XwgQ5GH5CODoXZpi0wxncXO+3YuuhGeArtzKSXLNxHzIMlY7wZX+0e9UU03zfV/
+    aOe4/q5DpkNxgHePt0oEpamSKY5W3jzVi1dlFWsRjud1p/Grt2zjSWTYClBlJqG1
+    A/3IeDZCu+acaePJjFyv5dFffIj2l4bAYB+LFrZlSu3F/EimO/dCDWJ9JGlMK0aF
+    l9brh7786Mo+YfyklaqMMEHBbbR2Es7PR6Gt7lrcIXmzy9XSsxT6IiD1rG9KKR3i
+    CQxTup6JAx9w1q+adL+Ypikoy3gGD/ccUY6TtPoCmkQwSCS+JqQnFlCiThDJbu+V
+    eqqUNkZq
+    -----END ENCRYPTED PRIVATE KEY-----
+    EOF
+    assert_same_rsa rsa1024, OpenSSL::PKey.read(pem, "abcdef")
+  end
+
+  def test_public_encoding
+    rsa1024 = Fixtures.pkey("rsa1024")
+    assert_equal dup_public(rsa1024).to_der, rsa1024.public_to_der
+    assert_equal dup_public(rsa1024).to_pem, rsa1024.public_to_pem
+  end
+
   def test_dup
     key = Fixtures.pkey("rsa1024")
     key2 = key.dup
