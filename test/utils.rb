@@ -43,11 +43,6 @@ module OpenSSL::TestUtils
       OpenSSL::PKey.read(read_file("pkey", name))
     end
 
-    def pkey_dh(name)
-      # DH parameters can be read by OpenSSL::PKey.read atm
-      OpenSSL::PKey::DH.new(read_file("pkey", name))
-    end
-
     def read_file(category, name)
       @file_cache ||= {}
       @file_cache[[category, name]] ||=
@@ -219,7 +214,7 @@ module OpenSSL::TestUtils
         ctx.cert_store = store
         ctx.cert = @svr_cert
         ctx.key = @svr_key
-        ctx.tmp_dh_callback = proc { Fixtures.pkey_dh("dh1024") }
+        ctx.tmp_dh_callback = proc { Fixtures.pkey("dh1024") }
         begin
           ctx.ecdh_curves = "P-256"
         rescue NotImplementedError

@@ -17,13 +17,14 @@ class OpenSSL::TestPKeyDH < OpenSSL::PKeyTestCase
   end
 
   def test_DHparams
-    dh1024 = Fixtures.pkey_dh("dh1024")
+    dh1024 = Fixtures.pkey("dh1024")
     asn1 = OpenSSL::ASN1::Sequence([
       OpenSSL::ASN1::Integer(dh1024.p),
       OpenSSL::ASN1::Integer(dh1024.g)
     ])
     key = OpenSSL::PKey::DH.new(asn1.to_der)
     assert_same_dh dup_public(dh1024), key
+    # OpenSSL::PKey.read does not understand DER-encoded DHParameter
 
     pem = <<~EOF
     -----BEGIN DH PARAMETERS-----
@@ -34,13 +35,15 @@ class OpenSSL::TestPKeyDH < OpenSSL::PKeyTestCase
     EOF
     key = OpenSSL::PKey::DH.new(pem)
     assert_same_dh dup_public(dh1024), key
+    key = OpenSSL::PKey.read(pem)
+    assert_same_dh dup_public(dh1024), key
 
     assert_equal asn1.to_der, dh1024.to_der
     assert_equal pem, dh1024.export
   end
 
   def test_public_key
-    dh = Fixtures.pkey_dh("dh1024")
+    dh = Fixtures.pkey("dh1024")
     public_key = dh.public_key
     assert_no_key(public_key) #implies public_key.public? is false!
     assert_equal(dh.to_der, public_key.to_der)
@@ -48,14 +51,14 @@ class OpenSSL::TestPKeyDH < OpenSSL::PKeyTestCase
   end
 
   def test_generate_key
-    dh = Fixtures.pkey_dh("dh1024").public_key # creates a copy
+    dh = Fixtures.pkey("dh1024").public_key # creates a copy
     assert_no_key(dh)
     dh.generate_key!
     assert_key(dh)
   end
 
   def test_key_exchange
-    dh = Fixtures.pkey_dh("dh1024")
+    dh = Fixtures.pkey("dh1024")
     dh2 = dh.public_key
     dh.generate_key!
     dh2.generate_key!
