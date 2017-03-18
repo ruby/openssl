@@ -569,6 +569,53 @@ ossl_pkey_verify(VALUE self, VALUE digest, VALUE sig, VALUE data)
 }
 
 /*
+ * call-seq:
+ *    pkey.derive(peer_pkey) -> string
+ *
+ * Derives a shared secret from _pkey_ and _peer_pkey_. _pkey_ must contain
+ * the private components, _peer_pkey_ must contain the public components.
+ */
+static VALUE
+ossl_pkey_derive(int argc, VALUE *argv, VALUE self)
+{
+    EVP_PKEY *pkey, *peer_pkey;
+    EVP_PKEY_CTX *ctx;
+    VALUE peer_pkey_obj, str;
+    size_t keylen;
+
+    GetPKey(self, pkey);
+    rb_scan_args(argc, argv, "1", &peer_pkey_obj);
+    SafeGetPKey(peer_pkey_obj, peer_pkey);
+
+    ctx = EVP_PKEY_CTX_new(pkey, /* engine */NULL);
+    if (!ctx)
+	ossl_raise(ePKeyError, "EVP_PKEY_CTX_new");
+    if (EVP_PKEY_derive_init(ctx) <= 0) {
+	EVP_PKEY_CTX_free(ctx);
+	ossl_raise(ePKeyError, "EVP_PKEY_derive_init");
+    }
+    if (EVP_PKEY_derive_set_peer(ctx, peer_pkey) <= 0) {
+	EVP_PKEY_CTX_free(ctx);
+	ossl_raise(ePKeyError, "EVP_PKEY_derive_set_peer");
+    }
+
+    if (EVP_PKEY_derive(ctx, NULL, &keylen) <= 0) {
+	EVP_PKEY_CTX_free(ctx);
+	ossl_raise(ePKeyError, "EVP_PKEY_derive");
+    }
+    /* FIXME: memleak of |ctx| */
+    assert(keylen <= LONG_MAX);
+    str = rb_str_new(NULL, (long)keylen);
+    if (EVP_PKEY_derive(ctx, (unsigned char *)RSTRING_PTR(str), &keylen) <= 0) {
+	EVP_PKEY_CTX_free(ctx);
+	ossl_raise(ePKeyError, "EVP_PKEY_derive");
+    }
+    rb_str_set_len(str, (long)keylen);
+    EVP_PKEY_CTX_free(ctx);
+    return str;
+}
+
+/*
  * INIT
  */
 void
@@ -660,6 +707,7 @@ Init_ossl_pkey(void)
 
     rb_define_method(cPKey, "sign", ossl_pkey_sign, 2);
     rb_define_method(cPKey, "verify", ossl_pkey_verify, 3);
+    rb_define_method(cPKey, "derive", ossl_pkey_derive, -1);
 
     id_private_q = rb_intern_const("private?");
 
