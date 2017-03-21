@@ -57,6 +57,11 @@ VALUE ossl_do_spki_export(VALUE self, int to_der);
  * String. Sub-classes use this when overriding #to_der.
  */
 VALUE ossl_do_traditional_export(int argc, VALUE *argv, VALUE self, int to_der);
+/*
+ * Reads a pkey and returns an EVP_PKEY, or NULL if cannot be parsed. It may
+ * raise an exception.
+ */
+EVP_PKEY *ossl_do_read_pkey(VALUE data, VALUE pass);
 
 VALUE ossl_pkey_new(EVP_PKEY *);
 EVP_PKEY *GetPKeyPtr(VALUE);

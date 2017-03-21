@@ -152,7 +152,7 @@ ossl_ec_key_s_generate(VALUE klass, VALUE arg)
  */
 static VALUE ossl_ec_key_initialize(int argc, VALUE *argv, VALUE self)
 {
-    EVP_PKEY *pkey;
+    EVP_PKEY *pkey, *pkey_tmp;
     EC_KEY *ec;
     VALUE arg, pass;
 
@@ -174,27 +174,14 @@ static VALUE ossl_ec_key_initialize(int argc, VALUE *argv, VALUE self)
     } else if (rb_obj_is_kind_of(arg, cEC_GROUP)) {
 	ec = ec_key_new_from_group(arg);
     } else {
-	BIO *in;
-
-	pass = ossl_pem_passwd_value(pass);
-	in = ossl_obj2bio(arg);
-
-	ec = PEM_read_bio_ECPrivateKey(in, NULL, ossl_pem_passwd_cb, (void *)pass);
-	if (!ec) {
-	    OSSL_BIO_reset(in);
-	    ec = PEM_read_bio_EC_PUBKEY(in, NULL, ossl_pem_passwd_cb, (void *)pass);
+	pkey_tmp = ossl_do_read_pkey(arg, pass);
+	if (pkey_tmp && EVP_PKEY_base_id(pkey_tmp) == EVP_PKEY_EC) {
+	    ec = EVP_PKEY_get0_EC_KEY(pkey_tmp);
+	    EC_KEY_up_ref(ec);
+	    EVP_PKEY_free(pkey_tmp);
 	}
-	if (!ec) {
-	    OSSL_BIO_reset(in);
-	    ec = d2i_ECPrivateKey_bio(in, NULL);
-	}
-	if (!ec) {
-	    OSSL_BIO_reset(in);
-	    ec = d2i_EC_PUBKEY_bio(in, NULL);
-	}
-	BIO_free(in);
-
-	if (!ec) {
+	else {
+	    EVP_PKEY_free(pkey_tmp);
 	    ossl_clear_error();
 	    ec = ec_key_new_from_group(arg);
 	}

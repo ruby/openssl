@@ -173,8 +173,8 @@ ossl_rsa_s_generate(int argc, VALUE *argv, VALUE klass)
 static VALUE
 ossl_rsa_initialize(int argc, VALUE *argv, VALUE self)
 {
-    EVP_PKEY *pkey;
-    RSA *rsa;
+    EVP_PKEY *pkey, *pkey_tmp;
+    RSA *rsa = NULL;
     BIO *in;
     VALUE arg, pass;
 
@@ -188,32 +188,27 @@ ossl_rsa_initialize(int argc, VALUE *argv, VALUE self)
 	rsa = rsa_generate(NUM2INT(arg), NIL_P(pass) ? RSA_F4 : NUM2ULONG(pass));
     }
     else {
-	pass = ossl_pem_passwd_value(pass);
 	arg = ossl_to_der_if_possible(arg);
-	in = ossl_obj2bio(arg);
-	rsa = PEM_read_bio_RSAPrivateKey(in, NULL, ossl_pem_passwd_cb, (void *)pass);
-	if (!rsa) {
-	    OSSL_BIO_reset(in);
-	    rsa = PEM_read_bio_RSA_PUBKEY(in, NULL, NULL, NULL);
+	pkey_tmp = ossl_do_read_pkey(arg, pass);
+	if (pkey_tmp) {
+	    if (EVP_PKEY_base_id(pkey_tmp) == EVP_PKEY_RSA) {
+		rsa = EVP_PKEY_get0_RSA(pkey_tmp);
+		RSA_up_ref(rsa);
+	    }
+	    EVP_PKEY_free(pkey_tmp);
 	}
-	if (!rsa) {
-	    OSSL_BIO_reset(in);
-	    rsa = d2i_RSAPrivateKey_bio(in, NULL);
-	}
-	if (!rsa) {
-	    OSSL_BIO_reset(in);
-	    rsa = d2i_RSA_PUBKEY_bio(in, NULL);
-	}
-	if (!rsa) {
-	    OSSL_BIO_reset(in);
+	else {
+	    ossl_clear_error();
+	    in = ossl_obj2bio(arg);
 	    rsa = PEM_read_bio_RSAPublicKey(in, NULL, NULL, NULL);
+	    if (!rsa) {
+		OSSL_BIO_reset(in);
+		rsa = d2i_RSAPublicKey_bio(in, NULL);
+	    }
+	    BIO_free(in);
 	}
 	if (!rsa) {
-	    OSSL_BIO_reset(in);
-	    rsa = d2i_RSAPublicKey_bio(in, NULL);
-	}
-	BIO_free(in);
-	if (!rsa) {
+	    ossl_clear_error();
 	    ossl_raise(eRSAError, "Neither PUB key nor PRIV key");
 	}
     }

@@ -170,8 +170,8 @@ ossl_dsa_s_generate(VALUE klass, VALUE size)
 static VALUE
 ossl_dsa_initialize(int argc, VALUE *argv, VALUE self)
 {
-    EVP_PKEY *pkey;
-    DSA *dsa;
+    EVP_PKEY *pkey, *pkey_tmp;
+    DSA *dsa = NULL;
     BIO *in;
     VALUE arg, pass;
 
@@ -185,30 +185,25 @@ ossl_dsa_initialize(int argc, VALUE *argv, VALUE self)
 	}
     }
     else {
-	pass = ossl_pem_passwd_value(pass);
 	arg = ossl_to_der_if_possible(arg);
-	in = ossl_obj2bio(arg);
-	dsa = PEM_read_bio_DSAPrivateKey(in, NULL, ossl_pem_passwd_cb, (void *)pass);
-	if (!dsa) {
-	    OSSL_BIO_reset(in);
-	    dsa = PEM_read_bio_DSA_PUBKEY(in, NULL, NULL, NULL);
+	pkey_tmp = ossl_do_read_pkey(arg, pass);
+	if (pkey_tmp) {
+	    if (EVP_PKEY_base_id(pkey_tmp) == EVP_PKEY_DSA) {
+		dsa = EVP_PKEY_get0_DSA(pkey_tmp);
+		DSA_up_ref(dsa);
+	    }
+	    EVP_PKEY_free(pkey_tmp);
 	}
-	if (!dsa) {
-	    OSSL_BIO_reset(in);
-	    dsa = d2i_DSAPrivateKey_bio(in, NULL);
-	}
-	if (!dsa) {
-	    OSSL_BIO_reset(in);
-	    dsa = d2i_DSA_PUBKEY_bio(in, NULL);
-	}
-	if (!dsa) {
-	    OSSL_BIO_reset(in);
+	else {
+	    ossl_clear_error();
+	    in = ossl_obj2bio(arg);
 #define PEM_read_bio_DSAPublicKey(bp,x,cb,u) (DSA *)PEM_ASN1_read_bio( \
 	(d2i_of_void *)d2i_DSAPublicKey, PEM_STRING_DSA_PUBLIC, (bp), (void **)(x), (cb), (u))
 	    dsa = PEM_read_bio_DSAPublicKey(in, NULL, NULL, NULL);
 #undef PEM_read_bio_DSAPublicKey
+	    BIO_free(in);
 	}
-	BIO_free(in);
+
 	if (!dsa) {
 	    ossl_clear_error();
 	    ossl_raise(eDSAError, "Neither PUB key nor PRIV key");

@@ -124,30 +124,12 @@ ossl_pkey_new(EVP_PKEY *pkey)
     return obj;
 }
 
-/*
- *  call-seq:
- *     OpenSSL::PKey.read(string [, pwd ]) -> PKey
- *     OpenSSL::PKey.read(io [, pwd ]) -> PKey
- *
- * Reads a DER or PEM encoded string from _string_ or _io_ and returns an
- * instance of the appropriate PKey class.
- *
- * === Parameters
- * * _string+ is a DER- or PEM-encoded string containing an arbitrary private
- *   or public key.
- * * _io_ is an instance of IO containing a DER- or PEM-encoded
- *   arbitrary private or public key.
- * * _pwd_ is an optional password in case _string_ or _io_ is an encrypted
- *   PEM resource.
- */
-static VALUE
-ossl_pkey_new_from_data(int argc, VALUE *argv, VALUE self)
+EVP_PKEY *
+ossl_do_read_pkey(VALUE data, VALUE pass)
 {
-    EVP_PKEY *pkey;
+    EVP_PKEY *pkey = NULL;
     BIO *bio;
-    VALUE data, pass;
 
-    rb_scan_args(argc, argv, "11", &data, &pass);
     pass = ossl_pem_passwd_value(pass);
 
     bio = ossl_obj2bio(data);
@@ -170,11 +152,38 @@ ossl_pkey_new_from_data(int argc, VALUE *argv, VALUE self)
     if ((pkey = PEM_read_bio_Parameters(bio, NULL)))
 	goto ok;
 
-    BIO_free(bio);
-    ossl_raise(ePKeyError, "Could not parse PKey");
-
 ok:
     BIO_free(bio);
+    return pkey;
+}
+
+/*
+ *  call-seq:
+ *     OpenSSL::PKey.read(string [, pwd ]) -> PKey
+ *     OpenSSL::PKey.read(io [, pwd ]) -> PKey
+ *
+ * Reads a DER or PEM encoded string from _string_ or _io_ and returns an
+ * instance of the appropriate PKey class.
+ *
+ * === Parameters
+ * * _string+ is a DER- or PEM-encoded string containing an arbitrary private
+ *   or public key.
+ * * _io_ is an instance of IO containing a DER- or PEM-encoded
+ *   arbitrary private or public key.
+ * * _pwd_ is an optional password in case _string_ or _io_ is an encrypted
+ *   PEM resource.
+ */
+static VALUE
+ossl_pkey_new_from_data(int argc, VALUE *argv, VALUE self)
+{
+    EVP_PKEY *pkey;
+    VALUE data, pass;
+
+    rb_scan_args(argc, argv, "11", &data, &pass);
+    pkey = ossl_do_read_pkey(data, pass);
+    if (!pkey)
+	ossl_raise(ePKeyError, "Could not parse PKey");
+
     return ossl_pkey_new(pkey);
 }
 
