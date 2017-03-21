@@ -613,13 +613,13 @@ static void Init_ossl_locks(void)
  *
  * A key can also be loaded from a file.
  *
- *   key2 = OpenSSL::PKey::RSA.new File.read 'private_key.pem'
+ *   key2 = OpenSSL::PKey.read File.read 'private_key.pem'
  *   key2.public? # => true
  *   key2.private? # => true
  *
  * or
  *
- *   key3 = OpenSSL::PKey::RSA.new File.read 'public_key.pem'
+ *   key3 = OpenSSL::PKey.read File.read 'public_key.pem'
  *   key3.public? # => true
  *   key3.private? # => false
  *
@@ -631,7 +631,7 @@ static void Init_ossl_locks(void)
  *
  *   key4_pem = File.read 'private.secure.pem'
  *   pass_phrase = 'my secure pass phrase goes here'
- *   key4 = OpenSSL::PKey::RSA.new key4_pem, pass_phrase
+ *   key4 = OpenSSL::PKey.read key4_pem, pass_phrase
  *
  * == RSA Encryption
  *
