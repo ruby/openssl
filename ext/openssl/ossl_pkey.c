@@ -217,10 +217,10 @@ GetPrivPKeyPtr(VALUE obj)
 {
     EVP_PKEY *pkey;
 
-    if (rb_funcallv(obj, id_private_q, 0, NULL) != Qtrue) {
-	ossl_raise(rb_eArgError, "Private key is needed.");
-    }
     SafeGetPKey(obj, pkey);
+    if (!OSSL_PKEY_IS_PRIVATE(obj) && rb_respond_to(obj, id_private_q) &&
+	!RTEST(rb_funcall(obj, id_private_q, 0)))
+	ossl_raise(rb_eArgError, "private key is needed");
 
     return pkey;
 }
