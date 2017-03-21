@@ -295,36 +295,12 @@ static VALUE
 ossl_rsa_export(int argc, VALUE *argv, VALUE self)
 {
     RSA *rsa;
-    BIO *out;
-    const EVP_CIPHER *ciph = NULL;
-    VALUE cipher, pass, str;
 
     GetRSA(self, rsa);
-
-    rb_scan_args(argc, argv, "02", &cipher, &pass);
-
-    if (!NIL_P(cipher)) {
-	ciph = GetCipherPtr(cipher);
-	pass = ossl_pem_passwd_value(pass);
-    }
-    if (!(out = BIO_new(BIO_s_mem()))) {
-	ossl_raise(eRSAError, NULL);
-    }
-    if (RSA_HAS_PRIVATE(rsa)) {
-	if (!PEM_write_bio_RSAPrivateKey(out, rsa, ciph, NULL, 0,
-					 ossl_pem_passwd_cb, (void *)pass)) {
-	    BIO_free(out);
-	    ossl_raise(eRSAError, NULL);
-	}
-    } else {
-	if (!PEM_write_bio_RSA_PUBKEY(out, rsa)) {
-	    BIO_free(out);
-	    ossl_raise(eRSAError, NULL);
-	}
-    }
-    str = ossl_membio2str(out);
-
-    return str;
+    if (RSA_HAS_PRIVATE(rsa))
+	return ossl_do_traditional_export(argc, argv, self, 0);
+    else
+	return ossl_do_spki_export(self, 0);
 }
 
 /*
@@ -337,25 +313,12 @@ static VALUE
 ossl_rsa_to_der(VALUE self)
 {
     RSA *rsa;
-    int (*i2d_func)(const RSA *, unsigned char **);
-    unsigned char *p;
-    long len;
-    VALUE str;
 
     GetRSA(self, rsa);
     if (RSA_HAS_PRIVATE(rsa))
-	i2d_func = i2d_RSAPrivateKey;
+	return ossl_do_traditional_export(0, NULL, self, 1);
     else
-	i2d_func = (int (*)(const RSA *, unsigned char **))i2d_RSA_PUBKEY;
-    if((len = i2d_func(rsa, NULL)) <= 0)
-	ossl_raise(eRSAError, NULL);
-    str = rb_str_new(0, len);
-    p = (unsigned char *)RSTRING_PTR(str);
-    if(i2d_func(rsa, &p) < 0)
-	ossl_raise(eRSAError, NULL);
-    ossl_str_adjust(str, p);
-
-    return str;
+	return ossl_do_spki_export(self, 1);
 }
 
 /*

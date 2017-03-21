@@ -47,6 +47,17 @@ struct ossl_generate_cb_arg {
 int ossl_generate_cb_2(int p, int n, BN_GENCB *cb);
 void ossl_generate_cb_stop(void *ptr);
 
+/*
+ * Serializes _self_ into X.509 SubjectPublicKeyInfo format and returns the
+ * resulting String. Sub-classes use this when overriding #to_der.
+ */
+VALUE ossl_do_spki_export(VALUE self, int to_der);
+/*
+ * Serializes _self_ into the traditional format and returns the resulting
+ * String. Sub-classes use this when overriding #to_der.
+ */
+VALUE ossl_do_traditional_export(int argc, VALUE *argv, VALUE self, int to_der);
+
 VALUE ossl_pkey_new(EVP_PKEY *);
 EVP_PKEY *GetPKeyPtr(VALUE);
 EVP_PKEY *DupPKeyPtr(VALUE);

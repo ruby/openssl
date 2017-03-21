@@ -354,8 +354,8 @@ ossl_pkey_private_to_pem(int argc, VALUE *argv, VALUE self)
     return do_pkcs8_export(argc, argv, self, 0);
 }
 
-static VALUE
-do_spki_export(VALUE self, int to_der)
+VALUE
+ossl_do_spki_export(VALUE self, int to_der)
 {
     EVP_PKEY *pkey;
     BIO *bio;
@@ -379,6 +379,50 @@ do_spki_export(VALUE self, int to_der)
     return ossl_membio2str(bio);
 }
 
+VALUE
+ossl_do_traditional_export(int argc, VALUE *argv, VALUE self, int to_der)
+{
+    EVP_PKEY *pkey;
+    VALUE cipher, pass;
+    const EVP_CIPHER *enc = NULL;
+    BIO *bio;
+
+    GetPKey(self, pkey);
+    rb_scan_args(argc, argv, "02", &cipher, &pass);
+    if (!NIL_P(cipher)) {
+	enc = GetCipherPtr(cipher);
+	pass = ossl_pem_passwd_value(pass);
+    }
+
+    bio = BIO_new(BIO_s_mem());
+    if (!bio)
+	ossl_raise(ePKeyError, "BIO_new");
+    if (to_der) {
+	if (!i2d_PrivateKey_bio(bio, pkey)) {
+	    BIO_free(bio);
+	    ossl_raise(ePKeyError, "i2d_PrivateKey_bio");
+	}
+    }
+    else {
+#if OPENSSL_VERSION_NUMBER >= 0x10100000 && !defined(LIBRESSL_VERSION_NUMBER)
+	if (!PEM_write_bio_PrivateKey_traditional(bio, pkey, enc, NULL, 0,
+						  ossl_pem_passwd_cb, (void *)pass)) {
+#else
+	char pem_str[80];
+	const char *aname;
+
+	EVP_PKEY_asn1_get0_info(NULL, NULL, NULL, NULL, &aname, pkey->ameth);
+	snprintf(pem_str, sizeof(pem_str), "%s PRIVATE KEY", aname);
+	if (!PEM_ASN1_write_bio((i2d_of_void *)i2d_PrivateKey, pem_str, bio,
+				pkey, enc, NULL, 0, ossl_pem_passwd_cb, (void *)pass)) {
+#endif
+	    BIO_free(bio);
+	    ossl_raise(ePKeyError, "PEM_write_bio_PrivateKey_traditional");
+	}
+    }
+    return ossl_membio2str(bio);
+}
+
 /*
  * call-seq:
  *    pkey.public_to_der -> string
@@ -388,7 +432,7 @@ do_spki_export(VALUE self, int to_der)
 static VALUE
 ossl_pkey_public_to_der(VALUE self)
 {
-    return do_spki_export(self, 1);
+    return ossl_do_spki_export(self, 1);
 }
 
 /*
@@ -400,7 +444,7 @@ ossl_pkey_public_to_der(VALUE self)
 static VALUE
 ossl_pkey_public_to_pem(VALUE self)
 {
-    return do_spki_export(self, 0);
+    return ossl_do_spki_export(self, 0);
 }
 
 /*
