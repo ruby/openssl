@@ -70,6 +70,19 @@ extern VALUE eOSSLError;
 } while (0)
 
 /*
+ * Type conversions
+ */
+#if !defined(NUM2UINT64T) /* in case Ruby starts to provide */
+#  if SIZEOF_LONG == 8
+#    define NUM2UINT64T(x) ((uint64_t)NUM2ULONG(x))
+#  elif defined(HAVE_LONG_LONG) && SIZEOF_LONG_LONG == 8
+#    define NUM2UINT64T(x) ((uint64_t)NUM2ULL(x))
+#  else
+#    error "unknown platform; no 64-bit width integer"
+#  endif
+#endif
+
+/*
  * Data Conversion
  */
 STACK_OF(X509) *ossl_x509_ary2sk0(VALUE);
@@ -173,13 +186,13 @@ void ossl_debug(const char *, ...);
 #include "ossl_ocsp.h"
 #include "ossl_pkcs12.h"
 #include "ossl_pkcs7.h"
-#include "ossl_pkcs5.h"
 #include "ossl_pkey.h"
 #include "ossl_rand.h"
 #include "ossl_ssl.h"
 #include "ossl_version.h"
 #include "ossl_x509.h"
 #include "ossl_engine.h"
+#include "ossl_kdf.h"
 
 void Init_openssl(void);
 
