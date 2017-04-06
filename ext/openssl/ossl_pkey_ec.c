@@ -1323,10 +1323,14 @@ static VALUE ossl_ec_point_initialize_copy(VALUE, VALUE);
 /*
  * call-seq:
  *   OpenSSL::PKey::EC::Point.new(point)
- *   OpenSSL::PKey::EC::Point.new(group)
- *   OpenSSL::PKey::EC::Point.new(group, bn)
+ *   OpenSSL::PKey::EC::Point.new(group [, encoded_point])
  *
- * See the OpenSSL documentation for EC_POINT_*
+ * Creates a new instance of OpenSSL::PKey::EC::Point. If the only argument is
+ * an instance of EC::Point, a copy is returned. Otherwise, creates a point
+ * that belongs to _group_.
+ *
+ * _encoded_point_ is the octet string representation of the point. This
+ * must be either a String or an OpenSSL::BN.
  */
 static VALUE ossl_ec_point_initialize(int argc, VALUE *argv, VALUE self)
 {
@@ -1358,16 +1362,17 @@ static VALUE ossl_ec_point_initialize(int argc, VALUE *argv, VALUE self)
 		ossl_raise(eEC_POINT, "EC_POINT_bn2point");
 	}
 	else {
-	    BIO *in = ossl_obj2bio(&arg2);
-
-/* BUG: finish me */
-
-            BIO_free(in);
-
-            if (point == NULL) {
-                ossl_raise(eEC_POINT, "unknown type for 2nd arg");
-            }
-        }
+	    StringValue(arg2);
+	    point = EC_POINT_new(group);
+	    if (!point)
+		ossl_raise(eEC_POINT, "EC_POINT_new");
+	    if (!EC_POINT_oct2point(group, point,
+				    (unsigned char *)RSTRING_PTR(arg2),
+				    RSTRING_LEN(arg2), ossl_bn_ctx)) {
+		EC_POINT_free(point);
+		ossl_raise(eEC_POINT, "EC_POINT_oct2point");
+	    }
+	}
     }
 
     RTYPEDDATA_DATA(self) = point;
@@ -1523,38 +1528,38 @@ static VALUE ossl_ec_point_set_to_infinity(VALUE self)
 
 /*
  * call-seq:
- *   point.to_bn(conversion_form = nil) => OpenSSL::BN
+ *    point.to_octet_string(conversion_form) -> String
  *
- * Convert the EC point into an octet string and store in an OpenSSL::BN. If
- * _conversion_form_ is given, the point data is converted using the specified
- * form. If not given, the default form set in the EC::Group object is used.
+ * Returns the octet string representation of the elliptic curve point.
  *
- * See also EC::Point#point_conversion_form=.
+ * _conversion_form_ specifies how the point is converted. Possible values are:
+ *
+ * - +:compressed+
+ * - +:uncompressed+
+ * - +:hybrid+
  */
 static VALUE
-ossl_ec_point_to_bn(int argc, VALUE *argv, VALUE self)
+ossl_ec_point_to_octet_string(VALUE self, VALUE conversion_form)
 {
     EC_POINT *point;
-    VALUE form_obj, bn_obj;
     const EC_GROUP *group;
     point_conversion_form_t form;
-    BIGNUM *bn;
+    VALUE str;
+    size_t len;
 
     GetECPoint(self, point);
     GetECPointGroup(self, group);
-    rb_scan_args(argc, argv, "01", &form_obj);
-    if (NIL_P(form_obj))
-	form = EC_GROUP_get_point_conversion_form(group);
-    else
-	form = parse_point_conversion_form_symbol(form_obj);
+    form = parse_point_conversion_form_symbol(conversion_form);
 
-    bn_obj = rb_obj_alloc(cBN);
-    bn = GetBNPtr(bn_obj);
-
-    if (EC_POINT_point2bn(group, point, form, bn, ossl_bn_ctx) == NULL)
-        ossl_raise(eEC_POINT, "EC_POINT_point2bn");
-
-    return bn_obj;
+    len = EC_POINT_point2oct(group, point, form, NULL, 0, ossl_bn_ctx);
+    if (!len)
+	ossl_raise(eEC_POINT, "EC_POINT_point2oct");
+    str = rb_str_new(NULL, (long)len);
+    if (!EC_POINT_point2oct(group, point, form,
+			    (unsigned char *)RSTRING_PTR(str), len,
+			    ossl_bn_ctx))
+	ossl_raise(eEC_POINT, "EC_POINT_point2oct");
+    return str;
 }
 
 /*
@@ -1779,7 +1784,7 @@ void Init_ossl_ec(void)
     rb_define_method(cEC_POINT, "set_to_infinity!", ossl_ec_point_set_to_infinity, 0);
 /* all the other methods */
 
-    rb_define_method(cEC_POINT, "to_bn", ossl_ec_point_to_bn, -1);
+    rb_define_method(cEC_POINT, "to_octet_string", ossl_ec_point_to_octet_string, 1);
     rb_define_method(cEC_POINT, "mul", ossl_ec_point_mul, -1);
 
     id_i_group = rb_intern("@group");
