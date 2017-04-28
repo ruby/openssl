@@ -1483,7 +1483,7 @@ ossl_ssl_setup(VALUE self)
     GetOpenFile(io, fptr);
     rb_io_check_readable(fptr);
     rb_io_check_writable(fptr);
-    SSL_set_fd(ssl, TO_SOCKET(FPTR_TO_FD(fptr)));
+    SSL_set_fd(ssl, TO_SOCKET(fptr->fd));
 
     return Qtrue;
 }
@@ -1548,12 +1548,12 @@ ossl_start_ssl(VALUE self, int (*func)(), const char *funcname, VALUE opts)
 	case SSL_ERROR_WANT_WRITE:
             if (no_exception_p(opts)) { return sym_wait_writable; }
             write_would_block(nonblock);
-            rb_io_wait_writable(FPTR_TO_FD(fptr));
+            rb_io_wait_writable(fptr->fd);
             continue;
 	case SSL_ERROR_WANT_READ:
             if (no_exception_p(opts)) { return sym_wait_readable; }
             read_would_block(nonblock);
-            rb_io_wait_readable(FPTR_TO_FD(fptr));
+            rb_io_wait_readable(fptr->fd);
             continue;
 	case SSL_ERROR_SYSCALL:
 	    if (errno) rb_sys_fail(funcname);
@@ -1691,7 +1691,7 @@ ossl_ssl_read_internal(int argc, VALUE *argv, VALUE self, int nonblock)
     GetOpenFile(io, fptr);
     if (ssl_started(ssl)) {
 	if(!nonblock && SSL_pending(ssl) <= 0)
-	    rb_thread_wait_fd(FPTR_TO_FD(fptr));
+	    rb_thread_wait_fd(fptr->fd);
 	for (;;){
 	    nread = SSL_read(ssl, RSTRING_PTR(str), RSTRING_LENINT(str));
 	    switch(ssl_get_error(ssl, nread)){
@@ -1703,12 +1703,12 @@ ossl_ssl_read_internal(int argc, VALUE *argv, VALUE self, int nonblock)
 	    case SSL_ERROR_WANT_WRITE:
 		if (no_exception_p(opts)) { return sym_wait_writable; }
                 write_would_block(nonblock);
-                rb_io_wait_writable(FPTR_TO_FD(fptr));
+                rb_io_wait_writable(fptr->fd);
                 continue;
 	    case SSL_ERROR_WANT_READ:
 		if (no_exception_p(opts)) { return sym_wait_readable; }
                 read_would_block(nonblock);
-                rb_io_wait_readable(FPTR_TO_FD(fptr));
+                rb_io_wait_readable(fptr->fd);
 		continue;
 	    case SSL_ERROR_SYSCALL:
 		if (!ERR_peek_error()) {
@@ -1809,12 +1809,12 @@ ossl_ssl_write_internal(VALUE self, VALUE str, VALUE opts)
 	    case SSL_ERROR_WANT_WRITE:
 		if (no_exception_p(opts)) { return sym_wait_writable; }
                 write_would_block(nonblock);
-                rb_io_wait_writable(FPTR_TO_FD(fptr));
+                rb_io_wait_writable(fptr->fd);
                 continue;
 	    case SSL_ERROR_WANT_READ:
 		if (no_exception_p(opts)) { return sym_wait_readable; }
                 read_would_block(nonblock);
-                rb_io_wait_readable(FPTR_TO_FD(fptr));
+                rb_io_wait_readable(fptr->fd);
                 continue;
 	    case SSL_ERROR_SYSCALL:
 		if (errno) rb_sys_fail(0);
