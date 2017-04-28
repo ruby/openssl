@@ -194,6 +194,7 @@ class OpenSSL::TestX509Store < OpenSSL::TestCase
   end
 
   def test_set_errors
+    return if OpenSSL::OPENSSL_VERSION_NUMBER >= 0x10100000
     now = Time.now
     ca1_cert = issue_cert(@ca1, @rsa2048, 1, [], nil, nil)
     store = OpenSSL::X509::Store.new
