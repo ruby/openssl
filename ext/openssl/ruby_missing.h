@@ -10,9 +10,6 @@
 #if !defined(_OSSL_RUBY_MISSING_H_)
 #define _OSSL_RUBY_MISSING_H_
 
-#define rb_define_copy_func(klass, func) \
-	rb_define_method((klass), "initialize_copy", (func), 1)
-
 #define FPTR_TO_FD(fptr) ((fptr)->fd)
 
 #ifndef RB_INTEGER_TYPE_P

@@ -267,7 +267,7 @@ Init_ossl_x509revoked(void)
 
     rb_define_alloc_func(cX509Rev, ossl_x509revoked_alloc);
     rb_define_method(cX509Rev, "initialize", ossl_x509revoked_initialize, -1);
-    rb_define_copy_func(cX509Rev, ossl_x509revoked_initialize_copy);
+    rb_define_method(cX509Rev, "initialize_copy", ossl_x509revoked_initialize_copy, 1);
 
     rb_define_method(cX509Rev, "serial", ossl_x509revoked_get_serial, 0);
     rb_define_method(cX509Rev, "serial=", ossl_x509revoked_set_serial, 1);

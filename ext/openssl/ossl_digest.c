@@ -448,7 +448,7 @@ Init_ossl_digest(void)
     rb_define_alloc_func(cDigest, ossl_digest_alloc);
 
     rb_define_method(cDigest, "initialize", ossl_digest_initialize, -1);
-    rb_define_copy_func(cDigest, ossl_digest_copy);
+    rb_define_method(cDigest, "initialize_copy", ossl_digest_copy, 1);
     rb_define_method(cDigest, "reset", ossl_digest_reset, 0);
     rb_define_method(cDigest, "update", ossl_digest_update, 1);
     rb_define_alias(cDigest, "<<", "update");

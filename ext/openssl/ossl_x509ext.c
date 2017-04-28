@@ -469,7 +469,7 @@ Init_ossl_x509ext(void)
     cX509Ext = rb_define_class_under(mX509, "Extension", rb_cObject);
     rb_define_alloc_func(cX509Ext, ossl_x509ext_alloc);
     rb_define_method(cX509Ext, "initialize", ossl_x509ext_initialize, -1);
-    rb_define_copy_func(cX509Ext, ossl_x509ext_initialize_copy);
+    rb_define_method(cX509Ext, "initialize_copy", ossl_x509ext_initialize_copy, 1);
     rb_define_method(cX509Ext, "oid=", ossl_x509ext_set_oid, 1);
     rb_define_method(cX509Ext, "value=", ossl_x509ext_set_value, 1);
     rb_define_method(cX509Ext, "critical=", ossl_x509ext_set_critical, 1);

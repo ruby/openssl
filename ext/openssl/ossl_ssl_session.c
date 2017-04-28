@@ -319,7 +319,7 @@ void Init_ossl_ssl_session(void)
 
 	rb_define_alloc_func(cSSLSession, ossl_ssl_session_alloc);
 	rb_define_method(cSSLSession, "initialize", ossl_ssl_session_initialize, 1);
-	rb_define_copy_func(cSSLSession, ossl_ssl_session_initialize_copy);
+	rb_define_method(cSSLSession, "initialize_copy", ossl_ssl_session_initialize_copy, 1);
 
 	rb_define_method(cSSLSession, "==", ossl_ssl_session_eq, 1);
 

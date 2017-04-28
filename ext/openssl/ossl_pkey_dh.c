@@ -618,7 +618,7 @@ Init_ossl_dh(void)
     cDH = rb_define_class_under(mPKey, "DH", cPKey);
     rb_define_singleton_method(cDH, "generate", ossl_dh_s_generate, -1);
     rb_define_method(cDH, "initialize", ossl_dh_initialize, -1);
-    rb_define_copy_func(cDH, ossl_dh_initialize_copy);
+    rb_define_method(cDH, "initialize_copy", ossl_dh_initialize_copy, 1);
     rb_define_method(cDH, "public?", ossl_dh_is_public, 0);
     rb_define_method(cDH, "private?", ossl_dh_is_private, 0);
     rb_define_method(cDH, "to_text", ossl_dh_to_text, 0);

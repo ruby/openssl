@@ -1726,7 +1726,7 @@ void Init_ossl_ec(void)
 
     rb_define_singleton_method(cEC, "generate", ossl_ec_key_s_generate, 1);
     rb_define_method(cEC, "initialize", ossl_ec_key_initialize, -1);
-    rb_define_copy_func(cEC, ossl_ec_key_initialize_copy);
+    rb_define_method(cEC, "initialize_copy", ossl_ec_key_initialize_copy, 1);
 /* copy/dup/cmp */
 
     rb_define_method(cEC, "group", ossl_ec_key_get_group, 0);
@@ -1763,7 +1763,7 @@ void Init_ossl_ec(void)
 
     rb_define_alloc_func(cEC_GROUP, ossl_ec_group_alloc);
     rb_define_method(cEC_GROUP, "initialize", ossl_ec_group_initialize, -1);
-    rb_define_copy_func(cEC_GROUP, ossl_ec_group_initialize_copy);
+    rb_define_method(cEC_GROUP, "initialize_copy", ossl_ec_group_initialize_copy, 1);
     rb_define_method(cEC_GROUP, "eql?", ossl_ec_group_eql, 1);
     rb_define_alias(cEC_GROUP, "==", "eql?");
 /* copy/dup/cmp */
@@ -1799,7 +1799,7 @@ void Init_ossl_ec(void)
 
     rb_define_alloc_func(cEC_POINT, ossl_ec_point_alloc);
     rb_define_method(cEC_POINT, "initialize", ossl_ec_point_initialize, -1);
-    rb_define_copy_func(cEC_POINT, ossl_ec_point_initialize_copy);
+    rb_define_method(cEC_POINT, "initialize_copy", ossl_ec_point_initialize_copy, 1);
     rb_attr(cEC_POINT, rb_intern("group"), 1, 0, 0);
     rb_define_method(cEC_POINT, "eql?", ossl_ec_point_eql, 1);
     rb_define_alias(cEC_POINT, "==", "eql?");

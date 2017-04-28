@@ -1055,7 +1055,7 @@ Init_ossl_cipher(void)
     eCipherError = rb_define_class_under(cCipher, "CipherError", eOSSLError);
 
     rb_define_alloc_func(cCipher, ossl_cipher_alloc);
-    rb_define_copy_func(cCipher, ossl_cipher_copy);
+    rb_define_method(cCipher, "initialize_copy", ossl_cipher_copy, 1);
     rb_define_module_function(cCipher, "ciphers", ossl_s_ciphers, 0);
     rb_define_method(cCipher, "initialize", ossl_cipher_initialize, 1);
     rb_define_method(cCipher, "reset", ossl_cipher_reset, 0);

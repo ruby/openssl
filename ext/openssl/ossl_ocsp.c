@@ -1824,7 +1824,7 @@ Init_ossl_ocsp(void)
 
     cOCSPReq = rb_define_class_under(mOCSP, "Request", rb_cObject);
     rb_define_alloc_func(cOCSPReq, ossl_ocspreq_alloc);
-    rb_define_copy_func(cOCSPReq, ossl_ocspreq_initialize_copy);
+    rb_define_method(cOCSPReq, "initialize_copy", ossl_ocspreq_initialize_copy, 1);
     rb_define_method(cOCSPReq, "initialize", ossl_ocspreq_initialize, -1);
     rb_define_method(cOCSPReq, "add_nonce", ossl_ocspreq_add_nonce, -1);
     rb_define_method(cOCSPReq, "check_nonce", ossl_ocspreq_check_nonce, 1);
@@ -1842,7 +1842,7 @@ Init_ossl_ocsp(void)
     cOCSPRes = rb_define_class_under(mOCSP, "Response", rb_cObject);
     rb_define_singleton_method(cOCSPRes, "create", ossl_ocspres_s_create, 2);
     rb_define_alloc_func(cOCSPRes, ossl_ocspres_alloc);
-    rb_define_copy_func(cOCSPRes, ossl_ocspres_initialize_copy);
+    rb_define_method(cOCSPRes, "initialize_copy", ossl_ocspres_initialize_copy, 1);
     rb_define_method(cOCSPRes, "initialize", ossl_ocspres_initialize, -1);
     rb_define_method(cOCSPRes, "status", ossl_ocspres_status, 0);
     rb_define_method(cOCSPRes, "status_string", ossl_ocspres_status_string, 0);
@@ -1857,7 +1857,7 @@ Init_ossl_ocsp(void)
 
     cOCSPBasicRes = rb_define_class_under(mOCSP, "BasicResponse", rb_cObject);
     rb_define_alloc_func(cOCSPBasicRes, ossl_ocspbres_alloc);
-    rb_define_copy_func(cOCSPBasicRes, ossl_ocspbres_initialize_copy);
+    rb_define_method(cOCSPBasicRes, "initialize_copy", ossl_ocspbres_initialize_copy, 1);
     rb_define_method(cOCSPBasicRes, "initialize", ossl_ocspbres_initialize, -1);
     rb_define_method(cOCSPBasicRes, "copy_nonce", ossl_ocspbres_copy_nonce, 1);
     rb_define_method(cOCSPBasicRes, "add_nonce", ossl_ocspbres_add_nonce, -1);
@@ -1876,7 +1876,7 @@ Init_ossl_ocsp(void)
      */
     cOCSPSingleRes = rb_define_class_under(mOCSP, "SingleResponse", rb_cObject);
     rb_define_alloc_func(cOCSPSingleRes, ossl_ocspsres_alloc);
-    rb_define_copy_func(cOCSPSingleRes, ossl_ocspsres_initialize_copy);
+    rb_define_method(cOCSPSingleRes, "initialize_copy", ossl_ocspsres_initialize_copy, 1);
     rb_define_method(cOCSPSingleRes, "initialize", ossl_ocspsres_initialize, 1);
     rb_define_method(cOCSPSingleRes, "check_validity", ossl_ocspsres_check_validity, -1);
     rb_define_method(cOCSPSingleRes, "certid", ossl_ocspsres_get_certid, 0);
@@ -1895,7 +1895,7 @@ Init_ossl_ocsp(void)
 
     cOCSPCertId = rb_define_class_under(mOCSP, "CertificateId", rb_cObject);
     rb_define_alloc_func(cOCSPCertId, ossl_ocspcid_alloc);
-    rb_define_copy_func(cOCSPCertId, ossl_ocspcid_initialize_copy);
+    rb_define_method(cOCSPCertId, "initialize_copy", ossl_ocspcid_initialize_copy, 1);
     rb_define_method(cOCSPCertId, "initialize", ossl_ocspcid_initialize, -1);
     rb_define_method(cOCSPCertId, "cmp", ossl_ocspcid_cmp, 1);
     rb_define_method(cOCSPCertId, "cmp_issuer", ossl_ocspcid_cmp_issuer, 1);
