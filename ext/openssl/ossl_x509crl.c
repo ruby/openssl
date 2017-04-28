@@ -520,7 +520,7 @@ Init_ossl_x509crl(void)
 
     rb_define_alloc_func(cX509CRL, ossl_x509crl_alloc);
     rb_define_method(cX509CRL, "initialize", ossl_x509crl_initialize, -1);
-    rb_define_copy_func(cX509CRL, ossl_x509crl_copy);
+    rb_define_method(cX509CRL, "initialize_copy", ossl_x509crl_copy, 1);
 
     rb_define_method(cX509CRL, "version", ossl_x509crl_get_version, 0);
     rb_define_method(cX509CRL, "version=", ossl_x509crl_set_version, 1);

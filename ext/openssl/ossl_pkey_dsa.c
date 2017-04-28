@@ -632,7 +632,7 @@ Init_ossl_dsa(void)
 
     rb_define_singleton_method(cDSA, "generate", ossl_dsa_s_generate, 1);
     rb_define_method(cDSA, "initialize", ossl_dsa_initialize, -1);
-    rb_define_copy_func(cDSA, ossl_dsa_initialize_copy);
+    rb_define_method(cDSA, "initialize_copy", ossl_dsa_initialize_copy, 1);
 
     rb_define_method(cDSA, "public?", ossl_dsa_is_public, 0);
     rb_define_method(cDSA, "private?", ossl_dsa_is_private, 0);

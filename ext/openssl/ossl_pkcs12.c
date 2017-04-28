@@ -252,7 +252,7 @@ Init_ossl_pkcs12(void)
     rb_define_singleton_method(cPKCS12, "create", ossl_pkcs12_s_create, -1);
 
     rb_define_alloc_func(cPKCS12, ossl_pkcs12_s_allocate);
-    rb_define_copy_func(cPKCS12, ossl_pkcs12_initialize_copy);
+    rb_define_method(cPKCS12, "initialize_copy", ossl_pkcs12_initialize_copy, 1);
     rb_attr(cPKCS12, rb_intern("key"), 1, 0, Qfalse);
     rb_attr(cPKCS12, rb_intern("certificate"), 1, 0, Qfalse);
     rb_attr(cPKCS12, rb_intern("ca_certs"), 1, 0, Qfalse);

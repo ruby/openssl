@@ -457,7 +457,7 @@ Init_ossl_x509req(void)
 
     rb_define_alloc_func(cX509Req, ossl_x509req_alloc);
     rb_define_method(cX509Req, "initialize", ossl_x509req_initialize, -1);
-    rb_define_copy_func(cX509Req, ossl_x509req_copy);
+    rb_define_method(cX509Req, "initialize_copy", ossl_x509req_copy, 1);
 
     rb_define_method(cX509Req, "to_pem", ossl_x509req_to_pem, 0);
     rb_define_method(cX509Req, "to_der", ossl_x509req_to_der, 0);

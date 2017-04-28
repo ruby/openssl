@@ -717,7 +717,7 @@ Init_ossl_rsa(void)
 
     rb_define_singleton_method(cRSA, "generate", ossl_rsa_s_generate, -1);
     rb_define_method(cRSA, "initialize", ossl_rsa_initialize, -1);
-    rb_define_copy_func(cRSA, ossl_rsa_initialize_copy);
+    rb_define_method(cRSA, "initialize_copy", ossl_rsa_initialize_copy, 1);
 
     rb_define_method(cRSA, "public?", ossl_rsa_is_public, 0);
     rb_define_method(cRSA, "private?", ossl_rsa_is_private, 0);

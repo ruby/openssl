@@ -1068,7 +1068,7 @@ Init_ossl_pkcs7(void)
     rb_attr(cPKCS7, rb_intern("data"), 1, 0, Qfalse);
     rb_attr(cPKCS7, rb_intern("error_string"), 1, 1, Qfalse);
     rb_define_alloc_func(cPKCS7, ossl_pkcs7_alloc);
-    rb_define_copy_func(cPKCS7, ossl_pkcs7_copy);
+    rb_define_method(cPKCS7, "initialize_copy", ossl_pkcs7_copy, 1);
     rb_define_method(cPKCS7, "initialize", ossl_pkcs7_initialize, -1);
     rb_define_method(cPKCS7, "type=", ossl_pkcs7_set_type, 1);
     rb_define_method(cPKCS7, "type", ossl_pkcs7_get_type, 0);

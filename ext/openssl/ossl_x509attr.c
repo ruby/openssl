@@ -319,7 +319,7 @@ Init_ossl_x509attr(void)
     cX509Attr = rb_define_class_under(mX509, "Attribute", rb_cObject);
     rb_define_alloc_func(cX509Attr, ossl_x509attr_alloc);
     rb_define_method(cX509Attr, "initialize", ossl_x509attr_initialize, -1);
-    rb_define_copy_func(cX509Attr, ossl_x509attr_initialize_copy);
+    rb_define_method(cX509Attr, "initialize_copy", ossl_x509attr_initialize_copy, 1);
     rb_define_method(cX509Attr, "oid=", ossl_x509attr_set_oid, 1);
     rb_define_method(cX509Attr, "oid", ossl_x509attr_get_oid, 0);
     rb_define_method(cX509Attr, "value=", ossl_x509attr_set_value, 1);

@@ -831,7 +831,7 @@ Init_ossl_x509cert(void)
 
     rb_define_alloc_func(cX509Cert, ossl_x509_alloc);
     rb_define_method(cX509Cert, "initialize", ossl_x509_initialize, -1);
-    rb_define_copy_func(cX509Cert, ossl_x509_copy);
+    rb_define_method(cX509Cert, "initialize_copy", ossl_x509_copy, 1);
 
     rb_define_method(cX509Cert, "to_der", ossl_x509_to_der, 0);
     rb_define_method(cX509Cert, "to_pem", ossl_x509_to_pem, 0);

@@ -480,7 +480,7 @@ Init_ossl_x509name(void)
 
     rb_define_alloc_func(cX509Name, ossl_x509name_alloc);
     rb_define_method(cX509Name, "initialize", ossl_x509name_initialize, -1);
-    rb_define_copy_func(cX509Name, ossl_x509name_initialize_copy);
+    rb_define_method(cX509Name, "initialize_copy", ossl_x509name_initialize_copy, 1);
     rb_define_method(cX509Name, "add_entry", ossl_x509name_add_entry, -1);
     rb_define_method(cX509Name, "to_s", ossl_x509name_to_s, -1);
     rb_define_method(cX509Name, "to_a", ossl_x509name_to_a, 0);

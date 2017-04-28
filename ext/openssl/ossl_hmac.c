@@ -377,7 +377,7 @@ Init_ossl_hmac(void)
     rb_define_singleton_method(cHMAC, "hexdigest", ossl_hmac_s_hexdigest, 3);
 
     rb_define_method(cHMAC, "initialize", ossl_hmac_initialize, 2);
-    rb_define_copy_func(cHMAC, ossl_hmac_copy);
+    rb_define_method(cHMAC, "initialize_copy", ossl_hmac_copy, 1);
 
     rb_define_method(cHMAC, "reset", ossl_hmac_reset, 0);
     rb_define_method(cHMAC, "update", ossl_hmac_update, 1);
