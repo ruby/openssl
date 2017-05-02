@@ -384,7 +384,7 @@ ossl_ocspreq_sign(int argc, VALUE *argv, VALUE self)
     if (NIL_P(digest))
 	md = EVP_sha1();
     else
-	md = GetDigestPtr(digest);
+	md = ossl_evp_get_digestbyname(digest);
     if (NIL_P(certs))
 	flg |= OCSP_NOCERTS;
     else
@@ -1016,7 +1016,7 @@ ossl_ocspbres_sign(int argc, VALUE *argv, VALUE self)
     if (NIL_P(digest))
 	md = EVP_sha1();
     else
-	md = GetDigestPtr(digest);
+	md = ossl_evp_get_digestbyname(digest);
     if (NIL_P(certs))
 	flg |= OCSP_NOCERTS;
     else
@@ -1496,7 +1496,7 @@ ossl_ocspcid_initialize(int argc, VALUE *argv, VALUE self)
 
 	x509s = GetX509CertPtr(subject); /* NO NEED TO DUP */
 	x509i = GetX509CertPtr(issuer); /* NO NEED TO DUP */
-	md = !NIL_P(digest) ? GetDigestPtr(digest) : NULL;
+	md = !NIL_P(digest) ? ossl_evp_get_digestbyname(digest) : NULL;
 
 	newid = OCSP_cert_to_id(md, x509s, x509i);
 	if (!newid)

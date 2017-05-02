@@ -298,7 +298,7 @@ ossl_pkey_sign(VALUE self, VALUE digest, VALUE data)
     int result;
 
     pkey = GetPrivPKeyPtr(self);
-    md = GetDigestPtr(digest);
+    md = ossl_evp_get_digestbyname(digest);
     StringValue(data);
     str = rb_str_new(0, EVP_PKEY_size(pkey));
 
@@ -353,7 +353,7 @@ ossl_pkey_verify(VALUE self, VALUE digest, VALUE sig, VALUE data)
 
     GetPKey(self, pkey);
     pkey_check_public_key(pkey);
-    md = GetDigestPtr(digest);
+    md = ossl_evp_get_digestbyname(digest);
     StringValue(sig);
     siglen = RSTRING_LENINT(sig);
     StringValue(data);

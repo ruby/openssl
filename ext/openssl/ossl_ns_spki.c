@@ -284,7 +284,7 @@ ossl_spki_sign(VALUE self, VALUE key, VALUE digest)
     const EVP_MD *md;
 
     pkey = GetPrivPKeyPtr(key); /* NO NEED TO DUP */
-    md = GetDigestPtr(digest);
+    md = ossl_evp_get_digestbyname(digest);
     GetSPKI(self, spki);
     if (!NETSCAPE_SPKI_sign(spki, pkey, md)) {
 	ossl_raise(eSPKIError, NULL);
