@@ -26,11 +26,6 @@
   } \
 } while (0)
 
-#define SafeGetBN(obj, bn) do { \
-  OSSL_Check_Kind((obj), cBN); \
-  GetBN((obj), (bn)); \
-} while (0)
-
 static void
 ossl_bn_free(void *ptr)
 {

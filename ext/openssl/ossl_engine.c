@@ -25,10 +25,6 @@
         ossl_raise(rb_eRuntimeError, "ENGINE wasn't initialized."); \
     } \
 } while (0)
-#define SafeGetEngine(obj, engine) do { \
-    OSSL_Check_Kind((obj), cEngine); \
-    GetPKCS7((obj), (engine)); \
-} while (0)
 
 /*
  * Classes

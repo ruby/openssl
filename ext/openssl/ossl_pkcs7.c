@@ -23,10 +23,6 @@
 	ossl_raise(rb_eRuntimeError, "PKCS7 wasn't initialized."); \
     } \
 } while (0)
-#define SafeGetPKCS7(obj, pkcs7) do { \
-    OSSL_Check_Kind((obj), cPKCS7); \
-    GetPKCS7((obj), (pkcs7)); \
-} while (0)
 
 #define NewPKCS7si(klass) \
     TypedData_Wrap_Struct((klass), &ossl_pkcs7_signer_info_type, 0)
@@ -42,10 +38,6 @@
 	ossl_raise(rb_eRuntimeError, "PKCS7si wasn't initialized."); \
     } \
 } while (0)
-#define SafeGetPKCS7si(obj, p7si) do { \
-    OSSL_Check_Kind((obj), cPKCS7Signer); \
-    GetPKCS7si((obj), (p7si)); \
-} while (0)
 
 #define NewPKCS7ri(klass) \
     TypedData_Wrap_Struct((klass), &ossl_pkcs7_recip_info_type, 0)
@@ -60,10 +52,6 @@
     if (!(p7ri)) { \
 	ossl_raise(rb_eRuntimeError, "PKCS7ri wasn't initialized."); \
     } \
-} while (0)
-#define SafeGetPKCS7ri(obj, p7ri) do { \
-    OSSL_Check_Kind((obj), cPKCS7Recipient); \
-    GetPKCS7ri((obj), (p7ri)); \
 } while (0)
 
 #define numberof(ary) (int)(sizeof(ary)/sizeof((ary)[0]))
@@ -162,7 +150,7 @@ DupPKCS7SignerPtr(VALUE obj)
 {
     PKCS7_SIGNER_INFO *p7si, *pkcs7;
 
-    SafeGetPKCS7si(obj, p7si);
+    GetPKCS7si(obj, p7si);
     if (!(pkcs7 = ossl_PKCS7_SIGNER_INFO_dup(p7si))) {
 	ossl_raise(ePKCS7Error, NULL);
     }
@@ -189,7 +177,7 @@ DupPKCS7RecipientPtr(VALUE obj)
 {
     PKCS7_RECIP_INFO *p7ri, *pkcs7;
 
-    SafeGetPKCS7ri(obj, p7ri);
+    GetPKCS7ri(obj, p7ri);
     if (!(pkcs7 = ossl_PKCS7_RECIP_INFO_dup(p7ri))) {
 	ossl_raise(ePKCS7Error, NULL);
     }
@@ -238,7 +226,7 @@ ossl_pkcs7_s_write_smime(int argc, VALUE *argv, VALUE klass)
     rb_scan_args(argc, argv, "12", &pkcs7, &data, &flags);
     flg = NIL_P(flags) ? 0 : NUM2INT(flags);
     if(NIL_P(data)) data = ossl_pkcs7_get_data(pkcs7);
-    SafeGetPKCS7(pkcs7, p7);
+    GetPKCS7(pkcs7, p7);
     if(!NIL_P(data) && PKCS7_is_detached(p7))
 	flg |= PKCS7_DETACHED;
     in = NIL_P(data) ? NULL : ossl_obj2bio(data);
@@ -414,7 +402,7 @@ ossl_pkcs7_copy(VALUE self, VALUE other)
     if (self == other) return self;
 
     GetPKCS7(self, a);
-    SafeGetPKCS7(other, b);
+    GetPKCS7(other, b);
 
     pkcs7 = PKCS7_dup(b);
     if (!pkcs7) {

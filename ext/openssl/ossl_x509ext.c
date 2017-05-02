@@ -23,10 +23,6 @@
 	ossl_raise(rb_eRuntimeError, "EXT wasn't initialized!"); \
     } \
 } while (0)
-#define SafeGetX509Ext(obj, ext) do { \
-    OSSL_Check_Kind((obj), cX509Ext); \
-    GetX509Ext((obj), (ext)); \
-} while (0)
 #define MakeX509ExtFactory(klass, obj, ctx) do { \
     (obj) = TypedData_Wrap_Struct((klass), &ossl_x509extfactory_type, 0); \
     if (!((ctx) = OPENSSL_malloc(sizeof(X509V3_CTX)))) \
@@ -90,7 +86,7 @@ GetX509ExtPtr(VALUE obj)
 {
     X509_EXTENSION *ext;
 
-    SafeGetX509Ext(obj, ext);
+    GetX509Ext(obj, ext);
 
     return ext;
 }
@@ -305,7 +301,7 @@ ossl_x509ext_initialize_copy(VALUE self, VALUE other)
 
     rb_check_frozen(self);
     GetX509Ext(self, ext);
-    SafeGetX509Ext(other, ext_other);
+    GetX509Ext(other, ext_other);
 
     ext_new = X509_EXTENSION_dup(ext_other);
     if (!ext_new)

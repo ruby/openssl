@@ -397,7 +397,7 @@ ossl_sslctx_session_get_cb(SSL *ssl, unsigned char *buf, int len, int *copy)
     if (!rb_obj_is_instance_of(ret_obj, cSSLSession))
         return NULL;
 
-    SafeGetSSLSession(ret_obj, sess);
+    GetSSLSession(ret_obj, sess);
     *copy = 1;
 
     return sess;
@@ -1194,7 +1194,7 @@ ossl_sslctx_session_add(VALUE self, VALUE arg)
     SSL_SESSION *sess;
 
     GetSSLCTX(self, ctx);
-    SafeGetSSLSession(arg, sess);
+    GetSSLSession(arg, sess);
 
     return SSL_CTX_add_session(ctx, sess) == 1 ? Qtrue : Qfalse;
 }
@@ -1212,7 +1212,7 @@ ossl_sslctx_session_remove(VALUE self, VALUE arg)
     SSL_SESSION *sess;
 
     GetSSLCTX(self, ctx);
-    SafeGetSSLSession(arg, sess);
+    GetSSLSession(arg, sess);
 
     return SSL_CTX_remove_session(ctx, sess) == 1 ? Qtrue : Qfalse;
 }
@@ -2087,7 +2087,7 @@ ossl_ssl_set_session(VALUE self, VALUE arg1)
     SSL_SESSION *sess;
 
     GetSSL(self, ssl);
-    SafeGetSSLSession(arg1, sess);
+    GetSSLSession(arg1, sess);
 
     if (SSL_set_session(ssl, sess) != 1)
         ossl_raise(eSSLError, "SSL_set_session");

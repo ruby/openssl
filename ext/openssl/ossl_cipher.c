@@ -26,10 +26,6 @@
 	ossl_raise(rb_eRuntimeError, "Cipher not inititalized!"); \
     } \
 } while (0)
-#define SafeGetCipher(obj, ctx) do { \
-    OSSL_Check_Kind((obj), cCipher); \
-    GetCipher((obj), (ctx)); \
-} while (0)
 
 /*
  * Classes
@@ -146,7 +142,7 @@ ossl_cipher_copy(VALUE self, VALUE other)
     if (!ctx1) {
 	AllocCipher(self, ctx1);
     }
-    SafeGetCipher(other, ctx2);
+    GetCipher(other, ctx2);
     if (EVP_CIPHER_CTX_copy(ctx1, ctx2) != 1)
 	ossl_raise(eCipherError, NULL);
 

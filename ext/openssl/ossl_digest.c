@@ -15,10 +15,6 @@
 	ossl_raise(rb_eRuntimeError, "Digest CTX wasn't initialized!"); \
     } \
 } while (0)
-#define SafeGetDigest(obj, ctx) do { \
-    OSSL_Check_Kind((obj), cDigest); \
-    GetDigest((obj), (ctx)); \
-} while (0)
 
 /*
  * Classes
@@ -65,7 +61,7 @@ GetDigestPtr(VALUE obj)
     } else {
         EVP_MD_CTX *ctx;
 
-        SafeGetDigest(obj, ctx);
+        GetDigest(obj, ctx);
 
         md = EVP_MD_CTX_md(ctx);
     }
@@ -158,7 +154,7 @@ ossl_digest_copy(VALUE self, VALUE other)
 	if (!ctx1)
 	    ossl_raise(eDigestError, "EVP_MD_CTX_new");
     }
-    SafeGetDigest(other, ctx2);
+    GetDigest(other, ctx2);
 
     if (!EVP_MD_CTX_copy(ctx1, ctx2)) {
 	ossl_raise(eDigestError, NULL);

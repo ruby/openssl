@@ -23,10 +23,6 @@
 	ossl_raise(rb_eRuntimeError, "STORE wasn't initialized!"); \
     } \
 } while (0)
-#define SafeGetX509Store(obj, st) do { \
-    OSSL_Check_Kind((obj), cX509Store); \
-    GetX509Store((obj), (st)); \
-} while (0)
 
 #define NewX509StCtx(klass) \
     TypedData_Wrap_Struct((klass), &ossl_x509stctx_type, 0)
@@ -41,10 +37,6 @@
     if (!(ctx)) { \
 	ossl_raise(rb_eRuntimeError, "STORE_CTX is out of scope!"); \
     } \
-} while (0)
-#define SafeGetX509StCtx(obj, storep) do { \
-    OSSL_Check_Kind((obj), cX509StoreContext); \
-    GetX509Store((obj), (ctx)); \
 } while (0)
 
 /*
@@ -146,7 +138,7 @@ GetX509StorePtr(VALUE obj)
 {
     X509_STORE *store;
 
-    SafeGetX509Store(obj, store);
+    GetX509Store(obj, store);
 
     return store;
 }
@@ -156,7 +148,7 @@ DupX509StorePtr(VALUE obj)
 {
     X509_STORE *store;
 
-    SafeGetX509Store(obj, store);
+    GetX509Store(obj, store);
     X509_STORE_up_ref(store);
 
     return store;
@@ -553,7 +545,7 @@ ossl_x509stctx_initialize(int argc, VALUE *argv, VALUE self)
 
     rb_scan_args(argc, argv, "12", &store, &cert, &chain);
     GetX509StCtx(self, ctx);
-    SafeGetX509Store(store, x509st);
+    GetX509Store(store, x509st);
     if(!NIL_P(cert)) x509 = DupX509CertPtr(cert); /* NEED TO DUP */
     if(!NIL_P(chain)) x509s = ossl_x509_ary2sk(chain);
     if(X509_STORE_CTX_init(ctx, x509st, x509, x509s) != 1){

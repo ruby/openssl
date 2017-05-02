@@ -80,7 +80,7 @@ ossl_ssl_session_initialize_copy(VALUE self, VALUE other)
 
     rb_check_frozen(self);
     sess = RTYPEDDATA_DATA(self); /* XXX */
-    SafeGetSSLSession(other, sess_other);
+    GetSSLSession(other, sess_other);
 
     sess_new = ASN1_dup((i2d_of_void *)i2d_SSL_SESSION, (d2i_of_void *)d2i_SSL_SESSION,
 			(char *)sess_other);
@@ -120,7 +120,7 @@ static VALUE ossl_ssl_session_eq(VALUE val1, VALUE val2)
 	SSL_SESSION *ctx1, *ctx2;
 
 	GetSSLSession(val1, ctx1);
-	SafeGetSSLSession(val2, ctx2);
+	GetSSLSession(val2, ctx2);
 
 	switch (ossl_SSL_SESSION_cmp(ctx1, ctx2)) {
 	case 0:		return Qtrue;

@@ -22,10 +22,6 @@
     TypedData_Get_Struct((obj), OCSP_REQUEST, &ossl_ocsp_request_type, (req)); \
     if(!(req)) ossl_raise(rb_eRuntimeError, "Request wasn't initialized!"); \
 } while (0)
-#define SafeGetOCSPReq(obj, req) do { \
-    OSSL_Check_Kind((obj), cOCSPReq); \
-    GetOCSPReq((obj), (req)); \
-} while (0)
 
 #define NewOCSPRes(klass) \
     TypedData_Wrap_Struct((klass), &ossl_ocsp_response_type, 0)
@@ -36,10 +32,6 @@
 #define GetOCSPRes(obj, res) do { \
     TypedData_Get_Struct((obj), OCSP_RESPONSE, &ossl_ocsp_response_type, (res)); \
     if(!(res)) ossl_raise(rb_eRuntimeError, "Response wasn't initialized!"); \
-} while (0)
-#define SafeGetOCSPRes(obj, res) do { \
-    OSSL_Check_Kind((obj), cOCSPRes); \
-    GetOCSPRes((obj), (res)); \
 } while (0)
 
 #define NewOCSPBasicRes(klass) \
@@ -52,10 +44,6 @@
     TypedData_Get_Struct((obj), OCSP_BASICRESP, &ossl_ocsp_basicresp_type, (res)); \
     if(!(res)) ossl_raise(rb_eRuntimeError, "Response wasn't initialized!"); \
 } while (0)
-#define SafeGetOCSPBasicRes(obj, res) do { \
-    OSSL_Check_Kind((obj), cOCSPBasicRes); \
-    GetOCSPBasicRes((obj), (res)); \
-} while (0)
 
 #define NewOCSPSingleRes(klass) \
     TypedData_Wrap_Struct((klass), &ossl_ocsp_singleresp_type, 0)
@@ -67,10 +55,6 @@
     TypedData_Get_Struct((obj), OCSP_SINGLERESP, &ossl_ocsp_singleresp_type, (res)); \
     if(!(res)) ossl_raise(rb_eRuntimeError, "SingleResponse wasn't initialized!"); \
 } while (0)
-#define SafeGetOCSPSingleRes(obj, res) do { \
-    OSSL_Check_Kind((obj), cOCSPSingleRes); \
-    GetOCSPSingleRes((obj), (res)); \
-} while (0)
 
 #define NewOCSPCertId(klass) \
     TypedData_Wrap_Struct((klass), &ossl_ocsp_certid_type, 0)
@@ -81,10 +65,6 @@
 #define GetOCSPCertId(obj, cid) do { \
     TypedData_Get_Struct((obj), OCSP_CERTID, &ossl_ocsp_certid_type, (cid)); \
     if(!(cid)) ossl_raise(rb_eRuntimeError, "Cert ID wasn't initialized!"); \
-} while (0)
-#define SafeGetOCSPCertId(obj, cid) do { \
-    OSSL_Check_Kind((obj), cOCSPCertId); \
-    GetOCSPCertId((obj), (cid)); \
 } while (0)
 
 VALUE mOCSP;
@@ -200,7 +180,7 @@ ossl_ocspreq_initialize_copy(VALUE self, VALUE other)
 
     rb_check_frozen(self);
     GetOCSPReq(self, req_old);
-    SafeGetOCSPReq(other, req);
+    GetOCSPReq(other, req);
 
     req_new = ASN1_item_dup(ASN1_ITEM_rptr(OCSP_REQUEST), req);
     if (!req_new)
@@ -304,7 +284,7 @@ ossl_ocspreq_check_nonce(VALUE self, VALUE basic_resp)
     int res;
 
     GetOCSPReq(self, req);
-    SafeGetOCSPBasicRes(basic_resp, bs);
+    GetOCSPBasicRes(basic_resp, bs);
     res = OCSP_check_nonce(req, bs);
 
     return INT2NUM(res);
@@ -521,7 +501,7 @@ ossl_ocspres_initialize_copy(VALUE self, VALUE other)
 
     rb_check_frozen(self);
     GetOCSPRes(self, res_old);
-    SafeGetOCSPRes(other, res);
+    GetOCSPRes(other, res);
 
     res_new = ASN1_item_dup(ASN1_ITEM_rptr(OCSP_RESPONSE), res);
     if (!res_new)
@@ -677,7 +657,7 @@ ossl_ocspbres_initialize_copy(VALUE self, VALUE other)
 
     rb_check_frozen(self);
     GetOCSPBasicRes(self, bs_old);
-    SafeGetOCSPBasicRes(other, bs);
+    GetOCSPBasicRes(other, bs);
 
     bs_new = ASN1_item_dup(ASN1_ITEM_rptr(OCSP_BASICRESP), bs);
     if (!bs_new)
@@ -736,7 +716,7 @@ ossl_ocspbres_copy_nonce(VALUE self, VALUE request)
     int ret;
 
     GetOCSPBasicRes(self, bs);
-    SafeGetOCSPReq(request, req);
+    GetOCSPReq(request, req);
     ret = OCSP_copy_nonce(bs, req);
 
     return INT2NUM(ret);
@@ -829,7 +809,7 @@ ossl_ocspbres_add_status(VALUE self, VALUE cid, VALUE status,
     VALUE tmp;
 
     GetOCSPBasicRes(self, bs);
-    SafeGetOCSPCertId(cid, id);
+    GetOCSPCertId(cid, id);
     st = NUM2INT(status);
     if (!NIL_P(ext)) { /* All ext's members must be X509::Extension */
 	ext = rb_check_array_type(ext);
@@ -988,7 +968,7 @@ ossl_ocspbres_find_response(VALUE self, VALUE target)
     OCSP_CERTID *id;
     int n;
 
-    SafeGetOCSPCertId(target, id);
+    GetOCSPCertId(target, id);
     GetOCSPBasicRes(self, bs);
 
     if ((n = OCSP_resp_find(bs, id, -1)) == -1)
@@ -1213,7 +1193,7 @@ ossl_ocspsres_initialize_copy(VALUE self, VALUE other)
 
     rb_check_frozen(self);
     GetOCSPSingleRes(self, sres_old);
-    SafeGetOCSPSingleRes(other, sres);
+    GetOCSPSingleRes(other, sres);
 
     sres_new = ASN1_item_dup(ASN1_ITEM_rptr(OCSP_SINGLERESP), sres);
     if (!sres_new)
@@ -1468,7 +1448,7 @@ ossl_ocspcid_initialize_copy(VALUE self, VALUE other)
 
     rb_check_frozen(self);
     GetOCSPCertId(self, cid_old);
-    SafeGetOCSPCertId(other, cid);
+    GetOCSPCertId(other, cid);
 
     cid_new = OCSP_CERTID_dup(cid);
     if (!cid_new)
@@ -1543,7 +1523,7 @@ ossl_ocspcid_cmp(VALUE self, VALUE other)
     int result;
 
     GetOCSPCertId(self, id);
-    SafeGetOCSPCertId(other, id2);
+    GetOCSPCertId(other, id2);
     result = OCSP_id_cmp(id, id2);
 
     return (result == 0) ? Qtrue : Qfalse;
@@ -1564,7 +1544,7 @@ ossl_ocspcid_cmp_issuer(VALUE self, VALUE other)
     int result;
 
     GetOCSPCertId(self, id);
-    SafeGetOCSPCertId(other, id2);
+    GetOCSPCertId(other, id2);
     result = OCSP_id_issuer_cmp(id, id2);
 
     return (result == 0) ? Qtrue : Qfalse;

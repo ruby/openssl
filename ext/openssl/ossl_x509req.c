@@ -23,10 +23,6 @@
 	ossl_raise(rb_eRuntimeError, "Req wasn't initialized!"); \
     } \
 } while (0)
-#define SafeGetX509Req(obj, req) do { \
-    OSSL_Check_Kind((obj), cX509Req); \
-    GetX509Req((obj), (req)); \
-} while (0)
 
 /*
  * Classes
@@ -76,7 +72,7 @@ GetX509ReqPtr(VALUE obj)
 {
     X509_REQ *req;
 
-    SafeGetX509Req(obj, req);
+    GetX509Req(obj, req);
 
     return req;
 }
@@ -86,7 +82,7 @@ DupX509ReqPtr(VALUE obj)
 {
     X509_REQ *req, *new;
 
-    SafeGetX509Req(obj, req);
+    GetX509Req(obj, req);
     if (!(new = X509_REQ_dup(req))) {
 	ossl_raise(eX509ReqError, NULL);
     }
@@ -145,7 +141,7 @@ ossl_x509req_copy(VALUE self, VALUE other)
     rb_check_frozen(self);
     if (self == other) return self;
     GetX509Req(self, a);
-    SafeGetX509Req(other, b);
+    GetX509Req(other, b);
     if (!(req = X509_REQ_dup(b))) {
 	ossl_raise(eX509ReqError, NULL);
     }

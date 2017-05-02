@@ -17,11 +17,6 @@
     if(!(p12)) ossl_raise(rb_eRuntimeError, "PKCS12 wasn't initialized."); \
 } while (0)
 
-#define SafeGetPKCS12(obj, p12) do { \
-    OSSL_Check_Kind((obj), cPKCS12); \
-    GetPKCS12((obj), (p12)); \
-} while (0)
-
 #define ossl_pkcs12_set_key(o,v)      rb_iv_set((o), "@key", (v))
 #define ossl_pkcs12_set_cert(o,v)     rb_iv_set((o), "@certificate", (v))
 #define ossl_pkcs12_set_ca_certs(o,v) rb_iv_set((o), "@ca_certs", (v))
@@ -72,7 +67,7 @@ ossl_pkcs12_initialize_copy(VALUE self, VALUE other)
 
     rb_check_frozen(self);
     GetPKCS12(self, p12_old);
-    SafeGetPKCS12(other, p12);
+    GetPKCS12(other, p12);
 
     p12_new = ASN1_dup((i2d_of_void *)i2d_PKCS12, (d2i_of_void *)d2i_PKCS12, (char *)p12);
     if (!p12_new)

@@ -23,10 +23,6 @@
 	ossl_raise(rb_eRuntimeError, "REV wasn't initialized!"); \
     } \
 } while (0)
-#define SafeGetX509Rev(obj, rev) do { \
-    OSSL_Check_Kind((obj), cX509Rev); \
-    GetX509Rev((obj), (rev)); \
-} while (0)
 
 /*
  * Classes
@@ -76,7 +72,7 @@ DupX509RevokedPtr(VALUE obj)
 {
     X509_REVOKED *rev, *new;
 
-    SafeGetX509Rev(obj, rev);
+    GetX509Rev(obj, rev);
     if (!(new = X509_REVOKED_dup(rev))) {
 	ossl_raise(eX509RevError, NULL);
     }
@@ -116,7 +112,7 @@ ossl_x509revoked_initialize_copy(VALUE self, VALUE other)
 
     rb_check_frozen(self);
     GetX509Rev(self, rev);
-    SafeGetX509Rev(other, rev_other);
+    GetX509Rev(other, rev_other);
 
     rev_new = X509_REVOKED_dup(rev_other);
     if (!rev_new)

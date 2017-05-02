@@ -19,10 +19,6 @@
 	ossl_raise(rb_eRuntimeError, "HMAC wasn't initialized"); \
     } \
 } while (0)
-#define SafeGetHMAC(obj, ctx) do { \
-    OSSL_Check_Kind((obj), cHMAC); \
-    GetHMAC((obj), (ctx)); \
-} while (0)
 
 /*
  * Classes
@@ -124,7 +120,7 @@ ossl_hmac_copy(VALUE self, VALUE other)
     if (self == other) return self;
 
     GetHMAC(self, ctx1);
-    SafeGetHMAC(other, ctx2);
+    GetHMAC(other, ctx2);
 
     if (!HMAC_CTX_copy(ctx1, ctx2))
 	ossl_raise(eHMACError, "HMAC_CTX_copy");

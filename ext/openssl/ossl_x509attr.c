@@ -23,10 +23,6 @@
 	ossl_raise(rb_eRuntimeError, "ATTR wasn't initialized!"); \
     } \
 } while (0)
-#define SafeGetX509Attr(obj, attr) do { \
-    OSSL_Check_Kind((obj), cX509Attr); \
-    GetX509Attr((obj), (attr)); \
-} while (0)
 
 /*
  * Classes
@@ -76,7 +72,7 @@ GetX509AttrPtr(VALUE obj)
 {
     X509_ATTRIBUTE *attr;
 
-    SafeGetX509Attr(obj, attr);
+    GetX509Attr(obj, attr);
 
     return attr;
 }
@@ -134,7 +130,7 @@ ossl_x509attr_initialize_copy(VALUE self, VALUE other)
 
     rb_check_frozen(self);
     GetX509Attr(self, attr);
-    SafeGetX509Attr(other, attr_other);
+    GetX509Attr(other, attr_other);
 
     attr_new = X509_ATTRIBUTE_dup(attr_other);
     if (!attr_new)

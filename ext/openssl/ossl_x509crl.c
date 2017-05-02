@@ -23,10 +23,6 @@
 	ossl_raise(rb_eRuntimeError, "CRL wasn't initialized!"); \
     } \
 } while (0)
-#define SafeGetX509CRL(obj, crl) do { \
-    OSSL_Check_Kind((obj), cX509CRL); \
-    GetX509CRL((obj), (crl)); \
-} while (0)
 
 /*
  * Classes
@@ -56,7 +52,7 @@ GetX509CRLPtr(VALUE obj)
 {
     X509_CRL *crl;
 
-    SafeGetX509CRL(obj, crl);
+    GetX509CRL(obj, crl);
 
     return crl;
 }
@@ -66,7 +62,7 @@ DupX509CRLPtr(VALUE obj)
 {
     X509_CRL *crl;
 
-    SafeGetX509CRL(obj, crl);
+    GetX509CRL(obj, crl);
     X509_CRL_up_ref(crl);
 
     return crl;
@@ -137,7 +133,7 @@ ossl_x509crl_copy(VALUE self, VALUE other)
     rb_check_frozen(self);
     if (self == other) return self;
     GetX509CRL(self, a);
-    SafeGetX509CRL(other, b);
+    GetX509CRL(other, b);
     if (!(crl = X509_CRL_dup(b))) {
 	ossl_raise(eX509CRLError, NULL);
     }

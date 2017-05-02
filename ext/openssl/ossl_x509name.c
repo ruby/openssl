@@ -23,10 +23,6 @@
 	ossl_raise(rb_eRuntimeError, "Name wasn't initialized."); \
     } \
 } while (0)
-#define SafeGetX509Name(obj, name) do { \
-    OSSL_Check_Kind((obj), cX509Name); \
-    GetX509Name((obj), (name)); \
-} while (0)
 
 #define OBJECT_TYPE_TEMPLATE \
   rb_const_get(cX509Name, rb_intern("OBJECT_TYPE_TEMPLATE"))
@@ -81,7 +77,7 @@ GetX509NamePtr(VALUE obj)
 {
     X509_NAME *name;
 
-    SafeGetX509Name(obj, name);
+    GetX509Name(obj, name);
 
     return name;
 }
@@ -188,7 +184,7 @@ ossl_x509name_initialize_copy(VALUE self, VALUE other)
 
     rb_check_frozen(self);
     GetX509Name(self, name);
-    SafeGetX509Name(other, name_other);
+    GetX509Name(other, name_other);
 
     name_new = X509_NAME_dup(name_other);
     if (!name_new)
@@ -342,7 +338,7 @@ ossl_x509name_cmp0(VALUE self, VALUE other)
     X509_NAME *name1, *name2;
 
     GetX509Name(self, name1);
-    SafeGetX509Name(other, name2);
+    GetX509Name(other, name2);
 
     return X509_NAME_cmp(name1, name2);
 }

@@ -23,10 +23,6 @@
 	ossl_raise(rb_eRuntimeError, "CERT wasn't initialized!"); \
     } \
 } while (0)
-#define SafeGetX509(obj, x509) do { \
-    OSSL_Check_Kind((obj), cX509Cert); \
-    GetX509((obj), (x509)); \
-} while (0)
 
 /*
  * Classes
@@ -110,7 +106,7 @@ GetX509CertPtr(VALUE obj)
 {
     X509 *x509;
 
-    SafeGetX509(obj, x509);
+    GetX509(obj, x509);
 
     return x509;
 }
@@ -120,7 +116,7 @@ DupX509CertPtr(VALUE obj)
 {
     X509 *x509;
 
-    SafeGetX509(obj, x509);
+    GetX509(obj, x509);
 
     X509_up_ref(x509);
 
@@ -184,7 +180,7 @@ ossl_x509_copy(VALUE self, VALUE other)
     if (self == other) return self;
 
     GetX509(self, a);
-    SafeGetX509(other, b);
+    GetX509(other, b);
 
     x509 = X509_dup(b);
     if (!x509) ossl_raise(eX509CertError, NULL);

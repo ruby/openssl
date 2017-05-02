@@ -207,7 +207,7 @@ GetPKeyPtr(VALUE obj)
 {
     EVP_PKEY *pkey;
 
-    SafeGetPKey(obj, pkey);
+    GetPKey(obj, pkey);
 
     return pkey;
 }
@@ -220,7 +220,7 @@ GetPrivPKeyPtr(VALUE obj)
     if (rb_funcallv(obj, id_private_q, 0, NULL) != Qtrue) {
 	ossl_raise(rb_eArgError, "Private key is needed.");
     }
-    SafeGetPKey(obj, pkey);
+    GetPKey(obj, pkey);
 
     return pkey;
 }
@@ -230,7 +230,7 @@ DupPKeyPtr(VALUE obj)
 {
     EVP_PKEY *pkey;
 
-    SafeGetPKey(obj, pkey);
+    GetPKey(obj, pkey);
     EVP_PKEY_up_ref(pkey);
 
     return pkey;
