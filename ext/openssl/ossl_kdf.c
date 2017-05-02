@@ -52,7 +52,7 @@ kdf_pbkdf2_hmac(int argc, VALUE *argv, VALUE self)
     salt = StringValue(kwargs[0]);
     iters = NUM2INT(kwargs[1]);
     len = NUM2INT(kwargs[2]);
-    md = GetDigestPtr(kwargs[3]);
+    md = ossl_evp_get_digestbyname(kwargs[3]);
 
     str = rb_str_new(0, len);
     if (!PKCS5_PBKDF2_HMAC(RSTRING_PTR(pass), RSTRING_LENINT(pass),

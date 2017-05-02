@@ -343,7 +343,7 @@ ossl_x509req_sign(VALUE self, VALUE key, VALUE digest)
 
     GetX509Req(self, req);
     pkey = GetPrivPKeyPtr(key); /* NO NEED TO DUP */
-    md = GetDigestPtr(digest);
+    md = ossl_evp_get_digestbyname(digest);
     if (!X509_REQ_sign(req, pkey, md)) {
 	ossl_raise(eX509ReqError, NULL);
     }

@@ -42,7 +42,7 @@ static const rb_data_type_t ossl_digest_type = {
  * Public
  */
 const EVP_MD *
-GetDigestPtr(VALUE obj)
+ossl_evp_get_digestbyname(VALUE obj)
 {
     const EVP_MD *md;
     ASN1_OBJECT *oid = NULL;
@@ -123,7 +123,7 @@ ossl_digest_initialize(int argc, VALUE *argv, VALUE self)
     VALUE type, data;
 
     rb_scan_args(argc, argv, "11", &type, &data);
-    md = GetDigestPtr(type);
+    md = ossl_evp_get_digestbyname(type);
     if (!NIL_P(data)) StringValue(data);
 
     TypedData_Get_Struct(self, EVP_MD_CTX, &ossl_digest_type, ctx);

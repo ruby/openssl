@@ -106,7 +106,7 @@ ossl_hmac_initialize(VALUE self, VALUE key, VALUE digest)
     StringValue(key);
     GetHMAC(self, ctx);
     HMAC_Init_ex(ctx, RSTRING_PTR(key), RSTRING_LENINT(key),
-		 GetDigestPtr(digest), NULL);
+		 ossl_evp_get_digestbyname(digest), NULL);
 
     return self;
 }
@@ -281,8 +281,9 @@ ossl_hmac_s_digest(VALUE klass, VALUE digest, VALUE key, VALUE data)
 
     StringValue(key);
     StringValue(data);
-    buf = HMAC(GetDigestPtr(digest), RSTRING_PTR(key), RSTRING_LENINT(key),
-	       (unsigned char *)RSTRING_PTR(data), RSTRING_LEN(data), NULL, &buf_len);
+    buf = HMAC(ossl_evp_get_digestbyname(digest), RSTRING_PTR(key),
+	       RSTRING_LENINT(key), (unsigned char *)RSTRING_PTR(data),
+	       RSTRING_LEN(data), NULL, &buf_len);
 
     return rb_str_new((const char *)buf, buf_len);
 }
@@ -314,9 +315,9 @@ ossl_hmac_s_hexdigest(VALUE klass, VALUE digest, VALUE key, VALUE data)
     StringValue(key);
     StringValue(data);
 
-    if (!HMAC(GetDigestPtr(digest), RSTRING_PTR(key), RSTRING_LENINT(key),
-	      (unsigned char *)RSTRING_PTR(data), RSTRING_LEN(data),
-	      buf, &buf_len))
+    if (!HMAC(ossl_evp_get_digestbyname(digest), RSTRING_PTR(key),
+	      RSTRING_LENINT(key), (unsigned char *)RSTRING_PTR(data),
+	      RSTRING_LEN(data), buf, &buf_len))
 	ossl_raise(eHMACError, "HMAC");
 
     ret = rb_str_new(NULL, buf_len * 2);
