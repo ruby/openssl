@@ -639,6 +639,10 @@ ossl_rsa_to_public_key(VALUE self)
  * The +Hash+ +options+ supports two key/value pairs:
  *
  * The +Integer+ +salt_length+ should be the salt length to use.
+ * Two special values are reserved: -1 means use the digest length, and
+ * -2 means use the maximum possible length. If not specified, a default
+ * value of -2 is assumed. The symbols +:digest_length+ and +:max_length+
+ * may be used instead.
  *
  * The +String+ +mgf1_hash+ should be the hash algorithm used in MGF1
  * (the currently supported mask generation function (MGF)).
@@ -656,15 +660,28 @@ ossl_rsa_to_public_key(VALUE self)
  *   signature = pkey.sign_pss(digest, data, salt_length: 20, mgf1_hash: 'SHA256')
  */
 static VALUE
-ossl_rsa_sign_pss(VALUE self, VALUE digest, VALUE data, VALUE saltlen, VALUE mgf1_hash)
+ossl_rsa_sign_pss(int argc, VALUE *argv, VALUE self)
 {
+    VALUE digest, data, options;
+    const ID options_table[] = {saltlen, mgf1_hash};
+    VALUE kwvals[sizeof(options_table) / sizeof(*options_table)];
     EVP_PKEY *pkey;
     EVP_PKEY_CTX *pkey_ctx;
     const EVP_MD *md, *mgf1md;
     EVP_MD_CTX *md_ctx;
     size_t buf_len;
-    int salt_len;
+    int salt_len, n_args;
     VALUE signature;
+
+    n_args = rb_scan_args(argc, argv, "21:", &digest, &data, &options);
+    if (n_args == 3)
+	rb_get_kwargs(options, options_table, 0, 2, kwvals);
+
+    if (kwvals[0] == Qundef) {
+	salt_len = -2;  // default
+    } else {
+	salt_len = NUM2INT(kwvals[0]);
+    }
 
     salt_len = NUM2INT(saltlen);
     pkey = GetPrivPKeyPtr(self);
@@ -910,8 +927,8 @@ Init_ossl_rsa(void)
     rb_define_method(cRSA, "private_encrypt", ossl_rsa_private_encrypt, -1);
     rb_define_method(cRSA, "private_decrypt", ossl_rsa_private_decrypt, -1);
 #if (OPENSSL_VERSION_NUMBER >= 0x1000100f)
-    rb_define_method(cRSA, "sign_pss", ossl_rsa_sign_pss, 4);
-    rb_define_method(cRSA, "verify_pss", ossl_rsa_verify_pss, 5);
+    rb_define_method(cRSA, "sign_pss", ossl_rsa_sign_pss, -1);
+    rb_define_method(cRSA, "verify_pss", ossl_rsa_verify_pss, -1);
 #endif
 
     DEF_OSSL_PKEY_BN(cRSA, rsa, n);
