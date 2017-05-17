@@ -1,1 +1,1 @@
-FROM zzak/ruby-openssl-docker:2.0
+FROM rhenium/ruby-openssl-docker:testing
