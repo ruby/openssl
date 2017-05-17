@@ -579,8 +579,8 @@ ossl_asn1_default_tag(VALUE obj)
 	    return NUM2INT(tag);
 	tmp_class = rb_class_superclass(tmp_class);
     }
-    ossl_raise(eASN1Error, "universal tag for %"PRIsVALUE" not found",
-	       rb_obj_class(obj));
+
+    return -1;
 }
 
 static int
@@ -1078,9 +1078,12 @@ static VALUE
 ossl_asn1_initialize(int argc, VALUE *argv, VALUE self)
 {
     VALUE value, tag, tagging, tag_class;
+    int default_tag;
 
     rb_scan_args(argc, argv, "13", &value, &tag, &tagging, &tag_class);
-    if(argc > 1){
+    default_tag = ossl_asn1_default_tag(self);
+
+    if (default_tag == -1 || argc > 1) {
 	if(NIL_P(tag))
 	    ossl_raise(eASN1Error, "must specify tag number");
 	if(!NIL_P(tagging) && !SYMBOL_P(tagging))
@@ -1097,7 +1100,7 @@ ossl_asn1_initialize(int argc, VALUE *argv, VALUE self)
 	    ossl_raise(eASN1Error, "tag number for Universal too large");
     }
     else{
-	tag = INT2NUM(ossl_asn1_default_tag(self));
+	tag = INT2NUM(default_tag);
 	tagging = Qnil;
 	tag_class = sym_UNIVERSAL;
     }
@@ -1113,7 +1116,7 @@ ossl_asn1_initialize(int argc, VALUE *argv, VALUE self)
 static VALUE
 ossl_asn1eoc_initialize(VALUE self) {
     VALUE tag, tagging, tag_class, value;
-    tag = INT2NUM(ossl_asn1_default_tag(self));
+    tag = INT2FIX(0);
     tagging = Qnil;
     tag_class = sym_UNIVERSAL;
     value = rb_str_new("", 0);
