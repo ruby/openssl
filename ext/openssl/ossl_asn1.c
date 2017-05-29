@@ -825,7 +825,7 @@ int_ossl_asn1_decode0_cons(unsigned char **pp, long max_len, long length,
 	rb_ary_push(ary, value);
 
 	if (indefinite &&
-	    NUM2INT(ossl_asn1_get_tag(value)) == V_ASN1_EOC &&
+	    ossl_asn1_tag(value) == V_ASN1_EOC &&
 	    ossl_asn1_get_tag_class(value) == sym_UNIVERSAL) {
 	    break;
 	}
@@ -1130,7 +1130,7 @@ ossl_asn1prim_to_der(VALUE self)
     unsigned char *buf, *p;
     VALUE str;
 
-    tn = NUM2INT(ossl_asn1_get_tag(self));
+    tn = ossl_asn1_tag(self);
     tc = ossl_asn1_tag_class(self);
     explicit = ossl_asn1_is_explicit(self);
     asn1 = ossl_asn1_get_asn1type(self);
@@ -1173,7 +1173,7 @@ ossl_asn1cons_to_der(VALUE self)
     unsigned char *p;
     VALUE value, str, inf_length;
 
-    tn = NUM2INT(ossl_asn1_get_tag(self));
+    tn = ossl_asn1_tag(self);
     tc = ossl_asn1_tag_class(self);
     inf_length = ossl_asn1_get_indefinite_length(self);
     if (inf_length == Qtrue) {
