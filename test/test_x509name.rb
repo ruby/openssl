@@ -1,4 +1,4 @@
-# coding: US-ASCII
+# coding: ASCII-8BIT
 # frozen_string_literal: false
 require_relative 'utils'
 
