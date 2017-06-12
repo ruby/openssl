@@ -1319,6 +1319,7 @@ ec_point_new(const EC_POINT *point, const EC_GROUP *group)
     return obj;
 }
 
+static VALUE ossl_ec_point_initialize_copy(VALUE, VALUE);
 /*
  * call-seq:
  *   OpenSSL::PKey::EC::Point.new(point)
@@ -1330,46 +1331,34 @@ ec_point_new(const EC_POINT *point, const EC_GROUP *group)
 static VALUE ossl_ec_point_initialize(int argc, VALUE *argv, VALUE self)
 {
     EC_POINT *point;
-    VALUE arg1, arg2;
-    VALUE group_v = Qnil;
-    const EC_GROUP *group = NULL;
+    VALUE group_v, arg2;
+    const EC_GROUP *group;
 
     TypedData_Get_Struct(self, EC_POINT, &ossl_ec_point_type, point);
     if (point)
-        ossl_raise(eEC_POINT, "EC_POINT already initialized");
+	rb_raise(eEC_POINT, "EC_POINT already initialized");
 
-    switch (rb_scan_args(argc, argv, "11", &arg1, &arg2)) {
-    case 1:
-        if (rb_obj_is_kind_of(arg1, cEC_POINT)) {
-            const EC_POINT *arg_point;
+    rb_scan_args(argc, argv, "11", &group_v, &arg2);
+    if (rb_obj_is_kind_of(group_v, cEC_POINT)) {
+	if (argc != 1)
+	    rb_raise(rb_eArgError, "invalid second argument");
+	return ossl_ec_point_initialize_copy(self, group_v);
+    }
 
-	    group_v = rb_attr_get(arg1, id_i_group);
-	    GetECGroup(group_v, group);
-	    GetECPoint(arg1, arg_point);
-
-            point = EC_POINT_dup(arg_point, group);
-        } else if (rb_obj_is_kind_of(arg1, cEC_GROUP)) {
-            group_v = arg1;
-            GetECGroup(group_v, group);
-
-            point = EC_POINT_new(group);
-        } else {
-            ossl_raise(eEC_POINT, "wrong argument type: must be OpenSSL::PKey::EC::Point or OpenSSL::Pkey::EC::Group");
-        }
-
-        break;
-     case 2:
-        if (!rb_obj_is_kind_of(arg1, cEC_GROUP))
-            ossl_raise(rb_eArgError, "1st argument must be OpenSSL::PKey::EC::Group");
-        group_v = arg1;
-        GetECGroup(group_v, group);
-
-        if (rb_obj_is_kind_of(arg2, cBN)) {
-            const BIGNUM *bn = GetBNPtr(arg2);
-
-            point = EC_POINT_bn2point(group, bn, NULL, ossl_bn_ctx);
-        } else {
-            BIO *in = ossl_obj2bio(&arg1);
+    GetECGroup(group_v, group);
+    if (argc == 1) {
+	point = EC_POINT_new(group);
+	if (!point)
+	    ossl_raise(eEC_POINT, "EC_POINT_new");
+    }
+    else {
+	if (rb_obj_is_kind_of(arg2, cBN)) {
+	    point = EC_POINT_bn2point(group, GetBNPtr(arg2), NULL, ossl_bn_ctx);
+	    if (!point)
+		ossl_raise(eEC_POINT, "EC_POINT_bn2point");
+	}
+	else {
+	    BIO *in = ossl_obj2bio(&arg2);
 
 /* BUG: finish me */
 
@@ -1379,16 +1368,7 @@ static VALUE ossl_ec_point_initialize(int argc, VALUE *argv, VALUE self)
                 ossl_raise(eEC_POINT, "unknown type for 2nd arg");
             }
         }
-        break;
-    default:
-        ossl_raise(rb_eArgError, "wrong number of arguments");
     }
-
-    if (point == NULL)
-        ossl_raise(eEC_POINT, NULL);
-
-    if (NIL_P(group_v))
-        ossl_raise(rb_eRuntimeError, "missing group (internal error)");
 
     RTYPEDDATA_DATA(self) = point;
     rb_ivar_set(self, id_i_group, group_v);
