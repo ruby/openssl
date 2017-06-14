@@ -1,3 +1,38 @@
+Version 2.0.3
+=============
+
+Bug fixes
+---------
+
+* OpenSSL::ASN1::Constructive#each which was broken by 2.0.0 is fixed.
+  [[ruby/openssl#96]](https://github.com/ruby/openssl/pull/96)
+* Fixed build with static OpenSSL libraries on Windows.
+  [[Bug #13080]](https://bugs.ruby-lang.org/issues/13080)
+* OpenSSL::X509::Name#eql? which was broken by 2.0.0 is fixed.
+
+
+Version 2.0.2
+=============
+
+Bug fixes
+---------
+
+* Fix build with early 0.9.8 series which did not have SSL_CTX_clear_options().
+  [ruby-core:78693]
+
+
+Version 2.0.1
+=============
+
+Bug fixes
+---------
+
+* A GC issue around OpenSSL::BN is fixed.
+  [[ruby/openssl#87]](https://github.com/ruby/openssl/issues/87)
+* OpenSSL::ASN1 now parses BER encoding of GeneralizedTime without seconds.
+  [[ruby/openssl#88]](https://github.com/ruby/openssl/pull/88)
+
+
 Version 2.0.0
 =============
 
