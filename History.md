@@ -23,7 +23,8 @@ Supported platforms
 Notable changes
 ---------------
 
-* Add support for OpenSSL 1.1.0. [[Feature #12324]](https://bugs.ruby-lang.org/issues/12324)
+* Add support for OpenSSL 1.1.0.
+  [[Feature #12324]](https://bugs.ruby-lang.org/issues/12324)
 * Add support for LibreSSL
 
 * OpenSSL::Cipher
