@@ -24,4 +24,13 @@ matrix:
     - env: RUBY_VERSION=ruby-2.4 OPENSSL_VERSION=libressl-2.3
     - env: RUBY_VERSION=ruby-2.4 OPENSSL_VERSION=libressl-2.4
     - env: RUBY_VERSION=ruby-2.4 OPENSSL_VERSION=libressl-2.5
+    - language: ruby
+      rvm: ruby-head
+      before_install:
+        - "rake install_dependencies"
+      script:
+        - "rake compile -- --enable-debug"
+        - "rake test"
   allow_failures:
+    - language: ruby
+      rvm: ruby-head

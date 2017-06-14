@@ -61,8 +61,8 @@ echo "#### Step 1. Sync '$BRANCH_EXTRACT' with 'ruby/trunk'"
 		sed -ie "/^$graftpoint$/d" $(git rev-parse --git-common-dir)/info/grafts
 )
 
-LASY_SYNC_COMMIT=$(git log --format=format:%H -n1 --grep '^Sync-with-trunk: r')
-LAST_SYNC_REV=$(git show --format=format:%B $LASY_SYNC_COMMIT | grep -Po '(?<=^Sync-with-trunk: r)[0-9]+$' | tail -n1)
+LAST_SYNC_COMMIT=$(git log --format=format:%H -n1 --grep '^Sync-with-trunk: r')
+LAST_SYNC_REV=$(git show --format=format:%B $LAST_SYNC_COMMIT | grep -Po '(?<=^Sync-with-trunk: r)[0-9]+$' | tail -n1)
 NEXT_SYNC_REV=$(sha1_to_rev $BRANCH_EXTRACT)
 
 [ "$LAST_SYNC_REV" = "$NEXT_SYNC_REV" ] && (
@@ -78,12 +78,12 @@ echo "#### Step 2. Rebase '$BRANCH_EXTRACT' on the last sync commit"
 	cd tmp/sync-merge
 	git checkout $BRANCH_MERGE
 	git reset -q --hard $BRANCH_EXTRACT
-	git rebase --onto $LASY_SYNC_COMMIT $(rev_to_sha1 $BRANCH_EXTRACT $LAST_SYNC_REV) $BRANCH_MERGE
+	git rebase --onto $LAST_SYNC_COMMIT $(rev_to_sha1 $BRANCH_EXTRACT $LAST_SYNC_REV) $BRANCH_MERGE
 )
 
 echo "#### Step 3. Merge '$BRANCH_MERGE' into '$(git rev-parse --abbrev-ref HEAD)'"
 commit_message=$(
-	commits=$(git log --oneline --format='%H %<(61,trunc)%s' $LASY_SYNC_COMMIT..$BRANCH_MERGE)
+	commits=$(git log --oneline --format='%H %<(61,trunc)%s' $LAST_SYNC_COMMIT..$BRANCH_MERGE)
 	echo "Merge changes from Ruby trunk r$LAST_SYNC_REV..r$NEXT_SYNC_REV"
 	echo ""
 	echo "* ruby-trunk r$LAST_SYNC_REV..r$NEXT_SYNC_REV: ($(echo "$commits" | wc -l) commits)"
