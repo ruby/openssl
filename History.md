@@ -1,3 +1,15 @@
+Version 2.0.4
+=============
+
+Bug fixes
+---------
+
+* It now compiles with LibreSSL without renaming on Windows (mswin).
+* A workaround for the error queue leak of X509_load_cert_crl_file() that
+  causes random errors is added.
+  [[Bug #11033]](https://bugs.ruby-lang.org/issues/11033)
+
+
 Version 2.0.3
 =============
 
