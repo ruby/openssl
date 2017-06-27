@@ -350,7 +350,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     assert_equal OpenSSL::SSL::VERIFY_PEER, ctx.verify_mode
     ciphers_names = ctx.ciphers.collect{|v, _, _, _| v }
     assert ciphers_names.all?{|v| /A(EC)?DH/ !~ v }, "anon ciphers are disabled"
-    assert ciphers_names.all?{|v| /(RC4|MD5|EXP|DES)/ !~ v }, "weak ciphers are disabled"
+    assert ciphers_names.all?{|v| /(RC4|MD5|EXP|DES(?!-EDE|-CBC3))/ !~ v }, "weak ciphers are disabled"
     assert_equal 0, ctx.options & OpenSSL::SSL::OP_DONT_INSERT_EMPTY_FRAGMENTS
     if defined?(OpenSSL::SSL::OP_NO_COMPRESSION) # >= 1.0.0
       assert_equal OpenSSL::SSL::OP_NO_COMPRESSION,
