@@ -970,12 +970,7 @@ ossl_sslctx_get_ciphers(VALUE self)
     int i, num;
 
     GetSSLCTX(self, ctx);
-    if(!ctx){
-        rb_warning("SSL_CTX is not initialized.");
-        return Qnil;
-    }
     ciphers = SSL_CTX_get_ciphers(ctx);
-
     if (!ciphers)
         return rb_ary_new();
 
