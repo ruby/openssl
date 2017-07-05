@@ -1997,22 +1997,21 @@ ossl_ssl_get_version(VALUE self)
 }
 
 /*
-* call-seq:
-*    ssl.cipher => [name, version, bits, alg_bits]
-*
-* The cipher being used for the current connection
-*/
+ * call-seq:
+ *    ssl.cipher -> nil or [name, version, bits, alg_bits]
+ *
+ * Returns the cipher suite actually used in the current session, or nil if
+ * no session has been established.
+ */
 static VALUE
 ossl_ssl_get_cipher(VALUE self)
 {
     SSL *ssl;
-    SSL_CIPHER *cipher;
+    const SSL_CIPHER *cipher;
 
     GetSSL(self, ssl);
-
-    cipher = (SSL_CIPHER *)SSL_get_current_cipher(ssl);
-
-    return ossl_ssl_cipher_to_ary(cipher);
+    cipher = SSL_get_current_cipher(ssl);
+    return cipher ? ossl_ssl_cipher_to_ary(cipher) : Qnil;
 }
 
 /*
