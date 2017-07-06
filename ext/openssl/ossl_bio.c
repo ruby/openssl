@@ -10,8 +10,9 @@
 #include "ossl.h"
 
 BIO *
-ossl_obj2bio(VALUE obj)
+ossl_obj2bio(volatile VALUE *pobj)
 {
+    VALUE obj = *pobj;
     BIO *bio;
 
     if (RB_TYPE_P(obj, T_FILE)) {
@@ -40,16 +41,8 @@ ossl_obj2bio(VALUE obj)
 	bio = BIO_new_mem_buf(RSTRING_PTR(obj), RSTRING_LENINT(obj));
 	if (!bio) ossl_raise(eOSSLError, NULL);
     }
-
+    *pobj = obj;
     return bio;
-}
-
-BIO *
-ossl_protect_obj2bio(VALUE obj, int *status)
-{
-     BIO *ret = NULL;
-     ret = (BIO*)rb_protect((VALUE (*)(VALUE))ossl_obj2bio, obj, status);
-     return ret;
 }
 
 VALUE
