@@ -34,8 +34,13 @@ task :install_dependencies do
   gemspec = eval(File.read("openssl.gemspec"))
   gemspec.development_dependencies.each do |dep|
     print "Installing #{dep.name} (#{dep.requirement}) ... "
-    gem = Gem.install(dep.name, dep.requirement, force: true)
-    puts "#{gem[0].version}"
+    installed = dep.matching_specs
+    if installed.empty?
+      installed = Gem.install(dep.name, dep.requirement)
+      puts "#{installed[0].version}"
+    else
+      puts "(found #{installed[0].version})"
+    end
   end
 end
 
