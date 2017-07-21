@@ -151,7 +151,7 @@ ossl_pem_passwd_cb0(VALUE flag)
     VALUE pass;
 
     pass = rb_yield(flag);
-    SafeStringValue(pass);
+    StringValue(pass);
 
     return pass;
 }
