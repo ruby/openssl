@@ -248,6 +248,9 @@ class OpenSSL::TestPKeyRSA < OpenSSL::PKeyTestCase
     assert_match (/ENCRYPTED/), pem3c
     assert_equal key.to_der, OpenSSL::PKey.read(pem3c, "key").to_der
     assert_equal key.to_der, OpenSSL::PKey.read(pem3c) { "key" }.to_der
+    assert_raise(OpenSSL::PKey::PKeyError) {
+      OpenSSL::PKey.read(pem3c) { nil }
+    }
   end
 
   def test_dup

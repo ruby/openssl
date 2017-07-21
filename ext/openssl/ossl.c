@@ -148,11 +148,10 @@ ossl_pem_passwd_value(VALUE pass)
 static VALUE
 ossl_pem_passwd_cb0(VALUE flag)
 {
-    VALUE pass;
-
-    pass = rb_yield(flag);
+    VALUE pass = rb_yield(flag);
+    if (NIL_P(pass))
+	return Qnil;
     StringValue(pass);
-
     return pass;
 }
 
@@ -195,6 +194,8 @@ ossl_pem_passwd_cb(char *buf, int max_len, int flag, void *pwd_)
 	    rb_set_errinfo(Qnil);
 	    return -1;
 	}
+	if (NIL_P(pass))
+	    return -1;
 	len = RSTRING_LEN(pass);
 	if (len > max_len) {
 	    rb_warning("password must not be longer than %d bytes", max_len);
