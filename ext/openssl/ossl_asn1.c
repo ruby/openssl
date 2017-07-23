@@ -13,7 +13,6 @@ static VALUE join_der(VALUE enumerable);
 static VALUE ossl_asn1_decode0(unsigned char **pp, long length, long *offset,
 			       int depth, int yield, long *num_read);
 static VALUE ossl_asn1_initialize(int argc, VALUE *argv, VALUE self);
-static VALUE ossl_asn1eoc_initialize(VALUE self);
 
 /*
  * DATE conversion
