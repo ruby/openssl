@@ -9,11 +9,9 @@
  */
 #include "ossl.h"
 
-static VALUE join_der(VALUE enumerable);
 static VALUE ossl_asn1_decode0(unsigned char **pp, long length, long *offset,
 			       int depth, int yield, long *num_read);
 static VALUE ossl_asn1_initialize(int argc, VALUE *argv, VALUE self);
-static VALUE ossl_asn1eoc_initialize(VALUE self);
 
 /*
  * DATE conversion
@@ -25,7 +23,6 @@ asn1time_to_time(const ASN1_TIME *time)
     VALUE argv[6];
     int count;
 
-    if (!time || !time->data) return Qnil;
     memset(&tm, 0, sizeof(struct tm));
 
     switch (time->type) {
@@ -147,13 +144,13 @@ num_to_asn1integer(VALUE obj, ASN1_INTEGER *ai)
 #define ossl_asn1_get_tag(o)             rb_attr_get((o),sivTAG)
 #define ossl_asn1_get_tagging(o)         rb_attr_get((o),sivTAGGING)
 #define ossl_asn1_get_tag_class(o)       rb_attr_get((o),sivTAG_CLASS)
-#define ossl_asn1_get_infinite_length(o) rb_attr_get((o),sivINFINITE_LENGTH)
+#define ossl_asn1_get_indefinite_length(o) rb_attr_get((o),sivINDEFINITE_LENGTH)
 
 #define ossl_asn1_set_value(o,v)           rb_ivar_set((o),sivVALUE,(v))
 #define ossl_asn1_set_tag(o,v)             rb_ivar_set((o),sivTAG,(v))
 #define ossl_asn1_set_tagging(o,v)         rb_ivar_set((o),sivTAGGING,(v))
 #define ossl_asn1_set_tag_class(o,v)       rb_ivar_set((o),sivTAG_CLASS,(v))
-#define ossl_asn1_set_infinite_length(o,v) rb_ivar_set((o),sivINFINITE_LENGTH,(v))
+#define ossl_asn1_set_indefinite_length(o,v) rb_ivar_set((o),sivINDEFINITE_LENGTH,(v))
 
 VALUE mASN1;
 VALUE eASN1Error;
@@ -179,7 +176,7 @@ VALUE cASN1Sequence, cASN1Set;                /* CONSTRUCTIVE      */
 
 static VALUE sym_IMPLICIT, sym_EXPLICIT;
 static VALUE sym_UNIVERSAL, sym_APPLICATION, sym_CONTEXT_SPECIFIC, sym_PRIVATE;
-static ID sivVALUE, sivTAG, sivTAG_CLASS, sivTAGGING, sivINFINITE_LENGTH, sivUNUSED_BITS;
+static ID sivVALUE, sivTAG, sivTAG_CLASS, sivTAGGING, sivINDEFINITE_LENGTH, sivUNUSED_BITS;
 static ID id_each;
 
 /*
@@ -205,13 +202,15 @@ obj_to_asn1bstr(VALUE obj, long unused_bits)
 {
     ASN1_BIT_STRING *bstr;
 
-    if(unused_bits < 0) unused_bits = 0;
+    if (unused_bits < 0 || unused_bits > 7)
+	ossl_raise(eASN1Error, "unused_bits for a bitstring value must be in "\
+		   "the range 0 to 7");
     StringValue(obj);
     if(!(bstr = ASN1_BIT_STRING_new()))
 	ossl_raise(eASN1Error, NULL);
     ASN1_BIT_STRING_set(bstr, (unsigned char *)RSTRING_PTR(obj), RSTRING_LENINT(obj));
     bstr->flags &= ~(ASN1_STRING_FLAG_BITS_LEFT|0x07); /* clear */
-    bstr->flags |= ASN1_STRING_FLAG_BITS_LEFT|(unused_bits&0x07);
+    bstr->flags |= ASN1_STRING_FLAG_BITS_LEFT | unused_bits;
 
     return bstr;
 }
@@ -499,7 +498,7 @@ ossl_asn1_get_asn1type(VALUE obj)
     VALUE value, rflag;
     void *ptr;
     void (*free_func)();
-    int tag, flag;
+    int tag;
 
     tag = ossl_asn1_default_tag(obj);
     value = ossl_asn1_get_value(obj);
@@ -515,8 +514,7 @@ ossl_asn1_get_asn1type(VALUE obj)
 	break;
     case V_ASN1_BIT_STRING:
         rflag = rb_attr_get(obj, sivUNUSED_BITS);
-        flag = NIL_P(rflag) ? -1 : NUM2INT(rflag);
-	ptr = obj_to_asn1bstr(value, flag);
+	ptr = obj_to_asn1bstr(value, NUM2INT(rflag));
 	free_func = ASN1_BIT_STRING_free;
 	break;
     case V_ASN1_NULL:
@@ -580,8 +578,8 @@ ossl_asn1_default_tag(VALUE obj)
 	    return NUM2INT(tag);
 	tmp_class = rb_class_superclass(tmp_class);
     }
-    ossl_raise(eASN1Error, "universal tag for %"PRIsVALUE" not found",
-	       rb_obj_class(obj));
+
+    return -1;
 }
 
 static int
@@ -594,20 +592,6 @@ ossl_asn1_tag(VALUE obj)
 	ossl_raise(eASN1Error, "tag number not specified");
 
     return NUM2INT(tag);
-}
-
-static int
-ossl_asn1_is_explicit(VALUE obj)
-{
-    VALUE s;
-
-    s = ossl_asn1_get_tagging(obj);
-    if (NIL_P(s) || s == sym_IMPLICIT)
-	return 0;
-    else if (s == sym_EXPLICIT)
-	return 1;
-    else
-	ossl_raise(eASN1Error, "invalid tag default");
 }
 
 static int
@@ -662,73 +646,85 @@ ossl_asn1data_initialize(VALUE self, VALUE value, VALUE tag, VALUE tag_class)
 {
     if(!SYMBOL_P(tag_class))
 	ossl_raise(eASN1Error, "invalid tag class");
-    if (tag_class == sym_UNIVERSAL && NUM2INT(tag) > 31)
-	ossl_raise(eASN1Error, "tag number for Universal too large");
     ossl_asn1_set_tag(self, tag);
     ossl_asn1_set_value(self, value);
     ossl_asn1_set_tag_class(self, tag_class);
-    ossl_asn1_set_infinite_length(self, Qfalse);
+    ossl_asn1_set_indefinite_length(self, Qfalse);
 
     return self;
 }
 
 static VALUE
-join_der_i(RB_BLOCK_CALL_FUNC_ARGLIST(i, str))
+to_der_internal(VALUE self, int constructed, int indef_len, VALUE body)
 {
-    i = ossl_to_der_if_possible(i);
-    StringValue(i);
-    rb_str_append(str, i);
-    return Qnil;
-}
+    int encoding = constructed ? indef_len ? 2 : 1 : 0;
+    int tag_class = ossl_asn1_tag_class(self);
+    int tag_number = ossl_asn1_tag(self);
+    int default_tag_number = ossl_asn1_default_tag(self);
+    int body_length, total_length;
+    VALUE str;
+    unsigned char *p;
 
-static VALUE
-join_der(VALUE enumerable)
-{
-    VALUE str = rb_str_new(0, 0);
-    rb_block_call(enumerable, id_each, 0, 0, join_der_i, str);
+    body_length = RSTRING_LENINT(body);
+    if (ossl_asn1_get_tagging(self) == sym_EXPLICIT) {
+	int inner_length, e_encoding = indef_len ? 2 : 1;
+
+	if (default_tag_number == -1)
+	    ossl_raise(eASN1Error, "explicit tagging of unknown tag");
+
+	inner_length = ASN1_object_size(encoding, body_length, default_tag_number);
+	total_length = ASN1_object_size(e_encoding, inner_length, tag_number);
+	str = rb_str_new(NULL, total_length);
+	p = (unsigned char *)RSTRING_PTR(str);
+	/* Put explicit tag */
+	ASN1_put_object(&p, e_encoding, inner_length, tag_number, tag_class);
+	/* Append inner object */
+	ASN1_put_object(&p, encoding, body_length, default_tag_number, V_ASN1_UNIVERSAL);
+	memcpy(p, RSTRING_PTR(body), body_length);
+	p += body_length;
+	if (indef_len) {
+	    ASN1_put_eoc(&p); /* For inner object */
+	    ASN1_put_eoc(&p); /* For wrapper object */
+	}
+    }
+    else {
+	total_length = ASN1_object_size(encoding, body_length, tag_number);
+	str = rb_str_new(NULL, total_length);
+	p = (unsigned char *)RSTRING_PTR(str);
+	ASN1_put_object(&p, encoding, body_length, tag_number, tag_class);
+	memcpy(p, RSTRING_PTR(body), body_length);
+	p += body_length;
+	if (indef_len)
+	    ASN1_put_eoc(&p);
+    }
+    assert(p - (unsigned char *)RSTRING_PTR(str) == total_length);
     return str;
 }
 
+static VALUE ossl_asn1prim_to_der(VALUE);
+static VALUE ossl_asn1cons_to_der(VALUE);
 /*
  * call-seq:
  *    asn1.to_der => DER-encoded String
  *
  * Encodes this ASN1Data into a DER-encoded String value. The result is
- * DER-encoded except for the possibility of infinite length encodings.
- * Infinite length encodings are not allowed in strict DER, so strictly
- * speaking the result of such an encoding would be a BER-encoding.
+ * DER-encoded except for the possibility of indefinite length forms.
+ * Indefinite length forms are not allowed in strict DER, so strictly speaking
+ * the result of such an encoding would be a BER-encoding.
  */
 static VALUE
 ossl_asn1data_to_der(VALUE self)
 {
-    VALUE value, der, inf_length;
-    int tag, tag_class, is_cons = 0;
-    long length;
-    unsigned char *p;
+    VALUE value = ossl_asn1_get_value(self);
 
-    value = ossl_asn1_get_value(self);
-    if(rb_obj_is_kind_of(value, rb_cArray)){
-	is_cons = 1;
-	value = join_der(value);
+    if (rb_obj_is_kind_of(value, rb_cArray))
+	return ossl_asn1cons_to_der(self);
+    else {
+	if (RTEST(ossl_asn1_get_indefinite_length(self)))
+	    ossl_raise(eASN1Error, "indefinite length form cannot be used " \
+		       "with primitive encoding");
+	return ossl_asn1prim_to_der(self);
     }
-    StringValue(value);
-
-    tag = ossl_asn1_tag(self);
-    tag_class = ossl_asn1_tag_class(self);
-    inf_length = ossl_asn1_get_infinite_length(self);
-    if (inf_length == Qtrue) {
-	is_cons = 2;
-    }
-    if((length = ASN1_object_size(is_cons, RSTRING_LENINT(value), tag)) <= 0)
-	ossl_raise(eASN1Error, NULL);
-    der = rb_str_new(0, length);
-    p = (unsigned char *)RSTRING_PTR(der);
-    ASN1_put_object(&p, is_cons, RSTRING_LENINT(value), tag, tag_class);
-    memcpy(p, RSTRING_PTR(value), RSTRING_LEN(value));
-    p += RSTRING_LEN(value);
-    ossl_str_adjust(der, p);
-
-    return der;
 }
 
 static VALUE
@@ -811,46 +807,33 @@ int_ossl_asn1_decode0_cons(unsigned char **pp, long max_len, long length,
 			   int tag, VALUE tc, long *num_read)
 {
     VALUE value, asn1data, ary;
-    int infinite;
+    int indefinite;
     long available_len, off = *offset;
 
-    infinite = (j == 0x21);
+    indefinite = (j == 0x21);
     ary = rb_ary_new();
 
-    available_len = infinite ? max_len : length;
+    available_len = indefinite ? max_len : length;
     while (available_len > 0) {
 	long inner_read = 0;
 	value = ossl_asn1_decode0(pp, available_len, &off, depth + 1, yield, &inner_read);
 	*num_read += inner_read;
 	available_len -= inner_read;
-	rb_ary_push(ary, value);
 
-	if (infinite &&
-	    NUM2INT(ossl_asn1_get_tag(value)) == V_ASN1_EOC &&
+	if (indefinite &&
+	    ossl_asn1_tag(value) == V_ASN1_EOC &&
 	    ossl_asn1_get_tag_class(value) == sym_UNIVERSAL) {
 	    break;
 	}
+	rb_ary_push(ary, value);
     }
 
     if (tc == sym_UNIVERSAL) {
 	VALUE args[4];
-	int not_sequence_or_set;
-
-	not_sequence_or_set = tag != V_ASN1_SEQUENCE && tag != V_ASN1_SET;
-
-	if (not_sequence_or_set) {
-	    if (infinite) {
-		asn1data = rb_obj_alloc(cASN1Constructive);
-	    }
-	    else {
-		ossl_raise(eASN1Error, "invalid non-infinite tag");
-		return Qnil;
-	    }
-	}
-	else {
-	    VALUE klass = *ossl_asn1_info[tag].klass;
-	    asn1data = rb_obj_alloc(klass);
-	}
+	if (tag == V_ASN1_SEQUENCE || tag == V_ASN1_SET)
+	    asn1data = rb_obj_alloc(*ossl_asn1_info[tag].klass);
+	else
+	    asn1data = rb_obj_alloc(cASN1Constructive);
 	args[0] = ary;
 	args[1] = INT2NUM(tag);
 	args[2] = Qnil;
@@ -862,10 +845,10 @@ int_ossl_asn1_decode0_cons(unsigned char **pp, long max_len, long length,
 	ossl_asn1data_initialize(asn1data, ary, INT2NUM(tag), tc);
     }
 
-    if (infinite)
-	ossl_asn1_set_infinite_length(asn1data, Qtrue);
+    if (indefinite)
+	ossl_asn1_set_indefinite_length(asn1data, Qtrue);
     else
-	ossl_asn1_set_infinite_length(asn1data, Qfalse);
+	ossl_asn1_set_indefinite_length(asn1data, Qfalse);
 
     *offset = off;
     return asn1data;
@@ -918,7 +901,8 @@ ossl_asn1_decode0(unsigned char **pp, long length, long *offset, int depth,
 	inner_read += hlen;
     }
     else {
-    	if ((j & 0x01) && (len == 0)) ossl_raise(eASN1Error, "Infinite length for primitive value");
+	if ((j & 0x01) && (len == 0))
+	    ossl_raise(eASN1Error, "indefinite length for primitive value");
 	asn1data = int_ossl_asn1_decode0_prim(pp, len, hlen, tag, tag_class, &inner_read);
 	off += hlen + len;
     }
@@ -1078,9 +1062,12 @@ static VALUE
 ossl_asn1_initialize(int argc, VALUE *argv, VALUE self)
 {
     VALUE value, tag, tagging, tag_class;
+    int default_tag;
 
     rb_scan_args(argc, argv, "13", &value, &tag, &tagging, &tag_class);
-    if(argc > 1){
+    default_tag = ossl_asn1_default_tag(self);
+
+    if (default_tag == -1 || argc > 1) {
 	if(NIL_P(tag))
 	    ossl_raise(eASN1Error, "must specify tag number");
 	if(!NIL_P(tagging) && !SYMBOL_P(tagging))
@@ -1093,11 +1080,9 @@ ossl_asn1_initialize(int argc, VALUE *argv, VALUE self)
 	}
 	if(!SYMBOL_P(tag_class))
 	    ossl_raise(eASN1Error, "invalid tag class");
-	if (tagging == sym_IMPLICIT && NUM2INT(tag) > 31)
-	    ossl_raise(eASN1Error, "tag number for Universal too large");
     }
     else{
-	tag = INT2NUM(ossl_asn1_default_tag(self));
+	tag = INT2NUM(default_tag);
 	tagging = Qnil;
 	tag_class = sym_UNIVERSAL;
     }
@@ -1105,7 +1090,9 @@ ossl_asn1_initialize(int argc, VALUE *argv, VALUE self)
     ossl_asn1_set_value(self, value);
     ossl_asn1_set_tagging(self, tagging);
     ossl_asn1_set_tag_class(self, tag_class);
-    ossl_asn1_set_infinite_length(self, Qfalse);
+    ossl_asn1_set_indefinite_length(self, Qfalse);
+    if (default_tag == V_ASN1_BIT_STRING)
+	rb_ivar_set(self, sivUNUSED_BITS, INT2FIX(0));
 
     return self;
 }
@@ -1113,7 +1100,7 @@ ossl_asn1_initialize(int argc, VALUE *argv, VALUE self)
 static VALUE
 ossl_asn1eoc_initialize(VALUE self) {
     VALUE tag, tagging, tag_class, value;
-    tag = INT2NUM(ossl_asn1_default_tag(self));
+    tag = INT2FIX(0);
     tagging = Qnil;
     tag_class = sym_UNIVERSAL;
     value = rb_str_new("", 0);
@@ -1121,8 +1108,14 @@ ossl_asn1eoc_initialize(VALUE self) {
     ossl_asn1_set_value(self, value);
     ossl_asn1_set_tagging(self, tagging);
     ossl_asn1_set_tag_class(self, tag_class);
-    ossl_asn1_set_infinite_length(self, Qfalse);
+    ossl_asn1_set_indefinite_length(self, Qfalse);
     return self;
+}
+
+static VALUE
+ossl_asn1eoc_to_der(VALUE self)
+{
+    return rb_str_new("\0\0", 2);
 }
 
 /*
@@ -1135,37 +1128,38 @@ static VALUE
 ossl_asn1prim_to_der(VALUE self)
 {
     ASN1_TYPE *asn1;
-    int tn, tc, explicit;
-    long len, reallen;
-    unsigned char *buf, *p;
+    long alllen, bodylen;
+    unsigned char *p0, *p1;
+    int j, tag, tc, state;
     VALUE str;
 
-    tn = NUM2INT(ossl_asn1_get_tag(self));
-    tc = ossl_asn1_tag_class(self);
-    explicit = ossl_asn1_is_explicit(self);
+    if (ossl_asn1_default_tag(self) == -1) {
+	str = ossl_asn1_get_value(self);
+	return to_der_internal(self, 0, 0, StringValue(str));
+    }
+
     asn1 = ossl_asn1_get_asn1type(self);
-
-    len = ASN1_object_size(1, i2d_ASN1_TYPE(asn1, NULL), tn);
-    if(!(buf = OPENSSL_malloc(len))){
+    alllen = i2d_ASN1_TYPE(asn1, NULL);
+    if (alllen < 0) {
 	ASN1_TYPE_free(asn1);
-	ossl_raise(eASN1Error, "cannot alloc buffer");
+	ossl_raise(eASN1Error, "i2d_ASN1_TYPE");
     }
-    p = buf;
-    if (tc == V_ASN1_UNIVERSAL) {
-        i2d_ASN1_TYPE(asn1, &p);
-    } else if (explicit) {
-        ASN1_put_object(&p, 1, i2d_ASN1_TYPE(asn1, NULL), tn, tc);
-        i2d_ASN1_TYPE(asn1, &p);
-    } else {
-        i2d_ASN1_TYPE(asn1, &p);
-        *buf = tc | tn | (*buf & V_ASN1_CONSTRUCTED);
+    str = ossl_str_new(NULL, alllen, &state);
+    if (state) {
+	ASN1_TYPE_free(asn1);
+	rb_jump_tag(state);
     }
+    p0 = p1 = (unsigned char *)RSTRING_PTR(str);
+    i2d_ASN1_TYPE(asn1, &p0);
     ASN1_TYPE_free(asn1);
-    reallen = p - buf;
-    assert(reallen <= len);
-    str = ossl_buf2str((char *)buf, rb_long2int(reallen)); /* buf will be free in ossl_buf2str */
+    assert(p0 - p1 == alllen);
 
-    return str;
+    /* Strip header since to_der_internal() wants only the payload */
+    j = ASN1_get_object((const unsigned char **)&p1, &bodylen, &tag, &tc, alllen);
+    if (j & 0x80)
+	ossl_raise(eASN1Error, "ASN1_get_object"); /* should not happen */
+
+    return to_der_internal(self, 0, 0, rb_str_drop_bytes(str, alllen - bodylen));
 }
 
 /*
@@ -1177,84 +1171,33 @@ ossl_asn1prim_to_der(VALUE self)
 static VALUE
 ossl_asn1cons_to_der(VALUE self)
 {
-    int tag, tn, tc, explicit, constructed = 1;
-    int found_prim = 0, seq_len;
-    long length;
-    unsigned char *p;
-    VALUE value, str, inf_length;
+    VALUE ary, str;
+    long i;
+    int indef_len;
 
-    tn = NUM2INT(ossl_asn1_get_tag(self));
-    tc = ossl_asn1_tag_class(self);
-    inf_length = ossl_asn1_get_infinite_length(self);
-    if (inf_length == Qtrue) {
-	VALUE ary, example;
-	constructed = 2;
-	if (rb_obj_class(self) == cASN1Sequence ||
-	    rb_obj_class(self) == cASN1Set) {
-	    tag = ossl_asn1_default_tag(self);
-	}
-	else { /* must be a constructive encoding of a primitive value */
-	    ary = ossl_asn1_get_value(self);
-	    if (!rb_obj_is_kind_of(ary, rb_cArray))
-		ossl_raise(eASN1Error, "Constructive value must be an Array");
-	    /* Recursively descend until a primitive value is found.
-	    The overall value of the entire constructed encoding
-	    is of the type of the first primitive encoding to be
-	    found. */
-	    while (!found_prim){
-		example = rb_ary_entry(ary, 0);
-		if (rb_obj_is_kind_of(example, cASN1Primitive)){
-		    found_prim = 1;
-		}
-		else {
-		    /* example is another ASN1Constructive */
-		    if (!rb_obj_is_kind_of(example, cASN1Constructive)){
-			ossl_raise(eASN1Error, "invalid constructed encoding");
-			return Qnil; /* dummy */
-		    }
-		    ary = ossl_asn1_get_value(example);
-		}
-	    }
-	    tag = ossl_asn1_default_tag(example);
-	}
-    }
-    else {
-	if (rb_obj_class(self) == cASN1Constructive)
-	    ossl_raise(eASN1Error, "Constructive shall only be used with infinite length");
-	tag = ossl_asn1_default_tag(self);
-    }
-    explicit = ossl_asn1_is_explicit(self);
-    value = join_der(ossl_asn1_get_value(self));
+    indef_len = RTEST(ossl_asn1_get_indefinite_length(self));
+    ary = rb_convert_type(ossl_asn1_get_value(self), T_ARRAY, "Array", "to_a");
+    str = rb_str_new(NULL, 0);
+    for (i = 0; i < RARRAY_LEN(ary); i++) {
+	VALUE item = RARRAY_AREF(ary, i);
 
-    seq_len = ASN1_object_size(constructed, RSTRING_LENINT(value), tag);
-    length = ASN1_object_size(constructed, seq_len, tn);
-    str = rb_str_new(0, length);
-    p = (unsigned char *)RSTRING_PTR(str);
-    if(tc == V_ASN1_UNIVERSAL)
-	ASN1_put_object(&p, constructed, RSTRING_LENINT(value), tn, tc);
-    else{
-	if(explicit){
-	    ASN1_put_object(&p, constructed, seq_len, tn, tc);
-	    ASN1_put_object(&p, constructed, RSTRING_LENINT(value), tag, V_ASN1_UNIVERSAL);
-	}
-	else{
-	    ASN1_put_object(&p, constructed, RSTRING_LENINT(value), tn, tc);
-	}
-    }
-    memcpy(p, RSTRING_PTR(value), RSTRING_LEN(value));
-    p += RSTRING_LEN(value);
+	if (indef_len && rb_obj_is_kind_of(item, cASN1EndOfContent)) {
+	    if (i != RARRAY_LEN(ary) - 1)
+		ossl_raise(eASN1Error, "illegal EOC octets in value");
 
-    /* In this case we need an additional EOC (one for the explicit part and
-     * one for the Constructive itself. The EOC for the Constructive is
-     * supplied by the user, but that for the "explicit wrapper" must be
-     * added here.
-     */
-    if (explicit && inf_length == Qtrue) {
-	ASN1_put_eoc(&p);
-    }
-    ossl_str_adjust(str, p);
+	    /*
+	     * EOC is not really part of the content, but we required to add one
+	     * at the end in the past.
+	     */
+	    break;
+	}
 
-    return str;
+	item = ossl_to_der_if_possible(item);
+	StringValue(item);
+	rb_str_append(str, item);
+    }
+
+    return to_der_internal(self, 1, indef_len, str);
 }
 
 /*
@@ -1342,6 +1285,28 @@ ossl_asn1obj_get_ln(VALUE self)
     return ret;
 }
 
+static VALUE
+asn1obj_get_oid_i(VALUE vobj)
+{
+    ASN1_OBJECT *a1obj = (void *)vobj;
+    VALUE str;
+    int len;
+
+    str = rb_usascii_str_new(NULL, 127);
+    len = OBJ_obj2txt(RSTRING_PTR(str), RSTRING_LENINT(str), a1obj, 1);
+    if (len <= 0 || len == INT_MAX)
+	ossl_raise(eASN1Error, "OBJ_obj2txt");
+    if (len > RSTRING_LEN(str)) {
+	/* +1 is for the \0 terminator added by OBJ_obj2txt() */
+	rb_str_resize(str, len + 1);
+	len = OBJ_obj2txt(RSTRING_PTR(str), len + 1, a1obj, 1);
+	if (len <= 0)
+	    ossl_raise(eASN1Error, "OBJ_obj2txt");
+    }
+    rb_str_set_len(str, len);
+    return str;
+}
+
 /*
  * call-seq:
  *    oid.oid -> string
@@ -1352,16 +1317,16 @@ ossl_asn1obj_get_ln(VALUE self)
 static VALUE
 ossl_asn1obj_get_oid(VALUE self)
 {
-    VALUE val;
+    VALUE str;
     ASN1_OBJECT *a1obj;
-    char buf[128];
+    int state;
 
-    val = ossl_asn1_get_value(self);
-    a1obj = obj_to_asn1obj(val);
-    OBJ_obj2txt(buf, sizeof(buf), a1obj, 1);
+    a1obj = obj_to_asn1obj(ossl_asn1_get_value(self));
+    str = rb_protect(asn1obj_get_oid_i, (VALUE)a1obj, &state);
     ASN1_OBJECT_free(a1obj);
-
-    return rb_str_new2(buf);
+    if (state)
+	rb_jump_tag(state);
+    return str;
 }
 
 #define OSSL_ASN1_IMPL_FACTORY_METHOD(klass) \
@@ -1414,7 +1379,7 @@ Init_ossl_asn1(void)
     sivTAG = rb_intern("@tag");
     sivTAGGING = rb_intern("@tagging");
     sivTAG_CLASS = rb_intern("@tag_class");
-    sivINFINITE_LENGTH = rb_intern("@infinite_length");
+    sivINDEFINITE_LENGTH = rb_intern("@indefinite_length");
     sivUNUSED_BITS = rb_intern("@unused_bits");
 
     /*
@@ -1453,11 +1418,8 @@ Init_ossl_asn1(void)
      *
      * Constructive is, as its name implies, the base class for all
      * constructed encodings, i.e. those that consist of several values,
-     * opposed to "primitive" encodings with just one single value.
-     * Primitive values that are encoded with "infinite length" are typically
-     * constructed (their values come in multiple chunks) and are therefore
-     * represented by instances of Constructive. The value of an Constructive
-     * is always an Array.
+     * opposed to "primitive" encodings with just one single value. The value of
+     * an Constructive is always an Array.
      *
      * ==== ASN1::Set and ASN1::Sequence
      *
@@ -1611,13 +1573,13 @@ Init_ossl_asn1(void)
      *   der = seq.to_der
      *   asn1 = OpenSSL::ASN1.decode(der)
      *   # pp asn1 => #<OpenSSL::ASN1::Sequence:0x87326e0
-     *   #              @infinite_length=false,
+     *   #              @indefinite_length=false,
      *   #              @tag=16,
      *   #              @tag_class=:UNIVERSAL,
      *   #              @tagging=nil,
      *   #              @value=
      *   #                [#<OpenSSL::ASN1::ASN1Data:0x87326f4
-     *   #                   @infinite_length=false,
+     *   #                   @indefinite_length=false,
      *   #                   @tag=0,
      *   #                   @tag_class=:CONTEXT_SPECIFIC,
      *   #                   @value="\x01">]>
@@ -1634,18 +1596,18 @@ Init_ossl_asn1(void)
      *   der = seq.to_der
      *   asn1 = OpenSSL::ASN1.decode(der)
      *   # pp asn1 => #<OpenSSL::ASN1::Sequence:0x87326e0
-     *   #              @infinite_length=false,
+     *   #              @indefinite_length=false,
      *   #              @tag=16,
      *   #              @tag_class=:UNIVERSAL,
      *   #              @tagging=nil,
      *   #              @value=
      *   #                [#<OpenSSL::ASN1::ASN1Data:0x87326f4
-     *   #                   @infinite_length=false,
+     *   #                   @indefinite_length=false,
      *   #                   @tag=0,
      *   #                   @tag_class=:CONTEXT_SPECIFIC,
      *   #                   @value=
      *   #                     [#<OpenSSL::ASN1::Integer:0x85bf308
-     *   #                        @infinite_length=false,
+     *   #                        @indefinite_length=false,
      *   #                        @tag=2,
      *   #                        @tag_class=:UNIVERSAL
      *   #                        @tagging=nil,
@@ -1670,33 +1632,35 @@ Init_ossl_asn1(void)
      */
     rb_attr(cASN1Data, rb_intern("tag_class"), 1, 1, 0);
     /*
-     * Never +nil+. A boolean value indicating whether the encoding was infinite
-     * length (in the case of parsing) or whether an infinite length encoding
-     * shall be used (in the encoding case).
-     * In DER, every value has a finite length associated with it. But in
-     * scenarios where large amounts of data need to be transferred it
-     * might be desirable to have some kind of streaming support available.
+     * Never +nil+. A boolean value indicating whether the encoding uses
+     * indefinite length (in the case of parsing) or whether an indefinite
+     * length form shall be used (in the encoding case).
+     * In DER, every value uses definite length form. But in scenarios where
+     * large amounts of data need to be transferred it might be desirable to
+     * have some kind of streaming support available.
      * For example, huge OCTET STRINGs are preferably sent in smaller-sized
      * chunks, each at a time.
      * This is possible in BER by setting the length bytes of an encoding
      * to zero and by this indicating that the following value will be
-     * sent in chunks. Infinite length encodings are always constructed.
+     * sent in chunks. Indefinite length encodings are always constructed.
      * The end of such a stream of chunks is indicated by sending a EOC
-     * (End of Content) tag. SETs and SEQUENCEs may use an infinite length
+     * (End of Content) tag. SETs and SEQUENCEs may use an indefinite length
      * encoding, but also primitive types such as e.g. OCTET STRINGS or
      * BIT STRINGS may leverage this functionality (cf. ITU-T X.690).
      */
-    rb_attr(cASN1Data, rb_intern("infinite_length"), 1, 1, 0);
+    rb_attr(cASN1Data, rb_intern("indefinite_length"), 1, 1, 0);
+    rb_define_alias(cASN1Data, "infinite_length", "indefinite_length");
+    rb_define_alias(cASN1Data, "infinite_length=", "indefinite_length=");
     rb_define_method(cASN1Data, "initialize", ossl_asn1data_initialize, 3);
     rb_define_method(cASN1Data, "to_der", ossl_asn1data_to_der, 0);
 
     /* Document-class: OpenSSL::ASN1::Primitive
      *
      * The parent class for all primitive encodings. Attributes are the same as
-     * for ASN1Data, with the addition of _tagging_
-     * Primitive values can never be infinite length encodings, thus it is not
-     * possible to set the _infinite_length_ attribute for Primitive and its
-     * sub-classes.
+     * for ASN1Data, with the addition of _tagging_.
+     * Primitive values can never be encoded with indefinite length form, thus
+     * it is not possible to set the _indefinite_length_ attribute for Primitive
+     * and its sub-classes.
      *
      * == Primitive sub-classes and their mapping to Ruby classes
      * * OpenSSL::ASN1::EndOfContent    <=> _value_ is always +nil+
@@ -1762,6 +1726,7 @@ Init_ossl_asn1(void)
      * OpenSSL::ASN1.decode.
      */
     rb_attr(cASN1Primitive, rb_intern("tagging"), 1, 1, Qtrue);
+    rb_undef_method(cASN1Primitive, "indefinite_length=");
     rb_undef_method(cASN1Primitive, "infinite_length=");
     rb_define_method(cASN1Primitive, "initialize", ossl_asn1_initialize, -1);
     rb_define_method(cASN1Primitive, "to_der", ossl_asn1prim_to_der, 0);
@@ -1792,41 +1757,6 @@ Init_ossl_asn1(void)
      *   int = OpenSSL::ASN1::Integer.new(1)
      *   str = OpenSSL::ASN1::PrintableString.new('abc')
      *   set = OpenSSL::ASN1::Set.new( [ int, str ] )
-     *
-     * == Infinite length primitive values
-     *
-     * The only case where Constructive is used directly is for infinite
-     * length encodings of primitive values. These encodings are always
-     * constructed, with the contents of the _value_ Array being either
-     * UNIVERSAL non-infinite length partial encodings of the actual value
-     * or again constructive encodings with infinite length (i.e. infinite
-     * length primitive encodings may be constructed recursively with another
-     * infinite length value within an already infinite length value). Each
-     * partial encoding must be of the same UNIVERSAL type as the overall
-     * encoding. The value of the overall encoding consists of the
-     * concatenation of each partial encoding taken in sequence. The _value_
-     * array of the outer infinite length value must end with a
-     * OpenSSL::ASN1::EndOfContent instance.
-     *
-     * Please note that it is not possible to encode Constructive without
-     * the _infinite_length_ attribute being set to +true+, use
-     * OpenSSL::ASN1::Sequence or OpenSSL::ASN1::Set in these cases instead.
-     *
-     * === Example - Infinite length OCTET STRING
-     *   partial1 = OpenSSL::ASN1::OctetString.new("\x01")
-     *   partial2 = OpenSSL::ASN1::OctetString.new("\x02")
-     *   inf_octets = OpenSSL::ASN1::Constructive.new( [ partial1,
-     *                                                   partial2,
-     *                                                   OpenSSL::ASN1::EndOfContent.new ],
-     *                                                 OpenSSL::ASN1::OCTET_STRING,
-     *                                                 nil,
-     *                                                 :UNIVERSAL )
-     *   # The real value of inf_octets is "\x01\x02", i.e. the concatenation
-     *   # of partial1 and partial2
-     *   inf_octets.infinite_length = true
-     *   der = inf_octets.to_der
-     *   asn1 = OpenSSL::ASN1.decode(der)
-     *   puts asn1.infinite_length # => true
      */
     cASN1Constructive = rb_define_class_under(mASN1,"Constructive", cASN1Data);
     rb_include_module(cASN1Constructive, rb_mEnumerable);
@@ -1890,6 +1820,7 @@ do{\
     rb_attr(cASN1BitString, rb_intern("unused_bits"), 1, 1, 0);
 
     rb_define_method(cASN1EndOfContent, "initialize", ossl_asn1eoc_initialize, 0);
+    rb_define_method(cASN1EndOfContent, "to_der", ossl_asn1eoc_to_der, 0);
 
     class_tag_map = rb_hash_new();
     rb_hash_aset(class_tag_map, cASN1EndOfContent, INT2NUM(V_ASN1_EOC));

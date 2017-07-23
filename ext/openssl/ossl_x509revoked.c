@@ -155,10 +155,14 @@ static VALUE
 ossl_x509revoked_get_time(VALUE self)
 {
     X509_REVOKED *rev;
+    const ASN1_TIME *time;
 
     GetX509Rev(self, rev);
+    time = X509_REVOKED_get0_revocationDate(rev);
+    if (!time)
+	return Qnil;
 
-    return asn1time_to_time(X509_REVOKED_get0_revocationDate(rev));
+    return asn1time_to_time(time);
 }
 
 static VALUE

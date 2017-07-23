@@ -1328,8 +1328,10 @@ ossl_ocspsres_get_this_update(VALUE self)
     status = OCSP_single_get0_status(sres, NULL, NULL, &time, NULL);
     if (status < 0)
 	ossl_raise(eOCSPError, "OCSP_single_get0_status");
+    if (!time)
+	return Qnil;
 
-    return asn1time_to_time(time); /* will handle NULL */
+    return asn1time_to_time(time);
 }
 
 /*
@@ -1347,6 +1349,8 @@ ossl_ocspsres_get_next_update(VALUE self)
     status = OCSP_single_get0_status(sres, NULL, NULL, NULL, &time);
     if (status < 0)
 	ossl_raise(eOCSPError, "OCSP_single_get0_status");
+    if (!time)
+	return Qnil;
 
     return asn1time_to_time(time);
 }
@@ -1368,6 +1372,8 @@ ossl_ocspsres_get_revocation_time(VALUE self)
 	ossl_raise(eOCSPError, "OCSP_single_get0_status");
     if (status != V_OCSP_CERTSTATUS_REVOKED)
 	ossl_raise(eOCSPError, "certificate is not revoked");
+    if (!time)
+	return Qnil;
 
     return asn1time_to_time(time);
 }
