@@ -320,6 +320,40 @@ class OpenSSL::TestX509Name < OpenSSL::TestCase
     assert_equal("Namiki", ary[5][1])
   end
 
+  def test_add_entry_placing
+    der = %w{ 30 2A
+                 31 12
+                    30 10 06 03 55 04 0A 0C 09 72 75 62 79 2D 6C 61 6E 67
+                 31 14
+                    30 08 06 03 55 04 0B 0C 01 61
+                    30 08 06 03 55 04 0B 0C 01 62 }
+    orig = OpenSSL::X509::Name.new([der.join].pack("H*"))
+    assert_equal("OU=b+OU=a,O=ruby-lang", orig.to_s(OpenSSL::X509::Name::RFC2253))
+    # Skip for now; they do not work
+    #
+    # dn = orig.dup
+    # dn.add_entry("CN", "unya", loc: 0, set: 0)
+    # assert_equal("OU=b+OU=a,O=ruby-lang,CN=unya", dn.dup.to_s(OpenSSL::X509::Name::RFC2253))
+    # dn = orig.dup
+    # dn.add_entry("CN", "unya", loc: 0, set: 1)
+    # assert_equal("OU=b+OU=a,O=ruby-lang+CN=unya", dn.dup.to_s(OpenSSL::X509::Name::RFC2253))
+    dn = orig.dup
+    dn.add_entry("CN", "unya", loc: 1, set: -1)
+    assert_equal("OU=b+OU=a,O=ruby-lang+CN=unya", dn.dup.to_s(OpenSSL::X509::Name::RFC2253))
+    # dn = orig.dup
+    # dn.add_entry("CN", "unya", loc: 1, set: 0)
+    # assert_equal("OU=b+OU=a,CN=unya,O=ruby-lang", dn.dup.to_s(OpenSSL::X509::Name::RFC2253))
+    dn = orig.dup
+    dn.add_entry("CN", "unya", loc: 1, set: 1)
+    assert_equal("CN=unya+OU=b+OU=a,O=ruby-lang", dn.dup.to_s(OpenSSL::X509::Name::RFC2253))
+    dn = orig.dup
+    dn.add_entry("CN", "unya", loc: -1, set: -1)
+    assert_equal("CN=unya+OU=b+OU=a,O=ruby-lang", dn.dup.to_s(OpenSSL::X509::Name::RFC2253))
+    dn = orig.dup
+    dn.add_entry("CN", "unya", loc: -1, set: 0)
+    assert_equal("CN=unya,OU=b+OU=a,O=ruby-lang", dn.dup.to_s(OpenSSL::X509::Name::RFC2253))
+  end
+
   def test_equals2
     n1 = OpenSSL::X509::Name.parse 'CN=a'
     n2 = OpenSSL::X509::Name.parse 'CN=a'

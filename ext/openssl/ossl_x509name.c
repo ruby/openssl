@@ -198,7 +198,7 @@ ossl_x509name_initialize_copy(VALUE self, VALUE other)
 
 /*
  * call-seq:
- *    name.add_entry(oid, value [, type]) => self
+ *    name.add_entry(oid, value [, type], loc: -1, set: 0) => self
  *
  * Adds a new entry with the given _oid_ and _value_ to this name.  The _oid_
  * is an object identifier defined in ASN.1.  Some common OIDs are:
@@ -209,24 +209,39 @@ ossl_x509name_initialize_copy(VALUE self, VALUE other)
  * O::  Organization Name
  * OU:: Organizational Unit Name
  * ST:: State or Province Name
+ *
+ * The optional keyword parameters _loc_ and _set_ specify where to insert the
+ * new attribute. Refer to the manpage of X509_NAME_add_entry(3) for details.
+ * _loc_ defaults to -1 and _set_ defaults to 0. This appends a single-valued
+ * RDN to the end.
  */
 static
 VALUE ossl_x509name_add_entry(int argc, VALUE *argv, VALUE self)
 {
     X509_NAME *name;
-    VALUE oid, value, type;
+    VALUE oid, value, type, opts, kwargs[2];
+    static ID kwargs_ids[2];
     const char *oid_name;
+    int loc = -1, set = 0;
 
-    rb_scan_args(argc, argv, "21", &oid, &value, &type);
+    if (!kwargs_ids[0]) {
+	kwargs_ids[0] = rb_intern_const("loc");
+	kwargs_ids[1] = rb_intern_const("set");
+    }
+    rb_scan_args(argc, argv, "21:", &oid, &value, &type, &opts);
+    rb_get_kwargs(opts, kwargs_ids, 0, 2, kwargs);
     oid_name = StringValueCStr(oid);
     StringValue(value);
     if(NIL_P(type)) type = rb_aref(OBJECT_TYPE_TEMPLATE, oid);
+    if (kwargs[0] != Qundef)
+	loc = NUM2INT(kwargs[0]);
+    if (kwargs[1] != Qundef)
+	set = NUM2INT(kwargs[1]);
     GetX509Name(self, name);
     if (!X509_NAME_add_entry_by_txt(name, oid_name, NUM2INT(type),
-		(const unsigned char *)RSTRING_PTR(value), RSTRING_LENINT(value), -1, 0)) {
-	ossl_raise(eX509NameError, NULL);
-    }
-
+				    (unsigned char *)RSTRING_PTR(value),
+				    RSTRING_LENINT(value), loc, set))
+	ossl_raise(eX509NameError, "X509_NAME_add_entry_by_txt");
     return self;
 }
 
