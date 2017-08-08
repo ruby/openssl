@@ -243,6 +243,17 @@ class OpenSSL::TestPKeyRSA < OpenSSL::PKeyTestCase
     assert_equal pem, dup_public(rsa1024).export
   end
 
+  def test_pem_passwd
+    key = Fixtures.pkey("rsa1024")
+    pem3c = key.to_pem("aes-128-cbc", "key")
+    assert_match (/ENCRYPTED/), pem3c
+    assert_equal key.to_der, OpenSSL::PKey.read(pem3c, "key").to_der
+    assert_equal key.to_der, OpenSSL::PKey.read(pem3c) { "key" }.to_der
+    assert_raise(OpenSSL::PKey::PKeyError) {
+      OpenSSL::PKey.read(pem3c) { nil }
+    }
+  end
+
   def test_dup
     key = OpenSSL::PKey::RSA.generate(256, 17)
     key2 = key.dup

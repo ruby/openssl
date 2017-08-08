@@ -1,16 +1,27 @@
 ---
 clone_depth: 10
 install:
-  - SET PATH=C:\Ruby%ruby_version%\bin;%PATH%
-  - appveyor DownloadFile http://dl.bintray.com/oneclick/OpenKnapsack/x64/openssl-1.0.2j-x64-windows.tar.lzma
-  - 7z e openssl-1.0.2j-x64-windows.tar.lzma
-  - 7z x -y -oC:\Ruby%ruby_version% openssl-1.0.2j-x64-windows.tar
-  - ruby -S rake install_dependencies
+  - ps: |
+      $Env:PATH = "C:\Ruby${Env:ruby_version}\bin;${Env:PATH}"
+      if ($Env:ruby_version -match "^23" ) {
+        # RubyInstaller; download OpenSSL headers from OpenKnapsack Project
+        $Env:openssl_dir = "C:\Ruby${Env:ruby_version}"
+        appveyor DownloadFile http://dl.bintray.com/oneclick/OpenKnapsack/x64/openssl-1.0.2j-x64-windows.tar.lzma
+        7z e openssl-1.0.2j-x64-windows.tar.lzma
+        7z x -y -oC:\Ruby${Env:ruby_version} openssl-1.0.2j-x64-windows.tar
+      } else {
+        # RubyInstaller2; openssl package seems to be installed already
+        $Env:openssl_dir = "C:\msys64\mingw64"
+      }
+  - ruby -v
+  - openssl version
+  - rake install_dependencies
 build_script:
-  - rake -rdevkit compile -- --with-openssl-dir=C:\Ruby%ruby_version% --enable-debug
+  - rake -rdevkit compile -- --with-openssl-dir=%openssl_dir% --enable-debug
 test_script:
   - rake test OSSL_MDEBUG=1
 deploy: off
 environment:
   matrix:
-    - ruby_version: "23-x64"
+    - ruby_version: "23-x64" # RI
+    - ruby_version: "24-x64" # RI2
