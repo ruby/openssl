@@ -810,7 +810,7 @@ if OpenSSL::SSL::SSLContext::METHODS.include?(:TLSv1) && OpenSSL::SSL::SSLContex
 
 end
 
-if OpenSSL::SSL::SSLContext::METHODS.include? :TLSv1_1
+if OpenSSL::SSL::SSLContext::METHODS.include?(:TLSv1_1) && OpenSSL::SSL::SSLContext::METHODS.include?(:TLSv1)
 
   def test_tls_v1_1
     start_server_version(:TLSv1_1) { |server, port|
@@ -837,7 +837,7 @@ if OpenSSL::SSL::SSLContext::METHODS.include? :TLSv1_1
 
 end
 
-if OpenSSL::SSL::SSLContext::METHODS.include? :TLSv1_2
+if OpenSSL::SSL::SSLContext::METHODS.include?(:TLSv1_2) && OpenSSL::SSL::SSLContext::METHODS.include?(:TLSv1_1)
 
   def test_tls_v1_2
     start_server_version(:TLSv1_2) { |server, port|
