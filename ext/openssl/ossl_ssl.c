@@ -74,10 +74,10 @@ static const struct {
 #if !defined(OPENSSL_NO_TLS1) && !defined(OPENSSL_NO_TLS1_METHOD)
     OSSL_SSL_METHOD_ENTRY(TLSv1, TLS1_VERSION),
 #endif
-#if !defined(OPENSSL_NO_TLS1_1) && !defined(OPENSSL_NO_TLS1_1_METHOD)
+#if !defined(OPENSSL_NO_TLS1_1) && !defined(OPENSSL_NO_TLS1_1_METHOD) && defined(HAVE_TLSV1_1_METHOD)
     OSSL_SSL_METHOD_ENTRY(TLSv1_1, TLS1_1_VERSION),
 #endif
-#if !defined(OPENSSL_NO_TLS1_2) && !defined(OPENSSL_NO_TLS1_2_METHOD)
+#if !defined(OPENSSL_NO_TLS1_2) && !defined(OPENSSL_NO_TLS1_2_METHOD) && defined(HAVE_TLSV1_2_METHOD)
     OSSL_SSL_METHOD_ENTRY(TLSv1_2, TLS1_2_VERSION),
 #endif
     OSSL_SSL_METHOD_ENTRY(SSLv23, 0),
