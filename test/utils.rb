@@ -252,7 +252,7 @@ class OpenSSL::SSLTestCase < OpenSSL::TestCase
 
         client = Thread.new do
           begin
-            block.call(server, port.to_i)
+            block.call(port)
           ensure
             stop_pipe_w.close
           end

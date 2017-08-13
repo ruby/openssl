@@ -27,7 +27,7 @@ tddwpBAEDjcwMzA5NTYzMTU1MzAwpQMCARM=
 -----END SSL SESSION PARAMETERS-----
     SESSION
 
-    start_server(ignore_listener_error: true) { |_, port|
+    start_server(ignore_listener_error: true) { |port|
       ctx = OpenSSL::SSL::SSLContext.new
       ctx.session_cache_mode = OpenSSL::SSL::SSLContext::SESSION_CACHE_CLIENT
       ctx.session_id_context = self.object_id.to_s
@@ -46,7 +46,7 @@ tddwpBAEDjcwMzA5NTYzMTU1MzAwpQMCARM=
 
   def test_session
     Timeout.timeout(5) do
-      start_server do |server, port|
+      start_server do |port|
         sock = TCPSocket.new("127.0.0.1", port)
         ctx = OpenSSL::SSL::SSLContext.new
         ssl = OpenSSL::SSL::SSLSocket.new(sock, ctx)
@@ -154,7 +154,7 @@ __EOS__
 
   def test_client_session
     last_session = nil
-    start_server do |server, port|
+    start_server do |port|
       2.times do
         sock = TCPSocket.new("127.0.0.1", port)
         ctx = OpenSSL::SSL::SSLContext.new
@@ -235,7 +235,7 @@ __EOS__
     end
 
     first_session = nil
-    start_server(ctx_proc: ctx_proc, server_proc: server_proc) do |server, port|
+    start_server(ctx_proc: ctx_proc, server_proc: server_proc) do |port|
       10.times do |i|
         sock = TCPSocket.new("127.0.0.1", port)
         ctx = OpenSSL::SSL::SSLContext.new
@@ -283,7 +283,7 @@ __EOS__
       # any resulting value is OK (ignored)
     }
 
-    start_server do |server, port|
+    start_server do |port|
       sock = TCPSocket.new("127.0.0.1", port)
       begin
         ssl = OpenSSL::SSL::SSLSocket.new(sock, ctx)
@@ -342,7 +342,7 @@ __EOS__
       c.session_cache_stats
       readwrite_loop(c, ssl)
     }
-    start_server(ctx_proc: ctx_proc, server_proc: server_proc) do |server, port|
+    start_server(ctx_proc: ctx_proc, server_proc: server_proc) do |port|
       last_client_session = nil
       3.times do
         sock = TCPSocket.new("127.0.0.1", port)
