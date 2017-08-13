@@ -1,6 +1,8 @@
 # frozen_string_literal: false
 require_relative 'utils'
 
+if defined?(OpenSSL::TestUtils)
+
 class OpenSSL::TestConfig < OpenSSL::TestCase
   def setup
     super
@@ -297,4 +299,6 @@ __EOC__
     @it['newsection'] = {'a' => 'b'}
     assert_not_equal(@it.sections.sort, c.sections.sort)
   end
-end if defined?(OpenSSL::TestUtils)
+end
+
+end

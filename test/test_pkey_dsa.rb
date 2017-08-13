@@ -1,6 +1,5 @@
 # frozen_string_literal: false
 require_relative 'utils'
-require 'base64'
 
 if defined?(OpenSSL::TestUtils)
 

@@ -1,10 +1,8 @@
 # frozen_string_literal: false
 require_relative 'utils'
+require_relative 'ut_eof'
 
 if defined?(OpenSSL::TestUtils)
-
-require 'socket'
-require_relative 'ut_eof'
 
 module OpenSSL::SSLPairM
   def server
