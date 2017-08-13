@@ -122,15 +122,6 @@ module OpenSSL::TestUtils
     pkvalue   = publickey.value
     OpenSSL::Digest::SHA1.hexdigest(pkvalue).scan(/../).join(":").upcase
   end
-
-  def silent
-    begin
-      back, $VERBOSE = $VERBOSE, nil
-      yield
-    ensure
-      $VERBOSE = back
-    end
-  end
 end
 
 class OpenSSL::TestCase < Test::Unit::TestCase

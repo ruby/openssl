@@ -187,7 +187,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   end
 
   def test_read_nonblock_without_session
-    OpenSSL::TestUtils.silent do
+    EnvUtil.suppress_warning do
       start_server(start_immediately: false) { |server, port|
         sock = TCPSocket.new("127.0.0.1", port)
         ssl = OpenSSL::SSL::SSLSocket.new(sock)
@@ -332,7 +332,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
       ssl = OpenSSL::SSL::SSLSocket.new(sock, ctx)
       ssl.sync_close = true
       begin
-        OpenSSL::TestUtils.silent do
+        EnvUtil.suppress_warning do
           # SSLError, not RuntimeError
           assert_raise(OpenSSL::SSL::SSLError) { ssl.connect }
         end
