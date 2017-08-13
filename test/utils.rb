@@ -222,10 +222,6 @@ class OpenSSL::SSLTestCase < OpenSSL::TestCase
       ctx.cert = @svr_cert
       ctx.key = @svr_key
       ctx.tmp_dh_callback = proc { Fixtures.pkey_dh("dh1024") }
-      begin
-        ctx.ecdh_curves = "P-256"
-      rescue NotImplementedError
-      end
       ctx.verify_mode = verify_mode
       ctx_proc.call(ctx) if ctx_proc
 

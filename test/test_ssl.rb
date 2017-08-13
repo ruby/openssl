@@ -1072,30 +1072,54 @@ end
   end
 
   def test_get_ephemeral_key
-    return unless OpenSSL::SSL::SSLSocket.method_defined?(:tmp_key)
-    pkey = OpenSSL::PKey
-    ciphers = {
-        'ECDHE-RSA-AES128-SHA' => (pkey::EC if defined?(pkey::EC)),
-        'DHE-RSA-AES128-SHA' => (pkey::DH if defined?(pkey::DH)),
-        'AES128-SHA' => nil
-    }
-    conf_proc = Proc.new { |ctx| ctx.ciphers = 'ALL' }
-    start_server(ctx_proc: conf_proc) do |port|
-      ciphers.each do |cipher, ephemeral|
+    # OpenSSL >= 1.0.2
+    unless OpenSSL::SSL::SSLSocket.method_defined?(:tmp_key)
+      pend "SSL_get_server_tmp_key() is not supported"
+    end
+
+    if tls12_supported?
+      # kRSA
+      ctx_proc1 = proc { |ctx|
+        ctx.ssl_version = :TLSv1_2
+        ctx.ciphers = "kRSA"
+      }
+      start_server(ctx_proc: ctx_proc1) do |port|
         ctx = OpenSSL::SSL::SSLContext.new
-        begin
-          ctx.ciphers = cipher
-        rescue OpenSSL::SSL::SSLError => e
-          next if /no cipher match/ =~ e.message
-          raise
-        end
-        server_connect(port, ctx) do |ssl|
-          if ephemeral
-            assert_instance_of(ephemeral, ssl.tmp_key)
-          else
-            assert_nil(ssl.tmp_key)
-          end
-        end
+        ctx.ssl_version = :TLSv1_2
+        ctx.ciphers = "kRSA"
+        server_connect(port, ctx) { |ssl| assert_nil ssl.tmp_key }
+      end
+    end
+
+    if defined?(OpenSSL::PKey::DH) && tls12_supported?
+      # DHE
+      # TODO: How to test this with TLS 1.3?
+      ctx_proc2 = proc { |ctx|
+        ctx.ssl_version = :TLSv1_2
+        ctx.ciphers = "EDH"
+      }
+      start_server(ctx_proc: ctx_proc2) do |port|
+        ctx = OpenSSL::SSL::SSLContext.new
+        ctx.ssl_version = :TLSv1_2
+        ctx.ciphers = "EDH"
+        server_connect(port, ctx) { |ssl|
+          assert_instance_of OpenSSL::PKey::DH, ssl.tmp_key
+        }
+      end
+    end
+
+    if defined?(OpenSSL::PKey::EC)
+      # ECDHE
+      ctx_proc3 = proc { |ctx|
+        ctx.ciphers = "DEFAULT:!kRSA:!kEDH"
+        ctx.ecdh_curves = "P-256"
+      }
+      start_server(ctx_proc: ctx_proc3) do |port|
+        ctx = OpenSSL::SSL::SSLContext.new
+        ctx.ciphers = "DEFAULT:!kRSA:!kEDH"
+        server_connect(port, ctx) { |ssl|
+          assert_instance_of OpenSSL::PKey::EC, ssl.tmp_key
+        }
       end
     end
   end
