@@ -911,6 +911,7 @@ end
     pend "TLS 1.2 is not supported" unless tls12_supported?
     pend "NPN is not supported" unless \
       OpenSSL::SSL::SSLContext.method_defined?(:npn_select_cb)
+    pend "LibreSSL 2.6 has broken NPN functions" if libressl?(2, 6, 1)
 
     advertised = ["http/1.1", "spdy/2"]
     ctx_proc = proc { |ctx| ctx.npn_protocols = advertised }
@@ -931,6 +932,7 @@ end
     pend "TLS 1.2 is not supported" unless tls12_supported?
     pend "NPN is not supported" unless \
       OpenSSL::SSL::SSLContext.method_defined?(:npn_select_cb)
+    pend "LibreSSL 2.6 has broken NPN functions" if libressl?(2, 6, 1)
 
     advertised = Object.new
     def advertised.each
@@ -955,6 +957,7 @@ end
     pend "TLS 1.2 is not supported" unless tls12_supported?
     pend "NPN is not supported" unless \
       OpenSSL::SSL::SSLContext.method_defined?(:npn_select_cb)
+    pend "LibreSSL 2.6 has broken NPN functions" if libressl?(2, 6, 1)
 
     ctx_proc = Proc.new { |ctx| ctx.npn_protocols = ["http/1.1"] }
     start_server_version(:TLSv1_2, ctx_proc) { |port|
@@ -968,6 +971,7 @@ end
     pend "TLS 1.2 is not supported" unless tls12_supported?
     pend "NPN is not supported" unless \
       OpenSSL::SSL::SSLContext.method_defined?(:npn_select_cb)
+    pend "LibreSSL 2.6 has broken NPN functions" if libressl?(2, 6, 1)
 
     ctx_proc = Proc.new { |ctx| ctx.npn_protocols = ["a" * 256] }
     start_server_version(:TLSv1_2, ctx_proc) { |port|
@@ -981,6 +985,7 @@ end
     pend "TLS 1.2 is not supported" unless tls12_supported?
     pend "NPN is not supported" unless \
       OpenSSL::SSL::SSLContext.method_defined?(:npn_select_cb)
+    pend "LibreSSL 2.6 has broken NPN functions" if libressl?(2, 6, 1)
 
     ctx_proc = Proc.new { |ctx| ctx.npn_protocols = ["http/1.1"] }
     start_server_version(:TLSv1_2, ctx_proc) { |port|
