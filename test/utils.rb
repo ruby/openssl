@@ -178,35 +178,6 @@ class OpenSSL::SSLTestCase < OpenSSL::TestCase
     end
   end
 
-  def server_loop(ctx, ssls, stop_pipe_r, ignore_listener_error, server_proc, threads)
-    loop do
-      ssl = nil
-      begin
-        readable, = IO.select([ssls, stop_pipe_r])
-        if readable.include? stop_pipe_r
-          return
-        end
-        ssl = ssls.accept
-      rescue OpenSSL::SSL::SSLError, IOError, Errno::EBADF, Errno::EINVAL,
-             Errno::ECONNABORTED, Errno::ENOTSOCK, Errno::ECONNRESET
-        if ignore_listener_error
-          retry
-        else
-          raise
-        end
-      end
-
-      th = Thread.start do
-        begin
-          server_proc.call(ctx, ssl)
-        ensure
-          ssl.close
-        end
-      end
-      threads << th
-    end
-  end
-
   def start_server(verify_mode: OpenSSL::SSL::VERIFY_NONE, start_immediately: true,
                    ctx_proc: nil, server_proc: method(:readwrite_loop),
                    ignore_listener_error: false, &block)
@@ -223,7 +194,6 @@ class OpenSSL::SSLTestCase < OpenSSL::TestCase
       ctx_proc.call(ctx) if ctx_proc
 
       Socket.do_not_reverse_lookup = true
-      tcps = nil
       tcps = TCPServer.new("127.0.0.1", 0)
       port = tcps.connect_address.ip_port
 
@@ -232,26 +202,58 @@ class OpenSSL::SSLTestCase < OpenSSL::TestCase
 
       threads = []
       begin
-        server = Thread.new do
+        server_thread = Thread.new do
           begin
-            server_loop(ctx, ssls, stop_pipe_r, ignore_listener_error, server_proc, threads)
+            loop do
+              begin
+                readable, = IO.select([ssls, stop_pipe_r])
+                break if readable.include? stop_pipe_r
+                ssl = ssls.accept
+              rescue OpenSSL::SSL::SSLError, IOError, Errno::EBADF, Errno::EINVAL,
+                     Errno::ECONNABORTED, Errno::ENOTSOCK, Errno::ECONNRESET
+                retry if ignore_listener_error
+                raise
+              end
+
+              th = Thread.new do
+                begin
+                  server_proc.call(ctx, ssl)
+                ensure
+                  ssl.close
+                end
+                true
+              end
+              threads << th
+            end
           ensure
             tcps.close
           end
         end
-        threads.unshift server
 
-        $stderr.printf("SSL server started: pid=%d port=%d\n", $$, port) if $DEBUG
-
-        client = Thread.new do
+        client_thread = Thread.new do
           begin
             block.call(port)
           ensure
+            # Stop accepting new connection
             stop_pipe_w.close
+            server_thread.join
           end
         end
-        threads.unshift client
+        threads.unshift client_thread
       ensure
+        # Terminate existing connections. If a thread did 'pend', re-raise it.
+        pend = nil
+        threads.each { |th|
+          begin
+            th.join(10) or
+              th.raise(RuntimeError, "[start_server] thread did not exit in 10 secs")
+          rescue (defined?(MiniTest::Skip) ? MiniTest::Skip : Test::Unit::PendedError)
+            # MiniTest::Skip is for the Ruby tree
+            pend = $!
+          rescue Exception
+          end
+        }
+        raise pend if pend
         assert_join_threads(threads)
       end
     }
