@@ -1111,6 +1111,8 @@ end
     pend "EC is disabled" unless defined?(OpenSSL::PKey::EC)
     pend "tmp_ecdh_callback is not supported" unless \
       OpenSSL::SSL::SSLContext.method_defined?(:tmp_ecdh_callback)
+    pend "LibreSSL 2.6 has broken SSL_CTX_set_tmp_ecdh_callback()" \
+      if libressl?(2, 6, 1)
 
     EnvUtil.suppress_warning do # tmp_ecdh_callback is deprecated (2016-05)
       called = false
