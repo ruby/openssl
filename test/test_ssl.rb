@@ -839,7 +839,7 @@ if OpenSSL::SSL::SSLContext::METHODS.include?(:TLSv1_2) && OpenSSL::SSL::SSLCont
       ctx.ssl_version = :TLSv1_2_client
       server_connect(port, ctx) { |ssl| assert_equal("TLSv1.2", ssl.ssl_version) }
     }
-  end if OpenSSL::OPENSSL_VERSION_NUMBER > 0x10001000
+  end
 
   def test_forbid_tls_v1_1_for_client
     ctx_proc = Proc.new { |ctx| ctx.options = OpenSSL::SSL::OP_ALL | OpenSSL::SSL::OP_NO_TLSv1_1 }
@@ -888,7 +888,7 @@ end
     }
   end
 
-if OpenSSL::OPENSSL_VERSION_NUMBER >= 0x10002000
+if openssl?(1, 0, 2) || libressl?
   def test_alpn_protocol_selection_ary
     advertised = ["http/1.1", "spdy/2"]
     ctx_proc = Proc.new { |ctx|
@@ -1216,8 +1216,7 @@ end
         end
       }
 
-      if OpenSSL::OPENSSL_VERSION_NUMBER >= 0x10002000 &&
-          !OpenSSL::OPENSSL_VERSION.include?("LibreSSL")
+      if openssl?(1, 0, 2) || libressl?(2, 5, 1)
         ctx = OpenSSL::SSL::SSLContext.new
         ctx.ecdh_curves = "P-256"
 

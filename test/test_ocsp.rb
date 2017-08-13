@@ -122,7 +122,7 @@ class OpenSSL::TestOCSP < OpenSSL::TestCase
 
     assert_equal true, req.verify([@cert], store, OpenSSL::OCSP::NOINTERN)
     ret = req.verify([@cert], store)
-    if ret || OpenSSL::OPENSSL_VERSION =~ /OpenSSL/ && OpenSSL::OPENSSL_VERSION_NUMBER >= 0x10002000
+    if ret || openssl?(1, 0, 2) || libressl?(2, 4, 2)
       assert_equal true, ret
     else
       # RT2560; OCSP_request_verify() does not find signer cert from 'certs' when

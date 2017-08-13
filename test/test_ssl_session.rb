@@ -150,7 +150,7 @@ __EOS__
 
   def test_session_exts_read
     assert(OpenSSL::SSL::Session.new(DUMMY_SESSION))
-  end if OpenSSL::OPENSSL_VERSION_NUMBER >= 0x009080bf
+  end
 
   def test_client_session
     last_session = nil

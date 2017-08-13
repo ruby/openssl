@@ -41,7 +41,7 @@ class OpenSSL::TestPKeyDSA < OpenSSL::PKeyTestCase
       assert_equal true, dsa512.verify(OpenSSL::Digest::DSS1.new, signature, data)
     end
 
-    return if OpenSSL::OPENSSL_VERSION_NUMBER <= 0x010000000
+    return unless openssl?(1, 0, 0)
     signature = dsa512.sign("SHA1", data)
     assert_equal true, dsa512.verify("SHA1", signature, data)
 
