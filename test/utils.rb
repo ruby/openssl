@@ -164,7 +164,7 @@ class OpenSSL::SSLTestCase < OpenSSL::TestCase
     super
     @ca_key  = Fixtures.pkey("rsa2048")
     @svr_key = Fixtures.pkey("rsa1024")
-    @cli_key = Fixtures.pkey("dsa1024")
+    @cli_key = Fixtures.pkey("rsa2048")
     @ca  = OpenSSL::X509::Name.parse("/DC=org/DC=ruby-lang/CN=CA")
     @svr = OpenSSL::X509::Name.parse("/DC=org/DC=ruby-lang/CN=localhost")
     @cli = OpenSSL::X509::Name.parse("/DC=org/DC=ruby-lang/CN=localhost")
