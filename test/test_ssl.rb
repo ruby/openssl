@@ -1005,20 +1005,6 @@ if OpenSSL::OPENSSL_VERSION_NUMBER > 0x10001000 &&
 
 end
 
-  def test_invalid_shutdown_by_gc
-    assert_nothing_raised {
-      start_server { |port|
-        10.times {
-          sock = TCPSocket.new("127.0.0.1", port)
-          ssl = OpenSSL::SSL::SSLSocket.new(sock)
-          GC.start
-          ssl.connect
-          sock.close
-        }
-      }
-    }
-  end
-
   def test_close_after_socket_close
     start_server { |port|
       sock = TCPSocket.new("127.0.0.1", port)
