@@ -476,6 +476,13 @@ ossl_sslctx_session_remove_cb(SSL_CTX *ctx, SSL_SESSION *sess)
     void *ptr;
     int state = 0;
 
+    /*
+     * This callback is also called for all sessions in the internal store
+     * when SSL_CTX_free() is called.
+     */
+    if (rb_during_gc())
+	return;
+
     OSSL_Debug("SSL SESSION remove callback entered");
 
     if ((ptr = SSL_CTX_get_ex_data(ctx, ossl_ssl_ex_ptr_idx)) == NULL)
