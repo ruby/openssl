@@ -168,6 +168,10 @@ class OpenSSL::SSLTestCase < OpenSSL::TestCase
     @server = nil
   end
 
+  def tls12_supported?
+    OpenSSL::SSL::SSLContext::METHODS.include?(:TLSv1_2)
+  end
+
   def readwrite_loop(ctx, ssl)
     while line = ssl.gets
       ssl.write(line)
