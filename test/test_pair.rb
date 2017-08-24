@@ -187,6 +187,27 @@ module OpenSSL::TestPairM
     }
   end
 
+  def test_multibyte_read_write
+    # German a umlaut
+    auml = [%w{ C3 A4 }.join('')].pack('H*')
+    auml.force_encoding(Encoding::UTF_8)
+    bsize = auml.bytesize
+
+    ssl_pair { |s1, s2|
+      assert_equal bsize, s1.write(auml)
+      read = s2.read(bsize)
+      assert_equal Encoding::ASCII_8BIT, read.encoding
+      assert_equal bsize, read.bytesize
+      assert_equal auml, read.force_encoding(Encoding::UTF_8)
+
+      s1.puts(auml)
+      read = s2.gets
+      assert_equal Encoding::ASCII_8BIT, read.encoding
+      assert_equal bsize + 1, read.bytesize
+      assert_equal auml + "\n", read.force_encoding(Encoding::UTF_8)
+    }
+  end
+
   def test_read_nonblock
     ssl_pair {|s1, s2|
       err = nil

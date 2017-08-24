@@ -744,30 +744,6 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     end
   end
 
-  def test_multibyte_read_write
-    #German a umlaut
-    auml = [%w{ C3 A4 }.join('')].pack('H*')
-    auml.force_encoding(Encoding::UTF_8)
-
-    [10, 1000, 100000].each {|i|
-      str = nil
-      num_written = nil
-      server_proc = Proc.new {|ctx, ssl|
-        cmp = ssl.read
-        raw_size = cmp.size
-        cmp.force_encoding(Encoding::UTF_8)
-        assert_equal(str, cmp)
-        assert_equal(num_written, raw_size)
-      }
-      start_server(server_proc: server_proc) { |port|
-        server_connect(port) { |ssl|
-          str = auml * i
-          num_written = ssl.write(str)
-        }
-      }
-    }
-  end
-
   def test_unset_OP_ALL
     ctx_proc = Proc.new { |ctx|
       # If OP_DONT_INSERT_EMPTY_FRAGMENTS is not defined, this test is
