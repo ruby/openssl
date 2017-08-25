@@ -2665,44 +2665,87 @@ Init_ossl_ssl(void)
 # endif
 #endif
 
-#define ossl_ssl_def_const(x) rb_define_const(mSSL, #x, ULONG2NUM(SSL_##x))
+    rb_define_const(mSSL, "VERIFY_NONE", INT2NUM(SSL_VERIFY_NONE));
+    rb_define_const(mSSL, "VERIFY_PEER", INT2NUM(SSL_VERIFY_PEER));
+    rb_define_const(mSSL, "VERIFY_FAIL_IF_NO_PEER_CERT", INT2NUM(SSL_VERIFY_FAIL_IF_NO_PEER_CERT));
+    rb_define_const(mSSL, "VERIFY_CLIENT_ONCE", INT2NUM(SSL_VERIFY_CLIENT_ONCE));
 
-    ossl_ssl_def_const(VERIFY_NONE);
-    ossl_ssl_def_const(VERIFY_PEER);
-    ossl_ssl_def_const(VERIFY_FAIL_IF_NO_PEER_CERT);
-    ossl_ssl_def_const(VERIFY_CLIENT_ONCE);
-    /* Introduce constants included in OP_ALL.  These constants are mostly for
-     * unset some bits in OP_ALL such as;
-     *   ctx.options = OP_ALL & ~OP_DONT_INSERT_EMPTY_FRAGMENTS
-     */
-    ossl_ssl_def_const(OP_MICROSOFT_SESS_ID_BUG);
-    ossl_ssl_def_const(OP_NETSCAPE_CHALLENGE_BUG);
-    ossl_ssl_def_const(OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG);
-    ossl_ssl_def_const(OP_SSLREF2_REUSE_CERT_TYPE_BUG);
-    ossl_ssl_def_const(OP_MICROSOFT_BIG_SSLV3_BUFFER);
-    ossl_ssl_def_const(OP_MSIE_SSLV2_RSA_PADDING);
-    ossl_ssl_def_const(OP_SSLEAY_080_CLIENT_DH_BUG);
-    ossl_ssl_def_const(OP_TLS_D5_BUG);
-    ossl_ssl_def_const(OP_TLS_BLOCK_PADDING_BUG);
-    ossl_ssl_def_const(OP_DONT_INSERT_EMPTY_FRAGMENTS);
-    ossl_ssl_def_const(OP_ALL);
-    ossl_ssl_def_const(OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION);
-    ossl_ssl_def_const(OP_SINGLE_ECDH_USE);
-    ossl_ssl_def_const(OP_SINGLE_DH_USE);
-    ossl_ssl_def_const(OP_EPHEMERAL_RSA);
-    ossl_ssl_def_const(OP_CIPHER_SERVER_PREFERENCE);
-    ossl_ssl_def_const(OP_TLS_ROLLBACK_BUG);
-    ossl_ssl_def_const(OP_NO_SSLv2);
-    ossl_ssl_def_const(OP_NO_SSLv3);
-    ossl_ssl_def_const(OP_NO_TLSv1);
-    ossl_ssl_def_const(OP_NO_TLSv1_1);
-    ossl_ssl_def_const(OP_NO_TLSv1_2);
-    ossl_ssl_def_const(OP_NO_TICKET);
-    ossl_ssl_def_const(OP_NO_COMPRESSION);
-    ossl_ssl_def_const(OP_PKCS1_CHECK_1);
-    ossl_ssl_def_const(OP_PKCS1_CHECK_2);
-    ossl_ssl_def_const(OP_NETSCAPE_CA_DN_BUG);
-    ossl_ssl_def_const(OP_NETSCAPE_DEMO_CIPHER_CHANGE_BUG);
+    rb_define_const(mSSL, "OP_ALL", ULONG2NUM(SSL_OP_ALL));
+    rb_define_const(mSSL, "OP_LEGACY_SERVER_CONNECT", ULONG2NUM(SSL_OP_LEGACY_SERVER_CONNECT));
+#ifdef SSL_OP_TLSEXT_PADDING /* OpenSSL 1.0.1h and OpenSSL 1.0.2 */
+    rb_define_const(mSSL, "OP_TLSEXT_PADDING", ULONG2NUM(SSL_OP_TLSEXT_PADDING));
+#endif
+#ifdef SSL_OP_SAFARI_ECDHE_ECDSA_BUG /* OpenSSL 1.0.1f and OpenSSL 1.0.2 */
+    rb_define_const(mSSL, "OP_SAFARI_ECDHE_ECDSA_BUG", ULONG2NUM(SSL_OP_SAFARI_ECDHE_ECDSA_BUG));
+#endif
+#ifdef SSL_OP_ALLOW_NO_DHE_KEX /* OpenSSL 1.1.1 */
+    rb_define_const(mSSL, "OP_ALLOW_NO_DHE_KEX", ULONG2NUM(SSL_OP_ALLOW_NO_DHE_KEX));
+#endif
+    rb_define_const(mSSL, "OP_DONT_INSERT_EMPTY_FRAGMENTS", ULONG2NUM(SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS));
+    rb_define_const(mSSL, "OP_NO_TICKET", ULONG2NUM(SSL_OP_NO_TICKET));
+    rb_define_const(mSSL, "OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION", ULONG2NUM(SSL_OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION));
+    rb_define_const(mSSL, "OP_NO_COMPRESSION", ULONG2NUM(SSL_OP_NO_COMPRESSION));
+    rb_define_const(mSSL, "OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION", ULONG2NUM(SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION));
+#ifdef SSL_OP_NO_ENCRYPT_THEN_MAC /* OpenSSL 1.1.1 */
+    rb_define_const(mSSL, "OP_NO_ENCRYPT_THEN_MAC", ULONG2NUM(SSL_OP_NO_ENCRYPT_THEN_MAC));
+#endif
+    rb_define_const(mSSL, "OP_CIPHER_SERVER_PREFERENCE", ULONG2NUM(SSL_OP_CIPHER_SERVER_PREFERENCE));
+    rb_define_const(mSSL, "OP_TLS_ROLLBACK_BUG", ULONG2NUM(SSL_OP_TLS_ROLLBACK_BUG));
+#ifdef SSL_OP_NO_RENEGOTIATION /* OpenSSL 1.1.1 */
+    rb_define_const(mSSL, "OP_NO_RENEGOTIATION", ULONG2NUM(SSL_OP_NO_RENEGOTIATION));
+#endif
+    rb_define_const(mSSL, "OP_CRYPTOPRO_TLSEXT_BUG", ULONG2NUM(SSL_OP_CRYPTOPRO_TLSEXT_BUG));
+
+    rb_define_const(mSSL, "OP_NO_SSLv3", ULONG2NUM(SSL_OP_NO_SSLv3));
+    rb_define_const(mSSL, "OP_NO_TLSv1", ULONG2NUM(SSL_OP_NO_TLSv1));
+    rb_define_const(mSSL, "OP_NO_TLSv1_1", ULONG2NUM(SSL_OP_NO_TLSv1_1));
+    rb_define_const(mSSL, "OP_NO_TLSv1_2", ULONG2NUM(SSL_OP_NO_TLSv1_2));
+#ifdef SSL_OP_NO_TLSv1_3 /* OpenSSL 1.1.1 */
+    rb_define_const(mSSL, "OP_NO_TLSv1_3", ULONG2NUM(SSL_OP_NO_TLSv1_3));
+#endif
+
+    /* SSL_OP_* flags for DTLS */
+#if 0
+    rb_define_const(mSSL, "OP_NO_QUERY_MTU", ULONG2NUM(SSL_OP_NO_QUERY_MTU));
+    rb_define_const(mSSL, "OP_COOKIE_EXCHANGE", ULONG2NUM(SSL_OP_COOKIE_EXCHANGE));
+    rb_define_const(mSSL, "OP_CISCO_ANYCONNECT", ULONG2NUM(SSL_OP_CISCO_ANYCONNECT));
+#endif
+
+    /* Deprecated in OpenSSL 1.1.0. */
+    rb_define_const(mSSL, "OP_MICROSOFT_SESS_ID_BUG", ULONG2NUM(SSL_OP_MICROSOFT_SESS_ID_BUG));
+    /* Deprecated in OpenSSL 1.1.0. */
+    rb_define_const(mSSL, "OP_NETSCAPE_CHALLENGE_BUG", ULONG2NUM(SSL_OP_NETSCAPE_CHALLENGE_BUG));
+    /* Deprecated in OpenSSL 0.9.8q and 1.0.0c. */
+    rb_define_const(mSSL, "OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG", ULONG2NUM(SSL_OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG));
+    /* Deprecated in OpenSSL 1.0.1h and 1.0.2. */
+    rb_define_const(mSSL, "OP_SSLREF2_REUSE_CERT_TYPE_BUG", ULONG2NUM(SSL_OP_SSLREF2_REUSE_CERT_TYPE_BUG));
+    /* Deprecated in OpenSSL 1.1.0. */
+    rb_define_const(mSSL, "OP_MICROSOFT_BIG_SSLV3_BUFFER", ULONG2NUM(SSL_OP_MICROSOFT_BIG_SSLV3_BUFFER));
+    /* Deprecated in OpenSSL 0.9.7h and 0.9.8b. */
+    rb_define_const(mSSL, "OP_MSIE_SSLV2_RSA_PADDING", ULONG2NUM(SSL_OP_MSIE_SSLV2_RSA_PADDING));
+    /* Deprecated in OpenSSL 1.1.0. */
+    rb_define_const(mSSL, "OP_SSLEAY_080_CLIENT_DH_BUG", ULONG2NUM(SSL_OP_SSLEAY_080_CLIENT_DH_BUG));
+    /* Deprecated in OpenSSL 1.1.0. */
+    rb_define_const(mSSL, "OP_TLS_D5_BUG", ULONG2NUM(SSL_OP_TLS_D5_BUG));
+    /* Deprecated in OpenSSL 1.1.0. */
+    rb_define_const(mSSL, "OP_TLS_BLOCK_PADDING_BUG", ULONG2NUM(SSL_OP_TLS_BLOCK_PADDING_BUG));
+    /* Deprecated in OpenSSL 1.1.0. */
+    rb_define_const(mSSL, "OP_SINGLE_ECDH_USE", ULONG2NUM(SSL_OP_SINGLE_ECDH_USE));
+    /* Deprecated in OpenSSL 1.1.0. */
+    rb_define_const(mSSL, "OP_SINGLE_DH_USE", ULONG2NUM(SSL_OP_SINGLE_DH_USE));
+    /* Deprecated in OpenSSL 1.0.1k and 1.0.2. */
+    rb_define_const(mSSL, "OP_EPHEMERAL_RSA", ULONG2NUM(SSL_OP_EPHEMERAL_RSA));
+    /* Deprecated in OpenSSL 1.1.0. */
+    rb_define_const(mSSL, "OP_NO_SSLv2", ULONG2NUM(SSL_OP_NO_SSLv2));
+    /* Deprecated in OpenSSL 1.0.1. */
+    rb_define_const(mSSL, "OP_PKCS1_CHECK_1", ULONG2NUM(SSL_OP_PKCS1_CHECK_1));
+    /* Deprecated in OpenSSL 1.0.1. */
+    rb_define_const(mSSL, "OP_PKCS1_CHECK_2", ULONG2NUM(SSL_OP_PKCS1_CHECK_2));
+    /* Deprecated in OpenSSL 1.1.0. */
+    rb_define_const(mSSL, "OP_NETSCAPE_CA_DN_BUG", ULONG2NUM(SSL_OP_NETSCAPE_CA_DN_BUG));
+    /* Deprecated in OpenSSL 1.1.0. */
+    rb_define_const(mSSL, "OP_NETSCAPE_DEMO_CIPHER_CHANGE_BUG", ULONG2NUM(SSL_OP_NETSCAPE_DEMO_CIPHER_CHANGE_BUG));
+
 
     sym_exception = ID2SYM(rb_intern("exception"));
     sym_wait_readable = ID2SYM(rb_intern("wait_readable"));
