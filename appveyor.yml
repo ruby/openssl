@@ -17,9 +17,9 @@ install:
   - openssl version
   - rake install_dependencies
 build_script:
-  - rake -rdevkit compile -- --with-openssl-dir=%openssl_dir%
+  - rake -rdevkit compile -- --with-openssl-dir=%openssl_dir% --enable-debug
 test_script:
-  - rake test
+  - rake test OSSL_MDEBUG=1
 deploy: off
 environment:
   matrix:

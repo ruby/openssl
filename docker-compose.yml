@@ -3,11 +3,10 @@ compile: &defaults
   environment:
     RUBY_VERSION:
     OPENSSL_VERSION:
-    MDEBUG:
   command: rake compile
 test:
   <<: *defaults
-  command: rake compile test
+  command: rake compile test OSSL_MDEBUG=1 -- --enable-debug
 debug:
   <<: *defaults
   command: /bin/bash
