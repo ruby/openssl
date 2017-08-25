@@ -1700,8 +1700,6 @@ ossl_ssl_read_internal(int argc, VALUE *argv, VALUE self, int nonblock)
     io = rb_attr_get(self, id_i_io);
     GetOpenFile(io, fptr);
     if (ssl_started(ssl)) {
-	if(!nonblock && SSL_pending(ssl) <= 0)
-	    rb_thread_wait_fd(FPTR_TO_FD(fptr));
 	for (;;){
 	    nread = SSL_read(ssl, RSTRING_PTR(str), RSTRING_LENINT(str));
 	    switch(ssl_get_error(ssl, nread)){
