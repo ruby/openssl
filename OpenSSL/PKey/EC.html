@@ -391,7 +391,7 @@ ossl_ec_key_s_generate(VALUE klass, VALUE arg)
         BIO *in;
 
         pass = ossl_pem_passwd_value(pass);
-        in = ossl_obj2bio(arg);
+        in = ossl_obj2bio(&amp;arg);
 
         ec = PEM_read_bio_ECPrivateKey(in, NULL, ossl_pem_passwd_cb, (void *)pass);
         if (!ec) {

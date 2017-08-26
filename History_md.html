@@ -56,6 +56,8 @@
   <h3>Table of Contents</h3>
 
   <ul class="link-list" role="directory">
+    <li><a href="#label-Version+2.0.5">Version 2.0.5</a>
+    <li><a href="#label-Bug+fixes">Bug fixes</a>
     <li><a href="#label-Version+2.0.4">Version 2.0.4</a>
     <li><a href="#label-Bug+fixes">Bug fixes</a>
     <li><a href="#label-Version+2.0.3">Version 2.0.3</a>
@@ -93,6 +95,20 @@
 </nav>
 
 <main role="main" aria-label="Page History.md">
+
+<h1 id="label-Version+2.0.5">Version 2.0.5<span><a href="#label-Version+2.0.5">&para;</a> <a href="#top">&uarr;</a></span></h1>
+
+<h2 id="label-Bug+fixes">Bug fixes<span><a href="#label-Bug+fixes">&para;</a> <a href="#top">&uarr;</a></span></h2>
+<ul><li>
+<p>Reading a PEM/DER-encoded private key or certificate from an <a
+href="IO.html">IO</a> object did  not work properly on mswin platforms.  <a
+href="https://github.com/ruby/openssl/issues/128">[ruby/openssl#128]</a></p>
+</li><li>
+<p>Broken length check in the PEM passphrase callback is fixed.</p>
+</li><li>
+<p>It failed to compile when <a href="OpenSSL.html">OpenSSL</a> is configured
+without TLS 1.0 support.</p>
+</li></ul>
 
 <h1 id="label-Version+2.0.4">Version 2.0.4<span><a href="#label-Version+2.0.4">&para;</a> <a href="#top">&uarr;</a></span></h1>
 

@@ -246,7 +246,7 @@ parameters.</p>
             if ((group = EC_GROUP_dup(arg1_group)) == NULL)
                 ossl_raise(eEC_GROUP, &quot;EC_GROUP_dup&quot;);
         } else {
-            BIO *in = ossl_obj2bio(arg1);
+            BIO *in = ossl_obj2bio(&amp;arg1);
 
             group = PEM_read_bio_ECPKParameters(in, NULL, NULL, NULL);
             if (!group) {

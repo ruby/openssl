@@ -170,7 +170,7 @@
                 if ((ctx = SSL_get1_session(ssl)) == NULL)
                         ossl_raise(eSSLSession, &quot;no session available&quot;);
         } else {
-                BIO *in = ossl_obj2bio(arg1);
+                BIO *in = ossl_obj2bio(&amp;arg1);
 
                 ctx = PEM_read_bio_SSL_SESSION(in, NULL, NULL, NULL);
 

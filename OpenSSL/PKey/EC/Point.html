@@ -225,7 +225,7 @@ EC_POINT_*</p>
 
             point = EC_POINT_bn2point(group, bn, NULL, ossl_bn_ctx);
         } else {
-            BIO *in = ossl_obj2bio(arg1);
+            BIO *in = ossl_obj2bio(&amp;arg1);
 
 /* BUG: finish me */
 
