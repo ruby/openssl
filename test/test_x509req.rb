@@ -1,6 +1,8 @@
 # frozen_string_literal: false
 require_relative "utils"
 
+if defined?(OpenSSL)
+
 class OpenSSL::TestX509Request < OpenSSL::TestCase
   def setup
     super
@@ -146,4 +148,6 @@ class OpenSSL::TestX509Request < OpenSSL::TestCase
   rescue OpenSSL::X509::RequestError
     false
   end
+end
+
 end

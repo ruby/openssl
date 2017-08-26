@@ -1,6 +1,8 @@
 # frozen_string_literal: false
 require_relative "utils"
 
+if defined?(OpenSSL)
+
 class OpenSSL::TestOCSP < OpenSSL::TestCase
   def setup
     super
@@ -120,7 +122,7 @@ class OpenSSL::TestOCSP < OpenSSL::TestCase
 
     assert_equal true, req.verify([@cert], store, OpenSSL::OCSP::NOINTERN)
     ret = req.verify([@cert], store)
-    if ret || OpenSSL::OPENSSL_VERSION =~ /OpenSSL/ && OpenSSL::OPENSSL_VERSION_NUMBER >= 0x10002000
+    if ret || openssl?(1, 0, 2) || libressl?(2, 4, 2)
       assert_equal true, ret
     else
       # RT2560; OCSP_request_verify() does not find signer cert from 'certs' when
@@ -306,4 +308,6 @@ class OpenSSL::TestOCSP < OpenSSL::TestCase
     res = OpenSSL::OCSP::Response.create(OpenSSL::OCSP::RESPONSE_STATUS_SUCCESSFUL, bres)
     assert_equal res.to_der, res.dup.to_der
   end
+end
+
 end

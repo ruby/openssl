@@ -1,6 +1,7 @@
 # frozen_string_literal: false
-require_relative 'utils'
-require 'base64'
+require_relative "utils"
+
+if defined?(OpenSSL)
 
 class OpenSSL::TestPKeyRSA < OpenSSL::PKeyTestCase
   def test_padding
@@ -266,4 +267,6 @@ class OpenSSL::TestPKeyRSA < OpenSSL::PKeyTestCase
   def assert_same_rsa(expected, key)
     check_component(expected, key, [:n, :e, :d, :p, :q, :dmp1, :dmq1, :iqmp])
   end
+end
+
 end

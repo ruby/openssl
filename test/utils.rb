@@ -30,10 +30,11 @@ if ENV["OSSL_MDEBUG"] == "1"
 end
 
 require "test/unit"
-require 'tempfile'
-require "rbconfig"
+require "tempfile"
 require "socket"
 require "envutil"
+
+if defined?(OpenSSL)
 
 module OpenSSL::TestUtils
   module Fixtures
@@ -117,183 +118,188 @@ module OpenSSL::TestUtils
     OpenSSL::Digest::SHA1.hexdigest(pkvalue).scan(/../).join(":").upcase
   end
 
-  def silent
-    begin
-      back, $VERBOSE = $VERBOSE, nil
-      yield
-    ensure
-      $VERBOSE = back
+  def openssl?(major = nil, minor = nil, fix = nil, patch = 0)
+    return false if OpenSSL::OPENSSL_VERSION.include?("LibreSSL")
+    return true unless major
+    OpenSSL::OPENSSL_VERSION_NUMBER >=
+      major * 0x10000000 + minor * 0x100000 + fix * 0x1000 + patch * 0x10
+  end
+
+  def libressl?(major = nil, minor = nil, fix = nil)
+    version = OpenSSL::OPENSSL_VERSION.scan(/LibreSSL (\d+)\.(\d+)\.(\d+).*/)[0]
+    return false unless version
+    !major || (version.map(&:to_i) <=> [major, minor, fix]) >= 0
+  end
+end
+
+class OpenSSL::TestCase < Test::Unit::TestCase
+  include OpenSSL::TestUtils
+  extend OpenSSL::TestUtils
+
+  def setup
+    if ENV["OSSL_GC_STRESS"] == "1"
+      GC.stress = true
     end
   end
 
-  class OpenSSL::TestCase < Test::Unit::TestCase
-    include OpenSSL::TestUtils
-    extend OpenSSL::TestUtils
-
-    def setup
-      if ENV["OSSL_GC_STRESS"] == "1"
-        GC.stress = true
-      end
+  def teardown
+    if ENV["OSSL_GC_STRESS"] == "1"
+      GC.stress = false
     end
+    # OpenSSL error stack must be empty
+    assert_equal([], OpenSSL.errors)
+  end
+end
 
-    def teardown
-      if ENV["OSSL_GC_STRESS"] == "1"
-        GC.stress = false
-      end
-      # OpenSSL error stack must be empty
-      assert_equal([], OpenSSL.errors)
+class OpenSSL::SSLTestCase < OpenSSL::TestCase
+  RUBY = EnvUtil.rubybin
+  ITERATIONS = ($0 == __FILE__) ? 100 : 10
+
+  def setup
+    super
+    @ca_key  = Fixtures.pkey("rsa2048")
+    @svr_key = Fixtures.pkey("rsa1024")
+    @cli_key = Fixtures.pkey("rsa2048")
+    @ca  = OpenSSL::X509::Name.parse("/DC=org/DC=ruby-lang/CN=CA")
+    @svr = OpenSSL::X509::Name.parse("/DC=org/DC=ruby-lang/CN=localhost")
+    @cli = OpenSSL::X509::Name.parse("/DC=org/DC=ruby-lang/CN=localhost")
+    ca_exts = [
+      ["basicConstraints","CA:TRUE",true],
+      ["keyUsage","cRLSign,keyCertSign",true],
+    ]
+    ee_exts = [
+      ["keyUsage","keyEncipherment,digitalSignature",true],
+    ]
+    @ca_cert  = issue_cert(@ca, @ca_key, 1, ca_exts, nil, nil)
+    @svr_cert = issue_cert(@svr, @svr_key, 2, ee_exts, @ca_cert, @ca_key)
+    @cli_cert = issue_cert(@cli, @cli_key, 3, ee_exts, @ca_cert, @ca_key)
+    @server = nil
+  end
+
+  def tls12_supported?
+    OpenSSL::SSL::SSLContext::METHODS.include?(:TLSv1_2)
+  end
+
+  def readwrite_loop(ctx, ssl)
+    while line = ssl.gets
+      ssl.write(line)
     end
   end
 
-  class OpenSSL::SSLTestCase < OpenSSL::TestCase
-    RUBY = EnvUtil.rubybin
-    ITERATIONS = ($0 == __FILE__) ? 100 : 10
+  def start_server(verify_mode: OpenSSL::SSL::VERIFY_NONE, start_immediately: true,
+                   ctx_proc: nil, server_proc: method(:readwrite_loop),
+                   ignore_listener_error: false, &block)
+    IO.pipe {|stop_pipe_r, stop_pipe_w|
+      store = OpenSSL::X509::Store.new
+      store.add_cert(@ca_cert)
+      store.purpose = OpenSSL::X509::PURPOSE_SSL_CLIENT
+      ctx = OpenSSL::SSL::SSLContext.new
+      ctx.cert_store = store
+      ctx.cert = @svr_cert
+      ctx.key = @svr_key
+      ctx.tmp_dh_callback = proc { Fixtures.pkey_dh("dh1024") }
+      ctx.verify_mode = verify_mode
+      ctx_proc.call(ctx) if ctx_proc
 
-    def setup
-      super
-      @ca_key  = Fixtures.pkey("rsa2048")
-      @svr_key = Fixtures.pkey("rsa1024")
-      @cli_key = Fixtures.pkey("dsa1024")
-      @ca  = OpenSSL::X509::Name.parse("/DC=org/DC=ruby-lang/CN=CA")
-      @svr = OpenSSL::X509::Name.parse("/DC=org/DC=ruby-lang/CN=localhost")
-      @cli = OpenSSL::X509::Name.parse("/DC=org/DC=ruby-lang/CN=localhost")
-      ca_exts = [
-        ["basicConstraints","CA:TRUE",true],
-        ["keyUsage","cRLSign,keyCertSign",true],
-      ]
-      ee_exts = [
-        ["keyUsage","keyEncipherment,digitalSignature",true],
-      ]
-      @ca_cert  = issue_cert(@ca, @ca_key, 1, ca_exts, nil, nil)
-      @svr_cert = issue_cert(@svr, @svr_key, 2, ee_exts, @ca_cert, @ca_key)
-      @cli_cert = issue_cert(@cli, @cli_key, 3, ee_exts, @ca_cert, @ca_key)
-      @server = nil
-    end
+      Socket.do_not_reverse_lookup = true
+      tcps = TCPServer.new("127.0.0.1", 0)
+      port = tcps.connect_address.ip_port
 
-    def readwrite_loop(ctx, ssl)
-      while line = ssl.gets
-        ssl.write(line)
-      end
-    rescue OpenSSL::SSL::SSLError
-    rescue IOError
-    ensure
-      ssl.close rescue nil
-    end
+      ssls = OpenSSL::SSL::SSLServer.new(tcps, ctx)
+      ssls.start_immediately = start_immediately
 
-    def server_loop(ctx, ssls, stop_pipe_r, ignore_listener_error, server_proc, threads)
-      loop do
-        ssl = nil
-        begin
-          readable, = IO.select([ssls, stop_pipe_r])
-          if readable.include? stop_pipe_r
-            return
-          end
-          ssl = ssls.accept
-        rescue OpenSSL::SSL::SSLError, Errno::ECONNRESET
-          if ignore_listener_error
-            retry
-          else
-            raise
-          end
-        end
+      threads = []
+      begin
+        server_thread = Thread.new do
+          begin
+            loop do
+              begin
+                readable, = IO.select([ssls, stop_pipe_r])
+                break if readable.include? stop_pipe_r
+                ssl = ssls.accept
+              rescue OpenSSL::SSL::SSLError, IOError, Errno::EBADF, Errno::EINVAL,
+                     Errno::ECONNABORTED, Errno::ENOTSOCK, Errno::ECONNRESET
+                retry if ignore_listener_error
+                raise
+              end
 
-        th = Thread.start do
-          server_proc.call(ctx, ssl)
-        end
-        threads << th
-      end
-    rescue Errno::EBADF, IOError, Errno::EINVAL, Errno::ECONNABORTED, Errno::ENOTSOCK, Errno::ECONNRESET
-      if !ignore_listener_error
-        raise
-      end
-    end
-
-    def start_server(verify_mode: OpenSSL::SSL::VERIFY_NONE, start_immediately: true,
-                     ctx_proc: nil, server_proc: method(:readwrite_loop),
-                     ignore_listener_error: false, &block)
-      IO.pipe {|stop_pipe_r, stop_pipe_w|
-        store = OpenSSL::X509::Store.new
-        store.add_cert(@ca_cert)
-        store.purpose = OpenSSL::X509::PURPOSE_SSL_CLIENT
-        ctx = OpenSSL::SSL::SSLContext.new
-        ctx.cert_store = store
-        ctx.cert = @svr_cert
-        ctx.key = @svr_key
-        ctx.tmp_dh_callback = proc { Fixtures.pkey_dh("dh1024") }
-        begin
-          ctx.ecdh_curves = "P-256"
-        rescue NotImplementedError
-        end
-        ctx.verify_mode = verify_mode
-        ctx_proc.call(ctx) if ctx_proc
-
-        Socket.do_not_reverse_lookup = true
-        tcps = nil
-        tcps = TCPServer.new("127.0.0.1", 0)
-        port = tcps.connect_address.ip_port
-
-        ssls = OpenSSL::SSL::SSLServer.new(tcps, ctx)
-        ssls.start_immediately = start_immediately
-
-        threads = []
-        begin
-          server = Thread.new do
-            begin
-              server_loop(ctx, ssls, stop_pipe_r, ignore_listener_error, server_proc, threads)
-            ensure
-              tcps.close
+              th = Thread.new do
+                begin
+                  server_proc.call(ctx, ssl)
+                ensure
+                  ssl.close
+                end
+                true
+              end
+              threads << th
             end
+          ensure
+            tcps.close
           end
-          threads.unshift server
-
-          $stderr.printf("SSL server started: pid=%d port=%d\n", $$, port) if $DEBUG
-
-          client = Thread.new do
-            begin
-              block.call(server, port.to_i)
-            ensure
-              stop_pipe_w.close
-            end
-          end
-          threads.unshift client
-        ensure
-          assert_join_threads(threads)
         end
-      }
-    end
+
+        client_thread = Thread.new do
+          begin
+            block.call(port)
+          ensure
+            # Stop accepting new connection
+            stop_pipe_w.close
+            server_thread.join
+          end
+        end
+        threads.unshift client_thread
+      ensure
+        # Terminate existing connections. If a thread did 'pend', re-raise it.
+        pend = nil
+        threads.each { |th|
+          begin
+            th.join(10) or
+              th.raise(RuntimeError, "[start_server] thread did not exit in 10 secs")
+          rescue (defined?(MiniTest::Skip) ? MiniTest::Skip : Test::Unit::PendedError)
+            # MiniTest::Skip is for the Ruby tree
+            pend = $!
+          rescue Exception
+          end
+        }
+        raise pend if pend
+        assert_join_threads(threads)
+      end
+    }
+  end
+end
+
+class OpenSSL::PKeyTestCase < OpenSSL::TestCase
+  def check_component(base, test, keys)
+    keys.each { |comp|
+      assert_equal base.send(comp), test.send(comp)
+    }
   end
 
-  class OpenSSL::PKeyTestCase < OpenSSL::TestCase
-    def check_component(base, test, keys)
-      keys.each { |comp|
-        assert_equal base.send(comp), test.send(comp)
-      }
-    end
-
-    def dup_public(key)
-      case key
-      when OpenSSL::PKey::RSA
-        rsa = OpenSSL::PKey::RSA.new
-        rsa.set_key(key.n, key.e, nil)
-        rsa
-      when OpenSSL::PKey::DSA
-        dsa = OpenSSL::PKey::DSA.new
-        dsa.set_pqg(key.p, key.q, key.g)
-        dsa.set_key(key.pub_key, nil)
-        dsa
-      when OpenSSL::PKey::DH
-        dh = OpenSSL::PKey::DH.new
-        dh.set_pqg(key.p, nil, key.g)
-        dh
+  def dup_public(key)
+    case key
+    when OpenSSL::PKey::RSA
+      rsa = OpenSSL::PKey::RSA.new
+      rsa.set_key(key.n, key.e, nil)
+      rsa
+    when OpenSSL::PKey::DSA
+      dsa = OpenSSL::PKey::DSA.new
+      dsa.set_pqg(key.p, key.q, key.g)
+      dsa.set_key(key.pub_key, nil)
+      dsa
+    when OpenSSL::PKey::DH
+      dh = OpenSSL::PKey::DH.new
+      dh.set_pqg(key.p, nil, key.g)
+      dh
+    else
+      if defined?(OpenSSL::PKey::EC) && OpenSSL::PKey::EC === key
+        ec = OpenSSL::PKey::EC.new(key.group)
+        ec.public_key = key.public_key
+        ec
       else
-        if defined?(OpenSSL::PKey::EC) && OpenSSL::PKey::EC === key
-          ec = OpenSSL::PKey::EC.new(key.group)
-          ec.public_key = key.public_key
-          ec
-        else
-          raise "unknown key type"
-        end
+        raise "unknown key type"
       end
     end
   end
+end
+
 end

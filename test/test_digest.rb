@@ -1,6 +1,8 @@
 # frozen_string_literal: false
 require_relative 'utils'
 
+if defined?(OpenSSL)
+
 class OpenSSL::TestDigest < OpenSSL::TestCase
   def setup
     super
@@ -53,7 +55,7 @@ class OpenSSL::TestDigest < OpenSSL::TestCase
 
   def test_digest_constants
     algs = %w(MD4 MD5 RIPEMD160 SHA1 SHA224 SHA256 SHA384 SHA512)
-    if OpenSSL::OPENSSL_VERSION_NUMBER < 0x10100000
+    if !libressl? && !openssl?(1, 1, 0)
       algs += %w(DSS1 SHA)
     end
     algs.each do |alg|
@@ -114,4 +116,6 @@ class OpenSSL::TestDigest < OpenSSL::TestCase
     d = OpenSSL::Digest.new(oid.oid)
     assert_not_nil(d)
   end
+end
+
 end

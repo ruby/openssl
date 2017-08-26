@@ -1,6 +1,8 @@
 # frozen_string_literal: false
 require_relative "utils"
 
+if defined?(OpenSSL)
+
 class OpenSSL::TestX509Store < OpenSSL::TestCase
   def setup
     super
@@ -207,7 +209,7 @@ class OpenSSL::TestX509Store < OpenSSL::TestCase
   end
 
   def test_set_errors
-    return if OpenSSL::OPENSSL_VERSION_NUMBER >= 0x10100000
+    return if openssl?(1, 1, 0) || libressl?
     now = Time.now
     ca1_cert = issue_cert(@ca1, @rsa2048, 1, [], nil, nil)
     store = OpenSSL::X509::Store.new
@@ -234,4 +236,6 @@ class OpenSSL::TestX509Store < OpenSSL::TestCase
     ctx = OpenSSL::X509::StoreContext.new(store)
     assert_raise(NoMethodError) { ctx.dup }
   end
+end
+
 end

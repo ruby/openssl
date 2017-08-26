@@ -2,6 +2,8 @@
 # frozen_string_literal: false
 require_relative 'utils'
 
+if defined?(OpenSSL)
+
 class OpenSSL::TestX509Name < OpenSSL::TestCase
   def setup
     super
@@ -402,4 +404,6 @@ class OpenSSL::TestX509Name < OpenSSL::TestCase
     name = OpenSSL::X509::Name.parse("/CN=ruby-lang.org")
     assert_equal(name.to_der, name.dup.to_der)
   end
+end
+
 end

@@ -470,6 +470,13 @@ ossl_sslctx_session_remove_cb(SSL_CTX *ctx, SSL_SESSION *sess)
     VALUE ary, sslctx_obj, sess_obj;
     int state = 0;
 
+    /*
+     * This callback is also called for all sessions in the internal store
+     * when SSL_CTX_free() is called.
+     */
+    if (rb_during_gc())
+	return;
+
     OSSL_Debug("SSL SESSION remove callback entered");
 
     sslctx_obj = (VALUE)SSL_CTX_get_ex_data(ctx, ossl_sslctx_ex_ptr_idx);
@@ -1689,8 +1696,6 @@ ossl_ssl_read_internal(int argc, VALUE *argv, VALUE self, int nonblock)
     io = rb_attr_get(self, id_i_io);
     GetOpenFile(io, fptr);
     if (ssl_started(ssl)) {
-	if(!nonblock && SSL_pending(ssl) <= 0)
-	    rb_thread_wait_fd(fptr->fd);
 	for (;;){
 	    nread = SSL_read(ssl, RSTRING_PTR(str), RSTRING_LENINT(str));
 	    switch(ssl_get_error(ssl, nread)){

@@ -1,6 +1,8 @@
 # frozen_string_literal: false
 require_relative 'utils'
 
+if defined?(OpenSSL)
+
 class  OpenSSL::TestASN1 < OpenSSL::TestCase
   def test_decode_x509_certificate
     subj = OpenSSL::X509::Name.parse("/DC=org/DC=ruby-lang/CN=TestCA")
@@ -677,5 +679,6 @@ class  OpenSSL::TestASN1 < OpenSSL::TestCase
     end
     assert_equal(:UNIVERSAL, asn1.tag_class)
   end
+end
 
 end

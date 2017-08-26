@@ -3,6 +3,8 @@
 require_relative 'utils'
 require "prime"
 
+if defined?(OpenSSL)
+
 class OpenSSL::TestBN < OpenSSL::TestCase
   def setup
     super
@@ -269,4 +271,6 @@ class OpenSSL::TestBN < OpenSSL::TestCase
     assert_equal(0, @e1.ucmp(999))
     assert_equal(0, @e1.ucmp(-999))
   end
+end
+
 end

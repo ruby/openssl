@@ -1,6 +1,8 @@
 # frozen_string_literal: false
 require_relative 'utils'
 
+if defined?(OpenSSL)
+
 class OpenSSL::TestCipher < OpenSSL::TestCase
   module Helper
     def has_cipher?(name)
@@ -308,5 +310,6 @@ class OpenSSL::TestCipher < OpenSSL::TestCase
       kwargs.each {|k, v| cipher.send(:"#{k}=", v) }
     end
   end
+end
 
 end

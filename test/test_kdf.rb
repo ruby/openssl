@@ -1,8 +1,9 @@
 # frozen_string_literal: false
 require_relative 'utils'
 
-class OpenSSL::TestKDF < OpenSSL::TestCase
+if defined?(OpenSSL)
 
+class OpenSSL::TestKDF < OpenSSL::TestCase
   def test_pkcs5_pbkdf2_hmac_compatibility
     expected = OpenSSL::KDF.pbkdf2_hmac("password", salt: "salt", iterations: 1, length: 20, hash: "sha1")
     assert_equal(expected, OpenSSL::PKCS5.pbkdf2_hmac("password", "salt", 1, 20, "sha1"))
@@ -135,5 +136,6 @@ class OpenSSL::TestKDF < OpenSSL::TestCase
   def B(ary)
     [Array(ary).join].pack("H*")
   end
+end
 
 end

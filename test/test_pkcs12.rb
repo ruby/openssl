@@ -1,6 +1,8 @@
 # frozen_string_literal: false
 require_relative "utils"
 
+if defined?(OpenSSL)
+
 module OpenSSL
   class TestPKCS12 < OpenSSL::TestCase
     def setup
@@ -305,6 +307,7 @@ Kw4DAhoFAAQUYAuwVtGD1TdgbFK4Yal2XBgwUR4ECEawsN3rNaa6AgIIAA==
       end
       false
     end
-
   end
+end
+
 end

@@ -58,11 +58,12 @@ namespace :sync do
 
     paths = [
       ["ext/openssl/", "ext/openssl/"],
+      ["lib/", "ext/openssl/lib/"],
+      ["sample/", "sample/openssl/"],
+      ["test/fixtures/", "test/openssl/fixtures/"],
       ["test/utils.rb", "test/openssl/"],
       ["test/ut_eof.rb", "test/openssl/"],
       ["test/test_*", "test/openssl/"],
-      ["lib/", "ext/openssl/lib/"],
-      ["sample/", "sample/openssl/"],
       ["History.md", "ext/openssl/"],
     ]
     paths.each do |src, dst|

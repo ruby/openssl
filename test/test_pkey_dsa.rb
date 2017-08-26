@@ -1,6 +1,7 @@
 # frozen_string_literal: false
 require_relative 'utils'
-require 'base64'
+
+if defined?(OpenSSL) && defined?(OpenSSL::PKey::DSA)
 
 class OpenSSL::TestPKeyDSA < OpenSSL::PKeyTestCase
   def test_private
@@ -194,4 +195,6 @@ fWLOqqkzFeRrYMDzUpl36XktY6Yq8EJYlW9pCMmBVNy/dQ==
   def assert_same_dsa(expected, key)
     check_component(expected, key, [:p, :q, :g, :pub_key, :priv_key])
   end
+end
+
 end
