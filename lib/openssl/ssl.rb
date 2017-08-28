@@ -181,6 +181,51 @@ YoaOffgTf5qxiwkjnlVZQc3whgnEt9FpVMvQ9eknyeGB5KHfayAc3+hUAvI3/Cr3
         set_minmax_proto_version(@min_proto_version ||= nil, version)
         @max_proto_version = version
       end
+
+      # call-seq:
+      #    ctx.ssl_version = :TLSv1
+      #    ctx.ssl_version = "SSLv23"
+      #
+      # Sets the SSL/TLS protocol version for the context. This forces
+      # connections to use only the specified protocol version. This is
+      # deprecated and only provided for backwards compatibility. Use
+      # #min_version= and #max_version= instead.
+      #
+      # === History
+      # As the name hints, this used to call the SSL_CTX_set_ssl_version()
+      # function which sets the SSL method used for connections created from
+      # the context. As of Ruby/OpenSSL 2.1, this accessor method is
+      # implemented to call #min_version= and #max_version= instead.
+      def ssl_version=(meth)
+        meth = meth.to_s if meth.is_a?(Symbol)
+        if /(?<type>_client|_server)\z/ =~ meth
+          meth = $`
+          if $VERBOSE
+            warn "#{caller(1)[0]}: method type #{type.inspect} is ignored"
+          end
+        end
+        version = METHODS_MAP[meth.intern] or
+          raise ArgumentError, "unknown SSL method `%s'" % meth
+        set_minmax_proto_version(version, version)
+        @min_proto_version = @max_proto_version = version
+      end
+
+      METHODS_MAP = {
+        SSLv23: 0,
+        SSLv2: OpenSSL::SSL::SSL2_VERSION,
+        SSLv3: OpenSSL::SSL::SSL3_VERSION,
+        TLSv1: OpenSSL::SSL::TLS1_VERSION,
+        TLSv1_1: OpenSSL::SSL::TLS1_1_VERSION,
+        TLSv1_2: OpenSSL::SSL::TLS1_2_VERSION,
+      }.freeze
+      private_constant :METHODS_MAP
+
+      # The list of available SSL/TLS methods. This constant is only provided
+      # for backwards compatibility.
+      METHODS = METHODS_MAP.flat_map { |name,|
+        [name, :"#{name}_client", :"#{name}_server"]
+      }.freeze
+      deprecate_constant :METHODS
     end
 
     module SocketForwarder

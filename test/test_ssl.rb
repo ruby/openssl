@@ -969,6 +969,17 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     end
   end
 
+  def test_ssl_methods_constant
+    EnvUtil.suppress_warning { # Deprecated in v2.1.0
+      base = [:TLSv1_2, :TLSv1_1, :TLSv1, :SSLv3, :SSLv2, :SSLv23]
+      base.each do |name|
+        assert_include OpenSSL::SSL::SSLContext::METHODS, name
+        assert_include OpenSSL::SSL::SSLContext::METHODS, :"#{name}_client"
+        assert_include OpenSSL::SSL::SSLContext::METHODS, :"#{name}_server"
+      end
+    }
+  end
+
   def test_renegotiation_cb
     num_handshakes = 0
     renegotiation_cb = Proc.new { |ssl| num_handshakes += 1 }
