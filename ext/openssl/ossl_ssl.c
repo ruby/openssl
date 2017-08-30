@@ -727,7 +727,11 @@ ossl_sslctx_get_options(VALUE self)
 {
     SSL_CTX *ctx;
     GetSSLCTX(self, ctx);
-    return LONG2NUM(SSL_CTX_get_options(ctx));
+    /*
+     * Do explicit cast because SSL_CTX_get_options() returned (signed) long in
+     * OpenSSL before 1.1.0.
+     */
+    return ULONG2NUM((unsigned long)SSL_CTX_get_options(ctx));
 }
 
 /*
@@ -746,7 +750,7 @@ ossl_sslctx_set_options(VALUE self, VALUE options)
     if (NIL_P(options)) {
 	SSL_CTX_set_options(ctx, SSL_OP_ALL);
     } else {
-	SSL_CTX_set_options(ctx, NUM2LONG(options));
+	SSL_CTX_set_options(ctx, NUM2ULONG(options));
     }
 
     return self;
@@ -2661,7 +2665,7 @@ Init_ossl_ssl(void)
 # endif
 #endif
 
-#define ossl_ssl_def_const(x) rb_define_const(mSSL, #x, LONG2NUM(SSL_##x))
+#define ossl_ssl_def_const(x) rb_define_const(mSSL, #x, ULONG2NUM(SSL_##x))
 
     ossl_ssl_def_const(VERIFY_NONE);
     ossl_ssl_def_const(VERIFY_PEER);
