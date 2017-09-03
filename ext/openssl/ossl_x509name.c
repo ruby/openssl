@@ -305,6 +305,21 @@ ossl_x509name_to_s(int argc, VALUE *argv, VALUE self)
 }
 
 /*
+ * call-seq;
+ *    name.to_utf8 -> string
+ *
+ * Returns an UTF-8 representation of the distinguished name, as specified
+ * in {RFC 2253}[https://www.ietf.org/rfc/rfc2253.txt].
+ */
+static VALUE
+ossl_x509name_to_utf8(VALUE self)
+{
+    VALUE str = x509name_print(self, XN_FLAG_RFC2253 & ~ASN1_STRFLGS_ESC_MSB);
+    rb_enc_associate_index(str, rb_utf8_encindex());
+    return str;
+}
+
+/*
  * call-seq:
  *    name.to_a => [[name, data, type], ...]
  *
@@ -498,6 +513,7 @@ Init_ossl_x509name(void)
     rb_define_method(cX509Name, "initialize_copy", ossl_x509name_initialize_copy, 1);
     rb_define_method(cX509Name, "add_entry", ossl_x509name_add_entry, -1);
     rb_define_method(cX509Name, "to_s", ossl_x509name_to_s, -1);
+    rb_define_method(cX509Name, "to_utf8", ossl_x509name_to_utf8, 0);
     rb_define_method(cX509Name, "to_a", ossl_x509name_to_a, 0);
     rb_define_method(cX509Name, "cmp", ossl_x509name_cmp, 1);
     rb_define_alias(cX509Name, "<=>", "cmp");

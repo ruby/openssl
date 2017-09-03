@@ -356,6 +356,43 @@ class OpenSSL::TestX509Name < OpenSSL::TestCase
     assert_equal("CN=unya,OU=b+OU=a,O=ruby-lang", dn.dup.to_s(OpenSSL::X509::Name::RFC2253))
   end
 
+  def test_to_s
+    dn = [
+      ["DC", "org"],
+      ["DC", "ruby-lang"],
+      ["CN", "フー, バー"],
+    ]
+    name = OpenSSL::X509::Name.new
+    dn.each { |x| name.add_entry(*x) }
+
+    assert_equal "/DC=org/DC=ruby-lang/" \
+      "CN=\\xE3\\x83\\x95\\xE3\\x83\\xBC, \\xE3\\x83\\x90\\xE3\\x83\\xBC",
+      name.to_s
+    # OpenSSL escapes characters with MSB by default
+    assert_equal \
+      "CN=\\E3\\83\\95\\E3\\83\\BC\\, \\E3\\83\\90\\E3\\83\\BC," \
+      "DC=ruby-lang,DC=org",
+      name.to_s(OpenSSL::X509::Name::RFC2253)
+    assert_equal "DC = org, DC = ruby-lang, " \
+      "CN = \"\\E3\\83\\95\\E3\\83\\BC, \\E3\\83\\90\\E3\\83\\BC\"",
+      name.to_s(OpenSSL::X509::Name::ONELINE)
+  end
+
+  def test_to_utf8
+    dn = [
+      ["DC", "org"],
+      ["DC", "ruby-lang"],
+      ["CN", "フー, バー"],
+    ]
+    name = OpenSSL::X509::Name.new
+    dn.each { |x| name.add_entry(*x) }
+
+    str = name.to_utf8
+    expected = "CN=フー\\, バー,DC=ruby-lang,DC=org".force_encoding("UTF-8")
+    assert_equal expected, str
+    assert_equal Encoding.find("UTF-8"), str.encoding
+  end
+
   def test_equals2
     n1 = OpenSSL::X509::Name.parse 'CN=a'
     n2 = OpenSSL::X509::Name.parse 'CN=a'
