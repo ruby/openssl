@@ -319,6 +319,14 @@ ossl_x509name_to_utf8(VALUE self)
     return str;
 }
 
+/* :nodoc: */
+static VALUE
+ossl_x509name_inspect(VALUE self)
+{
+    return rb_enc_sprintf(rb_utf8_encoding(), "#<%"PRIsVALUE" %"PRIsVALUE">",
+			  rb_obj_class(self), ossl_x509name_to_utf8(self));
+}
+
 /*
  * call-seq:
  *    name.to_a => [[name, data, type], ...]
@@ -514,6 +522,7 @@ Init_ossl_x509name(void)
     rb_define_method(cX509Name, "add_entry", ossl_x509name_add_entry, -1);
     rb_define_method(cX509Name, "to_s", ossl_x509name_to_s, -1);
     rb_define_method(cX509Name, "to_utf8", ossl_x509name_to_utf8, 0);
+    rb_define_method(cX509Name, "inspect", ossl_x509name_inspect, 0);
     rb_define_method(cX509Name, "to_a", ossl_x509name_to_a, 0);
     rb_define_method(cX509Name, "cmp", ossl_x509name_cmp, 1);
     rb_define_alias(cX509Name, "<=>", "cmp");
