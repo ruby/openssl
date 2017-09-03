@@ -177,7 +177,10 @@ class OpenSSL::SSLTestCase < OpenSSL::TestCase
   end
 
   def tls12_supported?
-    OpenSSL::SSL::SSLContext::METHODS.include?(:TLSv1_2)
+    ctx = OpenSSL::SSL::SSLContext.new
+    ctx.min_version = ctx.max_version = OpenSSL::SSL::TLS1_2_VERSION
+    true
+  rescue
   end
 
   def readwrite_loop(ctx, ssl)
