@@ -119,12 +119,12 @@ instances, but with a different outcome for implicit and explicit tagging.</p>
 <p>An implicitly 1-tagged INTEGER value will be parsed as an <a
 href="ASN1Data.html">ASN1Data</a> with</p>
 <ul><li>
-<p><code>tag</code> equal to 1</p>
+<p><em>tag</em> equal to 1</p>
 </li><li>
-<p><code>tag_class</code> equal to <code>:CONTEXT_SPECIFIC</code></p>
+<p><em>tag_class</em> equal to <code>:CONTEXT_SPECIFIC</code></p>
 </li><li>
-<p><code>value</code> equal to a <code>String</code> that carries the raw
-encoding of the INTEGER.</p>
+<p><em>value</em> equal to a String that carries the raw encoding of the
+INTEGER.</p>
 </li></ul>
 
 <p>This implies that a subsequent decoding step is required to completely
@@ -135,60 +135,60 @@ decode implicitly tagged values.</p>
 <p>An explicitly 1-tagged INTEGER value will be parsed as an <a
 href="ASN1Data.html">ASN1Data</a> with</p>
 <ul><li>
-<p><code>tag</code> equal to 1</p>
+<p><em>tag</em> equal to 1</p>
 </li><li>
-<p><code>tag_class</code> equal to <code>:CONTEXT_SPECIFIC</code></p>
+<p><em>tag_class</em> equal to <code>:CONTEXT_SPECIFIC</code></p>
 </li><li>
-<p><code>value</code> equal to an <code>Array</code> with one single element,
-an instance of OpenSSL::ASN1::Integer, i.e. the inner element is the
-non-tagged primitive value, and the tagging is represented in the outer <a
+<p><em>value</em> equal to an Array with one single element, an instance of
+OpenSSL::ASN1::Integer, i.e. the inner element is the non-tagged primitive
+value, and the tagging is represented in the outer <a
 href="ASN1Data.html">ASN1Data</a></p>
 </li></ul>
 
 <h2 id="class-OpenSSL::ASN1::ASN1Data-label-Example+-+Decoding+an+implicitly+tagged+INTEGER">Example - Decoding an implicitly tagged INTEGER<span><a href="#class-OpenSSL::ASN1::ASN1Data-label-Example+-+Decoding+an+implicitly+tagged+INTEGER">&para;</a> <a href="#top">&uarr;</a></span></h2>
 
-<pre class="ruby"><span class="ruby-identifier">int</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span><span class="ruby-operator">::</span><span class="ruby-constant">Integer</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">1</span>, <span class="ruby-value">0</span>, :<span class="ruby-constant">IMPLICIT</span>) <span class="ruby-comment"># implicit 0-tagged</span>
+<pre class="ruby"><span class="ruby-identifier">int</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span><span class="ruby-operator">::</span><span class="ruby-constant">Integer</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">1</span>, <span class="ruby-value">0</span>, <span class="ruby-value">:IMPLICIT</span>) <span class="ruby-comment"># implicit 0-tagged</span>
 <span class="ruby-identifier">seq</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span><span class="ruby-operator">::</span><span class="ruby-constant">Sequence</span>.<span class="ruby-identifier">new</span>( [<span class="ruby-identifier">int</span>] )
 <span class="ruby-identifier">der</span> = <span class="ruby-identifier">seq</span>.<span class="ruby-identifier">to_der</span>
 <span class="ruby-identifier">asn1</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span>.<span class="ruby-identifier">decode</span>(<span class="ruby-identifier">der</span>)
 <span class="ruby-comment"># pp asn1 =&gt; #&lt;OpenSSL::ASN1::Sequence:0x87326e0</span>
-<span class="ruby-comment">#              @infinite_length=false,</span>
+<span class="ruby-comment">#              @indefinite_length=false,</span>
 <span class="ruby-comment">#              @tag=16,</span>
 <span class="ruby-comment">#              @tag_class=:UNIVERSAL,</span>
 <span class="ruby-comment">#              @tagging=nil,</span>
 <span class="ruby-comment">#              @value=</span>
 <span class="ruby-comment">#                [#&lt;OpenSSL::ASN1::ASN1Data:0x87326f4</span>
-<span class="ruby-comment">#                   @infinite_length=false,</span>
+<span class="ruby-comment">#                   @indefinite_length=false,</span>
 <span class="ruby-comment">#                   @tag=0,</span>
 <span class="ruby-comment">#                   @tag_class=:CONTEXT_SPECIFIC,</span>
 <span class="ruby-comment">#                   @value=&quot;\x01&quot;&gt;]&gt;</span>
 <span class="ruby-identifier">raw_int</span> = <span class="ruby-identifier">asn1</span>.<span class="ruby-identifier">value</span>[<span class="ruby-value">0</span>]
 <span class="ruby-comment"># manually rewrite tag and tag class to make it an UNIVERSAL value</span>
 <span class="ruby-identifier">raw_int</span>.<span class="ruby-identifier">tag</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span><span class="ruby-operator">::</span><span class="ruby-constant">INTEGER</span>
-<span class="ruby-identifier">raw_int</span>.<span class="ruby-identifier">tag_class</span> = :<span class="ruby-constant">UNIVERSAL</span>
+<span class="ruby-identifier">raw_int</span>.<span class="ruby-identifier">tag_class</span> = <span class="ruby-value">:UNIVERSAL</span>
 <span class="ruby-identifier">int2</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span>.<span class="ruby-identifier">decode</span>(<span class="ruby-identifier">raw_int</span>)
 <span class="ruby-identifier">puts</span> <span class="ruby-identifier">int2</span>.<span class="ruby-identifier">value</span> <span class="ruby-comment"># =&gt; 1</span>
 </pre>
 
 <h2 id="class-OpenSSL::ASN1::ASN1Data-label-Example+-+Decoding+an+explicitly+tagged+INTEGER">Example - Decoding an explicitly tagged INTEGER<span><a href="#class-OpenSSL::ASN1::ASN1Data-label-Example+-+Decoding+an+explicitly+tagged+INTEGER">&para;</a> <a href="#top">&uarr;</a></span></h2>
 
-<pre class="ruby"><span class="ruby-identifier">int</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span><span class="ruby-operator">::</span><span class="ruby-constant">Integer</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">1</span>, <span class="ruby-value">0</span>, :<span class="ruby-constant">EXPLICIT</span>) <span class="ruby-comment"># explicit 0-tagged</span>
+<pre class="ruby"><span class="ruby-identifier">int</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span><span class="ruby-operator">::</span><span class="ruby-constant">Integer</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">1</span>, <span class="ruby-value">0</span>, <span class="ruby-value">:EXPLICIT</span>) <span class="ruby-comment"># explicit 0-tagged</span>
 <span class="ruby-identifier">seq</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span><span class="ruby-operator">::</span><span class="ruby-constant">Sequence</span>.<span class="ruby-identifier">new</span>( [<span class="ruby-identifier">int</span>] )
 <span class="ruby-identifier">der</span> = <span class="ruby-identifier">seq</span>.<span class="ruby-identifier">to_der</span>
 <span class="ruby-identifier">asn1</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span>.<span class="ruby-identifier">decode</span>(<span class="ruby-identifier">der</span>)
 <span class="ruby-comment"># pp asn1 =&gt; #&lt;OpenSSL::ASN1::Sequence:0x87326e0</span>
-<span class="ruby-comment">#              @infinite_length=false,</span>
+<span class="ruby-comment">#              @indefinite_length=false,</span>
 <span class="ruby-comment">#              @tag=16,</span>
 <span class="ruby-comment">#              @tag_class=:UNIVERSAL,</span>
 <span class="ruby-comment">#              @tagging=nil,</span>
 <span class="ruby-comment">#              @value=</span>
 <span class="ruby-comment">#                [#&lt;OpenSSL::ASN1::ASN1Data:0x87326f4</span>
-<span class="ruby-comment">#                   @infinite_length=false,</span>
+<span class="ruby-comment">#                   @indefinite_length=false,</span>
 <span class="ruby-comment">#                   @tag=0,</span>
 <span class="ruby-comment">#                   @tag_class=:CONTEXT_SPECIFIC,</span>
 <span class="ruby-comment">#                   @value=</span>
 <span class="ruby-comment">#                     [#&lt;OpenSSL::ASN1::Integer:0x85bf308</span>
-<span class="ruby-comment">#                        @infinite_length=false,</span>
+<span class="ruby-comment">#                        @indefinite_length=false,</span>
 <span class="ruby-comment">#                        @tag=2,</span>
 <span class="ruby-comment">#                        @tag_class=:UNIVERSAL</span>
 <span class="ruby-comment">#                        @tagging=nil,</span>
@@ -216,6 +216,31 @@ href="ASN1Data.html">ASN1Data</a></p>
       </header>
 
       
+      <div id="attribute-i-indefinite_length" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">indefinite_length</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        <p>Never <code>nil</code>. A boolean value indicating whether the encoding
+uses indefinite length (in the case of parsing) or whether an indefinite
+length form shall be used (in the encoding case). In DER, every value uses
+definite length form. But in scenarios where large amounts of data need to
+be transferred it might be desirable to have some kind of streaming support
+available. For example, huge OCTET STRINGs are preferably sent in
+smaller-sized chunks, each at a time. This is possible in BER by setting
+the length bytes of an encoding to zero and by this indicating that the
+following value will be sent in chunks. Indefinite length encodings are
+always constructed. The end of such a stream of chunks is indicated by
+sending a EOC (End of Content) tag. SETs and SEQUENCEs may use an
+indefinite length encoding, but also primitive types such as e.g. OCTET
+STRINGS or BIT STRINGS may leverage this functionality (cf. ITU-T X.690).</p>
+        
+        </div>
+      </div>
+      
       <div id="attribute-i-infinite_length" class="method-detail">
         <div class="method-heading attribute-method-heading">
           <span class="method-name">infinite_length</span><span
@@ -224,20 +249,19 @@ href="ASN1Data.html">ASN1Data</a></p>
 
         <div class="method-description">
         
-        <p>Never <code>nil</code>. A <code>Boolean</code> indicating whether the
-encoding was infinite length (in the case of parsing) or whether an
-infinite length encoding shall be used (in the encoding case). In DER,
-every value has a finite length associated with it. But in scenarios where
-large amounts of data need to be transferred it might be desirable to have
-some kind of streaming support available. For example, huge OCTET STRINGs
-are preferably sent in smaller-sized chunks, each at a time. This is
-possible in BER by setting the length bytes of an encoding to zero and by
-this indicating that the following value will be sent in chunks. Infinite
-length encodings are always constructed. The end of such a stream of chunks
-is indicated by sending a EOC (End of Content) tag. SETs and SEQUENCEs may
-use an infinite length encoding, but also primitive types such as e.g.
-OCTET STRINGS or BIT STRINGS may leverage this functionality (cf. ITU-T
-X.690).</p>
+        <p>Never <code>nil</code>. A boolean value indicating whether the encoding
+uses indefinite length (in the case of parsing) or whether an indefinite
+length form shall be used (in the encoding case). In DER, every value uses
+definite length form. But in scenarios where large amounts of data need to
+be transferred it might be desirable to have some kind of streaming support
+available. For example, huge OCTET STRINGs are preferably sent in
+smaller-sized chunks, each at a time. This is possible in BER by setting
+the length bytes of an encoding to zero and by this indicating that the
+following value will be sent in chunks. Indefinite length encodings are
+always constructed. The end of such a stream of chunks is indicated by
+sending a EOC (End of Content) tag. SETs and SEQUENCEs may use an
+indefinite length encoding, but also primitive types such as e.g. OCTET
+STRINGS or BIT STRINGS may leverage this functionality (cf. ITU-T X.690).</p>
         
         </div>
       </div>
@@ -250,8 +274,8 @@ X.690).</p>
 
         <div class="method-description">
         
-        <p>A <code>Number</code> representing the tag number of this <a
-href="ASN1Data.html">ASN1Data</a>. Never <code>nil</code>.</p>
+        <p>An <a href="../../Integer.html">Integer</a> representing the tag number of
+this <a href="ASN1Data.html">ASN1Data</a>. Never <code>nil</code>.</p>
         
         </div>
       </div>
@@ -264,7 +288,7 @@ href="ASN1Data.html">ASN1Data</a>. Never <code>nil</code>.</p>
 
         <div class="method-description">
         
-        <p>A <code>Symbol</code> representing the tag class of this <a
+        <p>A Symbol representing the tag class of this <a
 href="ASN1Data.html">ASN1Data</a>. Never <code>nil</code>. See <a
 href="ASN1Data.html">ASN1Data</a> for possible values.</p>
         
@@ -313,20 +337,21 @@ types and Ruby classes.</p>
 
         <div class="method-description">
           
-          <p><code>value</code>: Please have a look at <a
+          <p><em>value</em>: Please have a look at <a
 href="Constructive.html">Constructive</a> and <a
 href="Primitive.html">Primitive</a> to see how Ruby types are mapped to
 ASN.1 types and vice versa.</p>
 
-<p><code>tag</code>: A <code>Number</code> indicating the tag number.</p>
+<p><em>tag</em>: An <a href="../../Integer.html">Integer</a> indicating the
+tag number.</p>
 
-<p><code>tag_class</code>: A <code>Symbol</code> indicating the tag class.
-Please cf. <a href="../ASN1.html">ASN1</a> for possible values.</p>
+<p><em>tag_class</em>: A Symbol indicating the tag class. Please cf. <a
+href="../ASN1.html">ASN1</a> for possible values.</p>
 
 <h2 id="method-c-new-label-Example">Example<span><a href="#method-c-new-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h2>
 
-<pre class="ruby"><span class="ruby-identifier">asn1_int</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1Data</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">42</span>, <span class="ruby-value">2</span>, :<span class="ruby-constant">UNIVERSAL</span>) <span class="ruby-comment"># =&gt; Same as OpenSSL::ASN1::Integer.new(42)</span>
-<span class="ruby-identifier">tagged_int</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1Data</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">42</span>, <span class="ruby-value">0</span>, :<span class="ruby-constant">CONTEXT_SPECIFIC</span>) <span class="ruby-comment"># implicitly 0-tagged INTEGER</span>
+<pre class="ruby"><span class="ruby-identifier">asn1_int</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1Data</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">42</span>, <span class="ruby-value">2</span>, <span class="ruby-value">:UNIVERSAL</span>) <span class="ruby-comment"># =&gt; Same as OpenSSL::ASN1::Integer.new(42)</span>
+<span class="ruby-identifier">tagged_int</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1Data</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">42</span>, <span class="ruby-value">0</span>, <span class="ruby-value">:CONTEXT_SPECIFIC</span>) <span class="ruby-comment"># implicitly 0-tagged INTEGER</span>
 </pre>
           
           
@@ -338,12 +363,10 @@ ossl_asn1data_initialize(VALUE self, VALUE value, VALUE tag, VALUE tag_class)
 {
     if(!SYMBOL_P(tag_class))
         ossl_raise(eASN1Error, &quot;invalid tag class&quot;);
-    if (tag_class == sym_UNIVERSAL &amp;&amp; NUM2INT(tag) &gt; 31)
-        ossl_raise(eASN1Error, &quot;tag number for Universal too large&quot;);
     ossl_asn1_set_tag(self, tag);
     ossl_asn1_set_value(self, value);
     ossl_asn1_set_tag_class(self, tag_class);
-    ossl_asn1_set_infinite_length(self, Qfalse);
+    ossl_asn1_set_indefinite_length(self, Qfalse);
 
     return self;
 }</pre>
@@ -382,10 +405,9 @@ ossl_asn1data_initialize(VALUE self, VALUE value, VALUE tag, VALUE tag_class)
         <div class="method-description">
           
           <p>Encodes this <a href="ASN1Data.html">ASN1Data</a> into a DER-encoded String
-value. The result is DER-encoded except for the possibility of infinite
-length encodings. Infinite length encodings are not allowed in strict DER,
-so strictly speaking the result of such an encoding would be a
-BER-encoding.</p>
+value. The result is DER-encoded except for the possibility of indefinite
+length forms. Indefinite length forms are not allowed in strict DER, so
+strictly speaking the result of such an encoding would be a BER-encoding.</p>
           
           
 
@@ -394,34 +416,16 @@ BER-encoding.</p>
             <pre>static VALUE
 ossl_asn1data_to_der(VALUE self)
 {
-    VALUE value, der, inf_length;
-    int tag, tag_class, is_cons = 0;
-    long length;
-    unsigned char *p;
+    VALUE value = ossl_asn1_get_value(self);
 
-    value = ossl_asn1_get_value(self);
-    if(rb_obj_is_kind_of(value, rb_cArray)){
-        is_cons = 1;
-        value = join_der(value);
+    if (rb_obj_is_kind_of(value, rb_cArray))
+        return ossl_asn1cons_to_der(self);
+    else {
+        if (RTEST(ossl_asn1_get_indefinite_length(self)))
+            ossl_raise(eASN1Error, &quot;indefinite length form cannot be used &quot; \
+                       &quot;with primitive encoding&quot;);
+        return ossl_asn1prim_to_der(self);
     }
-    StringValue(value);
-
-    tag = ossl_asn1_tag(self);
-    tag_class = ossl_asn1_tag_class(self);
-    inf_length = ossl_asn1_get_infinite_length(self);
-    if (inf_length == Qtrue) {
-        is_cons = 2;
-    }
-    if((length = ASN1_object_size(is_cons, RSTRING_LENINT(value), tag)) &lt;= 0)
-        ossl_raise(eASN1Error, NULL);
-    der = rb_str_new(0, length);
-    p = (unsigned char *)RSTRING_PTR(der);
-    ASN1_put_object(&amp;p, is_cons, RSTRING_LENINT(value), tag, tag_class);
-    memcpy(p, RSTRING_PTR(value), RSTRING_LEN(value));
-    p += RSTRING_LEN(value);
-    ossl_str_adjust(der, p);
-
-    return der;
 }</pre>
           </div>
           
@@ -441,7 +445,7 @@ ossl_asn1data_to_der(VALUE self)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.1.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 6.0.0.beta1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

@@ -52,22 +52,6 @@
   </div>
 
   
-<div class="nav-section">
-  <h3>Table of Contents</h3>
-
-  <ul class="link-list" role="directory">
-    <li><a href="#module-OpenSSL::PKCS5-label-Parameters">Parameters</a>
-    <li><a href="#module-OpenSSL::PKCS5-label-Password">Password</a>
-    <li><a href="#module-OpenSSL::PKCS5-label-Salt">Salt</a>
-    <li><a href="#module-OpenSSL::PKCS5-label-Iteration+Count">Iteration Count</a>
-    <li><a href="#module-OpenSSL::PKCS5-label-Key+Length">Key Length</a>
-    <li><a href="#module-OpenSSL::PKCS5-label-Examples">Examples</a>
-    <li><a href="#module-OpenSSL::PKCS5-label-Generating+a+128+bit+key+for+a+Cipher+-28e.g.+AES-29">Generating a 128 bit key for a Cipher (e.g. AES)</a>
-    <li><a href="#module-OpenSSL::PKCS5-label-Storing+Passwords">Storing Passwords</a>
-    <li><a href="#module-OpenSSL::PKCS5-label-Important+Note+on+Checking+Passwords">Important Note on Checking Passwords</a>
-  </ul>
-</div>
-
 
   <div id="class-metadata">
     
@@ -80,9 +64,9 @@
 
   <ul class="link-list" role="directory">
     
-    <li ><a href="#method-c-pbkdf2_hmac">::pbkdf2_hmac</a>
+    <li ><a href="#method-i-pbkdf2_hmac">#pbkdf2_hmac</a>
     
-    <li ><a href="#method-c-pbkdf2_hmac_sha1">::pbkdf2_hmac_sha1</a>
+    <li ><a href="#method-i-pbkdf2_hmac_sha1">#pbkdf2_hmac_sha1</a>
     
   </ul>
 </div>
@@ -97,99 +81,6 @@
 
   <section class="description">
     
-<p>Provides password-based encryption functionality based on PKCS#5. Typically
-used for securely deriving arbitrary length symmetric keys to be used with
-an <a href="Cipher.html">OpenSSL::Cipher</a> from passwords. Another use
-case is for storing passwords: Due to the ability to tweak the effort of
-computation by increasing the iteration count, computation can be slowed
-down artificially in order to render possible attacks infeasible.</p>
-
-<p><a href="PKCS5.html">PKCS5</a> offers support for PBKDF2 with an
-OpenSSL::Digest::SHA1-based <a href="HMAC.html">HMAC</a>, or an arbitrary
-<a href="Digest.html">Digest</a> if the underlying version of <a
-href="../OpenSSL.html">OpenSSL</a> already supports it (&gt;= 1.0.0).</p>
-
-<h3 id="module-OpenSSL::PKCS5-label-Parameters">Parameters<span><a href="#module-OpenSSL::PKCS5-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
-
-<h4 id="module-OpenSSL::PKCS5-label-Password">Password<span><a href="#module-OpenSSL::PKCS5-label-Password">&para;</a> <a href="#top">&uarr;</a></span></h4>
-
-<p>Typically an arbitrary String that represents the password to be used for
-deriving a key.</p>
-
-<h4 id="module-OpenSSL::PKCS5-label-Salt">Salt<span><a href="#module-OpenSSL::PKCS5-label-Salt">&para;</a> <a href="#top">&uarr;</a></span></h4>
-
-<p>Prevents attacks based on dictionaries of common passwords. It is a public
-value that can be safely stored along with the password (e.g. if PBKDF2 is
-used for password storage). For maximum security, a fresh, random salt
-should be generated for each stored password. According to PKCS#5, a salt
-should be at least 8 bytes long.</p>
-
-<h4 id="module-OpenSSL::PKCS5-label-Iteration+Count">Iteration Count<span><a href="#module-OpenSSL::PKCS5-label-Iteration+Count">&para;</a> <a href="#top">&uarr;</a></span></h4>
-
-<p>Allows to tweak the length that the actual computation will take. The
-larger the iteration count, the longer it will take.</p>
-
-<h4 id="module-OpenSSL::PKCS5-label-Key+Length">Key Length<span><a href="#module-OpenSSL::PKCS5-label-Key+Length">&para;</a> <a href="#top">&uarr;</a></span></h4>
-
-<p>Specifies the length in bytes of the output that will be generated.
-Typically, the key length should be larger than or equal to the output
-length of the underlying digest function, otherwise an attacker could
-simply try to brute-force the key. According to PKCS#5, security is limited
-by the output length of the underlying digest function, i.e. security is
-not improved if a key length strictly larger than the digest output length
-is chosen. Therefore, when using <a href="PKCS5.html">PKCS5</a> for
-password storage, it suffices to store values equal to the digest output
-length, nothing is gained by storing larger values.</p>
-
-<h2 id="module-OpenSSL::PKCS5-label-Examples">Examples<span><a href="#module-OpenSSL::PKCS5-label-Examples">&para;</a> <a href="#top">&uarr;</a></span></h2>
-
-<h3 id="module-OpenSSL::PKCS5-label-Generating+a+128+bit+key+for+a+Cipher+-28e.g.+AES-29">Generating a 128 bit key for a <a href="Cipher.html">Cipher</a> (e.g. AES)<span><a href="#module-OpenSSL::PKCS5-label-Generating+a+128+bit+key+for+a+Cipher+-28e.g.+AES-29">&para;</a> <a href="#top">&uarr;</a></span></h3>
-
-<pre class="ruby"><span class="ruby-identifier">pass</span> = <span class="ruby-string">&quot;secret&quot;</span>
-<span class="ruby-identifier">salt</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Random</span>.<span class="ruby-identifier">random_bytes</span>(<span class="ruby-value">16</span>)
-<span class="ruby-identifier">iter</span> = <span class="ruby-value">20000</span>
-<span class="ruby-identifier">key_len</span> = <span class="ruby-value">16</span>
-<span class="ruby-identifier">key</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKCS5</span>.<span class="ruby-identifier">pbkdf2_hmac_sha1</span>(<span class="ruby-identifier">pass</span>, <span class="ruby-identifier">salt</span>, <span class="ruby-identifier">iter</span>, <span class="ruby-identifier">key_len</span>)
-</pre>
-
-<h3 id="module-OpenSSL::PKCS5-label-Storing+Passwords">Storing Passwords<span><a href="#module-OpenSSL::PKCS5-label-Storing+Passwords">&para;</a> <a href="#top">&uarr;</a></span></h3>
-
-<pre class="ruby"><span class="ruby-identifier">pass</span> = <span class="ruby-string">&quot;secret&quot;</span>
-<span class="ruby-identifier">salt</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Random</span>.<span class="ruby-identifier">random_bytes</span>(<span class="ruby-value">16</span>) <span class="ruby-comment">#store this with the generated value</span>
-<span class="ruby-identifier">iter</span> = <span class="ruby-value">20000</span>
-<span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span><span class="ruby-operator">::</span><span class="ruby-constant">SHA256</span>.<span class="ruby-identifier">new</span>
-<span class="ruby-identifier">len</span> = <span class="ruby-identifier">digest</span>.<span class="ruby-identifier">digest_length</span>
-<span class="ruby-comment">#the final value to be stored</span>
-<span class="ruby-identifier">value</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKCS5</span>.<span class="ruby-identifier">pbkdf2_hmac</span>(<span class="ruby-identifier">pass</span>, <span class="ruby-identifier">salt</span>, <span class="ruby-identifier">iter</span>, <span class="ruby-identifier">len</span>, <span class="ruby-identifier">digest</span>)
-</pre>
-
-<h3 id="module-OpenSSL::PKCS5-label-Important+Note+on+Checking+Passwords">Important Note on Checking Passwords<span><a href="#module-OpenSSL::PKCS5-label-Important+Note+on+Checking+Passwords">&para;</a> <a href="#top">&uarr;</a></span></h3>
-
-<p>When comparing passwords provided by the user with previously stored
-values, a common mistake made is comparing the two values using “==”.
-Typically, “==” short-circuits on evaluation, and is therefore vulnerable
-to timing attacks. The proper way is to use a method that always takes the
-same amount of time when comparing two values, thus not leaking any
-information to potential attackers. To compare two values, the following
-could be used:</p>
-
-<pre class="ruby"><span class="ruby-keyword">def</span> <span class="ruby-identifier">eql_time_cmp</span>(<span class="ruby-identifier">a</span>, <span class="ruby-identifier">b</span>)
-  <span class="ruby-keyword">unless</span> <span class="ruby-identifier">a</span>.<span class="ruby-identifier">length</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">b</span>.<span class="ruby-identifier">length</span>
-    <span class="ruby-keyword">return</span> <span class="ruby-keyword">false</span>
-  <span class="ruby-keyword">end</span>
-  <span class="ruby-identifier">cmp</span> = <span class="ruby-identifier">b</span>.<span class="ruby-identifier">bytes</span>.<span class="ruby-identifier">to_a</span>
-  <span class="ruby-identifier">result</span> = <span class="ruby-value">0</span>
-  <span class="ruby-identifier">a</span>.<span class="ruby-identifier">bytes</span>.<span class="ruby-identifier">each_with_index</span> {<span class="ruby-operator">|</span><span class="ruby-identifier">c</span>,<span class="ruby-identifier">i</span><span class="ruby-operator">|</span>
-    <span class="ruby-identifier">result</span> <span class="ruby-operator">|=</span> <span class="ruby-identifier">c</span> <span class="ruby-operator">^</span> <span class="ruby-identifier">cmp</span>[<span class="ruby-identifier">i</span>]
-  }
-  <span class="ruby-identifier">result</span> <span class="ruby-operator">==</span> <span class="ruby-value">0</span>
-<span class="ruby-keyword">end</span>
-</pre>
-
-<p>Please note that the premature return in case of differing lengths
-typically does not leak valuable information - when using PKCS#5, the
-length of the values to be compared is of fixed size.</p>
-
   </section>
 
   
@@ -205,73 +96,38 @@ length of the values to be compared is of fixed size.</p>
     
 
     
-     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
        <header>
-         <h3>Public Class Methods</h3>
+         <h3>Public Instance Methods</h3>
        </header>
 
     
-      <div id="method-c-pbkdf2_hmac" class="method-detail ">
-        
+      <div id="method-i-pbkdf2_hmac" class="method-detail ">
         
         <div class="method-heading">
-          <span class="method-callseq">
-            pbkdf2_hmac(pass, salt, iter, keylen, digest) &rarr; string
-          </span>
+          <span class="method-name">pbkdf2_hmac</span><span
+            class="method-args">(pass, salt, iter, keylen, digest)</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
         </div>
         
-        
 
         <div class="method-description">
           
-          <h3 id="method-c-pbkdf2_hmac-label-Parameters">Parameters<span><a href="#method-c-pbkdf2_hmac-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
-<ul><li>
-<p><code>pass</code> - string</p>
-</li><li>
-<p><code>salt</code> - string - should be at least 8 bytes long.</p>
-</li><li>
-<p><code>iter</code> - integer - should be greater than 1000.  20000 is
-better.</p>
-</li><li>
-<p><code>keylen</code> - integer</p>
-</li><li>
-<p><code>digest</code> - a string or <a href="Digest.html">OpenSSL::Digest</a>
-object.</p>
-</li></ul>
-
-<p>Available in <a href="../OpenSSL.html">OpenSSL</a> &gt;= 1.0.0.</p>
-
-<p>Digests other than SHA1 may not be supported by other cryptography
-libraries.</p>
+          <p><a href="PKCS5.html#method-i-pbkdf2_hmac">#pbkdf2_hmac</a> has been renamed
+to <a href="KDF.html#method-c-pbkdf2_hmac">OpenSSL::KDF.pbkdf2_hmac</a>.
+This method is provided for backwards compatibility.</p>
           
           
 
           
           <div class="method-source-code" id="pbkdf2_hmac-source">
-            <pre>static VALUE
-ossl_pkcs5_pbkdf2_hmac(VALUE self, VALUE pass, VALUE salt, VALUE iter, VALUE keylen, VALUE digest)
-{
-    VALUE str;
-    const EVP_MD *md;
-    int len = NUM2INT(keylen);
-
-    StringValue(pass);
-    StringValue(salt);
-    md = GetDigestPtr(digest);
-
-    str = rb_str_new(0, len);
-
-    if (PKCS5_PBKDF2_HMAC(RSTRING_PTR(pass), RSTRING_LENINT(pass),
-                          (unsigned char *)RSTRING_PTR(salt), RSTRING_LENINT(salt),
-                          NUM2INT(iter), md, len,
-                          (unsigned char *)RSTRING_PTR(str)) != 1)
-        ossl_raise(ePKCS5, &quot;PKCS5_PBKDF2_HMAC&quot;);
-
-    return str;
-}</pre>
+            <pre><span class="ruby-comment"># File lib/openssl/pkcs5.rb, line 12</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">pbkdf2_hmac</span>(<span class="ruby-identifier">pass</span>, <span class="ruby-identifier">salt</span>, <span class="ruby-identifier">iter</span>, <span class="ruby-identifier">keylen</span>, <span class="ruby-identifier">digest</span>)
+  <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">KDF</span>.<span class="ruby-identifier">pbkdf2_hmac</span>(<span class="ruby-identifier">pass</span>, <span class="ruby-value">salt:</span> <span class="ruby-identifier">salt</span>, <span class="ruby-value">iterations:</span> <span class="ruby-identifier">iter</span>,
+                           <span class="ruby-value">length:</span> <span class="ruby-identifier">keylen</span>, <span class="ruby-value">hash:</span> <span class="ruby-identifier">digest</span>)
+<span class="ruby-keyword">end</span></pre>
           </div>
           
         </div>
@@ -282,61 +138,29 @@ ossl_pkcs5_pbkdf2_hmac(VALUE self, VALUE pass, VALUE salt, VALUE iter, VALUE key
       </div>
 
     
-      <div id="method-c-pbkdf2_hmac_sha1" class="method-detail ">
-        
+      <div id="method-i-pbkdf2_hmac_sha1" class="method-detail ">
         
         <div class="method-heading">
-          <span class="method-callseq">
-            pbkdf2_hmac_sha1(pass, salt, iter, keylen) &rarr; string
-          </span>
+          <span class="method-name">pbkdf2_hmac_sha1</span><span
+            class="method-args">(pass, salt, iter, keylen)</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
         </div>
         
-        
 
         <div class="method-description">
           
-          <h3 id="method-c-pbkdf2_hmac_sha1-label-Parameters">Parameters<span><a href="#method-c-pbkdf2_hmac_sha1-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
-<ul><li>
-<p><code>pass</code> - string</p>
-</li><li>
-<p><code>salt</code> - string - should be at least 8 bytes long.</p>
-</li><li>
-<p><code>iter</code> - integer - should be greater than 1000.  20000 is
-better.</p>
-</li><li>
-<p><code>keylen</code> - integer</p>
-</li></ul>
-
-<p>This method is available in almost any version of <a
-href="../OpenSSL.html">OpenSSL</a>.</p>
-
-<p>Conforms to RFC 2898.</p>
+          
           
           
 
           
           <div class="method-source-code" id="pbkdf2_hmac_sha1-source">
-            <pre>static VALUE
-ossl_pkcs5_pbkdf2_hmac_sha1(VALUE self, VALUE pass, VALUE salt, VALUE iter, VALUE keylen)
-{
-    VALUE str;
-    int len = NUM2INT(keylen);
-
-    StringValue(pass);
-    StringValue(salt);
-
-    str = rb_str_new(0, len);
-
-    if (PKCS5_PBKDF2_HMAC_SHA1(RSTRING_PTR(pass), RSTRING_LENINT(pass),
-                               (const unsigned char *)RSTRING_PTR(salt), RSTRING_LENINT(salt), NUM2INT(iter),
-                               len, (unsigned char *)RSTRING_PTR(str)) != 1)
-        ossl_raise(ePKCS5, &quot;PKCS5_PBKDF2_HMAC_SHA1&quot;);
-
-    return str;
-}</pre>
+            <pre><span class="ruby-comment"># File lib/openssl/pkcs5.rb, line 17</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">pbkdf2_hmac_sha1</span>(<span class="ruby-identifier">pass</span>, <span class="ruby-identifier">salt</span>, <span class="ruby-identifier">iter</span>, <span class="ruby-identifier">keylen</span>)
+  <span class="ruby-identifier">pbkdf2_hmac</span>(<span class="ruby-identifier">pass</span>, <span class="ruby-identifier">salt</span>, <span class="ruby-identifier">iter</span>, <span class="ruby-identifier">keylen</span>, <span class="ruby-string">&quot;sha1&quot;</span>)
+<span class="ruby-keyword">end</span></pre>
           </div>
           
         </div>
@@ -355,7 +179,7 @@ ossl_pkcs5_pbkdf2_hmac_sha1(VALUE self, VALUE pass, VALUE salt, VALUE iter, VALU
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.1.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 6.0.0.beta1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

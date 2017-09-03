@@ -182,6 +182,19 @@ connection.</p>
         </div>
       </div>
       
+      <div id="attribute-i-hostname" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">hostname</span><span
+            class="attribute-access-type">[R]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
       <div id="attribute-i-io" class="method-detail">
         <div class="method-heading attribute-method-heading">
           <span class="method-name">io</span><span
@@ -255,11 +268,11 @@ is shut down. This defaults to <code>false</code>.</p>
 
         <div class="method-description">
           
-          <p>Creates a new <a href="../SSL.html">SSL</a> socket from <code>io</code>
-which must be a real <a href="../../IO.html">IO</a> object (not an IO-like
-object that responds to read/write).</p>
+          <p>Creates a new <a href="../SSL.html">SSL</a> socket from <em>io</em> which
+must be a real <a href="../../IO.html">IO</a> object (not an IO-like object
+that responds to read/write).</p>
 
-<p>If <code>ctx</code> is provided the <a href="../SSL.html">SSL</a> Sockets
+<p>If <em>ctx</em> is provided the <a href="../SSL.html">SSL</a> Sockets
 initial params will be taken from the context.</p>
 
 <p>The <a href="../Buffering.html">OpenSSL::Buffering</a> module provides
@@ -397,12 +410,13 @@ ossl_ssl_accept(VALUE self)
 <span class="ruby-keyword">end</span>
 </pre>
 
-<p>By specifying `exception: false`, the options hash allows you to indicate
-that <a href="SSLSocket.html#method-i-accept_nonblock">#accept_nonblock</a>
-should not raise an <a
-href="../../IO/WaitReadable.html">IO::WaitReadable</a> or <a
-href="../../IO/WaitWritable.html">IO::WaitWritable</a> exception, but
-return the symbol :wait_readable or :wait_writable instead.</p>
+<p>By specifying a keyword argument <em>exception</em> to <code>false</code>,
+you can indicate that <a
+href="SSLSocket.html#method-i-accept_nonblock">#accept_nonblock</a> should
+not raise an <a href="../../IO/WaitReadable.html">IO::WaitReadable</a> or
+<a href="../../IO/WaitWritable.html">IO::WaitWritable</a> exception, but
+return the symbol <code>:wait_readable</code> or
+<code>:wait_writable</code> instead.</p>
           
           
 
@@ -532,7 +546,7 @@ ossl_ssl_get_cert(VALUE self)
         
         <div class="method-heading">
           <span class="method-callseq">
-            cipher &rarr; [name, version, bits, alg_bits]
+            cipher &rarr; nil or [name, version, bits, alg_bits]
           </span>
           
           <span class="method-click-advice">click to toggle source</span>
@@ -543,7 +557,8 @@ ossl_ssl_get_cert(VALUE self)
 
         <div class="method-description">
           
-          <p>The cipher being used for the current connection</p>
+          <p>Returns the cipher suite actually used in the current session, or nil if no
+session has been established.</p>
           
           
 
@@ -553,13 +568,11 @@ ossl_ssl_get_cert(VALUE self)
 ossl_ssl_get_cipher(VALUE self)
 {
     SSL *ssl;
-    SSL_CIPHER *cipher;
+    const SSL_CIPHER *cipher;
 
     GetSSL(self, ssl);
-
-    cipher = (SSL_CIPHER *)SSL_get_current_cipher(ssl);
-
-    return ossl_ssl_cipher_to_ary(cipher);
+    cipher = SSL_get_current_cipher(ssl);
+    return cipher ? ossl_ssl_cipher_to_ary(cipher) : Qnil;
 }</pre>
           </div>
           
@@ -692,13 +705,14 @@ ossl_ssl_connect(VALUE self)
 <span class="ruby-keyword">end</span>
 </pre>
 
-<p>By specifying `exception: false`, the options hash allows you to indicate
-that <a
+<p>By specifying a keyword argument <em>exception</em> to <code>false</code>,
+you can indicate that <a
 href="SSLSocket.html#method-i-connect_nonblock">#connect_nonblock</a>
 should not raise an <a
 href="../../IO/WaitReadable.html">IO::WaitReadable</a> or <a
 href="../../IO/WaitWritable.html">IO::WaitWritable</a> exception, but
-return the symbol :wait_readable or :wait_writable instead.</p>
+return the symbol <code>:wait_readable</code> or
+<code>:wait_writable</code> instead.</p>
           
           
 
@@ -997,12 +1011,13 @@ hostname of a remote peer has been verified.</p>
 
           
           <div class="method-source-code" id="post_connection_check-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 279</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 381</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">post_connection_check</span>(<span class="ruby-identifier">hostname</span>)
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">peer_cert</span>.<span class="ruby-identifier">nil?</span>
     <span class="ruby-identifier">msg</span> = <span class="ruby-string">&quot;Peer verification enabled, but no certificate received.&quot;</span>
     <span class="ruby-keyword">if</span> <span class="ruby-identifier">using_anon_cipher?</span>
-      <span class="ruby-identifier">msg</span> <span class="ruby-operator">+=</span> <span class="ruby-node">&quot; Anonymous cipher suite #{cipher[0]} was negotiated. &quot;</span>                     <span class="ruby-string">&quot;Anonymous suites must be disabled to use peer verification.&quot;</span>
+      <span class="ruby-identifier">msg</span> <span class="ruby-operator">+=</span> <span class="ruby-node">&quot; Anonymous cipher suite #{cipher[0]} was negotiated. &quot;</span> \
+             <span class="ruby-string">&quot;Anonymous suites must be disabled to use peer verification.&quot;</span>
     <span class="ruby-keyword">end</span>
     <span class="ruby-identifier">raise</span> <span class="ruby-constant">SSLError</span>, <span class="ruby-identifier">msg</span>
   <span class="ruby-keyword">end</span>
@@ -1045,7 +1060,7 @@ established.</p>
 
           
           <div class="method-source-code" id="session-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 300</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 402</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">session</span>
   <span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Session</span>.<span class="ruby-identifier">new</span>(<span class="ruby-keyword">self</span>)
 <span class="ruby-keyword">rescue</span> <span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Session</span><span class="ruby-operator">::</span><span class="ruby-constant">SessionError</span>
@@ -1091,7 +1106,7 @@ ossl_ssl_set_session(VALUE self, VALUE arg1)
     SSL_SESSION *sess;
 
     GetSSL(self, ssl);
-    SafeGetSSLSession(arg1, sess);
+    GetSSLSession(arg1, sess);
 
     if (SSL_set_session(ssl, sess) != 1)
         ossl_raise(eSSLError, &quot;SSL_set_session&quot;);
@@ -1124,7 +1139,8 @@ ossl_ssl_set_session(VALUE self, VALUE arg1)
 
         <div class="method-description">
           
-          <p>Returns true if a reused session was negotiated during the handshake.</p>
+          <p>Returns <code>true</code> if a reused session was negotiated during the
+handshake.</p>
           
           
 
@@ -1266,7 +1282,7 @@ closed.</p>
 
           
           <div class="method-source-code" id="sysclose-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 266</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 368</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">sysclose</span>
   <span class="ruby-keyword">return</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">closed?</span>
   <span class="ruby-identifier">stop</span>
@@ -1305,9 +1321,9 @@ closed.</p>
 
         <div class="method-description">
           
-          <p>Reads <code>length</code> bytes from the <a href="../SSL.html">SSL</a>
-connection.  If a pre-allocated <code>buffer</code> is provided the data
-will be written into it.</p>
+          <p>Reads <em>length</em> bytes from the <a href="../SSL.html">SSL</a>
+connection.  If a pre-allocated <em>buffer</em> is provided the data will
+be written into it.</p>
           
           
 
@@ -1344,7 +1360,7 @@ ossl_ssl_read(int argc, VALUE *argv, VALUE self)
 
         <div class="method-description">
           
-          <p>Writes <code>string</code> to the <a href="../SSL.html">SSL</a> connection.</p>
+          <p>Writes <em>string</em> to the <a href="../SSL.html">SSL</a> connection.</p>
           
           
 
@@ -1460,7 +1476,7 @@ ossl_ssl_get_verify_result(VALUE self)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.1.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 6.0.0.beta1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

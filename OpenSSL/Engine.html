@@ -146,7 +146,7 @@ href="https://www.openssl.org/docs/crypto/engine.html">www.openssl.org/docs/cryp
         
         <div class="method-heading">
           <span class="method-callseq">
-            by_id(name) &rarr; engine
+            OpenSSL::Engine.by_id(name) &rarr; engine
           </span>
           
           <span class="method-click-advice">click to toggle source</span>
@@ -157,13 +157,13 @@ href="https://www.openssl.org/docs/crypto/engine.html">www.openssl.org/docs/cryp
 
         <div class="method-description">
           
-          <p>Fetch the engine as specified by the <code>id</code> String</p>
+          <p>Fetches the engine as specified by the <em>id</em> String.</p>
 
 <pre>OpenSSL::Engine.by_id(&quot;openssl&quot;)
  =&gt; #&lt;OpenSSL::Engine id=&quot;openssl&quot; name=&quot;Software engine support&quot;&gt;</pre>
 
 <p>See <a href="Engine.html#method-c-engines">::engines</a> for the currently
-loaded engines</p>
+loaded engines.</p>
           
           
 
@@ -245,13 +245,16 @@ ossl_engine_s_cleanup(VALUE self)
     
       <div id="method-c-engines" class="method-detail ">
         
+        
         <div class="method-heading">
-          <span class="method-name">engines</span><span
-            class="method-args">()</span>
+          <span class="method-callseq">
+            OpenSSL::Engine.engines &rarr; [engine, ...]
+          </span>
           
           <span class="method-click-advice">click to toggle source</span>
           
         </div>
+        
         
 
         <div class="method-description">
@@ -296,7 +299,7 @@ ossl_engine_s_engines(VALUE klass)
         
         <div class="method-heading">
           <span class="method-callseq">
-            load(enginename = nil)
+            OpenSSL::Engine.load(name = nil)
           </span>
           
           <span class="method-click-advice">click to toggle source</span>
@@ -307,10 +310,10 @@ ossl_engine_s_engines(VALUE klass)
 
         <div class="method-description">
           
-          <p>This method loads engines. If <code>name</code> is nil, then all builtin
-engines are loaded. Otherwise, the given <code>name</code>, as a string, 
-is loaded if available to your runtime, and returns true. If
-<code>name</code> is not found, then nil is returned.</p>
+          <p>This method loads engines. If <em>name</em> is nil, then all builtin
+engines are loaded. Otherwise, the given <em>name</em>, as a String,  is
+loaded if available to your runtime, and returns true. If <em>name</em> is
+not found, then nil is returned.</p>
           
           
 
@@ -419,8 +422,8 @@ ossl_engine_s_load(int argc, VALUE *argv, VALUE klass)
 
         <div class="method-description">
           
-          <p>This returns an <a href="Cipher.html">OpenSSL::Cipher</a> by
-<code>name</code>, if it is available in this engine.</p>
+          <p>Returns a new instance of <a href="Cipher.html">OpenSSL::Cipher</a> by
+<em>name</em>, if it is available in this engine.</p>
 
 <p>An <a href="Engine/EngineError.html">EngineError</a> will be raised if the
 cipher is unavailable.</p>
@@ -462,13 +465,16 @@ ossl_engine_get_cipher(VALUE self, VALUE name)
     
       <div id="method-i-cmds" class="method-detail ">
         
+        
         <div class="method-heading">
-          <span class="method-name">cmds</span><span
-            class="method-args">()</span>
+          <span class="method-callseq">
+            cmds &rarr; [[&quot;name&quot;, &quot;description&quot;, &quot;flags&quot;], ...]
+          </span>
           
           <span class="method-click-advice">click to toggle source</span>
           
         </div>
+        
         
 
         <div class="method-description">
@@ -526,10 +532,10 @@ ossl_engine_get_cmds(VALUE self)
 
         <div class="method-description">
           
-          <p>Send the given <code>command</code> to this engine.</p>
+          <p>Sends the given <em>command</em> to this engine.</p>
 
-<p>Raises an <a href="Engine/EngineError.html">EngineError</a> if the
-<code>command</code> fails.</p>
+<p>Raises an <a href="Engine/EngineError.html">EngineError</a> if the command
+fails.</p>
           
           
 
@@ -576,8 +582,8 @@ ossl_engine_ctrl_cmd(int argc, VALUE *argv, VALUE self)
 
         <div class="method-description">
           
-          <p>This returns an <a href="Digest.html">OpenSSL::Digest</a> by
-<code>name</code>.</p>
+          <p>Returns a new instance of <a href="Digest.html">OpenSSL::Digest</a> by
+<em>name</em>.</p>
 
 <p>Will raise an <a href="Engine/EngineError.html">EngineError</a> if the
 digest is unavailable.</p>
@@ -622,13 +628,16 @@ ossl_engine_get_digest(VALUE self, VALUE name)
     
       <div id="method-i-finish" class="method-detail ">
         
+        
         <div class="method-heading">
-          <span class="method-name">finish</span><span
-            class="method-args">()</span>
+          <span class="method-callseq">
+            finish &rarr; nil
+          </span>
           
           <span class="method-click-advice">click to toggle source</span>
           
         </div>
+        
         
 
         <div class="method-description">
@@ -664,18 +673,21 @@ ossl_engine_finish(VALUE self)
     
       <div id="method-i-id" class="method-detail ">
         
+        
         <div class="method-heading">
-          <span class="method-name">id</span><span
-            class="method-args">()</span>
+          <span class="method-callseq">
+            id &rarr; string
+          </span>
           
           <span class="method-click-advice">click to toggle source</span>
           
         </div>
         
+        
 
         <div class="method-description">
           
-          <p>Get the id for this engine</p>
+          <p>Gets the id for this engine.</p>
 
 <pre class="ruby"><span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Engine</span>.<span class="ruby-identifier">load</span>
 <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Engine</span>.<span class="ruby-identifier">engines</span> <span class="ruby-comment">#=&gt; [#&lt;OpenSSL::Engine#&gt;, ...]</span>
@@ -706,18 +718,21 @@ ossl_engine_get_id(VALUE self)
     
       <div id="method-i-inspect" class="method-detail ">
         
+        
         <div class="method-heading">
-          <span class="method-name">inspect</span><span
-            class="method-args">()</span>
+          <span class="method-callseq">
+            inspect &rarr; string
+          </span>
           
           <span class="method-click-advice">click to toggle source</span>
           
         </div>
         
+        
 
         <div class="method-description">
           
-          <p>Pretty print this engine</p>
+          <p>Pretty prints this engine.</p>
           
           
 
@@ -758,7 +773,7 @@ ossl_engine_inspect(VALUE self)
 
         <div class="method-description">
           
-          <p>Loads the given private key by <code>id</code> and <code>data</code>.</p>
+          <p>Loads the given private key identified by <em>id</em> and <em>data</em>.</p>
 
 <p>An <a href="Engine/EngineError.html">EngineError</a> is raised of the <a
 href="PKey.html">OpenSSL::PKey</a> is unavailable.</p>
@@ -812,7 +827,7 @@ ossl_engine_load_privkey(int argc, VALUE *argv, VALUE self)
 
         <div class="method-description">
           
-          <p>Loads the given private key by <code>id</code> and <code>data</code>.</p>
+          <p>Loads the given public key identified by <em>id</em> and <em>data</em>.</p>
 
 <p>An <a href="Engine/EngineError.html">EngineError</a> is raised of the <a
 href="PKey.html">OpenSSL::PKey</a> is unavailable.</p>
@@ -850,18 +865,21 @@ ossl_engine_load_pubkey(int argc, VALUE *argv, VALUE self)
     
       <div id="method-i-name" class="method-detail ">
         
+        
         <div class="method-heading">
-          <span class="method-name">name</span><span
-            class="method-args">()</span>
+          <span class="method-callseq">
+            name &rarr; string
+          </span>
           
           <span class="method-click-advice">click to toggle source</span>
           
         </div>
         
+        
 
         <div class="method-description">
           
-          <p>Get the descriptive name for this engine</p>
+          <p>Get the descriptive name for this engine.</p>
 
 <pre class="ruby"><span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Engine</span>.<span class="ruby-identifier">load</span>
 <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Engine</span>.<span class="ruby-identifier">engines</span> <span class="ruby-comment">#=&gt; [#&lt;OpenSSL::Engine#&gt;, ...]</span>
@@ -906,11 +924,11 @@ ossl_engine_get_name(VALUE self)
 
         <div class="method-description">
           
-          <p>Set the defaults for this engine with the given <code>flag</code>.</p>
+          <p>Set the defaults for this engine with the given <em>flag</em>.</p>
 
 <p>These flags are used to control combinations of algorithm methods.</p>
 
-<p><code>flag</code> can be one of the following, other flags are available
+<p><em>flag</em> can be one of the following, other flags are available
 depending on your OS.</p>
 <dl class="rdoc-list label-list"><dt>All flags
 <dd>
@@ -955,7 +973,7 @@ ossl_engine_set_default(VALUE self, VALUE flag)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.1.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 6.0.0.beta1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

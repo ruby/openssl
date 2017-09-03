@@ -92,6 +92,8 @@
     
     <li ><a href="#method-i-hexdigest">#hexdigest</a>
     
+    <li ><a href="#method-i-initialize_copy">#initialize_copy</a>
+    
     <li ><a href="#method-i-inspect">#inspect</a>
     
     <li ><a href="#method-i-reset">#reset</a>
@@ -179,16 +181,17 @@ href="Digest.html">OpenSSL::Digest</a>.</p>
 
         <div class="method-description">
           
-          <p>Returns the authentication code as a binary string. The <code>digest</code>
-parameter must be an instance of <a href="Digest.html">OpenSSL::Digest</a>.</p>
+          <p>Returns the authentication code as a binary string. The <em>digest</em>
+parameter specifies the digest algorithm to use. This may be a String
+representing the algorithm name or an instance of <a
+href="Digest.html">OpenSSL::Digest</a>.</p>
 
 <h3 id="method-c-digest-label-Example">Example<span><a href="#method-c-digest-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
 <pre class="ruby"><span class="ruby-identifier">key</span> = <span class="ruby-string">&#39;key&#39;</span>
 <span class="ruby-identifier">data</span> = <span class="ruby-string">&#39;The quick brown fox jumps over the lazy dog&#39;</span>
-<span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;sha1&#39;</span>)
 
-<span class="ruby-identifier">hmac</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">HMAC</span>.<span class="ruby-identifier">digest</span>(<span class="ruby-identifier">digest</span>, <span class="ruby-identifier">key</span>, <span class="ruby-identifier">data</span>)
+<span class="ruby-identifier">hmac</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">HMAC</span>.<span class="ruby-identifier">digest</span>(<span class="ruby-string">&#39;sha1&#39;</span>, <span class="ruby-identifier">key</span>, <span class="ruby-identifier">data</span>)
 <span class="ruby-comment">#=&gt; &quot;\xDE|\x9B\x85\xB8\xB7\x8A\xA6\xBC\x8Az6\xF7\n\x90p\x1C\x9D\xB4\xD9&quot;</span>
 </pre>
           
@@ -204,8 +207,9 @@ ossl_hmac_s_digest(VALUE klass, VALUE digest, VALUE key, VALUE data)
 
     StringValue(key);
     StringValue(data);
-    buf = HMAC(GetDigestPtr(digest), RSTRING_PTR(key), RSTRING_LENINT(key),
-               (unsigned char *)RSTRING_PTR(data), RSTRING_LEN(data), NULL, &amp;buf_len);
+    buf = HMAC(ossl_evp_get_digestbyname(digest), RSTRING_PTR(key),
+               RSTRING_LENINT(key), (unsigned char *)RSTRING_PTR(data),
+               RSTRING_LEN(data), NULL, &amp;buf_len);
 
     return rb_str_new((const char *)buf, buf_len);
 }</pre>
@@ -236,16 +240,16 @@ ossl_hmac_s_digest(VALUE klass, VALUE digest, VALUE key, VALUE data)
         <div class="method-description">
           
           <p>Returns the authentication code as a hex-encoded string. The
-<code>digest</code> parameter must be an instance of <a
+<em>digest</em> parameter specifies the digest algorithm to use. This may
+be a String representing the algorithm name or an instance of <a
 href="Digest.html">OpenSSL::Digest</a>.</p>
 
 <h3 id="method-c-hexdigest-label-Example">Example<span><a href="#method-c-hexdigest-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
 <pre class="ruby"><span class="ruby-identifier">key</span> = <span class="ruby-string">&#39;key&#39;</span>
 <span class="ruby-identifier">data</span> = <span class="ruby-string">&#39;The quick brown fox jumps over the lazy dog&#39;</span>
-<span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;sha1&#39;</span>)
 
-<span class="ruby-identifier">hmac</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">HMAC</span>.<span class="ruby-identifier">hexdigest</span>(<span class="ruby-identifier">digest</span>, <span class="ruby-identifier">key</span>, <span class="ruby-identifier">data</span>)
+<span class="ruby-identifier">hmac</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">HMAC</span>.<span class="ruby-identifier">hexdigest</span>(<span class="ruby-string">&#39;sha1&#39;</span>, <span class="ruby-identifier">key</span>, <span class="ruby-identifier">data</span>)
 <span class="ruby-comment">#=&gt; &quot;de7c9b85b8b78aa6bc8a7a36f70a90701c9db4d9&quot;</span>
 </pre>
           
@@ -263,9 +267,9 @@ ossl_hmac_s_hexdigest(VALUE klass, VALUE digest, VALUE key, VALUE data)
     StringValue(key);
     StringValue(data);
 
-    if (!HMAC(GetDigestPtr(digest), RSTRING_PTR(key), RSTRING_LENINT(key),
-              (unsigned char *)RSTRING_PTR(data), RSTRING_LEN(data),
-              buf, &amp;buf_len))
+    if (!HMAC(ossl_evp_get_digestbyname(digest), RSTRING_PTR(key),
+              RSTRING_LENINT(key), (unsigned char *)RSTRING_PTR(data),
+              RSTRING_LEN(data), buf, &amp;buf_len))
         ossl_raise(eHMACError, &quot;HMAC&quot;);
 
     ret = rb_str_new(NULL, buf_len * 2);
@@ -344,7 +348,7 @@ ossl_hmac_initialize(VALUE self, VALUE key, VALUE digest)
     StringValue(key);
     GetHMAC(self, ctx);
     HMAC_Init_ex(ctx, RSTRING_PTR(key), RSTRING_LENINT(key),
-                 GetDigestPtr(digest), NULL);
+                 ossl_evp_get_digestbyname(digest), NULL);
 
     return self;
 }</pre>
@@ -501,6 +505,50 @@ ossl_hmac_hexdigest(VALUE self)
       </div>
 
     
+      <div id="method-i-initialize_copy" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">initialize_copy</span><span
+            class="method-args">(p1)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="initialize_copy-source">
+            <pre>static VALUE
+ossl_hmac_copy(VALUE self, VALUE other)
+{
+    HMAC_CTX *ctx1, *ctx2;
+
+    rb_check_frozen(self);
+    if (self == other) return self;
+
+    GetHMAC(self, ctx1);
+    GetHMAC(other, ctx2);
+
+    if (!HMAC_CTX_copy(ctx1, ctx2))
+        ossl_raise(eHMACError, &quot;HMAC_CTX_copy&quot;);
+    return self;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
       <div id="method-i-inspect" class="method-detail method-alias">
         
         <div class="method-heading">
@@ -545,7 +593,7 @@ ossl_hmac_hexdigest(VALUE self)
 
         <div class="method-description">
           
-          <p>Returns <code>self</code> as it was when it was first initialized, with all
+          <p>Returns <em>hmac</em> as it was when it was first initialized, with all
 processed data cleared from it.</p>
 
 <h3 id="method-i-reset-label-Example">Example<span><a href="#method-i-reset-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
@@ -628,8 +676,8 @@ ossl_hmac_reset(VALUE self)
 
         <div class="method-description">
           
-          <p>Returns <code>self</code> updated with the message to be authenticated. Can
-be called repeatedly with chunks of the message.</p>
+          <p>Returns <em>hmac</em> updated with the message to be authenticated. Can be
+called repeatedly with chunks of the message.</p>
 
 <h3 id="method-i-update-label-Example">Example<span><a href="#method-i-update-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
@@ -679,7 +727,7 @@ ossl_hmac_update(VALUE self, VALUE data)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.1.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 6.0.0.beta1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

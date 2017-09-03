@@ -83,6 +83,10 @@
     
     <li ><a href="#method-i-freeze">#freeze</a>
     
+    <li ><a href="#method-i-max_version-3D">#max_version=</a>
+    
+    <li ><a href="#method-i-min_version-3D">#min_version=</a>
+    
     <li ><a href="#method-i-options">#options</a>
     
     <li ><a href="#method-i-options-3D">#options=</a>
@@ -150,9 +154,20 @@ href="SSLContext.html">SSLContext</a> will be frozen afterward.</p>
       </header>
       <dl>
       
+        <dt id="DEFAULT_2048">DEFAULT_2048
+        
+        <dd>
+        
+      
         <dt id="METHODS">METHODS
         
-        <dd><p>The list of available SSL/TLS methods</p>
+        <dd><p>The list of available SSL/TLS methods. This constant is only provided for
+backwards compatibility.</p>
+        
+      
+        <dt id="METHODS_MAP">METHODS_MAP
+        
+        <dd>
         
       
         <dt id="SESSION_CACHE_BOTH">SESSION_CACHE_BOTH
@@ -524,7 +539,8 @@ for multiple applications to be distinguished, for example, by name.</p>
         <p>A callback invoked when a new session was negotiated.</p>
 
 <p>The callback is invoked with an <a href="SSLSocket.html">SSLSocket</a>.  If
-false is returned the session will be removed from the internal cache.</p>
+<code>false</code> is returned the session will be removed from the
+internal cache.</p>
         
         </div>
       </div>
@@ -623,14 +639,14 @@ href="SSLContext.html#method-i-ecdh_curves-3D">#ecdh_curves=</a> instead.</p>
         <p>A callback for additional certificate verification.  The callback is
 invoked for each certificate in the chain.</p>
 
-<p>The callback is invoked with two values.  <code>preverify_ok</code>
-indicates indicates if the verification was passed (true) or not (false).
-<code>store_context</code> is an <a
+<p>The callback is invoked with two values.  <em>preverify_ok</em> indicates
+indicates if the verification was passed (<code>true</code>) or not
+(<code>false</code>). <em>store_context</em> is an <a
 href="../X509/StoreContext.html">OpenSSL::X509::StoreContext</a> containing
 the context used for certificate verification.</p>
 
-<p>If the callback returns false, the chain verification is immediately
-stopped and a bad_certificate alert is then sent.</p>
+<p>If the callback returns <code>false</code>, the chain verification is
+immediately stopped and a bad_certificate alert is then sent.</p>
         
         </div>
       </div>
@@ -703,7 +719,7 @@ all.</p>
         
         <div class="method-heading">
           <span class="method-callseq">
-            new &rarr; ctx
+            new           &rarr; ctx
           </span>
           
           <span class="method-click-advice">click to toggle source</span>
@@ -712,14 +728,14 @@ all.</p>
         
         <div class="method-heading">
           <span class="method-callseq">
-            new(:TLSv1) &rarr; ctx
+            new(:TLSv1)   &rarr; ctx
           </span>
           
         </div>
         
         <div class="method-heading">
           <span class="method-callseq">
-            new(&quot;SSLv23_client&quot;) &rarr; ctx
+            new(&quot;SSLv23&quot;) &rarr; ctx
           </span>
           
         </div>
@@ -728,14 +744,20 @@ all.</p>
 
         <div class="method-description">
           
-          <p>You can get a list of valid methods with <a
-href="SSLContext.html#METHODS">OpenSSL::SSL::SSLContext::METHODS</a></p>
+          <p>Creates a new <a href="../SSL.html">SSL</a> context.</p>
+
+<p>If an argument is given, <a
+href="SSLContext.html#method-i-ssl_version-3D">ssl_version=</a> is called
+with the value. Note that this form is deprecated. New applications should
+use <a href="SSLContext.html#method-i-min_version-3D">min_version=</a> and
+<a href="SSLContext.html#method-i-max_version-3D">max_version=</a> as
+necessary.</p>
           
           
 
           
           <div class="method-source-code" id="new-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 97</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 119</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">version</span> = <span class="ruby-keyword">nil</span>)
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">options</span> <span class="ruby-operator">|=</span> <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">OP_ALL</span>
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">ssl_version</span> = <span class="ruby-identifier">version</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">version</span>
@@ -790,12 +812,7 @@ ossl_sslctx_get_ciphers(VALUE self)
     int i, num;
 
     GetSSLCTX(self, ctx);
-    if(!ctx){
-        rb_warning(&quot;SSL_CTX is not initialized.&quot;);
-        return Qnil;
-    }
     ciphers = SSL_CTX_get_ciphers(ctx);
-
     if (!ciphers)
         return rb_ary_new();
 
@@ -1017,7 +1034,7 @@ ossl_sslctx_set_ecdh_curves(VALUE self, VALUE arg)
         
         <div class="method-heading">
           <span class="method-callseq">
-            flush_sessions(time | nil) &rarr; self
+            flush_sessions(time) &rarr; self
           </span>
           
           <span class="method-click-advice">click to toggle source</span>
@@ -1028,8 +1045,7 @@ ossl_sslctx_set_ecdh_curves(VALUE self, VALUE arg)
 
         <div class="method-description">
           
-          <p>Removes sessions in the internal cache that have expired at
-<code>time</code>.</p>
+          <p>Removes sessions in the internal cache that have expired at <em>time</em>.</p>
           
           
 
@@ -1096,6 +1112,128 @@ ossl_sslctx_flush_sessions(int argc, VALUE *argv, VALUE self)
       </div>
 
     
+      <div id="method-i-max_version-3D" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            max_version = OpenSSL::SSL::TLS1_2_VERSION
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            max_version = :TLS1_2
+          </span>
+          
+        </div>
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            max_version = nil
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Sets the upper bound of the supported SSL/TLS protocol version. See <a
+href="SSLContext.html#method-i-min_version-3D">min_version=</a> for the
+possible values.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="max_version-3D-source">
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 179</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">max_version=</span>(<span class="ruby-identifier">version</span>)
+  <span class="ruby-identifier">set_minmax_proto_version</span>(<span class="ruby-ivar">@min_proto_version</span> <span class="ruby-operator">||=</span> <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">version</span>)
+  <span class="ruby-ivar">@max_proto_version</span> = <span class="ruby-identifier">version</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-min_version-3D" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            min_version = OpenSSL::SSL::TLS1_2_VERSION
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            min_version = :TLS1_2
+          </span>
+          
+        </div>
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            min_version = nil
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Sets the lower bound on the supported SSL/TLS protocol version. The version
+may be specified by an integer constant named OpenSSL::SSL::*_VERSION, a
+Symbol, or <code>nil</code> which means “any version”.</p>
+
+<p>Be careful that you don&#39;t overwrite OpenSSL::SSL::OP_NO_{SSL,TLS}v*
+options by <a href="SSLContext.html#method-i-options-3D">options=</a> once
+you have called <a
+href="SSLContext.html#method-i-min_version-3D">min_version=</a> or <a
+href="SSLContext.html#method-i-max_version-3D">max_version=</a>.</p>
+
+<h3 id="method-i-min_version-3D-label-Example">Example<span><a href="#method-i-min_version-3D-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby"><span class="ruby-identifier">ctx</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSLContext</span>.<span class="ruby-identifier">new</span>
+<span class="ruby-identifier">ctx</span>.<span class="ruby-identifier">min_version</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">TLS1_1_VERSION</span>
+<span class="ruby-identifier">ctx</span>.<span class="ruby-identifier">max_version</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">TLS1_2_VERSION</span>
+
+<span class="ruby-identifier">sock</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSLSocket</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">tcp_sock</span>, <span class="ruby-identifier">ctx</span>)
+<span class="ruby-identifier">sock</span>.<span class="ruby-identifier">connect</span> <span class="ruby-comment"># Initiates a connection using either TLS 1.1 or TLS 1.2</span>
+</pre>
+          
+          
+
+          
+          <div class="method-source-code" id="min_version-3D-source">
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 167</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">min_version=</span>(<span class="ruby-identifier">version</span>)
+  <span class="ruby-identifier">set_minmax_proto_version</span>(<span class="ruby-identifier">version</span>, <span class="ruby-ivar">@max_proto_version</span> <span class="ruby-operator">||=</span> <span class="ruby-keyword">nil</span>)
+  <span class="ruby-ivar">@min_proto_version</span> = <span class="ruby-identifier">version</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
       <div id="method-i-options" class="method-detail ">
         
         <div class="method-heading">
@@ -1120,7 +1258,11 @@ ossl_sslctx_get_options(VALUE self)
 {
     SSL_CTX *ctx;
     GetSSLCTX(self, ctx);
-    return LONG2NUM(SSL_CTX_get_options(ctx));
+    /*
+     * Do explicit cast because SSL_CTX_get_options() returned (signed) long in
+     * OpenSSL before 1.1.0.
+     */
+    return ULONG2NUM((unsigned long)SSL_CTX_get_options(ctx));
 }</pre>
           </div>
           
@@ -1164,7 +1306,7 @@ ossl_sslctx_set_options(VALUE self, VALUE options)
     if (NIL_P(options)) {
         SSL_CTX_set_options(ctx, SSL_OP_ALL);
     } else {
-        SSL_CTX_set_options(ctx, NUM2LONG(options));
+        SSL_CTX_set_options(ctx, NUM2ULONG(options));
     }
 
     return self;
@@ -1310,7 +1452,7 @@ ossl_sslctx_set_security_level(VALUE self, VALUE value)
 
         <div class="method-description">
           
-          <p>Adds <code>session</code> to the session cache.</p>
+          <p>Adds <em>session</em> to the session cache.</p>
           
           
 
@@ -1323,7 +1465,7 @@ ossl_sslctx_session_add(VALUE self, VALUE arg)
     SSL_SESSION *sess;
 
     GetSSLCTX(self, ctx);
-    SafeGetSSLSession(arg, sess);
+    GetSSLSession(arg, sess);
 
     return SSL_CTX_add_session(ctx, sess) == 1 ? Qtrue : Qfalse;
 }</pre>
@@ -1619,7 +1761,7 @@ ossl_sslctx_get_session_cache_stats(VALUE self)
 
         <div class="method-description">
           
-          <p>Removes <code>session</code> from the session cache.</p>
+          <p>Removes <em>session</em> from the session cache.</p>
           
           
 
@@ -1632,7 +1774,7 @@ ossl_sslctx_session_remove(VALUE self, VALUE arg)
     SSL_SESSION *sess;
 
     GetSSLCTX(self, ctx);
-    SafeGetSSLSession(arg, sess);
+    GetSSLSession(arg, sess);
 
     return SSL_CTX_remove_session(ctx, sess) == 1 ? Qtrue : Qfalse;
 }</pre>
@@ -1664,8 +1806,8 @@ ossl_sslctx_session_remove(VALUE self, VALUE arg)
           
           <p>Sets saner defaults optimized for the use with HTTP-like protocols.</p>
 
-<p>If a Hash <code>params</code> is given, the parameters are overridden with
-it. The keys in <code>params</code> must be assignment methods on <a
+<p>If a Hash <em>params</em> is given, the parameters are overridden with it.
+The keys in <em>params</em> must be assignment methods on <a
 href="SSLContext.html">SSLContext</a>.</p>
 
 <p>If the <a href="SSLContext.html#attribute-i-verify_mode">#verify_mode</a>
@@ -1679,7 +1821,7 @@ then the system default certificate store is used.</p>
 
           
           <div class="method-source-code" id="set_params-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 114</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 136</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">set_params</span>(<span class="ruby-identifier">params</span>={})
   <span class="ruby-identifier">params</span> = <span class="ruby-constant">DEFAULT_PARAMS</span>.<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">params</span>)
   <span class="ruby-identifier">params</span>.<span class="ruby-identifier">each</span>{<span class="ruby-operator">|</span><span class="ruby-identifier">name</span>, <span class="ruby-identifier">value</span><span class="ruby-operator">|</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">__send__</span>(<span class="ruby-node">&quot;#{name}=&quot;</span>, <span class="ruby-identifier">value</span>) }
@@ -1781,7 +1923,7 @@ ossl_sslctx_setup(VALUE self)
          *   X509_STORE_free() doesn&#39;t care it.
          *   So we won&#39;t increment it but mark it by ex_data.
          */
-        SSL_CTX_set_ex_data(ctx, ossl_ssl_ex_store_p, (void *)1);
+        SSL_CTX_set_ex_data(ctx, ossl_sslctx_ex_store_p, ctx);
 #else /* Fixed in OpenSSL 1.0.2; bff9ce4db38b (master), 5b4b9ce976fc (1.0.2) */
         X509_STORE_up_ref(store);
 #endif
@@ -1852,7 +1994,7 @@ ossl_sslctx_setup(VALUE self)
     val = rb_attr_get(self, id_i_verify_depth);
     if(!NIL_P(val)) SSL_CTX_set_verify_depth(ctx, NUM2INT(val));
 
-#ifdef HAVE_SSL_CTX_SET_NEXT_PROTO_SELECT_CB
+#ifndef OPENSSL_NO_NEXTPROTONEG
     val = rb_attr_get(self, id_i_npn_protocols);
     if (!NIL_P(val)) {
         VALUE encoded = ssl_encode_npn_protocols(val);
@@ -1907,13 +2049,11 @@ ossl_sslctx_setup(VALUE self)
         OSSL_Debug(&quot;SSL SESSION remove callback added&quot;);
     }
 
-#ifdef HAVE_SSL_SET_TLSEXT_HOST_NAME
     val = rb_attr_get(self, id_i_servername_cb);
     if (!NIL_P(val)) {
         SSL_CTX_set_tlsext_servername_callback(ctx, ssl_servername_cb);
         OSSL_Debug(&quot;SSL TLSEXT servername callback added&quot;);
     }
-#endif
 
     return Qtrue;
 }</pre>
@@ -1945,7 +2085,7 @@ ossl_sslctx_setup(VALUE self)
         
         <div class="method-heading">
           <span class="method-callseq">
-            ssl_version = &quot;SSLv23_client&quot;
+            ssl_version = &quot;SSLv23&quot;
           </span>
           
         </div>
@@ -1955,49 +2095,38 @@ ossl_sslctx_setup(VALUE self)
         <div class="method-description">
           
           <p>Sets the SSL/TLS protocol version for the context. This forces connections
-to use only the specified protocol version.</p>
+to use only the specified protocol version. This is deprecated and only
+provided for backwards compatibility. Use <a
+href="SSLContext.html#method-i-min_version-3D">min_version=</a> and <a
+href="SSLContext.html#method-i-max_version-3D">max_version=</a> instead.</p>
 
-<p>You can get a list of valid versions with <a
-href="SSLContext.html#METHODS">OpenSSL::SSL::SSLContext::METHODS</a></p>
+<h3 id="method-i-ssl_version-3D-label-History"><a href="../../History_md.html">History</a><span><a href="#method-i-ssl_version-3D-label-History">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p>As the name hints, this used to call the SSL_CTX_set_ssl_version() function
+which sets the <a href="../SSL.html">SSL</a> method used for connections
+created from the context. As of Ruby/OpenSSL 2.1, this accessor method is
+implemented to call <a
+href="SSLContext.html#method-i-min_version-3D">min_version=</a> and <a
+href="SSLContext.html#method-i-max_version-3D">max_version=</a> instead.</p>
           
           
 
           
           <div class="method-source-code" id="ssl_version-3D-source">
-            <pre>static VALUE
-ossl_sslctx_set_ssl_version(VALUE self, VALUE ssl_method)
-{
-    SSL_CTX *ctx;
-    const char *s;
-    VALUE m = ssl_method;
-    int i;
-
-    GetSSLCTX(self, ctx);
-    if (RB_TYPE_P(ssl_method, T_SYMBOL))
-        m = rb_sym2str(ssl_method);
-    s = StringValueCStr(m);
-    for (i = 0; i &lt; numberof(ossl_ssl_method_tab); i++) {
-        if (strcmp(ossl_ssl_method_tab[i].name, s) == 0) {
-#if defined(HAVE_SSL_CTX_SET_MIN_PROTO_VERSION)
-            int version = ossl_ssl_method_tab[i].version;
-#endif
-            SSL_METHOD *method = ossl_ssl_method_tab[i].func();
-
-            if (SSL_CTX_set_ssl_version(ctx, method) != 1)
-                ossl_raise(eSSLError, &quot;SSL_CTX_set_ssl_version&quot;);
-
-#if defined(HAVE_SSL_CTX_SET_MIN_PROTO_VERSION)
-            if (!SSL_CTX_set_min_proto_version(ctx, version))
-                ossl_raise(eSSLError, &quot;SSL_CTX_set_min_proto_version&quot;);
-            if (!SSL_CTX_set_max_proto_version(ctx, version))
-                ossl_raise(eSSLError, &quot;SSL_CTX_set_max_proto_version&quot;);
-#endif
-            return ssl_method;
-        }
-    }
-
-    ossl_raise(rb_eArgError, &quot;unknown SSL method `%&quot;PRIsVALUE&quot;&#39;.&quot;, m);
-}</pre>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 198</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">ssl_version=</span>(<span class="ruby-identifier">meth</span>)
+  <span class="ruby-identifier">meth</span> = <span class="ruby-identifier">meth</span>.<span class="ruby-identifier">to_s</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">meth</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Symbol</span>)
+  <span class="ruby-keyword">if</span> <span class="ruby-regexp">/(?&lt;type&gt;_client|_server)\z/</span> <span class="ruby-operator">=~</span> <span class="ruby-identifier">meth</span>
+    <span class="ruby-identifier">meth</span> = <span class="ruby-node">$`</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">$VERBOSE</span>
+      <span class="ruby-identifier">warn</span> <span class="ruby-node">&quot;#{caller(1)[0]}: method type #{type.inspect} is ignored&quot;</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">version</span> = <span class="ruby-constant">METHODS_MAP</span>[<span class="ruby-identifier">meth</span>.<span class="ruby-identifier">intern</span>] <span class="ruby-keyword">or</span>
+    <span class="ruby-identifier">raise</span> <span class="ruby-constant">ArgumentError</span>, <span class="ruby-string">&quot;unknown SSL method `%s&#39;&quot;</span> <span class="ruby-operator">%</span> <span class="ruby-identifier">meth</span>
+  <span class="ruby-identifier">set_minmax_proto_version</span>(<span class="ruby-identifier">version</span>, <span class="ruby-identifier">version</span>)
+  <span class="ruby-ivar">@min_proto_version</span> = <span class="ruby-ivar">@max_proto_version</span> = <span class="ruby-identifier">version</span>
+<span class="ruby-keyword">end</span></pre>
           </div>
           
         </div>
@@ -2016,7 +2145,7 @@ ossl_sslctx_set_ssl_version(VALUE self, VALUE ssl_method)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.1.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 6.0.0.beta1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

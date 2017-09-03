@@ -81,7 +81,11 @@
     
     <li ><a href="#method-i-check_nonce">#check_nonce</a>
     
+    <li ><a href="#method-i-initialize_copy">#initialize_copy</a>
+    
     <li ><a href="#method-i-sign">#sign</a>
+    
+    <li ><a href="#method-i-signed-3F">#signed?</a>
     
     <li ><a href="#method-i-to_der">#to_der</a>
     
@@ -150,7 +154,7 @@ certificate or from a DER-encoded request created elsewhere.</p>
         <div class="method-description">
           
           <p>Creates a new <a href="Request.html">OpenSSL::OCSP::Request</a>.  The
-request may be created empty or from a <code>request_der</code> string.</p>
+request may be created empty or from a <em>request_der</em> string.</p>
           
           
 
@@ -212,7 +216,7 @@ ossl_ocspreq_initialize(int argc, VALUE *argv, VALUE self)
 
         <div class="method-description">
           
-          <p>Adds <code>certificate_id</code> to the request.</p>
+          <p>Adds <em>certificate_id</em> to the request.</p>
           
           
 
@@ -262,8 +266,8 @@ ossl_ocspreq_add_certid(VALUE self, VALUE certid)
 
         <div class="method-description">
           
-          <p>Adds a <code>nonce</code> to the <a href="../OCSP.html">OCSP</a> request. 
-If no nonce is given a random one will be generated.</p>
+          <p>Adds a <em>nonce</em> to the <a href="../OCSP.html">OCSP</a> request.  If
+no nonce is given a random one will be generated.</p>
 
 <p>The nonce is used to prevent replay attacks but some servers do not support
 it.</p>
@@ -374,7 +378,7 @@ ossl_ocspreq_get_certid(VALUE self)
 
         <div class="method-description">
           
-          <p>Checks the nonce validity for this request and <code>response</code>.</p>
+          <p>Checks the nonce validity for this request and <em>response</em>.</p>
 
 <p>The return value is one of the following:</p>
 <dl class="rdoc-list note-list"><dt>-1 
@@ -394,7 +398,7 @@ ossl_ocspreq_get_certid(VALUE self)
 <p>nonce present in response only.</p>
 </dd></dl>
 
-<p>For most responses, clients can check <code>result</code> &gt; 0.  If a
+<p>For most responses, clients can check <em>result</em> &gt; 0.  If a
 responder doesn&#39;t handle nonces <code>result.nonzero?</code> may be
 necessary.  A result of <code>0</code> is always an error.</p>
           
@@ -410,10 +414,57 @@ ossl_ocspreq_check_nonce(VALUE self, VALUE basic_resp)
     int res;
 
     GetOCSPReq(self, req);
-    SafeGetOCSPBasicRes(basic_resp, bs);
+    GetOCSPBasicRes(basic_resp, bs);
     res = OCSP_check_nonce(req, bs);
 
     return INT2NUM(res);
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-initialize_copy" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">initialize_copy</span><span
+            class="method-args">(p1)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="initialize_copy-source">
+            <pre>static VALUE
+ossl_ocspreq_initialize_copy(VALUE self, VALUE other)
+{
+    OCSP_REQUEST *req, *req_old, *req_new;
+
+    rb_check_frozen(self);
+    GetOCSPReq(self, req_old);
+    GetOCSPReq(other, req);
+
+    req_new = ASN1_item_dup(ASN1_ITEM_rptr(OCSP_REQUEST), req);
+    if (!req_new)
+        ossl_raise(eOCSPError, &quot;ASN1_item_dup&quot;);
+
+    SetOCSPReq(self, req_new);
+    OCSP_REQUEST_free(req_old);
+
+    return self;
 }</pre>
           </div>
           
@@ -441,19 +492,19 @@ ossl_ocspreq_check_nonce(VALUE self, VALUE basic_resp)
 
         <div class="method-description">
           
-          <p>Signs this <a href="../OCSP.html">OCSP</a> request using <code>cert</code>,
-<code>key</code> and optional <code>digest</code>. If <code>digest</code>
-is not specified, SHA-1 is used. <code>certs</code> is an optional Array of
-additional certificates which are included in the request in addition to
-the signer certificate. Note that if <code>certs</code> is nil or not
-given, flag OpenSSL::OCSP::NOCERTS is enabled. Pass an empty array to
-include only the signer certificate.</p>
+          <p>Signs this <a href="../OCSP.html">OCSP</a> request using <em>cert</em>,
+<em>key</em> and optional <em>digest</em>. If <em>digest</em> is not
+specified, SHA-1 is used. <em>certs</em> is an optional Array of additional
+certificates which are included in the request in addition to the signer
+certificate. Note that if <em>certs</em> is <code>nil</code> or not given,
+flag OpenSSL::OCSP::NOCERTS is enabled. Pass an empty array to include only
+the signer certificate.</p>
 
-<p><code>flags</code> can be a bitwise OR of the following constants:</p>
+<p><em>flags</em> is a bitwise OR of the following constants:</p>
 <dl class="rdoc-list note-list"><dt>OpenSSL::OCSP::NOCERTS
 <dd>
-<p>Don&#39;t include any certificates in the request. <code>certs</code> will
-be ignored.</p>
+<p>Don&#39;t include any certificates in the request. <em>certs</em> will be
+ignored.</p>
 </dd></dl>
           
           
@@ -481,7 +532,7 @@ ossl_ocspreq_sign(int argc, VALUE *argv, VALUE self)
     if (NIL_P(digest))
         md = EVP_sha1();
     else
-        md = GetDigestPtr(digest);
+        md = ossl_evp_get_digestbyname(digest);
     if (NIL_P(certs))
         flg |= OCSP_NOCERTS;
     else
@@ -492,6 +543,49 @@ ossl_ocspreq_sign(int argc, VALUE *argv, VALUE self)
     if (!ret) ossl_raise(eOCSPError, NULL);
 
     return self;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-signed-3F" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            signed? &rarr; true or false
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Returns <code>true</code> if the request is signed, <code>false</code>
+otherwise. Note that the validity of the signature is <strong>not</strong>
+checked. Use <a href="Request.html#method-i-verify">verify</a> to verify
+that.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="signed-3F-source">
+            <pre>static VALUE
+ossl_ocspreq_signed_p(VALUE self)
+{
+    OCSP_REQUEST *req;
+
+    GetOCSPReq(self, req);
+    return OCSP_request_is_signed(req) ? Qtrue : Qfalse;
 }</pre>
           </div>
           
@@ -567,11 +661,14 @@ ossl_ocspreq_to_der(VALUE self)
 
         <div class="method-description">
           
-          <p>Verifies this request using the given <code>certificates</code> and
-<code>store</code>. <code>certificates</code> is an array of <a
+          <p>Verifies this request using the given <em>certificates</em> and
+<em>store</em>. <em>certificates</em> is an array of <a
 href="../X509/Certificate.html">OpenSSL::X509::Certificate</a>,
-<code>store</code> is an <a
-href="../X509/Store.html">OpenSSL::X509::Store</a>.</p>
+<em>store</em> is an <a href="../X509/Store.html">OpenSSL::X509::Store</a>.</p>
+
+<p>Note that <code>false</code> is returned if the request does not have a
+signature. Use <a href="Request.html#method-i-signed-3F">signed?</a> to
+check whether the request is signed or not.</p>
           
           
 
@@ -616,7 +713,7 @@ ossl_ocspreq_verify(int argc, VALUE *argv, VALUE self)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.1.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 6.0.0.beta1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

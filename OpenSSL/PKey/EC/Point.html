@@ -79,6 +79,8 @@
     
     <li ><a href="#method-i-infinity-3F">#infinity?</a>
     
+    <li ><a href="#method-i-initialize_copy">#initialize_copy</a>
+    
     <li ><a href="#method-i-invert-21">#invert!</a>
     
     <li ><a href="#method-i-make_affine-21">#make_affine!</a>
@@ -200,13 +202,13 @@ EC_POINT_*</p>
             const EC_POINT *arg_point;
 
             group_v = rb_attr_get(arg1, id_i_group);
-            SafeGetECGroup(group_v, group);
-            SafeGetECPoint(arg1, arg_point);
+            GetECGroup(group_v, group);
+            GetECPoint(arg1, arg_point);
 
             point = EC_POINT_dup(arg_point, group);
         } else if (rb_obj_is_kind_of(arg1, cEC_GROUP)) {
             group_v = arg1;
-            SafeGetECGroup(group_v, group);
+            GetECGroup(group_v, group);
 
             point = EC_POINT_new(group);
         } else {
@@ -218,7 +220,7 @@ EC_POINT_*</p>
         if (!rb_obj_is_kind_of(arg1, cEC_GROUP))
             ossl_raise(rb_eArgError, &quot;1st argument must be OpenSSL::PKey::EC::Group&quot;);
         group_v = arg1;
-        SafeGetECGroup(group_v, group);
+        GetECGroup(group_v, group);
 
         if (rb_obj_is_kind_of(arg2, cBN)) {
             const BIGNUM *bn = GetBNPtr(arg2);
@@ -337,8 +339,8 @@ EC_POINT_*</p>
         return Qfalse;
 
     GetECPoint(a, point1);
-    SafeGetECPoint(b, point2);
-    SafeGetECGroup(group_v1, group);
+    GetECPoint(b, point2);
+    GetECGroup(group_v1, group);
 
     if (EC_POINT_cmp(group, point1, point2, ossl_bn_ctx) == 1)
         return Qfalse;
@@ -396,6 +398,58 @@ EC_POINT_*</p>
     }
 
     UNREACHABLE;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-initialize_copy" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">initialize_copy</span><span
+            class="method-args">(p1)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="initialize_copy-source">
+            <pre>static VALUE
+ossl_ec_point_initialize_copy(VALUE self, VALUE other)
+{
+    EC_POINT *point, *point_new;
+    EC_GROUP *group;
+    VALUE group_v;
+
+    TypedData_Get_Struct(self, EC_POINT, &amp;ossl_ec_point_type, point_new);
+    if (point_new)
+        ossl_raise(eEC_POINT, &quot;EC::Point already initialized&quot;);
+    GetECPoint(other, point);
+
+    group_v = rb_obj_dup(rb_attr_get(other, id_i_group));
+    GetECGroup(group_v, group);
+
+    point_new = EC_POINT_dup(point, group);
+    if (!point_new)
+        ossl_raise(eEC_POINT, &quot;EC_POINT_dup&quot;);
+    RTYPEDDATA_DATA(self) = point_new;
+    rb_ivar_set(self, id_i_group, group_v);
+
+    return self;
 }</pre>
           </div>
           
@@ -523,15 +577,15 @@ EC_POINT_*</p>
           <p>Performs elliptic curve point multiplication.</p>
 
 <p>The first form calculates <code>bn1 * point + bn2 * G</code>, where
-<code>G</code> is the generator of the group of <code>point</code>.
-<code>bn2</code> may be omitted, and in that case, the result is just
-<code>bn1 * point</code>.</p>
+<code>G</code> is the generator of the group of <em>point</em>.
+<em>bn2</em> may be omitted, and in that case, the result is just <code>bn1
+* point</code>.</p>
 
 <p>The second form calculates <code>bns[0] * point + bns[1] * points[0] + ...
-+ bns[-1] * points[-1] + bn2 * G</code>. <code>bn2</code> may be omitted.
-<code>bns</code> must be an array of <a
-href="../../BN.html">OpenSSL::BN</a>. <code>points</code> must be an array
-of <a href="Point.html">OpenSSL::PKey::EC::Point</a>. Please note that
++ bns[-1] * points[-1] + bn2 * G</code>. <em>bn2</em> may be omitted.
+<em>bns</em> must be an array of <a href="../../BN.html">OpenSSL::BN</a>.
+<em>points</em> must be an array of <a
+href="Point.html">OpenSSL::PKey::EC::Point</a>. Please note that
 <code>points[0]</code> is not multiplied by <code>bns[0]</code>, but
 <code>bns[1]</code>.</p>
           
@@ -548,7 +602,7 @@ of <a href="Point.html">OpenSSL::PKey::EC::Point</a>. Please note that
     const BIGNUM *bn_g = NULL;
 
     GetECPoint(self, point_self);
-    SafeGetECGroup(group_v, group);
+    GetECGroup(group_v, group);
 
     result = rb_obj_alloc(cEC_POINT);
     ossl_ec_point_initialize(1, &amp;group_v, result);
@@ -589,7 +643,7 @@ of <a href="Point.html">OpenSSL::PKey::EC::Point</a>. Please note that
         points = ALLOCV_N(const EC_POINT *, tmp_p, num);
         points[0] = point_self; /* self */
         for (i = 0; i &lt; num - 1; i++)
-            SafeGetECPoint(RARRAY_AREF(arg2, i), points[i + 1]);
+            GetECPoint(RARRAY_AREF(arg2, i), points[i + 1]);
 
         if (!NIL_P(arg3))
             bn_g = GetBNPtr(arg3);
@@ -727,8 +781,8 @@ of <a href="Point.html">OpenSSL::PKey::EC::Point</a>. Please note that
           
           <p>Convert the <a href="../EC.html">EC</a> point into an octet string and
 store in an <a href="../../BN.html">OpenSSL::BN</a>. If
-<code>conversion_form</code> is given, the point data is converted using
-the specified form. If not given, the default form set in the <a
+<em>conversion_form</em> is given, the point data is converted using the
+specified form. If not given, the default form set in the <a
 href="Group.html">EC::Group</a> object is used.</p>
 
 <p>See also EC::Point#point_conversion_form=.</p>
@@ -780,7 +834,7 @@ ossl_ec_point_to_bn(int argc, VALUE *argv, VALUE self)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.1.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 6.0.0.beta1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

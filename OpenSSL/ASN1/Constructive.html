@@ -59,8 +59,6 @@
     <li><a href="#class-OpenSSL::ASN1::Constructive-label-SET+and+SEQUENCE">SET and SEQUENCE</a>
     <li><a href="#class-OpenSSL::ASN1::Constructive-label-Example+-+constructing+a+SEQUENCE">Example - constructing a SEQUENCE</a>
     <li><a href="#class-OpenSSL::ASN1::Constructive-label-Example+-+constructing+a+SET">Example - constructing a SET</a>
-    <li><a href="#class-OpenSSL::ASN1::Constructive-label-Infinite+length+primitive+values">Infinite length primitive values</a>
-    <li><a href="#class-OpenSSL::ASN1::Constructive-label-Example+-+Infinite+length+OCTET+STRING">Example - Infinite length OCTET STRING</a>
   </ul>
 </div>
 
@@ -113,11 +111,10 @@
 
   <section class="description">
     
-<p>The parent class for all constructed encodings. The <code>value</code>
+<p>The parent class for all constructed encodings. The <em>value</em>
 attribute of a <a href="Constructive.html">Constructive</a> is always an
-<code>Array</code>. Attributes are the same as for <a
-href="ASN1Data.html">ASN1Data</a>, with the addition of
-<code>tagging</code>.</p>
+Array. Attributes are the same as for <a href="ASN1Data.html">ASN1Data</a>,
+with the addition of <em>tagging</em>.</p>
 
 <h2 id="class-OpenSSL::ASN1::Constructive-label-SET+and+SEQUENCE">SET and SEQUENCE<span><a href="#class-OpenSSL::ASN1::Constructive-label-SET+and+SEQUENCE">&para;</a> <a href="#top">&uarr;</a></span></h2>
 
@@ -145,44 +142,6 @@ there.</p>
 <pre class="ruby"><span class="ruby-identifier">int</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span><span class="ruby-operator">::</span><span class="ruby-constant">Integer</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">1</span>)
 <span class="ruby-identifier">str</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span><span class="ruby-operator">::</span><span class="ruby-constant">PrintableString</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;abc&#39;</span>)
 <span class="ruby-identifier">set</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span><span class="ruby-operator">::</span><span class="ruby-constant">Set</span>.<span class="ruby-identifier">new</span>( [ <span class="ruby-identifier">int</span>, <span class="ruby-identifier">str</span> ] )
-</pre>
-
-<h2 id="class-OpenSSL::ASN1::Constructive-label-Infinite+length+primitive+values">Infinite length primitive values<span><a href="#class-OpenSSL::ASN1::Constructive-label-Infinite+length+primitive+values">&para;</a> <a href="#top">&uarr;</a></span></h2>
-
-<p>The only case where <a href="Constructive.html">Constructive</a> is used
-directly is for infinite length encodings of primitive values. These
-encodings are always constructed, with the contents of the
-<code>value</code> <code>Array</code> being either UNIVERSAL non-infinite
-length partial encodings of the actual value or again constructive
-encodings with infinite length (i.e. infinite length primitive encodings
-may be constructed recursively with another infinite length value within an
-already infinite length value). Each partial encoding must be of the same
-UNIVERSAL type as the overall encoding. The value of the overall encoding
-consists of the concatenation of each partial encoding taken in sequence.
-The <code>value</code> array of the outer infinite length value must end
-with a OpenSSL::ASN1::EndOfContent instance.</p>
-
-<p>Please note that it is not possible to encode <a
-href="Constructive.html">Constructive</a> without the
-<code>infinite_length</code> attribute being set to <code>true</code>, use
-OpenSSL::ASN1::Sequence or OpenSSL::ASN1::Set in these cases instead.</p>
-
-<h3 id="class-OpenSSL::ASN1::Constructive-label-Example+-+Infinite+length+OCTET+STRING">Example - Infinite length OCTET STRING<span><a href="#class-OpenSSL::ASN1::Constructive-label-Example+-+Infinite+length+OCTET+STRING">&para;</a> <a href="#top">&uarr;</a></span></h3>
-
-<pre class="ruby"><span class="ruby-identifier">partial1</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span><span class="ruby-operator">::</span><span class="ruby-constant">OctetString</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&quot;\x01&quot;</span>)
-<span class="ruby-identifier">partial2</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span><span class="ruby-operator">::</span><span class="ruby-constant">OctetString</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&quot;\x02&quot;</span>)
-<span class="ruby-identifier">inf_octets</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span><span class="ruby-operator">::</span><span class="ruby-constant">Constructive</span>.<span class="ruby-identifier">new</span>( [ <span class="ruby-identifier">partial1</span>,
-                                                <span class="ruby-identifier">partial2</span>,
-                                                <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span><span class="ruby-operator">::</span><span class="ruby-constant">EndOfContent</span>.<span class="ruby-identifier">new</span> ],
-                                              <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span><span class="ruby-operator">::</span><span class="ruby-constant">OCTET_STRING</span>,
-                                              <span class="ruby-keyword">nil</span>,
-                                              :<span class="ruby-constant">UNIVERSAL</span> )
-<span class="ruby-comment"># The real value of inf_octets is &quot;\x01\x02&quot;, i.e. the concatenation</span>
-<span class="ruby-comment"># of partial1 and partial2</span>
-<span class="ruby-identifier">inf_octets</span>.<span class="ruby-identifier">infinite_length</span> = <span class="ruby-keyword">true</span>
-<span class="ruby-identifier">der</span> = <span class="ruby-identifier">inf_octets</span>.<span class="ruby-identifier">to_der</span>
-<span class="ruby-identifier">asn1</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span>.<span class="ruby-identifier">decode</span>(<span class="ruby-identifier">der</span>)
-<span class="ruby-identifier">puts</span> <span class="ruby-identifier">asn1</span>.<span class="ruby-identifier">infinite_length</span> <span class="ruby-comment"># =&gt; true</span>
 </pre>
 
   </section>
@@ -214,8 +173,8 @@ OpenSSL::ASN1::Sequence or OpenSSL::ASN1::Set in these cases instead.</p>
         
         <p>May be used as a hint for encoding a value either implicitly or explicitly
 by setting it either to <code>:IMPLICIT</code> or to
-<code>:EXPLICIT</code>. <code>tagging</code> is not set when a ASN.1
-structure is parsed using <a
+<code>:EXPLICIT</code>. <em>tagging</em> is not set when a ASN.1 structure
+is parsed using <a
 href="../ASN1.html#method-c-decode">OpenSSL::ASN1.decode</a>.</p>
         
         </div>
@@ -236,7 +195,7 @@ href="../ASN1.html#method-c-decode">OpenSSL::ASN1.decode</a>.</p>
         
         <div class="method-heading">
           <span class="method-callseq">
-            OpenSSL::ASN1::Primitive.new( value [, tag, tagging, tag_class ]) &rarr; Primitive
+            OpenSSL::ASN1::Primitive.new(value [, tag, tagging, tag_class ]) &rarr; Primitive
           </span>
           
           <span class="method-click-advice">click to toggle source</span>
@@ -247,27 +206,27 @@ href="../ASN1.html#method-c-decode">OpenSSL::ASN1.decode</a>.</p>
 
         <div class="method-description">
           
-          <p><code>value</code>: is mandatory.</p>
+          <p><em>value</em>: is mandatory.</p>
 
-<p><code>tag</code>: optional, may be specified for tagged values. If no
-<code>tag</code> is specified, the UNIVERSAL tag corresponding to the <a
+<p><em>tag</em>: optional, may be specified for tagged values. If no
+<em>tag</em> is specified, the UNIVERSAL tag corresponding to the <a
 href="Primitive.html">Primitive</a> sub-class is used by default.</p>
 
-<p><code>tagging</code>: may be used as an encoding hint to encode a value
-either explicitly or implicitly, see <a href="../ASN1.html">ASN1</a> for
-possible values.</p>
+<p><em>tagging</em>: may be used as an encoding hint to encode a value either
+explicitly or implicitly, see <a href="../ASN1.html">ASN1</a> for possible
+values.</p>
 
-<p><code>tag_class</code>: if <code>tag</code> and <code>tagging</code> are
+<p><em>tag_class</em>: if <em>tag</em> and <em>tagging</em> are
 <code>nil</code> then this is set to <code>:UNIVERSAL</code> by default. If
-either <code>tag</code> or <code>tagging</code> are set then
+either <em>tag</em> or <em>tagging</em> are set then
 <code>:CONTEXT_SPECIFIC</code> is used as the default. For possible values
 please cf. <a href="../ASN1.html">ASN1</a>.</p>
 
 <h2 id="method-c-new-label-Example">Example<span><a href="#method-c-new-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h2>
 
 <pre class="ruby"><span class="ruby-identifier">int</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span><span class="ruby-operator">::</span><span class="ruby-constant">Integer</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">42</span>)
-<span class="ruby-identifier">zero_tagged_int</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span><span class="ruby-operator">::</span><span class="ruby-constant">Integer</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">42</span>, <span class="ruby-value">0</span>, :<span class="ruby-constant">IMPLICIT</span>)
-<span class="ruby-identifier">private_explicit_zero_tagged_int</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span><span class="ruby-operator">::</span><span class="ruby-constant">Integer</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">42</span>, <span class="ruby-value">0</span>, :<span class="ruby-constant">EXPLICIT</span>, :<span class="ruby-constant">PRIVATE</span>)
+<span class="ruby-identifier">zero_tagged_int</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span><span class="ruby-operator">::</span><span class="ruby-constant">Integer</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">42</span>, <span class="ruby-value">0</span>, <span class="ruby-value">:IMPLICIT</span>)
+<span class="ruby-identifier">private_explicit_zero_tagged_int</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span><span class="ruby-operator">::</span><span class="ruby-constant">Integer</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">42</span>, <span class="ruby-value">0</span>, <span class="ruby-value">:EXPLICIT</span>, <span class="ruby-value">:PRIVATE</span>)
 </pre>
           
           
@@ -278,9 +237,12 @@ please cf. <a href="../ASN1.html">ASN1</a>.</p>
 ossl_asn1_initialize(int argc, VALUE *argv, VALUE self)
 {
     VALUE value, tag, tagging, tag_class;
+    int default_tag;
 
     rb_scan_args(argc, argv, &quot;13&quot;, &amp;value, &amp;tag, &amp;tagging, &amp;tag_class);
-    if(argc &gt; 1){
+    default_tag = ossl_asn1_default_tag(self);
+
+    if (default_tag == -1 || argc &gt; 1) {
         if(NIL_P(tag))
             ossl_raise(eASN1Error, &quot;must specify tag number&quot;);
         if(!NIL_P(tagging) &amp;&amp; !SYMBOL_P(tagging))
@@ -293,11 +255,9 @@ ossl_asn1_initialize(int argc, VALUE *argv, VALUE self)
         }
         if(!SYMBOL_P(tag_class))
             ossl_raise(eASN1Error, &quot;invalid tag class&quot;);
-        if (tagging == sym_IMPLICIT &amp;&amp; NUM2INT(tag) &gt; 31)
-            ossl_raise(eASN1Error, &quot;tag number for Universal too large&quot;);
     }
     else{
-        tag = INT2NUM(ossl_asn1_default_tag(self));
+        tag = INT2NUM(default_tag);
         tagging = Qnil;
         tag_class = sym_UNIVERSAL;
     }
@@ -305,7 +265,9 @@ ossl_asn1_initialize(int argc, VALUE *argv, VALUE self)
     ossl_asn1_set_value(self, value);
     ossl_asn1_set_tagging(self, tagging);
     ossl_asn1_set_tag_class(self, tag_class);
-    ossl_asn1_set_infinite_length(self, Qfalse);
+    ossl_asn1_set_indefinite_length(self, Qfalse);
+    if (default_tag == V_ASN1_BIT_STRING)
+        rb_ivar_set(self, sivUNUSED_BITS, INT2FIX(0));
 
     return self;
 }</pre>
@@ -343,9 +305,9 @@ ossl_asn1_initialize(int argc, VALUE *argv, VALUE self)
 
         <div class="method-description">
           
-          <p>Calls <em>block</em> once for each element in <code>self</code>, passing
-that element as parameter <code>asn1</code>. If no block is given, an
-enumerator is returned instead.</p>
+          <p>Calls the given block once for each element in self, passing that element
+as parameter <em>asn1</em>. If no block is given, an enumerator is returned
+instead.</p>
 
 <h2 id="method-i-each-label-Example">Example<span><a href="#method-i-each-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h2>
 
@@ -402,84 +364,33 @@ details.</p>
             <pre>static VALUE
 ossl_asn1cons_to_der(VALUE self)
 {
-    int tag, tn, tc, explicit, constructed = 1;
-    int found_prim = 0, seq_len;
-    long length;
-    unsigned char *p;
-    VALUE value, str, inf_length;
+    VALUE ary, str;
+    long i;
+    int indef_len;
 
-    tn = NUM2INT(ossl_asn1_get_tag(self));
-    tc = ossl_asn1_tag_class(self);
-    inf_length = ossl_asn1_get_infinite_length(self);
-    if (inf_length == Qtrue) {
-        VALUE ary, example;
-        constructed = 2;
-        if (rb_obj_class(self) == cASN1Sequence ||
-            rb_obj_class(self) == cASN1Set) {
-            tag = ossl_asn1_default_tag(self);
-        }
-        else { /* must be a constructive encoding of a primitive value */
-            ary = ossl_asn1_get_value(self);
-            if (!rb_obj_is_kind_of(ary, rb_cArray))
-                ossl_raise(eASN1Error, &quot;Constructive value must be an Array&quot;);
-            /* Recursively descend until a primitive value is found.
-            The overall value of the entire constructed encoding
-            is of the type of the first primitive encoding to be
-            found. */
-            while (!found_prim){
-                example = rb_ary_entry(ary, 0);
-                if (rb_obj_is_kind_of(example, cASN1Primitive)){
-                    found_prim = 1;
-                }
-                else {
-                    /* example is another ASN1Constructive */
-                    if (!rb_obj_is_kind_of(example, cASN1Constructive)){
-                        ossl_raise(eASN1Error, &quot;invalid constructed encoding&quot;);
-                        return Qnil; /* dummy */
-                    }
-                    ary = ossl_asn1_get_value(example);
-                }
-            }
-            tag = ossl_asn1_default_tag(example);
-        }
-    }
-    else {
-        if (rb_obj_class(self) == cASN1Constructive)
-            ossl_raise(eASN1Error, &quot;Constructive shall only be used with infinite length&quot;);
-        tag = ossl_asn1_default_tag(self);
-    }
-    explicit = ossl_asn1_is_explicit(self);
-    value = join_der(ossl_asn1_get_value(self));
+    indef_len = RTEST(ossl_asn1_get_indefinite_length(self));
+    ary = rb_convert_type(ossl_asn1_get_value(self), T_ARRAY, &quot;Array&quot;, &quot;to_a&quot;);
+    str = rb_str_new(NULL, 0);
+    for (i = 0; i &lt; RARRAY_LEN(ary); i++) {
+        VALUE item = RARRAY_AREF(ary, i);
 
-    seq_len = ASN1_object_size(constructed, RSTRING_LENINT(value), tag);
-    length = ASN1_object_size(constructed, seq_len, tn);
-    str = rb_str_new(0, length);
-    p = (unsigned char *)RSTRING_PTR(str);
-    if(tc == V_ASN1_UNIVERSAL)
-        ASN1_put_object(&amp;p, constructed, RSTRING_LENINT(value), tn, tc);
-    else{
-        if(explicit){
-            ASN1_put_object(&amp;p, constructed, seq_len, tn, tc);
-            ASN1_put_object(&amp;p, constructed, RSTRING_LENINT(value), tag, V_ASN1_UNIVERSAL);
-        }
-        else{
-            ASN1_put_object(&amp;p, constructed, RSTRING_LENINT(value), tn, tc);
-        }
-    }
-    memcpy(p, RSTRING_PTR(value), RSTRING_LEN(value));
-    p += RSTRING_LEN(value);
+        if (indef_len &amp;&amp; rb_obj_is_kind_of(item, cASN1EndOfContent)) {
+            if (i != RARRAY_LEN(ary) - 1)
+                ossl_raise(eASN1Error, &quot;illegal EOC octets in value&quot;);
 
-    /* In this case we need an additional EOC (one for the explicit part and
-     * one for the Constructive itself. The EOC for the Constructive is
-     * supplied by the user, but that for the &quot;explicit wrapper&quot; must be
-     * added here.
-     */
-    if (explicit &amp;&amp; inf_length == Qtrue) {
-        ASN1_put_eoc(&amp;p);
-    }
-    ossl_str_adjust(str, p);
+            /*
+             * EOC is not really part of the content, but we required to add one
+             * at the end in the past.
+             */
+            break;
+        }
 
-    return str;
+        item = ossl_to_der_if_possible(item);
+        StringValue(item);
+        rb_str_append(str, item);
+    }
+
+    return to_der_internal(self, 1, indef_len, str);
 }</pre>
           </div>
           
@@ -499,7 +410,7 @@ ossl_asn1cons_to_der(VALUE self)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.1.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 6.0.0.beta1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

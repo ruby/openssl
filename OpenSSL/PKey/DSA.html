@@ -77,6 +77,8 @@
     
     <li ><a href="#method-i-export">#export</a>
     
+    <li ><a href="#method-i-initialize_copy">#initialize_copy</a>
+    
     <li ><a href="#method-i-params">#params</a>
     
     <li ><a href="#method-i-private-3F">#private?</a>
@@ -116,14 +118,7 @@
     
 <p><a href="DSA.html">DSA</a>, the Digital Signature Algorithm, is specified
 in NIST&#39;s FIPS 186-3. It is an asymmetric public key algorithm that may
-be used similar to e.g. <a href="RSA.html">RSA</a>. Please note that for <a
-href="../../OpenSSL.html">OpenSSL</a> versions prior to 1.0.0 the digest
-algorithms OpenSSL::Digest::DSS (equivalent to SHA) or
-OpenSSL::Digest::DSS1 (equivalent to SHA-1) must be used for issuing
-signatures with a <a href="DSA.html">DSA</a> key using OpenSSL::PKey#sign.
-Starting with <a href="../../OpenSSL.html">OpenSSL</a> 1.0.0, digest
-algorithms are no longer restricted, any <a
-href="../Digest.html">Digest</a> may be used for signing.</p>
+be used similar to e.g. <a href="RSA.html">RSA</a>.</p>
 
   </section>
 
@@ -167,7 +162,7 @@ private/public key pair from scratch.</p>
 
 <h3 id="method-c-generate-label-Parameters">Parameters<span><a href="#method-c-generate-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
 <ul><li>
-<p><code>size</code> is an integer representing the desired key size.</p>
+<p><em>size</em> is an integer representing the desired key size.</p>
 </li></ul>
           
           
@@ -228,15 +223,15 @@ ossl_dsa_s_generate(VALUE klass, VALUE size)
         <div class="method-description">
           
           <p>Creates a new <a href="DSA.html">DSA</a> instance by reading an existing
-key from <code>string</code>.</p>
+key from <em>string</em>.</p>
 
 <h3 id="method-c-new-label-Parameters">Parameters<span><a href="#method-c-new-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
 <ul><li>
-<p><code>size</code> is an integer representing the desired key size.</p>
+<p><em>size</em> is an integer representing the desired key size.</p>
 </li><li>
-<p><code>string</code> contains a DER or PEM encoded key.</p>
+<p><em>string</em> contains a DER or PEM encoded key.</p>
 </li><li>
-<p><code>pass</code> is a string that contains an optional password.</p>
+<p><em>pass</em> is a string that contains an optional password.</p>
 </li></ul>
 
 <h3 id="method-c-new-label-Examples">Examples<span><a href="#method-c-new-label-Examples">&para;</a> <a href="#top">&uarr;</a></span></h3>
@@ -356,9 +351,9 @@ ossl_dsa_initialize(int argc, VALUE *argv, VALUE self)
 
 <h3 id="method-i-export-label-Parameters">Parameters<span><a href="#method-i-export-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
 <ul><li>
-<p><code>cipher</code> is an <a href="../Cipher.html">OpenSSL::Cipher</a>.</p>
+<p><em>cipher</em> is an <a href="../Cipher.html">OpenSSL::Cipher</a>.</p>
 </li><li>
-<p><code>password</code> is a string containing your password.</p>
+<p><em>password</em> is a string containing your password.</p>
 </li></ul>
 
 <h3 id="method-i-export-label-Examples">Examples<span><a href="#method-i-export-label-Examples">&para;</a> <a href="#top">&uarr;</a></span></h3>
@@ -381,7 +376,7 @@ ossl_dsa_export(int argc, VALUE *argv, VALUE self)
     GetDSA(self, dsa);
     rb_scan_args(argc, argv, &quot;02&quot;, &amp;cipher, &amp;pass);
     if (!NIL_P(cipher)) {
-        ciph = GetCipherPtr(cipher);
+        ciph = ossl_evp_get_cipherbyname(cipher);
         pass = ossl_pem_passwd_value(pass);
     }
     if (!(out = BIO_new(BIO_s_mem()))) {
@@ -411,6 +406,54 @@ ossl_dsa_export(int argc, VALUE *argv, VALUE self)
         <div class="aliases">
           Also aliased as: <a href="DSA.html#method-i-to_pem">to_pem</a>, <a href="DSA.html#method-i-to_s">to_s</a>
         </div>
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-initialize_copy" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">initialize_copy</span><span
+            class="method-args">(p1)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="initialize_copy-source">
+            <pre>static VALUE
+ossl_dsa_initialize_copy(VALUE self, VALUE other)
+{
+    EVP_PKEY *pkey;
+    DSA *dsa, *dsa_new;
+
+    GetPKey(self, pkey);
+    if (EVP_PKEY_base_id(pkey) != EVP_PKEY_NONE)
+        ossl_raise(eDSAError, &quot;DSA already initialized&quot;);
+    GetDSA(other, dsa);
+
+    dsa_new = ASN1_dup((i2d_of_void *)i2d_DSAPrivateKey, (d2i_of_void *)d2i_DSAPrivateKey, (char *)dsa);
+    if (!dsa_new)
+        ossl_raise(eDSAError, &quot;ASN1_dup&quot;);
+
+    EVP_PKEY_assign_DSA(pkey, dsa_new);
+
+    return self;
+}</pre>
+          </div>
+          
+        </div>
+
         
 
         
@@ -635,8 +678,9 @@ ossl_dsa_to_public_key(VALUE self)
 
         <div class="method-description">
           
-          <p>Sets <code>pub_key</code> and <code>priv_key</code> for the <a
-href="DSA.html">DSA</a> instance. <code>priv_key</code> may be nil.</p>
+          <p>Sets <em>pub_key</em> and <em>priv_key</em> for the <a
+href="DSA.html">DSA</a> instance. <em>priv_key</em> may be
+<code>nil</code>.</p>
           
           
 
@@ -663,8 +707,8 @@ href="DSA.html">DSA</a> instance. <code>priv_key</code> may be nil.</p>
 
         <div class="method-description">
           
-          <p>Sets <code>p</code>, <code>q</code>, <code>g</code> for the <a
-href="DSA.html">DSA</a> instance.</p>
+          <p>Sets <em>p</em>, <em>q</em>, <em>g</em> to the <a href="DSA.html">DSA</a>
+instance.</p>
           
           
 
@@ -694,15 +738,15 @@ href="DSA.html">DSA</a> instance.</p>
         <div class="method-description">
           
           <p>Computes and returns the <a href="DSA.html">DSA</a> signature of
-<code>string</code>, where <code>string</code> is expected to be an
+<em>string</em>, where <em>string</em> is expected to be an
 already-computed message digest of the original input data. The signature
 is issued using the private key of this <a href="DSA.html">DSA</a>
 instance.</p>
 
 <h3 id="method-i-syssign-label-Parameters">Parameters<span><a href="#method-i-syssign-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
 <ul><li>
-<p><code>string</code> is a message digest of the original input data to be
-signed</p>
+<p><em>string</em> is a message digest of the original input data to be
+signed.</p>
 </li></ul>
 
 <h3 id="method-i-syssign-label-Example">Example<span><a href="#method-i-syssign-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
@@ -769,15 +813,14 @@ ossl_dsa_sign(VALUE self, VALUE data)
         <div class="method-description">
           
           <p>Verifies whether the signature is valid given the message digest input. It
-does so by validating <code>sig</code> using the public key of this <a
+does so by validating <em>sig</em> using the public key of this <a
 href="DSA.html">DSA</a> instance.</p>
 
 <h3 id="method-i-sysverify-label-Parameters">Parameters<span><a href="#method-i-sysverify-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
 <ul><li>
-<p><code>digest</code> is a message digest of the original input data to be
-signed</p>
+<p><em>digest</em> is a message digest of the original input data to be signed</p>
 </li><li>
-<p><code>sig</code> is a <a href="DSA.html">DSA</a> signature value</p>
+<p><em>sig</em> is a <a href="DSA.html">DSA</a> signature value</p>
 </li></ul>
 
 <h3 id="method-i-sysverify-label-Example">Example<span><a href="#method-i-sysverify-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
@@ -996,7 +1039,7 @@ ossl_dsa_to_text(VALUE self)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.1.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 6.0.0.beta1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

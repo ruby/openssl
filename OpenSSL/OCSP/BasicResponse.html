@@ -81,6 +81,8 @@
     
     <li ><a href="#method-i-find_response">#find_response</a>
     
+    <li ><a href="#method-i-initialize_copy">#initialize_copy</a>
+    
     <li ><a href="#method-i-responses">#responses</a>
     
     <li ><a href="#method-i-sign">#sign</a>
@@ -148,7 +150,7 @@ href="Response.html">Response</a>.</p>
         <div class="method-description">
           
           <p>Creates a new <a href="BasicResponse.html">BasicResponse</a>. If
-<code>der_string</code> is given, decodes <code>der_string</code> as DER.</p>
+<em>der_string</em> is given, decodes <em>der_string</em> as DER.</p>
           
           
 
@@ -210,8 +212,8 @@ ossl_ocspbres_initialize(int argc, VALUE *argv, VALUE self)
 
         <div class="method-description">
           
-          <p>Adds <code>nonce</code> to this response.  If no nonce was provided a
-random nonce will be added.</p>
+          <p>Adds <em>nonce</em> to this response.  If no nonce was provided a random
+nonce will be added.</p>
           
           
 
@@ -264,8 +266,8 @@ ossl_ocspbres_add_nonce(int argc, VALUE *argv, VALUE self)
 
         <div class="method-description">
           
-          <p>Adds a certificate status for <code>certificate_id</code>.
-<code>status</code> is the status, and must be one of these:</p>
+          <p>Adds a certificate status for <em>certificate_id</em>. <em>status</em> is
+the status, and must be one of these:</p>
 <ul><li>
 <p>OpenSSL::OCSP::V_CERTSTATUS_GOOD</p>
 </li><li>
@@ -274,24 +276,24 @@ ossl_ocspbres_add_nonce(int argc, VALUE *argv, VALUE self)
 <p>OpenSSL::OCSP::V_CERTSTATUS_UNKNOWN</p>
 </li></ul>
 
-<p><code>reason</code> and <code>revocation_time</code> can be given only when
-<code>status</code> is OpenSSL::OCSP::V_CERTSTATUS_REVOKED.
-<code>reason</code> describes the reason for the revocation, and must be
-one of OpenSSL::OCSP::REVOKED_STATUS_* constants.
-<code>revocation_time</code> is the time when the certificate is revoked.</p>
+<p><em>reason</em> and <em>revocation_time</em> can be given only when
+<em>status</em> is OpenSSL::OCSP::V_CERTSTATUS_REVOKED. <em>reason</em>
+describes the reason for the revocation, and must be one of
+OpenSSL::OCSP::REVOKED_STATUS_* constants. <em>revocation_time</em> is the
+time when the certificate is revoked.</p>
 
-<p><code>this_update</code> and <code>next_update</code> indicate the time at
-which ths status is verified to be correct and the time at or before which
-newer information will be available, respectively. <code>next_update</code>
-is optional.</p>
+<p><em>this_update</em> and <em>next_update</em> indicate the time at which
+ths status is verified to be correct and the time at or before which newer
+information will be available, respectively. <em>next_update</em> is
+optional.</p>
 
-<p><code>extensions</code> is an Array of <a
+<p><em>extensions</em> is an Array of <a
 href="../X509/Extension.html">OpenSSL::X509::Extension</a> to be included
 in the <a href="SingleResponse.html">SingleResponse</a>. This is also
 optional.</p>
 
-<p>Note that the times, <code>revocation_time</code>, <code>this_update</code>
-and <code>next_update</code> can be specified in either of <a
+<p>Note that the times, <em>revocation_time</em>, <em>this_update</em> and
+<em>next_update</em> can be specified in either of <a
 href="../../Integer.html">Integer</a> or Time object. If they are <a
 href="../../Integer.html">Integer</a>, it is treated as the relative
 seconds from the current time.</p>
@@ -314,7 +316,7 @@ ossl_ocspbres_add_status(VALUE self, VALUE cid, VALUE status,
     VALUE tmp;
 
     GetOCSPBasicRes(self, bs);
-    SafeGetOCSPCertId(cid, id);
+    GetOCSPCertId(cid, id);
     st = NUM2INT(status);
     if (!NIL_P(ext)) { /* All ext&#39;s members must be X509::Extension */
         ext = rb_check_array_type(ext);
@@ -391,8 +393,8 @@ ossl_ocspbres_add_status(VALUE self, VALUE cid, VALUE status,
 
         <div class="method-description">
           
-          <p>Copies the nonce from <code>request</code> into this response.  Returns 1
-on success and 0 on failure.</p>
+          <p>Copies the nonce from <em>request</em> into this response.  Returns 1 on
+success and 0 on failure.</p>
           
           
 
@@ -406,7 +408,7 @@ ossl_ocspbres_copy_nonce(VALUE self, VALUE request)
     int ret;
 
     GetOCSPBasicRes(self, bs);
-    SafeGetOCSPReq(request, req);
+    GetOCSPReq(request, req);
     ret = OCSP_copy_nonce(bs, req);
 
     return INT2NUM(ret);
@@ -438,7 +440,7 @@ ossl_ocspbres_copy_nonce(VALUE self, VALUE request)
         <div class="method-description">
           
           <p>Returns a <a href="SingleResponse.html">SingleResponse</a> whose CertId
-matches with <code>certificate_id</code>, or nil if this <a
+matches with <em>certificate_id</em>, or <code>nil</code> if this <a
 href="BasicResponse.html">BasicResponse</a> does not contain it.</p>
           
           
@@ -453,7 +455,7 @@ ossl_ocspbres_find_response(VALUE self, VALUE target)
     OCSP_CERTID *id;
     int n;
 
-    SafeGetOCSPCertId(target, id);
+    GetOCSPCertId(target, id);
     GetOCSPBasicRes(self, bs);
 
     if ((n = OCSP_resp_find(bs, id, -1)) == -1)
@@ -465,6 +467,53 @@ ossl_ocspbres_find_response(VALUE self, VALUE target)
         ossl_raise(eOCSPError, &quot;ASN1_item_dup&quot;);
 
     return ossl_ocspsres_new(sres_new);
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-initialize_copy" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">initialize_copy</span><span
+            class="method-args">(p1)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="initialize_copy-source">
+            <pre>static VALUE
+ossl_ocspbres_initialize_copy(VALUE self, VALUE other)
+{
+    OCSP_BASICRESP *bs, *bs_old, *bs_new;
+
+    rb_check_frozen(self);
+    GetOCSPBasicRes(self, bs_old);
+    GetOCSPBasicRes(other, bs);
+
+    bs_new = ASN1_item_dup(ASN1_ITEM_rptr(OCSP_BASICRESP), bs);
+    if (!bs_new)
+        ossl_raise(eOCSPError, &quot;ASN1_item_dup&quot;);
+
+    SetOCSPBasicRes(self, bs_new);
+    OCSP_BASICRESP_free(bs_old);
+
+    return self;
 }</pre>
           </div>
           
@@ -550,11 +599,11 @@ ossl_ocspbres_get_responses(VALUE self)
         <div class="method-description">
           
           <p>Signs this <a href="../OCSP.html">OCSP</a> response using the
-<code>cert</code>, <code>key</code> and optional <code>digest</code>. This
-behaves in the similar way as <a
+<em>cert</em>, <em>key</em> and optional <em>digest</em>. This behaves in
+the similar way as <a
 href="Request.html#method-i-sign">OpenSSL::OCSP::Request#sign</a>.</p>
 
-<p><code>flags</code> can include:</p>
+<p><em>flags</em> can include:</p>
 <dl class="rdoc-list note-list"><dt>OpenSSL::OCSP::NOCERTS
 <dd>
 <p>don&#39;t include certificates</p>
@@ -591,7 +640,7 @@ ossl_ocspbres_sign(int argc, VALUE *argv, VALUE self)
     if (NIL_P(digest))
         md = EVP_sha1();
     else
-        md = GetDigestPtr(digest);
+        md = ossl_evp_get_digestbyname(digest);
     if (NIL_P(certs))
         flg |= OCSP_NOCERTS;
     else
@@ -632,8 +681,8 @@ ossl_ocspbres_sign(int argc, VALUE *argv, VALUE self)
           <p>Returns an Array of statuses for this response.  Each status contains a <a
 href="CertificateId.html">CertificateId</a>, the status (0 for good, 1 for
 revoked, 2 for unknown), the reason for the status, the revocation time,
-the time of this update, the time for the next update and a list of
-OpenSSL::X509::Extensions.</p>
+the time of this update, the time for the next update and a list of <a
+href="../X509/Extension.html">OpenSSL::X509::Extension</a>.</p>
 
 <p>This should be superseded by <a
 href="BasicResponse.html#method-i-responses">#responses</a> and <a
@@ -766,9 +815,8 @@ ossl_ocspbres_to_der(VALUE self)
         <div class="method-description">
           
           <p>Verifies the signature of the response using the given
-<code>certificates</code> and <code>store</code>. This works in the similar
-way as <a
-href="Request.html#method-i-verify">OpenSSL::OCSP::Request#verify</a>.</p>
+<em>certificates</em> and <em>store</em>. This works in the similar way as
+<a href="Request.html#method-i-verify">OpenSSL::OCSP::Request#verify</a>.</p>
           
           
 
@@ -861,7 +909,7 @@ ossl_ocspbres_verify(int argc, VALUE *argv, VALUE self)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.1.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 6.0.0.beta1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

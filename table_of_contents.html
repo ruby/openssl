@@ -43,6 +43,8 @@
     <a href="History_md.html">History</a>
 
     <ul>
+      <li><a href="History_md.html#label-Version+2.1.0.beta1">Version 2.1.0.beta1</a>
+      <li><a href="History_md.html#label-Notable+changes">Notable changes</a>
       <li><a href="History_md.html#label-Version+2.0.5">Version 2.0.5</a>
       <li><a href="History_md.html#label-Bug+fixes">Bug fixes</a>
       <li><a href="History_md.html#label-Version+2.0.4">Version 2.0.4</a>
@@ -164,8 +166,6 @@
       <li><a href="OpenSSL/ASN1/Constructive.html#label-SET+and+SEQUENCE">SET and SEQUENCE</a>
       <li><a href="OpenSSL/ASN1/Constructive.html#label-Example+-+constructing+a+SEQUENCE">Example - constructing a SEQUENCE</a>
       <li><a href="OpenSSL/ASN1/Constructive.html#label-Example+-+constructing+a+SET">Example - constructing a SET</a>
-      <li><a href="OpenSSL/ASN1/Constructive.html#label-Infinite+length+primitive+values">Infinite length primitive values</a>
-      <li><a href="OpenSSL/ASN1/Constructive.html#label-Example+-+Infinite+length+OCTET+STRING">Example - Infinite length OCTET STRING</a>
     </ul>
   </li>
   <li class="class">
@@ -272,6 +272,19 @@
     </ul>
   </li>
   <li class="module">
+    <a href="OpenSSL/KDF.html">OpenSSL::KDF</a>
+
+    <ul>
+      <li><a href="OpenSSL/KDF.html#label-Examples">Examples</a>
+      <li><a href="OpenSSL/KDF.html#label-Generating+a+128+bit+key+for+a+Cipher+-28e.g.+AES-29">Generating a 128 bit key for a Cipher (e.g. AES)</a>
+      <li><a href="OpenSSL/KDF.html#label-Storing+Passwords">Storing Passwords</a>
+      <li><a href="OpenSSL/KDF.html#label-Important+Note+on+Checking+Passwords">Important Note on Checking Passwords</a>
+    </ul>
+  </li>
+  <li class="class">
+    <a href="OpenSSL/KDF/KDFError.html">OpenSSL::KDF::KDFError</a>
+  </li>
+  <li class="module">
     <a href="OpenSSL/Netscape.html">OpenSSL::Netscape</a>
   </li>
   <li class="class">
@@ -318,21 +331,6 @@
   </li>
   <li class="module">
     <a href="OpenSSL/PKCS5.html">OpenSSL::PKCS5</a>
-
-    <ul>
-      <li><a href="OpenSSL/PKCS5.html#label-Parameters">Parameters</a>
-      <li><a href="OpenSSL/PKCS5.html#label-Password">Password</a>
-      <li><a href="OpenSSL/PKCS5.html#label-Salt">Salt</a>
-      <li><a href="OpenSSL/PKCS5.html#label-Iteration+Count">Iteration Count</a>
-      <li><a href="OpenSSL/PKCS5.html#label-Key+Length">Key Length</a>
-      <li><a href="OpenSSL/PKCS5.html#label-Examples">Examples</a>
-      <li><a href="OpenSSL/PKCS5.html#label-Generating+a+128+bit+key+for+a+Cipher+-28e.g.+AES-29">Generating a 128 bit key for a Cipher (e.g. AES)</a>
-      <li><a href="OpenSSL/PKCS5.html#label-Storing+Passwords">Storing Passwords</a>
-      <li><a href="OpenSSL/PKCS5.html#label-Important+Note+on+Checking+Passwords">Important Note on Checking Passwords</a>
-    </ul>
-  </li>
-  <li class="class">
-    <a href="OpenSSL/PKCS5/PKCS5Error.html">OpenSSL::PKCS5::PKCS5Error</a>
   </li>
   <li class="class">
     <a href="OpenSSL/PKCS7.html">OpenSSL::PKCS7</a>
@@ -606,6 +604,11 @@
     <span class="container">OpenSSL</span>
 
   <li class="method">
+    <a href="OpenSSL.html#method-c-fips_mode">::fips_mode</a>
+    &mdash;
+    <span class="container">OpenSSL</span>
+
+  <li class="method">
     <a href="OpenSSL.html#method-c-fips_mode-3D">::fips_mode=</a>
     &mdash;
     <span class="container">OpenSSL</span>
@@ -649,6 +652,11 @@
     <a href="OpenSSL/Random.html#method-c-load_random_file">::load_random_file</a>
     &mdash;
     <span class="container">OpenSSL::Random</span>
+
+  <li class="method">
+    <a href="OpenSSL.html#method-c-mem_check_start">::mem_check_start</a>
+    &mdash;
+    <span class="container">OpenSSL</span>
 
   <li class="method">
     <a href="OpenSSL/ASN1/ASN1Data.html#method-c-new">::new</a>
@@ -876,14 +884,14 @@
     <span class="container">OpenSSL::X509::Name</span>
 
   <li class="method">
-    <a href="OpenSSL/PKCS5.html#method-c-pbkdf2_hmac">::pbkdf2_hmac</a>
+    <a href="OpenSSL/KDF.html#method-c-pbkdf2_hmac">::pbkdf2_hmac</a>
     &mdash;
-    <span class="container">OpenSSL::PKCS5</span>
+    <span class="container">OpenSSL::KDF</span>
 
   <li class="method">
-    <a href="OpenSSL/PKCS5.html#method-c-pbkdf2_hmac_sha1">::pbkdf2_hmac_sha1</a>
+    <a href="OpenSSL.html#method-c-print_mem_leaks">::print_mem_leaks</a>
     &mdash;
-    <span class="container">OpenSSL::PKCS5</span>
+    <span class="container">OpenSSL</span>
 
   <li class="method">
     <a href="OpenSSL/Random.html#method-c-pseudo_bytes">::pseudo_bytes</a>
@@ -914,6 +922,11 @@
     <a href="OpenSSL/ASN1/ObjectId.html#method-c-register">::register</a>
     &mdash;
     <span class="container">OpenSSL::ASN1::ObjectId</span>
+
+  <li class="method">
+    <a href="OpenSSL/KDF.html#method-c-scrypt">::scrypt</a>
+    &mdash;
+    <span class="container">OpenSSL::KDF</span>
 
   <li class="method">
     <a href="OpenSSL/Random.html#method-c-seed">::seed</a>
@@ -971,7 +984,17 @@
     <span class="container">OpenSSL::BN</span>
 
   <li class="method">
+    <a href="OpenSSL/BN.html#method-i-2B-40">#+@</a>
+    &mdash;
+    <span class="container">OpenSSL::BN</span>
+
+  <li class="method">
     <a href="OpenSSL/BN.html#method-i-2D">#-</a>
+    &mdash;
+    <span class="container">OpenSSL::BN</span>
+
+  <li class="method">
+    <a href="OpenSSL/BN.html#method-i-2D-40">#-@</a>
     &mdash;
     <span class="container">OpenSSL::BN</span>
 
@@ -1876,6 +1899,131 @@
     <span class="container">OpenSSL::PKey::EC::Point</span>
 
   <li class="method">
+    <a href="OpenSSL/BN.html#method-i-initialize_copy">#initialize_copy</a>
+    &mdash;
+    <span class="container">OpenSSL::BN</span>
+
+  <li class="method">
+    <a href="OpenSSL/Cipher.html#method-i-initialize_copy">#initialize_copy</a>
+    &mdash;
+    <span class="container">OpenSSL::Cipher</span>
+
+  <li class="method">
+    <a href="OpenSSL/Digest.html#method-i-initialize_copy">#initialize_copy</a>
+    &mdash;
+    <span class="container">OpenSSL::Digest</span>
+
+  <li class="method">
+    <a href="OpenSSL/HMAC.html#method-i-initialize_copy">#initialize_copy</a>
+    &mdash;
+    <span class="container">OpenSSL::HMAC</span>
+
+  <li class="method">
+    <a href="OpenSSL/OCSP/Request.html#method-i-initialize_copy">#initialize_copy</a>
+    &mdash;
+    <span class="container">OpenSSL::OCSP::Request</span>
+
+  <li class="method">
+    <a href="OpenSSL/OCSP/Response.html#method-i-initialize_copy">#initialize_copy</a>
+    &mdash;
+    <span class="container">OpenSSL::OCSP::Response</span>
+
+  <li class="method">
+    <a href="OpenSSL/OCSP/BasicResponse.html#method-i-initialize_copy">#initialize_copy</a>
+    &mdash;
+    <span class="container">OpenSSL::OCSP::BasicResponse</span>
+
+  <li class="method">
+    <a href="OpenSSL/OCSP/SingleResponse.html#method-i-initialize_copy">#initialize_copy</a>
+    &mdash;
+    <span class="container">OpenSSL::OCSP::SingleResponse</span>
+
+  <li class="method">
+    <a href="OpenSSL/OCSP/CertificateId.html#method-i-initialize_copy">#initialize_copy</a>
+    &mdash;
+    <span class="container">OpenSSL::OCSP::CertificateId</span>
+
+  <li class="method">
+    <a href="OpenSSL/PKCS12.html#method-i-initialize_copy">#initialize_copy</a>
+    &mdash;
+    <span class="container">OpenSSL::PKCS12</span>
+
+  <li class="method">
+    <a href="OpenSSL/PKCS7.html#method-i-initialize_copy">#initialize_copy</a>
+    &mdash;
+    <span class="container">OpenSSL::PKCS7</span>
+
+  <li class="method">
+    <a href="OpenSSL/PKey/DH.html#method-i-initialize_copy">#initialize_copy</a>
+    &mdash;
+    <span class="container">OpenSSL::PKey::DH</span>
+
+  <li class="method">
+    <a href="OpenSSL/PKey/DSA.html#method-i-initialize_copy">#initialize_copy</a>
+    &mdash;
+    <span class="container">OpenSSL::PKey::DSA</span>
+
+  <li class="method">
+    <a href="OpenSSL/PKey/EC.html#method-i-initialize_copy">#initialize_copy</a>
+    &mdash;
+    <span class="container">OpenSSL::PKey::EC</span>
+
+  <li class="method">
+    <a href="OpenSSL/PKey/EC/Group.html#method-i-initialize_copy">#initialize_copy</a>
+    &mdash;
+    <span class="container">OpenSSL::PKey::EC::Group</span>
+
+  <li class="method">
+    <a href="OpenSSL/PKey/EC/Point.html#method-i-initialize_copy">#initialize_copy</a>
+    &mdash;
+    <span class="container">OpenSSL::PKey::EC::Point</span>
+
+  <li class="method">
+    <a href="OpenSSL/PKey/RSA.html#method-i-initialize_copy">#initialize_copy</a>
+    &mdash;
+    <span class="container">OpenSSL::PKey::RSA</span>
+
+  <li class="method">
+    <a href="OpenSSL/SSL/Session.html#method-i-initialize_copy">#initialize_copy</a>
+    &mdash;
+    <span class="container">OpenSSL::SSL::Session</span>
+
+  <li class="method">
+    <a href="OpenSSL/X509/Attribute.html#method-i-initialize_copy">#initialize_copy</a>
+    &mdash;
+    <span class="container">OpenSSL::X509::Attribute</span>
+
+  <li class="method">
+    <a href="OpenSSL/X509/Certificate.html#method-i-initialize_copy">#initialize_copy</a>
+    &mdash;
+    <span class="container">OpenSSL::X509::Certificate</span>
+
+  <li class="method">
+    <a href="OpenSSL/X509/CRL.html#method-i-initialize_copy">#initialize_copy</a>
+    &mdash;
+    <span class="container">OpenSSL::X509::CRL</span>
+
+  <li class="method">
+    <a href="OpenSSL/X509/Extension.html#method-i-initialize_copy">#initialize_copy</a>
+    &mdash;
+    <span class="container">OpenSSL::X509::Extension</span>
+
+  <li class="method">
+    <a href="OpenSSL/X509/Name.html#method-i-initialize_copy">#initialize_copy</a>
+    &mdash;
+    <span class="container">OpenSSL::X509::Name</span>
+
+  <li class="method">
+    <a href="OpenSSL/X509/Request.html#method-i-initialize_copy">#initialize_copy</a>
+    &mdash;
+    <span class="container">OpenSSL::X509::Request</span>
+
+  <li class="method">
+    <a href="OpenSSL/X509/Revoked.html#method-i-initialize_copy">#initialize_copy</a>
+    &mdash;
+    <span class="container">OpenSSL::X509::Revoked</span>
+
+  <li class="method">
     <a href="OpenSSL/Config.html#method-i-inspect">#inspect</a>
     &mdash;
     <span class="container">OpenSSL::Config</span>
@@ -2021,6 +2169,16 @@
     <span class="container">OpenSSL::PKey::EC::Point</span>
 
   <li class="method">
+    <a href="OpenSSL/SSL/SSLContext.html#method-i-max_version-3D">#max_version=</a>
+    &mdash;
+    <span class="container">OpenSSL::SSL::SSLContext</span>
+
+  <li class="method">
+    <a href="OpenSSL/SSL/SSLContext.html#method-i-min_version-3D">#min_version=</a>
+    &mdash;
+    <span class="container">OpenSSL::SSL::SSLContext</span>
+
+  <li class="method">
     <a href="OpenSSL/BN.html#method-i-mod_add">#mod_add</a>
     &mdash;
     <span class="container">OpenSSL::BN</span>
@@ -2074,6 +2232,11 @@
     <a href="OpenSSL/PKCS7/SignerInfo.html#method-i-name">#name</a>
     &mdash;
     <span class="container">OpenSSL::PKCS7::SignerInfo</span>
+
+  <li class="method">
+    <a href="OpenSSL/BN.html#method-i-negative-3F">#negative?</a>
+    &mdash;
+    <span class="container">OpenSSL::BN</span>
 
   <li class="method">
     <a href="OpenSSL/OCSP/SingleResponse.html#method-i-next_update">#next_update</a>
@@ -2204,6 +2367,16 @@
     <a href="OpenSSL/PKey/DH.html#method-i-params_ok-3F">#params_ok?</a>
     &mdash;
     <span class="container">OpenSSL::PKey::DH</span>
+
+  <li class="method">
+    <a href="OpenSSL/PKCS5.html#method-i-pbkdf2_hmac">#pbkdf2_hmac</a>
+    &mdash;
+    <span class="container">OpenSSL::PKCS5</span>
+
+  <li class="method">
+    <a href="OpenSSL/PKCS5.html#method-i-pbkdf2_hmac_sha1">#pbkdf2_hmac_sha1</a>
+    &mdash;
+    <span class="container">OpenSSL::PKCS5</span>
 
   <li class="method">
     <a href="OpenSSL/SSL/SSLSocket.html#method-i-peer_cert">#peer_cert</a>
@@ -2771,6 +2944,11 @@
     <span class="container">OpenSSL::X509::Request</span>
 
   <li class="method">
+    <a href="OpenSSL/OCSP/Request.html#method-i-signed-3F">#signed?</a>
+    &mdash;
+    <span class="container">OpenSSL::OCSP::Request</span>
+
+  <li class="method">
     <a href="OpenSSL/PKCS7/SignerInfo.html#method-i-signed_time">#signed_time</a>
     &mdash;
     <span class="container">OpenSSL::PKCS7::SignerInfo</span>
@@ -3256,6 +3434,11 @@
     <span class="container">OpenSSL::X509::Request</span>
 
   <li class="method">
+    <a href="OpenSSL/X509/Name.html#method-i-to_utf8">#to_utf8</a>
+    &mdash;
+    <span class="container">OpenSSL::X509::Name</span>
+
+  <li class="method">
     <a href="OpenSSL/X509/Store.html#method-i-trust-3D">#trust=</a>
     &mdash;
     <span class="container">OpenSSL::X509::Store</span>
@@ -3430,7 +3613,7 @@
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.1.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 6.0.0.beta1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

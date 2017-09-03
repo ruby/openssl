@@ -109,7 +109,13 @@
     
     <li ><a href="#method-c-errors">::errors</a>
     
+    <li ><a href="#method-c-fips_mode">::fips_mode</a>
+    
     <li ><a href="#method-c-fips_mode-3D">::fips_mode=</a>
+    
+    <li ><a href="#method-c-mem_check_start">::mem_check_start</a>
+    
+    <li ><a href="#method-c-print_mem_leaks">::print_mem_leaks</a>
     
   </ul>
 </div>
@@ -126,7 +132,7 @@
     
 <p><a href="OpenSSL.html">OpenSSL</a> provides <a
 href="OpenSSL/SSL.html">SSL</a>, TLS and general purpose cryptography.  It
-wraps the <a href="http://www.openssl.org/">OpenSSL</a> library.</p>
+wraps the <a href="https://www.openssl.org/">OpenSSL</a> library.</p>
 
 <h1 id="module-OpenSSL-label-Examples">Examples<span><a href="#module-OpenSSL-label-Examples">&para;</a> <a href="#top">&uarr;</a></span></h1>
 
@@ -392,12 +398,15 @@ OpenSSL::SSL::ExtensionFactory to indicate the purpose of the certificate.</p>
 
 <pre class="ruby"><span class="ruby-identifier">extension_factory</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">ExtensionFactory</span>.<span class="ruby-identifier">new</span> <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">cert</span>
 
-<span class="ruby-identifier">cert</span>.<span class="ruby-identifier">add_extension</span>    <span class="ruby-identifier">extension_factory</span>.<span class="ruby-identifier">create_extension</span>(<span class="ruby-string">&#39;basicConstraints&#39;</span>, <span class="ruby-string">&#39;CA:FALSE&#39;</span>, <span class="ruby-keyword">true</span>)
+<span class="ruby-identifier">cert</span>.<span class="ruby-identifier">add_extension</span> \
+  <span class="ruby-identifier">extension_factory</span>.<span class="ruby-identifier">create_extension</span>(<span class="ruby-string">&#39;basicConstraints&#39;</span>, <span class="ruby-string">&#39;CA:FALSE&#39;</span>, <span class="ruby-keyword">true</span>)
 
-<span class="ruby-identifier">cert</span>.<span class="ruby-identifier">add_extension</span>    <span class="ruby-identifier">extension_factory</span>.<span class="ruby-identifier">create_extension</span>(
+<span class="ruby-identifier">cert</span>.<span class="ruby-identifier">add_extension</span> \
+  <span class="ruby-identifier">extension_factory</span>.<span class="ruby-identifier">create_extension</span>(
     <span class="ruby-string">&#39;keyUsage&#39;</span>, <span class="ruby-string">&#39;keyEncipherment,dataEncipherment,digitalSignature&#39;</span>)
 
-<span class="ruby-identifier">cert</span>.<span class="ruby-identifier">add_extension</span>    <span class="ruby-identifier">extension_factory</span>.<span class="ruby-identifier">create_extension</span>(<span class="ruby-string">&#39;subjectKeyIdentifier&#39;</span>, <span class="ruby-string">&#39;hash&#39;</span>)
+<span class="ruby-identifier">cert</span>.<span class="ruby-identifier">add_extension</span> \
+  <span class="ruby-identifier">extension_factory</span>.<span class="ruby-identifier">create_extension</span>(<span class="ruby-string">&#39;subjectKeyIdentifier&#39;</span>, <span class="ruby-string">&#39;hash&#39;</span>)
 </pre>
 
 <p>The list of supported extensions (and in some cases their possible values)
@@ -476,18 +485,21 @@ but with different extensions.</p>
 <span class="ruby-identifier">extension_factory</span>.<span class="ruby-identifier">subject_certificate</span> = <span class="ruby-identifier">ca_cert</span>
 <span class="ruby-identifier">extension_factory</span>.<span class="ruby-identifier">issuer_certificate</span> = <span class="ruby-identifier">ca_cert</span>
 
-<span class="ruby-identifier">ca_cert</span>.<span class="ruby-identifier">add_extension</span>    <span class="ruby-identifier">extension_factory</span>.<span class="ruby-identifier">create_extension</span>(<span class="ruby-string">&#39;subjectKeyIdentifier&#39;</span>, <span class="ruby-string">&#39;hash&#39;</span>)
+<span class="ruby-identifier">ca_cert</span>.<span class="ruby-identifier">add_extension</span> \
+  <span class="ruby-identifier">extension_factory</span>.<span class="ruby-identifier">create_extension</span>(<span class="ruby-string">&#39;subjectKeyIdentifier&#39;</span>, <span class="ruby-string">&#39;hash&#39;</span>)
 </pre>
 
 <p>This extension indicates the CA&#39;s key may be used as a CA.</p>
 
-<pre class="ruby"><span class="ruby-identifier">ca_cert</span>.<span class="ruby-identifier">add_extension</span>    <span class="ruby-identifier">extension_factory</span>.<span class="ruby-identifier">create_extension</span>(<span class="ruby-string">&#39;basicConstraints&#39;</span>, <span class="ruby-string">&#39;CA:TRUE&#39;</span>, <span class="ruby-keyword">true</span>)
+<pre class="ruby"><span class="ruby-identifier">ca_cert</span>.<span class="ruby-identifier">add_extension</span> \
+  <span class="ruby-identifier">extension_factory</span>.<span class="ruby-identifier">create_extension</span>(<span class="ruby-string">&#39;basicConstraints&#39;</span>, <span class="ruby-string">&#39;CA:TRUE&#39;</span>, <span class="ruby-keyword">true</span>)
 </pre>
 
 <p>This extension indicates the CA&#39;s key may be used to verify signatures
 on both certificates and certificate revocations.</p>
 
-<pre class="ruby"><span class="ruby-identifier">ca_cert</span>.<span class="ruby-identifier">add_extension</span>    <span class="ruby-identifier">extension_factory</span>.<span class="ruby-identifier">create_extension</span>(
+<pre class="ruby"><span class="ruby-identifier">ca_cert</span>.<span class="ruby-identifier">add_extension</span> \
+  <span class="ruby-identifier">extension_factory</span>.<span class="ruby-identifier">create_extension</span>(
     <span class="ruby-string">&#39;keyUsage&#39;</span>, <span class="ruby-string">&#39;cRLSign,keyCertSign&#39;</span>, <span class="ruby-keyword">true</span>)
 </pre>
 
@@ -550,12 +562,15 @@ signed with the CA key and returned to the requester.</p>
 <span class="ruby-identifier">extension_factory</span>.<span class="ruby-identifier">subject_certificate</span> = <span class="ruby-identifier">csr_cert</span>
 <span class="ruby-identifier">extension_factory</span>.<span class="ruby-identifier">issuer_certificate</span> = <span class="ruby-identifier">ca_cert</span>
 
-<span class="ruby-identifier">csr_cert</span>.<span class="ruby-identifier">add_extension</span>    <span class="ruby-identifier">extension_factory</span>.<span class="ruby-identifier">create_extension</span>(<span class="ruby-string">&#39;basicConstraints&#39;</span>, <span class="ruby-string">&#39;CA:FALSE&#39;</span>)
+<span class="ruby-identifier">csr_cert</span>.<span class="ruby-identifier">add_extension</span> \
+  <span class="ruby-identifier">extension_factory</span>.<span class="ruby-identifier">create_extension</span>(<span class="ruby-string">&#39;basicConstraints&#39;</span>, <span class="ruby-string">&#39;CA:FALSE&#39;</span>)
 
-<span class="ruby-identifier">csr_cert</span>.<span class="ruby-identifier">add_extension</span>    <span class="ruby-identifier">extension_factory</span>.<span class="ruby-identifier">create_extension</span>(
+<span class="ruby-identifier">csr_cert</span>.<span class="ruby-identifier">add_extension</span> \
+  <span class="ruby-identifier">extension_factory</span>.<span class="ruby-identifier">create_extension</span>(
     <span class="ruby-string">&#39;keyUsage&#39;</span>, <span class="ruby-string">&#39;keyEncipherment,dataEncipherment,digitalSignature&#39;</span>)
 
-<span class="ruby-identifier">csr_cert</span>.<span class="ruby-identifier">add_extension</span>    <span class="ruby-identifier">extension_factory</span>.<span class="ruby-identifier">create_extension</span>(<span class="ruby-string">&#39;subjectKeyIdentifier&#39;</span>, <span class="ruby-string">&#39;hash&#39;</span>)
+<span class="ruby-identifier">csr_cert</span>.<span class="ruby-identifier">add_extension</span> \
+  <span class="ruby-identifier">extension_factory</span>.<span class="ruby-identifier">create_extension</span>(<span class="ruby-string">&#39;subjectKeyIdentifier&#39;</span>, <span class="ruby-string">&#39;hash&#39;</span>)
 
 <span class="ruby-identifier">csr_cert</span>.<span class="ruby-identifier">sign</span> <span class="ruby-identifier">ca_key</span>, <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span><span class="ruby-operator">::</span><span class="ruby-constant">SHA1</span>.<span class="ruby-identifier">new</span>
 
@@ -672,7 +687,7 @@ href="OpenSSL/SSL/SSLError.html">OpenSSL::SSL::SSLError</a> will be raised.</p>
         <dt id="OPENSSL_FIPS">OPENSSL_FIPS
         
         <dd><p>Boolean indicating whether <a href="OpenSSL.html">OpenSSL</a> is
-FIPS-enabled or not</p>
+FIPS-capable or not</p>
         
       
         <dt id="OPENSSL_LIBRARY_VERSION">OPENSSL_LIBRARY_VERSION
@@ -725,7 +740,7 @@ href="OpenSSL.html">OpenSSL</a> extension was built with (base 16)</p>
         <div class="method-description">
           
           <p>Returns a <a href="OpenSSL/Digest.html">Digest</a> subclass by
-<code>name</code>.</p>
+<em>name</em></p>
 
 <pre class="ruby"><span class="ruby-identifier">require</span> <span class="ruby-string">&#39;openssl&#39;</span>
 
@@ -740,7 +755,7 @@ href="OpenSSL.html">OpenSSL</a> extension was built with (base 16)</p>
 
           
           <div class="method-source-code" id="Digest-source">
-            <pre><span class="ruby-comment"># File lib/openssl/digest.rb, line 71</span>
+            <pre><span class="ruby-comment"># File lib/openssl/digest.rb, line 68</span>
 <span class="ruby-keyword">def</span> <span class="ruby-constant">Digest</span>(<span class="ruby-identifier">name</span>)
   <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">const_get</span>(<span class="ruby-identifier">name</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -849,7 +864,7 @@ ossl_debug_set(VALUE self, VALUE val)
           
           <p>See any remaining errors held in queue.</p>
 
-<p>Any errors you see here are probably due to a bug in ruby&#39;s <a
+<p>Any errors you see here are probably due to a bug in Ruby&#39;s <a
 href="OpenSSL.html">OpenSSL</a> implementation.</p>
           
           
@@ -868,6 +883,49 @@ ossl_get_errors(void)
     }
 
     return ary;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-fips_mode" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">fips_mode</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>call-seq</p>
+
+<pre>OpenSSL.fips_mode -&gt; true | false</pre>
+          
+          
+
+          
+          <div class="method-source-code" id="fips_mode-source">
+            <pre>static VALUE
+ossl_fips_mode_get(VALUE self)
+{
+
+#ifdef OPENSSL_FIPS
+    VALUE enabled;
+    enabled = FIPS_mode() ? Qtrue : Qfalse;
+    return enabled;
+#else
+    return Qfalse;
+#endif
 }</pre>
           </div>
           
@@ -940,6 +998,119 @@ ossl_fips_mode_set(VALUE self, VALUE enabled)
       </div>
 
     
+      <div id="method-c-mem_check_start" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            mem_check_start &rarr; nil
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Calls CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_ON). Starts tracking memory
+allocations. See also <a
+href="OpenSSL.html#method-c-print_mem_leaks">::print_mem_leaks</a>.</p>
+
+<p>This is available only when built with a capable <a
+href="OpenSSL.html">OpenSSL</a> and –enable-debug configure option.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="mem_check_start-source">
+            <pre>static VALUE
+mem_check_start(VALUE self)
+{
+        CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_ON);
+        return Qnil;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-print_mem_leaks" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            print_mem_leaks &rarr; true | false
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>For debugging the Ruby/OpenSSL library. Calls CRYPTO_mem_leaks_fp(stderr).
+Prints detected memory leaks to standard error. This cleans the global
+state up thus you cannot use any methods of the library after calling this.</p>
+
+<p>Returns <code>true</code> if leaks detected, <code>false</code> otherwise.</p>
+
+<p>This is available only when built with a capable <a
+href="OpenSSL.html">OpenSSL</a> and –enable-debug configure option.</p>
+
+<h3 id="method-c-print_mem_leaks-label-Example">Example<span><a href="#method-c-print_mem_leaks-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby"><span class="ruby-constant">OpenSSL</span>.<span class="ruby-identifier">mem_check_start</span>
+<span class="ruby-constant">NOT_GCED</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">RSA</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">256</span>)
+
+<span class="ruby-keyword">END</span> {
+  <span class="ruby-constant">GC</span>.<span class="ruby-identifier">start</span>
+  <span class="ruby-constant">OpenSSL</span>.<span class="ruby-identifier">print_mem_leaks</span> <span class="ruby-comment"># will print the leakage</span>
+}
+</pre>
+          
+          
+
+          
+          <div class="method-source-code" id="print_mem_leaks-source">
+            <pre>static VALUE
+print_mem_leaks(VALUE self)
+{
+#if OPENSSL_VERSION_NUMBER &gt;= 0x10100000
+    int ret;
+#endif
+
+    BN_CTX_free(ossl_bn_ctx);
+    ossl_bn_ctx = NULL;
+
+#if OPENSSL_VERSION_NUMBER &gt;= 0x10100000
+    ret = CRYPTO_mem_leaks_fp(stderr);
+    if (ret &lt; 0)
+        ossl_raise(eOSSLError, &quot;CRYPTO_mem_leaks_fp&quot;);
+    return ret ? Qfalse : Qtrue;
+#else
+    CRYPTO_mem_leaks_fp(stderr);
+    return Qnil;
+#endif
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
     </section>
   
   </section>
@@ -948,7 +1119,7 @@ ossl_fips_mode_set(VALUE self, VALUE enabled)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.1.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 6.0.0.beta1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

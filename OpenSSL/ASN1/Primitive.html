@@ -105,86 +105,69 @@
     
 <p>The parent class for all primitive encodings. Attributes are the same as
 for <a href="ASN1Data.html">ASN1Data</a>, with the addition of
-<code>tagging</code>. <a href="Primitive.html">Primitive</a> values can
-never be infinite length encodings, thus it is not possible to set the
-<code>infinite_length</code> attribute for <a
+<em>tagging</em>. <a href="Primitive.html">Primitive</a> values can never
+be encoded with indefinite length form, thus it is not possible to set the
+<em>indefinite_length</em> attribute for <a
 href="Primitive.html">Primitive</a> and its sub-classes.</p>
 
 <h2 id="class-OpenSSL::ASN1::Primitive-label-Primitive+sub-classes+and+their+mapping+to+Ruby+classes"><a href="Primitive.html">Primitive</a> sub-classes and their mapping to Ruby classes<span><a href="#class-OpenSSL::ASN1::Primitive-label-Primitive+sub-classes+and+their+mapping+to+Ruby+classes">&para;</a> <a href="#top">&uarr;</a></span></h2>
 <ul><li>
-<p>OpenSSL::ASN1::EndOfContent    &lt;=&gt; <code>value</code> is always
+<p>OpenSSL::ASN1::EndOfContent    &lt;=&gt; <em>value</em> is always
 <code>nil</code></p>
 </li><li>
-<p>OpenSSL::ASN1::Boolean         &lt;=&gt; <code>value</code> is a
-<code>Boolean</code></p>
+<p>OpenSSL::ASN1::Boolean         &lt;=&gt; <em>value</em> is
+<code>true</code> or <code>false</code></p>
 </li><li>
-<p>OpenSSL::ASN1::Integer         &lt;=&gt; <code>value</code> is a
-<code>Number</code></p>
+<p>OpenSSL::ASN1::Integer         &lt;=&gt; <em>value</em> is an <a
+href="../../Integer.html">Integer</a></p>
 </li><li>
-<p>OpenSSL::ASN1::BitString       &lt;=&gt; <code>value</code> is a
-<code>String</code></p>
+<p>OpenSSL::ASN1::BitString       &lt;=&gt; <em>value</em> is a String</p>
 </li><li>
-<p>OpenSSL::ASN1::OctetString     &lt;=&gt; <code>value</code> is a
-<code>String</code></p>
+<p>OpenSSL::ASN1::OctetString     &lt;=&gt; <em>value</em> is a String</p>
 </li><li>
-<p>OpenSSL::ASN1::Null            &lt;=&gt; <code>value</code> is always
+<p>OpenSSL::ASN1::Null            &lt;=&gt; <em>value</em> is always
 <code>nil</code></p>
 </li><li>
-<p>OpenSSL::ASN1::Object          &lt;=&gt; <code>value</code> is a
-<code>String</code></p>
+<p>OpenSSL::ASN1::Object          &lt;=&gt; <em>value</em> is a String</p>
 </li><li>
-<p>OpenSSL::ASN1::Enumerated      &lt;=&gt; <code>value</code> is a
-<code>Number</code></p>
+<p>OpenSSL::ASN1::Enumerated      &lt;=&gt; <em>value</em> is an <a
+href="../../Integer.html">Integer</a></p>
 </li><li>
-<p>OpenSSL::ASN1::UTF8String      &lt;=&gt; <code>value</code> is a
-<code>String</code></p>
+<p>OpenSSL::ASN1::UTF8String      &lt;=&gt; <em>value</em> is a String</p>
 </li><li>
-<p>OpenSSL::ASN1::NumericString   &lt;=&gt; <code>value</code> is a
-<code>String</code></p>
+<p>OpenSSL::ASN1::NumericString   &lt;=&gt; <em>value</em> is a String</p>
 </li><li>
-<p>OpenSSL::ASN1::PrintableString &lt;=&gt; <code>value</code> is a
-<code>String</code></p>
+<p>OpenSSL::ASN1::PrintableString &lt;=&gt; <em>value</em> is a String</p>
 </li><li>
-<p>OpenSSL::ASN1::T61String       &lt;=&gt; <code>value</code> is a
-<code>String</code></p>
+<p>OpenSSL::ASN1::T61String       &lt;=&gt; <em>value</em> is a String</p>
 </li><li>
-<p>OpenSSL::ASN1::VideotexString  &lt;=&gt; <code>value</code> is a
-<code>String</code></p>
+<p>OpenSSL::ASN1::VideotexString  &lt;=&gt; <em>value</em> is a String</p>
 </li><li>
-<p>OpenSSL::ASN1::IA5String       &lt;=&gt; <code>value</code> is a
-<code>String</code></p>
+<p>OpenSSL::ASN1::IA5String       &lt;=&gt; <em>value</em> is a String</p>
 </li><li>
-<p>OpenSSL::ASN1::UTCTime         &lt;=&gt; <code>value</code> is a
-<code>Time</code></p>
+<p>OpenSSL::ASN1::UTCTime         &lt;=&gt; <em>value</em> is a Time</p>
 </li><li>
-<p>OpenSSL::ASN1::GeneralizedTime &lt;=&gt; <code>value</code> is a
-<code>Time</code></p>
+<p>OpenSSL::ASN1::GeneralizedTime &lt;=&gt; <em>value</em> is a Time</p>
 </li><li>
-<p>OpenSSL::ASN1::GraphicString   &lt;=&gt; <code>value</code> is a
-<code>String</code></p>
+<p>OpenSSL::ASN1::GraphicString   &lt;=&gt; <em>value</em> is a String</p>
 </li><li>
-<p>OpenSSL::ASN1::ISO64String     &lt;=&gt; <code>value</code> is a
-<code>String</code></p>
+<p>OpenSSL::ASN1::ISO64String     &lt;=&gt; <em>value</em> is a String</p>
 </li><li>
-<p>OpenSSL::ASN1::GeneralString   &lt;=&gt; <code>value</code> is a
-<code>String</code></p>
+<p>OpenSSL::ASN1::GeneralString   &lt;=&gt; <em>value</em> is a String</p>
 </li><li>
-<p>OpenSSL::ASN1::UniversalString &lt;=&gt; <code>value</code> is a
-<code>String</code></p>
+<p>OpenSSL::ASN1::UniversalString &lt;=&gt; <em>value</em> is a String</p>
 </li><li>
-<p>OpenSSL::ASN1::BMPString       &lt;=&gt; <code>value</code> is a
-<code>String</code></p>
+<p>OpenSSL::ASN1::BMPString       &lt;=&gt; <em>value</em> is a String</p>
 </li></ul>
 
 <h2 id="class-OpenSSL::ASN1::Primitive-label-OpenSSL-3A-3AASN1-3A-3ABitString">OpenSSL::ASN1::BitString<span><a href="#class-OpenSSL::ASN1::Primitive-label-OpenSSL-3A-3AASN1-3A-3ABitString">&para;</a> <a href="#top">&uarr;</a></span></h2>
 
 <h3 id="class-OpenSSL::ASN1::Primitive-label-Additional+attributes">Additional attributes<span><a href="#class-OpenSSL::ASN1::Primitive-label-Additional+attributes">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
-<p><code>unused_bits</code>: if the underlying BIT STRING&#39;s length is a
-multiple of 8 then <code>unused_bits</code> is 0. Otherwise
-<code>unused_bits</code> indicates the number of bits that are to be
-ignored in the final octet of the <code>BitString</code>&#39;s
-<code>value</code>.</p>
+<p><em>unused_bits</em>: if the underlying BIT STRING&#39;s length is a
+multiple of 8 then <em>unused_bits</em> is 0. Otherwise
+<em>unused_bits</em> indicates the number of bits that are to be ignored in
+the final octet of the BitString&#39;s <em>value</em>.</p>
 
 <h2 id="class-OpenSSL::ASN1::Primitive-label-OpenSSL-3A-3AASN1-3A-3AObjectId"><a href="ObjectId.html">OpenSSL::ASN1::ObjectId</a><span><a href="#class-OpenSSL::ASN1::Primitive-label-OpenSSL-3A-3AASN1-3A-3AObjectId">&para;</a> <a href="#top">&uarr;</a></span></h2>
 
@@ -195,23 +178,22 @@ href="../ASN1.html">ASN1</a> encodings.</p>
 
 <h3 id="class-OpenSSL::ASN1::Primitive-label-Additional+attributes">Additional attributes<span><a href="#class-OpenSSL::ASN1::Primitive-label-Additional+attributes">&para;</a> <a href="#top">&uarr;</a></span></h3>
 <ul><li>
-<p><code>sn</code>: the short name as defined in &lt;openssl/objects.h&gt;.</p>
+<p><em>sn</em>: the short name as defined in &lt;openssl/objects.h&gt;.</p>
 </li><li>
-<p><code>ln</code>: the long name as defined in &lt;openssl/objects.h&gt;.</p>
+<p><em>ln</em>: the long name as defined in &lt;openssl/objects.h&gt;.</p>
 </li><li>
-<p><code>oid</code>: the object identifier as a <code>String</code>, e.g.
-“1.2.3.4.5”</p>
+<p><em>oid</em>: the object identifier as a String, e.g. “1.2.3.4.5”</p>
 </li><li>
-<p><code>short_name</code>: alias for <code>sn</code>.</p>
+<p><em>short_name</em>: alias for <em>sn</em>.</p>
 </li><li>
-<p><code>long_name</code>: alias for <code>ln</code>.</p>
+<p><em>long_name</em>: alias for <em>ln</em>.</p>
 </li></ul>
 
 <h2 id="class-OpenSSL::ASN1::Primitive-label-Examples">Examples<span><a href="#class-OpenSSL::ASN1::Primitive-label-Examples">&para;</a> <a href="#top">&uarr;</a></span></h2>
 
 <p>With the Exception of OpenSSL::ASN1::EndOfContent, each <a
 href="Primitive.html">Primitive</a> class constructor takes at least one
-parameter, the <code>value</code>.</p>
+parameter, the <em>value</em>.</p>
 
 <h3 id="class-OpenSSL::ASN1::Primitive-label-Creating+EndOfContent">Creating EndOfContent<span><a href="#class-OpenSSL::ASN1::Primitive-label-Creating+EndOfContent">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
@@ -253,8 +235,8 @@ prim_zero_tagged_explicit = &lt;class&gt;.new(value, 0, :EXPLICIT)</pre>
         
         <p>May be used as a hint for encoding a value either implicitly or explicitly
 by setting it either to <code>:IMPLICIT</code> or to
-<code>:EXPLICIT</code>. <code>tagging</code> is not set when a ASN.1
-structure is parsed using <a
+<code>:EXPLICIT</code>. <em>tagging</em> is not set when a ASN.1 structure
+is parsed using <a
 href="../ASN1.html#method-c-decode">OpenSSL::ASN1.decode</a>.</p>
         
         </div>
@@ -275,7 +257,7 @@ href="../ASN1.html#method-c-decode">OpenSSL::ASN1.decode</a>.</p>
         
         <div class="method-heading">
           <span class="method-callseq">
-            OpenSSL::ASN1::Primitive.new( value [, tag, tagging, tag_class ]) &rarr; Primitive
+            OpenSSL::ASN1::Primitive.new(value [, tag, tagging, tag_class ]) &rarr; Primitive
           </span>
           
           <span class="method-click-advice">click to toggle source</span>
@@ -286,27 +268,27 @@ href="../ASN1.html#method-c-decode">OpenSSL::ASN1.decode</a>.</p>
 
         <div class="method-description">
           
-          <p><code>value</code>: is mandatory.</p>
+          <p><em>value</em>: is mandatory.</p>
 
-<p><code>tag</code>: optional, may be specified for tagged values. If no
-<code>tag</code> is specified, the UNIVERSAL tag corresponding to the <a
+<p><em>tag</em>: optional, may be specified for tagged values. If no
+<em>tag</em> is specified, the UNIVERSAL tag corresponding to the <a
 href="Primitive.html">Primitive</a> sub-class is used by default.</p>
 
-<p><code>tagging</code>: may be used as an encoding hint to encode a value
-either explicitly or implicitly, see <a href="../ASN1.html">ASN1</a> for
-possible values.</p>
+<p><em>tagging</em>: may be used as an encoding hint to encode a value either
+explicitly or implicitly, see <a href="../ASN1.html">ASN1</a> for possible
+values.</p>
 
-<p><code>tag_class</code>: if <code>tag</code> and <code>tagging</code> are
+<p><em>tag_class</em>: if <em>tag</em> and <em>tagging</em> are
 <code>nil</code> then this is set to <code>:UNIVERSAL</code> by default. If
-either <code>tag</code> or <code>tagging</code> are set then
+either <em>tag</em> or <em>tagging</em> are set then
 <code>:CONTEXT_SPECIFIC</code> is used as the default. For possible values
 please cf. <a href="../ASN1.html">ASN1</a>.</p>
 
 <h2 id="method-c-new-label-Example">Example<span><a href="#method-c-new-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h2>
 
 <pre class="ruby"><span class="ruby-identifier">int</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span><span class="ruby-operator">::</span><span class="ruby-constant">Integer</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">42</span>)
-<span class="ruby-identifier">zero_tagged_int</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span><span class="ruby-operator">::</span><span class="ruby-constant">Integer</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">42</span>, <span class="ruby-value">0</span>, :<span class="ruby-constant">IMPLICIT</span>)
-<span class="ruby-identifier">private_explicit_zero_tagged_int</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span><span class="ruby-operator">::</span><span class="ruby-constant">Integer</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">42</span>, <span class="ruby-value">0</span>, :<span class="ruby-constant">EXPLICIT</span>, :<span class="ruby-constant">PRIVATE</span>)
+<span class="ruby-identifier">zero_tagged_int</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span><span class="ruby-operator">::</span><span class="ruby-constant">Integer</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">42</span>, <span class="ruby-value">0</span>, <span class="ruby-value">:IMPLICIT</span>)
+<span class="ruby-identifier">private_explicit_zero_tagged_int</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span><span class="ruby-operator">::</span><span class="ruby-constant">Integer</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">42</span>, <span class="ruby-value">0</span>, <span class="ruby-value">:EXPLICIT</span>, <span class="ruby-value">:PRIVATE</span>)
 </pre>
           
           
@@ -317,9 +299,12 @@ please cf. <a href="../ASN1.html">ASN1</a>.</p>
 ossl_asn1_initialize(int argc, VALUE *argv, VALUE self)
 {
     VALUE value, tag, tagging, tag_class;
+    int default_tag;
 
     rb_scan_args(argc, argv, &quot;13&quot;, &amp;value, &amp;tag, &amp;tagging, &amp;tag_class);
-    if(argc &gt; 1){
+    default_tag = ossl_asn1_default_tag(self);
+
+    if (default_tag == -1 || argc &gt; 1) {
         if(NIL_P(tag))
             ossl_raise(eASN1Error, &quot;must specify tag number&quot;);
         if(!NIL_P(tagging) &amp;&amp; !SYMBOL_P(tagging))
@@ -332,11 +317,9 @@ ossl_asn1_initialize(int argc, VALUE *argv, VALUE self)
         }
         if(!SYMBOL_P(tag_class))
             ossl_raise(eASN1Error, &quot;invalid tag class&quot;);
-        if (tagging == sym_IMPLICIT &amp;&amp; NUM2INT(tag) &gt; 31)
-            ossl_raise(eASN1Error, &quot;tag number for Universal too large&quot;);
     }
     else{
-        tag = INT2NUM(ossl_asn1_default_tag(self));
+        tag = INT2NUM(default_tag);
         tagging = Qnil;
         tag_class = sym_UNIVERSAL;
     }
@@ -344,7 +327,9 @@ ossl_asn1_initialize(int argc, VALUE *argv, VALUE self)
     ossl_asn1_set_value(self, value);
     ossl_asn1_set_tagging(self, tagging);
     ossl_asn1_set_tag_class(self, tag_class);
-    ossl_asn1_set_infinite_length(self, Qfalse);
+    ossl_asn1_set_indefinite_length(self, Qfalse);
+    if (default_tag == V_ASN1_BIT_STRING)
+        rb_ivar_set(self, sivUNUSED_BITS, INT2FIX(0));
 
     return self;
 }</pre>
@@ -384,7 +369,7 @@ ossl_asn1_initialize(int argc, VALUE *argv, VALUE self)
           
           <p>See <a
 href="ASN1Data.html#method-i-to_der">OpenSSL::ASN1::ASN1Data#to_der</a> for
-details. *</p>
+details.</p>
           
           
 
@@ -394,37 +379,38 @@ details. *</p>
 ossl_asn1prim_to_der(VALUE self)
 {
     ASN1_TYPE *asn1;
-    int tn, tc, explicit;
-    long len, reallen;
-    unsigned char *buf, *p;
+    long alllen, bodylen;
+    unsigned char *p0, *p1;
+    int j, tag, tc, state;
     VALUE str;
 
-    tn = NUM2INT(ossl_asn1_get_tag(self));
-    tc = ossl_asn1_tag_class(self);
-    explicit = ossl_asn1_is_explicit(self);
+    if (ossl_asn1_default_tag(self) == -1) {
+        str = ossl_asn1_get_value(self);
+        return to_der_internal(self, 0, 0, StringValue(str));
+    }
+
     asn1 = ossl_asn1_get_asn1type(self);
-
-    len = ASN1_object_size(1, i2d_ASN1_TYPE(asn1, NULL), tn);
-    if(!(buf = OPENSSL_malloc(len))){
+    alllen = i2d_ASN1_TYPE(asn1, NULL);
+    if (alllen &lt; 0) {
         ASN1_TYPE_free(asn1);
-        ossl_raise(eASN1Error, &quot;cannot alloc buffer&quot;);
+        ossl_raise(eASN1Error, &quot;i2d_ASN1_TYPE&quot;);
     }
-    p = buf;
-    if (tc == V_ASN1_UNIVERSAL) {
-        i2d_ASN1_TYPE(asn1, &amp;p);
-    } else if (explicit) {
-        ASN1_put_object(&amp;p, 1, i2d_ASN1_TYPE(asn1, NULL), tn, tc);
-        i2d_ASN1_TYPE(asn1, &amp;p);
-    } else {
-        i2d_ASN1_TYPE(asn1, &amp;p);
-        *buf = tc | tn | (*buf &amp; V_ASN1_CONSTRUCTED);
+    str = ossl_str_new(NULL, alllen, &amp;state);
+    if (state) {
+        ASN1_TYPE_free(asn1);
+        rb_jump_tag(state);
     }
+    p0 = p1 = (unsigned char *)RSTRING_PTR(str);
+    i2d_ASN1_TYPE(asn1, &amp;p0);
     ASN1_TYPE_free(asn1);
-    reallen = p - buf;
-    assert(reallen &lt;= len);
-    str = ossl_buf2str((char *)buf, rb_long2int(reallen)); /* buf will be free in ossl_buf2str */
+    assert(p0 - p1 == alllen);
 
-    return str;
+    /* Strip header since to_der_internal() wants only the payload */
+    j = ASN1_get_object((const unsigned char **)&amp;p1, &amp;bodylen, &amp;tag, &amp;tc, alllen);
+    if (j &amp; 0x80)
+        ossl_raise(eASN1Error, &quot;ASN1_get_object&quot;); /* should not happen */
+
+    return to_der_internal(self, 0, 0, rb_str_drop_bytes(str, alllen - bodylen));
 }</pre>
           </div>
           
@@ -444,7 +430,7 @@ ossl_asn1prim_to_der(VALUE self)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.1.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 6.0.0.beta1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

@@ -108,6 +108,8 @@
     
     <li ><a href="#method-i-final">#final</a>
     
+    <li ><a href="#method-i-initialize_copy">#initialize_copy</a>
+    
     <li ><a href="#method-i-iv-3D">#iv=</a>
     
     <li ><a href="#method-i-iv_len">#iv_len</a>
@@ -181,7 +183,7 @@ href="Cipher/Cipher.html">Cipher</a> class that goes by the name of the
 cipher, e.g. to obtain an instance of AES, you could also use</p>
 
 <pre class="ruby"><span class="ruby-comment"># these are equivalent</span>
-<span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span><span class="ruby-operator">::</span><span class="ruby-constant">AES</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">128</span>, :<span class="ruby-constant">CBC</span>)
+<span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span><span class="ruby-operator">::</span><span class="ruby-constant">AES</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">128</span>, <span class="ruby-value">:CBC</span>)
 <span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span><span class="ruby-operator">::</span><span class="ruby-constant">AES</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">128</span>, <span class="ruby-string">&#39;CBC&#39;</span>)
 <span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span><span class="ruby-operator">::</span><span class="ruby-constant">AES</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;128-CBC&#39;</span>)
 </pre>
@@ -189,9 +191,9 @@ cipher, e.g. to obtain an instance of AES, you could also use</p>
 <p>Finally, due to its wide-spread use, there are also extra classes defined
 for the different key sizes of AES</p>
 
-<pre class="ruby"><span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span><span class="ruby-operator">::</span><span class="ruby-constant">AES128</span>.<span class="ruby-identifier">new</span>(:<span class="ruby-constant">CBC</span>)
-<span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span><span class="ruby-operator">::</span><span class="ruby-constant">AES192</span>.<span class="ruby-identifier">new</span>(:<span class="ruby-constant">CBC</span>)
-<span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span><span class="ruby-operator">::</span><span class="ruby-constant">AES256</span>.<span class="ruby-identifier">new</span>(:<span class="ruby-constant">CBC</span>)
+<pre class="ruby"><span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span><span class="ruby-operator">::</span><span class="ruby-constant">AES128</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">:CBC</span>)
+<span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span><span class="ruby-operator">::</span><span class="ruby-constant">AES192</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">:CBC</span>)
+<span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span><span class="ruby-operator">::</span><span class="ruby-constant">AES256</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">:CBC</span>)
 </pre>
 
 <h3 id="class-OpenSSL::Cipher-label-Choosing+either+encryption+or+decryption+mode">Choosing either encryption or decryption mode<span><a href="#class-OpenSSL::Cipher-label-Choosing+either+encryption+or+decryption+mode">&para;</a> <a href="#top">&uarr;</a></span></h3>
@@ -224,7 +226,7 @@ the most notable is to simply take a password as the key without processing
 the password further. A simple and secure way to create a key for a
 particular <a href="Cipher/Cipher.html">Cipher</a> is</p>
 
-<pre class="ruby"><span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">AES256</span>.<span class="ruby-identifier">new</span>(:<span class="ruby-constant">CFB</span>)
+<pre class="ruby"><span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">AES256</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">:CFB</span>)
 <span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">encrypt</span>
 <span class="ruby-identifier">key</span> = <span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">random_key</span> <span class="ruby-comment"># also sets the generated key on the Cipher</span>
 </pre>
@@ -232,9 +234,9 @@ particular <a href="Cipher/Cipher.html">Cipher</a> is</p>
 <p>If you absolutely need to use passwords as encryption keys, you should use
 Password-Based Key Derivation Function 2 (PBKDF2) by generating the key
 with the help of the functionality provided by <a
-href="PKCS5.html#method-c-pbkdf2_hmac_sha1">OpenSSL::PKCS5.pbkdf2_hmac_sha1</a>
+href="PKCS5.html#method-i-pbkdf2_hmac_sha1">OpenSSL::PKCS5#pbkdf2_hmac_sha1</a>
 or <a
-href="PKCS5.html#method-c-pbkdf2_hmac">OpenSSL::PKCS5.pbkdf2_hmac</a>.</p>
+href="PKCS5.html#method-i-pbkdf2_hmac">OpenSSL::PKCS5#pbkdf2_hmac</a>.</p>
 
 <p>Although there is <a
 href="Cipher.html#method-i-pkcs5_keyivgen">#pkcs5_keyivgen</a>, its use is
@@ -334,12 +336,12 @@ library still requires a value to be set - “” may be used in case none is
 available.</p>
 
 <p>An example using the GCM (Galois/Counter Mode). You have 16 bytes
-<code>key</code>, 12 bytes (96 bits) <code>nonce</code> and the associated
-data <code>auth_data</code>. Be sure not to reuse the <code>key</code> and
-<code>nonce</code> pair. Reusing an nonce ruins the security guarantees of
-GCM mode.</p>
+<em>key</em>, 12 bytes (96 bits) <em>nonce</em> and the associated data
+<em>auth_data</em>. Be sure not to reuse the <em>key</em> and
+<em>nonce</em> pair. Reusing an nonce ruins the security guarantees of GCM
+mode.</p>
 
-<pre class="ruby"><span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span><span class="ruby-operator">::</span><span class="ruby-constant">AES</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">128</span>, :<span class="ruby-constant">GCM</span>).<span class="ruby-identifier">encrypt</span>
+<pre class="ruby"><span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span><span class="ruby-operator">::</span><span class="ruby-constant">AES</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">128</span>, <span class="ruby-value">:GCM</span>).<span class="ruby-identifier">encrypt</span>
 <span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">key</span> = <span class="ruby-identifier">key</span>
 <span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">iv</span> = <span class="ruby-identifier">nonce</span>
 <span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">auth_data</span> = <span class="ruby-identifier">auth_data</span>
@@ -348,16 +350,16 @@ GCM mode.</p>
 <span class="ruby-identifier">tag</span> = <span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">auth_tag</span> <span class="ruby-comment"># produces 16 bytes tag by default</span>
 </pre>
 
-<p>Now you are the receiver. You know the <code>key</code> and have received
-<code>nonce</code>, <code>auth_data</code>, <code>encrypted</code> and
-<code>tag</code> through an untrusted network. Note that GCM accepts an
-arbitrary length tag between 1 and 16 bytes. You may additionally need to
-check that the received tag has the correct length, or you allow attackers
-to forge a valid single byte tag for the tampered ciphertext with a
-probability of 1/256.</p>
+<p>Now you are the receiver. You know the <em>key</em> and have received
+<em>nonce</em>, <em>auth_data</em>, <em>encrypted</em> and <em>tag</em>
+through an untrusted network. Note that GCM accepts an arbitrary length tag
+between 1 and 16 bytes. You may additionally need to check that the
+received tag has the correct length, or you allow attackers to forge a
+valid single byte tag for the tampered ciphertext with a probability of
+1/256.</p>
 
 <pre class="ruby"><span class="ruby-identifier">raise</span> <span class="ruby-string">&quot;tag is truncated!&quot;</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">bytesize</span> <span class="ruby-operator">==</span> <span class="ruby-value">16</span>
-<span class="ruby-identifier">decipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span><span class="ruby-operator">::</span><span class="ruby-constant">AES</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">128</span>, :<span class="ruby-constant">GCM</span>).<span class="ruby-identifier">decrypt</span>
+<span class="ruby-identifier">decipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span><span class="ruby-operator">::</span><span class="ruby-constant">AES</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">128</span>, <span class="ruby-value">:GCM</span>).<span class="ruby-identifier">decrypt</span>
 <span class="ruby-identifier">decipher</span>.<span class="ruby-identifier">key</span> = <span class="ruby-identifier">key</span>
 <span class="ruby-identifier">decipher</span>.<span class="ruby-identifier">iv</span> = <span class="ruby-identifier">nonce</span>
 <span class="ruby-identifier">decipher</span>.<span class="ruby-identifier">auth_tag</span> = <span class="ruby-identifier">tag</span>
@@ -449,7 +451,7 @@ ossl_s_ciphers(VALUE self)
 
         <div class="method-description">
           
-          <p>The string must contain a valid cipher name like “AES-128-CBC” or “3DES”.</p>
+          <p>The string must be a valid cipher name like “AES-128-CBC” or “3DES”.</p>
 
 <p>A list of cipher names is available by calling <a
 href="Cipher.html#method-c-ciphers">::ciphers</a>.</p>
@@ -585,9 +587,9 @@ ossl_cipher_set_auth_data(VALUE self, VALUE data)
 href="Cipher/Cipher.html">Cipher</a> modes (GCM for example). This tag may
 be stored along with the ciphertext, then set on the decryption cipher to
 authenticate the contents of the ciphertext against changes. If the
-optional integer parameter <code>tag_len</code> is given, the returned tag
-will be <code>tag_len</code> bytes long. If the parameter is omitted, the
-default length of 16 bytes or the length previously set by <a
+optional integer parameter <em>tag_len</em> is given, the returned tag will
+be <em>tag_len</em> bytes long. If the parameter is omitted, the default
+length of 16 bytes or the length previously set by <a
 href="Cipher.html#method-i-auth_tag_len-3D">auth_tag_len=</a> will be used.
 For maximum security, the longest possible should be chosen.</p>
 
@@ -648,15 +650,13 @@ ossl_cipher_get_auth_tag(int argc, VALUE *argv, VALUE self)
 
         <div class="method-description">
           
-          <p>Sets the authentication tag to verify the contents of the ciphertext. The
-tag must be set after calling <a
-href="Cipher.html#method-i-decrypt">#decrypt</a>, <a
+          <p>Sets the authentication tag to verify the integrity of the ciphertext. This
+can be called only when the cipher supports AE. The tag must be set after
+calling <a href="Cipher.html#method-i-decrypt">#decrypt</a>, <a
 href="Cipher.html#method-i-key-3D">#key=</a> and <a
-href="Cipher.html#method-i-iv-3D">#iv=</a>, but before assigning the
-associated authenticated data using <a
-href="Cipher.html#method-i-auth_data-3D">#auth_data=</a> and of course,
-before decrypting any of the ciphertext. After all decryption is performed,
-the tag is verified automatically in the call to <a
+href="Cipher.html#method-i-iv-3D">#iv=</a>, but before calling <a
+href="Cipher.html#method-i-final">#final</a>. After all decryption is
+performed, the tag is verified automatically in the call to <a
 href="Cipher.html#method-i-final">#final</a>.</p>
 
 <p>For OCB mode, the tag length must be supplied with <a
@@ -781,11 +781,7 @@ ossl_cipher_is_authenticated(VALUE self)
 
     GetCipher(self, ctx);
 
-#if defined(HAVE_AUTHENTICATED_ENCRYPTION)
     return (EVP_CIPHER_CTX_flags(ctx) &amp; EVP_CIPH_FLAG_AEAD_CIPHER) ? Qtrue : Qfalse;
-#else
-    return Qfalse;
-#endif
 }</pre>
           </div>
           
@@ -990,6 +986,53 @@ ossl_cipher_final(VALUE self)
       </div>
 
     
+      <div id="method-i-initialize_copy" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">initialize_copy</span><span
+            class="method-args">(p1)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="initialize_copy-source">
+            <pre>static VALUE
+ossl_cipher_copy(VALUE self, VALUE other)
+{
+    EVP_CIPHER_CTX *ctx1, *ctx2;
+
+    rb_check_frozen(self);
+    if (self == other) return self;
+
+    GetCipherInit(self, ctx1);
+    if (!ctx1) {
+        AllocCipher(self, ctx1);
+    }
+    GetCipher(other, ctx2);
+    if (EVP_CIPHER_CTX_copy(ctx1, ctx2) != 1)
+        ossl_raise(eCipherError, NULL);
+
+    return self;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
       <div id="method-i-iv-3D" class="method-detail ">
         
         
@@ -1030,10 +1073,8 @@ ossl_cipher_set_iv(VALUE self, VALUE iv)
     StringValue(iv);
     GetCipher(self, ctx);
 
-#if defined(HAVE_AUTHENTICATED_ENCRYPTION)
     if (EVP_CIPHER_CTX_flags(ctx) &amp; EVP_CIPH_FLAG_AEAD_CIPHER)
         iv_len = (int)(VALUE)EVP_CIPHER_CTX_get_app_data(ctx);
-#endif
     if (!iv_len)
         iv_len = EVP_CIPHER_CTX_iv_length(ctx);
     if (RSTRING_LEN(iv) != iv_len)
@@ -1084,10 +1125,8 @@ ossl_cipher_iv_length(VALUE self)
     int len = 0;
 
     GetCipher(self, ctx);
-#if defined(HAVE_AUTHENTICATED_ENCRYPTION)
     if (EVP_CIPHER_CTX_flags(ctx) &amp; EVP_CIPH_FLAG_AEAD_CIPHER)
         len = (int)(VALUE)EVP_CIPHER_CTX_get_app_data(ctx);
-#endif
     if (!len)
         len = EVP_CIPHER_CTX_iv_length(ctx);
 
@@ -1431,12 +1470,12 @@ href="PKCS5.html">OpenSSL::PKCS5</a> instead.</p>
 
 <h3 id="method-i-pkcs5_keyivgen-label-Parameters">Parameters<span><a href="#method-i-pkcs5_keyivgen-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
 <ul><li>
-<p><code>salt</code> must be an 8 byte string if provided.</p>
+<p><em>salt</em> must be an 8 byte string if provided.</p>
 </li><li>
-<p><code>iterations</code> is an integer with a default of 2048.</p>
+<p><em>iterations</em> is an integer with a default of 2048.</p>
 </li><li>
-<p><code>digest</code> is a <a href="Digest.html">Digest</a> object that
-defaults to &#39;MD5&#39;</p>
+<p><em>digest</em> is a <a href="Digest.html">Digest</a> object that defaults
+to &#39;MD5&#39;</p>
 </li></ul>
 
 <p>A minimum of 1000 iterations is recommended.</p>
@@ -1463,7 +1502,7 @@ ossl_cipher_pkcs5_keyivgen(int argc, VALUE *argv, VALUE self)
         salt = (unsigned char *)RSTRING_PTR(vsalt);
     }
     iter = NIL_P(viter) ? 2048 : NUM2INT(viter);
-    digest = NIL_P(vdigest) ? EVP_md5() : GetDigestPtr(vdigest);
+    digest = NIL_P(vdigest) ? EVP_md5() : ossl_evp_get_digestbyname(vdigest);
     GetCipher(self, ctx);
     EVP_BytesToKey(EVP_CIPHER_CTX_cipher(ctx), digest, salt,
                    (unsigned char *)RSTRING_PTR(vpass), RSTRING_LENINT(vpass), iter, key, iv);
@@ -1635,13 +1674,13 @@ ossl_cipher_reset(VALUE self)
         <div class="method-description">
           
           <p>Encrypts data in a streaming fashion. Hand consecutive blocks of data to
-the <code>update</code> method in order to encrypt it. Returns the
-encrypted data chunk. When done, the output of <a
+the <a href="Cipher.html#method-i-update">update</a> method in order to
+encrypt it. Returns the encrypted data chunk. When done, the output of <a
 href="Cipher.html#method-i-final">#final</a> should be additionally added
 to the result.</p>
 
-<p>If <code>buffer</code> is given, the encryption/decryption result will be
-written to it. <code>buffer</code> will be resized automatically.</p>
+<p>If <em>buffer</em> is given, the encryption/decryption result will be
+written to it. <em>buffer</em> will be resized automatically.</p>
           
           
 
@@ -1703,7 +1742,7 @@ ossl_cipher_update(int argc, VALUE *argv, VALUE self)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.1.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 6.0.0.beta1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 
