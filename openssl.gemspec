@@ -5,7 +5,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["ruby-core@ruby-lang.org"]
   spec.summary       = %q{OpenSSL provides SSL, TLS and general purpose cryptography.}
   spec.description   = %q{It wraps the OpenSSL library.}
-  spec.homepage      = "https://www.ruby-lang.org/"
+  spec.homepage      = "https://github.com/ruby/openssl"
   spec.license       = "Ruby"
 
   spec.files         = Dir["lib/**/*.rb", "ext/**/*.{c,h,rb}", "*.md", "BSDL", "LICENSE.txt"]
