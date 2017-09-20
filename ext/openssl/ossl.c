@@ -486,21 +486,33 @@ print_mem_leaks(VALUE self)
  */
 struct CRYPTO_dynlock_value {
     rb_nativethread_lock_t lock;
+    rb_nativethread_id_t owner;
+    size_t count;
 };
 
 static void
 ossl_lock_init(struct CRYPTO_dynlock_value *l)
 {
     rb_nativethread_lock_initialize(&l->lock);
+    l->count = 0;
 }
 
 static void
 ossl_lock_unlock(int mode, struct CRYPTO_dynlock_value *l)
 {
     if (mode & CRYPTO_LOCK) {
+	/* TODO: rb_nativethread_id_t is not necessarily compared with ==. */
+	rb_nativethread_id_t tid = rb_nativethread_self();
+	if (l->count && l->owner == tid) {
+	    l->count++;
+	    return;
+	}
 	rb_nativethread_lock_lock(&l->lock);
+	l->owner = tid;
+	l->count = 1;
     } else {
-	rb_nativethread_lock_unlock(&l->lock);
+	if (!--l->count)
+	    rb_nativethread_lock_unlock(&l->lock);
     }
 }
 
