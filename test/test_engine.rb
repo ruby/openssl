@@ -52,9 +52,15 @@ class OpenSSL::TestEngine < OpenSSL::TestCase
   end
 
   def test_openssl_engine_cipher_rc4
+    begin
+      OpenSSL::Cipher.new("rc4")
+    rescue OpenSSL::Cipher::CipherError
+      pend "RC4 is not supported"
+    end
+
     with_openssl(<<-'end;', ignore_stderr: true)
       engine = get_engine
-      algo = "RC4" #AES is not supported by openssl Engine (<=1.0.0e)
+      algo = "RC4"
       data = "a" * 1000
       key = OpenSSL::Random.random_bytes(16)
       encrypted = crypt_data(data, key, :encrypt) { engine.cipher(algo) }
