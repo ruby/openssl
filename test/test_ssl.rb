@@ -1015,6 +1015,7 @@ if openssl?(1, 0, 2) || libressl?
     ctx1 = OpenSSL::SSL::SSLContext.new
     ctx1.cert = @svr_cert
     ctx1.key = @svr_key
+    ctx1.tmp_dh_callback = proc { Fixtures.pkey_dh("dh1024") }
     ctx1.alpn_select_cb = -> (protocols) { nil }
     ssl1 = OpenSSL::SSL::SSLSocket.new(sock1, ctx1)
 
@@ -1041,6 +1042,7 @@ end
     pend "TLS 1.2 is not supported" unless tls12_supported?
     pend "NPN is not supported" unless \
       OpenSSL::SSL::SSLContext.method_defined?(:npn_select_cb)
+    pend "LibreSSL 2.6 has broken NPN functions" if libressl?(2, 6, 1)
 
     advertised = ["http/1.1", "spdy/2"]
     ctx_proc = proc { |ctx| ctx.npn_protocols = advertised }
@@ -1061,6 +1063,7 @@ end
     pend "TLS 1.2 is not supported" unless tls12_supported?
     pend "NPN is not supported" unless \
       OpenSSL::SSL::SSLContext.method_defined?(:npn_select_cb)
+    pend "LibreSSL 2.6 has broken NPN functions" if libressl?(2, 6, 1)
 
     advertised = Object.new
     def advertised.each
@@ -1085,6 +1088,7 @@ end
     pend "TLS 1.2 is not supported" unless tls12_supported?
     pend "NPN is not supported" unless \
       OpenSSL::SSL::SSLContext.method_defined?(:npn_select_cb)
+    pend "LibreSSL 2.6 has broken NPN functions" if libressl?(2, 6, 1)
 
     ctx_proc = Proc.new { |ctx| ctx.npn_protocols = ["http/1.1"] }
     start_server_version(:TLSv1_2, ctx_proc) { |port|
@@ -1098,6 +1102,7 @@ end
     pend "TLS 1.2 is not supported" unless tls12_supported?
     pend "NPN is not supported" unless \
       OpenSSL::SSL::SSLContext.method_defined?(:npn_select_cb)
+    pend "LibreSSL 2.6 has broken NPN functions" if libressl?(2, 6, 1)
 
     ctx_proc = Proc.new { |ctx| ctx.npn_protocols = ["a" * 256] }
     start_server_version(:TLSv1_2, ctx_proc) { |port|
@@ -1111,6 +1116,7 @@ end
     pend "TLS 1.2 is not supported" unless tls12_supported?
     pend "NPN is not supported" unless \
       OpenSSL::SSL::SSLContext.method_defined?(:npn_select_cb)
+    pend "LibreSSL 2.6 has broken NPN functions" if libressl?(2, 6, 1)
 
     ctx_proc = Proc.new { |ctx| ctx.npn_protocols = ["http/1.1"] }
     start_server_version(:TLSv1_2, ctx_proc) { |port|
@@ -1241,6 +1247,8 @@ end
     pend "EC is disabled" unless defined?(OpenSSL::PKey::EC)
     pend "tmp_ecdh_callback is not supported" unless \
       OpenSSL::SSL::SSLContext.method_defined?(:tmp_ecdh_callback)
+    pend "LibreSSL 2.6 has broken SSL_CTX_set_tmp_ecdh_callback()" \
+      if libressl?(2, 6, 1)
 
     EnvUtil.suppress_warning do # tmp_ecdh_callback is deprecated (2016-05)
       called = false
