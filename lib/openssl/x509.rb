@@ -165,6 +165,13 @@ module OpenSSL
       end
     end
 
+    class Attribute
+      def ==(other)
+        return false unless Attribute === other
+        to_der == other.to_der
+      end
+    end
+
     class StoreContext
       def cleanup
         warn "(#{caller.first}) OpenSSL::X509::StoreContext#cleanup is deprecated with no replacement" if $VERBOSE
