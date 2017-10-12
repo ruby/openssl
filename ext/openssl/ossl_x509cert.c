@@ -684,6 +684,26 @@ ossl_x509_inspect(VALUE self)
 }
 
 /*
+ * call-seq:
+ *    cert1 == cert2 -> true | false
+ *
+ * Compares the two certificates. Note that this takes into account all fields,
+ * not just the issuer name and the serial number.
+ */
+static VALUE
+ossl_x509_eq(VALUE self, VALUE other)
+{
+    X509 *a, *b;
+
+    GetX509(self, a);
+    if (!rb_obj_is_kind_of(other, cX509Cert))
+	return Qfalse;
+    GetX509(other, b);
+
+    return !X509_cmp(a, b) ? Qtrue : Qfalse;
+}
+
+/*
  * INIT
  */
 void
@@ -821,4 +841,5 @@ Init_ossl_x509cert(void)
     rb_define_method(cX509Cert, "extensions=", ossl_x509_set_extensions, 1);
     rb_define_method(cX509Cert, "add_extension", ossl_x509_add_extension, 1);
     rb_define_method(cX509Cert, "inspect", ossl_x509_inspect, 0);
+    rb_define_method(cX509Cert, "==", ossl_x509_eq, 1);
 }
