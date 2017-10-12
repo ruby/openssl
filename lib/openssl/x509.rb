@@ -41,6 +41,11 @@ module OpenSSL
     end
 
     class Extension
+      def ==(other)
+        return false unless Extension === other
+        to_der == other.to_der
+      end
+
       def to_s # "oid = critical, value"
         str = self.oid
         str << " = "
