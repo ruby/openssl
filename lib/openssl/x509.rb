@@ -204,5 +204,12 @@ module OpenSSL
         to_der == other.to_der
       end
     end
+
+    class Request
+      def ==(other)
+        return false unless Request === other
+        to_der == other.to_der
+      end
+    end
   end
 end
