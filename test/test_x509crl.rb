@@ -220,6 +220,33 @@ class OpenSSL::TestX509CRL < OpenSSL::TestCase
     assert_equal asn1.to_der, rev1.to_der
   end
 
+  def test_eq
+    cacert = issue_cert(@ca, @rsa1024, 1, [], nil, nil)
+    crl1 = issue_crl([], 1, Time.now, Time.now + 3600, [], cacert, @rsa1024, "sha256")
+    rev1 = OpenSSL::X509::Revoked.new.tap { |rev|
+      rev.serial = 1
+      rev.time = Time.now
+    }
+    crl1.add_revoked(rev1)
+    crl2 = OpenSSL::X509::CRL.new(crl1.to_der)
+
+    # CRL
+    assert_equal false, crl1 == 12345
+    assert_equal true, crl1 == crl2
+    rev2 = OpenSSL::X509::Revoked.new.tap { |rev|
+      rev.serial = 2
+      rev.time = Time.now
+    }
+    crl2.add_revoked(rev2)
+    assert_equal false, crl1 == crl2
+
+    # Revoked
+    assert_equal false, rev1 == 12345
+    assert_equal true, rev1 == crl2.revoked[0]
+    assert_equal false, rev1 == crl2.revoked[1]
+    assert_equal true, rev2 == crl2.revoked[1]
+  end
+
   private
 
   def crl_error_returns_false

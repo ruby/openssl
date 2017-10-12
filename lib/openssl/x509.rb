@@ -190,5 +190,19 @@ module OpenSSL
         }
       end
     end
+
+    class CRL
+      def ==(other)
+        return false unless CRL === other
+        to_der == other.to_der
+      end
+    end
+
+    class Revoked
+      def ==(other)
+        return false unless Revoked === other
+        to_der == other.to_der
+      end
+    end
   end
 end
