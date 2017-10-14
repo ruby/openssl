@@ -440,7 +440,7 @@ ossl_x509_set_not_before(VALUE self, VALUE time)
 
     GetX509(self, x509);
     asn1time = ossl_x509_time_adjust(NULL, time);
-    if (!X509_set_notBefore(x509, asn1time)) {
+    if (!X509_set1_notBefore(x509, asn1time)) {
 	ASN1_TIME_free(asn1time);
 	ossl_raise(eX509CertError, "X509_set_notBefore");
     }
@@ -479,7 +479,7 @@ ossl_x509_set_not_after(VALUE self, VALUE time)
 
     GetX509(self, x509);
     asn1time = ossl_x509_time_adjust(NULL, time);
-    if (!X509_set_notAfter(x509, asn1time)) {
+    if (!X509_set1_notAfter(x509, asn1time)) {
 	ASN1_TIME_free(asn1time);
 	ossl_raise(eX509CertError, "X509_set_notAfter");
     }
