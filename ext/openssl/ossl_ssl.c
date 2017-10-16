@@ -32,7 +32,7 @@ VALUE cSSLSocket;
 static VALUE eSSLErrorWaitReadable;
 static VALUE eSSLErrorWaitWritable;
 
-static ID ID_callback_state, id_tmp_dh_callback, id_tmp_ecdh_callback,
+static ID id_call, ID_callback_state, id_tmp_dh_callback, id_tmp_ecdh_callback,
 	  id_npn_protocols_encoded;
 static VALUE sym_exception, sym_wait_readable, sym_wait_writable;
 
@@ -205,7 +205,7 @@ ossl_call_client_cert_cb(VALUE obj)
     if (NIL_P(cb))
 	return Qnil;
 
-    ary = rb_funcall(cb, rb_intern("call"), 1, obj);
+    ary = rb_funcallv(cb, id_call, 1, &obj);
     Check_Type(ary, T_ARRAY);
     GetX509CertPtr(cert = rb_ary_entry(ary, 0));
     GetPrivPKeyPtr(key = rb_ary_entry(ary, 1));
@@ -248,8 +248,8 @@ ossl_call_tmp_dh_callback(struct tmp_dh_callback_args *args)
     cb = rb_funcall(args->ssl_obj, args->id, 0);
     if (NIL_P(cb))
 	return NULL;
-    dh = rb_funcall(cb, rb_intern("call"), 3,
-		    args->ssl_obj, INT2NUM(args->is_export), INT2NUM(args->keylength));
+    dh = rb_funcall(cb, id_call, 3, args->ssl_obj, INT2NUM(args->is_export),
+		    INT2NUM(args->keylength));
     pkey = GetPKeyPtr(dh);
     if (EVP_PKEY_base_id(pkey) != args->type)
 	return NULL;
@@ -374,7 +374,7 @@ ossl_call_session_get_cb(VALUE ary)
     cb = rb_funcall(ssl_obj, rb_intern("session_get_cb"), 0);
     if (NIL_P(cb)) return Qnil;
 
-    return rb_funcall(cb, rb_intern("call"), 1, ary);
+    return rb_funcallv(cb, id_call, 1, &ary);
 }
 
 /* this method is currently only called for servers (in OpenSSL <= 0.9.8e) */
@@ -420,7 +420,7 @@ ossl_call_session_new_cb(VALUE ary)
     cb = rb_funcall(ssl_obj, rb_intern("session_new_cb"), 0);
     if (NIL_P(cb)) return Qnil;
 
-    return rb_funcall(cb, rb_intern("call"), 1, ary);
+    return rb_funcallv(cb, id_call, 1, &ary);
 }
 
 /* return 1 normal.  return 0 removes the session */
@@ -467,7 +467,7 @@ ossl_call_session_remove_cb(VALUE ary)
     cb = rb_attr_get(sslctx_obj, id_i_session_remove_cb);
     if (NIL_P(cb)) return Qnil;
 
-    return rb_funcall(cb, rb_intern("call"), 1, ary);
+    return rb_funcallv(cb, id_call, 1, &ary);
 }
 
 static void
@@ -533,7 +533,7 @@ ossl_call_servername_cb(VALUE ary)
     cb = rb_attr_get(sslctx_obj, id_i_servername_cb);
     if (NIL_P(cb)) return Qnil;
 
-    ret_obj = rb_funcall(cb, rb_intern("call"), 1, ary);
+    ret_obj = rb_funcallv(cb, id_call, 1, &ary);
     if (rb_obj_is_kind_of(ret_obj, cSSLContext)) {
         SSL *ssl;
         SSL_CTX *ctx2;
@@ -585,7 +585,7 @@ ssl_renegotiation_cb(const SSL *ssl)
     cb = rb_attr_get(sslctx_obj, id_i_renegotiation_cb);
     if (NIL_P(cb)) return;
 
-    (void) rb_funcall(cb, rb_intern("call"), 1, ssl_obj);
+    rb_funcallv(cb, id_call, 1, &ssl_obj);
 }
 
 #if !defined(OPENSSL_NO_NEXTPROTONEG) || \
@@ -635,7 +635,7 @@ npn_select_cb_common_i(VALUE tmp)
 	in += l;
     }
 
-    selected = rb_funcall(args->cb, rb_intern("call"), 1, protocols);
+    selected = rb_funcallv(args->cb, id_call, 1, &protocols);
     StringValue(selected);
     len = RSTRING_LEN(selected);
     if (len < 1 || len >= 256) {
@@ -2261,6 +2261,7 @@ Init_ossl_ssl(void)
     rb_mWaitWritable = rb_define_module_under(rb_cIO, "WaitWritable");
 #endif
 
+    id_call = rb_intern("call");
     ID_callback_state = rb_intern("callback_state");
 
     ossl_ssl_ex_vcb_idx = SSL_get_ex_new_index(0, (void *)"ossl_ssl_ex_vcb_idx", 0, 0, 0);
