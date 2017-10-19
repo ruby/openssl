@@ -302,7 +302,7 @@ class OpenSSL::TestCipher < OpenSSL::TestCase
       cipher = OpenSSL::Cipher.new("aes-128-cfb").encrypt
       cipher.auth_data = "123"
     }
-  end
+  end if has_cipher?("aes-128-gcm")
 
   private
 
