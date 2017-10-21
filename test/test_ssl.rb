@@ -811,6 +811,24 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     supported
   end
 
+  def test_set_params_min_version
+    supported = check_supported_protocol_versions
+    store = OpenSSL::X509::Store.new
+    store.add_cert(@ca_cert)
+
+    if supported.include?(OpenSSL::SSL::SSL3_VERSION)
+      # SSLContext#set_params properly disables SSL 3.0 by default
+      ctx_proc = proc { |ctx|
+        ctx.min_version = ctx.max_version = OpenSSL::SSL::SSL3_VERSION
+      }
+      start_server(ctx_proc: ctx_proc, ignore_listener_error: true) { |port|
+        ctx = OpenSSL::SSL::SSLContext.new
+        ctx.set_params(cert_store: store, verify_hostname: false)
+        assert_handshake_error { server_connect(port, ctx) { } }
+      }
+    end
+  end
+
   def test_minmax_version
     supported = check_supported_protocol_versions
 
