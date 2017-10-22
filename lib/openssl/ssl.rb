@@ -136,6 +136,7 @@ YoaOffgTf5qxiwkjnlVZQc3whgnEt9FpVMvQ9eknyeGB5KHfayAc3+hUAvI3/Cr3
       # used.
       def set_params(params={})
         params = DEFAULT_PARAMS.merge(params)
+        self.options = params.delete(:options) # set before min_version/max_version
         params.each{|name, value| self.__send__("#{name}=", value) }
         if self.verify_mode != OpenSSL::SSL::VERIFY_NONE
           unless self.ca_file or self.ca_path or self.cert_store
@@ -201,7 +202,7 @@ YoaOffgTf5qxiwkjnlVZQc3whgnEt9FpVMvQ9eknyeGB5KHfayAc3+hUAvI3/Cr3
         if /(?<type>_client|_server)\z/ =~ meth
           meth = $`
           if $VERBOSE
-            warn "#{caller(1)[0]}: method type #{type.inspect} is ignored"
+            warn "#{caller(1, 1)[0]}: method type #{type.inspect} is ignored"
           end
         end
         version = METHODS_MAP[meth.intern] or
