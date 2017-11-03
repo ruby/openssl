@@ -1222,6 +1222,59 @@ end
     end
   end
 
+  def test_fallback_scsv
+    pend "Fallback SCSV is not supported" unless OpenSSL::SSL::SSLContext.method_defined?( :enable_fallback_scsv)
+
+    start_server do |port|
+      ctx = OpenSSL::SSL::SSLContext.new
+      ctx.max_version = OpenSSL::SSL::TLS1_2_VERSION
+      # Here is OK
+      # TLS1.2 supported and this is what we ask the first time
+      server_connect(port, ctx)
+    end
+
+    ctx_proc = proc { |ctx|
+      ctx.max_version = OpenSSL::SSL::TLS1_1_VERSION
+    }
+    start_server(ctx_proc: ctx_proc) do |port|
+      ctx = OpenSSL::SSL::SSLContext.new
+      ctx.enable_fallback_scsv
+      ctx.max_version = OpenSSL::SSL::TLS1_1_VERSION
+      # Here is OK too
+      # TLS1.2 not supported, fallback to TLS1.1 and signaling the fallback
+      # Server doesn't support better, so connection OK
+      server_connect(port, ctx)
+    end
+
+    # Here is not OK
+    # TLS1.2 is supported, fallback to TLS1.1 (downgrade attack) and signaling the fallback
+    # Server support better, so refuse the connection
+    sock1, sock2 = socketpair
+    begin
+      ctx1 = OpenSSL::SSL::SSLContext.new
+      s1 = OpenSSL::SSL::SSLSocket.new(sock1, ctx1)
+
+      ctx2 = OpenSSL::SSL::SSLContext.new
+      ctx2.enable_fallback_scsv
+      ctx2.max_version = OpenSSL::SSL::TLS1_1_VERSION
+      s2 = OpenSSL::SSL::SSLSocket.new(sock2, ctx2)
+      t = Thread.new {
+        assert_raise_with_message(OpenSSL::SSL::SSLError, /inappropriate fallback/) {
+          s2.connect
+        }
+      }
+
+      assert_raise_with_message(OpenSSL::SSL::SSLError, /inappropriate fallback/) {
+        s1.accept
+      }
+
+      assert t.join
+    ensure
+      sock1.close
+      sock2.close
+    end
+  end
+
   def test_dh_callback
     pend "TLS 1.2 is not supported" unless tls12_supported?
 
