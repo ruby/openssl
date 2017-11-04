@@ -379,7 +379,7 @@ ossl_call_session_get_cb(VALUE ary)
 
 /* this method is currently only called for servers (in OpenSSL <= 0.9.8e) */
 static SSL_SESSION *
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L && !defined(LIBRESSL_VERSION_NUMBER)
+#if OPENSSL_VERSION_NUMBER >= 0x10100000 && !defined(LIBRESSL_VERSION_NUMBER)
 ossl_sslctx_session_get_cb(SSL *ssl, const unsigned char *buf, int len, int *copy)
 #else
 ossl_sslctx_session_get_cb(SSL *ssl, unsigned char *buf, int len, int *copy)
