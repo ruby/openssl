@@ -41,6 +41,15 @@
 #include <openssl/evp.h>
 #include <openssl/dh.h>
 
+#ifndef OPENSSL_VERSION_AT_LEAST
+/* this will show up in a future version of opensslv.h */
+
+#define OPENSSL_MAKE_VERSION(maj,min,fix,patch,status) (((maj&0xf) << 28)+((min&0xff)<<20)+((fix&0xff)<<12)+((patch&0xff)<<4)+status)
+/* use this for #if tests, should never depend upon patch/status */
+#define OPENSSL_VERSION_AT_LEAST(maj,min,fix) (OPENSSL_MAKE_VERSION(maj,min,fix, 0, 0) >= OPENSSL_VERSION_NUMBER)
+
+#endif
+
 /*
  * Common Module
  */
@@ -168,6 +177,7 @@ void ossl_debug(const char *, ...);
 #include "ossl_pkey.h"
 #include "ossl_rand.h"
 #include "ossl_ssl.h"
+#include "ossl_dtls.h"
 #include "ossl_version.h"
 #include "ossl_x509.h"
 #include "ossl_engine.h"
