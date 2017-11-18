@@ -30,6 +30,24 @@ extern VALUE mSSL;
 extern VALUE cSSLSocket;
 extern VALUE cSSLSession;
 
+#ifdef _WIN32
+#  define TO_SOCKET(s) _get_osfhandle(s)
+#else
+#  define TO_SOCKET(s) (s)
+#endif
+
+static inline int
+ssl_started(SSL *ssl)
+{
+    /* the FD is set in ossl_ssl_setup(), called by #connect or #accept */
+    return SSL_get_fd(ssl) >= 0;
+}
+
+extern ID id_i_io, id_i_context, id_i_hostname;
+
+extern VALUE ossl_start_ssl(VALUE self, int (*func)(),
+                            const char *funcname, VALUE opts);
+
 void Init_ossl_ssl(void);
 void Init_ossl_ssl_session(void);
 

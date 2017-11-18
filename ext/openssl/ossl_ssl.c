@@ -13,12 +13,6 @@
 
 #define numberof(ary) (int)(sizeof(ary)/sizeof((ary)[0]))
 
-#ifdef _WIN32
-#  define TO_SOCKET(s) _get_osfhandle(s)
-#else
-#  define TO_SOCKET(s) (s)
-#endif
-
 #define GetSSLCTX(obj, ctx) do { \
 	TypedData_Get_Struct((obj), SSL_CTX, &ossl_sslctx_type, (ctx));	\
 } while (0)
@@ -44,7 +38,7 @@ static ID id_i_cert_store, id_i_ca_file, id_i_ca_path, id_i_verify_mode,
 	  id_i_session_remove_cb, id_i_npn_select_cb, id_i_npn_protocols,
 	  id_i_alpn_select_cb, id_i_alpn_protocols, id_i_servername_cb,
 	  id_i_verify_hostname;
-static ID id_i_io, id_i_context, id_i_hostname;
+ID id_i_io, id_i_context, id_i_hostname;
 
 static int ossl_ssl_ex_vcb_idx;
 static int ossl_ssl_ex_ptr_idx;
@@ -64,7 +58,7 @@ ossl_sslctx_free(void *ptr)
     SSL_CTX_free(ctx);
 }
 
-static const rb_data_type_t ossl_sslctx_type = {
+const rb_data_type_t ossl_sslctx_type = {
     "OpenSSL/SSL/CTX",
     {
 	0, ossl_sslctx_free,
@@ -1403,13 +1397,6 @@ ossl_sslctx_flush_sessions(int argc, VALUE *argv, VALUE self)
  * SSLSocket class
  */
 #ifndef OPENSSL_NO_SOCK
-static inline int
-ssl_started(SSL *ssl)
-{
-    /* the FD is set in ossl_ssl_setup(), called by #connect or #accept */
-    return SSL_get_fd(ssl) >= 0;
-}
-
 static void
 ossl_ssl_free(void *ssl)
 {
@@ -1533,7 +1520,7 @@ no_exception_p(VALUE opts)
     return 0;
 }
 
-static VALUE
+VALUE
 ossl_start_ssl(VALUE self, int (*func)(), const char *funcname, VALUE opts)
 {
     SSL *ssl;

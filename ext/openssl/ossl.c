@@ -1204,6 +1204,7 @@ Init_openssl(void)
     Init_ossl_pkey();
     Init_ossl_rand();
     Init_ossl_ssl();
+    Init_ossl_dtls();  /* must be after _ssl */
     Init_ossl_x509();
     Init_ossl_ocsp();
     Init_ossl_engine();
