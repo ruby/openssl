@@ -21,7 +21,6 @@ matrix:
     - env: RUBY_VERSION=ruby-2.4 OPENSSL_VERSION=openssl-1.0.1
     - env: RUBY_VERSION=ruby-2.4 OPENSSL_VERSION=openssl-1.0.2
     - env: RUBY_VERSION=ruby-2.4 OPENSSL_VERSION=openssl-1.1.0
-    - env: RUBY_VERSION=ruby-2.4 OPENSSL_VERSION=libressl-2.4
     - env: RUBY_VERSION=ruby-2.4 OPENSSL_VERSION=libressl-2.5
     - env: RUBY_VERSION=ruby-2.4 OPENSSL_VERSION=libressl-2.6
     - language: ruby
