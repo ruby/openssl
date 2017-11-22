@@ -92,6 +92,18 @@ module EnvUtil
   end
   module_function :invoke_ruby
 
+  def verbose_warning
+    class << (stderr = "".dup)
+      alias write <<
+    end
+    stderr, $stderr, verbose, $VERBOSE = $stderr, stderr, $VERBOSE, true
+    yield stderr
+    return $stderr
+  ensure
+    stderr, $stderr, $VERBOSE = $stderr, stderr, verbose
+  end
+  module_function :verbose_warning
+
   def suppress_warning
     verbose, $VERBOSE = $VERBOSE, nil
     yield
@@ -218,6 +230,17 @@ eom
         end
         assert_equal(0, status, "assert_separately failed: '#{stderr}'")
         raise marshal_error if marshal_error
+      end
+
+      def assert_warning(pat, msg = nil)
+        stderr = EnvUtil.verbose_warning {
+          yield
+        }
+        if Regexp === pat
+          assert_match pat, stderr, msg
+        else
+          assert_equal pat, stderr, msg
+        end
       end
 
       def message msg = nil, ending = ".", &default
