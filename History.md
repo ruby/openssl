@@ -170,7 +170,7 @@ Notable changes
   - A new option 'verify_hostname' is added to OpenSSL::SSL::SSLContext. When it
     is enabled, and the SNI hostname is also set, the hostname verification on
     the server certificate is automatically performed. It is now enabled by
-    OpenSSL::SSL::Context#set_params.
+    OpenSSL::SSL::SSLContext#set_params.
     [[GH ruby/openssl#60]](https://github.com/ruby/openssl/pull/60)
 
 Removals
