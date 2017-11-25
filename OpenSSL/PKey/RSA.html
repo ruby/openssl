@@ -105,6 +105,8 @@
     
     <li ><a href="#method-i-set_key">#set_key</a>
     
+    <li ><a href="#method-i-sign_pss">#sign_pss</a>
+    
     <li ><a href="#method-i-to_der">#to_der</a>
     
     <li ><a href="#method-i-to_pem">#to_pem</a>
@@ -112,6 +114,8 @@
     <li ><a href="#method-i-to_s">#to_s</a>
     
     <li ><a href="#method-i-to_text">#to_text</a>
+    
+    <li ><a href="#method-i-verify_pss">#verify_pss</a>
     
   </ul>
 </div>
@@ -137,8 +141,6 @@ TLS/SSL connection. It is also used in various digital signature schemes.</p>
 
   </section>
 
-  
-  
   
   <section id="5Buntitled-5D" class="documentation-section">
     
@@ -1096,6 +1098,136 @@ instance.</p>
       </div>
 
     
+      <div id="method-i-sign_pss" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            sign_pss(digest, data, salt_length:, mgf1_hash:) &rarr; String
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Signs <em>data</em> using the Probabilistic Signature Scheme (RSA-PSS) and
+returns the calculated signature.</p>
+
+<p><a href="RSAError.html">RSAError</a> will be raised if an error occurs.</p>
+
+<p>See <a href="RSA.html#method-i-verify_pss">verify_pss</a> for the
+verification operation.</p>
+
+<h3 id="method-i-sign_pss-label-Parameters">Parameters<span><a href="#method-i-sign_pss-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
+<dl class="rdoc-list note-list"><dt><em>digest</em>
+<dd>
+<p>A String containing the message digest algorithm name.</p>
+</dd><dt><em>data</em>
+<dd>
+<p>A String. The data to be signed.</p>
+</dd><dt><em>salt_length</em>
+<dd>
+<p>The length in octets of the salt. Two special values are reserved:
+<code>:digest</code> means the digest length, and <code>:max</code> means
+the maximum possible length for the combination of the private key and the
+selected message digest algorithm.</p>
+</dd><dt><em>mgf1_hash</em>
+<dd>
+<p>The hash algorithm used in MGF1 (the currently supported mask generation
+function (MGF)).</p>
+</dd></dl>
+
+<h3 id="method-i-sign_pss-label-Example">Example<span><a href="#method-i-sign_pss-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby"><span class="ruby-identifier">data</span> = <span class="ruby-string">&quot;Sign me!&quot;</span>
+<span class="ruby-identifier">pkey</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">RSA</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">2048</span>)
+<span class="ruby-identifier">signature</span> = <span class="ruby-identifier">pkey</span>.<span class="ruby-identifier">sign_pss</span>(<span class="ruby-string">&quot;SHA256&quot;</span>, <span class="ruby-identifier">data</span>, <span class="ruby-value">salt_length:</span> <span class="ruby-value">:max</span>, <span class="ruby-value">mgf1_hash:</span> <span class="ruby-string">&quot;SHA256&quot;</span>)
+<span class="ruby-identifier">pub_key</span> = <span class="ruby-identifier">pkey</span>.<span class="ruby-identifier">public_key</span>
+<span class="ruby-identifier">puts</span> <span class="ruby-identifier">pub_key</span>.<span class="ruby-identifier">verify_pss</span>(<span class="ruby-string">&quot;SHA256&quot;</span>, <span class="ruby-identifier">signature</span>, <span class="ruby-identifier">data</span>,
+                        <span class="ruby-value">salt_length:</span> <span class="ruby-value">:auto</span>, <span class="ruby-value">mgf1_hash:</span> <span class="ruby-string">&quot;SHA256&quot;</span>) <span class="ruby-comment"># =&gt; true</span>
+</pre>
+          
+          
+
+          
+          <div class="method-source-code" id="sign_pss-source">
+            <pre>static VALUE
+ossl_rsa_sign_pss(int argc, VALUE *argv, VALUE self)
+{
+    VALUE digest, data, options, kwargs[2], signature;
+    static ID kwargs_ids[2];
+    EVP_PKEY *pkey;
+    EVP_PKEY_CTX *pkey_ctx;
+    const EVP_MD *md, *mgf1md;
+    EVP_MD_CTX *md_ctx;
+    size_t buf_len;
+    int salt_len;
+
+    if (!kwargs_ids[0]) {
+        kwargs_ids[0] = rb_intern_const(&quot;salt_length&quot;);
+        kwargs_ids[1] = rb_intern_const(&quot;mgf1_hash&quot;);
+    }
+    rb_scan_args(argc, argv, &quot;2:&quot;, &amp;digest, &amp;data, &amp;options);
+    rb_get_kwargs(options, kwargs_ids, 2, 0, kwargs);
+    if (kwargs[0] == ID2SYM(rb_intern(&quot;max&quot;)))
+        salt_len = -2; /* RSA_PSS_SALTLEN_MAX_SIGN */
+    else if (kwargs[0] == ID2SYM(rb_intern(&quot;digest&quot;)))
+        salt_len = -1; /* RSA_PSS_SALTLEN_DIGEST */
+    else
+        salt_len = NUM2INT(kwargs[0]);
+    mgf1md = ossl_evp_get_digestbyname(kwargs[1]);
+
+    pkey = GetPrivPKeyPtr(self);
+    buf_len = EVP_PKEY_size(pkey);
+    md = ossl_evp_get_digestbyname(digest);
+    StringValue(data);
+    signature = rb_str_new(NULL, (long)buf_len);
+
+    md_ctx = EVP_MD_CTX_new();
+    if (!md_ctx)
+        goto err;
+
+    if (EVP_DigestSignInit(md_ctx, &amp;pkey_ctx, md, NULL, pkey) != 1)
+        goto err;
+
+    if (EVP_PKEY_CTX_set_rsa_padding(pkey_ctx, RSA_PKCS1_PSS_PADDING) != 1)
+        goto err;
+
+    if (EVP_PKEY_CTX_set_rsa_pss_saltlen(pkey_ctx, salt_len) != 1)
+        goto err;
+
+    if (EVP_PKEY_CTX_set_rsa_mgf1_md(pkey_ctx, mgf1md) != 1)
+        goto err;
+
+    if (EVP_DigestSignUpdate(md_ctx, RSTRING_PTR(data), RSTRING_LEN(data)) != 1)
+        goto err;
+
+    if (EVP_DigestSignFinal(md_ctx, (unsigned char *)RSTRING_PTR(signature), &amp;buf_len) != 1)
+        goto err;
+
+    rb_str_set_len(signature, (long)buf_len);
+
+    EVP_MD_CTX_free(md_ctx);
+    return signature;
+
+  err:
+    EVP_MD_CTX_free(md_ctx);
+    ossl_raise(eRSAError, NULL);
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
       <div id="method-i-to_der" class="method-detail ">
         
         
@@ -1263,6 +1395,131 @@ ossl_rsa_to_text(VALUE self)
       </div>
 
     
+      <div id="method-i-verify_pss" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            verify_pss(digest, signature, data, salt_length:, mgf1_hash:) &rarr; true | false
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Verifies <em>data</em> using the Probabilistic Signature Scheme (RSA-PSS).</p>
+
+<p>The return value is <code>true</code> if the signature is valid,
+<code>false</code> otherwise. <a href="RSAError.html">RSAError</a> will be
+raised if an error occurs.</p>
+
+<p>See <a href="RSA.html#method-i-sign_pss">sign_pss</a> for the signing
+operation and an example code.</p>
+
+<h3 id="method-i-verify_pss-label-Parameters">Parameters<span><a href="#method-i-verify_pss-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
+<dl class="rdoc-list note-list"><dt><em>digest</em>
+<dd>
+<p>A String containing the message digest algorithm name.</p>
+</dd><dt><em>data</em>
+<dd>
+<p>A String. The data to be signed.</p>
+</dd><dt><em>salt_length</em>
+<dd>
+<p>The length in octets of the salt. Two special values are reserved:
+<code>:digest</code> means the digest length, and <code>:auto</code> means
+automatically determining the length based on the signature.</p>
+</dd><dt><em>mgf1_hash</em>
+<dd>
+<p>The hash algorithm used in MGF1.</p>
+</dd></dl>
+          
+          
+
+          
+          <div class="method-source-code" id="verify_pss-source">
+            <pre>static VALUE
+ossl_rsa_verify_pss(int argc, VALUE *argv, VALUE self)
+{
+    VALUE digest, signature, data, options, kwargs[2];
+    static ID kwargs_ids[2];
+    EVP_PKEY *pkey;
+    EVP_PKEY_CTX *pkey_ctx;
+    const EVP_MD *md, *mgf1md;
+    EVP_MD_CTX *md_ctx;
+    int result, salt_len;
+
+    if (!kwargs_ids[0]) {
+        kwargs_ids[0] = rb_intern_const(&quot;salt_length&quot;);
+        kwargs_ids[1] = rb_intern_const(&quot;mgf1_hash&quot;);
+    }
+    rb_scan_args(argc, argv, &quot;3:&quot;, &amp;digest, &amp;signature, &amp;data, &amp;options);
+    rb_get_kwargs(options, kwargs_ids, 2, 0, kwargs);
+    if (kwargs[0] == ID2SYM(rb_intern(&quot;auto&quot;)))
+        salt_len = -2; /* RSA_PSS_SALTLEN_AUTO */
+    else if (kwargs[0] == ID2SYM(rb_intern(&quot;digest&quot;)))
+        salt_len = -1; /* RSA_PSS_SALTLEN_DIGEST */
+    else
+        salt_len = NUM2INT(kwargs[0]);
+    mgf1md = ossl_evp_get_digestbyname(kwargs[1]);
+
+    GetPKey(self, pkey);
+    md = ossl_evp_get_digestbyname(digest);
+    StringValue(signature);
+    StringValue(data);
+
+    md_ctx = EVP_MD_CTX_new();
+    if (!md_ctx)
+        goto err;
+
+    if (EVP_DigestVerifyInit(md_ctx, &amp;pkey_ctx, md, NULL, pkey) != 1)
+        goto err;
+
+    if (EVP_PKEY_CTX_set_rsa_padding(pkey_ctx, RSA_PKCS1_PSS_PADDING) != 1)
+        goto err;
+
+    if (EVP_PKEY_CTX_set_rsa_pss_saltlen(pkey_ctx, salt_len) != 1)
+        goto err;
+
+    if (EVP_PKEY_CTX_set_rsa_mgf1_md(pkey_ctx, mgf1md) != 1)
+        goto err;
+
+    if (EVP_DigestVerifyUpdate(md_ctx, RSTRING_PTR(data), RSTRING_LEN(data)) != 1)
+        goto err;
+
+    result = EVP_DigestVerifyFinal(md_ctx,
+                                   (unsigned char *)RSTRING_PTR(signature),
+                                   RSTRING_LEN(signature));
+
+    switch (result) {
+      case 0:
+        ossl_clear_error();
+        EVP_MD_CTX_free(md_ctx);
+        return Qfalse;
+      case 1:
+        EVP_MD_CTX_free(md_ctx);
+        return Qtrue;
+      default:
+        goto err;
+    }
+
+  err:
+    EVP_MD_CTX_free(md_ctx);
+    ossl_raise(eRSAError, NULL);
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
     </section>
   
   </section>
@@ -1270,8 +1527,8 @@ ossl_rsa_to_text(VALUE self)
 
 
 <footer id="validator-badges" role="contentinfo">
-  <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 6.0.0.beta1.
+  <p><a href="https://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.0.beta3.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

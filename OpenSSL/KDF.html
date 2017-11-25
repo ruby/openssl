@@ -75,6 +75,8 @@
 
   <ul class="link-list" role="directory">
     
+    <li ><a href="#method-c-hkdf">::hkdf</a>
+    
     <li ><a href="#method-c-pbkdf2_hmac">::pbkdf2_hmac</a>
     
     <li ><a href="#method-c-scrypt">::scrypt</a>
@@ -108,6 +110,8 @@ the following KDF:</p>
 with <a href="HMAC.html">HMAC</a></p>
 </li><li>
 <p>scrypt</p>
+</li><li>
+<p>HKDF</p>
 </li></ul>
 
 <h2 id="module-OpenSSL::KDF-label-Examples">Examples<span><a href="#module-OpenSSL::KDF-label-Examples">&para;</a> <a href="#top">&uarr;</a></span></h2>
@@ -165,8 +169,6 @@ length of the values to be compared is of fixed size.</p>
   </section>
 
   
-  
-  
   <section id="5Buntitled-5D" class="documentation-section">
     
 
@@ -181,6 +183,126 @@ length of the values to be compared is of fixed size.</p>
        <header>
          <h3>Public Class Methods</h3>
        </header>
+
+    
+      <div id="method-c-hkdf" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            hkdf(ikm, salt:, info:, length:, hash:) &rarr; String
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>HMAC-based Extract-and-Expand Key Derivation Function (HKDF) as specified
+in <a href="https://tools.ietf.org/html/rfc5869">RFC 5869</a>.</p>
+
+<p>New in <a href="../OpenSSL.html">OpenSSL</a> 1.1.0.</p>
+
+<h3 id="method-c-hkdf-label-Parameters">Parameters<span><a href="#method-c-hkdf-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
+<dl class="rdoc-list note-list"><dt><em>ikm</em>
+<dd>
+<p>The input keying material.</p>
+</dd><dt><em>salt</em>
+<dd>
+<p>The salt.</p>
+</dd><dt><em>info</em>
+<dd>
+<p>The context and application specific information.</p>
+</dd><dt><em>length</em>
+<dd>
+<p>The output length in octets. Must be &lt;= <code>255 * HashLen</code>,
+where HashLen is the length of the hash function output in octets.</p>
+</dd><dt><em>hash</em>
+<dd>
+<p>The hash function.</p>
+</dd></dl>
+          
+          
+
+          
+          <div class="method-source-code" id="hkdf-source">
+            <pre>static VALUE
+kdf_hkdf(int argc, VALUE *argv, VALUE self)
+{
+    VALUE ikm, salt, info, opts, kwargs[4], str;
+    static ID kwargs_ids[4];
+    int saltlen, ikmlen, infolen;
+    size_t len;
+    const EVP_MD *md;
+    EVP_PKEY_CTX *pctx;
+
+    if (!kwargs_ids[0]) {
+        kwargs_ids[0] = rb_intern_const(&quot;salt&quot;);
+        kwargs_ids[1] = rb_intern_const(&quot;info&quot;);
+        kwargs_ids[2] = rb_intern_const(&quot;length&quot;);
+        kwargs_ids[3] = rb_intern_const(&quot;hash&quot;);
+    }
+    rb_scan_args(argc, argv, &quot;1:&quot;, &amp;ikm, &amp;opts);
+    rb_get_kwargs(opts, kwargs_ids, 4, 0, kwargs);
+
+    StringValue(ikm);
+    ikmlen = RSTRING_LENINT(ikm);
+    salt = StringValue(kwargs[0]);
+    saltlen = RSTRING_LENINT(salt);
+    info = StringValue(kwargs[1]);
+    infolen = RSTRING_LENINT(info);
+    len = (size_t)NUM2LONG(kwargs[2]);
+    if (len &gt; LONG_MAX)
+        rb_raise(rb_eArgError, &quot;length must be non-negative&quot;);
+    md = ossl_evp_get_digestbyname(kwargs[3]);
+
+    str = rb_str_new(NULL, (long)len);
+    pctx = EVP_PKEY_CTX_new_id(EVP_PKEY_HKDF, NULL);
+    if (!pctx)
+        ossl_raise(eKDF, &quot;EVP_PKEY_CTX_new_id&quot;);
+    if (EVP_PKEY_derive_init(pctx) &lt;= 0) {
+        EVP_PKEY_CTX_free(pctx);
+        ossl_raise(eKDF, &quot;EVP_PKEY_derive_init&quot;);
+    }
+    if (EVP_PKEY_CTX_set_hkdf_md(pctx, md) &lt;= 0) {
+        EVP_PKEY_CTX_free(pctx);
+        ossl_raise(eKDF, &quot;EVP_PKEY_CTX_set_hkdf_md&quot;);
+    }
+    if (EVP_PKEY_CTX_set1_hkdf_salt(pctx, (unsigned char *)RSTRING_PTR(salt),
+                                    saltlen) &lt;= 0) {
+        EVP_PKEY_CTX_free(pctx);
+        ossl_raise(eKDF, &quot;EVP_PKEY_CTX_set_hkdf_salt&quot;);
+    }
+    if (EVP_PKEY_CTX_set1_hkdf_key(pctx, (unsigned char *)RSTRING_PTR(ikm),
+                                   ikmlen) &lt;= 0) {
+        EVP_PKEY_CTX_free(pctx);
+        ossl_raise(eKDF, &quot;EVP_PKEY_CTX_set_hkdf_key&quot;);
+    }
+    if (EVP_PKEY_CTX_add1_hkdf_info(pctx, (unsigned char *)RSTRING_PTR(info),
+                                    infolen) &lt;= 0) {
+        EVP_PKEY_CTX_free(pctx);
+        ossl_raise(eKDF, &quot;EVP_PKEY_CTX_set_hkdf_info&quot;);
+    }
+    if (EVP_PKEY_derive(pctx, (unsigned char *)RSTRING_PTR(str), &amp;len) &lt;= 0) {
+        EVP_PKEY_CTX_free(pctx);
+        ossl_raise(eKDF, &quot;EVP_PKEY_derive&quot;);
+    }
+    rb_str_set_len(str, (long)len);
+    EVP_PKEY_CTX_free(pctx);
+
+    return str;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
 
     
       <div id="method-c-pbkdf2_hmac" class="method-detail ">
@@ -399,8 +521,8 @@ kdf_scrypt(int argc, VALUE *argv, VALUE self)
 
 
 <footer id="validator-badges" role="contentinfo">
-  <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 6.0.0.beta1.
+  <p><a href="https://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.0.beta3.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

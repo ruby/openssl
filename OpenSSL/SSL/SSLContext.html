@@ -73,11 +73,15 @@
     
     <li ><a href="#method-c-new">::new</a>
     
+    <li ><a href="#method-i-add_certificate">#add_certificate</a>
+    
     <li ><a href="#method-i-ciphers">#ciphers</a>
     
     <li ><a href="#method-i-ciphers-3D">#ciphers=</a>
     
     <li ><a href="#method-i-ecdh_curves-3D">#ecdh_curves=</a>
+    
+    <li ><a href="#method-i-enable_fallback_scsv">#enable_fallback_scsv</a>
     
     <li ><a href="#method-i-flush_sessions">#flush_sessions</a>
     
@@ -140,8 +144,6 @@ href="SSLContext.html">SSLContext</a> will be frozen afterward.</p>
   </section>
 
   
-  
-  
   <section id="5Buntitled-5D" class="documentation-section">
     
 
@@ -163,11 +165,6 @@ href="SSLContext.html">SSLContext</a> will be frozen afterward.</p>
         
         <dd><p>The list of available SSL/TLS methods. This constant is only provided for
 backwards compatibility.</p>
-        
-      
-        <dt id="METHODS_MAP">METHODS_MAP
-        
-        <dd>
         
       
         <dt id="SESSION_CACHE_BOTH">SESSION_CACHE_BOTH
@@ -318,6 +315,11 @@ name&#39;s hash value.</p>
         <div class="method-description">
         
         <p>Context certificate</p>
+
+<p>The <em>cert</em>, <em>key</em>, and <em>extra_chain_cert</em> attributes
+are deprecated. It is recommended to use <a
+href="SSLContext.html#method-i-add_certificate">add_certificate</a>
+instead.</p>
         
         </div>
       </div>
@@ -379,6 +381,11 @@ handshake is suspended.</p>
         
         <p>An Array of extra <a href="../X509.html">X509</a> certificates to be added
 to the certificate chain.</p>
+
+<p>The <em>cert</em>, <em>key</em>, and <em>extra_chain_cert</em> attributes
+are deprecated. It is recommended to use <a
+href="SSLContext.html#method-i-add_certificate">add_certificate</a>
+instead.</p>
         
         </div>
       </div>
@@ -392,6 +399,11 @@ to the certificate chain.</p>
         <div class="method-description">
         
         <p>Context private key</p>
+
+<p>The <em>cert</em>, <em>key</em>, and <em>extra_chain_cert</em> attributes
+are deprecated. It is recommended to use <a
+href="SSLContext.html#method-i-add_certificate">add_certificate</a>
+instead.</p>
         
         </div>
       </div>
@@ -557,6 +569,10 @@ internal cache.</p>
 
 <p>The callback is invoked with an <a href="SSLContext.html">SSLContext</a>
 and a <a href="Session.html">Session</a>.</p>
+
+<p>IMPORTANT NOTE: It is currently not possible to use this safely in a
+multi-threaded application. The callback is called inside a global lock and
+it can randomly cause deadlock on Ruby thread switching.</p>
         
         </div>
       </div>
@@ -778,6 +794,152 @@ necessary.</p>
        <header>
          <h3>Public Instance Methods</h3>
        </header>
+
+    
+      <div id="method-i-add_certificate" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            add_certificate(certiticate, pkey [, extra_certs]) &rarr; self
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Adds a certificate to the context. <em>pkey</em> must be a corresponding
+private key with <em>certificate</em>.</p>
+
+<p>Multiple certificates with different public key type can be added by
+repeated calls of this method, and <a href="../../OpenSSL.html">OpenSSL</a>
+will choose the most appropriate certificate during the handshake.</p>
+
+<p><a href="SSLContext.html#attribute-i-cert">cert=</a>, <a
+href="SSLContext.html#attribute-i-key">key=</a>, and <a
+href="SSLContext.html#attribute-i-extra_chain_cert">extra_chain_cert=</a>
+are old accessor methods for setting certificate and internally call this
+method.</p>
+
+<h3 id="method-i-add_certificate-label-Parameters">Parameters<span><a href="#method-i-add_certificate-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
+<dl class="rdoc-list note-list"><dt><em>certificate</em>
+<dd>
+<p>A certificate. An instance of <a
+href="../X509/Certificate.html">OpenSSL::X509::Certificate</a>.</p>
+</dd><dt><em>pkey</em>
+<dd>
+<p>The private key for <em>certificate</em>. An instance of <a
+href="../PKey/PKey.html">OpenSSL::PKey::PKey</a>.</p>
+</dd><dt><em>extra_certs</em>
+<dd>
+<p>Optional. An array of <a
+href="../X509/Certificate.html">OpenSSL::X509::Certificate</a>. When
+sending a certificate chain, the certificates specified by this are sent
+following <em>certificate</em>, in the order in the array.</p>
+</dd></dl>
+
+<h3 id="method-i-add_certificate-label-Example">Example<span><a href="#method-i-add_certificate-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre>rsa_cert = OpenSSL::X509::Certificate.new(...)
+rsa_pkey = OpenSSL::PKey.read(...)
+ca_intermediate_cert = OpenSSL::X509::Certificate.new(...)
+ctx.add_certificate(rsa_cert, rsa_pkey, [ca_intermediate_cert])
+
+ecdsa_cert = ...
+ecdsa_pkey = ...
+another_ca_cert = ...
+ctx.add_certificate(ecdsa_cert, ecdsa_pkey, [another_ca_cert])</pre>
+
+<h3 id="method-i-add_certificate-label-Note">Note<span><a href="#method-i-add_certificate-label-Note">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<p><a href="../../OpenSSL.html">OpenSSL</a> before the version 1.0.2 could
+handle only one extra chain across all key types. Calling this method
+discards the chain set previously.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="add_certificate-source">
+            <pre>static VALUE
+ossl_sslctx_add_certificate(int argc, VALUE *argv, VALUE self)
+{
+    VALUE cert, key, extra_chain_ary;
+    SSL_CTX *ctx;
+    X509 *x509;
+    STACK_OF(X509) *extra_chain = NULL;
+    EVP_PKEY *pkey, *pub_pkey;
+
+    GetSSLCTX(self, ctx);
+    rb_scan_args(argc, argv, &quot;21&quot;, &amp;cert, &amp;key, &amp;extra_chain_ary);
+    rb_check_frozen(self);
+    x509 = GetX509CertPtr(cert);
+    pkey = GetPrivPKeyPtr(key);
+
+    /*
+     * The reference counter is bumped, and decremented immediately.
+     * X509_get0_pubkey() is only available in OpenSSL &gt;= 1.1.0.
+     */
+    pub_pkey = X509_get_pubkey(x509);
+    EVP_PKEY_free(pub_pkey);
+    if (!pub_pkey)
+        rb_raise(rb_eArgError, &quot;certificate does not contain public key&quot;);
+    if (EVP_PKEY_cmp(pub_pkey, pkey) != 1)
+        rb_raise(rb_eArgError, &quot;public key mismatch&quot;);
+
+    if (argc &gt;= 3)
+        extra_chain = ossl_x509_ary2sk(extra_chain_ary);
+
+    if (!SSL_CTX_use_certificate(ctx, x509)) {
+        sk_X509_pop_free(extra_chain, X509_free);
+        ossl_raise(eSSLError, &quot;SSL_CTX_use_certificate&quot;);
+    }
+    if (!SSL_CTX_use_PrivateKey(ctx, pkey)) {
+        sk_X509_pop_free(extra_chain, X509_free);
+        ossl_raise(eSSLError, &quot;SSL_CTX_use_PrivateKey&quot;);
+    }
+
+    if (extra_chain) {
+#if OPENSSL_VERSION_NUMBER &gt;= 0x10002000 &amp;&amp; !defined(LIBRESSL_VERSION_NUMBER)
+        if (!SSL_CTX_set0_chain(ctx, extra_chain)) {
+            sk_X509_pop_free(extra_chain, X509_free);
+            ossl_raise(eSSLError, &quot;SSL_CTX_set0_chain&quot;);
+        }
+#else
+        STACK_OF(X509) *orig_extra_chain;
+        X509 *x509_tmp;
+
+        /* First, clear the existing chain */
+        SSL_CTX_get_extra_chain_certs(ctx, &amp;orig_extra_chain);
+        if (orig_extra_chain &amp;&amp; sk_X509_num(orig_extra_chain)) {
+            rb_warning(&quot;SSL_CTX_set0_chain() is not available; &quot; \
+                       &quot;clearing previously set certificate chain&quot;);
+            SSL_CTX_clear_extra_chain_certs(ctx);
+        }
+        while ((x509_tmp = sk_X509_shift(extra_chain))) {
+            /* Transfers ownership */
+            if (!SSL_CTX_add_extra_chain_cert(ctx, x509_tmp)) {
+                X509_free(x509_tmp);
+                sk_X509_pop_free(extra_chain, X509_free);
+                ossl_raise(eSSLError, &quot;SSL_CTX_add_extra_chain_cert&quot;);
+            }
+        }
+        sk_X509_free(extra_chain);
+#endif
+    }
+    return self;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
 
     
       <div id="method-i-ciphers" class="method-detail ">
@@ -1029,6 +1191,48 @@ ossl_sslctx_set_ecdh_curves(VALUE self, VALUE arg)
       </div>
 
     
+      <div id="method-i-enable_fallback_scsv" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            enable_fallback_scsv() &rarr; nil
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Activate TLS_FALLBACK_SCSV for this context. See RFC 7507.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="enable_fallback_scsv-source">
+            <pre>static VALUE
+ossl_sslctx_enable_fallback_scsv(VALUE self)
+{
+    SSL_CTX *ctx;
+
+    GetSSLCTX(self, ctx);
+    SSL_CTX_set_mode(ctx, SSL_MODE_SEND_FALLBACK_SCSV);
+
+    return Qnil;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
       <div id="method-i-flush_sessions" class="method-detail ">
         
         
@@ -1150,7 +1354,7 @@ possible values.</p>
 
           
           <div class="method-source-code" id="max_version-3D-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 179</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 180</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">max_version=</span>(<span class="ruby-identifier">version</span>)
   <span class="ruby-identifier">set_minmax_proto_version</span>(<span class="ruby-ivar">@min_proto_version</span> <span class="ruby-operator">||=</span> <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">version</span>)
   <span class="ruby-ivar">@max_proto_version</span> = <span class="ruby-identifier">version</span>
@@ -1219,7 +1423,7 @@ href="SSLContext.html#method-i-max_version-3D">max_version=</a>.</p>
 
           
           <div class="method-source-code" id="min_version-3D-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 167</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 168</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">min_version=</span>(<span class="ruby-identifier">version</span>)
   <span class="ruby-identifier">set_minmax_proto_version</span>(<span class="ruby-identifier">version</span>, <span class="ruby-ivar">@max_proto_version</span> <span class="ruby-operator">||=</span> <span class="ruby-keyword">nil</span>)
   <span class="ruby-ivar">@min_proto_version</span> = <span class="ruby-identifier">version</span>
@@ -1824,6 +2028,7 @@ then the system default certificate store is used.</p>
             <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 136</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">set_params</span>(<span class="ruby-identifier">params</span>={})
   <span class="ruby-identifier">params</span> = <span class="ruby-constant">DEFAULT_PARAMS</span>.<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">params</span>)
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">options</span> = <span class="ruby-identifier">params</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-value">:options</span>) <span class="ruby-comment"># set before min_version/max_version</span>
   <span class="ruby-identifier">params</span>.<span class="ruby-identifier">each</span>{<span class="ruby-operator">|</span><span class="ruby-identifier">name</span>, <span class="ruby-identifier">value</span><span class="ruby-operator">|</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">__send__</span>(<span class="ruby-node">&quot;#{name}=&quot;</span>, <span class="ruby-identifier">value</span>) }
   <span class="ruby-keyword">if</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">verify_mode</span> <span class="ruby-operator">!=</span> <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">VERIFY_NONE</span>
     <span class="ruby-keyword">unless</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">ca_file</span> <span class="ruby-keyword">or</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">ca_path</span> <span class="ruby-keyword">or</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">cert_store</span>
@@ -2113,13 +2318,13 @@ href="SSLContext.html#method-i-max_version-3D">max_version=</a> instead.</p>
 
           
           <div class="method-source-code" id="ssl_version-3D-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 198</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 199</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">ssl_version=</span>(<span class="ruby-identifier">meth</span>)
   <span class="ruby-identifier">meth</span> = <span class="ruby-identifier">meth</span>.<span class="ruby-identifier">to_s</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">meth</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Symbol</span>)
   <span class="ruby-keyword">if</span> <span class="ruby-regexp">/(?&lt;type&gt;_client|_server)\z/</span> <span class="ruby-operator">=~</span> <span class="ruby-identifier">meth</span>
     <span class="ruby-identifier">meth</span> = <span class="ruby-node">$`</span>
     <span class="ruby-keyword">if</span> <span class="ruby-identifier">$VERBOSE</span>
-      <span class="ruby-identifier">warn</span> <span class="ruby-node">&quot;#{caller(1)[0]}: method type #{type.inspect} is ignored&quot;</span>
+      <span class="ruby-identifier">warn</span> <span class="ruby-node">&quot;#{caller(1, 1)[0]}: method type #{type.inspect} is ignored&quot;</span>
     <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">end</span>
   <span class="ruby-identifier">version</span> = <span class="ruby-constant">METHODS_MAP</span>[<span class="ruby-identifier">meth</span>.<span class="ruby-identifier">intern</span>] <span class="ruby-keyword">or</span>
@@ -2144,8 +2349,8 @@ href="SSLContext.html#method-i-max_version-3D">max_version=</a> instead.</p>
 
 
 <footer id="validator-badges" role="contentinfo">
-  <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 6.0.0.beta1.
+  <p><a href="https://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.0.beta3.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

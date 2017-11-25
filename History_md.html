@@ -56,8 +56,10 @@
   <h3>Table of Contents</h3>
 
   <ul class="link-list" role="directory">
-    <li><a href="#label-Version+2.1.0.beta1">Version 2.1.0.beta1</a>
+    <li><a href="#label-Version+2.1.0.beta2">Version 2.1.0.beta2</a>
     <li><a href="#label-Notable+changes">Notable changes</a>
+    <li><a href="#label-Version+2.0.6">Version 2.0.6</a>
+    <li><a href="#label-Bug+fixes">Bug fixes</a>
     <li><a href="#label-Version+2.0.5">Version 2.0.5</a>
     <li><a href="#label-Bug+fixes">Bug fixes</a>
     <li><a href="#label-Version+2.0.4">Version 2.0.4</a>
@@ -98,13 +100,13 @@
 
 <main role="main" aria-label="Page History.md">
 
-<h1 id="label-Version+2.1.0.beta1">Version 2.1.0.beta1<span><a href="#label-Version+2.1.0.beta1">&para;</a> <a href="#top">&uarr;</a></span></h1>
+<h1 id="label-Version+2.1.0.beta2">Version 2.1.0.beta2<span><a href="#label-Version+2.1.0.beta2">&para;</a> <a href="#top">&uarr;</a></span></h1>
 
 <h2 id="label-Notable+changes">Notable changes<span><a href="#label-Notable+changes">&para;</a> <a href="#top">&uarr;</a></span></h2>
 <ul><li>
-<p>Support for <a href="OpenSSL.html">OpenSSL</a> versions before 1.0.1 is
-removed.  <a href="https://github.com/ruby/openssl/pull/86">[GitHub
-#86]</a></p>
+<p>Support for <a href="OpenSSL.html">OpenSSL</a> versions before 1.0.1 and
+LibreSSL versions before 2.5  is removed.  <a
+href="https://github.com/ruby/openssl/pull/86">[GitHub #86]</a></p>
 </li><li>
 <p><a href="OpenSSL/BN.html#method-i-negative-3F">OpenSSL::BN#negative?</a>,
 #+@, and #-@ are added.</p>
@@ -114,12 +116,15 @@ href="OpenSSL/SSL/SSLSocket.html#method-i-connect">OpenSSL::SSL::SSLSocket#conne
 raises a more informative exception when  certificate verification fails. 
 <a href="https://github.com/ruby/openssl/pull/99">[GitHub #99]</a></p>
 </li><li>
-<p><a href="OpenSSL/KDF.html">OpenSSL::KDF</a> module is newly added. Support
-for scrypt is added.  <a
-href="https://github.com/ruby/openssl/pull/109">[GitHub #109]</a></p>
+<p><a href="OpenSSL/KDF.html">OpenSSL::KDF</a> module is newly added. In
+addition to PBKDF2-HMAC that has moved  from <a
+href="OpenSSL/PKCS5.html">OpenSSL::PKCS5</a>, scrypt and HKDF are
+supported.  <a href="https://github.com/ruby/openssl/pull/109">[GitHub
+#109]</a>  <a href="https://github.com/ruby/openssl/pull/173">[GitHub
+#173]</a></p>
 </li><li>
 <p><a href="OpenSSL.html#method-c-fips_mode">OpenSSL.fips_mode</a> is added.
-We have had the setter, but not the getter.  <a
+We had the setter, but not the getter.  <a
 href="https://github.com/ruby/openssl/pull/125">[GitHub #125]</a></p>
 </li><li>
 <p><a
@@ -143,14 +148,74 @@ now accepts two additional keyword arguments  &#39;loc&#39; and
 </li><li>
 <p><a
 href="OpenSSL/SSL/SSLContext.html#method-i-min_version-3D">OpenSSL::SSL::SSLContext#min_version=</a>
-and max_version= are added.  <a
-href="https://github.com/ruby/openssl/pull/142">[GitHub #142]</a></p>
+and max_version= are added to replace  ssl_version= that was built on top
+of the deprecated <a href="OpenSSL.html">OpenSSL</a> C API. Use of  that
+method and the constant OpenSSL::SSL::SSLContext::METHODS is now 
+deprecated.  <a href="https://github.com/ruby/openssl/pull/142">[GitHub
+#142]</a></p>
 </li><li>
 <p><a
 href="OpenSSL/X509/Name.html#method-i-to_utf8">OpenSSL::X509::Name#to_utf8</a>
 is added.  <a href="https://github.com/ruby/openssl/issues/26">[GitHub
 #26]</a>  <a href="https://github.com/ruby/openssl/pull/143">[GitHub
 #143]</a></p>
+</li><li>
+<p>OpenSSL::X509::<a
+href="https://github.com/ruby/openssl/pull/161">Extension,Attribute,Certificate,CRL,Revoked,Request}
+can be  compared with == operator.  {[GitHub #161]</a></p>
+</li><li>
+<p>TLS Fallback Signaling Cipher Suite Value (SCSV) support is added.  <a
+href="https://github.com/ruby/openssl/pull/165">[GitHub #165]</a></p>
+</li><li>
+<p>Build failure with <a href="OpenSSL.html">OpenSSL</a> 1.1 built with
+no-deprecated is fixed.  <a
+href="https://github.com/ruby/openssl/pull/160">[GitHub #160]</a></p>
+</li><li>
+<p><a
+href="OpenSSL/Buffering.html#method-i-write">OpenSSL::Buffering#write</a>
+accepts an arbitrary number of arguments.  <a
+href="https://bugs.ruby-lang.org/issues/9323">[Feature #9323]</a>  <a
+href="https://github.com/ruby/openssl/pull/162">[GitHub #162]</a></p>
+</li><li>
+<p><a
+href="OpenSSL/PKey/RSA.html#method-i-sign_pss">OpenSSL::PKey::RSA#sign_pss</a>
+and verify_pss are added. They perform RSA-PSS  signature and verification.
+<a href="https://github.com/ruby/openssl/issues/75">[GitHub #75]</a>  <a
+href="https://github.com/ruby/openssl/pull/76">[GitHub #76]</a>  <a
+href="https://github.com/ruby/openssl/pull/169">[GitHub #169]</a></p>
+</li><li>
+<p><a
+href="OpenSSL/SSL/SSLContext.html#method-i-add_certificate">OpenSSL::SSL::SSLContext#add_certificate</a>
+is added.  <a href="https://github.com/ruby/openssl/pull/167">[GitHub
+#167]</a></p>
+</li></ul>
+
+<h1 id="label-Version+2.0.6">Version 2.0.6<span><a href="#label-Version+2.0.6">&para;</a> <a href="#top">&uarr;</a></span></h1>
+
+<h2 id="label-Bug+fixes">Bug fixes<span><a href="#label-Bug+fixes">&para;</a> <a href="#top">&uarr;</a></span></h2>
+<ul><li>
+<p>The session_remove_cb set to an <a
+href="OpenSSL/SSL/SSLContext.html">OpenSSL::SSL::SSLContext</a> is no
+longer called  during GC.</p>
+</li><li>
+<p>A possible deadlock in <a
+href="OpenSSL/SSL/SSLSocket.html#method-i-sysread">OpenSSL::SSL::SSLSocket#sysread</a>
+is fixed.  <a href="https://github.com/ruby/openssl/pull/139">[GitHub
+#139]</a></p>
+</li><li>
+<p><a href="OpenSSL/BN.html#method-i-hash">OpenSSL::BN#hash</a> could return
+an unnormalized fixnum value on Windows.  <a
+href="https://bugs.ruby-lang.org/issues/13877">[Bug #13877]</a></p>
+</li><li>
+<p><a
+href="OpenSSL/SSL/SSLSocket.html#method-i-sysread">OpenSSL::SSL::SSLSocket#sysread</a>
+and sysread_nonblock set the length of the  destination buffer String to 0
+on error.  <a href="https://github.com/ruby/openssl/pull/153">[GitHub
+#153]</a></p>
+</li><li>
+<p>Possible deadlock is fixed. This happened only when built with older
+versions  of <a href="OpenSSL.html">OpenSSL</a> (before 1.1.0) or LibreSSL.
+<a href="https://github.com/ruby/openssl/pull/155">[GitHub #155]</a></p>
 </li></ul>
 
 <h1 id="label-Version+2.0.5">Version 2.0.5<span><a href="#label-Version+2.0.5">&para;</a> <a href="#top">&uarr;</a></span></h1>
@@ -334,9 +399,9 @@ effective only when built with <a href="OpenSSL.html">OpenSSL</a> 1.1.0.</p>
 <p>A new option &#39;verify_hostname&#39; is added to <a
 href="OpenSSL/SSL/SSLContext.html">OpenSSL::SSL::SSLContext</a>. When it is
 enabled, and the SNI hostname is also set, the hostname verification on the
-server certificate is automatically performed. It is now enabled by
-OpenSSL::SSL::Context#set_params. <a
-href="https://github.com/ruby/openssl/pull/60">[GH ruby/openssl#60]</a></p>
+server certificate is automatically performed. It is now enabled by <a
+href="OpenSSL/SSL/SSLContext.html#method-i-set_params">OpenSSL::SSL::SSLContext#set_params</a>.
+<a href="https://github.com/ruby/openssl/pull/60">[GH ruby/openssl#60]</a></p>
 </li></ul>
 
 <h2 id="label-Removals">Removals<span><a href="#label-Removals">&para;</a> <a href="#top">&uarr;</a></span></h2>
@@ -399,8 +464,8 @@ with a capable <a href="OpenSSL.html">OpenSSL</a>.</p>
 
 
 <footer id="validator-badges" role="contentinfo">
-  <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 6.0.0.beta1.
+  <p><a href="https://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.0.beta3.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 
