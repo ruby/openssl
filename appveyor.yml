@@ -14,7 +14,6 @@ install:
         $Env:openssl_dir = "C:\msys64\mingw64"
       }
   - ruby -v
-  - openssl version
   - rake install_dependencies
 build_script:
   - rake -rdevkit compile -- --with-openssl-dir=%openssl_dir% --enable-debug
