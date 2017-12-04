@@ -29,11 +29,14 @@ module OpenSSL
       }
 
       # call-seq:
-      #    SSLContext.new           -> ctx
-      #    SSLContext.new(:TLSv1)   -> ctx
-      #    SSLContext.new("SSLv23") -> ctx
+      #    DTLSContext.new           -> ctx
+      #    DTLSContext.new(:TLSv1)   -> ctx
+      #    DTLSContext.new("SSLv23") -> ctx
       #
-      # Creates a new SSL context.
+      # Creates a new DTLS context.
+      #   This differs from an SSL context because the DTLS_method() is setup.
+      #   This arranges to do the right UDP things which involve recvfrom()/sendto() rather than
+      #   read/write() down at the BIO layer.
       #
       # If an argument is given, #ssl_version= is called with the value. Note
       # that this form is deprecated. New applications should use #min_version=
@@ -68,7 +71,7 @@ module OpenSSL
 
     ##
     # DTLSServer represents a TCP/IP server socket with Datagram TLS (DTLS)
-    #
+    # XXX, unclear this is even useful.
     class DTLSServer < SSLServer
       # Creates a new instance of SSLServer.
       # * _srv_ is an instance of TCPServer.

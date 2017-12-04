@@ -41,7 +41,7 @@ static ID id_i_cert_store, id_i_ca_file, id_i_ca_path, id_i_verify_mode,
 ID id_i_io, id_i_context, id_i_hostname;
 
 static int ossl_ssl_ex_vcb_idx;
-static int ossl_ssl_ex_ptr_idx;
+int ossl_ssl_ex_ptr_idx;
 static int ossl_sslctx_ex_ptr_idx;
 #if !defined(HAVE_X509_STORE_UP_REF)
 static int ossl_sslctx_ex_store_p;
@@ -709,7 +709,7 @@ ssl_alpn_select_cb(SSL *ssl, const unsigned char **out, unsigned char *outlen,
 #endif
 
 /* This function may serve as the entry point to support further callbacks. */
-static void
+void
 ssl_info_cb(const SSL *ssl, int where, int val)
 {
     int is_server = SSL_is_server((SSL *)ssl);

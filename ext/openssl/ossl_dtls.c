@@ -10,6 +10,10 @@
  */
 #include "ossl.h"
 
+#include <openssl/bio.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+
 VALUE cDTLSContext;
 VALUE cDTLSSocket;
 static VALUE eSSLError;
@@ -70,7 +74,7 @@ ossl_dtls_setup(VALUE self)
     rb_io_check_readable(fptr);
     rb_io_check_writable(fptr);
 
-    printf("dtls setup for fd: %d\n", TO_SOCKET(fptr->fd));
+    //printf("dtls setup for fd: %d\n", TO_SOCKET(fptr->fd));
     bio = BIO_new_dgram(TO_SOCKET(fptr->fd), BIO_NOCLOSE);
     if(bio == NULL) {
       ossl_raise(eSSLError, "ossl_dtls_setup");
@@ -84,15 +88,153 @@ ossl_dtls_setup(VALUE self)
  * call-seq:
  *    ssl.accept => self
  *
- * Waits for a SSL/TLS client to initiate a handshake.  The handshake may be
- * started after unencrypted data has been sent over the socket.
+ * Looks at the incoming (bind(), but not connect()) socket for new incoming
+ * DTLS connections, and return a new SSL context for the resulting connection.
  */
 static VALUE
 ossl_dtls_accept(VALUE self)
 {
+  SSL *ssl;
+  SSL *sslnew;
+  BIO_ADDR   *peer;
+  int oldsock;
+  int new_sock;
+  VALUE dtls_child;
+
+  /* make sure it's all setup */
+  ossl_dtls_setup(self);
+
+  GetSSL(self, ssl);
+
+  /* allocate a new BIO_ADDR */
+  peer = BIO_ADDR_new();
+
+  if(DTLSv1_listen(ssl, peer) == -1) {
+    return self;
+  }
+
+  {
+    char *peername= BIO_ADDR_hostname_string(peer, 1);
+    if(peername) {
+      printf("peername: %s\n", peername);
+      OPENSSL_free(peername);
+    }
+  }
+
+  /* now create a new socket of the same type */
+  {
+    int socket_type = SOCK_DGRAM;
+    int family      = BIO_ADDR_family(peer);
+    int protocol    = 0;  /* UDP has nothing here */
+    unsigned char *addrbuf, *sockname;
+    size_t addrlen;
+
+    /* find out size of addrbuf needed */
+    if(BIO_ADDR_rawaddress(peer, NULL, &addrlen) == 0) {
+      perror("rawaddress size bad");
+      goto error;
+    }
+    addrbuf = alloca(addrlen);
+    sockname= alloca(addrlen);  /* allocate space for sockname */
+    if(!addrbuf) {
+      goto error;
+    }
+
+    if(BIO_ADDR_rawaddress(peer, addrbuf, &addrlen)==0) {
+      perror("rawaddress size bad");
+      goto error;
+    }
+
+    {
+      /* get the local address from the original socket */
+      VALUE io;
+      rb_io_t *fptr;
+
+      io = rb_attr_get(self, id_i_io);
+      GetOpenFile(io, fptr);
+
+      oldsock = TO_SOCKET(fptr->fd);
+      if(getsockname(oldsock, (struct sockaddr *)sockname, (socklen_t *)&addrlen) != 0) {
+        perror("bad getsockname");
+        goto error;
+      }
+    }
+
+    /*
+     * got the address of peer, so set up new socket.  First connect(2)
+     * the socket, and then bind(2) it, so that socket is unique.
+     */
+    new_sock = socket(family, socket_type, protocol);
+    if(connect(new_sock, (struct sockaddr *)sockname, addrlen) != 0) {
+      perror("bad connect");
+      goto error;
+    }
+    if(bind(new_sock, (struct sockaddr *)addrbuf, addrlen) != 0) {
+      perror("dtls_accept");
+      goto error;
+    }
+
+  }
+
+  /* new_sock is now setup, need to allocate new SSL context and insert socket into new bio */
+  sslnew = SSL_new(SSL_get_SSL_CTX(ssl));
+  SSL_set_fd(sslnew, new_sock);
+
+  /* create a new ruby object */
+  dtls_child = TypedData_Wrap_Struct(cSSLSocket, &ossl_ssl_type, NULL);
+
+  /* connect them up. */
+  if (!sslnew)
+    ossl_raise(eSSLError, NULL);
+  RTYPEDDATA_DATA(self) = sslnew;
+
+  SSL_set_ex_data(sslnew, ossl_ssl_ex_ptr_idx, (void *)dtls_child);
+  SSL_set_info_callback(sslnew, ssl_info_cb);
+
+  if(peer) BIO_ADDR_free(peer);
+  peer = NULL;
+
+  /* start the DTLS on it */
+  return ossl_start_ssl(dtls_child, SSL_accept, "SSL_accept", Qfalse);
+
+ error:
+  if(peer) BIO_ADDR_free(peer);
+  peer = NULL;
+
+  return Qnil;
+}
+
+/*
+ * call-seq:
+ *    ssl.accept_nonblock([options]) => self
+ *
+ * Initiates the SSL/TLS handshake as a server in non-blocking manner.
+ *
+ *   # emulates blocking accept
+ *   begin
+ *     ssl.accept_nonblock
+ *   rescue IO::WaitReadable
+ *     IO.select([s2])
+ *     retry
+ *   rescue IO::WaitWritable
+ *     IO.select(nil, [s2])
+ *     retry
+ *   end
+ *
+ * By specifying a keyword argument _exception_ to +false+, you can indicate
+ * that accept_nonblock should not raise an IO::WaitReadable or
+ * IO::WaitWritable exception, but return the symbol +:wait_readable+ or
+ * +:wait_writable+ instead.
+ */
+static VALUE
+ossl_dtls_accept_nonblock(int argc, VALUE *argv, VALUE self)
+{
+    VALUE opts;
+
+    rb_scan_args(argc, argv, "0:", &opts);
     ossl_dtls_setup(self);
 
-    return ossl_start_ssl(self, SSL_accept, "SSL_accept", Qfalse);
+    return ossl_start_ssl(self, SSL_accept, "SSL_accept", opts);
 }
 
 #if 0
@@ -182,38 +324,6 @@ ossl_dtls_connect_nonblock(int argc, VALUE *argv, VALUE self)
     return ossl_start_ssl(self, SSL_connect, "SSL_connect", opts);
 }
 
-/*
- * call-seq:
- *    ssl.accept_nonblock([options]) => self
- *
- * Initiates the SSL/TLS handshake as a server in non-blocking manner.
- *
- *   # emulates blocking accept
- *   begin
- *     ssl.accept_nonblock
- *   rescue IO::WaitReadable
- *     IO.select([s2])
- *     retry
- *   rescue IO::WaitWritable
- *     IO.select(nil, [s2])
- *     retry
- *   end
- *
- * By specifying a keyword argument _exception_ to +false+, you can indicate
- * that accept_nonblock should not raise an IO::WaitReadable or
- * IO::WaitWritable exception, but return the symbol +:wait_readable+ or
- * +:wait_writable+ instead.
- */
-static VALUE
-ossl_dtls_accept_nonblock(int argc, VALUE *argv, VALUE self)
-{
-    VALUE opts;
-
-    rb_scan_args(argc, argv, "0:", &opts);
-    ossl_dtls_setup(self);
-
-    return ossl_start_ssl(self, SSL_accept, "SSL_accept", opts);
-}
 
 #endif /* 0 */
 #endif /* !defined(OPENSSL_NO_SOCK) */
@@ -248,4 +358,6 @@ Init_ossl_dtls(void)
 
     cDTLSSocket = rb_define_class_under(mSSL, "DTLSSocket", cSSLSocket);
     rb_define_method(cDTLSSocket, "accept",     ossl_dtls_accept, 0);
+    rb_define_method(cDTLSSocket, "accept_nonblock", ossl_dtls_accept_nonblock, -1);
+    //printf("\n\nsetting cDTLSSocket.accept to %p\n", ossl_dtls_accept);
 }

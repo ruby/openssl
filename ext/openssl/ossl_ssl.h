@@ -29,6 +29,9 @@ extern const rb_data_type_t ossl_ssl_session_type;
 extern VALUE mSSL;
 extern VALUE cSSLSocket;
 extern VALUE cSSLSession;
+extern int ossl_ssl_ex_ptr_idx;
+extern void ssl_info_cb(const SSL *ssl, int where, int val);
+
 
 #ifdef _WIN32
 #  define TO_SOCKET(s) _get_osfhandle(s)
