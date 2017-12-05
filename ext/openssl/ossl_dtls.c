@@ -92,27 +92,51 @@ ossl_dtls_setup(VALUE self)
  * DTLS connections, and return a new SSL context for the resulting connection.
  */
 static VALUE
-ossl_dtls_accept(VALUE self)
+ossl_dtls_start_accept(VALUE self, VALUE opts)
 {
+    int nonblock = opts != Qfalse;
   SSL *ssl;
   SSL *sslnew;
   BIO_ADDR   *peer;
   int oldsock;
   int new_sock;
+  rb_io_t *fptr;
   VALUE dtls_child;
+  int ret;
 
   /* make sure it's all setup */
   ossl_dtls_setup(self);
 
   GetSSL(self, ssl);
+  GetOpenFile(rb_attr_get(self, id_i_io), fptr);
 
   /* allocate a new BIO_ADDR */
   peer = BIO_ADDR_new();
 
-  if(DTLSv1_listen(ssl, peer) == -1) {
+  ret = -1;
+  while(ret != 0) {
+    ret = DTLSv1_listen(ssl, peer);
+
+    if(ret == 0) {
+      if (no_exception_p(opts)) { return sym_wait_readable; }
+      read_would_block(nonblock);
+      rb_io_wait_readable(fptr->fd);
+    }
+  }
+
+  if(ret == -1) {
+    /* this is an error */
+    ossl_raise(eSSLError, "%s SYSCALL returned=%d errno=%d state=%s", "DTLSv1_listen", ret, errno, SSL_state_string_long(ssl));
     return self;
   }
 
+  if(ret != 1) {
+    /* this is no data present, would block */
+    printf("DTLSv1_listen returned: %d\n", ret);
+    return Qnil;
+  }
+
+  /* a return of 1 means that a connection is present */
   {
     char *peername= BIO_ADDR_hostname_string(peer, 1);
     if(peername) {
@@ -204,6 +228,12 @@ ossl_dtls_accept(VALUE self)
   return Qnil;
 }
 
+static VALUE
+ossl_dtls_accept(VALUE self)
+{
+    return ossl_dtls_start_accept(self, Qfalse);
+}
+
 /*
  * call-seq:
  *    ssl.accept_nonblock([options]) => self
@@ -234,7 +264,7 @@ ossl_dtls_accept_nonblock(int argc, VALUE *argv, VALUE self)
     rb_scan_args(argc, argv, "0:", &opts);
     ossl_dtls_setup(self);
 
-    return ossl_start_ssl(self, SSL_accept, "SSL_accept", opts);
+    return ossl_dtls_start_accept(self, opts);
 }
 
 #if 0

@@ -51,6 +51,10 @@ extern ID id_i_io, id_i_context, id_i_hostname;
 extern VALUE ossl_start_ssl(VALUE self, int (*func)(),
                             const char *funcname, VALUE opts);
 
+extern int no_exception_p(VALUE opts);
+extern void read_would_block(int nonblock);
+extern VALUE sym_exception, sym_wait_readable, sym_wait_writable;
+
 void Init_ossl_ssl(void);
 void Init_ossl_ssl_session(void);
 

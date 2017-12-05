@@ -28,7 +28,7 @@ static VALUE eSSLErrorWaitWritable;
 
 static ID id_call, ID_callback_state, id_tmp_dh_callback, id_tmp_ecdh_callback,
 	  id_npn_protocols_encoded;
-static VALUE sym_exception, sym_wait_readable, sym_wait_writable;
+VALUE sym_exception, sym_wait_readable, sym_wait_writable;
 
 static ID id_i_cert_store, id_i_ca_file, id_i_ca_path, id_i_verify_mode,
 	  id_i_verify_depth, id_i_verify_callback, id_i_client_ca,
@@ -1504,14 +1504,14 @@ write_would_block(int nonblock)
 	ossl_raise(eSSLErrorWaitWritable, "write would block");
 }
 
-static void
+void
 read_would_block(int nonblock)
 {
     if (nonblock)
 	ossl_raise(eSSLErrorWaitReadable, "read would block");
 }
 
-static int
+int
 no_exception_p(VALUE opts)
 {
     if (RB_TYPE_P(opts, T_HASH) &&
