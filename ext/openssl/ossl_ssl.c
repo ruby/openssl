@@ -1034,10 +1034,6 @@ ossl_sslctx_set_ciphers(VALUE self, VALUE v)
     }
 
     GetSSLCTX(self, ctx);
-    if(!ctx){
-        ossl_raise(eSSLError, "SSL_CTX is not initialized.");
-        return Qnil;
-    }
     if (!SSL_CTX_set_cipher_list(ctx, StringValueCStr(str))) {
         ossl_raise(eSSLError, "SSL_CTX_set_cipher_list");
     }
