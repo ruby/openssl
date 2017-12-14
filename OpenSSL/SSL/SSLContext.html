@@ -774,7 +774,7 @@ necessary.</p>
           
           <div class="method-source-code" id="new-source">
             <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 119</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">version</span> = <span class="ruby-keyword">nil</span>)
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">initialize</span>(<span class="ruby-identifier">version</span> = <span class="ruby-keyword">nil</span>)
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">options</span> <span class="ruby-operator">|=</span> <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">OP_ALL</span>
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">ssl_version</span> = <span class="ruby-identifier">version</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">version</span>
 <span class="ruby-keyword">end</span></pre>
@@ -1060,10 +1060,6 @@ ossl_sslctx_set_ciphers(VALUE self, VALUE v)
     }
 
     GetSSLCTX(self, ctx);
-    if(!ctx){
-        ossl_raise(eSSLError, &quot;SSL_CTX is not initialized.&quot;);
-        return Qnil;
-    }
     if (!SSL_CTX_set_cipher_list(ctx, StringValueCStr(str))) {
         ossl_raise(eSSLError, &quot;SSL_CTX_set_cipher_list&quot;);
     }
@@ -1355,7 +1351,7 @@ possible values.</p>
           
           <div class="method-source-code" id="max_version-3D-source">
             <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 180</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">max_version=</span>(<span class="ruby-identifier">version</span>)
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">max_version=</span>(<span class="ruby-identifier">version</span>)
   <span class="ruby-identifier">set_minmax_proto_version</span>(<span class="ruby-ivar">@min_proto_version</span> <span class="ruby-operator">||=</span> <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">version</span>)
   <span class="ruby-ivar">@max_proto_version</span> = <span class="ruby-identifier">version</span>
 <span class="ruby-keyword">end</span></pre>
@@ -1424,7 +1420,7 @@ href="SSLContext.html#method-i-max_version-3D">max_version=</a>.</p>
           
           <div class="method-source-code" id="min_version-3D-source">
             <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 168</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">min_version=</span>(<span class="ruby-identifier">version</span>)
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">min_version=</span>(<span class="ruby-identifier">version</span>)
   <span class="ruby-identifier">set_minmax_proto_version</span>(<span class="ruby-identifier">version</span>, <span class="ruby-ivar">@max_proto_version</span> <span class="ruby-operator">||=</span> <span class="ruby-keyword">nil</span>)
   <span class="ruby-ivar">@min_proto_version</span> = <span class="ruby-identifier">version</span>
 <span class="ruby-keyword">end</span></pre>
@@ -2026,7 +2022,7 @@ then the system default certificate store is used.</p>
           
           <div class="method-source-code" id="set_params-source">
             <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 136</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">set_params</span>(<span class="ruby-identifier">params</span>={})
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">set_params</span>(<span class="ruby-identifier">params</span>={})
   <span class="ruby-identifier">params</span> = <span class="ruby-constant">DEFAULT_PARAMS</span>.<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">params</span>)
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">options</span> = <span class="ruby-identifier">params</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-value">:options</span>) <span class="ruby-comment"># set before min_version/max_version</span>
   <span class="ruby-identifier">params</span>.<span class="ruby-identifier">each</span>{<span class="ruby-operator">|</span><span class="ruby-identifier">name</span>, <span class="ruby-identifier">value</span><span class="ruby-operator">|</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">__send__</span>(<span class="ruby-node">&quot;#{name}=&quot;</span>, <span class="ruby-identifier">value</span>) }
@@ -2319,7 +2315,7 @@ href="SSLContext.html#method-i-max_version-3D">max_version=</a> instead.</p>
           
           <div class="method-source-code" id="ssl_version-3D-source">
             <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 199</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">ssl_version=</span>(<span class="ruby-identifier">meth</span>)
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">ssl_version=</span>(<span class="ruby-identifier">meth</span>)
   <span class="ruby-identifier">meth</span> = <span class="ruby-identifier">meth</span>.<span class="ruby-identifier">to_s</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">meth</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Symbol</span>)
   <span class="ruby-keyword">if</span> <span class="ruby-regexp">/(?&lt;type&gt;_client|_server)\z/</span> <span class="ruby-operator">=~</span> <span class="ruby-identifier">meth</span>
     <span class="ruby-identifier">meth</span> = <span class="ruby-node">$`</span>
@@ -2350,7 +2346,7 @@ href="SSLContext.html#method-i-max_version-3D">max_version=</a> instead.</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.0.beta3.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

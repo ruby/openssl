@@ -226,7 +226,7 @@ module.</p>
           
           <div class="method-source-code" id="new-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 38</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-operator">*</span>)
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">initialize</span>(<span class="ruby-operator">*</span>)
   <span class="ruby-keyword">super</span>
   <span class="ruby-ivar">@eof</span> = <span class="ruby-keyword">false</span>
   <span class="ruby-ivar">@rbuffer</span> = <span class="ruby-string">&quot;&quot;</span>
@@ -271,7 +271,7 @@ using <code>.to_s</code> method.</p>
           
           <div class="method-source-code" id="3C-3C-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 393</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">&lt;&lt;</span>(<span class="ruby-identifier">s</span>)
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">&lt;&lt;</span>(<span class="ruby-identifier">s</span>)
   <span class="ruby-identifier">do_write</span>(<span class="ruby-identifier">s</span>)
   <span class="ruby-keyword">self</span>
 <span class="ruby-keyword">end</span></pre>
@@ -305,7 +305,7 @@ using <code>.to_s</code> method.</p>
           
           <div class="method-source-code" id="close-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 456</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">close</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">close</span>
   <span class="ruby-identifier">flush</span> <span class="ruby-keyword">rescue</span> <span class="ruby-keyword">nil</span>
   <span class="ruby-identifier">sysclose</span>
 <span class="ruby-keyword">end</span></pre>
@@ -342,7 +342,7 @@ by <em>eol</em>.</p>
           
           <div class="method-source-code" id="each-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 225</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">each</span>(<span class="ruby-identifier">eol</span>=<span class="ruby-identifier">$/</span>)
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">each</span>(<span class="ruby-identifier">eol</span>=<span class="ruby-identifier">$/</span>)
   <span class="ruby-keyword">while</span> <span class="ruby-identifier">line</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">gets</span>(<span class="ruby-identifier">eol</span>)
     <span class="ruby-keyword">yield</span> <span class="ruby-identifier">line</span>
   <span class="ruby-keyword">end</span>
@@ -381,7 +381,7 @@ by <em>eol</em>.</p>
           
           <div class="method-source-code" id="each_byte-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 266</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">each_byte</span> <span class="ruby-comment"># :yields: byte</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">each_byte</span> <span class="ruby-comment"># :yields: byte</span>
   <span class="ruby-keyword">while</span> <span class="ruby-identifier">c</span> = <span class="ruby-identifier">getc</span>
     <span class="ruby-keyword">yield</span>(<span class="ruby-identifier">c</span>.<span class="ruby-identifier">ord</span>)
   <span class="ruby-keyword">end</span>
@@ -473,7 +473,7 @@ be read.</p>
           
           <div class="method-source-code" id="eof-3F-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 297</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">eof?</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">eof?</span>
   <span class="ruby-identifier">fill_rbuff</span> <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span><span class="ruby-ivar">@eof</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-ivar">@rbuffer</span>.<span class="ruby-identifier">empty?</span>
   <span class="ruby-ivar">@eof</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-ivar">@rbuffer</span>.<span class="ruby-identifier">empty?</span>
 <span class="ruby-keyword">end</span></pre>
@@ -511,7 +511,7 @@ be read.</p>
           
           <div class="method-source-code" id="flush-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 444</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">flush</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">flush</span>
   <span class="ruby-identifier">osync</span> = <span class="ruby-ivar">@sync</span>
   <span class="ruby-ivar">@sync</span> = <span class="ruby-keyword">true</span>
   <span class="ruby-identifier">do_write</span> <span class="ruby-string">&quot;&quot;</span>
@@ -549,7 +549,7 @@ be read.</p>
           
           <div class="method-source-code" id="getc-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 259</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">getc</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">getc</span>
   <span class="ruby-identifier">read</span>(<span class="ruby-value">1</span>)
 <span class="ruby-keyword">end</span></pre>
           </div>
@@ -590,7 +590,7 @@ than the given number of bytes.</p>
           
           <div class="method-source-code" id="gets-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 201</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">gets</span>(<span class="ruby-identifier">eol</span>=<span class="ruby-identifier">$/</span>, <span class="ruby-identifier">limit</span>=<span class="ruby-keyword">nil</span>)
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">gets</span>(<span class="ruby-identifier">eol</span>=<span class="ruby-identifier">$/</span>, <span class="ruby-identifier">limit</span>=<span class="ruby-keyword">nil</span>)
   <span class="ruby-identifier">idx</span> = <span class="ruby-ivar">@rbuffer</span>.<span class="ruby-identifier">index</span>(<span class="ruby-identifier">eol</span>)
   <span class="ruby-keyword">until</span> <span class="ruby-ivar">@eof</span>
     <span class="ruby-keyword">break</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">idx</span>
@@ -639,7 +639,7 @@ than the given number of bytes.</p>
           
           <div class="method-source-code" id="print-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 423</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">print</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">args</span>)
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">print</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">args</span>)
   <span class="ruby-identifier">s</span> = <span class="ruby-string">&quot;&quot;</span>
   <span class="ruby-identifier">args</span>.<span class="ruby-identifier">each</span>{ <span class="ruby-operator">|</span><span class="ruby-identifier">arg</span><span class="ruby-operator">|</span> <span class="ruby-identifier">s</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">arg</span>.<span class="ruby-identifier">to_s</span> }
   <span class="ruby-identifier">do_write</span>(<span class="ruby-identifier">s</span>)
@@ -678,7 +678,7 @@ format string.</p>
           
           <div class="method-source-code" id="printf-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 436</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">printf</span>(<span class="ruby-identifier">s</span>, <span class="ruby-operator">*</span><span class="ruby-identifier">args</span>)
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">printf</span>(<span class="ruby-identifier">s</span>, <span class="ruby-operator">*</span><span class="ruby-identifier">args</span>)
   <span class="ruby-identifier">do_write</span>(<span class="ruby-identifier">s</span> <span class="ruby-operator">%</span> <span class="ruby-identifier">args</span>)
   <span class="ruby-keyword">nil</span>
 <span class="ruby-keyword">end</span></pre>
@@ -714,7 +714,7 @@ format string.</p>
           
           <div class="method-source-code" id="puts-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 403</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">puts</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">args</span>)
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">puts</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">args</span>)
   <span class="ruby-identifier">s</span> = <span class="ruby-string">&quot;&quot;</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">args</span>.<span class="ruby-identifier">empty?</span>
     <span class="ruby-identifier">s</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-string">&quot;\n&quot;</span>
@@ -761,7 +761,7 @@ must reference a string which will receive the data.</p>
           
           <div class="method-source-code" id="read-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 85</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">read</span>(<span class="ruby-identifier">size</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">buf</span>=<span class="ruby-keyword">nil</span>)
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">read</span>(<span class="ruby-identifier">size</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">buf</span>=<span class="ruby-keyword">nil</span>)
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">size</span> <span class="ruby-operator">==</span> <span class="ruby-value">0</span>
     <span class="ruby-keyword">if</span> <span class="ruby-identifier">buf</span>
       <span class="ruby-identifier">buf</span>.<span class="ruby-identifier">clear</span>
@@ -854,7 +854,7 @@ it will return <code>nil</code> instead of raising EOFError.</p>
           
           <div class="method-source-code" id="read_nonblock-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 170</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">read_nonblock</span>(<span class="ruby-identifier">maxlen</span>, <span class="ruby-identifier">buf</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-value">exception:</span> <span class="ruby-keyword">true</span>)
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">read_nonblock</span>(<span class="ruby-identifier">maxlen</span>, <span class="ruby-identifier">buf</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-value">exception:</span> <span class="ruby-keyword">true</span>)
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">maxlen</span> <span class="ruby-operator">==</span> <span class="ruby-value">0</span>
     <span class="ruby-keyword">if</span> <span class="ruby-identifier">buf</span>
       <span class="ruby-identifier">buf</span>.<span class="ruby-identifier">clear</span>
@@ -904,7 +904,7 @@ file.</p>
           
           <div class="method-source-code" id="readchar-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 276</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">readchar</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">readchar</span>
   <span class="ruby-identifier">raise</span> <span class="ruby-constant">EOFError</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">eof?</span>
   <span class="ruby-identifier">getc</span>
 <span class="ruby-keyword">end</span></pre>
@@ -940,7 +940,7 @@ file.</p>
           
           <div class="method-source-code" id="readline-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 250</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">readline</span>(<span class="ruby-identifier">eol</span>=<span class="ruby-identifier">$/</span>)
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">readline</span>(<span class="ruby-identifier">eol</span>=<span class="ruby-identifier">$/</span>)
   <span class="ruby-identifier">raise</span> <span class="ruby-constant">EOFError</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">eof?</span>
   <span class="ruby-identifier">gets</span>(<span class="ruby-identifier">eol</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -976,7 +976,7 @@ file.</p>
           
           <div class="method-source-code" id="readlines-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 237</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">readlines</span>(<span class="ruby-identifier">eol</span>=<span class="ruby-identifier">$/</span>)
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">readlines</span>(<span class="ruby-identifier">eol</span>=<span class="ruby-identifier">$/</span>)
   <span class="ruby-identifier">ary</span> = []
   <span class="ruby-keyword">while</span> <span class="ruby-identifier">line</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">gets</span>(<span class="ruby-identifier">eol</span>)
     <span class="ruby-identifier">ary</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">line</span>
@@ -1016,7 +1016,7 @@ provided it must reference a string which will receive the data.</p>
           
           <div class="method-source-code" id="readpartial-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 112</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">readpartial</span>(<span class="ruby-identifier">maxlen</span>, <span class="ruby-identifier">buf</span>=<span class="ruby-keyword">nil</span>)
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">readpartial</span>(<span class="ruby-identifier">maxlen</span>, <span class="ruby-identifier">buf</span>=<span class="ruby-keyword">nil</span>)
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">maxlen</span> <span class="ruby-operator">==</span> <span class="ruby-value">0</span>
     <span class="ruby-keyword">if</span> <span class="ruby-identifier">buf</span>
       <span class="ruby-identifier">buf</span>.<span class="ruby-identifier">clear</span>
@@ -1074,7 +1074,7 @@ buffered character read will return it.</p>
           
           <div class="method-source-code" id="ungetc-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 289</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">ungetc</span>(<span class="ruby-identifier">c</span>)
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">ungetc</span>(<span class="ruby-identifier">c</span>)
   <span class="ruby-ivar">@rbuffer</span>[<span class="ruby-value">0</span>,<span class="ruby-value">0</span>] = <span class="ruby-identifier">c</span>.<span class="ruby-identifier">chr</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
@@ -1109,7 +1109,7 @@ written.</p>
           
           <div class="method-source-code" id="write-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 340</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">write</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">s</span>)
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">write</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">s</span>)
   <span class="ruby-identifier">s</span>.<span class="ruby-identifier">inject</span>(<span class="ruby-value">0</span>) <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">written</span>, <span class="ruby-identifier">str</span><span class="ruby-operator">|</span>
     <span class="ruby-identifier">do_write</span>(<span class="ruby-identifier">str</span>)
     <span class="ruby-identifier">written</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">str</span>.<span class="ruby-identifier">bytesize</span>
@@ -1193,7 +1193,7 @@ not raise an IO::Wait*able exception, but return the symbol
           
           <div class="method-source-code" id="write_nonblock-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 384</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">write_nonblock</span>(<span class="ruby-identifier">s</span>, <span class="ruby-value">exception:</span> <span class="ruby-keyword">true</span>)
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">write_nonblock</span>(<span class="ruby-identifier">s</span>, <span class="ruby-value">exception:</span> <span class="ruby-keyword">true</span>)
   <span class="ruby-identifier">flush</span>
   <span class="ruby-identifier">syswrite_nonblock</span>(<span class="ruby-identifier">s</span>, <span class="ruby-value">exception:</span> <span class="ruby-identifier">exception</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -1215,7 +1215,7 @@ not raise an IO::Wait*able exception, but return the symbol
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.0.beta3.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 
