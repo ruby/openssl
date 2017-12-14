@@ -1,5 +1,5 @@
-Version 2.1.0.beta2
-===================
+Version 2.1.0
+=============
 
 Notable changes
 ---------------
@@ -50,6 +50,9 @@ Notable changes
   [[GitHub #169]](https://github.com/ruby/openssl/pull/169)
 * OpenSSL::SSL::SSLContext#add_certificate is added.
   [[GitHub #167]](https://github.com/ruby/openssl/pull/167)
+* OpenSSL::PKey::EC::Point#to_octet_string is added.
+  OpenSSL::PKey::EC::Point.new can now take String as the second argument.
+  [[GitHub #177]](https://github.com/ruby/openssl/pull/177)
 
 
 Version 2.0.7
