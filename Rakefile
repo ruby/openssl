@@ -15,6 +15,12 @@ Rake::TestTask.new do |t|
   t.warning = true
 end
 
+Rake::TestTask.new do |t|
+  t.libs = ['test'] # Do not use our 'openssl.so' 
+  t.test_files = FileList['test/test_kdf.rb']
+  t.warning = true
+end
+
 RDoc::Task.new do |rdoc|
   rdoc.main = "README.md"
   rdoc.rdoc_files.include("*.md", "lib/**/*.rb", "ext/**/*.c")
@@ -23,6 +29,8 @@ end
 task :test => [:compile, :debug]
 task :debug do
   ruby "-I./lib -ropenssl -ve'puts OpenSSL::OPENSSL_VERSION, OpenSSL::OPENSSL_LIBRARY_VERSION'"
+  puts "Stock Ruby module:"
+  ruby "-ropenssl -ve'puts OpenSSL::OPENSSL_VERSION, OpenSSL::OPENSSL_LIBRARY_VERSION'"
 end
 
 task :install_dependencies do
