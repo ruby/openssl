@@ -4,13 +4,21 @@ require_relative 'utils'
 if defined?(OpenSSL)
 
 class OpenSSL::TestKDF < OpenSSL::TestCase
+
+  def test_pkcs5_pbkdf2_hmac_old_api
+    expected = OpenSSL::PKCS5.pbkdf2_hmac("password", "salt", 1, 20, "sha1")
+    assert_equal(expected, OpenSSL::PKCS5.pbkdf2_hmac_sha1("password", "salt", 1, 20))
+  end
+
   def test_pkcs5_pbkdf2_hmac_compatibility
+    kdf?
     expected = OpenSSL::KDF.pbkdf2_hmac("password", salt: "salt", iterations: 1, length: 20, hash: "sha1")
     assert_equal(expected, OpenSSL::PKCS5.pbkdf2_hmac("password", "salt", 1, 20, "sha1"))
     assert_equal(expected, OpenSSL::PKCS5.pbkdf2_hmac_sha1("password", "salt", 1, 20))
   end
 
   def test_pbkdf2_hmac_sha1_rfc6070_c_1_len_20
+    kdf?
     p ="password"
     s = "salt"
     c = 1
@@ -24,6 +32,7 @@ class OpenSSL::TestKDF < OpenSSL::TestCase
   end
 
   def test_pbkdf2_hmac_sha1_rfc6070_c_2_len_20
+    kdf?
     p ="password"
     s = "salt"
     c = 2
@@ -37,6 +46,7 @@ class OpenSSL::TestKDF < OpenSSL::TestCase
   end
 
   def test_pbkdf2_hmac_sha1_rfc6070_c_4096_len_20
+    kdf?
     p ="password"
     s = "salt"
     c = 4096
@@ -51,6 +61,7 @@ class OpenSSL::TestKDF < OpenSSL::TestCase
 
 # takes too long!
 #  def test_pbkdf2_hmac_sha1_rfc6070_c_16777216_len_20
+#    kdf?
 #    p ="password"
 #    s = "salt"
 #    c = 16777216
@@ -64,6 +75,7 @@ class OpenSSL::TestKDF < OpenSSL::TestCase
 #  end
 
   def test_pbkdf2_hmac_sha1_rfc6070_c_4096_len_25
+    kdf?
     p ="passwordPASSWORDpassword"
     s = "saltSALTsaltSALTsaltSALTsaltSALTsalt"
     c = 4096
@@ -79,6 +91,7 @@ class OpenSSL::TestKDF < OpenSSL::TestCase
   end
 
   def test_pbkdf2_hmac_sha1_rfc6070_c_4096_len_16
+    kdf?
     p ="pass\0word"
     s = "sa\0lt"
     c = 4096
@@ -91,6 +104,7 @@ class OpenSSL::TestKDF < OpenSSL::TestCase
   end
 
   def test_pbkdf2_hmac_sha256_c_20000_len_32
+    kdf?
     #unfortunately no official test vectors available yet for SHA-2
     p ="password"
     s = OpenSSL::Random.random_bytes(16)
@@ -102,6 +116,7 @@ class OpenSSL::TestKDF < OpenSSL::TestCase
   end
 
   def test_scrypt_rfc7914_first
+    kdf?
     pend "scrypt is not implemented" unless OpenSSL::KDF.respond_to?(:scrypt) # OpenSSL >= 1.1.0
     pass = ""
     salt = ""
@@ -117,6 +132,7 @@ class OpenSSL::TestKDF < OpenSSL::TestCase
   end
 
   def test_scrypt_rfc7914_second
+    kdf?
     pend "scrypt is not implemented" unless OpenSSL::KDF.respond_to?(:scrypt) # OpenSSL >= 1.1.0
     pass = "password"
     salt = "NaCl"
@@ -132,6 +148,7 @@ class OpenSSL::TestKDF < OpenSSL::TestCase
   end
 
   def test_hkdf_rfc5869_test_case_1
+    kdf?
     pend "HKDF is not implemented" unless OpenSSL::KDF.respond_to?(:hkdf) # OpenSSL >= 1.1.0
     hash = "sha256"
     ikm = B("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b")
@@ -146,6 +163,7 @@ class OpenSSL::TestKDF < OpenSSL::TestCase
   end
 
   def test_hkdf_rfc5869_test_case_3
+    kdf?
     pend "HKDF is not implemented" unless OpenSSL::KDF.respond_to?(:hkdf) # OpenSSL >= 1.1.0
     hash = "sha256"
     ikm = B("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b")
@@ -160,6 +178,7 @@ class OpenSSL::TestKDF < OpenSSL::TestCase
   end
 
   def test_hkdf_rfc5869_test_case_4
+    kdf?
     pend "HKDF is not implemented" unless OpenSSL::KDF.respond_to?(:hkdf) # OpenSSL >= 1.1.0
     hash = "sha1"
     ikm = B("0b0b0b0b0b0b0b0b0b0b0b")
@@ -174,6 +193,10 @@ class OpenSSL::TestKDF < OpenSSL::TestCase
   end
 
   private
+
+  def kdf?
+    pend "OpenSSL::KDF module not loaded" unless defined?(OpenSSL::KDF)
+  end
 
   def B(ary)
     [Array(ary).join].pack("H*")
