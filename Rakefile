@@ -10,15 +10,32 @@ rescue LoadError
     "install testing dependency gems."
 end
 
-Rake::TestTask.new do |t|
-  t.libs << 'test'
-  t.warning = true
+namespace :compiled do
+  Rake::TestTask.new do |t|
+    t.description = 'test compiled openssl.so'
+    t.libs << 'test'
+    t.warning = true
+  end
 end
 
-Rake::TestTask.new do |t|
-  t.libs = ['test'] # Do not use our 'openssl.so' 
-  t.test_files = FileList['test/test_kdf.rb']
-  t.warning = true
+namespace :builtin do
+  desc "Check if a stock openssl.so module is available"
+  task :check do
+      puts "Stock Ruby module:"
+      ruby "-ropenssl -ve'puts OpenSSL::OPENSSL_VERSION, OpenSSL::OPENSSL_LIBRARY_VERSION'" do |ok, res|
+	if ! ok
+	  puts "Ruby interpreter does not have openssl built in"
+	  Rake::Task['builtin:test'].clear_actions()
+	end
+      end
+  end
+
+  Rake::TestTask.new do |t|
+    t.description = 'test stock openssl.so'
+    t.libs = ['test']
+    t.test_files = FileList['test/test_kdf.rb']
+    t.warning = true
+  end
 end
 
 RDoc::Task.new do |rdoc|
@@ -26,11 +43,9 @@ RDoc::Task.new do |rdoc|
   rdoc.rdoc_files.include("*.md", "lib/**/*.rb", "ext/**/*.c")
 end
 
-task :test => [:compile, :debug]
+task :test => [:compile, :debug, "builtin:check", "builtin:test", "compiled:test"]
 task :debug do
   ruby "-I./lib -ropenssl -ve'puts OpenSSL::OPENSSL_VERSION, OpenSSL::OPENSSL_LIBRARY_VERSION'"
-  puts "Stock Ruby module:"
-  ruby "-ropenssl -ve'puts OpenSSL::OPENSSL_VERSION, OpenSSL::OPENSSL_LIBRARY_VERSION'"
 end
 
 task :install_dependencies do
