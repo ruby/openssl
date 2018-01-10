@@ -57,6 +57,7 @@ ossl_dtlsctx_s_alloc(VALUE klass)
 }
 
 #ifndef OPENSSL_NO_SOCK
+#if HAVE_DTLSV1_ACCEPT
 static VALUE
 ossl_dtls_setup(VALUE self)
 {
@@ -95,137 +96,74 @@ static VALUE
 ossl_dtls_start_accept(VALUE self, VALUE opts)
 {
     int nonblock = opts != Qfalse;
-  SSL *ssl;
-  SSL *sslnew;
-  BIO_ADDR   *peer;
-  int oldsock;
-  int new_sock;
-  rb_io_t *fptr;
-  VALUE dtls_child;
-  int ret;
+    SSL *ssl;
+    SSL *sslnew;
+    BIO_ADDR   *peer;
+    rb_io_t *fptr;
+    VALUE dtls_child;
+    int ret;
 
-  /* make sure it's all setup */
-  ossl_dtls_setup(self);
+    /* make sure it's all setup */
+    ossl_dtls_setup(self);
 
-  GetSSL(self, ssl);
-  GetOpenFile(rb_attr_get(self, id_i_io), fptr);
+    GetSSL(self, ssl);
+    GetOpenFile(rb_attr_get(self, id_i_io), fptr);
 
-  /* allocate a new BIO_ADDR */
-  peer = BIO_ADDR_new();
+    /* allocate a new BIO_ADDR */
+    sslnew = SSL_new(SSL_get_SSL_CTX(ssl));
 
-  ret = -1;
-  while(ret != 0) {
-    ret = DTLSv1_listen(ssl, peer);
+    peer = BIO_ADDR_new();
 
-    if(ret == 0) {
-      if (no_exception_p(opts)) { return sym_wait_readable; }
-      read_would_block(nonblock);
-      rb_io_wait_readable(fptr->fd);
-    }
-  }
+    while(ret != 0) {
+      ret = DTLSv1_accept(ssl, sslnew, peer);
 
-  if(ret == -1) {
-    /* this is an error */
-    ossl_raise(eSSLError, "%s SYSCALL returned=%d errno=%d state=%s", "DTLSv1_listen", ret, errno, SSL_state_string_long(ssl));
-    return self;
-  }
-
-  if(ret != 1) {
-    /* this is no data present, would block */
-    printf("DTLSv1_listen returned: %d\n", ret);
-    return Qnil;
-  }
-
-  /* a return of 1 means that a connection is present */
-  {
-    char *peername= BIO_ADDR_hostname_string(peer, 1);
-    if(peername) {
-      printf("peername: %s\n", peername);
-      OPENSSL_free(peername);
-    }
-  }
-
-  /* now create a new socket of the same type */
-  {
-    int socket_type = SOCK_DGRAM;
-    int family      = BIO_ADDR_family(peer);
-    int protocol    = 0;  /* UDP has nothing here */
-    unsigned char *addrbuf, *sockname;
-    size_t addrlen;
-
-    /* find out size of addrbuf needed */
-    if(BIO_ADDR_rawaddress(peer, NULL, &addrlen) == 0) {
-      perror("rawaddress size bad");
-      goto error;
-    }
-    addrbuf = alloca(addrlen);
-    sockname= alloca(addrlen);  /* allocate space for sockname */
-    if(!addrbuf) {
-      goto error;
-    }
-
-    if(BIO_ADDR_rawaddress(peer, addrbuf, &addrlen)==0) {
-      perror("rawaddress size bad");
-      goto error;
-    }
-
-    {
-      /* get the local address from the original socket */
-      VALUE io;
-      rb_io_t *fptr;
-
-      io = rb_attr_get(self, id_i_io);
-      GetOpenFile(io, fptr);
-
-      oldsock = TO_SOCKET(fptr->fd);
-      if(getsockname(oldsock, (struct sockaddr *)sockname, (socklen_t *)&addrlen) != 0) {
-        perror("bad getsockname");
-        goto error;
+      if(ret == 0) {
+        if (no_exception_p(opts)) { return sym_wait_readable; }
+        read_would_block(nonblock);
+        rb_io_wait_readable(fptr->fd);
       }
     }
 
-    /*
-     * got the address of peer, so set up new socket.  First connect(2)
-     * the socket, and then bind(2) it, so that socket is unique.
-     */
-    new_sock = socket(family, socket_type, protocol);
-    if(connect(new_sock, (struct sockaddr *)sockname, addrlen) != 0) {
-      perror("bad connect");
-      goto error;
-    }
-    if(bind(new_sock, (struct sockaddr *)addrbuf, addrlen) != 0) {
-      perror("dtls_accept");
-      goto error;
+    if(ret == -1) {
+      /* this is an error */
+      ossl_raise(eSSLError, "%s SYSCALL returned=%d errno=%d state=%s", "DTLSv1_listen", ret, errno, SSL_state_string_long(ssl));
+      return self;
     }
 
-  }
+    if(ret != 1) {
+      /* this is no data present, would block */
+      printf("DTLSv1_listen returned: %d\n", ret);
+      return Qnil;
+    }
 
-  /* new_sock is now setup, need to allocate new SSL context and insert socket into new bio */
-  sslnew = SSL_new(SSL_get_SSL_CTX(ssl));
-  SSL_set_fd(sslnew, new_sock);
+    /* a return of 1 means that a connection is present */
+    {
+      char *peername= BIO_ADDR_hostname_string(peer, 1);
+      if(peername) {
+        printf("peername: %s\n", peername);
+        OPENSSL_free(peername);
+      }
+    }
 
-  /* create a new ruby object */
-  dtls_child = TypedData_Wrap_Struct(cSSLSocket, &ossl_ssl_type, NULL);
+    /* sslnew contains an initialized SSL, which has a new socket connected to it */
 
-  /* connect them up. */
-  if (!sslnew)
-    ossl_raise(eSSLError, NULL);
-  RTYPEDDATA_DATA(self) = sslnew;
+    /* new_sock is now setup, need to allocate new SSL context and insert socket into new bio */
+    /* create a new ruby object */
+    dtls_child = TypedData_Wrap_Struct(cSSLSocket, &ossl_ssl_type, NULL);
 
-  SSL_set_ex_data(sslnew, ossl_ssl_ex_ptr_idx, (void *)dtls_child);
-  SSL_set_info_callback(sslnew, ssl_info_cb);
+    /* connect them up. */
+    if (!sslnew)
+      ossl_raise(eSSLError, NULL);
+    RTYPEDDATA_DATA(self) = sslnew;
 
-  if(peer) BIO_ADDR_free(peer);
-  peer = NULL;
+    SSL_set_ex_data(sslnew, ossl_ssl_ex_ptr_idx, (void *)dtls_child);
+    SSL_set_info_callback(sslnew, ssl_info_cb);
 
-  /* start the DTLS on it */
-  return ossl_start_ssl(dtls_child, SSL_accept, "SSL_accept", Qfalse);
+    if(peer) BIO_ADDR_free(peer);
+    peer = NULL;
 
- error:
-  if(peer) BIO_ADDR_free(peer);
-  peer = NULL;
-
-  return Qnil;
+    /* start the DTLS on it */
+    return ossl_start_ssl(dtls_child, SSL_accept, "SSL_accept", Qfalse);
 }
 
 static VALUE
@@ -266,6 +204,7 @@ ossl_dtls_accept_nonblock(int argc, VALUE *argv, VALUE self)
 
     return ossl_dtls_start_accept(self, opts);
 }
+#endif
 
 #if 0
 /*
@@ -387,7 +326,9 @@ Init_ossl_dtls(void)
     rb_undef_method(cDTLSContext, "initialize_copy");
 
     cDTLSSocket = rb_define_class_under(mSSL, "DTLSSocket", cSSLSocket);
+#ifdef HAVE_DTLSV1_ACCEPT
     rb_define_method(cDTLSSocket, "accept",     ossl_dtls_accept, 0);
     rb_define_method(cDTLSSocket, "accept_nonblock", ossl_dtls_accept_nonblock, -1);
+#endif
     //printf("\n\nsetting cDTLSSocket.accept to %p\n", ossl_dtls_accept);
 }
