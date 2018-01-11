@@ -13,12 +13,6 @@
 
 #define numberof(ary) (int)(sizeof(ary)/sizeof((ary)[0]))
 
-#ifdef _WIN32
-#  define TO_SOCKET(s) _get_osfhandle(s)
-#else
-#  define TO_SOCKET(s) (s)
-#endif
-
 #define GetSSLCTX(obj, ctx) do { \
 	TypedData_Get_Struct((obj), SSL_CTX, &ossl_sslctx_type, (ctx));	\
 } while (0)
@@ -34,7 +28,7 @@ static VALUE eSSLErrorWaitWritable;
 
 static ID id_call, ID_callback_state, id_tmp_dh_callback, id_tmp_ecdh_callback,
 	  id_npn_protocols_encoded;
-static VALUE sym_exception, sym_wait_readable, sym_wait_writable;
+VALUE sym_exception, sym_wait_readable, sym_wait_writable;
 
 static ID id_i_cert_store, id_i_ca_file, id_i_ca_path, id_i_verify_mode,
 	  id_i_verify_depth, id_i_verify_callback, id_i_client_ca,
@@ -44,10 +38,10 @@ static ID id_i_cert_store, id_i_ca_file, id_i_ca_path, id_i_verify_mode,
 	  id_i_session_remove_cb, id_i_npn_select_cb, id_i_npn_protocols,
 	  id_i_alpn_select_cb, id_i_alpn_protocols, id_i_servername_cb,
 	  id_i_verify_hostname;
-static ID id_i_io, id_i_context, id_i_hostname;
+ID id_i_io, id_i_context, id_i_hostname;
 
 static int ossl_ssl_ex_vcb_idx;
-static int ossl_ssl_ex_ptr_idx;
+int ossl_ssl_ex_ptr_idx;
 static int ossl_sslctx_ex_ptr_idx;
 #if !defined(HAVE_X509_STORE_UP_REF)
 static int ossl_sslctx_ex_store_p;
@@ -64,7 +58,7 @@ ossl_sslctx_free(void *ptr)
     SSL_CTX_free(ctx);
 }
 
-static const rb_data_type_t ossl_sslctx_type = {
+const rb_data_type_t ossl_sslctx_type = {
     "OpenSSL/SSL/CTX",
     {
 	0, ossl_sslctx_free,
@@ -714,7 +708,7 @@ ssl_alpn_select_cb(SSL *ssl, const unsigned char **out, unsigned char *outlen,
 #endif
 
 /* This function may serve as the entry point to support further callbacks. */
-static void
+void
 ssl_info_cb(const SSL *ssl, int where, int val)
 {
     int is_server = SSL_is_server((SSL *)ssl);
@@ -1506,13 +1500,6 @@ ossl_sslctx_flush_sessions(int argc, VALUE *argv, VALUE self)
  * SSLSocket class
  */
 #ifndef OPENSSL_NO_SOCK
-static inline int
-ssl_started(SSL *ssl)
-{
-    /* the FD is set in ossl_ssl_setup(), called by #connect or #accept */
-    return SSL_get_fd(ssl) >= 0;
-}
-
 static void
 ossl_ssl_free(void *ssl)
 {
@@ -1620,14 +1607,14 @@ write_would_block(int nonblock)
 	ossl_raise(eSSLErrorWaitWritable, "write would block");
 }
 
-static void
+void
 read_would_block(int nonblock)
 {
     if (nonblock)
 	ossl_raise(eSSLErrorWaitReadable, "read would block");
 }
 
-static int
+int
 no_exception_p(VALUE opts)
 {
     if (RB_TYPE_P(opts, T_HASH) &&
@@ -1636,7 +1623,7 @@ no_exception_p(VALUE opts)
     return 0;
 }
 
-static VALUE
+VALUE
 ossl_start_ssl(VALUE self, int (*func)(), const char *funcname, VALUE opts)
 {
     SSL *ssl;

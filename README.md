@@ -6,6 +6,8 @@
 OpenSSL provides SSL, TLS and general purpose cryptography. It wraps the
 OpenSSL library.
 
+[DTLS] support is being worked on.
+
 ## Installation
 
 The openssl gem is available at [rubygems.org](https://rubygems.org/gems/openssl).
