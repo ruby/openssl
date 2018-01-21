@@ -13,6 +13,8 @@
 #include <openssl/bio.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/time.h>
+#include <string.h>
 
 VALUE cDTLSContext;
 VALUE cDTLSSocket;
@@ -21,6 +23,100 @@ extern VALUE cSSLContext;
 static int ossl_dtlsctx_ex_ptr_idx;  /* suspect this should be shared with ssl*/
 
 extern const rb_data_type_t ossl_sslctx_type;
+
+unsigned int cookie_secret_set = 0;
+unsigned char cookie_secret[16];
+
+/*
+ * generate a stateless cookie by creating a keyed HMAC-SHA256 for the cookie.
+ * 1) The key is randomly generated if not already set and is kept constant.
+ * 2) The contents of the hash come from:
+ *      a) the current time in seconds since epoch with the low
+ *         byte forced to zero, so new cookies occur every 2.5 minutes.
+ *      b) the originating IP address and port number, taken from
+ *         SSL in network byte order.
+ */
+
+static void cookie_secret_setup(void)
+{
+  if(!cookie_secret_set) {
+    if(RAND_bytes(cookie_secret, sizeof(cookie_secret)) == 1) {
+      cookie_secret_set = 1;
+    }
+  }
+}
+
+static int cookie_gen(SSL *ssl, unsigned char *cookie, unsigned int *cookie_len)
+{
+    unsigned int i;
+    unsigned char cookie1[EVP_MAX_MD_SIZE];
+    unsigned int  cookie1_len;
+    unsigned char things_to_crunch[256];
+    int           things_len = 0;
+    unsigned short peerport;
+    struct timeval tv;
+    BIO_ADDR   *peer;
+    BIO *rbio;
+    int  ret;
+
+    cookie_secret_setup();
+    gettimeofday(&tv, NULL);
+
+    rbio = SSL_get_rbio(ssl);
+    peer = BIO_ADDR_new();
+    if(rbio == NULL || BIO_dgram_get_peer(rbio, peer) <= 0) {
+      ret = 0;
+      goto err;
+    }
+
+    /* 24 bits of time is enough */
+    things_to_crunch[0] = (tv.tv_sec >> 24) & 0xff;
+    things_to_crunch[1] = (tv.tv_sec >> 16) & 0xff;
+    things_to_crunch[2] = (tv.tv_sec >>  8) & 0xff;
+    things_to_crunch[3] = 0;
+
+    peerport = BIO_ADDR_rawport(peer);
+    things_to_crunch[4] = (peerport >> 8) & 0xff;
+    things_to_crunch[5] = (peerport >> 0) & 0xff;
+    things_len = 6;
+    memcpy(things_to_crunch + things_len, BIO_ADDR_sockaddr(peer),
+           BIO_ADDR_sockaddr_size(peer));
+    things_len += BIO_ADDR_sockaddr_size(peer);
+
+    HMAC(EVP_sha256(),
+         cookie_secret, sizeof(cookie_secret),
+         things_to_crunch, things_len,
+         cookie1, &cookie1_len);
+
+    for (i = 0; i < *cookie_len && i<cookie1_len; i++, cookie++) {
+      *cookie = cookie1[i];
+    }
+    *cookie_len = i;
+    ret = 1;
+
+ err:
+    if(peer) BIO_ADDR_free(peer);
+    return ret;
+}
+
+static int cookie_verify(SSL *ssl, const unsigned char *cookie,
+                         unsigned int cookie_len)
+{
+    unsigned int i;
+
+#if 0
+    if (cookie_len != COOKIE_LEN)
+        return 0;
+#endif
+
+    for (i = 0; i < cookie_len; i++, cookie++) {
+        if (*cookie != i)
+            return 0;
+    }
+
+    return 1;
+}
+
 
 static VALUE
 ossl_dtlsctx_s_alloc(VALUE klass)
@@ -40,6 +136,9 @@ ossl_dtlsctx_s_alloc(VALUE klass)
     SSL_CTX_set_mode(ctx, mode);
     RTYPEDDATA_DATA(obj) = ctx;
     SSL_CTX_set_ex_data(ctx, ossl_dtlsctx_ex_ptr_idx, (void *)obj);
+
+    SSL_CTX_set_cookie_generate_cb(ctx, cookie_gen);
+    SSL_CTX_set_cookie_verify_cb(ctx, cookie_verify);
 
 #if !defined(OPENSSL_NO_EC) && defined(HAVE_SSL_CTX_SET_ECDH_AUTO)
     /* We use SSL_CTX_set1_curves_list() to specify the curve used in ECDH. It
