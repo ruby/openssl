@@ -46,14 +46,38 @@ static void cookie_secret_setup(void)
   }
 }
 
+static void cookie_calculate(unsigned char cookie[],
+                             unsigned int  *cookie_len,
+                             const unsigned short peerport,
+                             const unsigned char *addrdata,
+                             const unsigned int   addrlen,
+                             const time_t         curtime)
+{
+    unsigned char things_to_crunch[256];
+    int           things_len = 0;
+
+    /* 24 bits of time is enough */
+    things_to_crunch[0] = (curtime >> 24) & 0xff;
+    things_to_crunch[1] = (curtime >> 16) & 0xff;
+    things_to_crunch[2] = (curtime >>  8) & 0xff;
+    things_to_crunch[3] = 0;
+    things_to_crunch[4] = (peerport >> 8) & 0xff;
+    things_to_crunch[5] = (peerport >> 0) & 0xff;
+    things_len = 6;
+    memcpy(things_to_crunch + things_len, addrdata, addrlen);
+    things_len += addrlen;
+
+    HMAC(EVP_sha256(),
+         cookie_secret, sizeof(cookie_secret),
+         things_to_crunch, things_len,
+         cookie, cookie_len);
+}
+
 static int cookie_gen(SSL *ssl, unsigned char *cookie, unsigned int *cookie_len)
 {
     unsigned int i;
     unsigned char cookie1[EVP_MAX_MD_SIZE];
     unsigned int  cookie1_len;
-    unsigned char things_to_crunch[256];
-    int           things_len = 0;
-    unsigned short peerport;
     struct timeval tv;
     BIO_ADDR   *peer;
     BIO *rbio;
@@ -69,24 +93,11 @@ static int cookie_gen(SSL *ssl, unsigned char *cookie, unsigned int *cookie_len)
       goto err;
     }
 
-    /* 24 bits of time is enough */
-    things_to_crunch[0] = (tv.tv_sec >> 24) & 0xff;
-    things_to_crunch[1] = (tv.tv_sec >> 16) & 0xff;
-    things_to_crunch[2] = (tv.tv_sec >>  8) & 0xff;
-    things_to_crunch[3] = 0;
-
-    peerport = BIO_ADDR_rawport(peer);
-    things_to_crunch[4] = (peerport >> 8) & 0xff;
-    things_to_crunch[5] = (peerport >> 0) & 0xff;
-    things_len = 6;
-    memcpy(things_to_crunch + things_len, BIO_ADDR_sockaddr(peer),
-           BIO_ADDR_sockaddr_size(peer));
-    things_len += BIO_ADDR_sockaddr_size(peer);
-
-    HMAC(EVP_sha256(),
-         cookie_secret, sizeof(cookie_secret),
-         things_to_crunch, things_len,
-         cookie1, &cookie1_len);
+    cookie1_len = sizeof(cookie1);
+    cookie_calculate(cookie1, &cookie1_len,   BIO_ADDR_rawport(peer),
+                     (const unsigned char *)BIO_ADDR_sockaddr(peer),
+                     BIO_ADDR_sockaddr_size(peer),
+                     tv.tv_sec);
 
     for (i = 0; i < *cookie_len && i<cookie1_len; i++, cookie++) {
       *cookie = cookie1[i];
@@ -99,22 +110,63 @@ static int cookie_gen(SSL *ssl, unsigned char *cookie, unsigned int *cookie_len)
     return ret;
 }
 
-static int cookie_verify(SSL *ssl, const unsigned char *cookie,
-                         unsigned int cookie_len)
+static int cookie_verify(SSL *ssl, const unsigned char *peer_cookie,
+                         unsigned int peer_cookie_len)
 {
-    unsigned int i;
+    unsigned char cookie1[EVP_MAX_MD_SIZE];
+    unsigned int  cookie1_len;
+    struct timeval tv;
+    BIO_ADDR   *peer;
+    BIO *rbio;
+    int  ret;
 
-#if 0
-    if (cookie_len != COOKIE_LEN)
-        return 0;
-#endif
+    cookie_secret_setup();
+    gettimeofday(&tv, NULL);
 
-    for (i = 0; i < cookie_len; i++, cookie++) {
-        if (*cookie != i)
-            return 0;
+    rbio = SSL_get_rbio(ssl);
+    peer = BIO_ADDR_new();
+    if(rbio == NULL || BIO_dgram_get_peer(rbio, peer) <= 0) {
+      ret = 0;
+      goto err;
     }
 
-    return 1;
+    cookie1_len = sizeof(cookie1);
+    cookie_calculate(cookie1, &cookie1_len,   BIO_ADDR_rawport(peer),
+                     (const unsigned char *)BIO_ADDR_sockaddr(peer),
+                     BIO_ADDR_sockaddr_size(peer),
+                     tv.tv_sec);
+
+    if(cookie1_len != peer_cookie_len) {
+      /* cookies lengths must match! */
+      return 0;
+    }
+
+    if(memcmp(cookie1, peer_cookie, cookie1_len) == 0) {
+      /* matches exactly */
+      return 1;
+    }
+
+    /* if clock&0xff < 128, then try previous period */
+    if((tv.tv_sec & 0xff) < 128) {
+      tv.tv_sec -= 256;
+
+      cookie1_len = sizeof(cookie1);
+      cookie_calculate(cookie1, &cookie1_len,   BIO_ADDR_rawport(peer),
+                       (const unsigned char *)BIO_ADDR_sockaddr(peer),
+                       BIO_ADDR_sockaddr_size(peer),
+                       tv.tv_sec);
+
+      if(memcmp(cookie1, peer_cookie, cookie1_len) == 0) {
+        /* matches exactly */
+        return 1;
+      }
+    }
+
+    return 0;
+
+ err:
+    if(peer) BIO_ADDR_free(peer);
+    return ret;
 }
 
 
