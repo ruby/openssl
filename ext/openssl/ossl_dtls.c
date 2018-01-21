@@ -46,6 +46,23 @@ static void cookie_secret_setup(void)
   }
 }
 
+#define DTLS_COOKIE_DEBUG 1
+
+#ifdef DTLS_COOKIE_DEBUG
+static void print_cookie(const char *label, const unsigned char cookie[], const unsigned int cookie_len)
+{
+  unsigned int i;
+  printf("%s cookie: ", label);
+  for(i=0; i<cookie_len; i++) {
+    printf("%02x ", cookie[i]);
+  }
+  printf("\n");
+}
+#define PRINT_COOKIE(label, cookie, len) print_cookie(label, cookie,len)
+#else
+#define PRINT_COOKIE(label, cookie, len) {} while(0)
+#endif
+
 static void cookie_calculate(unsigned char cookie[],
                              unsigned int  *cookie_len,
                              const unsigned short peerport,
@@ -71,6 +88,8 @@ static void cookie_calculate(unsigned char cookie[],
          cookie_secret, sizeof(cookie_secret),
          things_to_crunch, things_len,
          cookie, cookie_len);
+
+    PRINT_COOKIE("calculated  ", cookie, *cookie_len);
 }
 
 static int cookie_gen(SSL *ssl, unsigned char *cookie, unsigned int *cookie_len)
@@ -99,11 +118,13 @@ static int cookie_gen(SSL *ssl, unsigned char *cookie, unsigned int *cookie_len)
                      BIO_ADDR_sockaddr_size(peer),
                      tv.tv_sec);
 
-    for (i = 0; i < *cookie_len && i<cookie1_len; i++, cookie++) {
-      *cookie = cookie1[i];
+    for (i = 0; i<DTLS1_COOKIE_LENGTH && i<cookie1_len; i++) {
+      cookie[i] = cookie1[i];
     }
     *cookie_len = i;
     ret = 1;
+
+    PRINT_COOKIE("generated  ", cookie, *cookie_len);
 
  err:
     if(peer) BIO_ADDR_free(peer);
@@ -119,6 +140,8 @@ static int cookie_verify(SSL *ssl, const unsigned char *peer_cookie,
     BIO_ADDR   *peer;
     BIO *rbio;
     int  ret;
+
+    PRINT_COOKIE("peer cookie", peer_cookie, peer_cookie_len);
 
     cookie_secret_setup();
     gettimeofday(&tv, NULL);
