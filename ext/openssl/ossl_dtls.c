@@ -161,7 +161,7 @@ static int cookie_verify(SSL *ssl, const unsigned char *peer_cookie,
     struct timeval tv;
     BIO_ADDR   *peer;
     BIO *rbio;
-    int  ret;
+    int  ret = 0;
 
     PRINT_COOKIE("peer cookie", peer_cookie, peer_cookie_len);
 
@@ -172,7 +172,7 @@ static int cookie_verify(SSL *ssl, const unsigned char *peer_cookie,
     peer = BIO_ADDR_new();
     if(rbio == NULL || BIO_dgram_get_peer(rbio, peer) <= 0) {
       ret = 0;
-      goto err;
+      goto out;
     }
 
     cookie1_len = sizeof(cookie1);
@@ -180,12 +180,13 @@ static int cookie_verify(SSL *ssl, const unsigned char *peer_cookie,
 
     if(cookie1_len != peer_cookie_len) {
       /* cookies lengths must match! */
-      return 0;
+      goto out;
     }
 
     if(memcmp(cookie1, peer_cookie, cookie1_len) == 0) {
       /* matches exactly */
-      return 1;
+      ret = 1;
+      goto out;
     }
 
     /* if clock&0xff < 128, then try previous period */
@@ -198,13 +199,11 @@ static int cookie_verify(SSL *ssl, const unsigned char *peer_cookie,
 
       if(memcmp(cookie1, peer_cookie, cookie1_len) == 0) {
         /* matches exactly */
-        return 1;
+        ret = 1;
       }
     }
 
-    return 0;
-
- err:
+ out:
     if(peer) BIO_ADDR_free(peer);
     return ret;
 }
@@ -282,6 +281,9 @@ ossl_dtls_setup(VALUE self)
  *
  * Looks at the incoming (bind(), but not connect()) socket for new incoming
  * DTLS connections, and return a new SSL context for the resulting connection.
+ *
+ * This uses an OpenSSL extension DTLSv1_accept(), which handles cloning the
+ * the file descriptor and creating a new SSL context.
  */
 static VALUE
 ossl_dtls_start_accept(VALUE self, VALUE opts)
@@ -305,7 +307,8 @@ ossl_dtls_start_accept(VALUE self, VALUE opts)
 
     peer = BIO_ADDR_new();
 
-    while(ret != 0) {
+    ret = 0;
+    while(ret == 0) {
       ret = DTLSv1_accept(ssl, sslnew, peer);
 
       if(ret == 0) {
