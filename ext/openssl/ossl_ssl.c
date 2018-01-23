@@ -30,8 +30,11 @@ static ID id_call, ID_callback_state, id_tmp_dh_callback, id_tmp_ecdh_callback,
 	  id_npn_protocols_encoded;
 VALUE sym_exception, sym_wait_readable, sym_wait_writable;
 
+/* used by dtls code */
+ID id_i_verify_callback;
+
 static ID id_i_cert_store, id_i_ca_file, id_i_ca_path, id_i_verify_mode,
-	  id_i_verify_depth, id_i_verify_callback, id_i_client_ca,
+	  id_i_verify_depth, id_i_client_ca,
 	  id_i_renegotiation_cb, id_i_cert, id_i_key, id_i_extra_chain_cert,
 	  id_i_client_cert_cb, id_i_tmp_ecdh_callback, id_i_timeout,
 	  id_i_session_id_context, id_i_session_get_cb, id_i_session_new_cb,
@@ -40,7 +43,7 @@ static ID id_i_cert_store, id_i_ca_file, id_i_ca_path, id_i_verify_mode,
 	  id_i_verify_hostname;
 ID id_i_io, id_i_context, id_i_hostname;
 
-static int ossl_ssl_ex_vcb_idx;
+int ossl_ssl_ex_vcb_idx;
 int ossl_ssl_ex_ptr_idx;
 static int ossl_sslctx_ex_ptr_idx;
 #if !defined(HAVE_X509_STORE_UP_REF)
@@ -1411,7 +1414,7 @@ const rb_data_type_t ossl_ssl_type = {
     0, 0, RUBY_TYPED_FREE_IMMEDIATELY,
 };
 
-static VALUE
+VALUE
 ossl_ssl_s_alloc(VALUE klass)
 {
     return TypedData_Wrap_Struct(klass, &ossl_ssl_type, NULL);

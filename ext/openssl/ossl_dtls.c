@@ -13,6 +13,7 @@
 #include <openssl/bio.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <netinet/in.h>
 #include <sys/time.h>
 #include <string.h>
 
@@ -21,8 +22,11 @@ VALUE cDTLSSocket;
 static VALUE eSSLError;
 extern VALUE cSSLContext;
 static int ossl_dtlsctx_ex_ptr_idx;  /* suspect this should be shared with ssl*/
+extern int ossl_ssl_ex_vcb_idx;
 
 extern const rb_data_type_t ossl_sslctx_type;
+
+extern ID id_i_verify_callback;
 
 unsigned int cookie_secret_set = 0;
 unsigned char cookie_secret[16];
@@ -295,6 +299,10 @@ ossl_dtls_start_accept(VALUE self, VALUE opts)
     rb_io_t *fptr;
     VALUE dtls_child;
     int ret;
+    VALUE v_ctx, verify_cb;
+
+    /* extract the Ruby wrapper for the context for later on */
+    v_ctx = rb_ivar_get(self, id_i_context);
 
     /* make sure it's all setup */
     ossl_dtls_setup(self);
@@ -302,7 +310,7 @@ ossl_dtls_start_accept(VALUE self, VALUE opts)
     GetSSL(self, ssl);
     GetOpenFile(rb_attr_get(self, id_i_io), fptr);
 
-    /* allocate a new BIO_ADDR */
+    /* allocate a new SSL* for the connection */
     sslnew = SSL_new(SSL_get_SSL_CTX(ssl));
 
     peer = BIO_ADDR_new();
@@ -348,10 +356,12 @@ ossl_dtls_start_accept(VALUE self, VALUE opts)
     /* connect them up. */
     if (!sslnew)
       ossl_raise(eSSLError, NULL);
-    RTYPEDDATA_DATA(self) = sslnew;
+    RTYPEDDATA_DATA(dtls_child) = sslnew;
 
     SSL_set_ex_data(sslnew, ossl_ssl_ex_ptr_idx, (void *)dtls_child);
     SSL_set_info_callback(sslnew, ssl_info_cb);
+    verify_cb = rb_attr_get(v_ctx, id_i_verify_callback);
+    SSL_set_ex_data(sslnew, ossl_ssl_ex_vcb_idx, (void *)verify_cb);
 
     if(peer) BIO_ADDR_free(peer);
     peer = NULL;
