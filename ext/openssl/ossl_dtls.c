@@ -51,6 +51,7 @@ static void cookie_secret_setup(void)
 }
 
 #define DTLS_COOKIE_DEBUG 0
+#define DTLS_DEBUG 0
 
 #if DTLS_COOKIE_DEBUG
 static void print_cookie(const char *label, const unsigned char cookie[], const unsigned int cookie_len)
@@ -329,6 +330,7 @@ ossl_dtls_start_accept(VALUE self, VALUE io, VALUE opts)
       ret = DTLSv1_accept(ssl, sslnew, peer, nsock->fd);
 
       if(ret == 0) {
+        if(DTLS_DEBUG) printf("returned 0, waiting for more data\n");
         if (no_exception_p(opts)) { return sym_wait_readable; }
         read_would_block(nonblock);
         rb_io_wait_readable(fptr->fd);
@@ -343,10 +345,11 @@ ossl_dtls_start_accept(VALUE self, VALUE io, VALUE opts)
 
     if(ret != 1) {
       /* this is no data present, would block */
-      printf("DTLSv1_listen returned: %d\n", ret);
+      if(DTLS_DEBUG) printf("DTLSv1_accept returned: %d (needs data, block)\n", ret);
       return Qnil;
     }
 
+#if DTLS_DEBUG
     /* a return of 1 means that a connection is present */
     {
       char *peername= BIO_ADDR_hostname_string(peer, 1);
@@ -355,6 +358,7 @@ ossl_dtls_start_accept(VALUE self, VALUE io, VALUE opts)
         OPENSSL_free(peername);
       }
     }
+#endif
 
     /* sslnew contains an initialized SSL, which has a new socket connected to it */
 
