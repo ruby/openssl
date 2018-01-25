@@ -290,16 +290,17 @@ ossl_dtls_setup(VALUE self)
  * the file descriptor and creating a new SSL context.
  */
 static VALUE
-ossl_dtls_start_accept(VALUE self, VALUE opts)
+ossl_dtls_start_accept(VALUE self, VALUE io, VALUE opts)
 {
     int nonblock = opts != Qfalse;
     SSL *ssl;
     SSL *sslnew;
     BIO_ADDR   *peer;
-    rb_io_t *fptr;
-    VALUE dtls_child;
+    rb_io_t *fptr, *nsock;
+    VALUE dtls_child, ret_value = Qnil;
     int ret;
     VALUE v_ctx, verify_cb;
+    int one         = 1;
 
     /* extract the Ruby wrapper for the context for later on */
     v_ctx = rb_ivar_get(self, id_i_context);
@@ -309,15 +310,23 @@ ossl_dtls_start_accept(VALUE self, VALUE opts)
 
     GetSSL(self, ssl);
     GetOpenFile(rb_attr_get(self, id_i_io), fptr);
+    GetOpenFile(io, nsock);
 
     /* allocate a new SSL* for the connection */
     sslnew = SSL_new(SSL_get_SSL_CTX(ssl));
 
     peer = BIO_ADDR_new();
 
+    if(setsockopt(fptr->fd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one)) != 0) {
+      goto end;
+    }
+    if(setsockopt(nsock->fd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one)) != 0) {
+      goto end;
+    }
+
     ret = 0;
     while(ret == 0) {
-      ret = DTLSv1_accept(ssl, sslnew, peer);
+      ret = DTLSv1_accept(ssl, sslnew, peer, nsock->fd);
 
       if(ret == 0) {
         if (no_exception_p(opts)) { return sym_wait_readable; }
@@ -358,22 +367,35 @@ ossl_dtls_start_accept(VALUE self, VALUE opts)
       ossl_raise(eSSLError, NULL);
     RTYPEDDATA_DATA(dtls_child) = sslnew;
 
+    /* setup a new IO object for the FD attached to the dtls_child */
+    rb_ivar_set(dtls_child, id_i_io, io);
+
     SSL_set_ex_data(sslnew, ossl_ssl_ex_ptr_idx, (void *)dtls_child);
     SSL_set_info_callback(sslnew, ssl_info_cb);
     verify_cb = rb_attr_get(v_ctx, id_i_verify_callback);
     SSL_set_ex_data(sslnew, ossl_ssl_ex_vcb_idx, (void *)verify_cb);
 
+    /* start the DTLS on it */
+    ret_value = ossl_start_ssl(dtls_child, SSL_accept, "SSL_accept", Qfalse);
+
+    printf("completed ossl_start_ssl\n");
+
+ end:
     if(peer) BIO_ADDR_free(peer);
     peer = NULL;
 
-    /* start the DTLS on it */
-    return ossl_start_ssl(dtls_child, SSL_accept, "SSL_accept", Qfalse);
+    return ret_value;
 }
 
 static VALUE
-ossl_dtls_accept(VALUE self)
+ossl_dtls_accept(int argc, VALUE *argv, VALUE self)
 {
-    return ossl_dtls_start_accept(self, Qfalse);
+    VALUE io;
+
+    rb_scan_args(argc, argv, "1", &io);
+    ossl_dtls_setup(self);
+
+    return ossl_dtls_start_accept(self, io, Qfalse);
 }
 
 /*
@@ -402,11 +424,12 @@ static VALUE
 ossl_dtls_accept_nonblock(int argc, VALUE *argv, VALUE self)
 {
     VALUE opts;
+    VALUE io;
 
-    rb_scan_args(argc, argv, "0:", &opts);
+    rb_scan_args(argc, argv, "1:", &io, &opts);
     ossl_dtls_setup(self);
 
-    return ossl_dtls_start_accept(self, opts);
+    return ossl_dtls_start_accept(self, io, opts);
 }
 #endif
 
@@ -531,7 +554,7 @@ Init_ossl_dtls(void)
 
     cDTLSSocket = rb_define_class_under(mSSL, "DTLSSocket", cSSLSocket);
 #ifdef HAVE_DTLSV1_ACCEPT
-    rb_define_method(cDTLSSocket, "accept",     ossl_dtls_accept, 0);
+    rb_define_method(cDTLSSocket, "accept",          ossl_dtls_accept, -1);
     rb_define_method(cDTLSSocket, "accept_nonblock", ossl_dtls_accept_nonblock, -1);
 #endif
     //printf("\n\nsetting cDTLSSocket.accept to %p\n", ossl_dtls_accept);
