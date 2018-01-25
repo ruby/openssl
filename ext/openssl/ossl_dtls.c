@@ -50,9 +50,9 @@ static void cookie_secret_setup(void)
   }
 }
 
-#define DTLS_COOKIE_DEBUG 1
+#define DTLS_COOKIE_DEBUG 0
 
-#ifdef DTLS_COOKIE_DEBUG
+#if DTLS_COOKIE_DEBUG
 static void print_cookie(const char *label, const unsigned char cookie[], const unsigned int cookie_len)
 {
   unsigned int i;
