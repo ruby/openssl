@@ -2490,8 +2490,8 @@ Init_ossl_ssl(void)
      * Valid modes are VERIFY_NONE, VERIFY_PEER, VERIFY_CLIENT_ONCE,
      * VERIFY_FAIL_IF_NO_PEER_CERT and defined on OpenSSL::SSL
      *
-     * The default mode is VERIFY_NONE, which does not perform any verification
-     * at all.
+     * The default mode is VERIFY_PEER, which verifies the authenticity
+     * of the peer's certificate.
      *
      * See SSL_CTX_set_verify(3) for details.
      */
