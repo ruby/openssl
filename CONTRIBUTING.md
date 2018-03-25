@@ -12,12 +12,14 @@ If you think you found a bug, file a ticket on GitHub. Please DO NOT report
 security issues here, there is a separate procedure which is described on
 ["Security at ruby-lang.org"](https://www.ruby-lang.org/en/security/).
 
-When reporting a bug, please make sure you include the version of Ruby, the
-version of openssl gem, the version of the OpenSSL library, along with a sample
-file that illustrates the problem or link to repository or gem that is
-associated with the bug.
+When reporting a bug, please make sure you include: 
+* Ruby version 
+* OpenSSL gem version
+* OpenSSL library version 
+* A sample file that illustrates the problem or link to the repository or 
+  gem that is associated with the bug.
 
-There is a number of unresolved issues and feature requests for openssl that
+There are a number of unresolved issues and feature requests for openssl that
 need review. Before submitting a new ticket, it is recommended to check
 [known issues] and [bugs.ruby-lang.org], the previous issue tracker.
 
