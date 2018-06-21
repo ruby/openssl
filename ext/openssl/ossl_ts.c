@@ -187,7 +187,7 @@ ossl_tsreq_initialize(int argc, VALUE *argv, VALUE self)
     }
 
     arg = ossl_to_der_if_possible(arg);
-    in = ossl_obj2bio(arg);
+    in = ossl_obj2bio(&arg);
     if (!d2i_TS_REQ_bio(in, &ts_req)) {
         ossl_raise(eTimestampError,
                    "Error when decoding the timestamp request");
@@ -530,7 +530,7 @@ ossl_ts_initialize(VALUE self, VALUE der)
     BIO *in;
 
     der = ossl_to_der_if_possible(der);
-    in  = ossl_obj2bio(der);
+    in  = ossl_obj2bio(&der);
     if (!d2i_TS_RESP_bio(in, &ts_resp)) {
         ossl_raise(eTimestampError,
                    "Error when decoding the timestamp response");
@@ -655,13 +655,18 @@ ossl_ts_get_pkcs7(VALUE self)
 {
     TS_RESP *resp;
     PKCS7 *p7;
+    VALUE obj;
 
     GetTS_RESP(self, resp);
     p7 = resp->token;
     if (!p7)
         return Qnil;
 
-    return Data_Wrap_Struct(cPKCS7, 0, PKCS7_free, PKCS7_dup(p7));
+    obj = NewPKCS7(cPKCS7);
+    SetPKCS7(obj, PKCS7_dup(p7));
+
+    return obj;
+    // return Data_Wrap_Struct(cPKCS7, 0, PKCS7_free, PKCS7_dup(p7));
 }
 
 /*
@@ -957,7 +962,7 @@ static void int_ossl_init_roots(VALUE roots, X509_STORE * store)
         X509_STORE_add_cert(store, GetX509CertPtr(roots));
     }
     else {
-        in = ossl_obj2bio(roots);
+        in = ossl_obj2bio(&roots);
         inf = PEM_X509_INFO_read_bio(in, NULL, NULL, NULL);
 	BIO_free(in);
 	if(!inf) {
@@ -1116,9 +1121,10 @@ ossl_tsfac_serial_cb(struct TS_resp_ctx *ctx, void *data)
 static int
 ossl_tsfac_time_cb(struct TS_resp_ctx *ctx, void *data, long *sec, long *usec)
 {
-    VALUE time = *((VALUE *)data);
-    time_t secs = time_to_time_t(time);
-    *sec = (long) secs;
+    VALUE time_v = *((VALUE *)data);
+    if (rb_obj_is_instance_of(time_v, rb_cTime))
+	time_v = rb_funcall(time_v, rb_intern("to_i"), 0);
+    *sec = NUM2LONG(time_v);;
     *usec = 0;
     return 1;
 }
@@ -1236,7 +1242,7 @@ ossl_tsfac_create_ts(VALUE self, VALUE key, VALUE certificate, VALUE request)
     TS_RESP_CTX_add_md(ctx, EVP_get_digestbyname(OBJ_nid2sn(NID_sha512)));
 
     str = rb_funcall(request, rb_intern("to_der"), 0);
-    req_bio = ossl_obj2bio(str);
+    req_bio = ossl_obj2bio(&str);
     response = TS_RESP_create_response(ctx, req_bio);
     if (!response) {
         err_msg = "Error during response generation";
