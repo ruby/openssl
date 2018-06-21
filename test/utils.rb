@@ -324,4 +324,66 @@ class OpenSSL::PKeyTestCase < OpenSSL::TestCase
   end
 end
 
+module OpenSSL::Certs
+  include OpenSSL::TestUtils
+
+  module_function
+
+  def ca_cert
+    ca = OpenSSL::X509::Name.parse("/DC=org/DC=ruby-lang/CN=Timestamp Root CA")
+
+    now = Time.now
+    ca_exts = [
+      ["basicConstraints","CA:TRUE,pathlen:1",true],
+      ["keyUsage","keyCertSign, cRLSign",true],
+      ["subjectKeyIdentifier","hash",false],
+      ["authorityKeyIdentifier","keyid:always",false],
+    ]
+    OpenSSL::TestUtils.issue_cert(ca, Fixtures.pkey("rsa2048"), 1, ca_exts, nil, nil)
+  end
+
+  def ts_cert_direct(key, ca_cert)
+    dn = OpenSSL::X509::Name.parse("/DC=org/DC=ruby-lang/OU=Timestamp/CN=Server Direct")
+
+    now = Time.now
+    exts = [
+      ["basicConstraints","CA:FALSE",true],
+      ["keyUsage","digitalSignature, nonRepudiation", true],
+      ["subjectKeyIdentifier", "hash",false],
+      ["authorityKeyIdentifier","keyid,issuer", false],
+      ["extendedKeyUsage", "timeStamping", true]
+    ]
+
+    OpenSSL::TestUtils.issue_cert(dn, key, 2, exts, ca_cert, Fixtures.pkey("rsa2048"))
+  end
+
+  def intermediate_cert(key, ca_cert)
+    dn = OpenSSL::X509::Name.parse("/DC=org/DC=ruby-lang/OU=Timestamp/CN=Timestamp Intermediate CA")
+
+    now = Time.now
+    exts = [
+      ["basicConstraints","CA:TRUE,pathlen:0",true],
+      ["keyUsage","keyCertSign, cRLSign",true],
+      ["subjectKeyIdentifier","hash",false],
+      ["authorityKeyIdentifier","keyid:always",false],
+    ]
+
+    OpenSSL::TestUtils.issue_cert(dn, key, 3, exts, ca_cert, Fixtures.pkey("rsa2048"))
+  end
+
+  def ts_cert_ee(key, intermediate, im_key)
+    dn = OpenSSL::X509::Name.parse("/DC=org/DC=ruby-lang/OU=Timestamp/CN=Server End Entity")
+
+    now = Time.now
+    exts = [
+      ["keyUsage","digitalSignature, nonRepudiation", true],
+      ["subjectKeyIdentifier", "hash",false],
+      ["authorityKeyIdentifier","keyid,issuer", false],
+      ["extendedKeyUsage", "timeStamping", true]
+    ]
+
+    OpenSSL::TestUtils.issue_cert(dn, key, 4, exts, intermediate, im_key)
+  end
+end
+
 end
