@@ -1205,6 +1205,9 @@ Init_openssl(void)
     Init_ossl_pkey();
     Init_ossl_rand();
     Init_ossl_ssl();
+#if OPENSSL_VERSION_NUMBER >= 0x10000000L
+    Init_ossl_ts();
+#endif
     Init_ossl_x509();
     Init_ossl_ocsp();
     Init_ossl_engine();

@@ -28,6 +28,9 @@
 #include <openssl/rand.h>
 #include <openssl/conf.h>
 #include <openssl/conf_api.h>
+#if OPENSSL_VERSION_NUMBER >= 0x10000000L
+  #include <openssl/ts.h>
+#endif
 #include <openssl/crypto.h>
 #if !defined(OPENSSL_NO_ENGINE)
 #  include <openssl/engine.h>
@@ -168,6 +171,9 @@ void ossl_debug(const char *, ...);
 #include "ossl_pkey.h"
 #include "ossl_rand.h"
 #include "ossl_ssl.h"
+#if OPENSSL_VERSION_NUMBER >= 0x10000000L
+  #include "ossl_ts.h"
+#endif
 #include "ossl_version.h"
 #include "ossl_x509.h"
 #include "ossl_engine.h"
