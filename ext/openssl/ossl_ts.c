@@ -941,7 +941,7 @@ static void int_ossl_init_roots(VALUE roots, X509_STORE * store)
     STACK_OF(X509_INFO) *inf;
     X509_INFO *itmp;
     BIO *in;
-    int i, count = 0;
+    int i;
 
     if (roots == Qnil) {
         ossl_raise(rb_eTypeError, "roots must not be nil.");
@@ -968,7 +968,6 @@ static void int_ossl_init_roots(VALUE roots, X509_STORE * store)
             itmp = sk_X509_INFO_value(inf, i);
             if (itmp->x509) {
                 X509_STORE_add_cert(store, itmp->x509);
-                count++;
             }
             /* ignore CRLs deliberately */
         }
@@ -1053,8 +1052,9 @@ ossl_ts_verify(int argc, VALUE *argv, VALUE self)
     }
 
     if (!(ctx->store = X509_STORE_new())) {
+	TS_VERIFY_CTX_free(ctx);
         ossl_raise(eTimestampError, NULL);
-        goto end;
+        return Qnil;
     }
 
     int_ossl_init_roots(roots, ctx->store);

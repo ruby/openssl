@@ -382,7 +382,7 @@ GaL27FRs4fRWf9OmxPhUVgIyGzLGXrueemvQUDHObA==
         ts.verify(req, File.open('root_ca', 'rb'), INTERMEDIATE_CERT)
       ensure
         if File.exists?('root_ca')
-            FileUtils.rm('root_ca')
+            File.delete('root_ca')
         end
       end
     end
@@ -527,8 +527,30 @@ GaL27FRs4fRWf9OmxPhUVgIyGzLGXrueemvQUDHObA==
       fac.default_policy_id = '1.2.3.4.5'
       fac.additional_certs = [ TS_CERT_EE, INTERMEDIATE_CERT ]
       ts = fac.create_timestamp(EE_KEY, TS_CERT_EE, req)
-      assert_nil(ts.pkcs7.certificates)
+      assert_nil(ts.pkcs7.certificates) #since cert_requested? == false
       ts.verify(req, CA_CERT, TS_CERT_EE, INTERMEDIATE_CERT)
+    end
+
+    def test_reusable
+      #test if req and faq are reusable, i.e. the internal
+      #CTX_free methods don't mess up e.g. the certificates
+      req = OpenSSL::Timestamp::Request.new
+      req.algorithm = "SHA1"
+      digest = OpenSSL::Digest::SHA1.new.digest("test")
+      req.message_imprint = digest
+      req.policy_id = "1.2.3.4.5"
+      req.nonce = 42
+
+      fac = OpenSSL::Timestamp::Factory.new
+      fac.gen_time = Time.now
+      fac.serial_number = 1
+      fac.additional_certs = [ INTERMEDIATE_CERT ]
+      ts1 = fac.create_timestamp(EE_KEY, TS_CERT_EE, req)
+      ts1.verify(req, CA_CERT)
+      ts2 = fac.create_timestamp(EE_KEY, TS_CERT_EE, req)
+      ts2.verify(req, CA_CERT)
+      refute_nil(ts1.tsa_certificate)
+      refute_nil(ts2.tsa_certificate)
     end
 
     private
