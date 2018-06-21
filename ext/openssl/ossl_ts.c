@@ -1,5 +1,5 @@
 /*
- * 
+ *
  * Copyright (C) 2010 Martin Bosslet <Martin.Bosslet@googlemail.com>
  * All rights reserved.
  */
@@ -22,7 +22,7 @@
 
 #include "ossl.h"
 
-#if OPENSSL_VERSION_NUMBER >= 0x10000000L
+#if HAVE_OPENSSL_TS_H
 
 #define WrapTS_REQ(klass, obj, tsreq) do { \
     if (!tsreq) { \
@@ -108,19 +108,6 @@ obj_to_asn1obj(VALUE obj)
     if(!a1obj) ossl_raise(eASN1Error, "invalid OBJECT ID");
 
     return a1obj;
-}
-
-static ASN1_STRING*
-obj_to_asn1str(VALUE obj)
-{
-    ASN1_STRING *str;
-
-    StringValue(obj);
-    if(!(str = ASN1_STRING_new()))
-	ossl_raise(eASN1Error, NULL);
-    ASN1_STRING_set(str, RSTRING_PTR(obj), RSTRING_LEN(obj));
-
-    return str;
 }
 
 static VALUE
@@ -319,7 +306,7 @@ ossl_tsreq_set_msg_imprint(VALUE self, VALUE hash)
         ossl_raise(eTimestampError, NULL);
         return self;
     }
-    TS_MSG_IMPRINT_set_msg(mi, RSTRING_PTR(hash), RSTRING_LEN(hash));
+    TS_MSG_IMPRINT_set_msg(mi, (unsigned char *)RSTRING_PTR(hash), RSTRING_LEN(hash));
 
     return hash;
 }
@@ -401,6 +388,7 @@ ossl_tsreq_set_policy_id(VALUE self, VALUE oid)
         ASN1_OBJECT_free(req->policy_id);
     obj = obj_to_asn1obj(oid);
     req->policy_id = obj;
+    return oid;
 }
 
 /*
@@ -536,7 +524,8 @@ ossl_tsresp_alloc(VALUE klass)
  *       OpenSSL::Timestamp::Response.new(string)  -> response
  */
 static VALUE
-ossl_ts_initialize(VALUE self, VALUE der) {
+ossl_ts_initialize(VALUE self, VALUE der)
+{
     TS_RESP *ts_resp = DATA_PTR(self);
     BIO *in;
 
@@ -666,8 +655,6 @@ ossl_ts_get_pkcs7(VALUE self)
 {
     TS_RESP *resp;
     PKCS7 *p7;
-    unsigned char *p;
-    int len;
 
     GetTS_RESP(self, resp);
     p7 = resp->token;
@@ -892,7 +879,7 @@ ossl_ts_get_tsa_certificate(VALUE self)
     PKCS7 *p7;
     PKCS7_SIGNER_INFO *ts_info;
     X509 *cert;
-    
+
     GetTS_RESP(self, resp);
     p7 = resp->token;
     if (!p7)
@@ -920,7 +907,7 @@ ossl_ts_to_der(VALUE self)
 }
 
 static void
-int_ossl_handle_verify_errors()
+int_ossl_handle_verify_errors(void)
 {
     const char *msg = NULL;
     int is_validation_err = 0;
@@ -1075,8 +1062,9 @@ ossl_ts_verify(int argc, VALUE *argv, VALUE self)
     ts_cert = ossl_ts_get_tsa_certificate(self);
     if (ts_cert != Qnil || untrusted != Qnil) {
         if (!(certs = sk_X509_new_null())) {
+	    TS_VERIFY_CTX_free(ctx);
             ossl_raise(eTimestampError, NULL);
-            goto end;
+            return Qnil;
         }
         if (ts_cert != Qnil) {
             for (i=0; i < sk_X509_num(resp->token->d.sign->cert); i++) {
@@ -1111,20 +1099,9 @@ end:
     return ret;
 }
 
-/*
- * Creates a Factory.
- *
- * call-seq:
- *       OpenSSL::Timestamp::Factory.new    -> Factory
- */
-static VALUE
-ossl_tsfac_initialize(VALUE self)
-{
-    return self;
-}
-
 static ASN1_INTEGER *
-ossl_tsfac_serial_cb(struct TS_resp_ctx *ctx, void *data) {
+ossl_tsfac_serial_cb(struct TS_resp_ctx *ctx, void *data)
+{
     VALUE serial = *((VALUE *)data);
     ASN1_INTEGER *num;
     if (!(num = ASN1_INTEGER_new())) {
@@ -1173,7 +1150,7 @@ ossl_tsfac_time_cb(struct TS_resp_ctx *ctx, void *data, long *sec, long *usec)
  *
  * In addition one of either Request#policy_id or Factory#default_policy_id
  * must be set.
- * 
+ *
  * Raises a TimestampError if creation fails.
  *
  * call-seq:
@@ -1228,8 +1205,10 @@ ossl_tsfac_create_ts(VALUE self, VALUE key, VALUE certificate, VALUE request)
 
     additional_certs = ossl_tsfac_get_additional_certs(self);
     if (additional_certs != Qnil) {
-        if (!(inter_certs = sk_X509_new_null())) goto end;
-        if (tsa_cert)
+        if (!(inter_certs = sk_X509_new_null())) {
+            err_msg = "Memory allocation failed.";
+            goto end;
+        }
         if (rb_obj_is_kind_of(additional_certs, rb_cArray)) {
             for (i = 0; i < RARRAY_LEN(additional_certs); i++) {
                 cert = rb_ary_entry(additional_certs, i);
@@ -1280,7 +1259,7 @@ end:
  * INIT
  */
 void
-Init_ossl_ts()
+Init_ossl_ts(void)
 {
     #if 0
     mOSSL = rb_define_module("OpenSSL"); /* let rdoc know about mOSSL */
@@ -1535,7 +1514,6 @@ Init_ossl_ts()
      *
      */
     cTimestampFactory = rb_define_class_under(mTimestamp, "Factory", rb_cObject);
-    rb_define_method(cTimestampFactory, "initialize", ossl_tsfac_initialize, 0);
     rb_attr(cTimestampFactory, rb_intern("default_policy_id"), 1, 1, 0);
     rb_attr(cTimestampFactory, rb_intern("serial_number"), 1, 1, 0);
     rb_attr(cTimestampFactory, rb_intern("gen_time"), 1, 1, 0);

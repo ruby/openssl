@@ -68,7 +68,7 @@ module OpenSSL
         intermediate, im_key, OpenSSL::Digest::SHA1.new)
     end
   end
-  
+
   class TestTimestamp < MiniTest::Unit::TestCase
     include OpenSSL::TestUtils
 
@@ -112,7 +112,7 @@ GaL27FRs4fRWf9OmxPhUVgIyGzLGXrueemvQUDHObA==
     TS_CERT_DIRECT = Certs.ts_cert_direct(EE_KEY, CA_CERT)
     INTERMEDIATE_CERT = Certs.intermediate_cert(INTERMEDIATE_KEY, CA_CERT)
     TS_CERT_EE = Certs.ts_cert_ee(EE_KEY, INTERMEDIATE_CERT, INTERMEDIATE_KEY)
-       
+
     def test_create_request
       req = OpenSSL::Timestamp::Request.new
       assert_equal(true, req.cert_requested?)
@@ -215,7 +215,7 @@ GaL27FRs4fRWf9OmxPhUVgIyGzLGXrueemvQUDHObA==
       time = Time.now
       fac.gen_time = time
       fac.serial_number = 1
-            
+
       resp = fac.create_timestamp(EE_KEY, TS_CERT_EE, req)
       assert_equal(OpenSSL::Timestamp::Response::GRANTED, resp.status)
       assert_nil(resp.failure_info)
@@ -341,7 +341,7 @@ GaL27FRs4fRWf9OmxPhUVgIyGzLGXrueemvQUDHObA==
         ts.verify(req, [INTERMEDIATE_CERT], CA_CERT)
       end
     end
-    
+
     def test_verify_ee_nonce_mismatch
       assert_raises(OpenSSL::Timestamp::TimestampError) do
         ts, req = timestamp_ee
@@ -532,7 +532,7 @@ GaL27FRs4fRWf9OmxPhUVgIyGzLGXrueemvQUDHObA==
     end
 
     private
-    
+
     def assert_cert expected, actual
       assert_equal expected.to_der, actual.to_der
     end
