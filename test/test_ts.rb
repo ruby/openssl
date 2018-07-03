@@ -49,7 +49,7 @@ _end_of_pem_
     assert_equal(true, req.cert_requested?)
     assert_equal(1, req.version)
     assert_nil(req.algorithm)
-    assert_nil(req.message_imprint)
+    assert_equal("", req.message_imprint)
     assert_nil(req.policy_id)
     assert_nil(req.nonce)
   end
@@ -70,18 +70,39 @@ _end_of_pem_
 
   def test_request_assignment
     req = OpenSSL::Timestamp::Request.new
+
     req.version = 2
     assert_equal(2, req.version)
+    assert_raises(TypeError) { req.version = nil }
+    assert_raises(TypeError) { req.version = "foo" }
+
     req.algorithm = "SHA1"
     assert_equal("SHA1", req.algorithm)
+    assert_raises(TypeError) { req.algorithm = nil }
+    assert_raises(OpenSSL::ASN1::ASN1Error) { req.algorithm = "xxx" }
+
     req.message_imprint = "test"
     assert_equal("test", req.message_imprint)
+    assert_raises(TypeError) { req.message_imprint = nil }
+
     req.policy_id = "1.2.3.4.5"
     assert_equal("1.2.3.4.5", req.policy_id)
+    assert_raises(TypeError) { req.policy_id = 123 }
+    assert_raises(TypeError) { req.policy_id = nil }
+
     req.nonce = 42
     assert_equal(42, req.nonce)
+    assert_raises(TypeError) { req.nonce = "foo" }
+    assert_raises(OpenSSL::Timestamp::TimestampError) { req.nonce = nil }
+
     req.cert_requested = false
     assert_equal(false, req.cert_requested?)
+    req.cert_requested = nil
+    assert_equal(false, req.cert_requested?)
+    req.cert_requested = 123
+    assert_equal(true, req.cert_requested?)
+    req.cert_requested = "asdf"
+    assert_equal(true, req.cert_requested?)
   end
 
   def test_request_re_assignment

@@ -223,4 +223,28 @@ IMPL_PKEY_GETTER(EC_KEY, ec)
 #  define SSL_SESSION_get_protocol_version(s) ((s)->ssl_version)
 #endif
 
+#if !defined(HAVE_TS_STATUS_INFO_GET0_STATUS)
+#  define TS_STATUS_INFO_get0_status(a) ((a)->status)
+#endif
+
+#if !defined(HAVE_TS_STATUS_INFO_GET0_TEXT)
+#  define TS_STATUS_INFO_get0_text(a) ((a)->text)
+#endif
+
+#if !defined(HAVE_TS_STATUS_INFO_GET0_FAILURE_INFO)
+#  define TS_STATUS_INFO_get0_failure_info(a) ((a)->failure_info)
+#endif
+
+#if !defined(HAVE_TS_VERIFY_CTS_SET_CERTS)
+#  define TS_VERIFY_CTS_set_certs(ctx, crts) ((ctx)->certs=(crts))
+#endif
+
+#if !defined(HAVE_TS_VERIFY_CTX_SET_STORE)
+#  define TS_VERIFY_CTX_set_store(ctx, str) ((ctx)->store=(str))
+#endif
+
+#if !defined(HAVE_TS_VERIFY_CTX_ADD_FLAGS)
+#  define TS_VERIFY_CTX_add_flags(ctx, f) ((ctx)->flags |= (f))
+#endif
+
 #endif /* _OSSL_OPENSSL_MISSING_H_ */
