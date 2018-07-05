@@ -196,7 +196,9 @@ ossl_ts_req_initialize(int argc, VALUE *argv, VALUE self)
 
     arg = ossl_to_der_if_possible(arg);
     in = ossl_obj2bio(&arg);
-    if (!d2i_TS_REQ_bio(in, &ts_req))
+    ts_req = d2i_TS_REQ_bio(in, &ts_req);
+    BIO_free(in);
+    if (!ts_req)
 	ossl_raise(eTimestampError, "Error when decoding the timestamp request");
     DATA_PTR(self) = ts_req;
 
@@ -371,10 +373,13 @@ ossl_ts_req_set_policy_id(VALUE self, VALUE oid)
 {
     TS_REQ *req;
     ASN1_OBJECT *obj;
+    int ok;
 
     GetTSRequest(self, req);
     obj = obj_to_asn1obj(oid);
-    if (!TS_REQ_set_policy_id(req, obj))
+    ok = TS_REQ_set_policy_id(req, obj);
+    ASN1_OBJECT_free(obj);
+    if (!ok)
 	ossl_raise(eTimestampError, "TS_REQ_set_policy_id");
 
     return oid;
@@ -401,9 +406,8 @@ ossl_ts_req_get_nonce(VALUE self)
 
 /*
  * Sets the nonce (number used once) that the server shall include in its
- * response. This can be +nil+, implying that the server shall not return
- * a nonce in the Response. If the nonce is set, the server must return the
- * same nonce value in a valid Response.
+ * response. If the nonce is set, the server must return the same nonce value in
+ * a valid Response.
  *
  * call-seq:
  *       request.nonce = number    -> Fixnum
@@ -412,13 +416,12 @@ static VALUE
 ossl_ts_req_set_nonce(VALUE self, VALUE num)
 {
     TS_REQ *req;
-
-    // TS_REQ_set_nonce doesn't allow NULL value, though it is valid value.
-    if (num == Qnil)
-        ossl_raise(eTimestampError, NULL);
+    ASN1_INTEGER *nonce;
 
     GetTSRequest(self, req);
-    TS_REQ_set_nonce(req, num_to_asn1integer(num, NULL));
+    nonce = num_to_asn1integer(num, NULL);
+    TS_REQ_set_nonce(req, nonce);
+    ASN1_INTEGER_free(nonce);
     return num;
 }
 
@@ -662,15 +665,17 @@ static VALUE
 ossl_ts_resp_get_pkcs7(VALUE self)
 {
     TS_RESP *resp;
-    PKCS7 *p7;
+    PKCS7 *p7, *copy;
     VALUE obj;
 
     GetTSResponse(self, resp);
     if (!(p7 = TS_RESP_get_token(resp)))
 	return Qnil;
+    if (!(copy = PKCS7_dup(p7)))
+	ossl_raise(eTimestampError, NULL);
 
     obj = NewPKCS7(cPKCS7);
-    SetPKCS7(obj, PKCS7_dup(p7));
+    SetPKCS7(obj, copy);
 
     return obj;
 }
@@ -948,8 +953,10 @@ static void int_ossl_init_roots(VALUE roots, X509_STORE * store)
     BIO *in;
     int i;
 
-    if (roots == Qnil)
+    if (roots == Qnil) {
+	X509_STORE_free(store);
 	ossl_raise(rb_eTypeError, "roots must not be nil.");
+    }
     else if (rb_obj_is_kind_of(roots, rb_cArray)) {
 	for (i=0; i < RARRAY_LEN(roots); i++) {
 	    VALUE cert = rb_ary_entry(roots, i);
@@ -963,8 +970,10 @@ static void int_ossl_init_roots(VALUE roots, X509_STORE * store)
 	in = ossl_obj2bio(&roots);
 	inf = PEM_X509_INFO_read_bio(in, NULL, NULL, NULL);
 	BIO_free(in);
-	if(!inf)
+	if(!inf) {
+	    X509_STORE_free(store);
 	    ossl_raise(eTimestampError, "Could not parse root certificates.");
+	}
 	for (i = 0; i < sk_X509_INFO_num(inf); i++) {
 	    itmp = sk_X509_INFO_value(inf, i);
 	    if (itmp->x509) {
@@ -980,16 +989,14 @@ void
 int_ossl_verify_ctx_set_certs(TS_VERIFY_CTX *ctx, STACK_OF(X509) *certs)
 {
     int i;
-    STACK_OF(X509) *new_certs;
 
     if (!certs)
 	return;
 
-    new_certs = TS_VERIFY_CTS_set_certs(ctx, sk_X509_dup(certs));
-    if (!new_certs)
-	ossl_raise(eTimestampError, NULL);
-    for (i = 0; i < sk_X509_num(new_certs); ++i) {
-	X509 *cert = sk_X509_value(new_certs, i);
+    TS_VERIFY_CTS_set_certs(ctx, certs);
+
+    for (i = 0; i < sk_X509_num(certs); ++i) {
+	X509 *cert = sk_X509_value(certs, i);
 	X509_up_ref(cert);
     }
 }
@@ -1029,7 +1036,6 @@ int_ossl_verify_ctx_set_certs(TS_VERIFY_CTX *ctx, STACK_OF(X509) *certs)
 static VALUE
 ossl_ts_resp_verify(int argc, VALUE *argv, VALUE self)
 {
-    VALUE ret = Qnil;
     VALUE untrusted = Qnil;
     VALUE ts_cert;
     VALUE roots;
@@ -1047,26 +1053,23 @@ ossl_ts_resp_verify(int argc, VALUE *argv, VALUE self)
 
     GetTSResponse(self, resp);
     req = GetTsReqPtr(ts_req);
-    if (!(ctx = TS_REQ_to_TS_VERIFY_CTX(req, NULL)))
-	ossl_raise(eTimestampError, "Error when creating the verification context.");
 
-    store = TS_VERIFY_CTX_set_store(ctx, X509_STORE_new());
-    if (!store) {
-	TS_VERIFY_CTX_free(ctx);
-	ossl_raise(eTimestampError, NULL);
-    }
-
+    if (!(store = X509_STORE_new()))
+        ossl_raise(eTimestampError, NULL);
     int_ossl_init_roots(roots, store);
 
     ts_cert = ossl_ts_resp_get_tsa_certificate(self);
     if (ts_cert != Qnil || untrusted != Qnil) {
 	if (!(certs = sk_X509_new_null())) {
-	    TS_VERIFY_CTX_free(ctx);
+	    X509_STORE_free(store);
 	    ossl_raise(eTimestampError, NULL);
 	}
 	if (ts_cert != Qnil) {
-	    if (!(p7 = TS_RESP_get_token(resp)))
+	    if (!(p7 = TS_RESP_get_token(resp))) {
+		X509_STORE_free(store);
+		sk_X509_free(certs);
 		ossl_raise(eTimestampError, "TS_RESP_get_token");
+	    }
 	    for (i=0; i < sk_X509_num(p7->d.sign->cert); i++) {
 		sk_X509_push(certs, sk_X509_value(p7->d.sign->cert, i));
 	    }
@@ -1084,19 +1087,22 @@ ossl_ts_resp_verify(int argc, VALUE *argv, VALUE self)
 	}
     }
 
+    if (!(ctx = TS_REQ_to_TS_VERIFY_CTX(req, NULL))) {
+	X509_STORE_free(store);
+	sk_X509_pop_free(certs, X509_free);
+	ossl_raise(eTimestampError, "Error when creating the verification context.");
+     }
     int_ossl_verify_ctx_set_certs(ctx, certs);
+    TS_VERIFY_CTX_set_store(ctx, store);
     TS_VERIFY_CTX_add_flags(ctx, TS_VFY_SIGNATURE);
 
     if (!TS_RESP_verify_response(ctx, resp)) {
+	TS_VERIFY_CTX_free(ctx);
 	int_ossl_handle_verify_errors();
-	goto end;
     }
 
-    ret = self;
-
-end:
     TS_VERIFY_CTX_free(ctx);
-    return ret;
+    return self;
 }
 
 static ASN1_INTEGER *
@@ -1218,12 +1224,17 @@ ossl_tsfac_create_ts(VALUE self, VALUE key, VALUE certificate, VALUE request)
 	else {
 	    sk_X509_push(inter_certs, GetX509CertPtr(additional_certs));
 	}
+	// this dups the sk_X509 and ups each cert's ref count
 	TS_RESP_CTX_set_certs(ctx, inter_certs);
+	sk_X509_free(inter_certs);
     }
 
     TS_RESP_CTX_set_signer_key(ctx, sign_key);
-    if (def_policy_id != Qnil && !TS_REQ_get_policy_id(req))
-	TS_RESP_CTX_set_def_policy(ctx, obj_to_asn1obj(def_policy_id));
+    if (def_policy_id != Qnil && !TS_REQ_get_policy_id(req)) {
+	ASN1_OBJECT *def_policy_id_obj = obj_to_asn1obj(def_policy_id);
+	TS_RESP_CTX_set_def_policy(ctx, def_policy_id_obj);
+	ASN1_OBJECT_free(def_policy_id_obj);
+    }
     if (TS_REQ_get_policy_id(req))
 	TS_RESP_CTX_set_def_policy(ctx, TS_REQ_get_policy_id(req));
     TS_RESP_CTX_set_time_cb(ctx, ossl_tsfac_time_cb, &gen_time);
@@ -1238,6 +1249,7 @@ ossl_tsfac_create_ts(VALUE self, VALUE key, VALUE certificate, VALUE request)
     str = rb_funcall(request, rb_intern("to_der"), 0);
     req_bio = ossl_obj2bio(&str);
     response = TS_RESP_create_response(ctx, req_bio);
+    BIO_free(req_bio);
     if (!response) {
 	err_msg = "Error during response generation";
 	goto end;
