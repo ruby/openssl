@@ -3,7 +3,8 @@ require_relative "utils"
 if defined?(OpenSSL) && defined?(OpenSSL::Timestamp)
 
 class OpenSSL::TestTimestamp < OpenSSL::TestCase
-  INTERMEDIATE_KEY = OpenSSL::PKey::RSA.new <<-_end_of_pem_
+  def intermediate_key
+    @intermediate_key ||= OpenSSL::PKey::RSA.new <<-_end_of_pem_
 -----BEGIN RSA PRIVATE KEY-----
 MIICWwIBAAKBgQCcyODxH+oTrr7l7MITWcGaYnnBma6vidCCJjuSzZpaRmXZHAyH
 0YcY4ttC0BdJ4uV+cE05IySVC7tyvVfFb8gFQ6XJV+AEktP+XkLbcxZgj9d2NVu1
@@ -20,8 +21,10 @@ X5fAffWU0u7ZwqeByQJAOUAbYET4RU3iymAvAIDFj8LiQnizG9t5Ty3HXlijKQYv
 y8gsvWd4CdxwOPatWpBUX9L7IXcMJmD44xXTUvpbfQ==
 -----END RSA PRIVATE KEY-----
 _end_of_pem_
+  end
 
-  EE_KEY = OpenSSL::PKey::RSA.new <<-_end_of_pem_
+  def ee_key
+    @ee_key ||= OpenSSL::PKey::RSA.new <<-_end_of_pem_
 -----BEGIN RSA PRIVATE KEY-----
 MIICWwIBAAKBgQDA6eB5r2O5KOKNbKMBhzadl43lgpwqq28m+G0gH38kKCL1f3o9
 P8xUZm7sZqcWEervZMSSXMGBV9DgeoSR+U6FMJywgQGx/JNRx7wZTMNym3PvgLkl
@@ -38,11 +41,24 @@ EWRYkoNQ8/Q4lCeMjQJAfvDIGtyqF4PieFHYgluQAv5pGgYpakdc8SYyeRH9NKey
 GaL27FRs4fRWf9OmxPhUVgIyGzLGXrueemvQUDHObA==
 -----END RSA PRIVATE KEY-----
 _end_of_pem_
+  end
 
-  CA_CERT = OpenSSL::Certs.ca_cert
-  TS_CERT_DIRECT = OpenSSL::Certs.ts_cert_direct(EE_KEY, CA_CERT)
-  INTERMEDIATE_CERT = OpenSSL::Certs.intermediate_cert(INTERMEDIATE_KEY, CA_CERT)
-  TS_CERT_EE = OpenSSL::Certs.ts_cert_ee(EE_KEY, INTERMEDIATE_CERT, INTERMEDIATE_KEY)
+  def ca_cert
+    @ca_cert ||= OpenSSL::Certs.ca_cert
+  end
+
+
+  def ts_cert_direct
+    @ts_cert_direct ||= OpenSSL::Certs.ts_cert_direct(ee_key, ca_cert)
+  end
+
+  def intermediate_cert
+    @intermediate_cert ||= OpenSSL::Certs.intermediate_cert(intermediate_key, ca_cert)
+  end
+
+  def ts_cert_ee
+    @ts_cert_ee ||= OpenSSL::Certs.ts_cert_ee(ee_key, intermediate_cert, intermediate_key)
+  end
 
   def test_create_request
     req = OpenSSL::Timestamp::Request.new
@@ -93,7 +109,7 @@ _end_of_pem_
     req.nonce = 42
     assert_equal(42, req.nonce)
     assert_raises(TypeError) { req.nonce = "foo" }
-    assert_raises(OpenSSL::Timestamp::TimestampError) { req.nonce = nil }
+    assert_raises(TypeError) { req.nonce = nil }
 
     req.cert_requested = false
     assert_equal(false, req.cert_requested?)
@@ -168,7 +184,7 @@ _end_of_pem_
     fac.gen_time = time
     fac.serial_number = 1
 
-    resp = fac.create_timestamp(EE_KEY, TS_CERT_EE, req)
+    resp = fac.create_timestamp(ee_key, ts_cert_ee, req)
     assert_equal(OpenSSL::Timestamp::Response::GRANTED, resp.status)
     assert_nil(resp.failure_info)
     assert_nil(resp.status_text)
@@ -180,7 +196,7 @@ _end_of_pem_
     assert_equal(time.to_i, resp.gen_time.to_i)
     assert_equal(false, resp.ordering)
     assert_nil(req.nonce)
-    assert_cert(TS_CERT_EE, resp.tsa_certificate)
+    assert_cert(ts_cert_ee, resp.tsa_certificate)
     #compare PKCS7
     pkcs7 = OpenSSL::ASN1.decode(resp.to_der).value[1]
     assert_equal(pkcs7.to_der, resp.pkcs7.to_der)
@@ -190,32 +206,32 @@ _end_of_pem_
     fac = OpenSSL::Timestamp::Factory.new
     req = OpenSSL::Timestamp::Request.new
     assert_raises(OpenSSL::Timestamp::TimestampError) do
-      fac.create_timestamp(EE_KEY, TS_CERT_EE, req)
+      fac.create_timestamp(ee_key, ts_cert_ee, req)
     end
     req.algorithm = "sha1"
     assert_raises(OpenSSL::Timestamp::TimestampError) do
-      fac.create_timestamp(EE_KEY, TS_CERT_EE, req)
+      fac.create_timestamp(ee_key, ts_cert_ee, req)
     end
     req.message_imprint = OpenSSL::Digest::SHA1.new.digest("data")
     assert_raises(OpenSSL::Timestamp::TimestampError) do
-      fac.create_timestamp(EE_KEY, TS_CERT_EE, req)
+      fac.create_timestamp(ee_key, ts_cert_ee, req)
     end
     fac.gen_time = Time.now
     assert_raises(OpenSSL::Timestamp::TimestampError) do
-      fac.create_timestamp(EE_KEY, TS_CERT_EE, req)
+      fac.create_timestamp(ee_key, ts_cert_ee, req)
     end
     fac.serial_number = 1
     assert_raises(OpenSSL::Timestamp::TimestampError) do
-      fac.create_timestamp(EE_KEY, TS_CERT_EE, req)
+      fac.create_timestamp(ee_key, ts_cert_ee, req)
     end
     fac.default_policy_id = "1.2.3.4.5"
-    fac.create_timestamp(EE_KEY, TS_CERT_EE, req)
+    fac.create_timestamp(ee_key, ts_cert_ee, req)
     fac.default_policy_id = nil
     assert_raises(OpenSSL::Timestamp::TimestampError) do
-      fac.create_timestamp(EE_KEY, TS_CERT_EE, req)
+      fac.create_timestamp(ee_key, ts_cert_ee, req)
     end
     req.policy_id = "1.2.3.4.5"
-    fac.create_timestamp(EE_KEY, TS_CERT_EE, req)
+    fac.create_timestamp(ee_key, ts_cert_ee, req)
   end
 
   def test_response_default_policy
@@ -229,7 +245,7 @@ _end_of_pem_
     fac.serial_number = 1
     fac.default_policy_id = "1.2.3.4.6"
 
-    resp = fac.create_timestamp(EE_KEY, TS_CERT_EE, req)
+    resp = fac.create_timestamp(ee_key, ts_cert_ee, req)
     assert_equal(OpenSSL::Timestamp::Response::GRANTED, resp.status)
     assert_equal("1.2.3.4.6", resp.policy_id)
   end
@@ -246,7 +262,7 @@ _end_of_pem_
     fac.serial_number = 1
     fac.default_policy_id = "1.2.3.4.5"
 
-    resp = fac.create_timestamp(EE_KEY, TS_CERT_EE, req)
+    resp = fac.create_timestamp(ee_key, ts_cert_ee, req)
     assert_equal(OpenSSL::Timestamp::Response::GRANTED, resp.status)
     assert_nil(resp.tsa_certificate)
   end
@@ -262,14 +278,14 @@ _end_of_pem_
       fac.gen_time = Time.now
       fac.serial_number = 1
 
-      fac.create_timestamp(EE_KEY, TS_CERT_EE, req)
+      fac.create_timestamp(ee_key, ts_cert_ee, req)
     end
   end
 
   def test_verify_ee_no_req
     assert_raises(TypeError) do
       ts, req = timestamp_ee
-      ts.verify(nil, CA_CERT)
+      ts.verify(nil, ca_cert)
     end
   end
 
@@ -283,14 +299,14 @@ _end_of_pem_
   def test_verify_ee_wrong_root_no_intermediate
     assert_raises(OpenSSL::Timestamp::CertificateValidationError) do
       ts, req = timestamp_ee
-      ts.verify(req, [INTERMEDIATE_CERT])
+      ts.verify(req, [intermediate_cert])
     end
   end
 
   def test_verify_ee_wrong_root_wrong_intermediate
     assert_raises(OpenSSL::Timestamp::CertificateValidationError) do
       ts, req = timestamp_ee
-      ts.verify(req, [INTERMEDIATE_CERT], CA_CERT)
+      ts.verify(req, [intermediate_cert], ca_cert)
     end
   end
 
@@ -298,40 +314,40 @@ _end_of_pem_
     assert_raises(OpenSSL::Timestamp::TimestampError) do
       ts, req = timestamp_ee
       req.nonce = 1
-      ts.verify(req, [CA_CERT], INTERMEDIATE_CERT)
+      ts.verify(req, [ca_cert], intermediate_cert)
     end
   end
 
   def test_verify_ee_intermediate_missing
     assert_raises(OpenSSL::Timestamp::CertificateValidationError) do
       ts, req = timestamp_ee
-      ts.verify(req, [CA_CERT])
+      ts.verify(req, [ca_cert])
     end
   end
 
   def test_verify_ee_intermediate
     ts, req = timestamp_ee
-    ts.verify(req, [CA_CERT], INTERMEDIATE_CERT)
+    ts.verify(req, [ca_cert], intermediate_cert)
   end
 
   def test_verify_ee_single_root
     ts, req = timestamp_ee
-    ts.verify(req, CA_CERT, INTERMEDIATE_CERT)
+    ts.verify(req, ca_cert, intermediate_cert)
   end
 
   def test_verify_ee_root_from_string
     ts, req = timestamp_ee
-    pem_root = CA_CERT.to_pem
-    ts.verify(req, pem_root, INTERMEDIATE_CERT)
+    pem_root = ca_cert.to_pem
+    ts.verify(req, pem_root, intermediate_cert)
   end
 
   def test_verify_ee_root_from_file
     begin
       ts, req = timestamp_ee
       File.open('root_ca', 'wb') do |file|
-        file.print(CA_CERT.to_pem)
+        file.print(ca_cert.to_pem)
       end
-      ts.verify(req, File.open('root_ca', 'rb'), INTERMEDIATE_CERT)
+      ts.verify(req, File.open('root_ca', 'rb'), intermediate_cert)
     ensure
       if File.exists?('root_ca')
           File.delete('root_ca')
@@ -351,48 +367,48 @@ _end_of_pem_
     fac.serial_number = 1
     fac.default_policy_id = "1.2.3.4.5"
 
-    ts = fac.create_timestamp(EE_KEY, TS_CERT_EE, req)
-    ts.verify(req, [CA_CERT], INTERMEDIATE_CERT)
+    ts = fac.create_timestamp(ee_key, ts_cert_ee, req)
+    ts.verify(req, [ca_cert], intermediate_cert)
   end
 
   def test_verify_direct
     ts, req = timestamp_direct
-    ts.verify(req, [CA_CERT])
+    ts.verify(req, [ca_cert])
   end
 
   def test_verify_direct_redundant_untrusted
     ts, req = timestamp_direct
-    ts.verify(req, [CA_CERT], ts.tsa_certificate, ts.tsa_certificate)
+    ts.verify(req, [ca_cert], ts.tsa_certificate, ts.tsa_certificate)
   end
 
   def test_verify_direct_unrelated_untrusted
     ts, req = timestamp_direct
-    ts.verify(req, [CA_CERT], INTERMEDIATE_CERT)
+    ts.verify(req, [ca_cert], intermediate_cert)
   end
 
   def test_verify_direct_wrong_root
     assert_raises(OpenSSL::Timestamp::CertificateValidationError) do
       ts, req = timestamp_direct
-      ts.verify(req, [INTERMEDIATE_CERT])
+      ts.verify(req, [intermediate_cert])
     end
   end
 
   def test_verify_direct_no_cert_no_intermediate
     assert_raises(OpenSSL::Timestamp::TimestampError) do
       ts, req = timestamp_direct_no_cert
-      ts.verify(req, [CA_CERT])
+      ts.verify(req, [ca_cert])
     end
   end
 
   def test_verify_ee_no_cert
     ts, req = timestamp_ee_no_cert
-    ts.verify(req, [CA_CERT], TS_CERT_EE, INTERMEDIATE_CERT)
+    ts.verify(req, [ca_cert], ts_cert_ee, intermediate_cert)
   end
 
   def test_verify_ee_no_cert_no_intermediate
     assert_raises(OpenSSL::Timestamp::CertificateValidationError) do
       ts, req = timestamp_ee_no_cert
-      ts.verify(req, [CA_CERT], TS_CERT_EE)
+      ts.verify(req, [ca_cert], ts_cert_ee)
     end
   end
 
@@ -408,9 +424,9 @@ _end_of_pem_
       fac = OpenSSL::Timestamp::Factory.new
       fac.gen_time = Time.now
       fac.serial_number = 1
-      ts = fac.create_timestamp(EE_KEY, INTERMEDIATE_CERT, req)
+      ts = fac.create_timestamp(ee_key, intermediate_cert, req)
 
-      ts.verify(req, [CA_CERT])
+      ts.verify(req, [ca_cert])
     end
   end
 
@@ -424,12 +440,12 @@ _end_of_pem_
     fac = OpenSSL::Timestamp::Factory.new
     fac.gen_time = Time.now
     fac.serial_number = 1
-    fac.additional_certs = [INTERMEDIATE_CERT]
-    ts = fac.create_timestamp(EE_KEY, TS_CERT_EE, req)
+    fac.additional_certs = [intermediate_cert]
+    ts = fac.create_timestamp(ee_key, ts_cert_ee, req)
     assert_equal(2, ts.pkcs7.certificates.size)
     fac.additional_certs = nil
-    ts.verify(req, CA_CERT)
-    ts = fac.create_timestamp(EE_KEY, TS_CERT_EE, req)
+    ts.verify(req, ca_cert)
+    ts = fac.create_timestamp(ee_key, ts_cert_ee, req)
     assert_equal(1, ts.pkcs7.certificates.size)
   end
 
@@ -443,10 +459,10 @@ _end_of_pem_
     fac = OpenSSL::Timestamp::Factory.new
     fac.gen_time = Time.now
     fac.serial_number = 1
-    fac.additional_certs = INTERMEDIATE_CERT
-    ts = fac.create_timestamp(EE_KEY, TS_CERT_EE, req)
+    fac.additional_certs = intermediate_cert
+    ts = fac.create_timestamp(ee_key, ts_cert_ee, req)
     assert_equal(2, ts.pkcs7.certificates.size)
-    ts.verify(req, CA_CERT)
+    ts.verify(req, ca_cert)
   end
 
   def test_verify_ee_additional_certs_with_root
@@ -459,10 +475,10 @@ _end_of_pem_
     fac = OpenSSL::Timestamp::Factory.new
     fac.gen_time = Time.now
     fac.serial_number = 1
-    fac.additional_certs = [INTERMEDIATE_CERT, CA_CERT]
-    ts = fac.create_timestamp(EE_KEY, TS_CERT_EE, req)
+    fac.additional_certs = [intermediate_cert, ca_cert]
+    ts = fac.create_timestamp(ee_key, ts_cert_ee, req)
     assert_equal(3, ts.pkcs7.certificates.size)
-    ts.verify(req, CA_CERT)
+    ts.verify(req, ca_cert)
   end
 
   def test_verify_ee_cert_inclusion_not_requested
@@ -477,10 +493,10 @@ _end_of_pem_
     fac.serial_number = 1
     #needed because the Request contained no policy identifier
     fac.default_policy_id = '1.2.3.4.5'
-    fac.additional_certs = [ TS_CERT_EE, INTERMEDIATE_CERT ]
-    ts = fac.create_timestamp(EE_KEY, TS_CERT_EE, req)
+    fac.additional_certs = [ ts_cert_ee, intermediate_cert ]
+    ts = fac.create_timestamp(ee_key, ts_cert_ee, req)
     assert_nil(ts.pkcs7.certificates) #since cert_requested? == false
-    ts.verify(req, CA_CERT, TS_CERT_EE, INTERMEDIATE_CERT)
+    ts.verify(req, ca_cert, ts_cert_ee, intermediate_cert)
   end
 
   def test_reusable
@@ -496,11 +512,11 @@ _end_of_pem_
     fac = OpenSSL::Timestamp::Factory.new
     fac.gen_time = Time.now
     fac.serial_number = 1
-    fac.additional_certs = [ INTERMEDIATE_CERT ]
-    ts1 = fac.create_timestamp(EE_KEY, TS_CERT_EE, req)
-    ts1.verify(req, CA_CERT)
-    ts2 = fac.create_timestamp(EE_KEY, TS_CERT_EE, req)
-    ts2.verify(req, CA_CERT)
+    fac.additional_certs = [ intermediate_cert ]
+    ts1 = fac.create_timestamp(ee_key, ts_cert_ee, req)
+    ts1.verify(req, ca_cert)
+    ts2 = fac.create_timestamp(ee_key, ts_cert_ee, req)
+    ts2.verify(req, ca_cert)
     refute_nil(ts1.tsa_certificate)
     refute_nil(ts2.tsa_certificate)
   end
@@ -522,7 +538,7 @@ _end_of_pem_
     fac = OpenSSL::Timestamp::Factory.new
     fac.gen_time = Time.now
     fac.serial_number = 1
-    return fac.create_timestamp(EE_KEY, TS_CERT_EE, req), req
+    return fac.create_timestamp(ee_key, ts_cert_ee, req), req
   end
 
   def timestamp_ee_no_cert
@@ -537,7 +553,7 @@ _end_of_pem_
     fac = OpenSSL::Timestamp::Factory.new
     fac.gen_time = Time.now
     fac.serial_number = 1
-    return fac.create_timestamp(EE_KEY, TS_CERT_EE, req), req
+    return fac.create_timestamp(ee_key, ts_cert_ee, req), req
   end
 
   def timestamp_direct
@@ -551,7 +567,7 @@ _end_of_pem_
     fac = OpenSSL::Timestamp::Factory.new
     fac.gen_time = Time.now
     fac.serial_number = 1
-    return fac.create_timestamp(EE_KEY, TS_CERT_DIRECT, req), req
+    return fac.create_timestamp(ee_key, ts_cert_direct, req), req
   end
 
   def timestamp_direct_no_cert
@@ -566,7 +582,7 @@ _end_of_pem_
     fac = OpenSSL::Timestamp::Factory.new
     fac.gen_time = Time.now
     fac.serial_number = 1
-    return fac.create_timestamp(EE_KEY, TS_CERT_DIRECT, req), req
+    return fac.create_timestamp(ee_key, ts_cert_direct, req), req
   end
 end
 
