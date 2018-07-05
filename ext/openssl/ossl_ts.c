@@ -24,38 +24,34 @@
 
 #if HAVE_OPENSSL_TS_H
 
-#define WrapTS_REQ(klass, obj, tsreq) do { \
-    if (!tsreq) { \
-	ossl_raise(rb_eRuntimeError, "TimestampRequest wasn't initialized."); \
+#define NewTSRequest(klass) \
+    TypedData_Wrap_Struct((klass), &ossl_ts_req_type, 0)
+#define SetTSRequest(obj, req) do { \
+    if (!(req)) { \
+	ossl_raise(rb_eRuntimeError, "TS_REQ wasn't initialized."); \
     } \
-    obj = Data_Wrap_Struct(klass, 0, TS_REQ_free, tsreq); \
+    RTYPEDDATA_DATA(obj) = (req); \
 } while (0)
-#define GetTS_REQ(obj, tsreq) do { \
-    Data_Get_Struct(obj, TS_REQ, tsreq); \
-    if (!tsreq) { \
-	ossl_raise(rb_eRuntimeError, "TimestampRequest wasn't initialized."); \
+#define GetTSRequest(obj, req) do { \
+    TypedData_Get_Struct((obj), TS_REQ, &ossl_ts_req_type, (req)); \
+    if (!(req)) { \
+	ossl_raise(rb_eRuntimeError, "TS_REQ wasn't initialized."); \
     } \
-} while (0)
-#define SafeGetTS_REQ(obj, ts_req) do { \
-    OSSL_Check_Kind(obj, cTimestampRequest); \
-    GetTS_REQ(obj, ts_req); \
 } while (0)
 
-#define WrapTS_RESP(klass, obj, tsresp) do { \
-    if (!tsresp) { \
-	ossl_raise(rb_eRuntimeError, "TimestampResponse wasn't initialized."); \
+#define NewTSResponse(klass) \
+    TypedData_Wrap_Struct((klass), &ossl_ts_resp_type, 0)
+#define SetTSResponse(obj, resp) do { \
+    if (!(resp)) { \
+	ossl_raise(rb_eRuntimeError, "TS_RESP wasn't initialized."); \
     } \
-    obj = Data_Wrap_Struct(klass, 0, TS_RESP_free, tsresp); \
+    RTYPEDDATA_DATA(obj) = (resp); \
 } while (0)
-#define GetTS_RESP(obj, tsresp) do { \
-    Data_Get_Struct(obj, TS_RESP, tsresp); \
-    if (!tsresp) { \
-	ossl_raise(rb_eRuntimeError, "TimestampResponse wasn't initialized."); \
+#define GetTSResponse(obj, resp) do { \
+    TypedData_Get_Struct((obj), TS_RESP, &ossl_ts_resp_type, (resp)); \
+    if (!(resp)) { \
+	ossl_raise(rb_eRuntimeError, "TS_RESP wasn't initialized."); \
     } \
-} while (0)
-#define SafeGetTS_RESP(obj, ts_resp) do { \
-    OSSL_Check_Kind(obj, cTimestampResponse); \
-    GetTS_RESP(obj, ts_resp); \
 } while (0)
 
 #define ossl_tsfac_get_default_policy_id(o)      rb_attr_get((o),rb_intern("@default_policy_id"))
@@ -64,16 +60,41 @@
 #define ossl_tsfac_get_additional_certs(o)       rb_attr_get((o),rb_intern("@additional_certs"))
 
 VALUE mTimestamp;
-
 VALUE eTimestampError, eCertValidationError;
-
 VALUE cTimestampRequest;
 VALUE cTimestampResponse;
 VALUE cTimestampFactory;
-
 static ID sBAD_ALG, sBAD_REQUEST, sBAD_DATA_FORMAT, sTIME_NOT_AVAILABLE;
 static ID sUNACCEPTED_POLICY, sUNACCEPTED_EXTENSION, sADD_INFO_NOT_AVAILABLE;
 static ID sSYSTEM_FAILURE;
+
+static void
+ossl_ts_req_free(void *ptr)
+{
+    TS_REQ_free(ptr);
+}
+
+const rb_data_type_t ossl_ts_req_type = {
+    "OpenSSL/Timestamp/Request",
+    {
+	0, ossl_ts_req_free,
+    },
+    0, 0, RUBY_TYPED_FREE_IMMEDIATELY,
+};
+
+static void
+ossl_ts_resp_free(void *ptr)
+{
+    TS_RESP_free(ptr);
+}
+
+const rb_data_type_t ossl_ts_resp_type = {
+    "OpenSSL/Timestamp/Response",
+    {
+	0, ossl_ts_resp_free,
+    },
+    0, 0, RUBY_TYPED_FREE_IMMEDIATELY,
+};
 
 static VALUE
 asn1_to_der(void *template, int (*i2d)(void *template, unsigned char **pp))
@@ -129,25 +150,26 @@ GetTsReqPtr(VALUE obj)
 {
     TS_REQ *req;
 
-    SafeGetTS_REQ(obj, req);
+    OSSL_Check_Kind(obj, cTimestampRequest);
+    GetTSRequest(obj, req);
 
     return req;
 }
 
 static VALUE
-ossl_tsreq_alloc(VALUE klass)
+ossl_ts_req_alloc(VALUE klass)
 {
     TS_REQ *req;
     VALUE obj;
 
+    obj = NewTSRequest(klass);
     if (!(req = TS_REQ_new()))
 	ossl_raise(eTimestampError, NULL);
+    SetTSRequest(obj, req);
 
     // Defaults
     TS_REQ_set_version(req, 1);
     TS_REQ_set_cert_req(req, 1);
-
-    WrapTS_REQ(klass, obj, req);
 
     return obj;
 }
@@ -162,7 +184,7 @@ ossl_tsreq_alloc(VALUE klass)
  *       OpenSSL::Timestamp::Request.new          -> empty request
  */
 static VALUE
-ossl_tsreq_initialize(int argc, VALUE *argv, VALUE self)
+ossl_ts_req_initialize(int argc, VALUE *argv, VALUE self)
 {
     TS_REQ *ts_req = DATA_PTR(self);
     BIO *in;
@@ -189,13 +211,13 @@ ossl_tsreq_initialize(int argc, VALUE *argv, VALUE self)
  *       request.get_algorithm    -> string or nil
  */
 static VALUE
-ossl_tsreq_get_algorithm(VALUE self)
+ossl_ts_req_get_algorithm(VALUE self)
 {
     TS_REQ *req;
     TS_MSG_IMPRINT *mi;
     X509_ALGOR *algor;
 
-    GetTS_REQ(self, req);
+    GetTSRequest(self, req);
     mi = TS_REQ_get_msg_imprint(req);
     algor = TS_MSG_IMPRINT_get_algo(mi);
 
@@ -216,14 +238,14 @@ ossl_tsreq_get_algorithm(VALUE self)
  *       request.algorithm = "string"    -> string
  */
 static VALUE
-ossl_tsreq_set_algorithm(VALUE self, VALUE algo)
+ossl_ts_req_set_algorithm(VALUE self, VALUE algo)
 {
     TS_REQ *req;
     TS_MSG_IMPRINT *mi;
     ASN1_OBJECT *obj;
     X509_ALGOR *algor;
 
-    GetTS_REQ(self, req);
+    GetTSRequest(self, req);
     obj = obj_to_asn1obj(algo);
     mi = TS_REQ_get_msg_imprint(req);
     algor = TS_MSG_IMPRINT_get_algo(mi);
@@ -240,14 +262,14 @@ ossl_tsreq_set_algorithm(VALUE self, VALUE algo)
  *       request.message_imprint    -> string or nil
  */
 static VALUE
-ossl_tsreq_get_msg_imprint(VALUE self)
+ossl_ts_req_get_msg_imprint(VALUE self)
 {
     TS_REQ *req;
     TS_MSG_IMPRINT *mi;
     ASN1_OCTET_STRING *hashed_msg;
     VALUE ret;
 
-    GetTS_REQ(self, req);
+    GetTSRequest(self, req);
     mi = TS_REQ_get_msg_imprint(req);
     hashed_msg = TS_MSG_IMPRINT_get_msg(mi);
 
@@ -263,13 +285,13 @@ ossl_tsreq_get_msg_imprint(VALUE self)
  *       request.message_imprint = "string"    -> string
  */
 static VALUE
-ossl_tsreq_set_msg_imprint(VALUE self, VALUE hash)
+ossl_ts_req_set_msg_imprint(VALUE self, VALUE hash)
 {
     TS_REQ *req;
     TS_MSG_IMPRINT *mi;
     StringValue(hash);
 
-    GetTS_REQ(self, req);
+    GetTSRequest(self, req);
     mi = TS_REQ_get_msg_imprint(req);
     if (!TS_MSG_IMPRINT_set_msg(mi, (unsigned char *)RSTRING_PTR(hash), RSTRING_LEN(hash)))
 	ossl_raise(eTimestampError, "TS_MSG_IMPRINT_set_msg");
@@ -284,11 +306,11 @@ ossl_tsreq_set_msg_imprint(VALUE self, VALUE hash)
  *       request.version -> Fixnum
  */
 static VALUE
-ossl_tsreq_get_version(VALUE self)
+ossl_ts_req_get_version(VALUE self)
 {
     TS_REQ *req;
 
-    GetTS_REQ(self, req);
+    GetTSRequest(self, req);
     return LONG2NUM(TS_REQ_get_version(req));
 }
 
@@ -300,14 +322,14 @@ ossl_tsreq_get_version(VALUE self)
  *       request.algorithm = number    -> Fixnum
  */
 static VALUE
-ossl_tsreq_set_version(VALUE self, VALUE version)
+ossl_ts_req_set_version(VALUE self, VALUE version)
 {
     TS_REQ *req;
     long ver;
 
     if ((ver = NUM2LONG(version)) < 0)
 	ossl_raise(eTimestampError, "version must be >= 0!");
-    GetTS_REQ(self, req);
+    GetTSRequest(self, req);
     if (!TS_REQ_set_version(req, ver))
 	ossl_raise(eTimestampError, "TS_REQ_set_version");
 
@@ -322,11 +344,11 @@ ossl_tsreq_set_version(VALUE self, VALUE version)
  *       request.policy_id    -> string or nil
  */
 static VALUE
-ossl_tsreq_get_policy_id(VALUE self)
+ossl_ts_req_get_policy_id(VALUE self)
 {
     TS_REQ *req;
 
-    GetTS_REQ(self, req);
+    GetTSRequest(self, req);
     if (!TS_REQ_get_policy_id(req))
 	return Qnil;
     return get_asn1obj(TS_REQ_get_policy_id(req));
@@ -345,12 +367,12 @@ ossl_tsreq_get_policy_id(VALUE self)
  *       request.policy_id = "string"   -> string
  */
 static VALUE
-ossl_tsreq_set_policy_id(VALUE self, VALUE oid)
+ossl_ts_req_set_policy_id(VALUE self, VALUE oid)
 {
     TS_REQ *req;
     ASN1_OBJECT *obj;
 
-    GetTS_REQ(self, req);
+    GetTSRequest(self, req);
     obj = obj_to_asn1obj(oid);
     if (!TS_REQ_set_policy_id(req, obj))
 	ossl_raise(eTimestampError, "TS_REQ_set_policy_id");
@@ -366,12 +388,12 @@ ossl_tsreq_set_policy_id(VALUE self, VALUE oid)
  *       request.nonce    -> Fixnum or nil
  */
 static VALUE
-ossl_tsreq_get_nonce(VALUE self)
+ossl_ts_req_get_nonce(VALUE self)
 {
     TS_REQ *req;
     const ASN1_INTEGER * nonce;
 
-    GetTS_REQ(self, req);
+    GetTSRequest(self, req);
     if (!(nonce = TS_REQ_get_nonce(req)))
 	return Qnil;
     return asn1integer_to_num(nonce);
@@ -387,7 +409,7 @@ ossl_tsreq_get_nonce(VALUE self)
  *       request.nonce = number    -> Fixnum
  */
 static VALUE
-ossl_tsreq_set_nonce(VALUE self, VALUE num)
+ossl_ts_req_set_nonce(VALUE self, VALUE num)
 {
     TS_REQ *req;
 
@@ -395,7 +417,7 @@ ossl_tsreq_set_nonce(VALUE self, VALUE num)
     if (num == Qnil)
         ossl_raise(eTimestampError, NULL);
 
-    GetTS_REQ(self, req);
+    GetTSRequest(self, req);
     TS_REQ_set_nonce(req, num_to_asn1integer(num, NULL));
     return num;
 }
@@ -408,11 +430,11 @@ ossl_tsreq_set_nonce(VALUE self, VALUE num)
  *       request.cert_requested?  -> true or false
  */
 static VALUE
-ossl_tsreq_get_cert_requested(VALUE self)
+ossl_ts_req_get_cert_requested(VALUE self)
 {
     TS_REQ *req;
 
-    GetTS_REQ(self, req);
+    GetTSRequest(self, req);
     return TS_REQ_get_cert_req(req) ? Qtrue: Qfalse;
 }
 
@@ -424,11 +446,11 @@ ossl_tsreq_get_cert_requested(VALUE self)
  *       request.cert_requested = boolean -> true or false
  */
 static VALUE
-ossl_tsreq_set_cert_requested(VALUE self, VALUE requested)
+ossl_ts_req_set_cert_requested(VALUE self, VALUE requested)
 {
     TS_REQ *req;
 
-    GetTS_REQ(self, req);
+    GetTSRequest(self, req);
     TS_REQ_set_cert_req(req, RTEST(requested));
 
     return requested;
@@ -441,14 +463,14 @@ ossl_tsreq_set_cert_requested(VALUE self, VALUE requested)
  *       request.to_der    -> DER-encoded string
  */
 static VALUE
-ossl_tsreq_to_der(VALUE self)
+ossl_ts_req_to_der(VALUE self)
 {
     TS_REQ *req;
     TS_MSG_IMPRINT *mi;
     X509_ALGOR *algo;
     ASN1_OCTET_STRING *hashed_msg;
 
-    GetTS_REQ(self, req);
+    GetTSRequest(self, req);
     mi = TS_REQ_get_msg_imprint(req);
 
     algo = TS_MSG_IMPRINT_get_algo(mi);
@@ -467,21 +489,22 @@ GetTsRespPtr(VALUE obj)
 {
     TS_RESP *resp;
 
-    SafeGetTS_RESP(obj, resp);
+    OSSL_Check_Kind(obj, cTimestampResponse);
+    GetTSResponse(obj, resp);
 
     return resp;
 }
 
 static VALUE
-ossl_tsresp_alloc(VALUE klass)
+ossl_ts_resp_alloc(VALUE klass)
 {
     TS_RESP *resp;
     VALUE obj;
 
-    resp = TS_RESP_new();
-    if (!resp) ossl_raise(eTimestampError, NULL);
-
-    WrapTS_RESP(klass, obj, resp);
+    obj = NewTSResponse(klass);
+    if (!(resp = TS_RESP_new()))
+	ossl_raise(eTimestampError, NULL);
+    SetTSResponse(obj, resp);
 
     return obj;
 }
@@ -497,7 +520,7 @@ ossl_tsresp_alloc(VALUE klass)
  *       OpenSSL::Timestamp::Response.new(string)  -> response
  */
 static VALUE
-ossl_ts_initialize(VALUE self, VALUE der)
+ossl_ts_resp_initialize(VALUE self, VALUE der)
 {
     TS_RESP *ts_resp = DATA_PTR(self);
     BIO *in;
@@ -520,13 +543,13 @@ ossl_ts_initialize(VALUE self, VALUE der)
  *       response.status -> Fixnum (never nil)
  */
 static VALUE
-ossl_ts_get_status(VALUE self)
+ossl_ts_resp_get_status(VALUE self)
 {
     TS_RESP *resp;
     TS_STATUS_INFO *si;
     const ASN1_INTEGER *st;
 
-    GetTS_RESP(self, resp);
+    GetTSResponse(self, resp);
     si = TS_RESP_get_status_info(resp);
     st = TS_STATUS_INFO_get0_status(si);
 
@@ -559,7 +582,7 @@ ossl_ts_get_status(VALUE self)
  *       response.failure_info -> nil or symbol
  */
 static VALUE
-ossl_ts_get_failure_info(VALUE self)
+ossl_ts_resp_get_failure_info(VALUE self)
 {
     TS_RESP *resp;
     TS_STATUS_INFO *si;
@@ -572,7 +595,7 @@ ossl_ts_get_failure_info(VALUE self)
     ASN1_BIT_STRING *fi;
     #endif
 
-    GetTS_RESP(self, resp);
+    GetTSResponse(self, resp);
     si = TS_RESP_get_status_info(resp);
     fi = TS_STATUS_INFO_get0_failure_info(si);
     if (!fi)
@@ -605,7 +628,7 @@ ossl_ts_get_failure_info(VALUE self)
  *       response.status_text -> Array of strings or nil
  */
 static VALUE
-ossl_ts_get_status_text(VALUE self)
+ossl_ts_resp_get_status_text(VALUE self)
 {
     TS_RESP *resp;
     TS_STATUS_INFO *si;
@@ -614,7 +637,7 @@ ossl_ts_get_status_text(VALUE self)
     VALUE ret;
     int i;
 
-    GetTS_RESP(self, resp);
+    GetTSResponse(self, resp);
     si = TS_RESP_get_status_info(resp);
     text = TS_STATUS_INFO_get0_text(si);
     if (!text)
@@ -636,13 +659,13 @@ ossl_ts_get_status_text(VALUE self)
  *       response.pkcs7 -> nil or OpenSSL::PKCS7
  */
 static VALUE
-ossl_ts_get_pkcs7(VALUE self)
+ossl_ts_resp_get_pkcs7(VALUE self)
 {
     TS_RESP *resp;
     PKCS7 *p7;
     VALUE obj;
 
-    GetTS_RESP(self, resp);
+    GetTSResponse(self, resp);
     if (!(p7 = TS_RESP_get_token(resp)))
 	return Qnil;
 
@@ -661,12 +684,12 @@ ossl_ts_get_pkcs7(VALUE self)
  *       response.version -> Fixnum or nil
  */
 static VALUE
-ossl_ts_get_version(VALUE self)
+ossl_ts_resp_get_version(VALUE self)
 {
     TS_RESP *resp;
     TS_TST_INFO *tst;
 
-    GetTS_RESP(self, resp);
+    GetTSResponse(self, resp);
     if (!(tst = TS_RESP_get_tst_info(resp)))
 	return Qnil;
     return LONG2NUM(TS_TST_INFO_get_version(tst));
@@ -685,12 +708,12 @@ ossl_ts_get_version(VALUE self)
  *       response.policy_id -> string or nil
  */
 static VALUE
-ossl_ts_get_policy_id(VALUE self)
+ossl_ts_resp_get_policy_id(VALUE self)
 {
     TS_RESP *resp;
     TS_TST_INFO *tst;
 
-    GetTS_RESP(self, resp);
+    GetTSResponse(self, resp);
     if (!(tst = TS_RESP_get_tst_info(resp)))
 	return Qnil;
     return get_asn1obj(TS_TST_INFO_get_policy_id(tst));
@@ -710,14 +733,14 @@ ossl_ts_get_policy_id(VALUE self)
  *       response.algorithm -> string or nil
  */
 static VALUE
-ossl_ts_get_algorithm(VALUE self)
+ossl_ts_resp_get_algorithm(VALUE self)
 {
     TS_RESP *resp;
     TS_TST_INFO *tst;
     TS_MSG_IMPRINT *mi;
     X509_ALGOR *algo;
 
-    GetTS_RESP(self, resp);
+    GetTSResponse(self, resp);
     if (!(tst = TS_RESP_get_tst_info(resp)))
 	return Qnil;
     mi = TS_TST_INFO_get_msg_imprint(tst);
@@ -738,7 +761,7 @@ ossl_ts_get_algorithm(VALUE self)
  *       response.algorithm -> string or nil
  */
 static VALUE
-ossl_ts_get_msg_imprint(VALUE self)
+ossl_ts_resp_get_msg_imprint(VALUE self)
 {
     TS_RESP *resp;
     TS_TST_INFO *tst;
@@ -746,7 +769,7 @@ ossl_ts_get_msg_imprint(VALUE self)
     ASN1_OCTET_STRING *hashed_msg;
     VALUE ret;
 
-    GetTS_RESP(self, resp);
+    GetTSResponse(self, resp);
     if (!(tst = TS_RESP_get_tst_info(resp)))
 	return Qnil;
     mi = TS_TST_INFO_get_msg_imprint(tst);
@@ -765,12 +788,12 @@ ossl_ts_get_msg_imprint(VALUE self)
  *       response.serial_number -> number or nil
  */
 static VALUE
-ossl_ts_get_serial_number(VALUE self)
+ossl_ts_resp_get_serial_number(VALUE self)
 {
     TS_RESP *resp;
     TS_TST_INFO *tst;
 
-    GetTS_RESP(self, resp);
+    GetTSResponse(self, resp);
     if (!(tst = TS_RESP_get_tst_info(resp)))
 	return Qnil;
     return asn1integer_to_num(TS_TST_INFO_get_serial(tst));
@@ -784,12 +807,12 @@ ossl_ts_get_serial_number(VALUE self)
  *       response.gen_time -> Time
  */
 static VALUE
-ossl_ts_get_gen_time(VALUE self)
+ossl_ts_resp_get_gen_time(VALUE self)
 {
     TS_RESP *resp;
     TS_TST_INFO *tst;
 
-    GetTS_RESP(self, resp);
+    GetTSResponse(self, resp);
     if (!(tst = TS_RESP_get_tst_info(resp)))
 	return Qnil;
     return asn1time_to_time(TS_TST_INFO_get_time(tst));
@@ -813,12 +836,12 @@ ossl_ts_get_gen_time(VALUE self)
  *       response.ordering -> true, falses or nil
  */
 static VALUE
-ossl_ts_get_ordering(VALUE self)
+ossl_ts_resp_get_ordering(VALUE self)
 {
     TS_RESP *resp;
     TS_TST_INFO *tst;
 
-    GetTS_RESP(self, resp);
+    GetTSResponse(self, resp);
     if (!(tst = TS_RESP_get_tst_info(resp)))
 	return Qnil;
     return TS_TST_INFO_get_ordering(tst) ? Qtrue : Qfalse;
@@ -832,13 +855,13 @@ ossl_ts_get_ordering(VALUE self)
  *       response.nonce -> number or nil
  */
 static VALUE
-ossl_ts_get_nonce(VALUE self)
+ossl_ts_resp_get_nonce(VALUE self)
 {
     TS_RESP *resp;
     TS_TST_INFO *tst;
     const ASN1_INTEGER *nonce;
 
-    GetTS_RESP(self, resp);
+    GetTSResponse(self, resp);
     if (!(tst = TS_RESP_get_tst_info(resp)))
 	return Qnil;
     if (!(nonce = TS_TST_INFO_get_nonce(tst)))
@@ -856,14 +879,14 @@ ossl_ts_get_nonce(VALUE self)
  *       response.tsa_certificate -> OpenSSL::X509::Certificate or nil
  */
 static VALUE
-ossl_ts_get_tsa_certificate(VALUE self)
+ossl_ts_resp_get_tsa_certificate(VALUE self)
 {
     TS_RESP *resp;
     PKCS7 *p7;
     PKCS7_SIGNER_INFO *ts_info;
     X509 *cert;
 
-    GetTS_RESP(self, resp);
+    GetTSResponse(self, resp);
     if (!(p7 = TS_RESP_get_token(resp)))
 	return Qnil;
     ts_info = sk_PKCS7_SIGNER_INFO_value(p7->d.sign->signer_info, 0);
@@ -880,11 +903,11 @@ ossl_ts_get_tsa_certificate(VALUE self)
  *       response.to_der -> string
  */
 static VALUE
-ossl_ts_to_der(VALUE self)
+ossl_ts_resp_to_der(VALUE self)
 {
     TS_RESP *resp;
 
-    GetTS_RESP(self, resp);
+    GetTSResponse(self, resp);
     return asn1_to_der((void *)resp, (int (*)(void *, unsigned char **))i2d_TS_RESP);
 }
 
@@ -1004,7 +1027,7 @@ int_ossl_verify_ctx_set_certs(TS_VERIFY_CTX *ctx, STACK_OF(X509) *certs)
  *       response.verify(Request, string, intermediate1, intermediate2, ...)                     -> Response
  */
 static VALUE
-ossl_ts_verify(int argc, VALUE *argv, VALUE self)
+ossl_ts_resp_verify(int argc, VALUE *argv, VALUE self)
 {
     VALUE ret = Qnil;
     VALUE untrusted = Qnil;
@@ -1022,7 +1045,7 @@ ossl_ts_verify(int argc, VALUE *argv, VALUE self)
 
     rb_scan_args(argc, argv, "2*", &ts_req, &roots, &untrusted);
 
-    GetTS_RESP(self, resp);
+    GetTSResponse(self, resp);
     req = GetTsReqPtr(ts_req);
     if (!(ctx = TS_REQ_to_TS_VERIFY_CTX(req, NULL)))
 	ossl_raise(eTimestampError, "Error when creating the verification context.");
@@ -1035,7 +1058,7 @@ ossl_ts_verify(int argc, VALUE *argv, VALUE self)
 
     int_ossl_init_roots(roots, store);
 
-    ts_cert = ossl_ts_get_tsa_certificate(self);
+    ts_cert = ossl_ts_resp_get_tsa_certificate(self);
     if (ts_cert != Qnil || untrusted != Qnil) {
 	if (!(certs = sk_X509_new_null())) {
 	    TS_VERIFY_CTX_free(ctx);
@@ -1220,7 +1243,8 @@ ossl_tsfac_create_ts(VALUE self, VALUE key, VALUE certificate, VALUE request)
 	goto end;
     }
 
-    WrapTS_RESP(cTimestampResponse, ret, response);
+    ret = NewTSResponse(cTimestampResponse);
+    SetTSResponse(ret, response);
 
 end:
     if (ctx) TS_RESP_CTX_free(ctx);
@@ -1330,23 +1354,23 @@ Init_ossl_ts(void)
      * verify the Response.
      */
     cTimestampResponse = rb_define_class_under(mTimestamp, "Response", rb_cObject);
-    rb_define_alloc_func(cTimestampResponse, ossl_tsresp_alloc);
-    rb_define_method(cTimestampResponse, "initialize", ossl_ts_initialize, 1);
-    rb_define_method(cTimestampResponse, "status", ossl_ts_get_status, 0);
-    rb_define_method(cTimestampResponse, "failure_info", ossl_ts_get_failure_info, 0);
-    rb_define_method(cTimestampResponse, "status_text", ossl_ts_get_status_text, 0);
-    rb_define_method(cTimestampResponse, "pkcs7", ossl_ts_get_pkcs7, 0);
-    rb_define_method(cTimestampResponse, "tsa_certificate", ossl_ts_get_tsa_certificate, 0);
-    rb_define_method(cTimestampResponse, "version", ossl_ts_get_version, 0);
-    rb_define_method(cTimestampResponse, "policy_id", ossl_ts_get_policy_id, 0);
-    rb_define_method(cTimestampResponse, "algorithm", ossl_ts_get_algorithm, 0);
-    rb_define_method(cTimestampResponse, "message_imprint", ossl_ts_get_msg_imprint, 0);
-    rb_define_method(cTimestampResponse, "serial_number", ossl_ts_get_serial_number, 0);
-    rb_define_method(cTimestampResponse, "gen_time", ossl_ts_get_gen_time, 0);
-    rb_define_method(cTimestampResponse, "ordering", ossl_ts_get_ordering, 0);
-    rb_define_method(cTimestampResponse, "nonce", ossl_ts_get_nonce, 0);
-    rb_define_method(cTimestampResponse, "to_der", ossl_ts_to_der, 0);
-    rb_define_method(cTimestampResponse, "verify", ossl_ts_verify, -1);
+    rb_define_alloc_func(cTimestampResponse, ossl_ts_resp_alloc);
+    rb_define_method(cTimestampResponse, "initialize", ossl_ts_resp_initialize, 1);
+    rb_define_method(cTimestampResponse, "status", ossl_ts_resp_get_status, 0);
+    rb_define_method(cTimestampResponse, "failure_info", ossl_ts_resp_get_failure_info, 0);
+    rb_define_method(cTimestampResponse, "status_text", ossl_ts_resp_get_status_text, 0);
+    rb_define_method(cTimestampResponse, "pkcs7", ossl_ts_resp_get_pkcs7, 0);
+    rb_define_method(cTimestampResponse, "tsa_certificate", ossl_ts_resp_get_tsa_certificate, 0);
+    rb_define_method(cTimestampResponse, "version", ossl_ts_resp_get_version, 0);
+    rb_define_method(cTimestampResponse, "policy_id", ossl_ts_resp_get_policy_id, 0);
+    rb_define_method(cTimestampResponse, "algorithm", ossl_ts_resp_get_algorithm, 0);
+    rb_define_method(cTimestampResponse, "message_imprint", ossl_ts_resp_get_msg_imprint, 0);
+    rb_define_method(cTimestampResponse, "serial_number", ossl_ts_resp_get_serial_number, 0);
+    rb_define_method(cTimestampResponse, "gen_time", ossl_ts_resp_get_gen_time, 0);
+    rb_define_method(cTimestampResponse, "ordering", ossl_ts_resp_get_ordering, 0);
+    rb_define_method(cTimestampResponse, "nonce", ossl_ts_resp_get_nonce, 0);
+    rb_define_method(cTimestampResponse, "to_der", ossl_ts_resp_to_der, 0);
+    rb_define_method(cTimestampResponse, "verify", ossl_ts_resp_verify, -1);
 
     /* Document-class: OpenSSL::Timestamp::Request
      * Allows to create timestamp requests or parse existing ones. A Request is
@@ -1357,21 +1381,21 @@ Init_ossl_ts(void)
      * * algorithm, message_imprint, policy_id, and nonce are set to +false+
      */
     cTimestampRequest = rb_define_class_under(mTimestamp, "Request", rb_cObject);
-    rb_define_alloc_func(cTimestampRequest, ossl_tsreq_alloc);
-    rb_define_method(cTimestampRequest, "initialize", ossl_tsreq_initialize, -1);
-    rb_define_method(cTimestampRequest, "version=", ossl_tsreq_set_version, 1);
-    rb_define_method(cTimestampRequest, "version", ossl_tsreq_get_version, 0);
-    rb_define_method(cTimestampRequest, "algorithm=", ossl_tsreq_set_algorithm, 1);
-    rb_define_method(cTimestampRequest, "algorithm", ossl_tsreq_get_algorithm, 0);
-    rb_define_method(cTimestampRequest, "message_imprint=", ossl_tsreq_set_msg_imprint, 1);
-    rb_define_method(cTimestampRequest, "message_imprint", ossl_tsreq_get_msg_imprint, 0);
-    rb_define_method(cTimestampRequest, "policy_id=", ossl_tsreq_set_policy_id, 1);
-    rb_define_method(cTimestampRequest, "policy_id", ossl_tsreq_get_policy_id, 0);
-    rb_define_method(cTimestampRequest, "nonce=", ossl_tsreq_set_nonce, 1);
-    rb_define_method(cTimestampRequest, "nonce", ossl_tsreq_get_nonce, 0);
-    rb_define_method(cTimestampRequest, "cert_requested=", ossl_tsreq_set_cert_requested, 1);
-    rb_define_method(cTimestampRequest, "cert_requested?", ossl_tsreq_get_cert_requested, 0);
-    rb_define_method(cTimestampRequest, "to_der", ossl_tsreq_to_der, 0);
+    rb_define_alloc_func(cTimestampRequest, ossl_ts_req_alloc);
+    rb_define_method(cTimestampRequest, "initialize", ossl_ts_req_initialize, -1);
+    rb_define_method(cTimestampRequest, "version=", ossl_ts_req_set_version, 1);
+    rb_define_method(cTimestampRequest, "version", ossl_ts_req_get_version, 0);
+    rb_define_method(cTimestampRequest, "algorithm=", ossl_ts_req_set_algorithm, 1);
+    rb_define_method(cTimestampRequest, "algorithm", ossl_ts_req_get_algorithm, 0);
+    rb_define_method(cTimestampRequest, "message_imprint=", ossl_ts_req_set_msg_imprint, 1);
+    rb_define_method(cTimestampRequest, "message_imprint", ossl_ts_req_get_msg_imprint, 0);
+    rb_define_method(cTimestampRequest, "policy_id=", ossl_ts_req_set_policy_id, 1);
+    rb_define_method(cTimestampRequest, "policy_id", ossl_ts_req_get_policy_id, 0);
+    rb_define_method(cTimestampRequest, "nonce=", ossl_ts_req_set_nonce, 1);
+    rb_define_method(cTimestampRequest, "nonce", ossl_ts_req_get_nonce, 0);
+    rb_define_method(cTimestampRequest, "cert_requested=", ossl_ts_req_set_cert_requested, 1);
+    rb_define_method(cTimestampRequest, "cert_requested?", ossl_ts_req_get_cert_requested, 0);
+    rb_define_method(cTimestampRequest, "to_der", ossl_ts_req_to_der, 0);
 
     /*
      * Indicates a successful response. Equal to +0+.
