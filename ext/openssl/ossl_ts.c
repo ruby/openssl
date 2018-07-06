@@ -218,12 +218,16 @@ ossl_ts_req_get_algorithm(VALUE self)
     TS_REQ *req;
     TS_MSG_IMPRINT *mi;
     X509_ALGOR *algor;
+    int algi;
 
     GetTSRequest(self, req);
     mi = TS_REQ_get_msg_imprint(req);
     algor = TS_MSG_IMPRINT_get_algo(mi);
 
-    if (!algor || OBJ_obj2nid(algor->algorithm) == NID_undef)
+    if (!algor)
+	return Qnil;
+    algi = OBJ_obj2nid(algor->algorithm);
+    if (algi == NID_undef || algi == NID_ccitt)
 	return Qnil;
 
     return get_asn1obj(algor->algorithm);
