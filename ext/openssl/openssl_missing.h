@@ -247,4 +247,11 @@ IMPL_PKEY_GETTER(EC_KEY, ec)
 #  define TS_VERIFY_CTX_add_flags(ctx, f) ((ctx)->flags |= (f))
 #endif
 
+#if !defined(HAVE_TS_RESP_CTX_SET_TIME_CB)
+#   define TS_RESP_CTX_set_time_cb(ctx, callback, dta) do { \
+	(ctx)->time_cb = (callback); \
+	(ctx)->time_cb_data = (dta); \
+    } while (0)
+#endif
+
 #endif /* _OSSL_OPENSSL_MISSING_H_ */
