@@ -7,19 +7,6 @@
  * This program is licenced under the same licence as Ruby.
  * (See the file 'LICENCE'.)
  */
-
-#include <openssl/asn1.h>
-#include <openssl/ossl_typ.h>
-#include <openssl/x509.h>
-#include <openssl/pkcs7.h>
-#include <openssl/objects.h>
-#include <openssl/evp.h>
-#include <openssl/err.h>
-#include <unistd.h>
-#include <openssl/bio.h>
-#include <openssl/crypto.h>
-#include <openssl/x509_vfy.h>
-
 #include "ossl.h"
 
 #if HAVE_OPENSSL_TS_H
@@ -1049,7 +1036,7 @@ ossl_ts_resp_verify(int argc, VALUE *argv, VALUE self)
     TS_VERIFY_CTX *ctx;
     X509_STORE *store;
     TS_REQ *req;
-    STACK_OF(X509) *certs;
+    STACK_OF(X509) *certs = NULL;
     VALUE cert;
     int i;
 
