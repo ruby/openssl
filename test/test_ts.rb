@@ -342,17 +342,13 @@ _end_of_pem_
   end
 
   def test_verify_ee_root_from_file
-    begin
-      ts, req = timestamp_ee
-      File.open('root_ca', 'wb') do |file|
-        file.print(ca_cert.to_pem)
-      end
-      ts.verify(req, File.open('root_ca', 'rb'), intermediate_cert)
-    ensure
-      if File.exists?('root_ca')
-          File.delete('root_ca')
-      end
-    end
+    file = Tempfile.new('root_ca', Dir.tmpdir, :mode => File::BINARY)
+    ts, req = timestamp_ee
+    file.print(ca_cert.to_pem)
+    file.close
+    ts.verify(req, File.open(file.path, 'rb'), intermediate_cert)
+  ensure
+    file.unlink
   end
 
   def test_verify_ee_def_policy
