@@ -125,6 +125,10 @@ engines.each { |name|
   OpenSSL.check_func_or_macro("ENGINE_load_#{name}", "openssl/engine.h")
 }
 
+if ($mswin || $mingw) && have_macro("LIBRESSL_VERSION_NUMBER")
+  $defs.push("-DNOCRYPT")
+end
+
 # added in 0.9.8X
 have_func("EVP_CIPHER_CTX_new")
 have_func("EVP_CIPHER_CTX_free")
