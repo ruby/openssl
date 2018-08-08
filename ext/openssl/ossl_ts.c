@@ -981,24 +981,13 @@ ossl_ts_verify_ctx_free(TS_VERIFY_CTX *ctx)
 static ASN1_INTEGER *
 ossl_tsfac_serial_cb(struct TS_resp_ctx *ctx, void *data)
 {
-    VALUE serial = *((VALUE *)data);
-    ASN1_INTEGER *num;
-    if (!(num = ASN1_INTEGER_new())) {
-	TSerr(TS_F_DEF_SERIAL_CB, ERR_R_MALLOC_FAILURE);
-	TS_RESP_CTX_set_status_info(ctx, TS_STATUS_REJECTION,
-	    "Error during serial number generation.");
-	return NULL;
-    }
-    return num_to_asn1integer(serial, num);
+    return (ASN1_INTEGER *)data;
 }
 
 static int
 ossl_tsfac_time_cb(struct TS_resp_ctx *ctx, void *data, long *sec, long *usec)
 {
-    VALUE time_v = *((VALUE *)data);
-    if (rb_obj_is_instance_of(time_v, rb_cTime))
-	time_v = rb_funcall(time_v, rb_intern("to_i"), 0);
-    *sec = NUM2LONG(time_v);;
+    *sec = *((long *)data);
     *usec = 0;
     return 1;
 }
@@ -1049,6 +1038,8 @@ ossl_tsfac_create_ts(VALUE self, VALUE key, VALUE certificate, VALUE request)
     TS_RESP *response = NULL;
     TS_RESP_CTX *ctx = NULL;
     BIO *req_bio;
+    ASN1_INTEGER *asn1_serial = NULL;
+    long lgen_time;
     const char * err_msg = NULL;
     int i, status = 0;
 
@@ -1056,27 +1047,32 @@ ossl_tsfac_create_ts(VALUE self, VALUE key, VALUE certificate, VALUE request)
     sign_key = GetPrivPKeyPtr(key);
     GetTSRequest(request, req);
 
-    if (!(ctx = TS_RESP_CTX_new())) {
-	err_msg = "Memory allocation failed.";
+    gen_time = ossl_tsfac_get_gen_time(self);
+    if (!rb_obj_is_instance_of(gen_time, rb_cTime)) {
+	err_msg = "@gen_time must be a Time.";
 	goto end;
     }
+    lgen_time = NUM2LONG(rb_funcall(gen_time, rb_intern("to_i"), 0));
+
     serial_number = ossl_tsfac_get_serial_number(self);
     if (serial_number == Qnil) {
 	err_msg = "@serial_number must be set.";
 	goto end;
     }
-    gen_time = ossl_tsfac_get_gen_time(self);
-    if (gen_time == Qnil) {
-	err_msg = "@gen_time must be set.";
-	goto end;
-    }
+    asn1_serial = num_to_asn1integer(serial_number, NULL);
+
     def_policy_id = ossl_tsfac_get_default_policy_id(self);
     if (def_policy_id == Qnil && !TS_REQ_get_policy_id(req)) {
 	err_msg = "No policy id in the request and no default policy set";
 	goto end;
     }
 
-    TS_RESP_CTX_set_serial_cb(ctx, ossl_tsfac_serial_cb, &serial_number);
+    if (!(ctx = TS_RESP_CTX_new())) {
+	err_msg = "Memory allocation failed.";
+	goto end;
+    }
+
+    TS_RESP_CTX_set_serial_cb(ctx, ossl_tsfac_serial_cb, asn1_serial);
     if (!TS_RESP_CTX_set_signer_cert(ctx, tsa_cert)) {
 	err_msg = "Certificate does not contain the timestamping extension";
 	goto end;
@@ -1101,7 +1097,7 @@ ossl_tsfac_create_ts(VALUE self, VALUE key, VALUE certificate, VALUE request)
     }
     if (TS_REQ_get_policy_id(req))
 	TS_RESP_CTX_set_def_policy(ctx, TS_REQ_get_policy_id(req));
-    TS_RESP_CTX_set_time_cb(ctx, ossl_tsfac_time_cb, &gen_time);
+    TS_RESP_CTX_set_time_cb(ctx, ossl_tsfac_time_cb, &lgen_time);
 
     TS_RESP_CTX_add_md(ctx, EVP_md5());
     TS_RESP_CTX_add_md(ctx, EVP_sha1());
@@ -1114,6 +1110,7 @@ ossl_tsfac_create_ts(VALUE self, VALUE key, VALUE certificate, VALUE request)
     req_bio = ossl_obj2bio(&str);
     response = TS_RESP_create_response(ctx, req_bio);
     BIO_free(req_bio);
+    asn1_serial = NULL;
     if (!response) {
 	err_msg = "Error during response generation";
 	goto end;
@@ -1123,6 +1120,7 @@ ossl_tsfac_create_ts(VALUE self, VALUE key, VALUE certificate, VALUE request)
     SetTSResponse(ret, response);
 
 end:
+    if(asn1_serial) ASN1_INTEGER_free(asn1_serial);
     if (ctx) TS_RESP_CTX_free(ctx);
     if (err_msg) {
 	if (response) TS_RESP_free(response);
