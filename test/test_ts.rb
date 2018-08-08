@@ -47,6 +47,9 @@ _end_of_pem_
     @ca_cert ||= OpenSSL::Certs.ca_cert
   end
 
+  def ca_store
+    @ca_store ||= OpenSSL::X509::Store.new.tap { |s| s.add_cert(ca_cert) }
+  end
 
   def ts_cert_direct
     @ts_cert_direct ||= OpenSSL::Certs.ts_cert_direct(ee_key, ca_cert)
@@ -54,6 +57,10 @@ _end_of_pem_
 
   def intermediate_cert
     @intermediate_cert ||= OpenSSL::Certs.intermediate_cert(intermediate_key, ca_cert)
+  end
+
+  def intermediate_store
+    @intermediate_store ||= OpenSSL::X509::Store.new.tap { |s| s.add_cert(intermediate_cert) }
   end
 
   def ts_cert_ee
@@ -307,7 +314,7 @@ _end_of_pem_
     end
   end
 
-  def test_verify_ee_no_root
+  def test_verify_ee_no_store
     assert_raises(TypeError) do
       ts, req = timestamp_ee
       ts.verify(req, nil)
@@ -317,14 +324,14 @@ _end_of_pem_
   def test_verify_ee_wrong_root_no_intermediate
     assert_raises(OpenSSL::Timestamp::TimestampError) do
       ts, req = timestamp_ee
-      ts.verify(req, [intermediate_cert])
+      ts.verify(req, intermediate_store)
     end
   end
 
   def test_verify_ee_wrong_root_wrong_intermediate
     assert_raises(OpenSSL::Timestamp::TimestampError) do
       ts, req = timestamp_ee
-      ts.verify(req, [intermediate_cert], ca_cert)
+      ts.verify(req, intermediate_store, [ca_cert])
     end
   end
 
@@ -332,20 +339,20 @@ _end_of_pem_
     assert_raises(OpenSSL::Timestamp::TimestampError) do
       ts, req = timestamp_ee
       req.nonce = 1
-      ts.verify(req, [ca_cert], intermediate_cert)
+      ts.verify(req, ca_store, [intermediate_cert])
     end
   end
 
   def test_verify_ee_intermediate_missing
     assert_raises(OpenSSL::Timestamp::TimestampError) do
       ts, req = timestamp_ee
-      ts.verify(req, [ca_cert])
+      ts.verify(req, ca_store)
     end
   end
 
   def test_verify_ee_intermediate
     ts, req = timestamp_ee
-    ts.verify(req, [ca_cert], intermediate_cert)
+    ts.verify(req, ca_store, [intermediate_cert])
   end
 
   # TODO: This leaks. Fix this.
@@ -353,27 +360,6 @@ _end_of_pem_
   #   ts, req = timestamp_ee
   #   assert_raises(TypeError) { ts.verify(req, [ca_cert], 123) }
   # end
-
-  def test_verify_ee_single_root
-    ts, req = timestamp_ee
-    ts.verify(req, ca_cert, intermediate_cert)
-  end
-
-  def test_verify_ee_root_from_string
-    ts, req = timestamp_ee
-    pem_root = ca_cert.to_pem
-    ts.verify(req, pem_root, intermediate_cert)
-  end
-
-  def test_verify_ee_root_from_file
-    file = Tempfile.new('root_ca', Dir.tmpdir, :mode => File::BINARY)
-    ts, req = timestamp_ee
-    file.print(ca_cert.to_pem)
-    file.close
-    ts.verify(req, File.open(file.path, 'rb'), intermediate_cert)
-  ensure
-    file.unlink
-  end
 
   def test_verify_ee_def_policy
     req = OpenSSL::Timestamp::Request.new
@@ -388,47 +374,47 @@ _end_of_pem_
     fac.default_policy_id = "1.2.3.4.5"
 
     ts = fac.create_timestamp(ee_key, ts_cert_ee, req)
-    ts.verify(req, [ca_cert], intermediate_cert)
+    ts.verify(req, ca_store, [intermediate_cert])
   end
 
   def test_verify_direct
     ts, req = timestamp_direct
-    ts.verify(req, [ca_cert])
+    ts.verify(req, ca_store)
   end
 
   def test_verify_direct_redundant_untrusted
     ts, req = timestamp_direct
-    ts.verify(req, [ca_cert], ts.tsa_certificate, ts.tsa_certificate)
+    ts.verify(req, ca_store, [ts.tsa_certificate, ts.tsa_certificate])
   end
 
   def test_verify_direct_unrelated_untrusted
     ts, req = timestamp_direct
-    ts.verify(req, [ca_cert], intermediate_cert)
+    ts.verify(req, ca_store, [intermediate_cert])
   end
 
   def test_verify_direct_wrong_root
     assert_raises(OpenSSL::Timestamp::TimestampError) do
       ts, req = timestamp_direct
-      ts.verify(req, [intermediate_cert])
+      ts.verify(req, intermediate_store)
     end
   end
 
   def test_verify_direct_no_cert_no_intermediate
     assert_raises(OpenSSL::Timestamp::TimestampError) do
       ts, req = timestamp_direct_no_cert
-      ts.verify(req, [ca_cert])
+      ts.verify(req, ca_store)
     end
   end
 
   def test_verify_ee_no_cert
     ts, req = timestamp_ee_no_cert
-    ts.verify(req, [ca_cert], ts_cert_ee, intermediate_cert)
+    ts.verify(req, ca_store, [ts_cert_ee, intermediate_cert])
   end
 
   def test_verify_ee_no_cert_no_intermediate
     assert_raises(OpenSSL::Timestamp::TimestampError) do
       ts, req = timestamp_ee_no_cert
-      ts.verify(req, [ca_cert], ts_cert_ee)
+      ts.verify(req, ca_store, [ts_cert_ee])
     end
   end
 
@@ -446,7 +432,7 @@ _end_of_pem_
     ts = fac.create_timestamp(ee_key, ts_cert_ee, req)
     assert_equal(2, ts.token.certificates.size)
     fac.additional_certs = nil
-    ts.verify(req, ca_cert)
+    ts.verify(req, ca_store)
     ts = fac.create_timestamp(ee_key, ts_cert_ee, req)
     assert_equal(1, ts.token.certificates.size)
   end
@@ -464,7 +450,7 @@ _end_of_pem_
     fac.additional_certs = intermediate_cert
     ts = fac.create_timestamp(ee_key, ts_cert_ee, req)
     assert_equal(2, ts.token.certificates.size)
-    ts.verify(req, ca_cert)
+    ts.verify(req, ca_store)
   end
 
   def test_verify_ee_additional_certs_with_root
@@ -480,7 +466,7 @@ _end_of_pem_
     fac.additional_certs = [intermediate_cert, ca_cert]
     ts = fac.create_timestamp(ee_key, ts_cert_ee, req)
     assert_equal(3, ts.token.certificates.size)
-    ts.verify(req, ca_cert)
+    ts.verify(req, ca_store)
   end
 
   def test_verify_ee_cert_inclusion_not_requested
@@ -498,7 +484,7 @@ _end_of_pem_
     fac.additional_certs = [ ts_cert_ee, intermediate_cert ]
     ts = fac.create_timestamp(ee_key, ts_cert_ee, req)
     assert_nil(ts.token.certificates) #since cert_requested? == false
-    ts.verify(req, ca_cert, ts_cert_ee, intermediate_cert)
+    ts.verify(req, ca_store, [ts_cert_ee, intermediate_cert])
   end
 
   def test_reusable
@@ -516,9 +502,9 @@ _end_of_pem_
     fac.serial_number = 1
     fac.additional_certs = [ intermediate_cert ]
     ts1 = fac.create_timestamp(ee_key, ts_cert_ee, req)
-    ts1.verify(req, ca_cert)
+    ts1.verify(req, ca_store)
     ts2 = fac.create_timestamp(ee_key, ts_cert_ee, req)
-    ts2.verify(req, ca_cert)
+    ts2.verify(req, ca_store)
     refute_nil(ts1.tsa_certificate)
     refute_nil(ts2.tsa_certificate)
   end

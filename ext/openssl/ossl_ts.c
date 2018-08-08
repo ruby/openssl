@@ -613,7 +613,7 @@ ossl_ts_resp_get_status_text(VALUE self)
 
     GetTSResponse(self, resp);
     si = TS_RESP_get_status_info(resp);
-    if (text = TS_STATUS_INFO_get0_text(si)) {
+    if ((text = TS_STATUS_INFO_get0_text(si))) {
 	for (i = 0; i < sk_ASN1_UTF8STRING_num(text); i++) {
 	    current = sk_ASN1_UTF8STRING_value(text, i);
 	    rb_ary_push(ret, asn1str_to_str(current));
@@ -887,163 +887,95 @@ ossl_ts_resp_to_der(VALUE self)
     return asn1_to_der((void *)resp, (int (*)(void *, unsigned char **))i2d_TS_RESP);
 }
 
-static void int_ossl_init_roots(VALUE roots, X509_STORE * store)
-{
-    STACK_OF(X509_INFO) *inf;
-    X509_INFO *itmp;
-    BIO *in;
-    int i;
-
-    if (roots == Qnil) {
-	X509_STORE_free(store);
-	ossl_raise(rb_eTypeError, "roots must not be nil.");
-    }
-    else if (rb_obj_is_kind_of(roots, rb_cArray)) {
-	for (i=0; i < RARRAY_LEN(roots); i++) {
-	    VALUE cert = rb_ary_entry(roots, i);
-	    X509_STORE_add_cert(store, GetX509CertPtr(cert));
-	}
-    }
-    else if (rb_obj_is_kind_of(roots, cX509Cert)) {
-	X509_STORE_add_cert(store, GetX509CertPtr(roots));
-    }
-    else {
-	in = ossl_obj2bio(&roots);
-	inf = PEM_X509_INFO_read_bio(in, NULL, NULL, NULL);
-	BIO_free(in);
-	if(!inf) {
-	    X509_STORE_free(store);
-	    ossl_raise(eTimestampError, "Could not parse root certificates.");
-	}
-	for (i = 0; i < sk_X509_INFO_num(inf); i++) {
-	    itmp = sk_X509_INFO_value(inf, i);
-	    if (itmp->x509) {
-		X509_STORE_add_cert(store, itmp->x509);
-	    }
-	    /* ignore CRLs deliberately */
-	}
-	sk_X509_INFO_pop_free(inf, X509_INFO_free);
-    }
-}
-
-void
-int_ossl_verify_ctx_set_certs(TS_VERIFY_CTX *ctx, STACK_OF(X509) *certs)
-{
-    int i;
-
-    if (!certs)
-	return;
-
-    TS_VERIFY_CTS_set_certs(ctx, certs);
-
-    for (i = 0; i < sk_X509_num(certs); ++i) {
-	X509 *cert = sk_X509_value(certs, i);
-	X509_up_ref(cert);
-    }
-}
-
 /*
  * Verifies a timestamp token by checking the signature, validating the
  * certificate chain implied by tsa_certificate and by checking conformance to
  * a given Request. Mandatory parameters are the Request associated to this
- * Response, and one or more root certificates (self-signed). The root
- * certificates can be passed in various forms:
- * * a single OpenSSL::X509::Certificate
- * * an Array of OpenSSL::X509::Certificate
- * * a File instance containing a list of PEM-encoded certificates
- * * a +string+ containing a list of PEM-encoded certificates
+ * Response, and an OpenSSL::X509::Store of trusted roots.
  *
- * Furthermore, intermediate certificates can optionally be supplied for
- * creating the certificate chain. These intermediate certificates must all be
+ * Intermediate certificates can optionally be supplied for creating the
+ * certificate chain. These intermediate certificates must all be
  * instances of OpenSSL::X509::Certificate.
  *
  * If validation fails, several kinds of exceptions can be raised:
  * * TypeError if types don't fit
- * * TimestampError if something is wrong with the timestamp token itself or if
- *   it is not conformant to the Request
- * * CertificateValidationError if validation of the timestamp certificate chain
- *   fails.
+ * * TimestampError if something is wrong with the timestamp token itself, if
+ *   it is not conformant to the Request, or if validation of the timestamp
+ *   certificate chain fails.
  *
  * call-seq:
- *       response.verify(Request, root_certificate) -> Response
- *       response.verify(Request, root_certificate, intermediate_cert1, intermediate_cert2, ...) -> Response
- *       response.verify(Request, [ root_certificate1, root_certificate2 ])                      -> Response
- *       response.verify(Request, [ root_cert1, root_cert2 ]. intermediate1, intermediate2, ...) -> Response
- *       response.verify(Request, File)                                                          -> Response
- *       response.verify(Request, File, intermediate1, intermediate2, ...)                       -> Response
- *       response.verify(Request, string)                                                        -> Response
- *       response.verify(Request, string, intermediate1, intermediate2, ...)                     -> Response
+ *       response.verify(Request, root_store) -> Response
+ *       response.verify(Request, root_store, [intermediate_cert]) -> Response
  */
 static VALUE
 ossl_ts_resp_verify(int argc, VALUE *argv, VALUE self)
 {
-    VALUE untrusted = Qnil;
-    VALUE ts_cert;
-    VALUE roots;
-    VALUE ts_req;
+    VALUE ts_req, store, intermediates;
     TS_RESP *resp;
-    PKCS7* p7;
-    TS_VERIFY_CTX *ctx;
-    X509_STORE *store;
     TS_REQ *req;
-    STACK_OF(X509) *certs = NULL;
-    VALUE cert;
-    int i, ok;
+    X509_STORE *x509st;
+    TS_VERIFY_CTX *ctx;
+    STACK_OF(X509) *x509inter = NULL;
+    PKCS7* p7;
+    X509 *cert;
+    int status, i, ok;
 
-    rb_scan_args(argc, argv, "2*", &ts_req, &roots, &untrusted);
+    rb_scan_args(argc, argv, "21", &ts_req, &store, &intermediates);
 
     GetTSResponse(self, resp);
     GetTSRequest(ts_req, req);
-
-    if (!(store = X509_STORE_new()))
-        ossl_raise(eTimestampError, NULL);
-    int_ossl_init_roots(roots, store);
-
-    ts_cert = ossl_ts_resp_get_tsa_certificate(self);
-    if (ts_cert != Qnil || untrusted != Qnil) {
-	if (!(certs = sk_X509_new_null())) {
-	    X509_STORE_free(store);
-	    ossl_raise(eTimestampError, NULL);
-	}
-	if (ts_cert != Qnil) {
-	    if (!(p7 = TS_RESP_get_token(resp))) {
-		X509_STORE_free(store);
-		sk_X509_free(certs);
-		ossl_raise(eTimestampError, "TS_RESP_get_token");
-	    }
-	    for (i=0; i < sk_X509_num(p7->d.sign->cert); i++) {
-		sk_X509_push(certs, sk_X509_value(p7->d.sign->cert, i));
-	    }
-	}
-	if (untrusted != Qnil) {
-	    if (rb_obj_is_kind_of(untrusted, rb_cArray)) {
-		for (i=0; i < RARRAY_LEN(untrusted); i++) {
-		    cert = rb_ary_entry(untrusted, i);
-		    sk_X509_push(certs, GetX509CertPtr(cert));
-		}
-	    }
-	    else {
-		sk_X509_push(certs, GetX509CertPtr(untrusted));
-	    }
-	}
-    }
+    x509st = GetX509StorePtr(store);
 
     if (!(ctx = TS_REQ_to_TS_VERIFY_CTX(req, NULL))) {
-	X509_STORE_free(store);
-	sk_X509_free(certs);
 	ossl_raise(eTimestampError, "Error when creating the verification context.");
-     }
-    int_ossl_verify_ctx_set_certs(ctx, certs);
-    TS_VERIFY_CTX_set_store(ctx, store);
+    }
+
+    if (intermediates != Qnil) {
+	x509inter = ossl_protect_x509_ary2sk(intermediates, &status);
+	if (status) {
+	    TS_VERIFY_CTX_free(ctx);
+	    rb_jump_tag(status);
+	}
+    } else {
+	x509inter = sk_X509_new_null();
+    }
+
+    if (!(p7 = TS_RESP_get_token(resp))) {
+	TS_VERIFY_CTX_free(ctx);
+	sk_X509_pop_free(x509inter, X509_free);
+	ossl_raise(eTimestampError, "TS_RESP_get_token");
+    }
+    for (i=0; i < sk_X509_num(p7->d.sign->cert); i++) {
+	cert = sk_X509_value(p7->d.sign->cert, i);
+	X509_up_ref(cert);
+	sk_X509_push(x509inter, cert);
+    }
+
+    TS_VERIFY_CTS_set_certs(ctx, x509inter);
     TS_VERIFY_CTX_add_flags(ctx, TS_VFY_SIGNATURE);
+    TS_VERIFY_CTX_set_store(ctx, x509st);
 
     ok = TS_RESP_verify_response(ctx, resp);
+
+    /* WORKAROUND:
+     *   X509_STORE can count references, but X509_STORE_free() doesn't check
+     *   this. To prevent our X509_STORE from being freed with our
+     *   TS_VERIFY_CTX we set the store to NULL first.
+     *   Fixed in OpenSSL 1.0.2; bff9ce4db38b (master), 5b4b9ce976fc (1.0.2)
+     */
+    TS_VERIFY_CTX_set_store(ctx, NULL);
     TS_VERIFY_CTX_free(ctx);
 
     if (!ok)
 	ossl_raise(eTimestampError, "TS_RESP_verify_response");
 
     return self;
+}
+
+void
+ossl_ts_verify_ctx_free(TS_VERIFY_CTX *ctx)
+{
+    
 }
 
 static ASN1_INTEGER *
