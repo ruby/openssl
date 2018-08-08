@@ -437,22 +437,6 @@ _end_of_pem_
     assert_equal(1, ts.token.certificates.size)
   end
 
-  def test_verify_ee_additional_certs_single
-    req = OpenSSL::Timestamp::Request.new
-    req.algorithm = "SHA1"
-    digest = OpenSSL::Digest::SHA1.new.digest("test")
-    req.message_imprint = digest
-    req.policy_id = "1.2.3.4.5"
-    req.nonce = 42
-    fac = OpenSSL::Timestamp::Factory.new
-    fac.gen_time = Time.now
-    fac.serial_number = 1
-    fac.additional_certs = intermediate_cert
-    ts = fac.create_timestamp(ee_key, ts_cert_ee, req)
-    assert_equal(2, ts.token.certificates.size)
-    ts.verify(req, ca_store)
-  end
-
   def test_verify_ee_additional_certs_with_root
     req = OpenSSL::Timestamp::Request.new
     req.algorithm = "SHA1"

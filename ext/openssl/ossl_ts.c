@@ -1050,7 +1050,7 @@ ossl_tsfac_create_ts(VALUE self, VALUE key, VALUE certificate, VALUE request)
     TS_RESP_CTX *ctx = NULL;
     BIO *req_bio;
     const char * err_msg = NULL;
-    int i;
+    int i, status = 0;
 
     tsa_cert = GetX509CertPtr(certificate);
     sign_key = GetPrivPKeyPtr(key);
@@ -1083,23 +1083,14 @@ ossl_tsfac_create_ts(VALUE self, VALUE key, VALUE certificate, VALUE request)
     }
 
     additional_certs = ossl_tsfac_get_additional_certs(self);
-    if (additional_certs != Qnil) {
-	if (!(inter_certs = sk_X509_new_null())) {
-	    err_msg = "Memory allocation failed.";
-	    goto end;
-	}
-	if (rb_obj_is_kind_of(additional_certs, rb_cArray)) {
-	    for (i = 0; i < RARRAY_LEN(additional_certs); i++) {
-		cert = rb_ary_entry(additional_certs, i);
-		sk_X509_push(inter_certs, GetX509CertPtr(cert));
-	    }
-	}
-	else {
-	    sk_X509_push(inter_certs, GetX509CertPtr(additional_certs));
-	}
+    if (rb_obj_is_kind_of(additional_certs, rb_cArray)) {
+	inter_certs = ossl_protect_x509_ary2sk(additional_certs, &status);
+	if (status)
+		goto end;
+
 	/* this dups the sk_X509 and ups each cert's ref count */
 	TS_RESP_CTX_set_certs(ctx, inter_certs);
-	sk_X509_free(inter_certs);
+	sk_X509_pop_free(inter_certs, X509_free);
     }
 
     TS_RESP_CTX_set_signer_key(ctx, sign_key);
@@ -1137,6 +1128,8 @@ end:
 	if (response) TS_RESP_free(response);
 	ossl_raise(eTimestampError, err_msg);
     }
+    if (status)
+	rb_jump_tag(status);
     return ret;
 }
 
@@ -1381,12 +1374,11 @@ Init_ossl_ts(void)
      *
      * Sets or retrieves additional certificates apart from the timestamp
      * certificate (e.g. intermediate certificates) to be added to the Response.
-     * May be a single OpenSSL::X509::Certificate or an Array of these.
+     * Must be an Array of OpenSSL::X509::Certificate.
      *
      * call-seq:
-     *       factory.additional_certs = cert            -> cert
      *       factory.additional_certs = [ cert1, cert2] -> [ cert1, cert2 ]
-     *       factory.additional_certs                   -> single cert, array or nil
+     *       factory.additional_certs                   -> array or nil
      *
      */
     cTimestampFactory = rb_define_class_under(mTimestamp, "Factory", rb_cObject);
