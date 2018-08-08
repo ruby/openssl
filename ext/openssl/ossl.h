@@ -28,7 +28,7 @@
 #include <openssl/rand.h>
 #include <openssl/conf.h>
 #include <openssl/conf_api.h>
-#if HAVE_OPENSSL_TS_H
+#ifndef OPENSSL_NO_TS
   #include <openssl/ts.h>
 #endif
 #include <openssl/crypto.h>
@@ -171,7 +171,7 @@ void ossl_debug(const char *, ...);
 #include "ossl_pkey.h"
 #include "ossl_rand.h"
 #include "ossl_ssl.h"
-#if HAVE_OPENSSL_TS_H
+#ifndef OPENSSL_NO_TS
   #include "ossl_ts.h"
 #endif
 #include "ossl_version.h"
