@@ -11,15 +11,6 @@
 #if !defined(_OSSL_TS_H_)
 #define _OSSL_TS_H_
 
-extern VALUE mTimestamp;
-extern VALUE eTimestampError;
-extern VALUE eCertValidationError;
-
-extern VALUE cTimestampRequest;
-extern VALUE cTimestampResponse;
-extern VALUE cTimestampFactory;
-
 void Init_ossl_ts(void);
-TS_RESP *GetTsRespPtr(VALUE obj);
 
 #endif

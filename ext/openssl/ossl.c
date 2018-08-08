@@ -1205,7 +1205,7 @@ Init_openssl(void)
     Init_ossl_pkey();
     Init_ossl_rand();
     Init_ossl_ssl();
-#if HAVE_OPENSSL_TS_H
+#ifndef OPENSSL_NO_TS
     Init_ossl_ts();
 #endif
     Init_ossl_x509();
