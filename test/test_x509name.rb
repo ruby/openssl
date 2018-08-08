@@ -322,6 +322,34 @@ class OpenSSL::TestX509Name < OpenSSL::TestCase
     assert_equal("Namiki", ary[5][1])
   end
 
+  def test_to_s
+    dn = [
+      ["DC", "org"],
+      ["DC", "ruby-lang"],
+      ["CN", "フー, バー"],
+    ]
+    name = OpenSSL::X509::Name.new
+    dn.each { |x| name.add_entry(*x) }
+
+    assert_equal "/DC=org/DC=ruby-lang/" \
+      "CN=\\xE3\\x83\\x95\\xE3\\x83\\xBC, \\xE3\\x83\\x90\\xE3\\x83\\xBC",
+      name.to_s
+    # OpenSSL escapes characters with MSB by default
+    assert_equal \
+      "CN=\\E3\\83\\95\\E3\\83\\BC\\, \\E3\\83\\90\\E3\\83\\BC," \
+      "DC=ruby-lang,DC=org",
+      name.to_s(OpenSSL::X509::Name::RFC2253)
+    assert_equal "DC = org, DC = ruby-lang, " \
+      "CN = \"\\E3\\83\\95\\E3\\83\\BC, \\E3\\83\\90\\E3\\83\\BC\"",
+      name.to_s(OpenSSL::X509::Name::ONELINE)
+
+    empty = OpenSSL::X509::Name.new
+    assert_equal "", empty.to_s
+    assert_equal "", empty.to_s(OpenSSL::X509::Name::COMPAT)
+    assert_equal "", empty.to_s(OpenSSL::X509::Name::RFC2253)
+    assert_equal "", empty.to_s(OpenSSL::X509::Name::ONELINE)
+  end
+
   def test_equals2
     n1 = OpenSSL::X509::Name.parse 'CN=a'
     n2 = OpenSSL::X509::Name.parse 'CN=a'
