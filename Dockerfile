@@ -1,1 +1,1 @@
-FROM zzak/ruby-openssl-docker:2.0
+FROM zzak/ruby-openssl-docker:testing

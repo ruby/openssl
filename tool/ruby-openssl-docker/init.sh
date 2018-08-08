@@ -2,7 +2,7 @@
 
 if [[ "$RUBY_VERSION" = "" ]]
 then
-  RUBY_VERSION=ruby-2.4
+  RUBY_VERSION=ruby-2.5
 fi
 
 if [[ "$OPENSSL_VERSION" = "" ]]
