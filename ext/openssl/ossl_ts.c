@@ -1039,6 +1039,7 @@ ossl_tsfac_create_ts(VALUE self, VALUE key, VALUE certificate, VALUE request)
     TS_RESP_CTX *ctx = NULL;
     BIO *req_bio;
     ASN1_INTEGER *asn1_serial = NULL;
+    ASN1_OBJECT *def_policy_id_obj = NULL;
     long lgen_time;
     const char * err_msg = NULL;
     int i, status = 0;
@@ -1066,6 +1067,8 @@ ossl_tsfac_create_ts(VALUE self, VALUE key, VALUE certificate, VALUE request)
 	err_msg = "No policy id in the request and no default policy set";
 	goto end;
     }
+    if (def_policy_id != Qnil && !TS_REQ_get_policy_id(req))
+	def_policy_id_obj = obj_to_asn1obj(def_policy_id);
 
     if (!(ctx = TS_RESP_CTX_new())) {
 	err_msg = "Memory allocation failed.";
@@ -1090,11 +1093,8 @@ ossl_tsfac_create_ts(VALUE self, VALUE key, VALUE certificate, VALUE request)
     }
 
     TS_RESP_CTX_set_signer_key(ctx, sign_key);
-    if (def_policy_id != Qnil && !TS_REQ_get_policy_id(req)) {
-	ASN1_OBJECT *def_policy_id_obj = obj_to_asn1obj(def_policy_id);
+    if (def_policy_id != Qnil && !TS_REQ_get_policy_id(req))
 	TS_RESP_CTX_set_def_policy(ctx, def_policy_id_obj);
-	ASN1_OBJECT_free(def_policy_id_obj);
-    }
     if (TS_REQ_get_policy_id(req))
 	TS_RESP_CTX_set_def_policy(ctx, TS_REQ_get_policy_id(req));
     TS_RESP_CTX_set_time_cb(ctx, ossl_tsfac_time_cb, &lgen_time);
@@ -1121,6 +1121,7 @@ ossl_tsfac_create_ts(VALUE self, VALUE key, VALUE certificate, VALUE request)
 
 end:
     if(asn1_serial) ASN1_INTEGER_free(asn1_serial);
+    if(def_policy_id_obj) ASN1_OBJECT_free(def_policy_id_obj);
     if (ctx) TS_RESP_CTX_free(ctx);
     if (err_msg) {
 	if (response) TS_RESP_free(response);
