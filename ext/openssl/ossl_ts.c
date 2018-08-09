@@ -41,6 +41,21 @@
     } \
 } while (0)
 
+#define NewTSTokenInfo(klass) \
+    TypedData_Wrap_Struct((klass), &ossl_ts_token_info_type, 0)
+#define SetTSTokenInfo(obj, info) do { \
+    if (!(info)) { \
+	ossl_raise(rb_eRuntimeError, "TS_TST_INFO wasn't initialized."); \
+    } \
+    RTYPEDDATA_DATA(obj) = (info); \
+} while (0)
+#define GetTSTokenInfo(obj, info) do { \
+    TypedData_Get_Struct((obj), TS_TST_INFO, &ossl_ts_token_info_type, (info)); \
+    if (!(info)) { \
+	ossl_raise(rb_eRuntimeError, "TS_TST_INFO wasn't initialized."); \
+    } \
+} while (0)
+
 #define ossl_tsfac_get_default_policy_id(o)      rb_attr_get((o),rb_intern("@default_policy_id"))
 #define ossl_tsfac_get_serial_number(o)          rb_attr_get((o),rb_intern("@serial_number"))
 #define ossl_tsfac_get_gen_time(o)               rb_attr_get((o),rb_intern("@gen_time"))
@@ -50,6 +65,7 @@ static VALUE mTimestamp;
 static VALUE eTimestampError;
 static VALUE cTimestampRequest;
 static VALUE cTimestampResponse;
+static VALUE cTimestampTokenInfo;
 static VALUE cTimestampFactory;
 static ID sBAD_ALG, sBAD_REQUEST, sBAD_DATA_FORMAT, sTIME_NOT_AVAILABLE;
 static ID sUNACCEPTED_POLICY, sUNACCEPTED_EXTENSION, sADD_INFO_NOT_AVAILABLE;
@@ -79,6 +95,20 @@ static  const rb_data_type_t ossl_ts_resp_type = {
     "OpenSSL/Timestamp/Response",
     {
 	0, ossl_ts_resp_free,
+    },
+    0, 0, RUBY_TYPED_FREE_IMMEDIATELY,
+};
+
+static void
+ossl_ts_token_info_free(void *ptr)
+{
+	TS_TST_INFO_free(ptr);
+}
+
+static const rb_data_type_t ossl_ts_token_info_type = {
+    "OpenSSL/Timestamp/TokenInfo",
+    {
+	0, ossl_ts_token_info_free,
     },
     0, 0, RUBY_TYPED_FREE_IMMEDIATELY,
 };
@@ -501,7 +531,9 @@ ossl_ts_resp_initialize(VALUE self, VALUE der)
 
     der = ossl_to_der_if_possible(der);
     in  = ossl_obj2bio(&der);
-    if (!d2i_TS_RESP_bio(in, &ts_resp))
+    ts_resp = d2i_TS_RESP_bio(in, &ts_resp);
+    BIO_free(in);
+    if (!ts_resp)
 	ossl_raise(eTimestampError, "Error when decoding the timestamp response");
     DATA_PTR(self) = ts_resp;
 
@@ -652,198 +684,30 @@ ossl_ts_resp_get_token(VALUE self)
 }
 
 /*
- * Returns the version number of the timestamp token. With compliant servers,
- * this value should be +1+ if present. If status is GRANTED or
- * GRANTED_WITH_MODS.
+ * Get the response's token info if present.
  *
  * call-seq:
- *       response.version -> Integer or nil
+ *       response.token_info -> nil or OpenSSL::Timestamp::TokenInfo
  */
 static VALUE
-ossl_ts_resp_get_version(VALUE self)
+ossl_ts_resp_get_token_info(VALUE self)
 {
     TS_RESP *resp;
-    TS_TST_INFO *tst;
+    TS_TST_INFO *info, *copy;
+    VALUE obj;
 
     GetTSResponse(self, resp);
-    if (!(tst = TS_RESP_get_tst_info(resp)))
-	return Qnil;
-    return LONG2NUM(TS_TST_INFO_get_version(tst));
-}
-
-/*
- * Returns the timestamp policy object identifier of the policy this timestamp
- * was created under. If status is GRANTED or GRANTED_WITH_MODS, this is never
- * +nil+.
- *
- * ===Example:
- *      id = response.policy_id
- *      puts id                 -> "1.2.3.4.5"
- *
- * call-seq:
- *       response.policy_id -> string or nil
- */
-static VALUE
-ossl_ts_resp_get_policy_id(VALUE self)
-{
-    TS_RESP *resp;
-    TS_TST_INFO *tst;
-
-    GetTSResponse(self, resp);
-    if (!(tst = TS_RESP_get_tst_info(resp)))
-	return Qnil;
-    return get_asn1obj(TS_TST_INFO_get_policy_id(tst));
-}
-
-/*
- * Returns the 'short name' of the object identifier representing the algorithm
- * that was used to derive the message imprint digest. For valid timestamps,
- * this is the same value that was already given in the Request. If status is
- * GRANTED or GRANTED_WITH_MODS, this is never +nil+.
- *
- * ===Example:
- *      algo = request.algorithm
- *      puts algo                -> "SHA1"
- *
- * call-seq:
- *       response.algorithm -> string or nil
- */
-static VALUE
-ossl_ts_resp_get_algorithm(VALUE self)
-{
-    TS_RESP *resp;
-    TS_TST_INFO *tst;
-    TS_MSG_IMPRINT *mi;
-    X509_ALGOR *algo;
-
-    GetTSResponse(self, resp);
-    if (!(tst = TS_RESP_get_tst_info(resp)))
-	return Qnil;
-    mi = TS_TST_INFO_get_msg_imprint(tst);
-    algo = TS_MSG_IMPRINT_get_algo(mi);
-    return get_asn1obj(algo->algorithm);
-}
-
-/*
- * Returns the message imprint digest. For valid timestamps,
- * this is the same value that was already given in the Request.
- * If status is GRANTED or GRANTED_WITH_MODS, this is never +nil+.
- *
- * ===Example:
- *      algo = request.algorithm
- *      puts algo                -> "SHA1"
- *
- * call-seq:
- *       response.algorithm -> string or nil
- */
-static VALUE
-ossl_ts_resp_get_msg_imprint(VALUE self)
-{
-    TS_RESP *resp;
-    TS_TST_INFO *tst;
-    TS_MSG_IMPRINT *mi;
-    ASN1_OCTET_STRING *hashed_msg;
-    VALUE ret;
-
-    GetTSResponse(self, resp);
-    if (!(tst = TS_RESP_get_tst_info(resp)))
-	return Qnil;
-    mi = TS_TST_INFO_get_msg_imprint(tst);
-    hashed_msg = TS_MSG_IMPRINT_get_msg(mi);
-    ret = rb_str_new((const char *)hashed_msg->data, hashed_msg->length);
-
-    return ret;
-}
-
-/*
- * Returns serial number of the timestamp token. This value shall never be the
- * same for two timestamp tokens issued by a dedicated timestamp authority.
- * If status is GRANTED or GRANTED_WITH_MODS, this is never +nil+.
- *
- * call-seq:
- *       response.serial_number -> BN or nil
- */
-static VALUE
-ossl_ts_resp_get_serial_number(VALUE self)
-{
-    TS_RESP *resp;
-    TS_TST_INFO *tst;
-
-    GetTSResponse(self, resp);
-    if (!(tst = TS_RESP_get_tst_info(resp)))
-	return Qnil;
-    return asn1integer_to_num(TS_TST_INFO_get_serial(tst));
-}
-
-/*
- * Returns time when this timestamp token was created. If status is GRANTED or
- * GRANTED_WITH_MODS, this is never +nil+.
- *
- * call-seq:
- *       response.gen_time -> Time
- */
-static VALUE
-ossl_ts_resp_get_gen_time(VALUE self)
-{
-    TS_RESP *resp;
-    TS_TST_INFO *tst;
-
-    GetTSResponse(self, resp);
-    if (!(tst = TS_RESP_get_tst_info(resp)))
-	return Qnil;
-    return asn1time_to_time(TS_TST_INFO_get_time(tst));
-}
-
-/*
- * If the ordering field is missing, or if the ordering field is present
- * and set to false, then the genTime field only indicates the time at
- * which the time-stamp token has been created by the TSA.  In such a
- * case, the ordering of time-stamp tokens issued by the same TSA or
- * different TSAs is only possible when the difference between the
- * genTime of the first time-stamp token and the genTime of the second
- * time-stamp token is greater than the sum of the accuracies of the
- * genTime for each time-stamp token.
- *
- * If the ordering field is present and set to true, every time-stamp
- * token from the same TSA can always be ordered based on the genTime
- * field, regardless of the genTime accuracy.
- *
- * call-seq:
- *       response.ordering -> true, falses or nil
- */
-static VALUE
-ossl_ts_resp_get_ordering(VALUE self)
-{
-    TS_RESP *resp;
-    TS_TST_INFO *tst;
-
-    GetTSResponse(self, resp);
-    if (!(tst = TS_RESP_get_tst_info(resp)))
-	return Qnil;
-    return TS_TST_INFO_get_ordering(tst) ? Qtrue : Qfalse;
-}
-
-/*
- * If the timestamp token is valid then this field contains the same nonce that
- * was passed to the timestamp server in the initial Request.
- *
- * call-seq:
- *       response.nonce -> BN or nil
- */
-static VALUE
-ossl_ts_resp_get_nonce(VALUE self)
-{
-    TS_RESP *resp;
-    TS_TST_INFO *tst;
-    const ASN1_INTEGER *nonce;
-
-    GetTSResponse(self, resp);
-    if (!(tst = TS_RESP_get_tst_info(resp)))
-	return Qnil;
-    if (!(nonce = TS_TST_INFO_get_nonce(tst)))
+    if (!(info = TS_RESP_get_tst_info(resp)))
 	return Qnil;
 
-    return asn1integer_to_num(nonce);
+    obj = NewTSTokenInfo(cTimestampTokenInfo);
+
+    if (!(copy = TS_TST_INFO_dup(info)))
+	ossl_raise(eTimestampError, NULL);
+
+    SetTSTokenInfo(obj, copy);
+
+    return obj;
 }
 
 /*
@@ -990,6 +854,233 @@ ossl_tsfac_time_cb(struct TS_resp_ctx *ctx, void *data, long *sec, long *usec)
     *sec = *((long *)data);
     *usec = 0;
     return 1;
+}
+
+static VALUE
+ossl_ts_token_info_alloc(VALUE klass)
+{
+    TS_TST_INFO *info;
+    VALUE obj;
+
+    obj = NewTSTokenInfo(klass);
+    if (!(info = TS_TST_INFO_new()))
+	ossl_raise(eTimestampError, NULL);
+    SetTSTokenInfo(obj, info);
+
+    return obj;
+}
+
+/*
+ * Creates a TokenInfo from a +File+ or +string+ parameter, the
+ * corresponding +File+ or +string+ must be DER-encoded. Please note
+ * that TokenInfo is an immutable read-only class. If you'd like to create
+ * timestamps please refer to Factory instead.
+ *
+ * call-seq:
+ *       OpenSSL::Timestamp::TokenInfo.new(file)    -> token-info
+ *       OpenSSL::Timestamp::TokenInfo.new(string)  -> token-info
+ */
+static VALUE
+ossl_ts_token_info_initialize(VALUE self, VALUE der)
+{
+    TS_TST_INFO *info = DATA_PTR(self);
+    BIO *in;
+
+    der = ossl_to_der_if_possible(der);
+    in  = ossl_obj2bio(&der);
+    info = d2i_TS_TST_INFO_bio(in, &info);
+    BIO_free(in);
+    if (!info)
+	ossl_raise(eTimestampError, "Error when decoding the timestamp token info");
+    DATA_PTR(self) = info;
+
+    return self;
+}
+
+/*
+ * Returns the version number of the token info. With compliant servers,
+ * this value should be +1+ if present. If status is GRANTED or
+ * GRANTED_WITH_MODS.
+ *
+ * call-seq:
+ *       token_info.version -> Integer or nil
+ */
+static VALUE
+ossl_ts_token_info_get_version(VALUE self)
+{
+    TS_TST_INFO *info;
+
+    GetTSTokenInfo(self, info);
+    return LONG2NUM(TS_TST_INFO_get_version(info));
+}
+
+/*
+ * Returns the timestamp policy object identifier of the policy this timestamp
+ * was created under. If status is GRANTED or GRANTED_WITH_MODS, this is never
+ * +nil+.
+ *
+ * ===Example:
+ *      id = token_info.policy_id
+ *      puts id                 -> "1.2.3.4.5"
+ *
+ * call-seq:
+ *       token_info.policy_id -> string or nil
+ */
+static VALUE
+ossl_ts_token_info_get_policy_id(VALUE self)
+{
+    TS_TST_INFO *info;
+
+    GetTSTokenInfo(self, info);
+    return get_asn1obj(TS_TST_INFO_get_policy_id(info));
+}
+
+/*
+ * Returns the 'short name' of the object identifier representing the algorithm
+ * that was used to derive the message imprint digest. For valid timestamps,
+ * this is the same value that was already given in the Request. If status is
+ * GRANTED or GRANTED_WITH_MODS, this is never +nil+.
+ *
+ * ===Example:
+ *      algo = token_info.algorithm
+ *      puts algo                -> "SHA1"
+ *
+ * call-seq:
+ *       token_info.algorithm -> string or nil
+ */
+static VALUE
+ossl_ts_token_info_get_algorithm(VALUE self)
+{
+    TS_TST_INFO *info;
+    TS_MSG_IMPRINT *mi;
+    X509_ALGOR *algo;
+
+    GetTSTokenInfo(self, info);
+    mi = TS_TST_INFO_get_msg_imprint(info);
+    algo = TS_MSG_IMPRINT_get_algo(mi);
+    return get_asn1obj(algo->algorithm);
+}
+
+/*
+ * Returns the message imprint digest. For valid timestamps,
+ * this is the same value that was already given in the Request.
+ * If status is GRANTED or GRANTED_WITH_MODS, this is never +nil+.
+ *
+ * ===Example:
+ *      mi = token_info.msg_imprint
+ *      puts mi                -> "DEADBEEF"
+ *
+ * call-seq:
+ *       token_info.msg_imprint -> string.
+ */
+static VALUE
+ossl_ts_token_info_get_msg_imprint(VALUE self)
+{
+    TS_TST_INFO *info;
+    TS_MSG_IMPRINT *mi;
+    ASN1_OCTET_STRING *hashed_msg;
+    VALUE ret;
+
+    GetTSTokenInfo(self, info);
+    mi = TS_TST_INFO_get_msg_imprint(info);
+    hashed_msg = TS_MSG_IMPRINT_get_msg(mi);
+    ret = rb_str_new((const char *)hashed_msg->data, hashed_msg->length);
+
+    return ret;
+}
+
+/*
+ * Returns serial number of the timestamp token. This value shall never be the
+ * same for two timestamp tokens issued by a dedicated timestamp authority.
+ * If status is GRANTED or GRANTED_WITH_MODS, this is never +nil+.
+ *
+ * call-seq:
+ *       token_info.serial_number -> BN or nil
+ */
+static VALUE
+ossl_ts_token_info_get_serial_number(VALUE self)
+{
+    TS_TST_INFO *info;
+
+    GetTSTokenInfo(self, info);
+    return asn1integer_to_num(TS_TST_INFO_get_serial(info));
+}
+
+/*
+ * Returns time when this timestamp token was created. If status is GRANTED or
+ * GRANTED_WITH_MODS, this is never +nil+.
+ *
+ * call-seq:
+ *       token_info.gen_time -> Time
+ */
+static VALUE
+ossl_ts_token_info_get_gen_time(VALUE self)
+{
+    TS_TST_INFO *info;
+
+    GetTSTokenInfo(self, info);
+    return asn1time_to_time(TS_TST_INFO_get_time(info));
+}
+
+/*
+ * If the ordering field is missing, or if the ordering field is present
+ * and set to false, then the genTime field only indicates the time at
+ * which the time-stamp token has been created by the TSA.  In such a
+ * case, the ordering of time-stamp tokens issued by the same TSA or
+ * different TSAs is only possible when the difference between the
+ * genTime of the first time-stamp token and the genTime of the second
+ * time-stamp token is greater than the sum of the accuracies of the
+ * genTime for each time-stamp token.
+ *
+ * If the ordering field is present and set to true, every time-stamp
+ * token from the same TSA can always be ordered based on the genTime
+ * field, regardless of the genTime accuracy.
+ *
+ * call-seq:
+ *       token_info.ordering -> true, falses or nil
+ */
+static VALUE
+ossl_ts_token_info_get_ordering(VALUE self)
+{
+    TS_TST_INFO *info;
+
+    GetTSTokenInfo(self, info);
+    return TS_TST_INFO_get_ordering(info) ? Qtrue : Qfalse;
+}
+
+/*
+ * If the timestamp token is valid then this field contains the same nonce that
+ * was passed to the timestamp server in the initial Request.
+ *
+ * call-seq:
+ *       token_info.nonce -> BN or nil
+ */
+static VALUE
+ossl_ts_token_info_get_nonce(VALUE self)
+{
+    TS_TST_INFO *info;
+    const ASN1_INTEGER *nonce;
+
+    GetTSTokenInfo(self, info);
+    if (!(nonce = TS_TST_INFO_get_nonce(info)))
+	return Qnil;
+
+    return asn1integer_to_num(nonce);
+}
+
+/*
+ * Returns the TokenInfo in DER-encoded form.
+ *
+ * call-seq:
+ *       token_info.to_der -> string
+ */
+static VALUE
+ossl_ts_token_info_to_der(VALUE self)
+{
+    TS_TST_INFO *info;
+
+    GetTSTokenInfo(self, info);
+    return asn1_to_der((void *)info, (int (*)(void *, unsigned char **))i2d_TS_TST_INFO);
 }
 
 /*
@@ -1228,17 +1319,27 @@ Init_ossl_ts(void)
     rb_define_method(cTimestampResponse, "failure_info", ossl_ts_resp_get_failure_info, 0);
     rb_define_method(cTimestampResponse, "status_text", ossl_ts_resp_get_status_text, 0);
     rb_define_method(cTimestampResponse, "token", ossl_ts_resp_get_token, 0);
+    rb_define_method(cTimestampResponse, "token_info", ossl_ts_resp_get_token_info, 0);
     rb_define_method(cTimestampResponse, "tsa_certificate", ossl_ts_resp_get_tsa_certificate, 0);
-    rb_define_method(cTimestampResponse, "version", ossl_ts_resp_get_version, 0);
-    rb_define_method(cTimestampResponse, "policy_id", ossl_ts_resp_get_policy_id, 0);
-    rb_define_method(cTimestampResponse, "algorithm", ossl_ts_resp_get_algorithm, 0);
-    rb_define_method(cTimestampResponse, "message_imprint", ossl_ts_resp_get_msg_imprint, 0);
-    rb_define_method(cTimestampResponse, "serial_number", ossl_ts_resp_get_serial_number, 0);
-    rb_define_method(cTimestampResponse, "gen_time", ossl_ts_resp_get_gen_time, 0);
-    rb_define_method(cTimestampResponse, "ordering", ossl_ts_resp_get_ordering, 0);
-    rb_define_method(cTimestampResponse, "nonce", ossl_ts_resp_get_nonce, 0);
     rb_define_method(cTimestampResponse, "to_der", ossl_ts_resp_to_der, 0);
     rb_define_method(cTimestampResponse, "verify", ossl_ts_resp_verify, -1);
+
+    /* Document-class: OpenSSL::Timestamp::TokenInfo
+     * Immutable and read-only representation of a timestamp token info from a
+     * Response.
+     */
+    cTimestampTokenInfo = rb_define_class_under(mTimestamp, "TokenInfo", rb_cObject);
+    rb_define_alloc_func(cTimestampTokenInfo, ossl_ts_token_info_alloc);
+    rb_define_method(cTimestampTokenInfo, "initialize", ossl_ts_token_info_initialize, 1);
+    rb_define_method(cTimestampTokenInfo, "version", ossl_ts_token_info_get_version, 0);
+    rb_define_method(cTimestampTokenInfo, "policy_id", ossl_ts_token_info_get_policy_id, 0);
+    rb_define_method(cTimestampTokenInfo, "algorithm", ossl_ts_token_info_get_algorithm, 0);
+    rb_define_method(cTimestampTokenInfo, "message_imprint", ossl_ts_token_info_get_msg_imprint, 0);
+    rb_define_method(cTimestampTokenInfo, "serial_number", ossl_ts_token_info_get_serial_number, 0);
+    rb_define_method(cTimestampTokenInfo, "gen_time", ossl_ts_token_info_get_gen_time, 0);
+    rb_define_method(cTimestampTokenInfo, "ordering", ossl_ts_token_info_get_ordering, 0);
+    rb_define_method(cTimestampTokenInfo, "nonce", ossl_ts_token_info_get_nonce, 0);
+    rb_define_method(cTimestampTokenInfo, "to_der", ossl_ts_token_info_to_der, 0);
 
     /* Document-class: OpenSSL::Timestamp::Request
      * Allows to create timestamp requests or parse existing ones. A Request is
