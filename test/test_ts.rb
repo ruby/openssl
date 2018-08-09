@@ -128,6 +128,27 @@ _end_of_pem_
     assert_equal(true, req.cert_requested?)
   end
 
+  def test_request_serialization
+    req = OpenSSL::Timestamp::Request.new
+
+    req.version = 2
+    req.algorithm = "SHA1"
+    req.message_imprint = "test"
+    req.policy_id = "1.2.3.4.5"
+    req.nonce = 42
+    req.cert_requested = true
+
+    req = OpenSSL::Timestamp::Request.new(req.to_der)
+
+    assert_equal(2, req.version)
+    assert_equal("SHA1", req.algorithm)
+    assert_equal("test", req.message_imprint)
+    assert_equal("1.2.3.4.5", req.policy_id)
+    assert_equal(42, req.nonce)
+    assert_equal(true, req.cert_requested?)
+
+  end
+
   def test_request_re_assignment
     #tests whether the potential 'freeing' of previous values in C works properly
     req = OpenSSL::Timestamp::Request.new
@@ -192,17 +213,18 @@ _end_of_pem_
     fac.serial_number = 1
 
     resp = fac.create_timestamp(ee_key, ts_cert_ee, req)
+    resp = OpenSSL::Timestamp::Response.new(resp)
     assert_equal(OpenSSL::Timestamp::Response::GRANTED, resp.status)
     assert_nil(resp.failure_info)
     assert_equal([], resp.status_text)
-    assert_equal(1, resp.version)
-    assert_equal("1.2.3.4.5", resp.policy_id)
-    assert_equal("SHA1", resp.algorithm)
-    assert_equal(digest, resp.message_imprint)
-    assert_equal(1, resp.serial_number)
-    assert_equal(time.to_i, resp.gen_time.to_i)
-    assert_equal(false, resp.ordering)
-    assert_nil(req.nonce)
+    assert_equal(1, resp.token_info.version)
+    assert_equal("1.2.3.4.5", resp.token_info.policy_id)
+    assert_equal("SHA1", resp.token_info.algorithm)
+    assert_equal(digest, resp.token_info.message_imprint)
+    assert_equal(1, resp.token_info.serial_number)
+    assert_equal(time.to_i, resp.token_info.gen_time.to_i)
+    assert_equal(false, resp.token_info.ordering)
+    assert_nil(resp.token_info.nonce)
     assert_cert(ts_cert_ee, resp.tsa_certificate)
     #compare PKCS7
     token = OpenSSL::ASN1.decode(resp.to_der).value[1]
@@ -254,7 +276,7 @@ _end_of_pem_
 
     resp = fac.create_timestamp(ee_key, ts_cert_ee, req)
     assert_equal(OpenSSL::Timestamp::Response::GRANTED, resp.status)
-    assert_equal("1.2.3.4.6", resp.policy_id)
+    assert_equal("1.2.3.4.6", resp.token_info.policy_id)
   end
 
   def test_response_bad_purpose
@@ -355,11 +377,10 @@ _end_of_pem_
     ts.verify(req, ca_store, [intermediate_cert])
   end
 
-  # TODO: This leaks. Fix this.
-  # def test_verify_ee_intermediate_type_error
-  #   ts, req = timestamp_ee
-  #   assert_raises(TypeError) { ts.verify(req, [ca_cert], 123) }
-  # end
+  def test_verify_ee_intermediate_type_error
+    ts, req = timestamp_ee
+    assert_raises(TypeError) { ts.verify(req, [ca_cert], 123) }
+  end
 
   def test_verify_ee_def_policy
     req = OpenSSL::Timestamp::Request.new
@@ -491,6 +512,33 @@ _end_of_pem_
     ts2.verify(req, ca_store)
     refute_nil(ts1.tsa_certificate)
     refute_nil(ts2.tsa_certificate)
+  end
+
+  def test_token_info_creation
+    req = OpenSSL::Timestamp::Request.new
+    req.algorithm = "SHA1"
+    digest = OpenSSL::Digest::SHA1.new.digest("test")
+    req.message_imprint = digest
+    req.policy_id = "1.2.3.4.5"
+    req.nonce = OpenSSL::BN.new(123)
+
+    fac = OpenSSL::Timestamp::Factory.new
+    time = Time.now
+    fac.gen_time = time
+    fac.serial_number = 1
+
+    resp = fac.create_timestamp(ee_key, ts_cert_ee, req)
+    info = resp.token_info
+    info = OpenSSL::Timestamp::TokenInfo.new(info.to_der)
+
+    assert_equal(1, info.version)
+    assert_equal("1.2.3.4.5", info.policy_id)
+    assert_equal("SHA1", info.algorithm)
+    assert_equal(digest, info.message_imprint)
+    assert_equal(1, info.serial_number)
+    assert_equal(time.to_i, info.gen_time.to_i)
+    assert_equal(false, info.ordering)
+    assert_equal(123, info.nonce)
   end
 
   private
