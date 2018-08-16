@@ -794,14 +794,15 @@ ossl_ts_resp_verify(int argc, VALUE *argv, VALUE self)
 	ossl_raise(eTimestampError, "Error when creating the verification context.");
     }
 
-    if (intermediates != Qnil) {
+    if (!NIL_P(intermediates)) {
 	x509inter = ossl_protect_x509_ary2sk(intermediates, &status);
 	if (status) {
 	    TS_VERIFY_CTX_free(ctx);
 	    rb_jump_tag(status);
 	}
-    } else {
-	x509inter = sk_X509_new_null();
+    } else if (!(x509inter = sk_X509_new_null())) {
+	TS_VERIFY_CTX_free(ctx);
+	ossl_raise(eTimestampError, "sk_X509_new_null");
     }
 
     if (!(p7 = TS_RESP_get_token(resp))) {
@@ -811,8 +812,12 @@ ossl_ts_resp_verify(int argc, VALUE *argv, VALUE self)
     }
     for (i=0; i < sk_X509_num(p7->d.sign->cert); i++) {
 	cert = sk_X509_value(p7->d.sign->cert, i);
+	if (!sk_X509_push(x509inter, cert)) {
+	    sk_X509_pop_free(x509inter, X509_free);
+	    TS_VERIFY_CTX_free(ctx);
+	    ossl_raise(eTimestampError, "sk_X509_push");
+	}
 	X509_up_ref(cert);
-	sk_X509_push(x509inter, cert);
     }
 
     TS_VERIFY_CTS_set_certs(ctx, x509inter);
@@ -834,26 +839,6 @@ ossl_ts_resp_verify(int argc, VALUE *argv, VALUE self)
 	ossl_raise(eTimestampError, "TS_RESP_verify_response");
 
     return self;
-}
-
-void
-ossl_ts_verify_ctx_free(TS_VERIFY_CTX *ctx)
-{
-    
-}
-
-static ASN1_INTEGER *
-ossl_tsfac_serial_cb(struct TS_resp_ctx *ctx, void *data)
-{
-    return (ASN1_INTEGER *)data;
-}
-
-static int
-ossl_tsfac_time_cb(struct TS_resp_ctx *ctx, void *data, long *sec, long *usec)
-{
-    *sec = *((long *)data);
-    *usec = 0;
-    return 1;
 }
 
 static VALUE
@@ -1083,6 +1068,20 @@ ossl_ts_token_info_to_der(VALUE self)
     return asn1_to_der((void *)info, (int (*)(void *, unsigned char **))i2d_TS_TST_INFO);
 }
 
+static ASN1_INTEGER *
+ossl_tsfac_serial_cb(struct TS_resp_ctx *ctx, void *data)
+{
+    return (ASN1_INTEGER *)data;
+}
+
+static int
+ossl_tsfac_time_cb(struct TS_resp_ctx *ctx, void *data, long *sec, long *usec)
+{
+    *sec = *((long *)data);
+    *usec = 0;
+    return 1;
+}
+
 /*
  * Creates a Response with the help of an OpenSSL::PKey, an
  * OpenSSL::X509::Certificate and a Request.
@@ -1120,9 +1119,9 @@ static VALUE
 ossl_tsfac_create_ts(VALUE self, VALUE key, VALUE certificate, VALUE request)
 {
     VALUE serial_number, def_policy_id, gen_time, additional_certs;
-    VALUE str, cert;
+    VALUE str;
     STACK_OF(X509) *inter_certs;
-    VALUE ret;
+    VALUE tsresp, ret = Qnil;
     EVP_PKEY *sign_key;
     X509 *tsa_cert;
     TS_REQ *req;
@@ -1133,8 +1132,9 @@ ossl_tsfac_create_ts(VALUE self, VALUE key, VALUE certificate, VALUE request)
     ASN1_OBJECT *def_policy_id_obj = NULL;
     long lgen_time;
     const char * err_msg = NULL;
-    int i, status = 0;
+    int status = 0;
 
+    tsresp = NewTSResponse(cTimestampResponse);
     tsa_cert = GetX509CertPtr(certificate);
     sign_key = GetPrivPKeyPtr(key);
     GetTSRequest(request, req);
@@ -1147,19 +1147,22 @@ ossl_tsfac_create_ts(VALUE self, VALUE key, VALUE certificate, VALUE request)
     lgen_time = NUM2LONG(rb_funcall(gen_time, rb_intern("to_i"), 0));
 
     serial_number = ossl_tsfac_get_serial_number(self);
-    if (serial_number == Qnil) {
+    if (NIL_P(serial_number)) {
 	err_msg = "@serial_number must be set.";
 	goto end;
     }
     asn1_serial = num_to_asn1integer(serial_number, NULL);
 
     def_policy_id = ossl_tsfac_get_default_policy_id(self);
-    if (def_policy_id == Qnil && !TS_REQ_get_policy_id(req)) {
+    if (NIL_P(def_policy_id) && !TS_REQ_get_policy_id(req)) {
 	err_msg = "No policy id in the request and no default policy set";
 	goto end;
     }
-    if (def_policy_id != Qnil && !TS_REQ_get_policy_id(req))
-	def_policy_id_obj = obj_to_asn1obj(def_policy_id);
+    if (!NIL_P(def_policy_id) && !TS_REQ_get_policy_id(req)) {
+	def_policy_id_obj = (ASN1_OBJECT*)rb_protect((VALUE (*)(VALUE))obj_to_asn1obj, (VALUE)def_policy_id, &status);
+	if (status)
+	    goto end;
+    }
 
     if (!(ctx = TS_RESP_CTX_new())) {
 	err_msg = "Memory allocation failed.";
@@ -1184,7 +1187,7 @@ ossl_tsfac_create_ts(VALUE self, VALUE key, VALUE certificate, VALUE request)
     }
 
     TS_RESP_CTX_set_signer_key(ctx, sign_key);
-    if (def_policy_id != Qnil && !TS_REQ_get_policy_id(req))
+    if (!NIL_P(def_policy_id) && !TS_REQ_get_policy_id(req))
 	TS_RESP_CTX_set_def_policy(ctx, def_policy_id_obj);
     if (TS_REQ_get_policy_id(req))
 	TS_RESP_CTX_set_def_policy(ctx, TS_REQ_get_policy_id(req));
@@ -1197,8 +1200,14 @@ ossl_tsfac_create_ts(VALUE self, VALUE key, VALUE certificate, VALUE request)
     TS_RESP_CTX_add_md(ctx, EVP_sha384());
     TS_RESP_CTX_add_md(ctx, EVP_sha512());
 
-    str = rb_funcall(request, rb_intern("to_der"), 0);
-    req_bio = ossl_obj2bio(&str);
+    str = rb_protect(ossl_to_der, request, &status);
+    if (status)
+	goto end;
+
+    req_bio = (BIO*)rb_protect((VALUE (*)(VALUE))ossl_obj2bio, (VALUE)&str, &status);
+    if (status)
+	goto end;
+
     response = TS_RESP_create_response(ctx, req_bio);
     BIO_free(req_bio);
     asn1_serial = NULL;
@@ -1207,13 +1216,13 @@ ossl_tsfac_create_ts(VALUE self, VALUE key, VALUE certificate, VALUE request)
 	goto end;
     }
 
-    ret = NewTSResponse(cTimestampResponse);
-    SetTSResponse(ret, response);
+    SetTSResponse(tsresp, response);
+    ret = tsresp;
 
 end:
-    if(asn1_serial) ASN1_INTEGER_free(asn1_serial);
-    if(def_policy_id_obj) ASN1_OBJECT_free(def_policy_id_obj);
-    if (ctx) TS_RESP_CTX_free(ctx);
+    ASN1_INTEGER_free(asn1_serial);
+    ASN1_OBJECT_free(def_policy_id_obj);
+    TS_RESP_CTX_free(ctx);
     if (err_msg) {
 	if (response) TS_RESP_free(response);
 	ossl_raise(eTimestampError, err_msg);
