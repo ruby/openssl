@@ -331,7 +331,7 @@ _end_of_pem_
 
   def test_verify_ee_no_req
     assert_raises(TypeError) do
-      ts, req = timestamp_ee
+      ts, _ = timestamp_ee
       ts.verify(nil, ca_cert)
     end
   end
