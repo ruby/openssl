@@ -10,7 +10,7 @@ module OpenSSL::SSLPairM
     ee_exts = [
       ["keyUsage", "keyEncipherment,digitalSignature", true],
     ]
-    @svr_key = OpenSSL::TestUtils::Fixtures.pkey("rsa1024")
+    @svr_key = OpenSSL::TestUtils::Fixtures.pkey("rsa-1")
     @svr_cert = issue_cert(svr_dn, @svr_key, 1, ee_exts, nil, nil)
   end
 
@@ -23,7 +23,7 @@ module OpenSSL::SSLPairM
       sctx = OpenSSL::SSL::SSLContext.new
       sctx.cert = @svr_cert
       sctx.key = @svr_key
-      sctx.tmp_dh_callback = proc { OpenSSL::TestUtils::Fixtures.pkey_dh("dh1024") }
+      sctx.tmp_dh_callback = proc { OpenSSL::TestUtils::Fixtures.pkey("dh-1") }
       sctx.options |= OpenSSL::SSL::OP_NO_COMPRESSION
       ssls = OpenSSL::SSL::SSLServer.new(tcps, sctx)
       ns = ssls.accept
@@ -397,7 +397,7 @@ module OpenSSL::TestPairM
     ctx2 = OpenSSL::SSL::SSLContext.new
     ctx2.cert = @svr_cert
     ctx2.key = @svr_key
-    ctx2.tmp_dh_callback = proc { OpenSSL::TestUtils::Fixtures.pkey_dh("dh1024") }
+    ctx2.tmp_dh_callback = proc { OpenSSL::TestUtils::Fixtures.pkey("dh-1") }
 
     sock1, sock2 = tcp_pair
 
@@ -445,7 +445,7 @@ module OpenSSL::TestPairM
     ctx = OpenSSL::SSL::SSLContext.new
     ctx.cert = @svr_cert
     ctx.key = @svr_key
-    ctx.tmp_dh_callback = proc { OpenSSL::TestUtils::Fixtures.pkey_dh("dh1024") }
+    ctx.tmp_dh_callback = proc { OpenSSL::TestUtils::Fixtures.pkey("dh-1") }
 
     sock1, sock2 = tcp_pair
 
