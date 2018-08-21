@@ -60,6 +60,7 @@
 #define ossl_tsfac_get_serial_number(o)          rb_attr_get((o),rb_intern("@serial_number"))
 #define ossl_tsfac_get_gen_time(o)               rb_attr_get((o),rb_intern("@gen_time"))
 #define ossl_tsfac_get_additional_certs(o)       rb_attr_get((o),rb_intern("@additional_certs"))
+#define ossl_tsfac_get_allowed_digests(o)        rb_attr_get((o),rb_intern("@allowed_digests"))
 
 static VALUE mTimestamp;
 static VALUE eTimestampError;
@@ -1071,7 +1072,10 @@ ossl_ts_token_info_to_der(VALUE self)
 static ASN1_INTEGER *
 ossl_tsfac_serial_cb(struct TS_resp_ctx *ctx, void *data)
 {
-    return (ASN1_INTEGER *)data;
+    ASN1_INTEGER **snptr = (ASN1_INTEGER **)data;
+    ASN1_INTEGER *sn = *snptr;
+    *snptr = NULL;
+    return sn;
 }
 
 static int
@@ -1086,17 +1090,6 @@ ossl_tsfac_time_cb(struct TS_resp_ctx *ctx, void *data, long *sec, long *usec)
  * Creates a Response with the help of an OpenSSL::PKey, an
  * OpenSSL::X509::Certificate and a Request.
  *
- * The Request message imprint may have only been created using one of the
- * following algorithms:
- * * MD5
- * * SHA1
- * * SHA224
- * * SHA256
- * * SHA384
- * * SHA512
- * Otherwise creation of the timestamp token will fail and a TimestampError
- * will be raised.
- *
  * Mandatory parameters for timestamp creation that need to be set in the
  * Request:
  *
@@ -1106,11 +1099,13 @@ ossl_tsfac_time_cb(struct TS_resp_ctx *ctx, void *data, long *sec, long *usec)
  * Mandatory parameters that need to be set in the Factory:
  * * Factory#serial_number
  * * Factory#gen_time
+ * * Factory#allowed_digests
  *
  * In addition one of either Request#policy_id or Factory#default_policy_id
  * must be set.
  *
- * Raises a TimestampError if creation fails.
+ * Raises a TimestampError if creation fails, though successfully created error
+ * responses may be returned.
  *
  * call-seq:
  *       factory.create_timestamp(key, certificate, request) -> Response
@@ -1118,7 +1113,7 @@ ossl_tsfac_time_cb(struct TS_resp_ctx *ctx, void *data, long *sec, long *usec)
 static VALUE
 ossl_tsfac_create_ts(VALUE self, VALUE key, VALUE certificate, VALUE request)
 {
-    VALUE serial_number, def_policy_id, gen_time, additional_certs;
+    VALUE serial_number, def_policy_id, gen_time, additional_certs, allowed_digests;
     VALUE str;
     STACK_OF(X509) *inter_certs;
     VALUE tsresp, ret = Qnil;
@@ -1169,7 +1164,7 @@ ossl_tsfac_create_ts(VALUE self, VALUE key, VALUE certificate, VALUE request)
 	goto end;
     }
 
-    TS_RESP_CTX_set_serial_cb(ctx, ossl_tsfac_serial_cb, asn1_serial);
+    TS_RESP_CTX_set_serial_cb(ctx, ossl_tsfac_serial_cb, &asn1_serial);
     if (!TS_RESP_CTX_set_signer_cert(ctx, tsa_cert)) {
 	err_msg = "Certificate does not contain the timestamping extension";
 	goto end;
@@ -1193,12 +1188,20 @@ ossl_tsfac_create_ts(VALUE self, VALUE key, VALUE certificate, VALUE request)
 	TS_RESP_CTX_set_def_policy(ctx, TS_REQ_get_policy_id(req));
     TS_RESP_CTX_set_time_cb(ctx, ossl_tsfac_time_cb, &lgen_time);
 
-    TS_RESP_CTX_add_md(ctx, EVP_md5());
-    TS_RESP_CTX_add_md(ctx, EVP_sha1());
-    TS_RESP_CTX_add_md(ctx, EVP_sha224());
-    TS_RESP_CTX_add_md(ctx, EVP_sha256());
-    TS_RESP_CTX_add_md(ctx, EVP_sha384());
-    TS_RESP_CTX_add_md(ctx, EVP_sha512());
+    allowed_digests = ossl_tsfac_get_allowed_digests(self);
+    if (rb_obj_is_kind_of(allowed_digests, rb_cArray)) {
+	int i;
+	VALUE rbmd;
+	const EVP_MD *md;
+
+	for (i = 0; i < RARRAY_LEN(allowed_digests); i++) {
+	    rbmd = rb_ary_entry(allowed_digests, i);
+	    md = (const EVP_MD *)rb_protect((VALUE (*)(VALUE))ossl_evp_get_digestbyname, rbmd, &status);
+	    if (status)
+		goto end;
+	    TS_RESP_CTX_add_md(ctx, md);
+	}
+    }
 
     str = rb_protect(ossl_to_der, request, &status);
     if (status)
@@ -1210,11 +1213,15 @@ ossl_tsfac_create_ts(VALUE self, VALUE key, VALUE certificate, VALUE request)
 
     response = TS_RESP_create_response(ctx, req_bio);
     BIO_free(req_bio);
-    asn1_serial = NULL;
+
     if (!response) {
 	err_msg = "Error during response generation";
 	goto end;
     }
+
+    /* bad responses aren't exceptional, but openssl still sets error
+     * information. */
+    ossl_clear_error();
 
     SetTSResponse(tsresp, response);
     ret = tsresp;
@@ -1223,10 +1230,8 @@ end:
     ASN1_INTEGER_free(asn1_serial);
     ASN1_OBJECT_free(def_policy_id_obj);
     TS_RESP_CTX_free(ctx);
-    if (err_msg) {
-	if (response) TS_RESP_free(response);
+    if (err_msg)
 	ossl_raise(eTimestampError, err_msg);
-    }
     if (status)
 	rb_jump_tag(status);
     return ret;
@@ -1443,6 +1448,7 @@ Init_ossl_ts(void)
      *      fac = OpenSSL::Timestamp::Factory.new
      *      fac.gen_time = Time.now
      *      fac.serial_number = 1
+     *      fac.allowed_digests = ["sha256", "sha384", "sha512"]
      *      #needed because the Request contained no policy identifier
      *      fac.default_policy_id = '1.2.3.4.5'
      *      fac.additional_certificates = [ inter1, inter2 ]
@@ -1486,11 +1492,23 @@ Init_ossl_ts(void)
      * Must be an Array of OpenSSL::X509::Certificate.
      *
      * call-seq:
-     *       factory.additional_certs = [ cert1, cert2] -> [ cert1, cert2 ]
-     *       factory.additional_certs                   -> array or nil
+     *       factory.additional_certs = [cert1, cert2] -> [ cert1, cert2 ]
+     *       factory.additional_certs                  -> array or nil
+     *
+     * ===allowed_digests
+     *
+     * Sets or retrieves the digest algorithms that the factory is allowed
+     * create timestamps for. Known vulnerable or weak algorithms should not be
+     * allowed where possible.
+     * Must be an Array of String or OpenSSL::Digest subclass instances.
+     *
+     * call-seq:
+     *       factory.allowed_digests = ["sha1", OpenSSL::Digest::SHA256.new] -> [ "sha1", OpenSSL::Digest::SHA256.new ]
+     *       factory.allowed_digests                                         -> array or nil
      *
      */
     cTimestampFactory = rb_define_class_under(mTimestamp, "Factory", rb_cObject);
+    rb_attr(cTimestampFactory, rb_intern("allowed_digests"), 1, 1, 0);
     rb_attr(cTimestampFactory, rb_intern("default_policy_id"), 1, 1, 0);
     rb_attr(cTimestampFactory, rb_intern("serial_number"), 1, 1, 0);
     rb_attr(cTimestampFactory, rb_intern("gen_time"), 1, 1, 0);
