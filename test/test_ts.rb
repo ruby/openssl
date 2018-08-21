@@ -211,6 +211,7 @@ _end_of_pem_
     time = Time.now
     fac.gen_time = time
     fac.serial_number = 1
+    fac.allowed_digests = ["sha1"]
 
     resp = fac.create_timestamp(ee_key, ts_cert_ee, req)
     resp = OpenSSL::Timestamp::Response.new(resp)
@@ -250,17 +251,60 @@ _end_of_pem_
       fac.create_timestamp(ee_key, ts_cert_ee, req)
     end
     fac.serial_number = 1
+    fac.allowed_digests = ["sha1"]
     assert_raises(OpenSSL::Timestamp::TimestampError) do
       fac.create_timestamp(ee_key, ts_cert_ee, req)
     end
     fac.default_policy_id = "1.2.3.4.5"
-    fac.create_timestamp(ee_key, ts_cert_ee, req)
+    assert_equal OpenSSL::Timestamp::Response::GRANTED, fac.create_timestamp(ee_key, ts_cert_ee, req).status
     fac.default_policy_id = nil
     assert_raises(OpenSSL::Timestamp::TimestampError) do
       fac.create_timestamp(ee_key, ts_cert_ee, req)
     end
     req.policy_id = "1.2.3.4.5"
-    fac.create_timestamp(ee_key, ts_cert_ee, req)
+    assert_equal OpenSSL::Timestamp::Response::GRANTED, fac.create_timestamp(ee_key, ts_cert_ee, req).status
+  end
+
+  def test_response_allowed_digests
+    req = OpenSSL::Timestamp::Request.new
+    req.algorithm = "SHA1"
+    req.message_imprint = OpenSSL::Digest::SHA1.digest("test")
+
+    fac = OpenSSL::Timestamp::Factory.new
+    fac.gen_time = Time.now
+    fac.serial_number = 1
+    fac.default_policy_id = "1.2.3.4.6"
+
+    # None allowed by default
+    resp = fac.create_timestamp(ee_key, ts_cert_ee, req)
+    assert_equal OpenSSL::Timestamp::Response::REJECTION, resp.status
+
+    # Explicitly allow SHA1 (string)
+    fac.allowed_digests = ["sha1"]
+    resp = fac.create_timestamp(ee_key, ts_cert_ee, req)
+    assert_equal OpenSSL::Timestamp::Response::GRANTED, resp.status
+
+    # Explicitly allow SHA1 (object)
+    fac.allowed_digests = [OpenSSL::Digest::SHA1.new]
+    resp = fac.create_timestamp(ee_key, ts_cert_ee, req)
+    assert_equal OpenSSL::Timestamp::Response::GRANTED, resp.status
+
+    # Others not allowed
+    req.algorithm = "SHA256"
+    req.message_imprint = OpenSSL::Digest::SHA256.digest("test")
+    resp = fac.create_timestamp(ee_key, ts_cert_ee, req)
+    assert_equal OpenSSL::Timestamp::Response::REJECTION, resp.status
+
+    # Non-Array
+    fac.allowed_digests = 123
+    resp = fac.create_timestamp(ee_key, ts_cert_ee, req)
+    assert_equal OpenSSL::Timestamp::Response::REJECTION, resp.status
+
+    # Non-String, non-Digest Array element
+    fac.allowed_digests = ["sha1", OpenSSL::Digest::SHA1.new, 123]
+    assert_raises(TypeError) do
+      fac.create_timestamp(ee_key, ts_cert_ee, req)
+    end
   end
 
   def test_response_default_policy
@@ -272,6 +316,7 @@ _end_of_pem_
     fac = OpenSSL::Timestamp::Factory.new
     fac.gen_time = Time.now
     fac.serial_number = 1
+    fac.allowed_digests = ["sha1"]
     fac.default_policy_id = "1.2.3.4.6"
 
     resp = fac.create_timestamp(ee_key, ts_cert_ee, req)
@@ -290,6 +335,7 @@ _end_of_pem_
     fac = OpenSSL::Timestamp::Factory.new
     fac.gen_time = Time.now
     fac.serial_number = 1
+    fac.allowed_digests = ["sha1"]
 
 
     assert_raises(OpenSSL::Timestamp::TimestampError) do
@@ -307,6 +353,7 @@ _end_of_pem_
     fac = OpenSSL::Timestamp::Factory.new
     fac.gen_time = Time.now
     fac.serial_number = 1
+    fac.allowed_digests = ["sha1"]
     fac.default_policy_id = "1.2.3.4.5"
 
     resp = fac.create_timestamp(ee_key, ts_cert_ee, req)
@@ -324,6 +371,7 @@ _end_of_pem_
       fac = OpenSSL::Timestamp::Factory.new
       fac.gen_time = Time.now
       fac.serial_number = 1
+      fac.allowed_digests = ["sha1"]
 
       fac.create_timestamp(ee_key, ts_cert_ee, req)
     end
@@ -392,6 +440,7 @@ _end_of_pem_
     fac = OpenSSL::Timestamp::Factory.new
     fac.gen_time = Time.now
     fac.serial_number = 1
+    fac.allowed_digests = ["sha1"]
     fac.default_policy_id = "1.2.3.4.5"
 
     ts = fac.create_timestamp(ee_key, ts_cert_ee, req)
@@ -449,6 +498,7 @@ _end_of_pem_
     fac = OpenSSL::Timestamp::Factory.new
     fac.gen_time = Time.now
     fac.serial_number = 1
+    fac.allowed_digests = ["sha1"]
     fac.additional_certs = [intermediate_cert]
     ts = fac.create_timestamp(ee_key, ts_cert_ee, req)
     assert_equal(2, ts.token.certificates.size)
@@ -468,6 +518,7 @@ _end_of_pem_
     fac = OpenSSL::Timestamp::Factory.new
     fac.gen_time = Time.now
     fac.serial_number = 1
+    fac.allowed_digests = ["sha1"]
     fac.additional_certs = [intermediate_cert, ca_cert]
     ts = fac.create_timestamp(ee_key, ts_cert_ee, req)
     assert_equal(3, ts.token.certificates.size)
@@ -484,6 +535,7 @@ _end_of_pem_
     fac = OpenSSL::Timestamp::Factory.new
     fac.gen_time = Time.now
     fac.serial_number = 1
+    fac.allowed_digests = ["sha1"]
     #needed because the Request contained no policy identifier
     fac.default_policy_id = '1.2.3.4.5'
     fac.additional_certs = [ ts_cert_ee, intermediate_cert ]
@@ -505,6 +557,7 @@ _end_of_pem_
     fac = OpenSSL::Timestamp::Factory.new
     fac.gen_time = Time.now
     fac.serial_number = 1
+    fac.allowed_digests = ["sha1"]
     fac.additional_certs = [ intermediate_cert ]
     ts1 = fac.create_timestamp(ee_key, ts_cert_ee, req)
     ts1.verify(req, ca_store)
@@ -526,6 +579,7 @@ _end_of_pem_
     time = Time.now
     fac.gen_time = time
     fac.serial_number = 1
+    fac.allowed_digests = ["sha1"]
 
     resp = fac.create_timestamp(ee_key, ts_cert_ee, req)
     info = resp.token_info
@@ -558,6 +612,7 @@ _end_of_pem_
     fac = OpenSSL::Timestamp::Factory.new
     fac.gen_time = Time.now
     fac.serial_number = 1
+    fac.allowed_digests = ["sha1"]
     return fac.create_timestamp(ee_key, ts_cert_ee, req), req
   end
 
@@ -573,6 +628,7 @@ _end_of_pem_
     fac = OpenSSL::Timestamp::Factory.new
     fac.gen_time = Time.now
     fac.serial_number = 1
+    fac.allowed_digests = ["sha1"]
     return fac.create_timestamp(ee_key, ts_cert_ee, req), req
   end
 
@@ -587,6 +643,7 @@ _end_of_pem_
     fac = OpenSSL::Timestamp::Factory.new
     fac.gen_time = Time.now
     fac.serial_number = 1
+    fac.allowed_digests = ["sha1"]
     return fac.create_timestamp(ee_key, ts_cert_direct, req), req
   end
 
@@ -602,6 +659,7 @@ _end_of_pem_
     fac = OpenSSL::Timestamp::Factory.new
     fac.gen_time = Time.now
     fac.serial_number = 1
+    fac.allowed_digests = ["sha1"]
     return fac.create_timestamp(ee_key, ts_cert_direct, req), req
   end
 end
