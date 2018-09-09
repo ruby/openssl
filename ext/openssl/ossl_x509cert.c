@@ -242,7 +242,7 @@ ossl_x509_to_req(VALUE self)
     VALUE obj;
 
     GetX509(self, x509);
-    if (!(req = X509_to_X509_REQ(x509, NULL, EVP_md5()))) {
+    if (!(req = X509_to_X509_REQ(x509, NULL, EVP_sha256()))) {
 	ossl_raise(eX509CertError, NULL);
     }
     obj = ossl_x509req_new(req);
