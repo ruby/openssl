@@ -225,7 +225,7 @@ ossl_cipher_init(int argc, VALUE *argv, VALUE self, int mode)
 	    }
 	    else memcpy(iv, RSTRING_PTR(init_v), sizeof(iv));
 	}
-	EVP_BytesToKey(EVP_CIPHER_CTX_cipher(ctx), EVP_md5(), iv,
+	EVP_BytesToKey(EVP_CIPHER_CTX_cipher(ctx), EVP_sha256(), iv,
 		       (unsigned char *)RSTRING_PTR(pass), RSTRING_LENINT(pass), 1, key, NULL);
 	p_key = key;
 	p_iv = iv;
@@ -319,7 +319,7 @@ ossl_cipher_pkcs5_keyivgen(int argc, VALUE *argv, VALUE self)
     iter = NIL_P(viter) ? 2048 : NUM2INT(viter);
     if (iter <= 0)
 	rb_raise(rb_eArgError, "iterations must be a positive integer");
-    digest = NIL_P(vdigest) ? EVP_md5() : ossl_evp_get_digestbyname(vdigest);
+    digest = NIL_P(vdigest) ? EVP_sha256() : ossl_evp_get_digestbyname(vdigest);
     GetCipher(self, ctx);
     EVP_BytesToKey(EVP_CIPHER_CTX_cipher(ctx), digest, salt,
 		   (unsigned char *)RSTRING_PTR(vpass), RSTRING_LENINT(vpass), iter, key, iv);

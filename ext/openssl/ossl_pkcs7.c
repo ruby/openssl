@@ -306,12 +306,12 @@ ossl_pkcs7_s_encrypt(int argc, VALUE *argv, VALUE klass)
 
     rb_scan_args(argc, argv, "22", &certs, &data, &cipher, &flags);
     if(NIL_P(cipher)){
-#if !defined(OPENSSL_NO_RC2)
-	ciph = EVP_rc2_40_cbc();
-#elif !defined(OPENSSL_NO_DES)
+//#if !defined(OPENSSL_NO_RC2)
+//	ciph = EVP_rc2_40_cbc();
+#if !defined(OPENSSL_NO_DES)
 	ciph = EVP_des_ede3_cbc();
-#elif !defined(OPENSSL_NO_RC2)
-	ciph = EVP_rc2_40_cbc();
+//#elif !defined(OPENSSL_NO_RC2)
+//	ciph = EVP_rc2_40_cbc();
 #elif !defined(OPENSSL_NO_AES)
 	ciph = EVP_EVP_aes_128_cbc();
 #else
