@@ -10,6 +10,9 @@
 #include RUBY_EXTCONF_H
 
 #include <string.h> /* memcpy() */
+#ifdef _WIN32
+# include <winsock2.h>
+#endif
 #if !defined(OPENSSL_NO_ENGINE)
 # include <openssl/engine.h>
 #endif
