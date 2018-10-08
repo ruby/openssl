@@ -1,5 +1,13 @@
 FROM ubuntu:18.04
 
+# Supported OpenSSL versions: 1.0.1-
+ENV OPENSSL10_VERSIONS 1.0.0t 1.0.1u 1.0.2o
+ENV OPENSSL11_VERSIONS 1.1.0h 1.1.1-pre8
+# Supported libressl versions: 2.3-
+ENV LIBRESSL_VERSIONS 2.3.10 2.4.5 2.5.5 2.6.5 2.7.4
+# Supported Ruby versions: 2.3-
+ENV RUBY_VERSIONS 2.3.7 2.4.4 2.5.1
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
   autoconf \
   bison \
@@ -13,101 +21,48 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   sed \
   zlib1g-dev
 
-# Supported OpenSSL versions: 1.0.1-
 RUN mkdir -p /build/openssl
-RUN curl -s https://www.openssl.org/source/openssl-1.0.0t.tar.gz | tar -C /build/openssl -xzf - && \
-    cd /build/openssl/openssl-1.0.0t && \
-    ./Configure \
-      --openssldir=/opt/openssl/openssl-1.0.0 \
-      shared linux-x86_64 && \
-    make && make install_sw
+RUN for version in ${OPENSSL10_VERSIONS}; do \
+      version_dir=$(echo "${version}" | sed -E 's/^([0-9]+\.[0-9]+\.[0-9]+).*$/\1/') && \
+      curl -s https://www.openssl.org/source/openssl-${version}.tar.gz | tar -C /build/openssl -xzf - && \
+      cd /build/openssl/openssl-${version} && \
+      ./Configure \
+        --openssldir=/opt/openssl/openssl-${version_dir} \
+        shared linux-x86_64 && \
+      make && make install_sw; \
+    done
 
-RUN curl -s https://www.openssl.org/source/openssl-1.0.1u.tar.gz | tar -C /build/openssl -xzf - && \
-    cd /build/openssl/openssl-1.0.1u && \
-    ./Configure \
-      --openssldir=/opt/openssl/openssl-1.0.1 \
-      shared linux-x86_64 && \
-    make && make install_sw
+RUN for version in ${OPENSSL11_VERSIONS}; do \
+      version_dir=$(echo "${version}" | sed -E 's/^([0-9]+\.[0-9]+\.[0-9]+).*$/\1/') && \
+      curl -s https://www.openssl.org/source/openssl-${version}.tar.gz | tar -C /build/openssl -xzf - && \
+      cd /build/openssl/openssl-${version} && \
+      ./Configure \
+        --prefix=/opt/openssl/openssl-${version_dir} \
+        enable-crypto-mdebug enable-crypto-mdebug-backtrace \
+        linux-x86_64 && \
+      make && make install_sw; \
+    done
 
-RUN curl -s https://www.openssl.org/source/openssl-1.0.2o.tar.gz | tar -C /build/openssl -xzf - && \
-    cd /build/openssl/openssl-1.0.2o && \
-    ./Configure \
-      --openssldir=/opt/openssl/openssl-1.0.2 \
-      shared linux-x86_64 && \
-    make && make install_sw
+RUN for version in ${LIBRESSL_VERSIONS}; do \
+      version_dir=$(echo "${version}" | sed -E 's/^([0-9]+\.[0-9]+).*$/\1/') && \
+      curl -s http://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-${version}.tar.gz | tar -C /build/openssl -xzf - && \
+      cd /build/openssl/libressl-${version} && \
+      ./configure \
+        --prefix=/opt/openssl/libressl-${version_dir} && \
+      make && make install; \
+    done
 
-RUN curl -s https://www.openssl.org/source/openssl-1.1.0h.tar.gz | tar -C /build/openssl -xzf - && \
-    cd /build/openssl/openssl-1.1.0h && \
-    ./Configure \
-      --prefix=/opt/openssl/openssl-1.1.0 \
-      enable-crypto-mdebug enable-crypto-mdebug-backtrace \
-      linux-x86_64 && \
-    make && make install_sw
-
-RUN curl -s https://www.openssl.org/source/openssl-1.1.1-pre8.tar.gz | tar -C /build/openssl -xzf - && \
-    cd /build/openssl/openssl-1.1.1-pre8 && \
-    ./Configure \
-      --prefix=/opt/openssl/openssl-1.1.1 \
-      enable-crypto-mdebug enable-crypto-mdebug-backtrace \
-      linux-x86_64 && \
-    make && make install_sw
-
-# Supported libressl versions: 2.3-
-RUN curl -s http://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.3.10.tar.gz | tar -C /build/openssl -xzf - && \
-    cd /build/openssl/libressl-2.3.10 && \
-    ./configure \
-      --prefix=/opt/openssl/libressl-2.3 && \
-    make && make install
-
-RUN curl -s http://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.4.5.tar.gz | tar -C /build/openssl -xzf - && \
-    cd /build/openssl/libressl-2.4.5 && \
-    ./configure \
-      --prefix=/opt/openssl/libressl-2.4 && \
-    make && make install
-
-RUN curl -s http://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.5.5.tar.gz | tar -C /build/openssl -xzf - && \
-    cd /build/openssl/libressl-2.5.5 && \
-    ./configure \
-      --prefix=/opt/openssl/libressl-2.5 && \
-    make && make install
-
-RUN curl -s http://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.6.5.tar.gz | tar -C /build/openssl -xzf - && \
-    cd /build/openssl/libressl-2.6.5 && \
-    ./configure \
-      --prefix=/opt/openssl/libressl-2.6 && \
-    make && make install
-
-RUN curl -s http://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.7.4.tar.gz | tar -C /build/openssl -xzf - && \
-    cd /build/openssl/libressl-2.7.4 && \
-    ./configure \
-      --prefix=/opt/openssl/libressl-2.7 && \
-    make && make install
-
-# Supported Ruby versions: 2.3-
 RUN mkdir -p /build/ruby
-RUN curl -s https://cache.ruby-lang.org/pub/ruby/2.3/ruby-2.3.7.tar.gz | tar -C /build/ruby -xzf - && \
-    cd /build/ruby/ruby-2.3.7 && \
-    autoconf && ./configure \
-      --without-openssl \
-      --prefix=/opt/ruby/ruby-2.3 \
-      --disable-install-doc && \
-    make && make install
-
-RUN curl -s https://cache.ruby-lang.org/pub/ruby/2.4/ruby-2.4.4.tar.gz | tar -C /build/ruby -xzf - && \
-    cd /build/ruby/ruby-2.4.4 && \
-    autoconf && ./configure \
-      --without-openssl \
-      --prefix=/opt/ruby/ruby-2.4 \
-      --disable-install-doc && \
-    make && make install
-
-RUN curl -s https://cache.ruby-lang.org/pub/ruby/2.5/ruby-2.5.1.tar.gz | tar -C /build/ruby -xzf - && \
-    cd /build/ruby/ruby-2.5.1 && \
-    autoconf && ./configure \
-      --without-openssl \
-      --prefix=/opt/ruby/ruby-2.5 \
-      --disable-install-doc && \
-    make && make install
+RUN for version in ${RUBY_VERSIONS}; do \
+      version_dir=$(echo "${version}" | sed -E 's/^([0-9]+\.[0-9]+).*$/\1/') && \
+      curl -s https://cache.ruby-lang.org/pub/ruby/${version_dir}/ruby-${version}.tar.gz | tar -C /build/ruby -xzf - && \
+      cd /build/ruby/ruby-${version} && \
+      autoconf && ./configure \
+        --without-openssl \
+        --prefix=/opt/ruby/ruby-${version_dir} \
+        --disable-install-doc && \
+      make && make install; \
+    done
 
 ONBUILD ADD . /home/openssl/code
 ONBUILD WORKDIR /home/openssl/code
