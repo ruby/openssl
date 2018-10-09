@@ -1,8 +1,8 @@
 FROM ubuntu:18.04
 
 # Supported OpenSSL versions: 1.0.1-
-ENV OPENSSL10_VERSIONS 1.0.0t 1.0.1u 1.0.2o
-ENV OPENSSL11_VERSIONS 1.1.0h 1.1.1-pre8
+ENV OPENSSL10_VERSIONS 1.0.0t 1.0.1u 1.0.2p
+ENV OPENSSL11_VERSIONS 1.1.0i 1.1.1
 # Supported libressl versions: 2.3-
 ENV LIBRESSL_VERSIONS 2.3.10 2.4.5 2.5.5 2.6.5 2.7.4
 # Supported Ruby versions: 2.3-
