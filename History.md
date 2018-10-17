@@ -1,3 +1,15 @@
+Version 2.1.2
+=============
+
+Merged changes in 2.0.9.
+
+
+Version 2.1.1
+=============
+
+Merged changes in 2.0.8.
+
+
 Version 2.1.0
 =============
 
