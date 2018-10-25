@@ -7,6 +7,8 @@ Compatibility notes
 * Remove unsupported MDC2, DSS, DSS1, and SHA algorithms.
 * Remove `OpenSSL::PKCS7::SignerInfo#name` alias for `#issuer`.
   [[GitHub #266]](https://github.com/ruby/openssl/pull/266)
+* Deprecate `OpenSSL::Config#add_value` and `#[]=` for future removal.
+  [[GitHub #322]](https://github.com/ruby/openssl/pull/322)
 
 
 Notable changes
