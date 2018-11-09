@@ -3,31 +3,101 @@ sudo: required
 dist: xenial
 services:
   - docker
+env:
+  global:
+    - IMAGE="$DOCKER_USER/ruby-openssl-docker"
+before_install:
+  - sudo apt-get -qq update
+  # https://github.com/travis-ci/travis-ci/issues/4596
+  - echo "${TRAVIS_COMMIT_RANGE} -> ${TRAVIS_COMMIT_RANGE/.../..}"
+  - TRAVIS_COMMIT_RANGE="${TRAVIS_COMMIT_RANGE/.../..}"
+  - |
+    if [ "${DOCKER_USER}" != "" -a "${DOCKER_PASSWORD}" != "" ]; then
+      # Target files to trigger building ruby-openssl-docker.
+      target_files=(
+        tool/ruby-openssl-docker/Dockerfile
+        tool/ruby-openssl-docker/init.sh
+      )
+      files=$(git diff --name-only "${TRAVIS_COMMIT_RANGE}") || true
+      for file in ${files}; do
+        for target_file in ${target_files[@]}; do
+          if [ "${file}" = "${target_file}" ]; then
+            BUILD_RUBY_OPENSSL_DOCKER=true
+            break 2
+          fi
+        done
+      done
+    fi
+  - echo "DOCKER_USER=${DOCKER_USER=} BUILD_RUBY_OPENSSL_DOCKER=${BUILD_RUBY_OPENSSL_DOCKER=}"
 install:
 script:
   - docker -v
   - docker-compose -v
+  - |
+    if [ "${BUILD_RUBY_OPENSSL_DOCKER}" = true ]; then
+      docker pull $IMAGE:pr && \
+        sed -i "/^FROM/ s/zzak/${DOCKER_USER}/" Dockerfile && \
+        sed -i '/^FROM/ s/testing/pr/' Dockerfile && \
+        grep ^FROM Dockerfile
+    fi
   - docker-compose build --no-cache
   - docker-compose run test
+stages:
+  - prepare
+  - test
+  - deploy
 matrix:
   fast_finish: true
   include:
-    - env: RUBY_VERSION=ruby-2.3 OPENSSL_VERSION=openssl-1.0.2
-    - env: RUBY_VERSION=ruby-2.4 OPENSSL_VERSION=openssl-1.0.2
-    - env: RUBY_VERSION=ruby-2.5 OPENSSL_VERSION=openssl-1.0.1
-    - env: RUBY_VERSION=ruby-2.5 OPENSSL_VERSION=openssl-1.0.2
-    - env: RUBY_VERSION=ruby-2.5 OPENSSL_VERSION=openssl-1.1.0
-    - env: RUBY_VERSION=ruby-2.5 OPENSSL_VERSION=openssl-1.1.1
-    - env: RUBY_VERSION=ruby-2.5 OPENSSL_VERSION=libressl-2.5
-    - env: RUBY_VERSION=ruby-2.5 OPENSSL_VERSION=libressl-2.6
-    - env: RUBY_VERSION=ruby-2.5 OPENSSL_VERSION=libressl-2.7
-    - language: ruby
+    - name: bulid and push ruby-openssl-docker image for pull-request
+      stage: prepare
+      if: (env(DOCKER_USER) IS present) AND (env(DOCKER_PASSWORD) IS present) AND (type = pull_request) AND (branch = master)
+      script:
+        - |
+          if [ "${BUILD_RUBY_OPENSSL_DOCKER}" = true ]; then
+            pushd tool/ruby-openssl-docker && \
+              docker build --no-cache -t $IMAGE:pr . && \
+              echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USER}" --password-stdin && \
+              docker push $IMAGE:pr && \
+              popd
+          fi
+    - stage: test
+      env: RUBY_VERSION=ruby-2.3 OPENSSL_VERSION=openssl-1.0.2
+    - stage: test
+      env: RUBY_VERSION=ruby-2.4 OPENSSL_VERSION=openssl-1.0.2
+    - stage: test
+      env: RUBY_VERSION=ruby-2.5 OPENSSL_VERSION=openssl-1.0.1
+    - stage: test
+      env: RUBY_VERSION=ruby-2.5 OPENSSL_VERSION=openssl-1.0.2
+    - stage: test
+      env: RUBY_VERSION=ruby-2.5 OPENSSL_VERSION=openssl-1.1.0
+    - stage: test
+      env: RUBY_VERSION=ruby-2.5 OPENSSL_VERSION=openssl-1.1.1
+    - stage: test
+      env: RUBY_VERSION=ruby-2.5 OPENSSL_VERSION=libressl-2.5
+    - stage: test
+      env: RUBY_VERSION=ruby-2.5 OPENSSL_VERSION=libressl-2.6
+    - stage: test
+      env: RUBY_VERSION=ruby-2.5 OPENSSL_VERSION=libressl-2.7
+    - stage: test
+      language: ruby
       rvm: ruby-head
       before_install:
         - "rake install_dependencies"
       script:
         - "rake compile -- --enable-debug"
         - "rake test"
+    - name: push ruby-openssl-docker image for testing
+      stage: deploy
+      if: (env(DOCKER_USER) IS present) AND (env(DOCKER_PASSWORD) IS present) AND (type = push) AND (branch = master)
+      script:
+        - |
+          if [ "${BUILD_RUBY_OPENSSL_DOCKER}" = true ]; then
+            docker pull $IMAGE:pr && \
+              echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USER}" --password-stdin && \
+              docker tag $IMAGE:pr $IMAGE:testing && \
+              docker push $IMAGE:testing
+          fi
   allow_failures:
     - language: ruby
       rvm: ruby-head
