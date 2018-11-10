@@ -896,7 +896,7 @@ Init_ossl_cipher(void)
      * without processing the password further. A simple and secure way to
      * create a key for a particular Cipher is
      *
-     *  cipher = OpenSSL::AES256.new(:CFB)
+     *  cipher = OpenSSL::Cipher::AES256.new(:CFB)
      *  cipher.encrypt
      *  key = cipher.random_key # also sets the generated key on the Cipher
      *
