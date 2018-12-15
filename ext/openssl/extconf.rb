@@ -143,6 +143,9 @@ have_func("SSL_CTX_set1_client_sigalgs_list(NULL, NULL)", ssl_h)
 # added in 1.1.0, currently not in LibreSSL
 have_func("EVP_PBE_scrypt(\"\", 0, (unsigned char *)\"\", 0, 0, 0, 0, 0, NULL, 0)", evp_h)
 
+# look for CMS code, normally included, but some variations compile it out
+have_func("CMS_sign", ssl_h)
+
 # added in OpenSSL 1.1.1 and LibreSSL 3.5.0, then removed in LibreSSL 4.0.0
 have_func("EVP_PKEY_check(NULL)", evp_h)
 
