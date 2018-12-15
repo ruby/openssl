@@ -24,6 +24,7 @@
 #include <openssl/ssl.h>
 #include <openssl/pkcs12.h>
 #include <openssl/pkcs7.h>
+#include <openssl/cms.h>
 #include <openssl/hmac.h>
 #include <openssl/rand.h>
 #include <openssl/conf.h>
@@ -165,6 +166,7 @@ void ossl_debug(const char *, ...);
 #include "ossl_ocsp.h"
 #include "ossl_pkcs12.h"
 #include "ossl_pkcs7.h"
+#include "ossl_cms.h"
 #include "ossl_pkey.h"
 #include "ossl_rand.h"
 #include "ossl_ssl.h"
