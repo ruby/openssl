@@ -10,6 +10,7 @@
 #if !defined(_OSSL_PKCS7_H_)
 #define _OSSL_PKCS7_H_
 
+extern VALUE ePKCS7Error;
 VALUE ossl_pkcs7_new(PKCS7 *p7);
 void Init_ossl_pkcs7(void);
 

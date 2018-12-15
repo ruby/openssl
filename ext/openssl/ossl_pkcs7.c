@@ -67,7 +67,7 @@
 static VALUE cPKCS7;
 static VALUE cPKCS7Signer;
 static VALUE cPKCS7Recipient;
-static VALUE ePKCS7Error;
+VALUE ePKCS7Error;
 
 static void
 ossl_pkcs7_free(void *ptr)
