@@ -1202,7 +1202,9 @@ Init_openssl(void)
     Init_ossl_ns_spki();
     Init_ossl_pkcs12();
     Init_ossl_pkcs7();
+#if defined(HAVE_CMS_SIGN)
     Init_ossl_cms();
+#endif
     Init_ossl_pkey();
     Init_ossl_rand();
     Init_ossl_ssl();

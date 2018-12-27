@@ -11,6 +11,7 @@
  */
 #include "ossl.h"
 
+#if defined(HAVE_CMS_SIGN)
 /*
  * The CMS_ContentInfo is the primary data structure which this module creates and maintains
  * Is is called OpenSSL::CMS::ContentInfo in ruby.
@@ -496,3 +497,5 @@ Init_ossl_cms(void)
     DefCMSConst(STREAM);
     DefCMSConst(PARTIAL);
 }
+
+#endif /* HAVE_CMS_SIGN */

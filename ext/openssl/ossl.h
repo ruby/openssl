@@ -24,7 +24,9 @@
 #include <openssl/ssl.h>
 #include <openssl/pkcs12.h>
 #include <openssl/pkcs7.h>
+#if defined(HAVE_CMS_SIGN)
 #include <openssl/cms.h>
+#endif
 #include <openssl/hmac.h>
 #include <openssl/rand.h>
 #include <openssl/conf.h>
