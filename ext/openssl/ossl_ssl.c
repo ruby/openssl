@@ -810,6 +810,10 @@ ossl_sslctx_setup(VALUE self)
     }
 #endif /* OPENSSL_NO_EC */
 
+#ifdef HAVE_SSL_CTX_SET_POST_HANDSHAKE_AUTH
+    SSL_CTX_set_post_handshake_auth(ctx, 1);
+#endif
+
     val = rb_attr_get(self, id_i_cert_store);
     if (!NIL_P(val)) {
 	X509_STORE *store = GetX509StorePtr(val); /* NO NEED TO DUP */
