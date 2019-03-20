@@ -43,4 +43,6 @@ cryptogram_t * cryptogram_alloc(size_t key, size_t mac, size_t body);
 cryptogram_t * ecies_encrypt(const ies_ctx_t *ctx, const unsigned char *data, size_t length, char *error);
 unsigned char * ecies_decrypt(const ies_ctx_t *ctx, const cryptogram_t *cryptogram, size_t *length, char *error);
 
+void Init_ies(void);
+
 #endif /* _IES_H_ */

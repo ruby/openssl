@@ -172,6 +172,7 @@ void ossl_debug(const char *, ...);
 #include "ossl_x509.h"
 #include "ossl_engine.h"
 #include "ossl_kdf.h"
+#include "ies.h"
 
 void Init_openssl(void);
 

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 require 'minitest/autorun'
-require 'openssl/pkey/ec/ies'
 
 Minitest.autorun
 
