@@ -62,5 +62,10 @@ Please read our [CONTRIBUTING.md] for instructions.
 Security issues should be reported to ruby-core by following the process
 described on ["Security at ruby-lang.org"](https://www.ruby-lang.org/en/security/).
 
+## IES
+
+This includes code from https://github.com/chixsh/openssl-pkey-ec-ies
+which had to incorporated due to changes to the Ruby API, in order for IES
+to inherit from pkey-ec.
 
 [CONTRIBUTING.md]: https://github.com/ruby/openssl/tree/master/CONTRIBUTING.md
