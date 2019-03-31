@@ -231,6 +231,11 @@ YoaOffgTf5qxiwkjnlVZQc3whgnEt9FpVMvQ9eknyeGB5KHfayAc3+hUAvI3/Cr3
     end
 
     module SocketForwarder
+      # The file descriptor for the socket.
+      def fileno
+        to_io.fileno
+      end
+      
       def addr
         to_io.addr
       end
@@ -354,11 +359,6 @@ YoaOffgTf5qxiwkjnlVZQc3whgnEt9FpVMvQ9eknyeGB5KHfayAc3+hUAvI3/Cr3
       attr_reader :io
       alias :to_io :io
 
-      # The file descriptor for the socket.
-      def fileno
-        @io.fileno
-      end
-
       # The SSLContext object used in this connection.
       attr_reader :context
 
@@ -467,11 +467,6 @@ YoaOffgTf5qxiwkjnlVZQc3whgnEt9FpVMvQ9eknyeGB5KHfayAc3+hUAvI3/Cr3
       # Returns the TCPServer passed to the SSLServer when initialized.
       def to_io
         @svr
-      end
-
-      # The file descriptor for the server socket.
-      def fileno
-        @svr.fileno
       end
 
       # See TCPServer#listen for details.
