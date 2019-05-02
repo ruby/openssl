@@ -1544,6 +1544,20 @@ end
     }
   end
 
+  def test_fileno
+    ctx = OpenSSL::SSL::SSLContext.new
+    sock1, sock2 = socketpair
+    
+    socket = OpenSSL::SSL::SSLSocket.new(sock1)
+    server = OpenSSL::SSL::SSLServer.new(sock2, ctx)
+    
+    assert_equal socket.fileno, socket.to_io.fileno
+    assert_equal server.fileno, server.to_io.fileno
+  ensure
+    sock1.close
+    sock2.close
+  end
+
   private
 
   def start_server_version(version, ctx_proc = nil,

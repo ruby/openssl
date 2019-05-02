@@ -231,6 +231,11 @@ YoaOffgTf5qxiwkjnlVZQc3whgnEt9FpVMvQ9eknyeGB5KHfayAc3+hUAvI3/Cr3
     end
 
     module SocketForwarder
+      # The file descriptor for the socket.
+      def fileno
+        to_io.fileno
+      end
+      
       def addr
         to_io.addr
       end
