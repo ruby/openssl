@@ -1361,7 +1361,12 @@ end
     # Server support better, so refuse the connection
     sock1, sock2 = socketpair
     begin
+      # This test is for the downgrade protection mechanism of TLS1.2.
+      # This is why ctx1 bounds max_version == TLS1.2.
+      # Otherwise, this test fails when using openssl 1.1.1 (or later) that supports TLS1.3.
+      # TODO: We may need another test for TLS1.3 because it seems to have a different mechanism.
       ctx1 = OpenSSL::SSL::SSLContext.new
+      ctx1.max_version = OpenSSL::SSL::TLS1_2_VERSION
       s1 = OpenSSL::SSL::SSLSocket.new(sock1, ctx1)
 
       ctx2 = OpenSSL::SSL::SSLContext.new
