@@ -74,7 +74,7 @@ void ossl_HMAC_CTX_free(HMAC_CTX *);
 	CRYPTO_set_ex_data(&(x)->ex_data, (idx), (data))
 #endif
 
-#if !defined(HAVE_X509_STORE_GET_EX_NEW_INDEX)
+#if !defined(HAVE_X509_STORE_GET_EX_NEW_INDEX) && !defined(X509_STORE_get_ex_new_index)
 #  define X509_STORE_get_ex_new_index(l, p, newf, dupf, freef) \
 	CRYPTO_get_ex_new_index(CRYPTO_EX_INDEX_X509_STORE, (l), (p), \
 				(newf), (dupf), (freef))
