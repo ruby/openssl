@@ -712,7 +712,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
 
   def test_tlsext_hostname
     fooctx = OpenSSL::SSL::SSLContext.new
-    fooctx.tmp_dh_callback = proc { Fixtures.pkey_dh("dh1024") }
+    fooctx.tmp_dh_callback = proc { Fixtures.pkey("dh-1") }
     fooctx.cert = @cli_cert
     fooctx.key = @cli_key
 
@@ -764,7 +764,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     ctx2 = OpenSSL::SSL::SSLContext.new
     ctx2.cert = @svr_cert
     ctx2.key = @svr_key
-    ctx2.tmp_dh_callback = proc { Fixtures.pkey_dh("dh1024") }
+    ctx2.tmp_dh_callback = proc { Fixtures.pkey("dh-1") }
     ctx2.servername_cb = lambda { |args| Object.new }
 
     sock1, sock2 = socketpair
@@ -1144,7 +1144,7 @@ if openssl?(1, 0, 2) || libressl?
     ctx1 = OpenSSL::SSL::SSLContext.new
     ctx1.cert = @svr_cert
     ctx1.key = @svr_key
-    ctx1.tmp_dh_callback = proc { Fixtures.pkey_dh("dh1024") }
+    ctx1.tmp_dh_callback = proc { Fixtures.pkey("dh-1") }
     ctx1.alpn_select_cb = -> (protocols) { nil }
     ssl1 = OpenSSL::SSL::SSLSocket.new(sock1, ctx1)
 
@@ -1386,20 +1386,21 @@ end
   def test_dh_callback
     pend "TLS 1.2 is not supported" unless tls12_supported?
 
+    dh = Fixtures.pkey("dh-1")
     called = false
     ctx_proc = -> ctx {
       ctx.ssl_version = :TLSv1_2
       ctx.ciphers = "DH:!NULL"
       ctx.tmp_dh_callback = ->(*args) {
         called = true
-        Fixtures.pkey_dh("dh1024")
+        dh
       }
     }
     start_server(ctx_proc: ctx_proc) do |port|
       server_connect(port) { |ssl|
         assert called, "dh callback should be called"
         if ssl.respond_to?(:tmp_key)
-          assert_equal Fixtures.pkey_dh("dh1024").to_der, ssl.tmp_key.to_der
+          assert_equal dh.to_der, ssl.tmp_key.to_der
         end
       }
     end
