@@ -1843,7 +1843,6 @@ do{\
     rb_define_alias(cASN1ObjectId, "short_name", "sn");
     rb_define_alias(cASN1ObjectId, "long_name", "ln");
     rb_define_method(cASN1ObjectId, "==", ossl_asn1obj_eq, 1);
-    rb_define_alias(cASN1ObjectId, "===", "==");
     rb_attr(cASN1BitString, rb_intern("unused_bits"), 1, 1, 0);
 
     rb_define_method(cASN1EndOfContent, "initialize", ossl_asn1eoc_initialize, 0);
