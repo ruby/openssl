@@ -1318,6 +1318,17 @@ ossl_sslctx_add_certificate(int argc, VALUE *argv, VALUE self)
     return self;
 }
 
+static VALUE
+ossl_sslctx_add_certificate_chain_file(VALUE self, VALUE path)
+{
+    StringValue(path);
+    SSL_CTX *ctx = NULL;
+
+    GetSSLCTX(self, ctx);
+
+    return SSL_CTX_use_certificate_chain_file(ctx, RSTRING_PTR(path)) == 1 ? Qtrue : Qfalse;
+}
+
 /*
  *  call-seq:
  *     ctx.session_add(session) -> true | false
@@ -2700,6 +2711,7 @@ Init_ossl_ssl(void)
     rb_define_method(cSSLContext, "enable_fallback_scsv", ossl_sslctx_enable_fallback_scsv, 0);
 #endif
     rb_define_method(cSSLContext, "add_certificate", ossl_sslctx_add_certificate, -1);
+    rb_define_method(cSSLContext, "add_certificate_chain_file", ossl_sslctx_add_certificate_chain_file, 1);
 
     rb_define_method(cSSLContext, "setup", ossl_sslctx_setup, 0);
     rb_define_alias(cSSLContext, "freeze", "setup");
