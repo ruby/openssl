@@ -104,7 +104,7 @@ ossl_cipher_alloc(VALUE klass)
  *  call-seq:
  *     Cipher.new(string) -> cipher
  *
- *  The string must be a valid cipher name like "AES-128-CBC" or "3DES".
+ *  The string must contain a valid cipher name like "AES-256-CBC".
  *
  *  A list of cipher names is available by calling OpenSSL::Cipher.ciphers.
  */
