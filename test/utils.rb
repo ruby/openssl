@@ -52,6 +52,10 @@ module OpenSSL::TestUtils
       @file_cache[[category, name]] ||=
         File.read(File.join(__dir__, "fixtures", category, name + ".pem"))
     end
+
+    def file_path(category, name)
+      File.join(__dir__, "fixtures", category, name)
+    end
   end
 
   module_function

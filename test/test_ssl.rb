@@ -139,6 +139,11 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     end
   end
 
+  def test_add_certificate_chain_file
+    ctx = OpenSSL::SSL::SSLContext.new
+    assert ctx.add_certificate_chain_file(Fixtures.file_path("chain", "server.crt"))
+  end
+
   def test_sysread_and_syswrite
     start_server { |port|
       server_connect(port) { |ssl|
