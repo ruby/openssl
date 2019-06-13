@@ -72,6 +72,9 @@ void ossl_HMAC_CTX_free(HMAC_CTX *);
 #if !defined(HAVE_X509_STORE_SET_EX_DATA)
 #  define X509_STORE_set_ex_data(x, idx, data) \
 	CRYPTO_set_ex_data(&(x)->ex_data, (idx), (data))
+#endif
+
+#if !defined(HAVE_X509_STORE_GET_EX_NEW_INDEX) && !defined(X509_STORE_get_ex_new_index)
 #  define X509_STORE_get_ex_new_index(l, p, newf, dupf, freef) \
 	CRYPTO_get_ex_new_index(CRYPTO_EX_INDEX_X509_STORE, (l), (p), \
 				(newf), (dupf), (freef))
@@ -144,7 +147,8 @@ void ossl_X509_REQ_get0_signature(const X509_REQ *, const ASN1_BIT_STRING **, co
 	CRYPTO_add(&(x)->references, 1, CRYPTO_LOCK_EVP_PKEY);
 #endif
 
-#if !defined(HAVE_OPAQUE_OPENSSL)
+#if !defined(HAVE_OPAQUE_OPENSSL) && \
+    (!defined(LIBRESSL_VERSION_NUMBER) || LIBRESSL_VERSION_NUMBER < 0x2070000fL)
 #define IMPL_PKEY_GETTER(_type, _name) \
 static inline _type *EVP_PKEY_get0_##_type(EVP_PKEY *pkey) { \
 	return pkey->pkey._name; }
