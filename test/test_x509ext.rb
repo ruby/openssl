@@ -86,6 +86,11 @@ class OpenSSL::TestX509Extension < OpenSSL::TestCase
     assert_equal true, ext1 == ext2
     assert_equal false, ext1 == ext3
   end
+
+  def test_value_der
+    ext = OpenSSL::X509::Extension.new(@basic_constraints.to_der)
+    assert_equal @basic_constraints_value.to_der, ext.value_der
+  end
 end
 
 end
