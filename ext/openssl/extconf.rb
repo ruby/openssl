@@ -166,6 +166,7 @@ have_func("SSL_CTX_get_security_level")
 have_func("X509_get0_notBefore")
 have_func("SSL_SESSION_get_protocol_version")
 have_func("EVP_PBE_scrypt")
+have_func("SSL_CTX_set_post_handshake_auth")
 
 Logging::message "=== Checking done. ===\n"
 
