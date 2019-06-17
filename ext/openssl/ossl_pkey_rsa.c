@@ -26,10 +26,10 @@
 static inline int
 RSA_HAS_PRIVATE(RSA *rsa)
 {
-    const BIGNUM *p, *q;
+    const BIGNUM *e, *d;
 
-    RSA_get0_factors(rsa, &p, &q);
-    return p && q; /* d? why? */
+    RSA_get0_key(rsa, NULL, &e, &d);
+    return e && d;
 }
 
 static inline int
