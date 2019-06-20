@@ -171,6 +171,40 @@ class OpenSSL::TestPKeyRSA < OpenSSL::PKeyTestCase
     }
   end
 
+  def test_export
+    rsa1024 = Fixtures.pkey("rsa1024")
+    key = OpenSSL::PKey::RSA.new
+
+    # key has only n, e and d
+    key.set_key(rsa1024.n, rsa1024.e, rsa1024.d)
+    assert_equal rsa1024.public_key.export, key.export
+
+    # key has only n, e, d, p and q
+    key.set_factors(rsa1024.p, rsa1024.q)
+    assert_equal rsa1024.public_key.export, key.export
+
+    # key has n, e, d, p, q, dmp1, dmq1 and iqmp
+    key.set_crt_params(rsa1024.dmp1, rsa1024.dmq1, rsa1024.iqmp)
+    assert_equal rsa1024.export, key.export
+  end
+
+  def test_to_der
+    rsa1024 = Fixtures.pkey("rsa1024")
+    key = OpenSSL::PKey::RSA.new
+
+    # key has only n, e and d
+    key.set_key(rsa1024.n, rsa1024.e, rsa1024.d)
+    assert_equal rsa1024.public_key.to_der, key.to_der
+
+    # key has only n, e, d, p and q
+    key.set_factors(rsa1024.p, rsa1024.q)
+    assert_equal rsa1024.public_key.to_der, key.to_der
+
+    # key has n, e, d, p, q, dmp1, dmq1 and iqmp
+    key.set_crt_params(rsa1024.dmp1, rsa1024.dmq1, rsa1024.iqmp)
+    assert_equal rsa1024.to_der, key.to_der
+  end
+
   def test_RSAPrivateKey
     rsa1024 = Fixtures.pkey("rsa1024")
     asn1 = OpenSSL::ASN1::Sequence([
