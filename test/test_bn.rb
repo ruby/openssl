@@ -15,6 +15,9 @@ class OpenSSL::TestBN < OpenSSL::TestCase
   end
 
   def test_new
+    assert_raise(ArgumentError) { OpenSSL::BN.new(nil) }
+    assert_raise(ArgumentError) { OpenSSL::BN.new(nil, 2) }
+
     assert_equal(@e1, OpenSSL::BN.new("999"))
     assert_equal(@e1, OpenSSL::BN.new("999", 10))
     assert_equal(@e1, OpenSSL::BN.new("\x03\xE7", 2))

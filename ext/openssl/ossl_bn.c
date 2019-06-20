@@ -192,6 +192,10 @@ ossl_bn_initialize(int argc, VALUE *argv, VALUE self)
 	base = NUM2INT(bs);
     }
 
+    if (NIL_P(str)) {
+        ossl_raise(rb_eArgError, "invalid argument");
+    }
+
     if (RB_INTEGER_TYPE_P(str)) {
 	GetBN(self, bn);
 	integer_to_bnptr(str, bn);
