@@ -15,6 +15,7 @@ class OpenSSL::TestBN < OpenSSL::TestCase
   end
 
   def test_new
+    assert_raise(ArgumentError) { OpenSSL::BN.new }
     assert_raise(ArgumentError) { OpenSSL::BN.new(nil) }
     assert_raise(ArgumentError) { OpenSSL::BN.new(nil, 2) }
 

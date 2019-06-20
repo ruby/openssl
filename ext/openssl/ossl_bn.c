@@ -173,7 +173,6 @@ ossl_bn_alloc(VALUE klass)
 
 /*
  * call-seq:
- *    OpenSSL::BN.new => aBN
  *    OpenSSL::BN.new(bn) => aBN
  *    OpenSSL::BN.new(integer) => aBN
  *    OpenSSL::BN.new(string) => aBN
