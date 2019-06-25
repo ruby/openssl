@@ -198,6 +198,7 @@ class OpenSSL::SSLTestCase < OpenSSL::TestCase
 
   def start_server(verify_mode: OpenSSL::SSL::VERIFY_NONE, start_immediately: true,
                    ctx_proc: nil, server_proc: method(:readwrite_loop),
+                   accept_proc: proc{},
                    ignore_listener_error: false, &block)
     IO.pipe {|stop_pipe_r, stop_pipe_w|
       store = OpenSSL::X509::Store.new
@@ -231,6 +232,7 @@ class OpenSSL::SSLTestCase < OpenSSL::TestCase
                 readable, = IO.select([ssls, stop_pipe_r])
                 break if readable.include? stop_pipe_r
                 ssl = ssls.accept
+                accept_proc.call(ssl)
               rescue OpenSSL::SSL::SSLError, IOError, Errno::EBADF, Errno::EINVAL,
                      Errno::ECONNABORTED, Errno::ENOTSOCK, Errno::ECONNRESET
                 retry if ignore_listener_error
