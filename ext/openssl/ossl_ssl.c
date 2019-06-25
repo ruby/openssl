@@ -2297,6 +2297,56 @@ ossl_ssl_get_verify_result(VALUE self)
 
 /*
  * call-seq:
+ *    ssl.finished_message => "finished message"
+ *
+ * Returns the last *Finished* message sent
+ *
+ */
+static VALUE
+ossl_ssl_get_finished(VALUE self)
+{
+    SSL *ssl;
+
+    GetSSL(self, ssl);
+
+    char sizer[0];
+    size_t len = SSL_get_finished(ssl, sizer, 0);
+    if(len == 0)
+      return Qnil;
+
+    char* buf = ALLOCA_N(char, len+1);
+          buf[len] = 0;
+    SSL_get_finished(ssl, buf, len);
+    return rb_str_new_cstr(buf);
+}
+
+/*
+ * call-seq:
+ *    ssl.peer_finished_message => "peer finished message"
+ *
+ * Returns the last *Finished* message received
+ *
+ */
+static VALUE
+ossl_ssl_get_peer_finished(VALUE self)
+{
+    SSL *ssl;
+
+    GetSSL(self, ssl);
+
+    char sizer[0];
+    size_t len = SSL_get_peer_finished(ssl, sizer, 0);
+    if(len == 0)
+      return Qnil;
+
+    char* buf = ALLOCA_N(char, len+1);
+          buf[len] = 0;
+    SSL_get_peer_finished(ssl, buf, len);
+    return rb_str_new_cstr(buf);
+}
+
+/*
+ * call-seq:
  *    ssl.client_ca => [x509name, ...]
  *
  * Returns the list of client CAs. Please note that in contrast to
@@ -2813,6 +2863,8 @@ Init_ossl_ssl(void)
     rb_define_method(cSSLSocket, "client_ca", ossl_ssl_get_client_ca_list, 0);
     /* #hostname is defined in lib/openssl/ssl.rb */
     rb_define_method(cSSLSocket, "hostname=", ossl_ssl_set_hostname, 1);
+    rb_define_method(cSSLSocket, "finished_message", ossl_ssl_get_finished, 0);
+    rb_define_method(cSSLSocket, "peer_finished_message", ossl_ssl_get_peer_finished, 0);
 # ifdef HAVE_SSL_GET_SERVER_TMP_KEY
     rb_define_method(cSSLSocket, "tmp_key", ossl_ssl_tmp_key, 0);
 # endif
