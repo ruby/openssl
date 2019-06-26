@@ -111,13 +111,18 @@ module OpenSSL::TestUtils
     crl
   end
 
-  def get_subject_key_id(cert)
+  def get_subject_key_id(cert, hex: true)
     asn1_cert = OpenSSL::ASN1.decode(cert)
     tbscert   = asn1_cert.value[0]
     pkinfo    = tbscert.value[6]
     publickey = pkinfo.value[1]
     pkvalue   = publickey.value
-    OpenSSL::Digest::SHA1.hexdigest(pkvalue).scan(/../).join(":").upcase
+    digest = OpenSSL::Digest::SHA1.digest(pkvalue)
+    if hex
+      digest.unpack("H2"*20).join(":").upcase
+    else
+      digest
+    end
   end
 
   def openssl?(major = nil, minor = nil, fix = nil, patch = 0)

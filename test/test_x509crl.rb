@@ -118,7 +118,7 @@ class OpenSSL::TestX509CRL < OpenSSL::TestCase
       ["keyUsage", "cRLSign, keyCertSign", true],
     ]
     crl_exts = [
-      ["authorityKeyIdentifier", "keyid:always", false],
+      ["authorityKeyIdentifier", "issuer:always,keyid:always", false],
       ["issuerAltName", "issuer:copy", false],
     ]
 
@@ -130,6 +130,18 @@ class OpenSSL::TestX509CRL < OpenSSL::TestCase
     assert_equal("1", exts[0].value)
     assert_equal("crlNumber", exts[0].oid)
     assert_equal(false, exts[0].critical?)
+
+    expected_keyid = OpenSSL::TestUtils.get_subject_key_id(cert, hex: false)
+    actual_keyid = crl.authority_key_identifier[:key_identifier]
+    assert_equal expected_keyid, actual_keyid
+
+    expected_issuer = cert.issuer
+    actual_issuer = crl.authority_key_identifier[:authority_cert_issuer]
+    assert_equal expected_issuer, actual_issuer
+
+    expected_serial = cert.serial
+    actual_serial = crl.authority_key_identifier[:authority_cert_serial_number]
+    assert_equal expected_serial, actual_serial
 
     assert_equal("authorityKeyIdentifier", exts[1].oid)
     keyid = OpenSSL::TestUtils.get_subject_key_id(cert)
@@ -155,6 +167,10 @@ class OpenSSL::TestX509CRL < OpenSSL::TestCase
     assert_equal("issuerAltName", exts[2].oid)
     assert_equal("email:xyzzy@ruby-lang.org", exts[2].value)
     assert_equal(false, exts[2].critical?)
+
+    no_ext_crl = issue_crl([], 1, Time.now, Time.now+1600, [],
+      cert, @rsa2048, OpenSSL::Digest::SHA1.new)
+    assert_equal nil, no_ext_crl.authority_key_identifier
   end
 
   def test_crlnumber
