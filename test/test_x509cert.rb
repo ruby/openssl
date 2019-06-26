@@ -73,9 +73,15 @@ class OpenSSL::TestX509Certificate < OpenSSL::TestCase
       ["basicConstraints","CA:TRUE",true],
       ["keyUsage","keyCertSign, cRLSign",true],
       ["subjectKeyIdentifier","hash",false],
-      ["authorityKeyIdentifier","keyid:always",false],
+      ["authorityKeyIdentifier","issuer:always,keyid:always",false],
     ]
     ca_cert = issue_cert(@ca, @rsa2048, 1, ca_exts, nil, nil)
+    aki_fields = ca_cert.authority_key_identifier
+    keyid = get_subject_key_id(ca_cert.to_der, hex: false)
+    assert_equal keyid, aki_fields[:key_identifier]
+    assert_equal ca_cert.subject, aki_fields[:authority_cert_issuer]
+    assert_equal ca_cert.serial, aki_fields[:authority_cert_serial_number]
+    assert_equal keyid, ca_cert.subject_key_identifier
     ca_cert.extensions.each_with_index{|ext, i|
       assert_equal(ca_exts[i].first, ext.oid)
       assert_equal(ca_exts[i].last, ext.critical?)
@@ -84,7 +90,7 @@ class OpenSSL::TestX509Certificate < OpenSSL::TestCase
     ee1_exts = [
       ["keyUsage","Non Repudiation, Digital Signature, Key Encipherment",true],
       ["subjectKeyIdentifier","hash",false],
-      ["authorityKeyIdentifier","keyid:always",false],
+      ["authorityKeyIdentifier","issuer:always,keyid:always",false],
       ["extendedKeyUsage","clientAuth, emailProtection, codeSigning",false],
       ["subjectAltName","email:ee1@ruby-lang.org",false],
     ]
@@ -94,6 +100,10 @@ class OpenSSL::TestX509Certificate < OpenSSL::TestCase
       assert_equal(ee1_exts[i].first, ext.oid)
       assert_equal(ee1_exts[i].last, ext.critical?)
     }
+
+    no_exts_cert = issue_cert(@ca, @rsa2048, 1, [], nil, nil)
+    assert_equal nil, no_exts_cert.authority_key_identifier
+    assert_equal nil, no_exts_cert.subject_key_identifier
   end
 
   def test_sign_and_verify_rsa_sha1
