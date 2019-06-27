@@ -132,16 +132,7 @@ class OpenSSL::TestX509CRL < OpenSSL::TestCase
     assert_equal(false, exts[0].critical?)
 
     expected_keyid = OpenSSL::TestUtils.get_subject_key_id(cert, hex: false)
-    actual_keyid = crl.authority_key_identifier[:key_identifier]
-    assert_equal expected_keyid, actual_keyid
-
-    expected_issuer = cert.issuer
-    actual_issuer = crl.authority_key_identifier[:authority_cert_issuer]
-    assert_equal expected_issuer, actual_issuer
-
-    expected_serial = cert.serial
-    actual_serial = crl.authority_key_identifier[:authority_cert_serial_number]
-    assert_equal expected_serial, actual_serial
+    assert_equal expected_keyid, crl.authority_key_identifier
 
     assert_equal("authorityKeyIdentifier", exts[1].oid)
     keyid = OpenSSL::TestUtils.get_subject_key_id(cert)

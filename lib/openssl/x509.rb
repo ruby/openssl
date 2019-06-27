@@ -65,28 +65,16 @@ module OpenSSL
         def find_extension(oid)
           extensions.find { |e| e.oid == oid }
         end
-
-        def x509_name_from_general_name(gn_asn1)
-          unless gn_asn1.tag_class == :CONTEXT_SPECIFIC
-            raise ASN1::ASN1Error "invalid GeneralName"
-          end
-
-          if gn_asn1.tag == 4
-            Name.new(gn_asn1.value.first.to_der)
-          else
-            # TODO: raise error instead of returning nil?
-            # this is some other kind of general name.
-            nil
-          end
-        end
       end
 
       module SubjectKeyIdentifier
         include Helpers
 
-        # Described in RFC5280 Section 4.2.1.2
+        # Get the subject's key identifier from the subjectKeyIdentifier
+        # exteension, as described in RFC5280 Section 4.2.1.2.
         #
-        # Returns a binary String key identifier or nil.
+        # Returns the binary String key identifier or nil or raises
+        # ASN1::ASN1Error.
         def subject_key_identifier
           ext = find_extension("subjectKeyIdentifier")
           return nil if ext.nil?
@@ -103,10 +91,12 @@ module OpenSSL
       module AuthorityKeyIdentifier
         include Helpers
 
-        # Described in RFC5280 Section 4.2.1.1
+        # Get the issuing certificate's key identifier from the
+        # authorityKeyIdentifier extension, as described in RFC5280
+        # Section 4.2.1.1
         #
-        # Returns a Hash with keys :key_identifier, :authority_cert_issuer,
-        # and :authority_cert_serial_number.
+        # Returns the binary String keyIdentifier or nil or raises
+        # ASN1::ASN1Error.
         def authority_key_identifier
           ext = find_extension("authorityKeyIdentifier")
           return nil if ext.nil?
@@ -116,51 +106,11 @@ module OpenSSL
             raise ASN1::ASN1Error "invalid extension"
           end
 
-          fields = {}
-
           key_id = aki_asn1.value.find do |v|
             v.tag_class == :CONTEXT_SPECIFIC && v.tag == 0
           end
 
-          issuer = aki_asn1.value.find do |v|
-            v.tag_class == :CONTEXT_SPECIFIC && v.tag == 1
-          end
-
-          serial = aki_asn1.value.find do |v|
-            v.tag_class == :CONTEXT_SPECIFIC && v.tag == 2
-          end
-
-          # must have neither or both of issuer and serial
-          if (!issuer.nil? && serial.nil?) || (issuer.nil? && !serial.nil?)
-            raise ASN1::ASN1Error "invalid extension"
-          end
-
-          fields[:key_identifier] = if !key_id.nil?
-            key_id.value
-          else
-            nil
-          end
-
-          fields[:authority_cert_issuer] = if !issuer.nil?
-            # TODO raise if there are more than one values? GeneralNames is a
-            # SEQUENCE.
-            x509_name_from_general_name(issuer.value.first)
-          else
-            nil
-          end
-
-          fields[:authority_cert_serial_number] = if !serial.nil?
-            # encode/decode as integer to get value parsed as BN
-            ASN1.decode(ASN1::ASN1Data.new(
-              serial.value,
-              ASN1::INTEGER,
-              :UNIVERSAL
-            ).to_der).value
-          else
-            nil
-          end
-
-          fields
+          key_id.nil? ? nil : key_id.value
         end
       end
     end
