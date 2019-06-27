@@ -76,11 +76,8 @@ class OpenSSL::TestX509Certificate < OpenSSL::TestCase
       ["authorityKeyIdentifier","issuer:always,keyid:always",false],
     ]
     ca_cert = issue_cert(@ca, @rsa2048, 1, ca_exts, nil, nil)
-    aki_fields = ca_cert.authority_key_identifier
     keyid = get_subject_key_id(ca_cert.to_der, hex: false)
-    assert_equal keyid, aki_fields[:key_identifier]
-    assert_equal ca_cert.subject, aki_fields[:authority_cert_issuer]
-    assert_equal ca_cert.serial, aki_fields[:authority_cert_serial_number]
+    assert_equal keyid, ca_cert.authority_key_identifier
     assert_equal keyid, ca_cert.subject_key_identifier
     ca_cert.extensions.each_with_index{|ext, i|
       assert_equal(ca_exts[i].first, ext.oid)
