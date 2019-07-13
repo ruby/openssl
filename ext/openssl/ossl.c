@@ -904,7 +904,7 @@ static void Init_ossl_locks(void)
  *   ca_key = OpenSSL::PKey::RSA.new 2048
  *   pass_phrase = 'my secure pass phrase goes here'
  *
- *   cipher = OpenSSL::Cipher::Cipher.new 'AES-256-CBC'
+ *   cipher = OpenSSL::Cipher.new 'AES-256-CBC'
  *
  *   open 'ca_key.pem', 'w', 0400 do |io|
  *     io.write ca_key.export(cipher, pass_phrase)
