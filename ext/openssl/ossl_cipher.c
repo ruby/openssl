@@ -237,8 +237,7 @@ ossl_cipher_init(int argc, VALUE *argv, VALUE self, int mode)
 	ossl_raise(eCipherError, NULL);
     }
 
-    if (p_key)
-	rb_ivar_set(self, id_key_set, Qtrue);
+    rb_ivar_set(self, id_key_set, p_key ? Qtrue : Qfalse);
 
     return self;
 }
