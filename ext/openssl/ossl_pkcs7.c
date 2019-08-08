@@ -1088,7 +1088,6 @@ Init_ossl_pkcs7(void)
     rb_define_alloc_func(cPKCS7Signer, ossl_pkcs7si_alloc);
     rb_define_method(cPKCS7Signer, "initialize", ossl_pkcs7si_initialize,3);
     rb_define_method(cPKCS7Signer, "issuer", ossl_pkcs7si_get_issuer, 0);
-    rb_define_alias(cPKCS7Signer, "name", "issuer");
     rb_define_method(cPKCS7Signer, "serial", ossl_pkcs7si_get_serial,0);
     rb_define_method(cPKCS7Signer,"signed_time",ossl_pkcs7si_get_signed_time,0);
 
