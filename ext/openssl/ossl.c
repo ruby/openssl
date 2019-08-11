@@ -1114,6 +1114,7 @@ Init_openssl(void)
     if (!OPENSSL_init_ssl(0, NULL))
         rb_raise(rb_eRuntimeError, "OPENSSL_init_ssl");
 #else
+    OPENSSL_config(NULL);
     OpenSSL_add_ssl_algorithms();
     OpenSSL_add_all_algorithms();
     ERR_load_crypto_strings();
