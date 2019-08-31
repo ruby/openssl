@@ -19,6 +19,9 @@ module OpenSSL
     if OPENSSL_VERSION_NUMBER < 0x10100000
       alg += %w(DSS DSS1 SHA)
     end
+    if OPENSSL_VERSION_NUMBER > 0x10100000
+      alg += %w(SHA3_224 SHA3_256 SHA3_384 SHA3_512)
+    end
 
     # Return the hash value computed with _name_ Digest. _name_ is either the
     # long name or short name of a supported digest algorithm.
