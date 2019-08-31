@@ -52,8 +52,8 @@ ossl_evp_get_digestbyname(VALUE obj)
     	const char *name = StringValueCStr(obj);
 
     char *pos = strchr(name, '_');
-    // find SHA3-256 instead of SHA_256 etc.
-    // ruby class name SHA3-256 is invalid, so we call it SHA_256 in ruby.
+    // find SHA3-256 instead of SHA3_256 etc.
+    // ruby class name SHA3-256 is invalid, so we call it SHA3_256 in ruby.
 	if(pos) {
 		char n_name[9];
 		char *n_pos;
