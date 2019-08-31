@@ -19,7 +19,7 @@ module OpenSSL
     if OPENSSL_VERSION_NUMBER < 0x10100000
       alg += %w(DSS DSS1 SHA)
     end
-    if OPENSSL_VERSION_NUMBER > 0x10100000
+    if !OPENSSL_VERSION.include?("LibreSSL") && OPENSSL_VERSION_NUMBER > 0x10101000
       alg += %w(SHA3_224 SHA3_256 SHA3_384 SHA3_512)
     end
 
