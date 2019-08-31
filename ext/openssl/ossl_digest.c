@@ -8,6 +8,7 @@
  * (See the file 'LICENCE'.)
  */
 #include "ossl.h"
+#include <string.h>
 
 #define GetDigest(obj, ctx) do { \
     TypedData_Get_Struct((obj), EVP_MD_CTX, &ossl_digest_type, (ctx)); \
@@ -50,7 +51,19 @@ ossl_evp_get_digestbyname(VALUE obj)
     if (RB_TYPE_P(obj, T_STRING)) {
     	const char *name = StringValueCStr(obj);
 
-	md = EVP_get_digestbyname(name);
+    char *pos = strchr(name, '_');
+    // find SHA3-256 instead of SHA_256 etc.
+    // ruby class name SHA3-256 is invalid, so we call it SHA_256 in ruby.
+	if(pos) {
+		char n_name[9];
+		char *n_pos;
+		strncpy(n_name, name, 9);
+		n_pos = strchr(n_name, '_');
+		*n_pos = '-';
+		md = EVP_get_digestbyname(n_name);
+	}else{
+		md = EVP_get_digestbyname(name);
+	}
 	if (!md) {
 	    oid = OBJ_txt2obj(name, 0);
 	    md = EVP_get_digestbyobj(oid);
