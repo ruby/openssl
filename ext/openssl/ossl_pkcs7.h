@@ -14,14 +14,14 @@
     TypedData_Wrap_Struct((klass), &ossl_pkcs7_type, 0)
 #define SetPKCS7(obj, pkcs7) do { \
     if (!(pkcs7)) { \
-	ossl_raise(rb_eRuntimeError, "PKCS7 wasn't initialized."); \
+        ossl_raise(rb_eRuntimeError, "PKCS7 wasn't initialized."); \
     } \
     RTYPEDDATA_DATA(obj) = (pkcs7); \
 } while (0)
 #define GetPKCS7(obj, pkcs7) do { \
     TypedData_Get_Struct((obj), PKCS7, &ossl_pkcs7_type, (pkcs7)); \
     if (!(pkcs7)) { \
-	ossl_raise(rb_eRuntimeError, "PKCS7 wasn't initialized."); \
+        ossl_raise(rb_eRuntimeError, "PKCS7 wasn't initialized."); \
     } \
 } while (0)
 
