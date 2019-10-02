@@ -51,17 +51,12 @@ ossl_evp_get_digestbyname(VALUE obj)
     if (RB_TYPE_P(obj, T_STRING)) {
     	const char *name = StringValueCStr(obj);
 
-    char *pos = strchr(name, '_');
-    // find SHA3-256 instead of SHA3_256 etc.
-    // ruby class name SHA3-256 is invalid, so we call it SHA3_256 in ruby.
-	if(pos) {
-		char n_name[9];
-		char *n_pos;
-		strncpy(n_name, name, 9);
-		n_pos = strchr(n_name, '_');
-		*n_pos = '-';
-		md = EVP_get_digestbyname(n_name);
-	}else{
+    if(strncmp(name, "SHA3_", 5)==0 && strlen(name)==8) {
+        char hyphen_name[8];
+        strncpy(hyphen_name, name, 8);
+        hyphen_name[4] = '-'; //SHA3_256 to SHA3-256 
+        md = EVP_get_digestbyname(hyphen_name);
+    }else{
 		md = EVP_get_digestbyname(name);
 	}
 	if (!md) {
