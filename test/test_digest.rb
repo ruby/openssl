@@ -26,6 +26,7 @@ class OpenSSL::TestDigest < OpenSSL::TestCase
   end
 
   def test_sha3
+    pend "SHA3 is not implemented" unless OpenSSL::Digest.const_defined?(:SHA3_224)
     s224 = '6b4e03423667dbb73b6e15454f0eb1abd4597f9a1b078e3f5b5a6bc7'
     s256 = 'a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a'
     s384 = '0c63a75b845e4f7d01107d852e4c2485c51a50aaaa94fc61995e71bbee983a2ac3713831264adb47fb6bd1e058d5f004'
