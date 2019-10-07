@@ -424,6 +424,23 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     }
   end
 
+  def test_finished_messages
+    server_finished = nil
+    server_peer_finished = nil
+
+    start_server(accept_proc: proc { |server|
+      server_finished = server.finished_message
+      server_peer_finished = server.peer_finished_message
+    }){ |port, server|
+      ctx = OpenSSL::SSL::SSLContext.new
+      ctx.verify_mode = OpenSSL::SSL::VERIFY_NONE
+      server_connect(port, ctx) { |ssl|
+        assert_equal(server_finished, ssl.peer_finished_message)
+        assert_equal(server_peer_finished, ssl.finished_message)
+      }
+    }
+  end
+
   def test_sslctx_set_params
     ctx = OpenSSL::SSL::SSLContext.new
     ctx.set_params
