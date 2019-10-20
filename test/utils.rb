@@ -60,11 +60,10 @@ module OpenSSL::TestUtils
 
   module_function
 
-  def issue_cert(dn, key, serial, extensions, issuer, issuer_key,
-                 not_before: nil, not_after: nil, digest: "sha256")
+  def generate_cert(dn, key, serial, issuer,
+                    not_before: nil, not_after: nil)
     cert = OpenSSL::X509::Certificate.new
     issuer = cert unless issuer
-    issuer_key = key unless issuer_key
     cert.version = 2
     cert.serial = serial
     cert.subject = dn
@@ -73,6 +72,16 @@ module OpenSSL::TestUtils
     now = Time.now
     cert.not_before = not_before || now - 3600
     cert.not_after = not_after || now + 3600
+    cert
+  end
+
+
+  def issue_cert(dn, key, serial, extensions, issuer, issuer_key,
+                 not_before: nil, not_after: nil, digest: "sha256")
+    cert = generate_cert(dn, key, serial, issuer,
+                         not_before: not_before, not_after: not_after)
+    issuer = cert unless issuer
+    issuer_key = key unless issuer_key
     ef = OpenSSL::X509::ExtensionFactory.new
     ef.subject_certificate = cert
     ef.issuer_certificate = issuer
