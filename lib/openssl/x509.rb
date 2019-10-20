@@ -131,6 +131,39 @@ module OpenSSL
           key_id.nil? ? nil : key_id.value
         end
       end
+
+      module CRLDistributionPoints
+        include Helpers
+
+        # Get the distributionPoint fullName URI from the certificate's CRL
+        # distribution points extension, as described in RFC5280 Section
+        # 4.2.1.13
+        #
+        # Returns an array of strings or nil or raises ASN1::ASN1Error.
+        def crl_uris
+          ext = find_extension("crlDistributionPoints")
+          return nil if ext.nil?
+
+          cdp_asn1 = ASN1.decode(ext.value_der)
+          if cdp_asn1.tag_class != :UNIVERSAL || cdp_asn1.tag != ASN1::SEQUENCE
+            raise ASN1::ASN1Error "invalid extension"
+          end
+
+          crl_uris = cdp_asn1.map do |crl_distribution_point|
+            distribution_point = crl_distribution_point.value.find do |v|
+              v.tag_class == :CONTEXT_SPECIFIC && v.tag == 0
+            end
+            full_name = distribution_point&.value&.find do |v|
+              v.tag_class == :CONTEXT_SPECIFIC && v.tag == 0
+            end
+            full_name&.value&.find do |v|
+              v.tag_class == :CONTEXT_SPECIFIC && v.tag == 6 # uniformResourceIdentifier
+            end
+          end
+
+          crl_uris&.map(&:value)
+        end
+      end
     end
 
     class Name
@@ -257,6 +290,7 @@ module OpenSSL
       include Marshal
       include Extension::SubjectKeyIdentifier
       include Extension::AuthorityKeyIdentifier
+      include Extension::CRLDistributionPoints
 
       def pretty_print(q)
         q.object_group(self) {
