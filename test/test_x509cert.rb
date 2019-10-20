@@ -97,6 +97,22 @@ class OpenSSL::TestX509Certificate < OpenSSL::TestCase
       assert_equal(ee1_exts[i].first, ext.oid)
       assert_equal(ee1_exts[i].last, ext.critical?)
     }
+    assert_nil(ee1_cert.crl_uris)
+
+    ef = OpenSSL::X509::ExtensionFactory.new
+    ef.config = OpenSSL::Config.parse(<<~_cnf_)
+      [crlDistPts]
+      URI.1 = http://www.example.com/crl
+      URI.2 = ldap://ldap.example.com/cn=ca?certificateRevocationList;binary
+    _cnf_
+    cdp_cert = generate_cert(@ee1, @rsa1024, 3, ca_cert)
+    ef.subject_certificate = cdp_cert
+    cdp_cert.add_extension(ef.create_extension("crlDistributionPoints", "@crlDistPts"))
+    cdp_cert.sign(@rsa2048, "sha256")
+    assert_equal(
+      ["http://www.example.com/crl", "ldap://ldap.example.com/cn=ca?certificateRevocationList;binary"],
+      cdp_cert.crl_uris
+    )
 
     no_exts_cert = issue_cert(@ca, @rsa2048, 1, [], nil, nil)
     assert_equal nil, no_exts_cert.authority_key_identifier
