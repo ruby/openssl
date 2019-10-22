@@ -440,6 +440,12 @@ YoaOffgTf5qxiwkjnlVZQc3whgnEt9FpVMvQ9eknyeGB5KHfayAc3+hUAvI3/Cr3
       def session_get_cb
         @context.session_get_cb
       end
+
+      class << self
+        ##
+        # open is an alias to ::new
+        alias open new
+      end
     end
 
     ##

@@ -1592,6 +1592,17 @@ end
     sock2.close
   end
 
+  def test_ssl_socket_new_alias
+    mn = OpenSSL::SSL::SSLSocket.method(:new)
+    mo = OpenSSL::SSL::SSLSocket.method(:open)
+
+    if mn.inspect == "#<Method: Class#new>"
+      assert_equal mn.hash, mo.hash
+    else
+      assert_equal mn, mo
+    end
+  end
+
   private
 
   def start_server_version(version, ctx_proc = nil,
