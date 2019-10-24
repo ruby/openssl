@@ -427,18 +427,22 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   def test_finished_messages
     server_finished = nil
     server_peer_finished = nil
+    client_finished = nil
+    client_peer_finished = nil
 
     start_server(accept_proc: proc { |server|
       server_finished = server.finished_message
       server_peer_finished = server.peer_finished_message
-    }){ |port, server|
+    }) { |port|
       ctx = OpenSSL::SSL::SSLContext.new
       ctx.verify_mode = OpenSSL::SSL::VERIFY_NONE
       server_connect(port, ctx) { |ssl|
-        assert_equal(server_finished, ssl.peer_finished_message)
-        assert_equal(server_peer_finished, ssl.finished_message)
+        client_finished = ssl.finished_message
+        client_peer_finished = ssl.peer_finished_message
       }
     }
+    assert_equal(server_finished, client_peer_finished)
+    assert_equal(server_peer_finished, client_finished)
   end
 
   def test_sslctx_set_params
