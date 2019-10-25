@@ -1,0 +1,58 @@
+name: OpenSSL
+
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  build:
+    name: >-
+      OS: ${{ matrix.os }}  Ruby: ${{ matrix.ruby }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ 'ubuntu-16.04', 'ubuntu-18.04', 'macos', 'windows-latest' ]
+        ruby: [ '2.3.x', '2.4.x', '2.5.x', '2.6.x' ]
+        exclude:
+        - os: ubuntu-16.04
+          ruby: 2.4.x
+        - os: ubuntu-16.04
+          ruby: 2.5.x
+        - os: ubuntu-16.04
+          ruby: 2.6.x
+        - os: ubuntu-18.04
+          ruby: 2.3.x
+        - os: macos
+          ruby: 2.3.x
+        - os: windows-latest
+          ruby: 2.3.x
+    steps:
+    - name: repo checkout
+      uses: actions/checkout@v1
+      with:
+        fetch-depth: 10
+    - name: load ruby
+      uses: actions/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby }}
+
+    - name: windows - update MSYS2, openssl
+      if:   startsWith(matrix.os, 'windows')
+      uses: MSP-Greg/msys2-action@master
+      with:
+        base:  update
+        mingw: openssl
+
+    - name: depends
+      run:  rake install_dependencies
+    - name: compile
+      run:  rake compile -- --enable-debug
+    - name: test
+      run:  rake test TESTOPTS="-v --no-show-detail-immediately" OSSL_MDEBUG=1
+      env:
+        CI: true
