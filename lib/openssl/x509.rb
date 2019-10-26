@@ -14,6 +14,22 @@
 
 module OpenSSL
   module X509
+    module Marshal
+      def self.included(base)
+        base.extend(ClassMethods)
+      end
+
+      module ClassMethods
+        def _load(string)
+          new(string)
+        end
+      end
+
+      def _dump(_level)
+        to_der
+      end
+    end
+
     class ExtensionFactory
       def create_extension(*arg)
         if arg.size > 1
@@ -41,6 +57,8 @@ module OpenSSL
     end
 
     class Extension
+      include Marshal
+
       def ==(other)
         return false unless Extension === other
         to_der == other.to_der
@@ -116,6 +134,8 @@ module OpenSSL
     end
 
     class Name
+      include Marshal
+
       module RFC2253DN
         Special = ',=+<>#;'
         HexChar = /[0-9a-fA-F]/
@@ -219,6 +239,8 @@ module OpenSSL
     end
 
     class Attribute
+      include Marshal
+
       def ==(other)
         return false unless Attribute === other
         to_der == other.to_der
@@ -232,6 +254,7 @@ module OpenSSL
     end
 
     class Certificate
+      include Marshal
       include Extension::SubjectKeyIdentifier
       include Extension::AuthorityKeyIdentifier
 
@@ -248,6 +271,7 @@ module OpenSSL
     end
 
     class CRL
+      include Marshal
       include Extension::AuthorityKeyIdentifier
 
       def ==(other)
@@ -264,6 +288,8 @@ module OpenSSL
     end
 
     class Request
+      include Marshal
+
       def ==(other)
         return false unless Request === other
         to_der == other.to_der
