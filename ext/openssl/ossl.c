@@ -606,36 +606,42 @@ static void Init_ossl_locks(void)
 
 /*
  * call-seq:
- *   OpenSSL.memcmp?(string, string) -> boolean
+ *   OpenSSL.secure_compare(string, string) -> boolean
  *
  * Constant time memory comparison. Inputs must be of equal length, otherwise
  * an error is raised since timing attacks could leak the length of a
  * secret.
  *
+ * Returns +true+ if the strings are identical, +false+ otherwise.
+ *
  * For securely comparing user input, it's recommended to use hashing and
  * regularly compare after to prevent an unlikely false positive due to a
  * collision.
  *
- *   user_input      = "..."
- *   expected        = "..."
- *   hashed_input    = OpenSSL::Digest::SHA256.digest(user_input)
- *   hashed_expected = OpenSSL::Digest::SHA256.digest(expected)
- *   OpenSSL.memcmp?(hashed_input, hashed_expected) && user_input == expected
+ *   user_input = "..."
+ *   secret = "..."
+ *   hashed_input = OpenSSL::Digest::SHA256.digest(user_input)
+ *   hashed_secret = OpenSSL::Digest::SHA256.digest(secret)
+ *   OpenSSL.secure_compare(hashed_input, hashed_secret) && user_input == secret
+ *
+ * Be aware that timing attacks against the hash functions may reveal the
+ * length of the secret.
  */
 static VALUE
-ossl_crypto_memcmp(VALUE dummy, VALUE str1, VALUE str2)
+ossl_crypto_secure_compare(VALUE dummy, VALUE str1, VALUE str2)
 {
     const unsigned char *p1 = (const unsigned char *)StringValuePtr(str1);
     const unsigned char *p2 = (const unsigned char *)StringValuePtr(str2);
     long len1 = RSTRING_LEN(str1);
     long len2 = RSTRING_LEN(str2);
 
-    if(len1 != len2)
-    ossl_raise(rb_eArgError, "inputs must be of equal length");
+    if (len1 != len2) {
+        ossl_raise(rb_eArgError, "inputs must be of equal length");
+    }
 
     switch (CRYPTO_memcmp(p1, p2, len1)) {
-      case 0:	return Qtrue;
-      default:	return Qfalse;
+        case 0:	return Qtrue;
+        default: return Qfalse;
     }
 }
 
@@ -1160,7 +1166,7 @@ Init_openssl(void)
      */
     mOSSL = rb_define_module("OpenSSL");
     rb_global_variable(&mOSSL);
-    rb_define_singleton_method(mOSSL, "memcmp?", ossl_crypto_memcmp, 2);
+    rb_define_singleton_method(mOSSL, "secure_compare", ossl_crypto_secure_compare, 2);
 
     /*
      * OpenSSL ruby extension version
