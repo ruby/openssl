@@ -256,6 +256,22 @@ class OpenSSL::TestX509CRL < OpenSSL::TestCase
     assert_equal true, rev2 == crl2.revoked[1]
   end
 
+  def test_marshal
+    now = Time.now
+
+    cacert = issue_cert(@ca, @rsa1024, 1, [], nil, nil)
+    crl = issue_crl([], 1, now, now + 3600, [], cacert, @rsa1024, "sha256")
+    rev = OpenSSL::X509::Revoked.new.tap { |rev|
+      rev.serial = 1
+      rev.time = now
+    }
+    crl.add_revoked(rev)
+    deserialized = Marshal.load(Marshal.dump(crl))
+
+    assert_equal crl.to_der, deserialized.to_der
+    assert_equal crl.revoked[0].to_der, deserialized.revoked[0].to_der
+  end
+
   private
 
   def crl_error_returns_false

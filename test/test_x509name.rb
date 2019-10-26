@@ -453,6 +453,13 @@ class OpenSSL::TestX509Name < OpenSSL::TestCase
     assert_equal false, name0.eql?(name2)
   end
 
+  def test_marshal
+    name = OpenSSL::X509::Name.new([["DC", "org"], ["DC", "ruby-lang"], ["CN", "bar.ruby-lang.org"]])
+    deserialized = Marshal.load(Marshal.dump(name))
+
+    assert_equal name.to_der, deserialized.to_der
+  end
+
   def test_dup
     name = OpenSSL::X509::Name.parse("/CN=ruby-lang.org")
     assert_equal(name.to_der, name.dup.to_der)

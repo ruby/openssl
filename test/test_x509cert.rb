@@ -196,6 +196,17 @@ class OpenSSL::TestX509Certificate < OpenSSL::TestCase
     assert_equal false, cert3 == cert4
   end
 
+  def test_marshal
+    now = Time.now
+    cacert = issue_cert(@ca, @rsa1024, 1, [], nil, nil,
+      not_before: now, not_after: now + 3600)
+    cert = issue_cert(@ee1, @rsa2048, 2, [], cacert, @rsa1024,
+      not_before: now, not_after: now + 3600)
+    deserialized = Marshal.load(Marshal.dump(cert))
+
+    assert_equal cert.to_der, deserialized.to_der
+  end
+
   private
 
   def certificate_error_returns_false
