@@ -40,6 +40,12 @@ end
 Logging::message "=== Checking for required stuff... ===\n"
 result = pkg_config("openssl") && have_header("openssl/ssl.h")
 
+if $mingw
+  append_cflags '-D_FORTIFY_SOURCE=2'
+  append_ldflags '-fstack-protector'
+  have_library 'ssp'
+end
+
 def find_openssl_library
   if $mswin || $mingw
     # required for static OpenSSL libraries
