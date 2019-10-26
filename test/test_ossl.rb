@@ -26,6 +26,23 @@ class OpenSSL::OSSL < OpenSSL::SSLTestCase
     assert_raises(ArgumentError) { OpenSSL.fixed_length_secure_compare("aaa", "bbbb") }
   end
 
+  def test_secure_compare
+    refute OpenSSL.secure_compare("aaa", "a")
+    refute OpenSSL.secure_compare("aaa", "aa")
+
+    assert OpenSSL.secure_compare("aaa", "aaa")
+
+    refute OpenSSL.secure_compare("aaa", "aaaa")
+    refute OpenSSL.secure_compare("aaa", "baa")
+    refute OpenSSL.secure_compare("aaa", "aba")
+    refute OpenSSL.secure_compare("aaa", "aab")
+    refute OpenSSL.secure_compare("aaa", "aaab")
+    refute OpenSSL.secure_compare("aaa", "b")
+    refute OpenSSL.secure_compare("aaa", "bb")
+    refute OpenSSL.secure_compare("aaa", "bbb")
+    refute OpenSSL.secure_compare("aaa", "bbbb")
+  end
+
   def test_memcmp_timing
     # Ensure using fixed_length_secure_compare takes almost exactly the same amount of time to compare two different strings.
     # Regular string comparison will short-circuit on the first non-matching character, failing this test.
