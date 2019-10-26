@@ -439,6 +439,8 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
       server_connect(port, ctx) { |ssl|
         client_finished = ssl.finished_message
         client_peer_finished = ssl.peer_finished_message
+        sleep 0.05
+        ssl.send :stop
       }
     }
     assert_equal(server_finished, client_peer_finished)
@@ -1579,10 +1581,10 @@ end
   def test_fileno
     ctx = OpenSSL::SSL::SSLContext.new
     sock1, sock2 = socketpair
-    
+
     socket = OpenSSL::SSL::SSLSocket.new(sock1)
     server = OpenSSL::SSL::SSLServer.new(sock2, ctx)
-    
+
     assert_equal socket.fileno, socket.to_io.fileno
     assert_equal server.fileno, server.to_io.fileno
   ensure
