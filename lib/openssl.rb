@@ -20,3 +20,17 @@ require 'openssl/digest'
 require 'openssl/x509'
 require 'openssl/ssl'
 require 'openssl/pkcs5'
+
+module OpenSSL
+  # call-seq:
+  #   OpenSSL.secure_compare(string, string) -> boolean
+  #
+  # Constant time memory comparison. Inputs are hashed using SHA-256 to mask
+  # the length of the secret. Returns +true+ if the strings are identical,
+  # +false+ otherwise.
+  def self.secure_compare(a, b)
+    hashed_a = OpenSSL::Digest::SHA256.digest(a)
+    hashed_b = OpenSSL::Digest::SHA256.digest(b)
+    OpenSSL.fixed_length_secure_compare(hashed_a, hashed_b) && a == b
+  end
+end
