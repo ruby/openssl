@@ -56,6 +56,21 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     }
   end
 
+  def test_ssl_socket_open
+    start_server { |port|
+      begin
+        ctx = OpenSSL::SSL::SSLContext.new
+        ssl = OpenSSL::SSL::SSLSocket.open("127.0.0.1", port, ctx)
+        ssl.sync_close = true
+        ssl.connect
+
+        ssl.puts "abc"; assert_equal "abc\n", ssl.gets
+      ensure
+        ssl&.close
+      end
+    }
+  end
+
   def test_add_certificate
     ctx_proc = -> ctx {
       # Unset values set by start_server
@@ -1590,17 +1605,6 @@ end
   ensure
     sock1.close
     sock2.close
-  end
-
-  def test_ssl_socket_new_alias
-    mn = OpenSSL::SSL::SSLSocket.method(:new)
-    mo = OpenSSL::SSL::SSLSocket.method(:open)
-
-    if mn.inspect == "#<Method: Class#new>"
-      assert_equal mn.hash, mo.hash
-    else
-      assert_equal mn, mo
-    end
   end
 
   private

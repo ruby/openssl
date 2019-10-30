@@ -442,9 +442,25 @@ YoaOffgTf5qxiwkjnlVZQc3whgnEt9FpVMvQ9eknyeGB5KHfayAc3+hUAvI3/Cr3
       end
 
       class << self
-        ##
-        # open is an alias to ::new
-        alias open new
+
+        # call-seq:
+        #   open(remote_host, remote_port, context=nil, local_host=nil, local_port=nil)
+        #
+        # Creates a new instance of SSLSocket.
+        # _remote\_host_ and _remote_port_ are used to open TCPSocket.
+        # If _context_ is provided,
+        # the SSL Sockets initial params will be taken from the context.
+        # If _local\_host_ and _local\_port_ are specified,
+        # then those parameters are used on the local end to establish the connection.
+        #
+        # === Example
+        #   ctx = OpenSSL::SSL::SSLContext.new
+        #   sock = OpenSSL::SSL::SSLSocket.open('localhost', 443, ctx)
+        #   sock.connect # Initiates a connection to localhost:443
+        def open(remote_host, remote_port, context=nil, local_host=nil, local_port=nil)
+          sock = ::TCPSocket.open(remote_host, remote_port, local_host, local_port)
+          OpenSSL::SSL::SSLSocket.new(sock, context)
+        end
       end
     end
 
