@@ -56,14 +56,45 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     }
   end
 
-  def test_ssl_socket_open
+  def test_socket_open
     start_server { |port|
       begin
-        ctx = OpenSSL::SSL::SSLContext.new
-        ssl = OpenSSL::SSL::SSLSocket.open("127.0.0.1", port, ctx)
+        ssl = OpenSSL::SSL::SSLSocket.open("127.0.0.1", port)
         ssl.sync_close = true
         ssl.connect
 
+        ssl.puts "abc"; assert_equal "abc\n", ssl.gets
+      ensure
+        ssl&.close
+      end
+    }
+  end
+
+  def test_socket_open_with_context
+    start_server { |port|
+      begin
+        ctx = OpenSSL::SSL::SSLContext.new
+        ssl = OpenSSL::SSL::SSLSocket.open("127.0.0.1", port, context: ctx)
+        ssl.sync_close = true
+        ssl.connect
+
+        assert_equal ssl.context, ctx
+        ssl.puts "abc"; assert_equal "abc\n", ssl.gets
+      ensure
+        ssl&.close
+      end
+    }
+  end
+
+  def test_socket_open_with_local_address_port_context
+    start_server { |port|
+      begin
+        ctx = OpenSSL::SSL::SSLContext.new
+        ssl = OpenSSL::SSL::SSLSocket.open("127.0.0.1", port, "127.0.0.1", 8000, context: ctx)
+        ssl.sync_close = true
+        ssl.connect
+
+        assert_equal ssl.context, ctx
         ssl.puts "abc"; assert_equal "abc\n", ssl.gets
       ensure
         ssl&.close
