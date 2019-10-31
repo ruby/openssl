@@ -15,11 +15,10 @@
 module OpenSSL
   class Digest
 
-    ALGORITHMS = %w(MD4 MD5 MDC2 RIPEMD160 SHA1 SHA224 SHA256 SHA384 SHA512)
+    # You can get a list of all algorithms:
+    #   openssl list -digest-algorithms
 
-    if OPENSSL_VERSION_NUMBER < 0x10100000
-      ALGORITHMS.concat %w(DSS DSS1 SHA)
-    end
+    ALGORITHMS = %w(MD4 MD5 MDC2 RIPEMD160 SHA1 SHA224 SHA256 SHA384 SHA512)
 
     if !OPENSSL_VERSION.include?("LibreSSL") && OPENSSL_VERSION_NUMBER > 0x10101000
       ALGORITHMS.concat %w(SHA3-224 SHA3-256 SHA3-384 SHA3-512)
