@@ -1157,11 +1157,6 @@ Init_openssl(void)
     rb_define_singleton_method(mOSSL, "fixed_length_secure_compare", ossl_crypto_fixed_length_secure_compare, 2);
 
     /*
-     * OpenSSL ruby extension version
-     */
-    rb_define_const(mOSSL, "VERSION", rb_str_new2(OSSL_VERSION));
-
-    /*
      * Version of OpenSSL the ruby OpenSSL extension was built with
      */
     rb_define_const(mOSSL, "OPENSSL_VERSION", rb_str_new2(OPENSSL_VERSION_TEXT));

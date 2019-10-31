@@ -173,7 +173,6 @@ void ossl_debug(const char *, ...);
 #ifndef OPENSSL_NO_TS
   #include "ossl_ts.h"
 #endif
-#include "ossl_version.h"
 #include "ossl_x509.h"
 #include "ossl_engine.h"
 #include "ossl_kdf.h"
