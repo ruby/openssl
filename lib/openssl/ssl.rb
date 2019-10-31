@@ -444,10 +444,10 @@ YoaOffgTf5qxiwkjnlVZQc3whgnEt9FpVMvQ9eknyeGB5KHfayAc3+hUAvI3/Cr3
       class << self
 
         # call-seq:
-        #   open(remote_host, remote_port, context=nil, local_host=nil, local_port=nil)
+        #   open(remote_host, remote_port, local_host=nil, local_port=nil, context: nil)
         #
         # Creates a new instance of SSLSocket.
-        # _remote\_host_ and _remote_port_ are used to open TCPSocket.
+        # _remote\_host_ and _remote\_port_ are used to open TCPSocket.
         # If _local\_host_ and _local\_port_ are specified,
         # then those parameters are used on the local end to establish the connection.
         # If _context_ is provided,
