@@ -10,16 +10,16 @@
   (See the file 'LICENCE'.)
 =end
 
-require 'openssl.so'
+require_relative 'openssl.so'
 
-require 'openssl/bn'
-require 'openssl/pkey'
-require 'openssl/cipher'
-require 'openssl/config'
-require 'openssl/digest'
-require 'openssl/x509'
-require 'openssl/ssl'
-require 'openssl/pkcs5'
+require_relative 'openssl/bn'
+require_relative 'openssl/pkey'
+require_relative 'openssl/cipher'
+require_relative 'openssl/config'
+require_relative 'openssl/digest'
+require_relative 'openssl/x509'
+require_relative 'openssl/ssl'
+require_relative 'openssl/pkcs5'
 
 module OpenSSL
   # call-seq:
