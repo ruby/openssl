@@ -67,7 +67,7 @@ class OpenSSL::TestDigest < OpenSSL::TestCase
 
     algorithms.each do |name|
       assert_not_nil(OpenSSL::Digest.new(name))
-      klass = OpenSSL::Digest.const_get(name)
+      klass = OpenSSL::Digest.const_get(name.tr('-', '_'))
       assert_not_nil(klass.new)
     end
   end
