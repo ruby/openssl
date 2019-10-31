@@ -31,7 +31,8 @@ task :install_dependencies do
   end
 
   Gem.configuration.verbose = false
-  gemspec = eval(File.read("openssl.gemspec"))
+  gemspec = Gem::Specification.load('openssl.gemspec')
+
   gemspec.development_dependencies.each do |dep|
     print "Installing #{dep.name} (#{dep.requirement}) ... "
     installed = dep.matching_specs
