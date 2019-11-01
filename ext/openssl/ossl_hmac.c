@@ -85,17 +85,19 @@ ossl_hmac_alloc(VALUE klass)
  * === A note about comparisons
  *
  * Two instances won't be equal when they're compared, even if they have the
- * same value. Use #to_s or #hexdigest to return the authentication code that
- * the instance represents. For example:
+ * same value. For example:
  *
  *	other_instance = OpenSSL::HMAC.new('key', OpenSSL::Digest.new('sha1'))
- *  	#=> f42bb0eeb018ebbd4597ae7213711ec60760843f
- *  	instance
- *  	#=> f42bb0eeb018ebbd4597ae7213711ec60760843f
- *  	instance == other_instance
- *  	#=> false
- *  	instance.to_s == other_instance.to_s
- *  	#=> true
+ *  #=> f42bb0eeb018ebbd4597ae7213711ec60760843f
+ *  instance
+ *  #=> f42bb0eeb018ebbd4597ae7213711ec60760843f
+ *  instance == other_instance
+ *  #=> false
+ *
+ * Use #digest and compare in constant time:
+ *
+ *	OpenSSL.fixed_length_secure_compare(instance.digest, other_instance.digest)
+ *	#=> true
  *
  */
 static VALUE
