@@ -13,6 +13,7 @@
 require "openssl/buffering"
 require "io/nonblock"
 require "ipaddr"
+require "socket"
 
 module OpenSSL
   module SSL
@@ -502,7 +503,7 @@ YoaOffgTf5qxiwkjnlVZQc3whgnEt9FpVMvQ9eknyeGB5KHfayAc3+hUAvI3/Cr3
       end
 
       # See TCPServer#listen for details.
-      def listen(backlog=5)
+      def listen(backlog=Socket::SOMAXCONN)
         @svr.listen(backlog)
       end
 
