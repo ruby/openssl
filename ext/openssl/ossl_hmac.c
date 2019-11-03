@@ -84,20 +84,12 @@ ossl_hmac_alloc(VALUE klass)
  *
  * === A note about comparisons
  *
- * Two instances won't be equal when they're compared, even if they have the
- * same value. For example:
+ * Two instances can be securely compared with #== in constant time:
  *
  *	other_instance = OpenSSL::HMAC.new('key', OpenSSL::Digest.new('sha1'))
  *  #=> f42bb0eeb018ebbd4597ae7213711ec60760843f
- *  instance
- *  #=> f42bb0eeb018ebbd4597ae7213711ec60760843f
  *  instance == other_instance
- *  #=> false
- *
- * Use #digest and compare in constant time:
- *
- *	OpenSSL.fixed_length_secure_compare(instance.digest, other_instance.digest)
- *	#=> true
+ *  #=> true
  *
  */
 static VALUE
