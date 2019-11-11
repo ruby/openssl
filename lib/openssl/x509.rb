@@ -99,7 +99,7 @@ module OpenSSL
 
           ski_asn1 = ASN1.decode(ext.value_der)
           if ext.critical? || ski_asn1.tag_class != :UNIVERSAL || ski_asn1.tag != ASN1::OCTET_STRING
-            raise ASN1::ASN1Error "invalid extension"
+            raise ASN1::ASN1Error.new("invalid extension")
           end
 
           ski_asn1.value
@@ -121,7 +121,7 @@ module OpenSSL
 
           aki_asn1 = ASN1.decode(ext.value_der)
           if ext.critical? || aki_asn1.tag_class != :UNIVERSAL || aki_asn1.tag != ASN1::SEQUENCE
-            raise ASN1::ASN1Error "invalid extension"
+            raise ASN1::ASN1Error.new("invalid extension")
           end
 
           key_id = aki_asn1.value.find do |v|
@@ -146,7 +146,7 @@ module OpenSSL
 
           cdp_asn1 = ASN1.decode(ext.value_der)
           if cdp_asn1.tag_class != :UNIVERSAL || cdp_asn1.tag != ASN1::SEQUENCE
-            raise ASN1::ASN1Error "invalid extension"
+            raise ASN1::ASN1Error.new("invalid extension")
           end
 
           crl_uris = cdp_asn1.map do |crl_distribution_point|
