@@ -19,7 +19,8 @@ Version 2.2.0 (not yet released)
   responses.
 * Add helper methods for `OpenSSL::X509::{Certificate,CRL}`:
   `find_extension`, `subject_key_identifier`,
-  and `authority_key_identifier` (`Certificate` only).
+  `authority_key_identifier` (`Certificate` only) and `crl_uris`
+  (`Certificate` only).
 * Remove `OpenSSL::PKCS7::SignerInfo#name` alias for `#issuer`.
 * Add `OpenSSL::ECPoint#add` for adding points to an elliptic curve
   group.
