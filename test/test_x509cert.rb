@@ -117,6 +117,27 @@ class OpenSSL::TestX509Certificate < OpenSSL::TestCase
     no_exts_cert = issue_cert(@ca, @rsa2048, 1, [], nil, nil)
     assert_equal nil, no_exts_cert.authority_key_identifier
     assert_equal nil, no_exts_cert.subject_key_identifier
+    assert_equal nil, no_exts_cert.crl_uris
+  end
+
+  def test_invalid_extension
+    integer = OpenSSL::ASN1::Integer.new(0)
+    invalid_exts_cert = generate_cert(@ee1, @rsa1024, 1, nil)
+    ["subjectKeyIdentifier", "authorityKeyIdentifier", "crlDistributionPoints"].each do |ext|
+      invalid_exts_cert.add_extension(
+        OpenSSL::X509::Extension.new(ext, integer.to_der)
+      )
+    end
+
+    assert_raise(OpenSSL::ASN1::ASN1Error, "invalid extension") {
+      invalid_exts_cert.authority_key_identifier
+    }
+    assert_raise(OpenSSL::ASN1::ASN1Error, "invalid extension") {
+      invalid_exts_cert.subject_key_identifier
+    }
+    assert_raise(OpenSSL::ASN1::ASN1Error, "invalid extension") {
+      invalid_exts_cert.crl_uris
+    }
   end
 
   def test_sign_and_verify_rsa_sha1
