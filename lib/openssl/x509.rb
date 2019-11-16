@@ -164,6 +164,49 @@ module OpenSSL
           crl_uris&.map(&:value)
         end
       end
+
+      module AuthorityInfoAccess
+        include Helpers
+
+        def ca_issuer_uris
+          aia_asn1 = parse_aia_asn1
+          return nil if aia_asn1.nil?
+
+          if aia_asn1.tag_class != :UNIVERSAL || aia_asn1.tag != ASN1::SEQUENCE
+            raise ASN1::ASN1Error, "invalid extension"
+          end
+
+          ca_issuer = aia_asn1.value.select do |authority_info_access|
+            authority_info_access.value.first.value == "caIssuers"
+          end
+
+          ca_issuer&.map(&:value)&.map(&:last)&.map(&:value)
+        end
+
+        def ocsp_uris
+          aia_asn1 = parse_aia_asn1
+          return nil if aia_asn1.nil?
+
+          ocsp = aia_asn1.value.select do |authority_info_access|
+            authority_info_access.value.first.value == "OCSP"
+          end
+
+          ocsp&.map(&:value)&.map(&:last)&.map(&:value)
+        end
+
+        private
+        def parse_aia_asn1
+          ext = find_extension("authorityInfoAccess")
+          return nil if ext.nil?
+
+          aia_asn1 = ASN1.decode(ext.value_der)
+          if aia_asn1.tag_class != :UNIVERSAL || aia_asn1.tag != ASN1::SEQUENCE
+            raise ASN1::ASN1Error, "invalid extension"
+          end
+
+          aia_asn1
+        end
+      end
     end
 
     class Name
@@ -291,6 +334,7 @@ module OpenSSL
       include Extension::SubjectKeyIdentifier
       include Extension::AuthorityKeyIdentifier
       include Extension::CRLDistributionPoints
+      include Extension::AuthorityInfoAccess
 
       def pretty_print(q)
         q.object_group(self) {

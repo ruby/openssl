@@ -98,6 +98,8 @@ class OpenSSL::TestX509Certificate < OpenSSL::TestCase
       assert_equal(ee1_exts[i].last, ext.critical?)
     }
     assert_nil(ee1_cert.crl_uris)
+    assert_nil(ee1_cert.ca_issuer_uris)
+    assert_nil(ee1_cert.ocsp_uris)
 
     ef = OpenSSL::X509::ExtensionFactory.new
     ef.config = OpenSSL::Config.parse(<<~_cnf_)
@@ -114,16 +116,41 @@ class OpenSSL::TestX509Certificate < OpenSSL::TestCase
       cdp_cert.crl_uris
     )
 
-    no_exts_cert = issue_cert(@ca, @rsa2048, 1, [], nil, nil)
+    ef = OpenSSL::X509::ExtensionFactory.new
+    aia_cert = generate_cert(@ee1, @rsa1024, 4, ca_cert)
+    ef.subject_certificate = aia_cert
+    aia_cert.add_extension(
+      ef.create_extension(
+        "authorityInfoAccess",
+        "caIssuers;URI:http://www.example.com/caIssuers," \
+        "caIssuers;URI:ldap://ldap.example.com/cn=ca?authorityInfoAccessCaIssuers;binary," \
+        "OCSP;URI:http://www.example.com/ocsp," \
+        "OCSP;URI:ldap://ldap.example.com/cn=ca?authorityInfoAccessOcsp;binary",
+        false
+      )
+    )
+    aia_cert.sign(@rsa2048, "sha256")
+    assert_equal(
+      ["http://www.example.com/caIssuers", "ldap://ldap.example.com/cn=ca?authorityInfoAccessCaIssuers;binary"],
+      aia_cert.ca_issuer_uris
+    )
+    assert_equal(
+      ["http://www.example.com/ocsp", "ldap://ldap.example.com/cn=ca?authorityInfoAccessOcsp;binary"],
+      aia_cert.ocsp_uris
+    )
+
+    no_exts_cert = issue_cert(@ca, @rsa2048, 5, [], nil, nil)
     assert_equal nil, no_exts_cert.authority_key_identifier
     assert_equal nil, no_exts_cert.subject_key_identifier
     assert_equal nil, no_exts_cert.crl_uris
+    assert_equal nil, no_exts_cert.ca_issuer_uris
+    assert_equal nil, no_exts_cert.ocsp_uris
   end
 
   def test_invalid_extension
     integer = OpenSSL::ASN1::Integer.new(0)
     invalid_exts_cert = generate_cert(@ee1, @rsa1024, 1, nil)
-    ["subjectKeyIdentifier", "authorityKeyIdentifier", "crlDistributionPoints"].each do |ext|
+    ["subjectKeyIdentifier", "authorityKeyIdentifier", "crlDistributionPoints", "authorityInfoAccess"].each do |ext|
       invalid_exts_cert.add_extension(
         OpenSSL::X509::Extension.new(ext, integer.to_der)
       )
@@ -137,6 +164,12 @@ class OpenSSL::TestX509Certificate < OpenSSL::TestCase
     }
     assert_raise(OpenSSL::ASN1::ASN1Error, "invalid extension") {
       invalid_exts_cert.crl_uris
+    }
+    assert_raise(OpenSSL::ASN1::ASN1Error, "invalid extension") {
+      invalid_exts_cert.ca_issuer_uris
+    }
+    assert_raise(OpenSSL::ASN1::ASN1Error, "invalid extension") {
+      invalid_exts_cert.ocsp_uris
     }
   end
 
