@@ -17,10 +17,12 @@ Version 2.2.0 (not yet released)
   for last finished message sent and received.
 * Add `OpenSSL::Timestamp` module for handing timestamp requests and
   responses.
-* Add helper methods for `OpenSSL::X509::{Certificate,CRL}`:
+* Add helper methods for `OpenSSL::X509::Certificate`:
   `find_extension`, `subject_key_identifier`,
-  `authority_key_identifier` (`Certificate` only) and `crl_uris`
-  (`Certificate` only).
+  `authority_key_identifier`, `crl_uris`, `ca_issuer_uris` and
+  `ocsp_uris`.
+* Add helper methods for `OpenSSL::X509::CRL`:
+  `find_extension` and `subject_key_identifier`.
 * Remove `OpenSSL::PKCS7::SignerInfo#name` alias for `#issuer`.
 * Add `OpenSSL::ECPoint#add` for adding points to an elliptic curve
   group.
