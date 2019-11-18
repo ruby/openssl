@@ -168,6 +168,11 @@ module OpenSSL
       module AuthorityInfoAccess
         include Helpers
 
+        # Get the information and services for the issuer from the certificate's
+        # authority information access extension exteension, as described in RFC5280
+        # Section 4.2.2.1.
+        #
+        # Returns an array of strings or nil or raises ASN1::ASN1Error.
         def ca_issuer_uris
           aia_asn1 = parse_aia_asn1
           return nil if aia_asn1.nil?
@@ -183,6 +188,10 @@ module OpenSSL
           ca_issuer&.map(&:value)&.map(&:last)&.map(&:value)
         end
 
+        # Get the URIs for OCSP from the certificate's authority information access
+        # extension exteension, as described in RFC5280 Section 4.2.2.1.
+        #
+        # Returns an array of strings or nil or raises ASN1::ASN1Error.
         def ocsp_uris
           aia_asn1 = parse_aia_asn1
           return nil if aia_asn1.nil?
