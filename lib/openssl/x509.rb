@@ -204,17 +204,18 @@ module OpenSSL
         end
 
         private
-        def parse_aia_asn1
-          ext = find_extension("authorityInfoAccess")
-          return nil if ext.nil?
 
-          aia_asn1 = ASN1.decode(ext.value_der)
-          if aia_asn1.tag_class != :UNIVERSAL || aia_asn1.tag != ASN1::SEQUENCE
-            raise ASN1::ASN1Error, "invalid extension"
+          def parse_aia_asn1
+            ext = find_extension("authorityInfoAccess")
+            return nil if ext.nil?
+
+            aia_asn1 = ASN1.decode(ext.value_der)
+            if aia_asn1.tag_class != :UNIVERSAL || aia_asn1.tag != ASN1::SEQUENCE
+              raise ASN1::ASN1Error, "invalid extension"
+            end
+
+            aia_asn1
           end
-
-          aia_asn1
-        end
       end
     end
 
