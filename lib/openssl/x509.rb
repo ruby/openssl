@@ -177,10 +177,6 @@ module OpenSSL
           aia_asn1 = parse_aia_asn1
           return nil if aia_asn1.nil?
 
-          if aia_asn1.tag_class != :UNIVERSAL || aia_asn1.tag != ASN1::SEQUENCE
-            raise ASN1::ASN1Error, "invalid extension"
-          end
-
           ca_issuer = aia_asn1.value.select do |authority_info_access|
             authority_info_access.value.first.value == "caIssuers"
           end
@@ -210,7 +206,7 @@ module OpenSSL
             return nil if ext.nil?
 
             aia_asn1 = ASN1.decode(ext.value_der)
-            if aia_asn1.tag_class != :UNIVERSAL || aia_asn1.tag != ASN1::SEQUENCE
+            if ext.critical? || aia_asn1.tag_class != :UNIVERSAL || aia_asn1.tag != ASN1::SEQUENCE
               raise ASN1::ASN1Error, "invalid extension"
             end
 
