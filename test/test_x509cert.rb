@@ -90,6 +90,7 @@ class OpenSSL::TestX509Certificate < OpenSSL::TestCase
       ["authorityKeyIdentifier","issuer:always,keyid:always",false],
       ["extendedKeyUsage","clientAuth, emailProtection, codeSigning",false],
       ["subjectAltName","email:ee1@ruby-lang.org",false],
+      ["authorityInfoAccess","caIssuers;URI:http://www.example.com/caIssuers,OCSP;URI:http://www.example.com/ocsp",false],
     ]
     ee1_cert = issue_cert(@ee1, @rsa1024, 2, ee1_exts, ca_cert, @rsa2048)
     assert_equal(ca_cert.subject.to_der, ee1_cert.issuer.to_der)
@@ -98,8 +99,6 @@ class OpenSSL::TestX509Certificate < OpenSSL::TestCase
       assert_equal(ee1_exts[i].last, ext.critical?)
     }
     assert_nil(ee1_cert.crl_uris)
-    assert_nil(ee1_cert.ca_issuer_uris)
-    assert_nil(ee1_cert.ocsp_uris)
 
     ef = OpenSSL::X509::ExtensionFactory.new
     ef.config = OpenSSL::Config.parse(<<~_cnf_)
