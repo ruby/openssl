@@ -2666,13 +2666,13 @@ Init_ossl_ssl(void)
     rb_define_const(mSSLExtConfig, "HAVE_TLSEXT_HOST_NAME", Qtrue);
 
     /*
-     * A callback invoked whenever a new handshake is initiated. May be used
-     * to disable renegotiation entirely.
+     * A callback invoked whenever a new handshake is initiated on an
+     * established connection. May be used to disable renegotiation entirely.
      *
      * The callback is invoked with the active SSLSocket. The callback's
-     * return value is irrelevant, normal return indicates "approval" of the
+     * return value is ignored. A normal return indicates "approval" of the
      * renegotiation and will continue the process. To forbid renegotiation
-     * and to cancel the process, an Error may be raised within the callback.
+     * and to cancel the process, raise an exception within the callback.
      *
      * === Disable client renegotiation
      *
@@ -2680,10 +2680,8 @@ Init_ossl_ssl(void)
      * renegotiation entirely. You may use a callback as follows to implement
      * this feature:
      *
-     *   num_handshakes = 0
      *   ctx.renegotiation_cb = lambda do |ssl|
-     *     num_handshakes += 1
-     *     raise RuntimeError.new("Client renegotiation disabled") if num_handshakes > 1
+     *     raise RuntimeError, "Client renegotiation disabled"
      *   end
      */
     rb_attr(cSSLContext, rb_intern("renegotiation_cb"), 1, 1, Qfalse);
