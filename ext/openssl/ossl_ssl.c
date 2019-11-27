@@ -1892,18 +1892,24 @@ ossl_ssl_read_internal(int argc, VALUE *argv, VALUE self, int nonblock)
         }
     }
     else {
-	ID meth = nonblock ? rb_intern("read_nonblock") : rb_intern("sysread");
+        ID meth = nonblock ? rb_intern("read_nonblock") : rb_intern("sysread");
 
-	rb_warning("SSL session is not started yet.");
-	if (nonblock) {
+        rb_warning("SSL session is not started yet.");
+#if defined(RB_PASS_KEYWORDS)
+        if (nonblock) {
             VALUE argv[3];
             argv[0] = len;
             argv[1] = str;
             argv[2] = opts;
             return rb_funcallv_kw(io, meth, 3, argv, RB_PASS_KEYWORDS);
         }
-	else
-	    return rb_funcall(io, meth, 2, len, str);
+#else
+        if (nonblock) {
+            return rb_funcall(io, meth, 3, len, str, opts);
+        }
+#endif
+        else
+            return rb_funcall(io, meth, 2, len, str);
     }
 
   end:
@@ -1990,15 +1996,21 @@ ossl_ssl_write_internal(VALUE self, VALUE str, VALUE opts)
 	ID meth = nonblock ?
 	    rb_intern("write_nonblock") : rb_intern("syswrite");
 
-	rb_warning("SSL session is not started yet.");
-	if (nonblock) {
+        rb_warning("SSL session is not started yet.");
+#if defined(RB_PASS_KEYWORDS)
+        if (nonblock) {
             VALUE argv[2];
             argv[0] = str;
             argv[1] = opts;
             return rb_funcallv_kw(io, meth, 2, argv, RB_PASS_KEYWORDS);
         }
-	else
-	    return rb_funcall(io, meth, 1, str);
+#else
+        if (nonblock) {
+            return rb_funcall(io, meth, 2, str, opts);
+        }
+#endif
+        else
+            return rb_funcall(io, meth, 1, str);
     }
 
   end:
