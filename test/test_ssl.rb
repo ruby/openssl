@@ -206,8 +206,20 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     }
   end
 
+  def test_sysread_nonblock_and_syswrite_nonblock_keywords
+    start_server do |port|
+      server_connect(port) do |ssl|
+        assert_warning("") do
+          ssl.send(:syswrite_nonblock, "12", exception: false)
+          ssl.send(:sysread_nonblock, 1, exception: false) rescue nil
+          ssl.send(:sysread_nonblock, 1, String.new, exception: false) rescue nil
+        end
+      end
+    end
+  end
+
   def test_sync_close
-    start_server { |port|
+    start_server do |port|
       begin
         sock = TCPSocket.new("127.0.0.1", port)
         ssl = OpenSSL::SSL::SSLSocket.new(sock)
@@ -230,7 +242,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
       ensure
         sock&.close
       end
-    }
+    end
   end
 
   def test_copy_stream
