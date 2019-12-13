@@ -862,7 +862,7 @@ ossl_crypto_fixed_length_secure_compare(VALUE dummy, VALUE str1, VALUE str2)
  * signature.
  *
  *   key = OpenSSL::PKey::RSA.new 2048
- *   name = OpenSSL::X509::Name.parse 'CN=nobody/DC=example'
+ *   name = OpenSSL::X509::Name.parse '/CN=nobody/DC=example'
  *
  *   cert = OpenSSL::X509::Certificate.new
  *   cert.version = 2
@@ -944,7 +944,7 @@ ossl_crypto_fixed_length_secure_compare(VALUE dummy, VALUE str1, VALUE str2)
  * A CA certificate is created the same way we created a certificate above, but
  * with different extensions.
  *
- *   ca_name = OpenSSL::X509::Name.parse 'CN=ca/DC=example'
+ *   ca_name = OpenSSL::X509::Name.parse '/CN=ca/DC=example'
  *
  *   ca_cert = OpenSSL::X509::Certificate.new
  *   ca_cert.serial = 0
