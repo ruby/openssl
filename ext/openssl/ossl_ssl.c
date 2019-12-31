@@ -1322,15 +1322,45 @@ ossl_sslctx_add_certificate(int argc, VALUE *argv, VALUE self)
     return self;
 }
 
+/*
+ * call-seq:
+ *    ctx.add_certificate_chain_file(certs_path, pkey_path) -> true | false
+ *
+ * Loads (chain) certificate(s) from _certs_path_ and private key from
+ * _pkey_path_.
+ *
+ * === Parameters
+ * _certs_path_::
+ *   A path to a (chain) certificate(s) file. A instance of String.
+ * _pkey_path_::
+ *   A path to a private key file. A instance of String.
+ *
+ * === Note
+ * The file format of certificate and private key must be PEM.
+ *
+ * The certificate file must be starting with the subject's certificate and
+ * followed by intermediate CA certificates (and root CA certificate).
+ */
 static VALUE
-ossl_sslctx_add_certificate_chain_file(VALUE self, VALUE path)
+ossl_sslctx_add_certificate_chain_file(VALUE self, VALUE certs_path, VALUE pkey_path)
 {
-    StringValue(path);
-    SSL_CTX *ctx = NULL;
+    SSL_CTX *ctx;
 
     GetSSLCTX(self, ctx);
+    if (NIL_P(certs_path))
+        ossl_raise(rb_eArgError, "certs_path must be the path to certificates");
 
-    return SSL_CTX_use_certificate_chain_file(ctx, RSTRING_PTR(path)) == 1 ? Qtrue : Qfalse;
+    if (NIL_P(pkey_path))
+        ossl_raise(rb_eArgError, "pkey_path must be the path to private key");
+
+    /* SSL_CTX_use_certificate_chain_file() loads PEM format file. */
+    if (SSL_CTX_use_certificate_chain_file(ctx, StringValueCStr(certs_path)) != 1)
+        return Qfalse;
+
+    if (SSL_CTX_use_PrivateKey_file(ctx, StringValueCStr(pkey_path), SSL_FILETYPE_PEM) != 1)
+        return Qfalse;
+
+    return Qtrue;
 }
 
 /*
@@ -2784,7 +2814,7 @@ Init_ossl_ssl(void)
     rb_define_method(cSSLContext, "enable_fallback_scsv", ossl_sslctx_enable_fallback_scsv, 0);
 #endif
     rb_define_method(cSSLContext, "add_certificate", ossl_sslctx_add_certificate, -1);
-    rb_define_method(cSSLContext, "add_certificate_chain_file", ossl_sslctx_add_certificate_chain_file, 1);
+    rb_define_method(cSSLContext, "add_certificate_chain_file", ossl_sslctx_add_certificate_chain_file, 2);
 
     rb_define_method(cSSLContext, "setup", ossl_sslctx_setup, 0);
     rb_define_alias(cSSLContext, "freeze", "setup");
