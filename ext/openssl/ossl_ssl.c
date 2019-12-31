@@ -1326,17 +1326,18 @@ ossl_sslctx_add_certificate(int argc, VALUE *argv, VALUE self)
  * call-seq:
  *    ctx.add_certificate_chain_file(certs_path, pkey_path) -> true | false
  *
- * Loads (chain) certificate(s) from _certs_path_ and private key from
+ * Loads chain certificates from _certs_path_ and a private key from
  * _pkey_path_.
  *
  * === Parameters
  * _certs_path_::
- *   A path to a (chain) certificate(s) file. A instance of String.
+ *   A path to a chain certificates file. It may be a single certificate.
+ *   An instance of String.
  * _pkey_path_::
- *   A path to a private key file. A instance of String.
+ *   A path to a private key file. An instance of String.
  *
  * === Note
- * The file format of certificate and private key must be PEM.
+ * The file format of the certificate and private key must be PEM.
  *
  * The certificate file must be starting with the subject's certificate and
  * followed by intermediate CA certificates (and root CA certificate).
