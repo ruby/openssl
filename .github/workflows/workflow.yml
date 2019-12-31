@@ -15,8 +15,6 @@ jobs:
     steps:
       - name: repo checkout
         uses: actions/checkout@v2
-        with:
-          fetch-depth: 10
       - name: load ruby
         uses: actions/setup-ruby@v1
         with:
@@ -42,8 +40,6 @@ jobs:
     steps:
       - name: repo checkout
         uses: actions/checkout@v2
-        with:
-          fetch-depth: 10
       - name: load ruby, update gcc, install openssl
         uses: MSP-Greg/actions-ruby@master
         with:
