@@ -1370,23 +1370,35 @@ ossl_sslctx_add_certificate_chain_file(VALUE self, VALUE certs_path, VALUE pkey_
     fclose(fp);
     if (!pkey)
         rb_raise(rb_eArgError, "failed to open pkey file");
+
     /* Retrieve public key */
     ccerts_path = StringValueCStr(certs_path);
     fp = fopen(ccerts_path, "r");
-    if (!fp)
+    if (!fp) {
+        EVP_PKEY_free(pkey);
         rb_raise(rb_eArgError, "failed to open certs file");
+    }
     x509 = PEM_read_X509(fp, NULL, 0, NULL);
     fclose(fp);
-    if (!x509)
+    if (!x509) {
+        EVP_PKEY_free(pkey);
         rb_raise(rb_eArgError, "failed to open certs file");
+    }
     pub_pkey = X509_get_pubkey(x509);
-    /* The reference counter is bumped, and decremented immediately. */
-    EVP_PKEY_free(pub_pkey);
-    if (!pub_pkey)
+    if (!pub_pkey) {
+        EVP_PKEY_free(pkey);
+        X509_free(x509);
         rb_raise(rb_eArgError, "certificate does not contain public key");
-
-    if (EVP_PKEY_cmp(pub_pkey, pkey) != 1)
+    }
+    if (EVP_PKEY_cmp(pub_pkey, pkey) != 1) {
+        EVP_PKEY_free(pkey);
+        X509_free(x509);
+        EVP_PKEY_free(pub_pkey);
         rb_raise(rb_eArgError, "public key mismatch");
+    }
+    EVP_PKEY_free(pkey);
+    X509_free(x509);
+    EVP_PKEY_free(pub_pkey);
 
     /* SSL_CTX_use_certificate_chain_file() loads PEM format file. */
     if (SSL_CTX_use_certificate_chain_file(ctx, ccerts_path) != 1)
