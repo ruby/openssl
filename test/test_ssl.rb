@@ -187,7 +187,6 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
 
   def test_add_certificate_chain_file
     # Create chain certificates file
-    GC.disable # for tempfile
     certs = Tempfile.open { |f| f << @svr_cert.to_pem << @ca_cert.to_pem; f }
     pkey = Tempfile.open { |f| f << @svr_key.to_pem; f }
 
@@ -209,6 +208,8 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   ensure
     certs&.close
     pkey&.close
+    certs&.unlink
+    pkey&.unlink
   end
 
   def test_add_certificate_chain_file_multiple_certs
@@ -239,7 +240,6 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     ecdsa_cert = issue_cert(ecdsa_dn, ecdsa_key, 456, exts, ca2_cert, ca2_key)
 
     # Create chain certificates file
-    GC.disable # for tempfile
     certs1 = Tempfile.open { |f| f << @svr_cert.to_pem << @ca_cert.to_pem; f }
     pkey1 = Tempfile.open { |f| f << @svr_key.to_pem; f }
     certs2 = Tempfile.open { |f| f << ecdsa_cert.to_pem << ca2_cert.to_pem; f }
@@ -281,8 +281,12 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   ensure
     certs1&.close
     pkey1&.close
+    certs1&.unlink
+    pkey1&.unlink
     certs2&.close
     pkey2&.close
+    certs2&.unlink
+    pkey2&.unlink
   end
 
   def test_sysread_and_syswrite
