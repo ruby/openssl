@@ -10,7 +10,7 @@ class OpenSSL::TestBuffering < OpenSSL::TestCase
     attr_accessor :sync
 
     def initialize
-      @io = String.new
+      @io = Buffer.new
       def @io.sync
         true
       end
@@ -39,6 +39,13 @@ class OpenSSL::TestBuffering < OpenSSL::TestCase
   def setup
     super
     @io = IO.new
+  end
+
+  def test_encoding
+    @io.write '😊'
+    @io.flush
+
+    assert_equal @io.string.encoding, Encoding::BINARY
   end
 
   def test_flush
