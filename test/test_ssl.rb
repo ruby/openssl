@@ -1,4 +1,4 @@
-# frozen_string_literal: false
+# frozen_string_literal: true
 require_relative "utils"
 
 if defined?(OpenSSL)
@@ -292,12 +292,12 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   def test_sysread_and_syswrite
     start_server { |port|
       server_connect(port) { |ssl|
-        str = "x" * 100 + "\n"
+        str = +("x" * 100 + "\n")
         ssl.syswrite(str)
         newstr = ssl.sysread(str.bytesize)
         assert_equal(str, newstr)
 
-        buf = ""
+        buf = String.new
         ssl.syswrite(str)
         assert_same buf, ssl.sysread(str.size, buf)
         assert_equal(str, buf)

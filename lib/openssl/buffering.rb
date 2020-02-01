@@ -1,5 +1,5 @@
 # coding: binary
-# frozen_string_literal: false
+# frozen_string_literal: true
 #--
 #= Info
 #  'OpenSSL for Ruby 2' project
@@ -40,7 +40,7 @@ module OpenSSL::Buffering
   def initialize(*)
     super
     @eof = false
-    @rbuffer = ""
+    @rbuffer = String.new
     @sync = @io.sync
   end
 
@@ -312,7 +312,7 @@ module OpenSSL::Buffering
   # buffer is flushed to the underlying socket.
 
   def do_write(s)
-    @wbuffer = "" unless defined? @wbuffer
+    @wbuffer = String.new unless defined? @wbuffer
     @wbuffer << s
     @wbuffer.force_encoding(Encoding::BINARY)
     @sync ||= false
@@ -398,7 +398,7 @@ module OpenSSL::Buffering
   # See IO#puts for full details.
 
   def puts(*args)
-    s = ""
+    s = String.new
     if args.empty?
       s << "\n"
     end
@@ -416,7 +416,7 @@ module OpenSSL::Buffering
   # See IO#print for full details.
 
   def print(*args)
-    s = ""
+    s = String.new
     args.each{ |arg| s << arg.to_s }
     do_write(s)
     nil
