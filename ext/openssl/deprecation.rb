@@ -1,4 +1,4 @@
-# frozen_string_literal: false
+# frozen_string_literal: true
 module OpenSSL
   def self.deprecated_warning_flag
     unless flag = (@deprecated_warning_flag ||= nil)

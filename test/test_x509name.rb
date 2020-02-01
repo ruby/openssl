@@ -1,5 +1,5 @@
 # coding: ASCII-8BIT
-# frozen_string_literal: false
+# frozen_string_literal: true
 require_relative 'utils'
 
 if defined?(OpenSSL)
@@ -389,7 +389,7 @@ class OpenSSL::TestX509Name < OpenSSL::TestCase
     dn.each { |x| name.add_entry(*x) }
 
     str = name.to_utf8
-    expected = "CN=フー\\, バー,DC=ruby-lang,DC=org".force_encoding("UTF-8")
+    expected = String.new("CN=フー\\, バー,DC=ruby-lang,DC=org").force_encoding("UTF-8")
     assert_equal expected, str
     assert_equal Encoding.find("UTF-8"), str.encoding
 

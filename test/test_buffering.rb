@@ -1,4 +1,4 @@
-# frozen_string_literal: false
+# frozen_string_literal: true
 require_relative 'utils'
 
 if defined?(OpenSSL)
@@ -10,7 +10,7 @@ class OpenSSL::TestBuffering < OpenSSL::TestCase
     attr_accessor :sync
 
     def initialize
-      @io = ""
+      @io = String.new
       def @io.sync
         true
       end
