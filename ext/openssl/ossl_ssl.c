@@ -2407,8 +2407,7 @@ ossl_ssl_get_finished(VALUE self)
 
     GetSSL(self, ssl);
 
-    char sizer[0];
-    size_t len = SSL_get_finished(ssl, sizer, 0);
+    size_t len = SSL_get_finished(ssl, NULL, 0);
     if(len == 0)
       return Qnil;
 
@@ -2432,8 +2431,7 @@ ossl_ssl_get_peer_finished(VALUE self)
 
     GetSSL(self, ssl);
 
-    char sizer[0];
-    size_t len = SSL_get_peer_finished(ssl, sizer, 0);
+    size_t len = SSL_get_peer_finished(ssl, NULL, 0);
     if(len == 0)
       return Qnil;
 
