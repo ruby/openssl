@@ -1782,8 +1782,8 @@ end
 
   def assert_handshake_error
     # different OpenSSL versions react differently when facing a SSL/TLS version
-    # that has been marked as forbidden, therefore either of these may be raised
-    assert_raise(OpenSSL::SSL::SSLError, Errno::ECONNRESET) {
+    # that has been marked as forbidden, therefore any of these may be raised
+    assert_raise(OpenSSL::SSL::SSLError, Errno::ECONNRESET, Errno::EPIPE) {
       yield
     }
   end
