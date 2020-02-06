@@ -2408,14 +2408,14 @@ ossl_ssl_get_finished(VALUE self)
     GetSSL(self, ssl);
 
     char sizer[1];
-    size_t len = SSL_get_finished(ssl, sizer, 1);
+    size_t len = SSL_get_finished(ssl, sizer, 0);
+
     if(len == 0)
       return Qnil;
 
-    char* buf = ALLOCA_N(char, len+1);
-          buf[len] = 0;
+    char* buf = ALLOCA_N(char, len);
     SSL_get_finished(ssl, buf, len);
-    return rb_str_new_cstr(buf);
+    return rb_str_new(buf, len);
 }
 
 /*
@@ -2433,14 +2433,14 @@ ossl_ssl_get_peer_finished(VALUE self)
     GetSSL(self, ssl);
 
     char sizer[1];
-    size_t len = SSL_get_peer_finished(ssl, sizer, 1);
+    size_t len = SSL_get_peer_finished(ssl, sizer, 0);
+
     if(len == 0)
       return Qnil;
 
-    char* buf = ALLOCA_N(char, len+1);
-          buf[len] = 0;
+    char* buf = ALLOCA_N(char, len);
     SSL_get_peer_finished(ssl, buf, len);
-    return rb_str_new_cstr(buf);
+    return rb_str_new(buf, len);
 }
 
 /*
