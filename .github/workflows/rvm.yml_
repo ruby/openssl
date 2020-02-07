@@ -1,0 +1,43 @@
+name: OpenSSL
+
+on: [push, pull_request]
+
+jobs:
+  # tests RVM Ruby 2.3.8 and master
+  rvm:
+    name: >-
+      ${{ matrix.ruby }}  ubuntu rvm
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        cfg:
+          - { ruby: '2.3.8' , openssl: 'libssl1.0-dev' }
+          - { ruby: '2.7.0' , openssl: ''              }
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up RVM
+        run: |
+          curl -sSL https://get.rvm.io | bash
+      - name: Set up Ruby
+        run: |
+          source $HOME/.rvm/scripts/rvm
+          rvm install ${{ matrix.cfg.ruby }} --binary --autolibs=disable
+          rvm --default use ${{ matrix.cfg.ruby }}
+      - name: install openssl
+        if: matrix.cfg.openssl != ''
+        run: sudo apt-get -qy install ${{ matrix.cfg.openssl }}
+      - name: depends
+        run:  |
+          source $HOME/.rvm/scripts/rvm
+          rake install_dependencies
+      - name: compile
+        run:  |
+          source $HOME/.rvm/scripts/rvm
+          rake compile -- --enable-debug
+      - name: test
+        run:  |
+          source $HOME/.rvm/scripts/rvm
+          rake test TESTOPTS="-v --no-show-detail-immediately" OSSL_MDEBUG=1
+        env:
+          CI: true

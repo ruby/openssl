@@ -1,0 +1,33 @@
+name: Ubuntu-macOS
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: >-
+      ${{ matrix.ruby }}  ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ 'ubuntu-18.04', 'macos' ]
+        ruby: [ ruby-head, 2.7, 2.6, 2.5, 2.4, 2.3 ]
+    steps:
+      - name: repo checkout
+        uses: actions/checkout@v2
+
+      - name: load ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+
+      - name: depends
+        run:  rake install_dependencies
+
+      - name: compile
+        run:  rake compile -- --enable-debug
+
+      - name: test
+        run:  rake test TESTOPTS="-v --no-show-detail-immediately" OSSL_MDEBUG=1
+        env:
+          CI: true
