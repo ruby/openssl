@@ -1354,45 +1354,14 @@ static VALUE
 ossl_sslctx_add_certificate_chain_file(VALUE self, VALUE certs_path, VALUE pkey_path)
 {
     SSL_CTX *ctx;
-    X509 *x509;
-    char *ccerts_path, *cpkey_path;
-    FILE *fp;
-    EVP_PKEY *pkey, *pub_pkey;
 
     GetSSLCTX(self, ctx);
 
-    /* Retrieve private key */
-    cpkey_path = StringValueCStr(pkey_path);
-    fp = fopen(cpkey_path, "r");
-    if (!fp)
-        rb_raise(rb_eArgError, "failed to open pkey file");
-    pkey = PEM_read_PrivateKey(fp, NULL, 0, NULL);
-    fclose(fp);
-    if (!pkey)
-        rb_raise(rb_eArgError, "failed to open pkey file");
-    /* Retrieve public key */
-    ccerts_path = StringValueCStr(certs_path);
-    fp = fopen(ccerts_path, "r");
-    if (!fp)
-        rb_raise(rb_eArgError, "failed to open certs file");
-    x509 = PEM_read_X509(fp, NULL, 0, NULL);
-    fclose(fp);
-    if (!x509)
-        rb_raise(rb_eArgError, "failed to open certs file");
-    pub_pkey = X509_get_pubkey(x509);
-    /* The reference counter is bumped, and decremented immediately. */
-    EVP_PKEY_free(pub_pkey);
-    if (!pub_pkey)
-        rb_raise(rb_eArgError, "certificate does not contain public key");
-
-    if (EVP_PKEY_cmp(pub_pkey, pkey) != 1)
-        rb_raise(rb_eArgError, "public key mismatch");
-
     /* SSL_CTX_use_certificate_chain_file() loads PEM format file. */
-    if (SSL_CTX_use_certificate_chain_file(ctx, ccerts_path) != 1)
+    if (SSL_CTX_use_certificate_chain_file(ctx, StringValueCStr(certs_path)) != 1)
         ossl_raise(eSSLError, "SSL_CTX_use_certificate_chain_file");
 
-    if (SSL_CTX_use_PrivateKey_file(ctx, cpkey_path, SSL_FILETYPE_PEM) != 1)
+    if (SSL_CTX_use_PrivateKey_file(ctx, StringValueCStr(pkey_path), SSL_FILETYPE_PEM) != 1)
         ossl_raise(eSSLError, "SSL_CTX_use_PrivateKey_file");
 
     return self;
