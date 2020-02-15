@@ -1337,9 +1337,9 @@ ossl_sslctx_add_certificate(int argc, VALUE *argv, VALUE self)
  *   A path to a private key file. An instance of String.
  *
  * === Example
- *   ctx.add_certificate_chain(rsa_and_intermediate_certs_path, rsa_key_path)
+ *   ctx.add_certificate_chain(rsa_cert_path, rsa_key_path)
  *
- *   ctx.add_certificate_chain(ecdsa_and_intermediate_certs_path, ecdsa_key_path)
+ *   ctx.add_certificate_chain(ecdsa_cert_path, ecdsa_key_path)
  *
  * === Note
  * The file format of the certificate and private key must be PEM.
