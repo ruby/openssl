@@ -1324,7 +1324,7 @@ ossl_sslctx_add_certificate(int argc, VALUE *argv, VALUE self)
 
 /*
  * call-seq:
- *    ctx.add_certificate_chain_file(certs_path, pkey_path) -> self
+ *    ctx.add_certificate_chain_file(certs_path, pkey_path) -> true | false
  *
  * Loads chain certificates from _certs_path_ and a private key from
  * _pkey_path_.
@@ -1336,19 +1336,11 @@ ossl_sslctx_add_certificate(int argc, VALUE *argv, VALUE self)
  * _pkey_path_::
  *   A path to a private key file. An instance of String.
  *
- * === Example
- *   ctx.add_certificate_chain(rsa_cert_path, rsa_key_path)
- *
- *   ctx.add_certificate_chain(ecdsa_cert_path, ecdsa_key_path)
- *
  * === Note
  * The file format of the certificate and private key must be PEM.
  *
  * The certificate file must be starting with the subject's certificate and
- * followed by intermediate CA certificate(s).
- *
- * OpenSSL before the version 1.0.2 could handle only one extra chain across
- * all key types. Calling this method discards the chain set previously.
+ * followed by intermediate CA certificates (and root CA certificate).
  */
 static VALUE
 ossl_sslctx_add_certificate_chain_file(VALUE self, VALUE certs_path, VALUE pkey_path)
@@ -1356,15 +1348,20 @@ ossl_sslctx_add_certificate_chain_file(VALUE self, VALUE certs_path, VALUE pkey_
     SSL_CTX *ctx;
 
     GetSSLCTX(self, ctx);
+    if (NIL_P(certs_path))
+        ossl_raise(rb_eArgError, "certs_path must be the path to certificates");
+
+    if (NIL_P(pkey_path))
+        ossl_raise(rb_eArgError, "pkey_path must be the path to private key");
 
     /* SSL_CTX_use_certificate_chain_file() loads PEM format file. */
     if (SSL_CTX_use_certificate_chain_file(ctx, StringValueCStr(certs_path)) != 1)
-        ossl_raise(eSSLError, "SSL_CTX_use_certificate_chain_file");
+        return Qfalse;
 
     if (SSL_CTX_use_PrivateKey_file(ctx, StringValueCStr(pkey_path), SSL_FILETYPE_PEM) != 1)
-        ossl_raise(eSSLError, "SSL_CTX_use_PrivateKey_file");
+        return Qfalse;
 
-    return self;
+    return Qtrue;
 }
 
 /*
