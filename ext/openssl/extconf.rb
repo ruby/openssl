@@ -148,7 +148,6 @@ have_func("EVP_MD_CTX_new")
 have_func("EVP_MD_CTX_free")
 have_func("HMAC_CTX_new")
 have_func("HMAC_CTX_free")
-OpenSSL.check_func("RAND_pseudo_bytes", "openssl/rand.h") # deprecated
 have_func("X509_STORE_get_ex_data")
 have_func("X509_STORE_set_ex_data")
 have_func("X509_STORE_get_ex_new_index")
