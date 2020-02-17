@@ -89,13 +89,17 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   def test_socket_open_with_local_address_port_context
     start_server { |port|
       begin
+        # Guess a free port number
+        random_port = rand(49152..65535)
         ctx = OpenSSL::SSL::SSLContext.new
-        ssl = OpenSSL::SSL::SSLSocket.open("127.0.0.1", port, "127.0.0.1", 8000, context: ctx)
+        ssl = OpenSSL::SSL::SSLSocket.open("127.0.0.1", port, "127.0.0.1", random_port, context: ctx)
         ssl.sync_close = true
         ssl.connect
 
-        assert_equal ssl.context, ctx
+        assert_equal ctx, ssl.context
+        assert_equal random_port, ssl.io.local_address.ip_port
         ssl.puts "abc"; assert_equal "abc\n", ssl.gets
+      rescue Errno::EADDRINUSE
       ensure
         ssl&.close
       end
