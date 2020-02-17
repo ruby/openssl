@@ -1419,6 +1419,10 @@ end
   end
 
   def test_fallback_scsv
+    supported = check_supported_protocol_versions
+    return unless supported.include?(OpenSSL::SSL::TLS1_1_VERSION) &&
+      supported.include?(OpenSSL::SSL::TLS1_2_VERSION)
+
     pend "Fallback SCSV is not supported" unless \
       OpenSSL::SSL::SSLContext.method_defined?(:enable_fallback_scsv)
 
