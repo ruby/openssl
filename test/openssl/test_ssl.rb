@@ -496,12 +496,14 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
       ctx = OpenSSL::SSL::SSLContext.new
       ctx.verify_mode = OpenSSL::SSL::VERIFY_NONE
       server_connect(port, ctx) { |ssl|
+        ssl.puts "abc"; ssl.gets
+
         client_finished = ssl.finished_message
         client_peer_finished = ssl.peer_finished_message
-        sleep 0.05
-        ssl.send :stop
       }
     }
+    assert_not_nil(server_finished)
+    assert_not_nil(client_finished)
     assert_equal(server_finished, client_peer_finished)
     assert_equal(server_peer_finished, client_finished)
   end
