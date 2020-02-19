@@ -89,13 +89,17 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   def test_socket_open_with_local_address_port_context
     start_server { |port|
       begin
+        # Guess a free port number
+        random_port = rand(49152..65535)
         ctx = OpenSSL::SSL::SSLContext.new
-        ssl = OpenSSL::SSL::SSLSocket.open("127.0.0.1", port, "127.0.0.1", 8000, context: ctx)
+        ssl = OpenSSL::SSL::SSLSocket.open("127.0.0.1", port, "127.0.0.1", random_port, context: ctx)
         ssl.sync_close = true
         ssl.connect
 
-        assert_equal ssl.context, ctx
+        assert_equal ctx, ssl.context
+        assert_equal random_port, ssl.io.local_address.ip_port
         ssl.puts "abc"; assert_equal "abc\n", ssl.gets
+      rescue Errno::EADDRINUSE
       ensure
         ssl&.close
       end
@@ -127,7 +131,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     add0_chain_supported = openssl?(1, 0, 2)
 
     if add0_chain_supported
-      ca2_key = Fixtures.pkey("rsa2048")
+      ca2_key = Fixtures.pkey("rsa-3")
       ca2_exts = [
         ["basicConstraints", "CA:TRUE", true],
         ["keyUsage", "cRLSign, keyCertSign", true],
@@ -205,19 +209,6 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
       }
     }
   end
-
-  # TODO fix this test
-  # def test_sysread_nonblock_and_syswrite_nonblock_keywords
-  #   start_server do |port|
-  #     server_connect(port) do |ssl|
-  #       assert_warning("") do
-  #         ssl.send(:syswrite_nonblock, "12", exception: false)
-  #         ssl.send(:sysread_nonblock, 1, exception: false) rescue nil
-  #         ssl.send(:sysread_nonblock, 1, String.new, exception: false) rescue nil
-  #       end
-  #     end
-  #   end
-  # end
 
   def test_sync_close
     start_server do |port|
@@ -496,12 +487,14 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
       ctx = OpenSSL::SSL::SSLContext.new
       ctx.verify_mode = OpenSSL::SSL::VERIFY_NONE
       server_connect(port, ctx) { |ssl|
+        ssl.puts "abc"; ssl.gets
+
         client_finished = ssl.finished_message
         client_peer_finished = ssl.peer_finished_message
-        sleep 0.05
-        ssl.send :stop
       }
     }
+    assert_not_nil(server_finished)
+    assert_not_nil(client_finished)
     assert_equal(server_finished, client_peer_finished)
     assert_equal(server_peer_finished, client_finished)
   end
@@ -1376,11 +1369,16 @@ end
         ctx.ssl_version = :TLSv1_2
         ctx.ciphers = "kRSA"
       }
-      start_server(ctx_proc: ctx_proc1) do |port|
+      start_server(ctx_proc: ctx_proc1, ignore_listener_error: true) do |port|
         ctx = OpenSSL::SSL::SSLContext.new
         ctx.ssl_version = :TLSv1_2
         ctx.ciphers = "kRSA"
-        server_connect(port, ctx) { |ssl| assert_nil ssl.tmp_key }
+        begin
+          server_connect(port, ctx) { |ssl| assert_nil ssl.tmp_key }
+        rescue OpenSSL::SSL::SSLError
+          # kRSA seems disabled
+          raise unless $!.message =~ /no cipher/
+        end
       end
     end
 
