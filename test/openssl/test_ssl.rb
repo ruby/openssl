@@ -1369,11 +1369,16 @@ end
         ctx.ssl_version = :TLSv1_2
         ctx.ciphers = "kRSA"
       }
-      start_server(ctx_proc: ctx_proc1) do |port|
+      start_server(ctx_proc: ctx_proc1, ignore_listener_error: true) do |port|
         ctx = OpenSSL::SSL::SSLContext.new
         ctx.ssl_version = :TLSv1_2
         ctx.ciphers = "kRSA"
-        server_connect(port, ctx) { |ssl| assert_nil ssl.tmp_key }
+        begin
+          server_connect(port, ctx) { |ssl| assert_nil ssl.tmp_key }
+        rescue OpenSSL::SSL::SSLError
+          # kRSA seems disabled
+          raise unless $!.message =~ /no cipher/
+        end
       end
     end
 
