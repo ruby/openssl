@@ -93,9 +93,6 @@ static const rb_data_type_t ossl_engine_type = {
 static VALUE
 ossl_engine_s_load(int argc, VALUE *argv, VALUE klass)
 {
-#if !defined(HAVE_ENGINE_LOAD_BUILTIN_ENGINES)
-    return Qnil;
-#else
     VALUE name;
 
     rb_scan_args(argc, argv, "01", &name);
@@ -151,7 +148,6 @@ ossl_engine_s_load(int argc, VALUE *argv, VALUE klass)
     OSSL_ENGINE_LOAD_IF_MATCH(openssl, OPENSSL);
     rb_warning("no such builtin loader for `%"PRIsVALUE"'", name);
     return Qnil;
-#endif /* HAVE_ENGINE_LOAD_BUILTIN_ENGINES */
 }
 
 /*
