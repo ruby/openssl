@@ -111,8 +111,7 @@ Logging::message "=== Checking for OpenSSL features... ===\n"
 # compile options
 have_func("RAND_egd")
 engines = %w{builtin_engines openbsd_dev_crypto dynamic 4758cca aep atalla chil
-             cswift nuron sureware ubsec padlock capi gmp gost cryptodev aesni
-             cloudhsm}
+             cswift nuron sureware ubsec padlock capi gmp gost cryptodev aesni}
 engines.each { |name|
   have_func("ENGINE_load_#{name}()", "openssl/engine.h")
 }
