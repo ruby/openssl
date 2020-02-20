@@ -147,12 +147,6 @@ ossl_engine_s_load(int argc, VALUE *argv, VALUE klass)
 #if HAVE_ENGINE_LOAD_CRYPTODEV
     OSSL_ENGINE_LOAD_IF_MATCH(cryptodev, CRYPTODEV);
 #endif
-#if HAVE_ENGINE_LOAD_AESNI
-    OSSL_ENGINE_LOAD_IF_MATCH(aesni, AESNI);
-#endif
-#endif
-#ifdef HAVE_ENGINE_LOAD_OPENBSD_DEV_CRYPTO
-    OSSL_ENGINE_LOAD_IF_MATCH(openbsd_dev_crypto, OPENBSD_DEV_CRYPTO);
 #endif
     OSSL_ENGINE_LOAD_IF_MATCH(openssl, OPENSSL);
     rb_warning("no such builtin loader for `%"PRIsVALUE"'", name);
