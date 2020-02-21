@@ -211,45 +211,54 @@ __EOC__
 
   def test_sections
     assert_equal(['CA_default', 'ca', 'default'], @it.sections.sort)
-    @it['new_section'] = {'foo' => 'bar'}
-    assert_equal(['CA_default', 'ca', 'default', 'new_section'], @it.sections.sort)
-    @it['new_section'] = {}
-    assert_equal(['CA_default', 'ca', 'default', 'new_section'], @it.sections.sort)
+    # OpenSSL::Config#[]= is deprecated
+    EnvUtil.suppress_warning do
+      @it['new_section'] = {'foo' => 'bar'}
+      assert_equal(['CA_default', 'ca', 'default', 'new_section'], @it.sections.sort)
+      @it['new_section'] = {}
+      assert_equal(['CA_default', 'ca', 'default', 'new_section'], @it.sections.sort)
+    end
   end
 
   def test_add_value
-    c = OpenSSL::Config.new
-    assert_equal("", c.to_s)
-    # add key
-    c.add_value('default', 'foo', 'bar')
-    assert_equal("[ default ]\nfoo=bar\n\n", c.to_s)
-    # add another key
-    c.add_value('default', 'baz', 'qux')
-    assert_equal('bar', c['default']['foo'])
-    assert_equal('qux', c['default']['baz'])
-    # update the value
-    c.add_value('default', 'baz', 'quxxx')
-    assert_equal('bar', c['default']['foo'])
-    assert_equal('quxxx', c['default']['baz'])
-    # add section and key
-    c.add_value('section', 'foo', 'bar')
-    assert_equal('bar', c['default']['foo'])
-    assert_equal('quxxx', c['default']['baz'])
-    assert_equal('bar', c['section']['foo'])
+    # OpenSSL::Config#add_value is deprecated
+    EnvUtil.suppress_warning do
+      c = OpenSSL::Config.new
+      assert_equal("", c.to_s)
+      # add key
+      c.add_value('default', 'foo', 'bar')
+      assert_equal("[ default ]\nfoo=bar\n\n", c.to_s)
+      # add another key
+      c.add_value('default', 'baz', 'qux')
+      assert_equal('bar', c['default']['foo'])
+      assert_equal('qux', c['default']['baz'])
+      # update the value
+      c.add_value('default', 'baz', 'quxxx')
+      assert_equal('bar', c['default']['foo'])
+      assert_equal('quxxx', c['default']['baz'])
+      # add section and key
+      c.add_value('section', 'foo', 'bar')
+      assert_equal('bar', c['default']['foo'])
+      assert_equal('quxxx', c['default']['baz'])
+      assert_equal('bar', c['section']['foo'])
+    end
   end
 
   def test_aset
-    @it['foo'] = {'bar' => 'baz'}
-    assert_equal({'bar' => 'baz'}, @it['foo'])
-    @it['foo'] = {'bar' => 'qux', 'baz' => 'quxx'}
-    assert_equal({'bar' => 'qux', 'baz' => 'quxx'}, @it['foo'])
+    # OpenSSL::Config#[]= is deprecated
+    EnvUtil.suppress_warning do
+      @it['foo'] = {'bar' => 'baz'}
+      assert_equal({'bar' => 'baz'}, @it['foo'])
+      @it['foo'] = {'bar' => 'qux', 'baz' => 'quxx'}
+      assert_equal({'bar' => 'qux', 'baz' => 'quxx'}, @it['foo'])
 
-    # OpenSSL::Config is add only for now.
-    @it['foo'] = {'foo' => 'foo'}
-    assert_equal({'foo' => 'foo', 'bar' => 'qux', 'baz' => 'quxx'}, @it['foo'])
-    # you cannot override or remove any section and key.
-    @it['foo'] = {}
-    assert_equal({'foo' => 'foo', 'bar' => 'qux', 'baz' => 'quxx'}, @it['foo'])
+      # OpenSSL::Config is add only for now.
+      @it['foo'] = {'foo' => 'foo'}
+      assert_equal({'foo' => 'foo', 'bar' => 'qux', 'baz' => 'quxx'}, @it['foo'])
+      # you cannot override or remove any section and key.
+      @it['foo'] = {}
+      assert_equal({'foo' => 'foo', 'bar' => 'qux', 'baz' => 'quxx'}, @it['foo'])
+    end
   end
 
   def test_each
@@ -272,32 +281,39 @@ __EOC__
   end
 
   def test_freeze
-    c = OpenSSL::Config.new
-    c['foo'] = [['key', 'value']]
-    c.freeze
+    @it.freeze
 
-    bug = '[ruby-core:18377]'
-    # RuntimeError for 1.9, TypeError for 1.8
-    e = assert_raise(TypeError, bug) do
-      c['foo'] = [['key', 'wrong']]
+    # Modifying OpenSSL::Config produces a warning
+    EnvUtil.suppress_warning do
+      bug = '[ruby-core:18377]'
+      # RuntimeError for 1.9, TypeError for 1.8
+      e = assert_raise(TypeError, bug) do
+        @it['foo'] = [['key', 'wrong']]
+      end
+      assert_match(/can't modify/, e.message, bug)
     end
-    assert_match(/can't modify/, e.message, bug)
   end
 
   def test_dup
     assert(!@it.sections.empty?)
     c = @it.dup
     assert_equal(@it.sections.sort, c.sections.sort)
-    @it['newsection'] = {'a' => 'b'}
-    assert_not_equal(@it.sections.sort, c.sections.sort)
+    # OpenSSL::Config#[]= is deprecated
+    EnvUtil.suppress_warning do
+      @it['newsection'] = {'a' => 'b'}
+      assert_not_equal(@it.sections.sort, c.sections.sort)
+    end
   end
 
   def test_clone
     assert(!@it.sections.empty?)
     c = @it.clone
     assert_equal(@it.sections.sort, c.sections.sort)
-    @it['newsection'] = {'a' => 'b'}
-    assert_not_equal(@it.sections.sort, c.sections.sort)
+    # OpenSSL::Config#[]= is deprecated
+    EnvUtil.suppress_warning do
+      @it['newsection'] = {'a' => 'b'}
+      assert_not_equal(@it.sections.sort, c.sections.sort)
+    end
   end
 end
 
