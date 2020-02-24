@@ -350,7 +350,14 @@ ossl_ssl_verify_callback(int preverify_ok, X509_STORE_CTX *ctx)
 	    rb_ivar_set(ssl_obj, ID_callback_state, INT2NUM(status));
 	    return 0;
 	}
-	preverify_ok = ret == Qtrue;
+        if (ret != Qtrue) {
+            preverify_ok = 0;
+#if defined(X509_V_ERR_HOSTNAME_MISMATCH)
+            X509_STORE_CTX_set_error(ctx, X509_V_ERR_HOSTNAME_MISMATCH);
+#else
+            X509_STORE_CTX_set_error(ctx, X509_V_ERR_CERT_REJECTED);
+#endif
+        }
     }
 
     return ossl_verify_cb_call(cb, preverify_ok, ctx);
