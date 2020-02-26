@@ -1,0 +1,137 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    name: >-
+      ${{ matrix.os }} ${{ matrix.ruby }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, macos-latest ]
+        ruby: [ head, 2.7, 2.6, 2.5, 2.4, 2.3 ]
+    steps:
+      - name: repo checkout
+        uses: actions/checkout@v2
+
+      - name: load ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+
+      - name: depends
+        run:  rake install_dependencies
+
+      - name: compile
+        run:  rake compile -- --enable-debug
+
+      - name: test
+        run:  rake test TESTOPTS="-v --no-show-detail-immediately" OSSL_MDEBUG=1
+
+  test-windows:
+    name: >-
+      ${{ matrix.os }} ${{ matrix.ruby }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ windows-latest ]
+        ruby: [ mswin, mingw, 2.7, 2.6, 2.5, 2.4, 2.3 ]
+    steps:
+      - name: repo checkout
+        uses: actions/checkout@v2
+
+      - name: load ruby, update gcc, install openssl
+        uses: MSP-Greg/actions-ruby@mswin
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          base: update
+          mingw: openssl
+
+      - name: depends
+        run:  rake install_dependencies
+
+      - name: compile
+        shell: cmd
+        env:
+          RVERS: ${{ matrix.ruby }}
+        run:  |
+          if "%RVERS%" == "mswin" (
+            call "%VCVARS%"
+            rake compile -- --with-openssl-dir=C:/openssl-win --enable-debug
+          ) else (
+            if "%RVERS%" == "2.3" (
+              rake compile -- --with-openssl-dir=C:/openssl-win --enable-debug
+            ) else (
+              rake compile -- --enable-debug
+            )
+          )
+
+      - name: test
+        run:  rake test TESTOPTS="-v --no-show-detail-immediately" OSSL_MDEBUG=1
+
+  test-openssls:
+    name: >-
+      ${{ matrix.openssl }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest ]
+        ruby: [ 2.7 ]
+        openssl:
+          - openssl-1.0.1u # EOL
+          - openssl-1.0.2u # EOL
+          - openssl-1.1.0l # EOL
+          - openssl-1.1.1d
+          # - libressl-2.3.7 # EOL
+          # - libressl-2.4.5 # EOL
+          # - libressl-2.5.5 # EOL
+          # - libressl-2.6.5 # EOL
+          - libressl-2.7.5 # EOL
+          - libressl-2.8.3 # EOL
+          - libressl-2.9.2
+          - libressl-3.0.2
+    steps:
+      - name: repo checkout
+        uses: actions/checkout@v2
+
+      - name: prepare openssl
+        run: |
+          mkdir -p tmp/build-openssl && cd tmp/build-openssl
+          case ${{ matrix.openssl }} in
+          openssl-*)
+            curl -OL https://ftp.openssl.org/source/${{ matrix.openssl }}.tar.gz
+            tar xf ${{ matrix.openssl }}.tar.gz && cd ${{ matrix.openssl }}
+            # shared is required for 1.0.x.
+            ./Configure --prefix=$HOME/.openssl/${{ matrix.openssl }} \
+                shared linux-x86_64
+            make depend
+            ;;
+          libressl-*)
+            curl -OL https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/${{ matrix.openssl }}.tar.gz
+            tar xf ${{ matrix.openssl }}.tar.gz && cd ${{ matrix.openssl }}
+            ./configure --prefix=$HOME/.openssl/${{ matrix.openssl }}
+            ;;
+          *)
+            false
+            ;;
+          esac
+          make -j4
+          make install_sw
+
+      - name: load ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+
+      - name: depends
+        run:  rake install_dependencies
+
+      - name: compile
+        run:  rake compile -- --enable-debug --with-openssl-dir=$HOME/.openssl/${{ matrix.openssl }}
+
+      - name: test
+        run:  rake test TESTOPTS="-v --no-show-detail-immediately" OSSL_MDEBUG=1
