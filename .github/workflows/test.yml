@@ -1,15 +1,43 @@
-name: Windows
+name: CI
 
 on: [push, pull_request]
 
 jobs:
-  windows:
+  test:
     name: >-
-      ${{ matrix.ruby }}  windows-latest
-    runs-on: windows-latest
+      ${{ matrix.os }} ${{ matrix.ruby }}
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
+        os: [ ubuntu-latest, macos-latest ]
+        ruby: [ head, 2.7, 2.6, 2.5, 2.4, 2.3 ]
+    steps:
+      - name: repo checkout
+        uses: actions/checkout@v2
+
+      - name: load ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+
+      - name: depends
+        run:  rake install_dependencies
+
+      - name: compile
+        run:  rake compile -- --enable-debug
+
+      - name: test
+        run:  rake test TESTOPTS="-v --no-show-detail-immediately" OSSL_MDEBUG=1
+
+  test-windows:
+    name: >-
+      ${{ matrix.os }} ${{ matrix.ruby }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ windows-latest ]
         ruby: [ mswin, mingw, 2.7, 2.6, 2.5, 2.4, 2.3 ]
     steps:
       - name: repo checkout
@@ -43,5 +71,3 @@ jobs:
 
       - name: test
         run:  rake test TESTOPTS="-v --no-show-detail-immediately" OSSL_MDEBUG=1
-        env:
-          CI: true
