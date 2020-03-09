@@ -1325,12 +1325,16 @@ ossl_sslctx_add_certificate(int argc, VALUE *argv, VALUE self)
 static VALUE
 ossl_sslctx_add_certificate_chain_file(VALUE self, VALUE path)
 {
-    StringValue(path);
-    SSL_CTX *ctx = NULL;
+    SSL_CTX *ctx;
+    int ret;
 
     GetSSLCTX(self, ctx);
+    StringValueCStr(path);
+    ret = SSL_CTX_use_certificate_chain_file(ctx, RSTRING_PTR(path));
+    if (ret != 1)
+        ossl_raise(eSSLError, "SSL_CTX_use_certificate_chain_file");
 
-    return SSL_CTX_use_certificate_chain_file(ctx, RSTRING_PTR(path)) == 1 ? Qtrue : Qfalse;
+    return Qtrue;
 }
 
 /*
