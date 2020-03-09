@@ -832,6 +832,46 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     end
   end
 
+  def test_verify_hostname_failure_error_code
+    ctx_proc = proc { |ctx|
+      exts = [
+        ["keyUsage", "keyEncipherment,digitalSignature", true],
+        ["subjectAltName", "DNS:a.example.com"],
+      ]
+      ctx.cert = issue_cert(@svr, @svr_key, 4, exts, @ca_cert, @ca_key)
+      ctx.key = @svr_key
+    }
+
+    start_server(ctx_proc: ctx_proc, ignore_listener_error: true) do |port|
+      verify_callback_ok = verify_callback_err = nil
+
+      ctx = OpenSSL::SSL::SSLContext.new
+      ctx.verify_hostname = true
+      ctx.cert_store = OpenSSL::X509::Store.new
+      ctx.cert_store.add_cert(@ca_cert)
+      ctx.verify_mode = OpenSSL::SSL::VERIFY_PEER
+      ctx.verify_callback = -> (preverify_ok, store_ctx) {
+        verify_callback_ok = preverify_ok
+        verify_callback_err = store_ctx.error
+        preverify_ok
+      }
+
+      begin
+        sock = TCPSocket.new("127.0.0.1", port)
+        ssl = OpenSSL::SSL::SSLSocket.new(sock, ctx)
+        ssl.hostname = "b.example.com"
+        assert_handshake_error { ssl.connect }
+        assert_equal false, verify_callback_ok
+        code_expected = openssl?(1, 0, 2) || defined?(OpenSSL::X509::V_ERR_HOSTNAME_MISMATCH) ?
+          OpenSSL::X509::V_ERR_HOSTNAME_MISMATCH :
+          OpenSSL::X509::V_ERR_CERT_REJECTED
+        assert_equal code_expected, verify_callback_err
+      ensure
+        sock&.close
+      end
+    end
+  end
+
   def test_connect_certificate_verify_failed_exception_message
     start_server(ignore_listener_error: true) { |port|
       ctx = OpenSSL::SSL::SSLContext.new
