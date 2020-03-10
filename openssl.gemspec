@@ -1,8 +1,6 @@
-require_relative 'lib/openssl/version'
-
 Gem::Specification.new do |spec|
   spec.name          = "openssl"
-  spec.version       = OpenSSL::VERSION
+  spec.version       = "2.2.0"
   spec.authors       = ["Martin Bosslet", "SHIBATA Hiroshi", "Zachary Scott", "Kazuki Yamaguchi"]
   spec.email         = ["ruby-core@ruby-lang.org"]
   spec.summary       = %q{OpenSSL provides SSL, TLS and general purpose cryptography.}
