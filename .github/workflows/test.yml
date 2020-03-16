@@ -43,31 +43,19 @@ jobs:
       - name: repo checkout
         uses: actions/checkout@v2
 
-      - name: load ruby, update gcc, install openssl
-        uses: MSP-Greg/actions-ruby@mswin
+      - name: load ruby, install/update gcc, install openssl
+        uses: MSP-Greg/setup-ruby-pkgs@v1
         with:
           ruby-version: ${{ matrix.ruby }}
-          base: update
-          mingw: openssl
+          mingw: _upgrade_ openssl
 
       - name: depends
         run:  rake install_dependencies
 
+      # SSL_DIR is set as needed by MSP-Greg/setup-ruby-pkgs
+      # only used with mswin
       - name: compile
-        shell: cmd
-        env:
-          RVERS: ${{ matrix.ruby }}
-        run:  |
-          if "%RVERS%" == "mswin" (
-            call "%VCVARS%"
-            rake compile -- --with-openssl-dir=C:/openssl-win --enable-debug
-          ) else (
-            if "%RVERS%" == "2.3" (
-              rake compile -- --with-openssl-dir=C:/openssl-win --enable-debug
-            ) else (
-              rake compile -- --enable-debug
-            )
-          )
+        run:  rake compile -- --enable-debug $env:SSL_DIR
 
       - name: test
         run:  rake test TESTOPTS="-v --no-show-detail-immediately" OSSL_MDEBUG=1
