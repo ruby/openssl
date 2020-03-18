@@ -85,7 +85,7 @@ jobs:
           - openssl-1.0.1u # EOL
           - openssl-1.0.2u # EOL
           - openssl-1.1.0l # EOL
-          - openssl-1.1.1d
+          - openssl-1.1.1e
           # - libressl-2.3.7 # EOL
           # - libressl-2.4.5 # EOL
           # - libressl-2.5.5 # EOL
