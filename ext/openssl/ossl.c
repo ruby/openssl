@@ -1166,6 +1166,7 @@ Init_openssl(void)
      */
 #if !defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000
     rb_define_const(mOSSL, "OPENSSL_LIBRARY_VERSION", rb_str_new2(OpenSSL_version(OPENSSL_VERSION)));
+    rb_define_const(mOSSL, "OPENSSL_LIBRARY_VERSION_NUMBER", INT2NUM(OpenSSL_version_num()));
 #else
     rb_define_const(mOSSL, "OPENSSL_LIBRARY_VERSION", rb_str_new2(SSLeay_version(SSLEAY_VERSION)));
 #endif
