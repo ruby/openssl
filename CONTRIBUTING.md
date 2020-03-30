@@ -80,7 +80,7 @@ $ docker-compose run debug
 ```
 
 All possible values for `RUBY_VERSION` and `OPENSSL_VERSION` can be found in
-[`.travis.yml`](https://github.com/ruby/openssl/tree/master/.travis.yml).
+[`test.yml`](https://github.com/ruby/openssl/tree/master/.github/workflows/test.yml).
 
 **NOTE**: these commands must be run from the openssl repository root, in order
 to use the
