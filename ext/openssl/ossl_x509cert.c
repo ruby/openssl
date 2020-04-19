@@ -705,6 +705,37 @@ ossl_x509_eq(VALUE self, VALUE other)
 }
 
 /*
+ * call-seq:
+ *    cert.load_chained_cert_from_file(path) -> [certs...]
+ *
+ * Read the chained certificates from specified file path.
+ */
+static VALUE
+ossl_x509_load_chained_cert_from_file(VALUE self, VALUE path)
+{
+    BIO *in;
+    X509 *x509;
+    VALUE ary, cert;
+
+    in = BIO_new(BIO_s_file());
+    if (in == NULL)
+        ossl_raise(eX509CertError, NULL);
+
+    if (BIO_read_filename(in, StringValueCStr(path)) <= 0)
+        ossl_raise(eX509CertError, NULL);
+
+    while ((x509 = PEM_read_bio_X509(in, NULL, NULL, NULL)) != NULL) {
+        cert = ossl_x509_new(x509);
+        rb_ary_push(ary, cert);
+        X509_free(x509);
+    }
+
+    BIO_free(in);
+    return ary;
+}
+
+
+/*
  * INIT
  */
 void
@@ -843,4 +874,5 @@ Init_ossl_x509cert(void)
     rb_define_method(cX509Cert, "add_extension", ossl_x509_add_extension, 1);
     rb_define_method(cX509Cert, "inspect", ossl_x509_inspect, 0);
     rb_define_method(cX509Cert, "==", ossl_x509_eq, 1);
+    rb_define_method(cX509Cert, "load_chained_cert_from_file", ossl_x509_load_chained_cert_from_file, 1);
 }
