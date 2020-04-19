@@ -705,6 +705,60 @@ ossl_x509_eq(VALUE self, VALUE other)
 }
 
 /*
+ * call-seq:
+ *    cert.load_chained_cert_from_file(path) -> [certs...]
+ *
+ * Read the chained certificates from specified file path.
+ */
+static VALUE
+ossl_x509_load_chained_cert_from_file(VALUE self, VALUE path)
+{
+    BIO *in;
+    X509 *x509;
+    VALUE ary = rb_ary_new();
+    VALUE cert;
+
+    in = BIO_new(BIO_s_file());
+    if (in == NULL)
+        ossl_raise(eX509CertError, NULL);
+
+    if (BIO_read_filename(in, StringValueCStr(path)) <= 0)
+        ossl_raise(eX509CertError, NULL);
+    
+    /* check the certificate format is PEM or DER */
+    if ((x509 = PEM_read_bio_X509(in, NULL, NULL, NULL)) != NULL) {
+        /* case 1: certificate format is PEM */
+        do {
+            cert = ossl_x509_new(x509);
+            rb_ary_push(ary, cert);
+            X509_free(x509);
+        } while ((x509 = PEM_read_bio_X509(in, NULL, NULL, NULL)) != NULL);
+
+        BIO_free(in);
+        return ary;
+    }
+
+    /* certificate format is not PEM */
+    OSSL_BIO_reset(in);
+    if ((x509 = d2i_X509_bio(in, NULL)) != NULL) {
+        /* case 2: certificate format is DER */
+        do {
+            cert = ossl_x509_new(x509);
+            rb_ary_push(ary, cert);
+            X509_free(x509);
+        } while ((x509 = d2i_X509_bio(in, NULL)) != NULL);
+
+        BIO_free(in);
+        return ary;
+    }
+
+    /* error: certificate format is not both PEM or DER */
+    BIO_free(in);
+    ossl_raise(eX509CertError, NULL);
+}
+
+
+/*
  * INIT
  */
 void
@@ -843,4 +897,5 @@ Init_ossl_x509cert(void)
     rb_define_method(cX509Cert, "add_extension", ossl_x509_add_extension, 1);
     rb_define_method(cX509Cert, "inspect", ossl_x509_inspect, 0);
     rb_define_method(cX509Cert, "==", ossl_x509_eq, 1);
+    rb_define_method(cX509Cert, "load_chained_cert_from_file", ossl_x509_load_chained_cert_from_file, 1);
 }

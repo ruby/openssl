@@ -338,6 +338,20 @@ module OpenSSL
           q.text 'not_after='; q.pp self.not_after
         }
       end
+
+      # TODO: sikuan: Load the certificates (PEM, DER, etc.) from file, using BIO
+      #     input   string (File path)
+      #     output  array (Array of Certificate objects)
+      def load_file(path)
+        return load_chained_cert_from_file(path)
+      end
+
+      # TODO: sikuan: Load the certificates (PEM, DER, etc.) from BIO (various data sources)
+      #     input   cert content (DER(ASN1) or PEM)
+      #     output  array (Array of Certificate objects)
+      def read_certificates(cert_content)
+        raise NotImplementedError
+      end
     end
 
     class CRL
