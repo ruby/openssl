@@ -715,7 +715,8 @@ ossl_x509_load_chained_cert_from_file(VALUE self, VALUE path)
 {
     BIO *in;
     X509 *x509;
-    VALUE ary, cert;
+    VALUE ary = rb_ary_new();
+    VALUE cert;
 
     in = BIO_new(BIO_s_file());
     if (in == NULL)
