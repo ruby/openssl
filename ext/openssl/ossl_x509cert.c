@@ -724,15 +724,37 @@ ossl_x509_load_chained_cert_from_file(VALUE self, VALUE path)
 
     if (BIO_read_filename(in, StringValueCStr(path)) <= 0)
         ossl_raise(eX509CertError, NULL);
+    
+    /* check the certificate format is PEM or DER */
+    if ((x509 = PEM_read_bio_X509(in, NULL, NULL, NULL)) != NULL) {
+        /* case 1: certificate format is PEM */
+        do {
+            cert = ossl_x509_new(x509);
+            rb_ary_push(ary, cert);
+            X509_free(x509);
+        } while ((x509 = PEM_read_bio_X509(in, NULL, NULL, NULL)) != NULL);
 
-    while ((x509 = PEM_read_bio_X509(in, NULL, NULL, NULL)) != NULL) {
-        cert = ossl_x509_new(x509);
-        rb_ary_push(ary, cert);
-        X509_free(x509);
+        BIO_free(in);
+        return ary;
     }
 
+    /* certificate format is not PEM */
+    OSSL_BIO_reset(in);
+    if ((x509 = d2i_X509_bio(in, NULL)) != NULL) {
+        /* case 2: certificate format is DER */
+        do {
+            cert = ossl_x509_new(x509);
+            rb_ary_push(ary, cert);
+            X509_free(x509);
+        } while ((x509 = d2i_X509_bio(in, NULL)) != NULL);
+
+        BIO_free(in);
+        return ary;
+    }
+
+    /* error: certificate format is not both PEM or DER */
     BIO_free(in);
-    return ary;
+    ossl_raise(eX509CertError, NULL);
 }
 
 
