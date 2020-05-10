@@ -24,7 +24,7 @@ module OpenSSL
     #
     # which is equivalent to:
     #
-    #   OpenSSL::Digest.digest('SHA256', "abc")
+    #   OpenSSL::Digest.new("SHA256").digest("abc")
 
     def self.digest(name, data)
       super(data, name)
@@ -42,7 +42,10 @@ module OpenSSL
         define_method(:hexdigest) {|data| new.hexdigest(data)}
       }
 
-      const_set(name.tr('-', '_'), klass)
+      constant_name = name.tr('-', '_')
+      const_set(constant_name, klass)
+      deprecate_constant(constant_name)
+      klass
     end
 
     # Deprecated.

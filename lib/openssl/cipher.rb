@@ -22,6 +22,8 @@ module OpenSSL
         }
       }
       const_set(name, klass)
+      deprecate_constant(name)
+      klass
     }
 
     %w(128 192 256).each{|keylen|
@@ -30,7 +32,10 @@ module OpenSSL
           super("aes-#{keylen}-#{mode}".downcase)
         }
       }
-      const_set("AES#{keylen}", klass)
+      name = "AES#{keylen}"
+      const_set(name, klass)
+      deprecate_constant(name)
+      klass
     }
 
     # call-seq:

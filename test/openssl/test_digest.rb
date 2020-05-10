@@ -7,7 +7,7 @@ class OpenSSL::TestDigest < OpenSSL::TestCase
   def setup
     super
     @d1 = OpenSSL::Digest.new("MD5")
-    @d2 = OpenSSL::Digest::MD5.new
+    @d2 = EnvUtil.suppress_warning { OpenSSL::Digest::MD5.new }
   end
 
   def test_digest
@@ -54,10 +54,12 @@ class OpenSSL::TestDigest < OpenSSL::TestCase
   end
 
   def test_digest_constants
-    %w{MD4 MD5 RIPEMD160 SHA1 SHA224 SHA256 SHA384 SHA512}.each do |name|
-      assert_not_nil(OpenSSL::Digest.new(name))
-      klass = OpenSSL::Digest.const_get(name.tr('-', '_'))
-      assert_not_nil(klass.new)
+    EnvUtil.suppress_warning do
+      %w{MD4 MD5 RIPEMD160 SHA1 SHA224 SHA256 SHA384 SHA512}.each do |name|
+        assert_not_nil(OpenSSL::Digest.new(name))
+        klass = OpenSSL::Digest.const_get(name.tr('-', '_'))
+        assert_not_nil(klass.new)
+      end
     end
   end
 
@@ -116,14 +118,6 @@ class OpenSSL::TestDigest < OpenSSL::TestCase
     check_digest(OpenSSL::ASN1::ObjectId.new("SHA256"))
     check_digest(OpenSSL::ASN1::ObjectId.new("SHA384"))
     check_digest(OpenSSL::ASN1::ObjectId.new("SHA512"))
-  end
-
-  def test_openssl_digest
-    assert_equal OpenSSL::Digest::MD5, OpenSSL::Digest("MD5")
-
-    assert_raise NameError do
-      OpenSSL::Digest("no such digest")
-    end
   end
 
   private

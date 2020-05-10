@@ -9,6 +9,9 @@ Compatibility notes
   [[GitHub #266]](https://github.com/ruby/openssl/pull/266)
 * Deprecate `OpenSSL::Config#add_value` and `#[]=` for future removal.
   [[GitHub #322]](https://github.com/ruby/openssl/pull/322)
+* Deprecate algorithmic constants for `OpenSSL::Cipher` and `OpenSSL::Digest` 
+  for future removal.
+  [[GitHub #366]](https://github.com/ruby/openssl/pull/366)
 
 
 Notable changes
