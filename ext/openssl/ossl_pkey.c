@@ -197,6 +197,226 @@ ossl_pkey_new_from_data(int argc, VALUE *argv, VALUE self)
     return ossl_pkey_new(pkey);
 }
 
+static VALUE
+pkey_gen_apply_options_i(RB_BLOCK_CALL_FUNC_ARGLIST(i, ctx_v))
+{
+    VALUE key = rb_ary_entry(i, 0), value = rb_ary_entry(i, 1);
+    EVP_PKEY_CTX *ctx = (EVP_PKEY_CTX *)ctx_v;
+
+    if (SYMBOL_P(key))
+        key = rb_sym2str(key);
+    value = rb_String(value);
+
+    if (EVP_PKEY_CTX_ctrl_str(ctx, StringValueCStr(key), StringValueCStr(value)) <= 0)
+        ossl_raise(ePKeyError, "EVP_PKEY_CTX_ctrl_str(ctx, %+"PRIsVALUE", %+"PRIsVALUE")",
+                   key, value);
+    return Qnil;
+}
+
+static VALUE
+pkey_gen_apply_options0(VALUE args_v)
+{
+    VALUE *args = (VALUE *)args_v;
+
+    rb_block_call(args[1], rb_intern("each"), 0, NULL,
+                  pkey_gen_apply_options_i, args[0]);
+    return Qnil;
+}
+
+struct pkey_blocking_generate_arg {
+    EVP_PKEY_CTX *ctx;
+    EVP_PKEY *pkey;
+    int state;
+    int yield: 1;
+    int genparam: 1;
+    int stop: 1;
+};
+
+static VALUE
+pkey_gen_cb_yield(VALUE ctx_v)
+{
+    EVP_PKEY_CTX *ctx = (void *)ctx_v;
+    int i, info_num;
+    VALUE *argv;
+
+    info_num = EVP_PKEY_CTX_get_keygen_info(ctx, -1);
+    argv = ALLOCA_N(VALUE, info_num);
+    for (i = 0; i < info_num; i++)
+        argv[i] = INT2NUM(EVP_PKEY_CTX_get_keygen_info(ctx, i));
+
+    return rb_yield_values2(info_num, argv);
+}
+
+static int
+pkey_gen_cb(EVP_PKEY_CTX *ctx)
+{
+    struct pkey_blocking_generate_arg *arg = EVP_PKEY_CTX_get_app_data(ctx);
+
+    if (arg->yield) {
+        int state;
+        rb_protect(pkey_gen_cb_yield, (VALUE)ctx, &state);
+        if (state) {
+            arg->stop = 1;
+            arg->state = state;
+        }
+    }
+    return !arg->stop;
+}
+
+static void
+pkey_blocking_gen_stop(void *ptr)
+{
+    struct pkey_blocking_generate_arg *arg = ptr;
+    arg->stop = 1;
+}
+
+static void *
+pkey_blocking_gen(void *ptr)
+{
+    struct pkey_blocking_generate_arg *arg = ptr;
+
+    if (arg->genparam && EVP_PKEY_paramgen(arg->ctx, &arg->pkey) <= 0)
+        return NULL;
+    if (!arg->genparam && EVP_PKEY_keygen(arg->ctx, &arg->pkey) <= 0)
+        return NULL;
+    return arg->pkey;
+}
+
+static VALUE
+pkey_generate(int argc, VALUE *argv, VALUE self, int genparam)
+{
+    EVP_PKEY_CTX *ctx;
+    VALUE alg, options;
+    struct pkey_blocking_generate_arg gen_arg = { 0 };
+    int state;
+
+    rb_scan_args(argc, argv, "11", &alg, &options);
+    if (rb_obj_is_kind_of(alg, cPKey)) {
+        EVP_PKEY *base_pkey;
+
+        GetPKey(alg, base_pkey);
+        ctx = EVP_PKEY_CTX_new(base_pkey, NULL/* engine */);
+        if (!ctx)
+            ossl_raise(ePKeyError, "EVP_PKEY_CTX_new");
+    }
+    else {
+        const EVP_PKEY_ASN1_METHOD *ameth;
+        ENGINE *tmpeng;
+        int pkey_id;
+
+        StringValue(alg);
+        ameth = EVP_PKEY_asn1_find_str(&tmpeng, RSTRING_PTR(alg),
+                                       RSTRING_LENINT(alg));
+        if (!ameth)
+            ossl_raise(ePKeyError, "algorithm %"PRIsVALUE" not found", alg);
+        EVP_PKEY_asn1_get0_info(&pkey_id, NULL, NULL, NULL, NULL, ameth);
+#if !defined(OPENSSL_NO_ENGINE)
+        if (tmpeng)
+            ENGINE_finish(tmpeng);
+#endif
+
+        ctx = EVP_PKEY_CTX_new_id(pkey_id, NULL/* engine */);
+        if (!ctx)
+            ossl_raise(ePKeyError, "EVP_PKEY_CTX_new_id");
+    }
+
+    if (genparam && EVP_PKEY_paramgen_init(ctx) <= 0) {
+        EVP_PKEY_CTX_free(ctx);
+        ossl_raise(ePKeyError, "EVP_PKEY_paramgen_init");
+    }
+    if (!genparam && EVP_PKEY_keygen_init(ctx) <= 0) {
+        EVP_PKEY_CTX_free(ctx);
+        ossl_raise(ePKeyError, "EVP_PKEY_keygen_init");
+    }
+
+    if (!NIL_P(options)) {
+        VALUE args[2];
+
+        args[0] = (VALUE)ctx;
+        args[1] = options;
+        rb_protect(pkey_gen_apply_options0, (VALUE)args, &state);
+        if (state) {
+            EVP_PKEY_CTX_free(ctx);
+            rb_jump_tag(state);
+        }
+    }
+
+    gen_arg.genparam = genparam;
+    gen_arg.ctx = ctx;
+    gen_arg.yield = rb_block_given_p();
+    EVP_PKEY_CTX_set_app_data(ctx, &gen_arg);
+    EVP_PKEY_CTX_set_cb(ctx, pkey_gen_cb);
+    if (gen_arg.yield)
+        pkey_blocking_gen(&gen_arg);
+    else
+        rb_thread_call_without_gvl(pkey_blocking_gen, &gen_arg,
+                                   pkey_blocking_gen_stop, &gen_arg);
+    EVP_PKEY_CTX_free(ctx);
+    if (!gen_arg.pkey) {
+        if (gen_arg.state) {
+            ossl_clear_error();
+            rb_jump_tag(gen_arg.state);
+        }
+        else {
+            ossl_raise(ePKeyError, genparam ? "EVP_PKEY_paramgen" : "EVP_PKEY_keygen");
+        }
+    }
+
+    return ossl_pkey_new(gen_arg.pkey);
+}
+
+/*
+ * call-seq:
+ *    OpenSSL::PKey.generate_parameters(algo_name [, options]) -> pkey
+ *
+ * Generates new parameters for the algorithm. _algo_name_ is a String that
+ * represents the algorithm. The optional argument _options_ is a Hash that
+ * specifies the options specific to the algorithm. The order of the options
+ * can be important.
+ *
+ * A block can be passed optionally. The meaning of the arguments passed to
+ * the block varies depending on the implementation of the algorithm. The block
+ * may be called once or multiple times, or may not even be called.
+ *
+ * For the supported options, see the documentation for the 'openssl genpkey'
+ * utility command.
+ *
+ * == Example
+ *   pkey = OpenSSL::PKey.generate_parameters("DSA", "dsa_paramgen_bits" => 2048)
+ *   p pkey.p.num_bits #=> 2048
+ */
+static VALUE
+ossl_pkey_s_generate_parameters(int argc, VALUE *argv, VALUE self)
+{
+    return pkey_generate(argc, argv, self, 1);
+}
+
+/*
+ * call-seq:
+ *    OpenSSL::PKey.generate_key(algo_name [, options]) -> pkey
+ *    OpenSSL::PKey.generate_key(pkey [, options]) -> pkey
+ *
+ * Generates a new key (pair).
+ *
+ * If a String is given as the first argument, it generates a new random key
+ * for the algorithm specified by the name just as ::generate_parameters does.
+ * If an OpenSSL::PKey::PKey is given instead, it generates a new random key
+ * for the same algorithm as the key, using the parameters the key contains.
+ *
+ * See ::generate_parameters for the details of _options_ and the given block.
+ *
+ * == Example
+ *   pkey_params = OpenSSL::PKey.generate_parameters("DSA", "dsa_paramgen_bits" => 2048)
+ *   pkey_params.priv_key #=> nil
+ *   pkey = OpenSSL::PKey.generate_key(pkey_params)
+ *   pkey.priv_key #=> #<OpenSSL::BN 6277...
+ */
+static VALUE
+ossl_pkey_s_generate_key(int argc, VALUE *argv, VALUE self)
+{
+    return pkey_generate(argc, argv, self, 0);
+}
+
 void
 ossl_pkey_check_public_key(const EVP_PKEY *pkey)
 {
@@ -252,12 +472,19 @@ GetPrivPKeyPtr(VALUE obj)
 {
     EVP_PKEY *pkey;
 
-    if (rb_funcallv(obj, id_private_q, 0, NULL) != Qtrue) {
-	ossl_raise(rb_eArgError, "Private key is needed.");
-    }
     GetPKey(obj, pkey);
+    if (OSSL_PKEY_IS_PRIVATE(obj))
+        return pkey;
+    /*
+     * The EVP API does not provide a way to check if the EVP_PKEY has private
+     * components. Assuming it does...
+     */
+    if (!rb_respond_to(obj, id_private_q))
+        return pkey;
+    if (RTEST(rb_funcallv(obj, id_private_q, 0, NULL)))
+        return pkey;
 
-    return pkey;
+    rb_raise(rb_eArgError, "private key is needed");
 }
 
 EVP_PKEY *
@@ -526,35 +753,68 @@ static VALUE
 ossl_pkey_sign(VALUE self, VALUE digest, VALUE data)
 {
     EVP_PKEY *pkey;
-    const EVP_MD *md;
+    const EVP_MD *md = NULL;
     EVP_MD_CTX *ctx;
-    unsigned int buf_len;
-    VALUE str;
-    int result;
+    size_t siglen;
+    int state;
+    VALUE sig;
 
     pkey = GetPrivPKeyPtr(self);
-    md = ossl_evp_get_digestbyname(digest);
+    if (!NIL_P(digest))
+        md = ossl_evp_get_digestbyname(digest);
     StringValue(data);
-    str = rb_str_new(0, EVP_PKEY_size(pkey));
 
     ctx = EVP_MD_CTX_new();
     if (!ctx)
-	ossl_raise(ePKeyError, "EVP_MD_CTX_new");
-    if (!EVP_SignInit_ex(ctx, md, NULL)) {
-	EVP_MD_CTX_free(ctx);
-	ossl_raise(ePKeyError, "EVP_SignInit_ex");
+        ossl_raise(ePKeyError, "EVP_MD_CTX_new");
+    if (EVP_DigestSignInit(ctx, NULL, md, /* engine */NULL, pkey) < 1) {
+        EVP_MD_CTX_free(ctx);
+        ossl_raise(ePKeyError, "EVP_DigestSignInit");
     }
-    if (!EVP_SignUpdate(ctx, RSTRING_PTR(data), RSTRING_LEN(data))) {
-	EVP_MD_CTX_free(ctx);
-	ossl_raise(ePKeyError, "EVP_SignUpdate");
+#if OPENSSL_VERSION_NUMBER >= 0x10101000 && !defined(LIBRESSL_VERSION_NUMBER)
+    if (EVP_DigestSign(ctx, NULL, &siglen, (unsigned char *)RSTRING_PTR(data),
+                       RSTRING_LEN(data)) < 1) {
+        EVP_MD_CTX_free(ctx);
+        ossl_raise(ePKeyError, "EVP_DigestSign");
     }
-    result = EVP_SignFinal(ctx, (unsigned char *)RSTRING_PTR(str), &buf_len, pkey);
+    if (siglen > LONG_MAX)
+        rb_raise(ePKeyError, "signature would be too large");
+    sig = ossl_str_new(NULL, (long)siglen, &state);
+    if (state) {
+        EVP_MD_CTX_free(ctx);
+        rb_jump_tag(state);
+    }
+    if (EVP_DigestSign(ctx, (unsigned char *)RSTRING_PTR(sig), &siglen,
+                       (unsigned char *)RSTRING_PTR(data),
+                       RSTRING_LEN(data)) < 1) {
+        EVP_MD_CTX_free(ctx);
+        ossl_raise(ePKeyError, "EVP_DigestSign");
+    }
+#else
+    if (EVP_DigestSignUpdate(ctx, RSTRING_PTR(data), RSTRING_LEN(data)) < 1) {
+        EVP_MD_CTX_free(ctx);
+        ossl_raise(ePKeyError, "EVP_DigestSignUpdate");
+    }
+    if (EVP_DigestSignFinal(ctx, NULL, &siglen) < 1) {
+        EVP_MD_CTX_free(ctx);
+        ossl_raise(ePKeyError, "EVP_DigestSignFinal");
+    }
+    if (siglen > LONG_MAX)
+        rb_raise(ePKeyError, "signature would be too large");
+    sig = ossl_str_new(NULL, (long)siglen, &state);
+    if (state) {
+        EVP_MD_CTX_free(ctx);
+        rb_jump_tag(state);
+    }
+    if (EVP_DigestSignFinal(ctx, (unsigned char *)RSTRING_PTR(sig),
+                            &siglen) < 1) {
+        EVP_MD_CTX_free(ctx);
+        ossl_raise(ePKeyError, "EVP_DigestSignFinal");
+    }
+#endif
     EVP_MD_CTX_free(ctx);
-    if (!result)
-	ossl_raise(ePKeyError, "EVP_SignFinal");
-    rb_str_set_len(str, buf_len);
-
-    return str;
+    rb_str_set_len(sig, siglen);
+    return sig;
 }
 
 /*
@@ -582,39 +842,99 @@ static VALUE
 ossl_pkey_verify(VALUE self, VALUE digest, VALUE sig, VALUE data)
 {
     EVP_PKEY *pkey;
-    const EVP_MD *md;
+    const EVP_MD *md = NULL;
     EVP_MD_CTX *ctx;
-    int siglen, result;
+    int ret;
 
     GetPKey(self, pkey);
     ossl_pkey_check_public_key(pkey);
-    md = ossl_evp_get_digestbyname(digest);
+    if (!NIL_P(digest))
+        md = ossl_evp_get_digestbyname(digest);
     StringValue(sig);
-    siglen = RSTRING_LENINT(sig);
     StringValue(data);
 
     ctx = EVP_MD_CTX_new();
     if (!ctx)
-	ossl_raise(ePKeyError, "EVP_MD_CTX_new");
-    if (!EVP_VerifyInit_ex(ctx, md, NULL)) {
-	EVP_MD_CTX_free(ctx);
-	ossl_raise(ePKeyError, "EVP_VerifyInit_ex");
+        ossl_raise(ePKeyError, "EVP_MD_CTX_new");
+    if (EVP_DigestVerifyInit(ctx, NULL, md, /* engine */NULL, pkey) < 1) {
+        EVP_MD_CTX_free(ctx);
+        ossl_raise(ePKeyError, "EVP_DigestVerifyInit");
     }
-    if (!EVP_VerifyUpdate(ctx, RSTRING_PTR(data), RSTRING_LEN(data))) {
-	EVP_MD_CTX_free(ctx);
-	ossl_raise(ePKeyError, "EVP_VerifyUpdate");
-    }
-    result = EVP_VerifyFinal(ctx, (unsigned char *)RSTRING_PTR(sig), siglen, pkey);
+#if OPENSSL_VERSION_NUMBER >= 0x10101000 && !defined(LIBRESSL_VERSION_NUMBER)
+    ret = EVP_DigestVerify(ctx, (unsigned char *)RSTRING_PTR(sig),
+                           RSTRING_LEN(sig), (unsigned char *)RSTRING_PTR(data),
+                           RSTRING_LEN(data));
     EVP_MD_CTX_free(ctx);
-    switch (result) {
-    case 0:
-	ossl_clear_error();
-	return Qfalse;
-    case 1:
-	return Qtrue;
-    default:
-	ossl_raise(ePKeyError, "EVP_VerifyFinal");
+    if (ret < 0)
+        ossl_raise(ePKeyError, "EVP_DigestVerify");
+#else
+    if (EVP_DigestVerifyUpdate(ctx, RSTRING_PTR(data), RSTRING_LEN(data)) < 1) {
+        EVP_MD_CTX_free(ctx);
+        ossl_raise(ePKeyError, "EVP_DigestVerifyUpdate");
     }
+    ret = EVP_DigestVerifyFinal(ctx, (unsigned char *)RSTRING_PTR(sig),
+                                RSTRING_LEN(sig));
+    EVP_MD_CTX_free(ctx);
+    if (ret < 0)
+        ossl_raise(ePKeyError, "EVP_DigestVerifyFinal");
+#endif
+    if (ret)
+        return Qtrue;
+    else {
+        ossl_clear_error();
+        return Qfalse;
+    }
+}
+
+/*
+ * call-seq:
+ *    pkey.derive(peer_pkey) -> string
+ *
+ * Derives a shared secret from _pkey_ and _peer_pkey_. _pkey_ must contain
+ * the private components, _peer_pkey_ must contain the public components.
+ */
+static VALUE
+ossl_pkey_derive(int argc, VALUE *argv, VALUE self)
+{
+    EVP_PKEY *pkey, *peer_pkey;
+    EVP_PKEY_CTX *ctx;
+    VALUE peer_pkey_obj, str;
+    size_t keylen;
+    int state;
+
+    GetPKey(self, pkey);
+    rb_scan_args(argc, argv, "1", &peer_pkey_obj);
+    GetPKey(peer_pkey_obj, peer_pkey);
+
+    ctx = EVP_PKEY_CTX_new(pkey, /* engine */NULL);
+    if (!ctx)
+        ossl_raise(ePKeyError, "EVP_PKEY_CTX_new");
+    if (EVP_PKEY_derive_init(ctx) <= 0) {
+        EVP_PKEY_CTX_free(ctx);
+        ossl_raise(ePKeyError, "EVP_PKEY_derive_init");
+    }
+    if (EVP_PKEY_derive_set_peer(ctx, peer_pkey) <= 0) {
+        EVP_PKEY_CTX_free(ctx);
+        ossl_raise(ePKeyError, "EVP_PKEY_derive_set_peer");
+    }
+    if (EVP_PKEY_derive(ctx, NULL, &keylen) <= 0) {
+        EVP_PKEY_CTX_free(ctx);
+        ossl_raise(ePKeyError, "EVP_PKEY_derive");
+    }
+    if (keylen > LONG_MAX)
+        rb_raise(ePKeyError, "derived key would be too large");
+    str = ossl_str_new(NULL, (long)keylen, &state);
+    if (state) {
+        EVP_PKEY_CTX_free(ctx);
+        rb_jump_tag(state);
+    }
+    if (EVP_PKEY_derive(ctx, (unsigned char *)RSTRING_PTR(str), &keylen) <= 0) {
+        EVP_PKEY_CTX_free(ctx);
+        ossl_raise(ePKeyError, "EVP_PKEY_derive");
+    }
+    EVP_PKEY_CTX_free(ctx);
+    rb_str_set_len(str, keylen);
+    return str;
 }
 
 /*
@@ -700,6 +1020,8 @@ Init_ossl_pkey(void)
     cPKey = rb_define_class_under(mPKey, "PKey", rb_cObject);
 
     rb_define_module_function(mPKey, "read", ossl_pkey_new_from_data, -1);
+    rb_define_module_function(mPKey, "generate_parameters", ossl_pkey_s_generate_parameters, -1);
+    rb_define_module_function(mPKey, "generate_key", ossl_pkey_s_generate_key, -1);
 
     rb_define_alloc_func(cPKey, ossl_pkey_alloc);
     rb_define_method(cPKey, "initialize", ossl_pkey_initialize, 0);
@@ -712,6 +1034,7 @@ Init_ossl_pkey(void)
 
     rb_define_method(cPKey, "sign", ossl_pkey_sign, 2);
     rb_define_method(cPKey, "verify", ossl_pkey_verify, 3);
+    rb_define_method(cPKey, "derive", ossl_pkey_derive, -1);
 
     id_private_q = rb_intern("private?");
 
