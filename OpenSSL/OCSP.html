@@ -11,8 +11,11 @@
   var index_rel_prefix = "../";
 </script>
 
-<script src="../js/jquery.js"></script>
-<script src="../js/darkfish.js"></script>
+<script src="../js/navigation.js" defer></script>
+<script src="../js/search.js" defer></script>
+<script src="../js/search_index.js" defer></script>
+<script src="../js/searcher.js" defer></script>
+<script src="../js/darkfish.js" defer></script>
 
 <link href="../css/fonts.css" rel="stylesheet">
 <link href="../css/rdoc.css" rel="stylesheet">
@@ -70,22 +73,17 @@
 
   <section class="description">
     
-<p><a href="OCSP.html">OpenSSL::OCSP</a> implements Online Certificate Status
-Protocol requests and responses.</p>
+<p><a href="OCSP.html"><code>OpenSSL::OCSP</code></a> implements Online Certificate Status Protocol requests and responses.</p>
 
-<p>Creating and sending an <a href="OCSP.html">OCSP</a> request requires a
-subject certificate that contains an <a href="OCSP.html">OCSP</a> URL in an
-authorityInfoAccess extension and the issuer certificate for the subject
-certificate.  First, load the issuer and subject certificates:</p>
+<p>Creating and sending an <a href="OCSP.html"><code>OCSP</code></a> request requires a subject certificate that contains an <a href="OCSP.html"><code>OCSP</code></a> URL in an authorityInfoAccess extension and the issuer certificate for the subject certificate.  First, load the issuer and subject certificates:</p>
 
 <pre class="ruby"><span class="ruby-identifier">subject</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">Certificate</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">subject_pem</span>
 <span class="ruby-identifier">issuer</span>  = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">Certificate</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">issuer_pem</span>
 </pre>
 
-<p>To create the request we need to create a certificate ID for the subject
-certificate so the CA knows which certificate we are asking about:</p>
+<p>To create the request we need to create a certificate ID for the subject certificate so the CA knows which certificate we are asking about:</p>
 
-<pre class="ruby"><span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span><span class="ruby-operator">::</span><span class="ruby-constant">SHA1</span>.<span class="ruby-identifier">new</span>
+<pre class="ruby"><span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;SHA1&#39;</span>)
 <span class="ruby-identifier">certificate_id</span> =
   <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">OCSP</span><span class="ruby-operator">::</span><span class="ruby-constant">CertificateId</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">subject</span>, <span class="ruby-identifier">issuer</span>, <span class="ruby-identifier">digest</span>
 </pre>
@@ -96,33 +94,21 @@ certificate so the CA knows which certificate we are asking about:</p>
 <span class="ruby-identifier">request</span>.<span class="ruby-identifier">add_certid</span> <span class="ruby-identifier">certificate_id</span>
 </pre>
 
-<p>Adding a nonce to the request protects against replay attacks but not all
-CA process the nonce.</p>
+<p>Adding a nonce to the request protects against replay attacks but not all CA process the nonce.</p>
 
 <pre class="ruby"><span class="ruby-identifier">request</span>.<span class="ruby-identifier">add_nonce</span>
 </pre>
 
-<p>To submit the request to the CA for verification we need to extract the <a
-href="OCSP.html">OCSP</a> URI from the subject certificate:</p>
+<p>To submit the request to the CA for verification we need to extract the <a href="OCSP.html"><code>OCSP</code></a> URI from the subject certificate:</p>
 
-<pre class="ruby"><span class="ruby-identifier">authority_info_access</span> = <span class="ruby-identifier">subject</span>.<span class="ruby-identifier">extensions</span>.<span class="ruby-identifier">find</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">extension</span><span class="ruby-operator">|</span>
-  <span class="ruby-identifier">extension</span>.<span class="ruby-identifier">oid</span> <span class="ruby-operator">==</span> <span class="ruby-string">&#39;authorityInfoAccess&#39;</span>
-<span class="ruby-keyword">end</span>
-
-<span class="ruby-identifier">descriptions</span> = <span class="ruby-identifier">authority_info_access</span>.<span class="ruby-identifier">value</span>.<span class="ruby-identifier">split</span> <span class="ruby-string">&quot;\n&quot;</span>
-<span class="ruby-identifier">ocsp</span> = <span class="ruby-identifier">descriptions</span>.<span class="ruby-identifier">find</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">description</span><span class="ruby-operator">|</span>
-  <span class="ruby-identifier">description</span>.<span class="ruby-identifier">start_with?</span> <span class="ruby-string">&#39;OCSP&#39;</span>
-<span class="ruby-keyword">end</span>
+<pre class="ruby"><span class="ruby-identifier">ocsp_uris</span> = <span class="ruby-identifier">subject</span>.<span class="ruby-identifier">ocsp_uris</span>
 
 <span class="ruby-identifier">require</span> <span class="ruby-string">&#39;uri&#39;</span>
 
-<span class="ruby-identifier">ocsp_uri</span> = <span class="ruby-constant">URI</span> <span class="ruby-identifier">ocsp</span>[<span class="ruby-regexp">/URI:(.*)/</span>, <span class="ruby-value">1</span>]
+<span class="ruby-identifier">ocsp_uri</span> = <span class="ruby-constant">URI</span> <span class="ruby-identifier">ocsp_uris</span>[<span class="ruby-value">0</span>]
 </pre>
 
-<p>To submit the request we&#39;ll POST the request to the <a
-href="OCSP.html">OCSP</a> URI (per RFC 2560).  Note that we only handle
-HTTP requests and don&#39;t handle any redirects in this example, so this
-is insufficient for serious use.</p>
+<p>To submit the request we&#39;ll POST the request to the <a href="OCSP.html"><code>OCSP</code></a> URI (per RFC 2560).  Note that we only handle HTTP requests and don&#39;t handle any redirects in this example, so this is insufficient for serious use.</p>
 
 <pre class="ruby"><span class="ruby-identifier">require</span> <span class="ruby-string">&#39;net/http&#39;</span>
 
@@ -136,9 +122,7 @@ is insufficient for serious use.</p>
 <span class="ruby-identifier">response_basic</span> = <span class="ruby-identifier">response</span>.<span class="ruby-identifier">basic</span>
 </pre>
 
-<p>First we check if the response has a valid signature.  Without a valid
-signature we cannot trust it.  If you get a failure here you may be missing
-a system certificate store or may be missing the intermediate certificates.</p>
+<p>First we check if the response has a valid signature.  Without a valid signature we cannot trust it.  If you get a failure here you may be missing a system certificate store or may be missing the intermediate certificates.</p>
 
 <pre class="ruby"><span class="ruby-identifier">store</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">Store</span>.<span class="ruby-identifier">new</span>
 <span class="ruby-identifier">store</span>.<span class="ruby-identifier">set_default_paths</span>
@@ -148,23 +132,17 @@ a system certificate store or may be missing the intermediate certificates.</p>
 <span class="ruby-keyword">end</span>
 </pre>
 
-<p>The response contains the status information (success/fail).  We can
-display the status as a string:</p>
+<p>The response contains the status information (success/fail).  We can display the status as a string:</p>
 
 <pre class="ruby"><span class="ruby-identifier">puts</span> <span class="ruby-identifier">response</span>.<span class="ruby-identifier">status_string</span> <span class="ruby-comment">#=&gt; successful</span>
 </pre>
 
-<p>Next we need to know the response details to determine if the response
-matches our request.  First we check the nonce.  Again, not all CAs support
-a nonce.  See <a
-href="OCSP/Request.html#method-i-check_nonce">OpenSSL::OCSP::Request#check_nonce</a>
-for the meanings of the return values.</p>
+<p>Next we need to know the response details to determine if the response matches our request.  First we check the nonce.  Again, not all CAs support a nonce.  See <a href="OCSP/Request.html#method-i-check_nonce"><code>Request#check_nonce</code></a> for the meanings of the return values.</p>
 
 <pre class="ruby"><span class="ruby-identifier">p</span> <span class="ruby-identifier">request</span>.<span class="ruby-identifier">check_nonce</span> <span class="ruby-identifier">basic_response</span> <span class="ruby-comment">#=&gt; value from -1 to 3</span>
 </pre>
 
-<p>Then extract the status information for the certificate from the basic
-response.</p>
+<p>Then extract the status information for the certificate from the basic response.</p>
 
 <pre class="ruby"><span class="ruby-identifier">single_response</span> = <span class="ruby-identifier">basic_response</span>.<span class="ruby-identifier">find_response</span>(<span class="ruby-identifier">certificate_id</span>)
 
@@ -205,7 +183,7 @@ end</pre>
       
         <dt id="NOCASIGN">NOCASIGN
         
-        <dd><p>(This flag is not used by <a href="../OpenSSL.html">OpenSSL</a> 1.0.1g)</p>
+        <dd><p>(This flag is not used by <a href="../OpenSSL.html"><code>OpenSSL</code></a> 1.0.1g)</p>
         
       
         <dt id="NOCERTS">NOCERTS
@@ -225,7 +203,7 @@ end</pre>
       
         <dt id="NODELEGATED">NODELEGATED
         
-        <dd><p>(This flag is not used by <a href="../OpenSSL.html">OpenSSL</a> 1.0.1g)</p>
+        <dd><p>(This flag is not used by <a href="../OpenSSL.html"><code>OpenSSL</code></a> 1.0.1g)</p>
         
       
         <dt id="NOEXPLICIT">NOEXPLICIT
@@ -275,7 +253,7 @@ end</pre>
       
         <dt id="RESPONSE_STATUS_SUCCESSFUL">RESPONSE_STATUS_SUCCESSFUL
         
-        <dd><p><a href="OCSP/Response.html">Response</a> has valid confirmations</p>
+        <dd><p><a href="OCSP/Response.html"><code>Response</code></a> has valid confirmations</p>
         
       
         <dt id="RESPONSE_STATUS_TRYLATER">RESPONSE_STATUS_TRYLATER
@@ -320,8 +298,7 @@ end</pre>
       
         <dt id="REVOKED_STATUS_REMOVEFROMCRL">REVOKED_STATUS_REMOVEFROMCRL
         
-        <dd><p>The certificate was previously on hold and should now be removed from the
-CRL</p>
+        <dd><p>The certificate was previously on hold and should now be removed from the CRL</p>
         
       
         <dt id="REVOKED_STATUS_SUPERSEDED">REVOKED_STATUS_SUPERSEDED
@@ -341,21 +318,17 @@ CRL</p>
       
         <dt id="V_CERTSTATUS_GOOD">V_CERTSTATUS_GOOD
         
-        <dd><p>Indicates the certificate is not revoked but does not necessarily mean the
-certificate was issued or that this response is within the
-certificate&#39;s validity interval</p>
+        <dd><p>Indicates the certificate is not revoked but does not necessarily mean the certificate was issued or that this response is within the certificate&#39;s validity interval</p>
         
       
         <dt id="V_CERTSTATUS_REVOKED">V_CERTSTATUS_REVOKED
         
-        <dd><p>Indicates the certificate has been revoked either permanently or
-temporarily (on hold).</p>
+        <dd><p>Indicates the certificate has been revoked either permanently or temporarily (on hold).</p>
         
       
         <dt id="V_CERTSTATUS_UNKNOWN">V_CERTSTATUS_UNKNOWN
         
-        <dd><p>Indicates the responder does not know about the certificate being
-requested.</p>
+        <dd><p>Indicates the responder does not know about the certificate being requested.</p>
         
       
         <dt id="V_RESPID_KEY">V_RESPID_KEY
@@ -382,7 +355,7 @@ requested.</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.4.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

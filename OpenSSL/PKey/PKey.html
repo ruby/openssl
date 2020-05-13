@@ -11,8 +11,11 @@
   var index_rel_prefix = "../../";
 </script>
 
-<script src="../../js/jquery.js"></script>
-<script src="../../js/darkfish.js"></script>
+<script src="../../js/navigation.js" defer></script>
+<script src="../../js/search.js" defer></script>
+<script src="../../js/search_index.js" defer></script>
+<script src="../../js/searcher.js" defer></script>
+<script src="../../js/darkfish.js" defer></script>
 
 <link href="../../css/fonts.css" rel="stylesheet">
 <link href="../../css/rdoc.css" rel="stylesheet">
@@ -74,6 +77,18 @@
     
     <li ><a href="#method-c-new">::new</a>
     
+    <li ><a href="#method-i-inspect">#inspect</a>
+    
+    <li ><a href="#method-i-oid">#oid</a>
+    
+    <li ><a href="#method-i-private_to_der">#private_to_der</a>
+    
+    <li ><a href="#method-i-private_to_pem">#private_to_pem</a>
+    
+    <li ><a href="#method-i-public_to_der">#public_to_der</a>
+    
+    <li ><a href="#method-i-public_to_pem">#public_to_pem</a>
+    
     <li ><a href="#method-i-sign">#sign</a>
     
     <li ><a href="#method-i-verify">#verify</a>
@@ -91,15 +106,13 @@
 
   <section class="description">
     
-<p>An abstract class that bundles signature creation (PKey#sign) and
-validation (PKey#verify) that is common to all implementations except <a
-href="DH.html">OpenSSL::PKey::DH</a></p>
+<p>An abstract class that bundles signature creation (<a href="PKey.html#method-i-sign"><code>PKey#sign</code></a>) and validation (<a href="PKey.html#method-i-verify"><code>PKey#verify</code></a>) that is common to all implementations except <a href="DH.html"><code>OpenSSL::PKey::DH</code></a></p>
 <ul><li>
-<p><a href="RSA.html">OpenSSL::PKey::RSA</a></p>
+<p><a href="RSA.html"><code>OpenSSL::PKey::RSA</code></a></p>
 </li><li>
-<p><a href="DSA.html">OpenSSL::PKey::DSA</a></p>
+<p><a href="DSA.html"><code>OpenSSL::PKey::DSA</code></a></p>
 </li><li>
-<p><a href="EC.html">OpenSSL::PKey::EC</a></p>
+<p><a href="EC.html"><code>OpenSSL::PKey::EC</code></a></p>
 </li></ul>
 
   </section>
@@ -137,8 +150,7 @@ href="DH.html">OpenSSL::PKey::DH</a></p>
 
         <div class="method-description">
           
-          <p>Because <a href="PKey.html">PKey</a> is an abstract class, actually calling
-this method explicitly will raise a NotImplementedError.</p>
+          <p>Because <a href="PKey.html"><code>PKey</code></a> is an abstract class, actually calling this method explicitly will raise a NotImplementedError.</p>
           
           
 
@@ -170,6 +182,254 @@ ossl_pkey_initialize(VALUE self)
        </header>
 
     
+      <div id="method-i-inspect" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            inspect &rarr; string
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Returns a string describing the <a href="PKey.html"><code>PKey</code></a> object.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="inspect-source">
+            <pre>static VALUE
+ossl_pkey_inspect(VALUE self)
+{
+    EVP_PKEY *pkey;
+    int nid;
+
+    GetPKey(self, pkey);
+    nid = EVP_PKEY_id(pkey);
+    return rb_sprintf(&quot;#&lt;%&quot;PRIsVALUE&quot;:%p oid=%s&gt;&quot;,
+                      rb_class_name(CLASS_OF(self)), (void *)self,
+                      OBJ_nid2sn(nid));
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-oid" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            oid &rarr; string
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Returns the short name of the OID associated with <em>pkey</em>.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="oid-source">
+            <pre>static VALUE
+ossl_pkey_oid(VALUE self)
+{
+    EVP_PKEY *pkey;
+    int nid;
+
+    GetPKey(self, pkey);
+    nid = EVP_PKEY_id(pkey);
+    return rb_str_new_cstr(OBJ_nid2sn(nid));
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-private_to_der" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            private_to_der                   &rarr; string
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            private_to_der(cipher, password) &rarr; string
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Serializes the private key to DER-encoded PKCS #8 format. If called without arguments, unencrypted PKCS #8 PrivateKeyInfo format is used. If called with a cipher name and a password, PKCS #8 EncryptedPrivateKeyInfo format with PBES2 encryption scheme is used.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="private_to_der-source">
+            <pre>static VALUE
+ossl_pkey_private_to_der(int argc, VALUE *argv, VALUE self)
+{
+    return do_pkcs8_export(argc, argv, self, 1);
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-private_to_pem" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            private_to_pem                   &rarr; string
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            private_to_pem(cipher, password) &rarr; string
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Serializes the private key to PEM-encoded PKCS #8 format. See <a href="PKey.html#method-i-private_to_der"><code>private_to_der</code></a> for more details.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="private_to_pem-source">
+            <pre>static VALUE
+ossl_pkey_private_to_pem(int argc, VALUE *argv, VALUE self)
+{
+    return do_pkcs8_export(argc, argv, self, 0);
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-public_to_der" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            public_to_der &rarr; string
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Serializes the public key to DER-encoded X.509 SubjectPublicKeyInfo format.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="public_to_der-source">
+            <pre>static VALUE
+ossl_pkey_public_to_der(VALUE self)
+{
+    return do_spki_export(self, 1);
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-public_to_pem" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            public_to_pem &rarr; string
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Serializes the public key to PEM-encoded X.509 SubjectPublicKeyInfo format.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="public_to_pem-source">
+            <pre>static VALUE
+ossl_pkey_public_to_pem(VALUE self)
+{
+    return do_spki_export(self, 0);
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
       <div id="method-i-sign" class="method-detail ">
         
         
@@ -186,18 +446,12 @@ ossl_pkey_initialize(VALUE self)
 
         <div class="method-description">
           
-          <p>To sign the String <em>data</em>, <em>digest</em>, an instance of <a
-href="../Digest.html">OpenSSL::Digest</a>, must be provided. The return
-value is again a String containing the signature. A <a
-href="PKeyError.html">PKeyError</a> is raised should errors occur. Any
-previous state of the <a href="../Digest.html">Digest</a> instance is
-irrelevant to the signature outcome, the digest instance is reset to its
-initial state during the operation.</p>
+          <p>To sign the String <em>data</em>, <em>digest</em>, an instance of <a href="../Digest.html"><code>OpenSSL::Digest</code></a>, must be provided. The return value is again a String containing the signature. A <a href="PKeyError.html"><code>PKeyError</code></a> is raised should errors occur. Any previous state of the <a href="../Digest.html"><code>Digest</code></a> instance is irrelevant to the signature outcome, the digest instance is reset to its initial state during the operation.</p>
 
 <h2 id="method-i-sign-label-Example">Example<span><a href="#method-i-sign-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h2>
 
 <pre class="ruby"><span class="ruby-identifier">data</span> = <span class="ruby-string">&#39;Sign me!&#39;</span>
-<span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span><span class="ruby-operator">::</span><span class="ruby-constant">SHA256</span>.<span class="ruby-identifier">new</span>
+<span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;SHA256&#39;</span>)
 <span class="ruby-identifier">pkey</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">RSA</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">2048</span>)
 <span class="ruby-identifier">signature</span> = <span class="ruby-identifier">pkey</span>.<span class="ruby-identifier">sign</span>(<span class="ruby-identifier">digest</span>, <span class="ruby-identifier">data</span>)
 </pre>
@@ -266,19 +520,12 @@ ossl_pkey_sign(VALUE self, VALUE digest, VALUE data)
 
         <div class="method-description">
           
-          <p>To verify the String <em>signature</em>, <em>digest</em>, an instance of <a
-href="../Digest.html">OpenSSL::Digest</a>, must be provided to re-compute
-the message digest of the original <em>data</em>, also a String. The return
-value is <code>true</code> if the signature is valid, <code>false</code>
-otherwise. A <a href="PKeyError.html">PKeyError</a> is raised should errors
-occur. Any previous state of the <a href="../Digest.html">Digest</a>
-instance is irrelevant to the validation outcome, the digest instance is
-reset to its initial state during the operation.</p>
+          <p>To verify the String <em>signature</em>, <em>digest</em>, an instance of <a href="../Digest.html"><code>OpenSSL::Digest</code></a>, must be provided to re-compute the message digest of the original <em>data</em>, also a String. The return value is <code>true</code> if the signature is valid, <code>false</code> otherwise. A <a href="PKeyError.html"><code>PKeyError</code></a> is raised should errors occur. Any previous state of the <a href="../Digest.html"><code>Digest</code></a> instance is irrelevant to the validation outcome, the digest instance is reset to its initial state during the operation.</p>
 
 <h2 id="method-i-verify-label-Example">Example<span><a href="#method-i-verify-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h2>
 
 <pre class="ruby"><span class="ruby-identifier">data</span> = <span class="ruby-string">&#39;Sign me!&#39;</span>
-<span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span><span class="ruby-operator">::</span><span class="ruby-constant">SHA256</span>.<span class="ruby-identifier">new</span>
+<span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;SHA256&#39;</span>)
 <span class="ruby-identifier">pkey</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">RSA</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">2048</span>)
 <span class="ruby-identifier">signature</span> = <span class="ruby-identifier">pkey</span>.<span class="ruby-identifier">sign</span>(<span class="ruby-identifier">digest</span>, <span class="ruby-identifier">data</span>)
 <span class="ruby-identifier">pub_key</span> = <span class="ruby-identifier">pkey</span>.<span class="ruby-identifier">public_key</span>
@@ -346,7 +593,7 @@ ossl_pkey_verify(VALUE self, VALUE digest, VALUE sig, VALUE data)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.4.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

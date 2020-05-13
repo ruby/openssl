@@ -11,8 +11,11 @@
   var index_rel_prefix = "../../";
 </script>
 
-<script src="../../js/jquery.js"></script>
-<script src="../../js/darkfish.js"></script>
+<script src="../../js/navigation.js" defer></script>
+<script src="../../js/search.js" defer></script>
+<script src="../../js/search_index.js" defer></script>
+<script src="../../js/searcher.js" defer></script>
+<script src="../../js/darkfish.js" defer></script>
 
 <link href="../../css/fonts.css" rel="stylesheet">
 <link href="../../css/rdoc.css" rel="stylesheet">
@@ -74,7 +77,34 @@
   
 </div>
 
-    
+    <div id="includes-section" class="nav-section">
+  <h3>Included Modules</h3>
+
+  <ul class="link-list">
+  
+  
+    <li><a class="include" href="../Marshal.html">OpenSSL::Marshal</a>
+  
+  
+  
+    <li><a class="include" href="Extension/SubjectKeyIdentifier.html">OpenSSL::X509::Extension::SubjectKeyIdentifier</a>
+  
+  
+  
+    <li><a class="include" href="Extension/AuthorityKeyIdentifier.html">OpenSSL::X509::Extension::AuthorityKeyIdentifier</a>
+  
+  
+  
+    <li><a class="include" href="Extension/CRLDistributionPoints.html">OpenSSL::X509::Extension::CRLDistributionPoints</a>
+  
+  
+  
+    <li><a class="include" href="Extension/AuthorityInfoAccess.html">OpenSSL::X509::Extension::AuthorityInfoAccess</a>
+  
+  
+  </ul>
+</div>
+
     
     <!-- Method Quickref -->
 <div id="method-list-section" class="nav-section">
@@ -155,16 +185,11 @@
 
   <section class="description">
     
-<p>Implementation of an X.509 certificate as specified in RFC 5280. Provides
-access to a certificate&#39;s attributes and allows certificates to be read
-from a string, but also supports the creation of new certificates from
-scratch.</p>
+<p>Implementation of an X.509 certificate as specified in RFC 5280. Provides access to a certificate&#39;s attributes and allows certificates to be read from a string, but also supports the creation of new certificates from scratch.</p>
 
 <h3 id="class-OpenSSL::X509::Certificate-label-Reading+a+certificate+from+a+file">Reading a certificate from a file<span><a href="#class-OpenSSL::X509::Certificate-label-Reading+a+certificate+from+a+file">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
-<p><a href="Certificate.html">Certificate</a> is capable of handling
-DER-encoded certificates and certificates encoded in OpenSSL&#39;s PEM
-format.</p>
+<p><a href="Certificate.html"><code>Certificate</code></a> is capable of handling DER-encoded certificates and certificates encoded in OpenSSL&#39;s PEM format.</p>
 
 <pre class="ruby"><span class="ruby-identifier">raw</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span> <span class="ruby-string">&quot;cert.cer&quot;</span> <span class="ruby-comment"># DER- or PEM-encoded</span>
 <span class="ruby-identifier">certificate</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">Certificate</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">raw</span>
@@ -174,41 +199,25 @@ format.</p>
 
 <p>A certificate may be encoded in DER format</p>
 
-<pre>cert = ...
-File.open(&quot;cert.cer&quot;, &quot;wb&quot;) { |f| f.print cert.to_der }</pre>
+<pre class="ruby"><span class="ruby-identifier">cert</span> = <span class="ruby-operator">...</span>
+<span class="ruby-constant">File</span>.<span class="ruby-identifier">open</span>(<span class="ruby-string">&quot;cert.cer&quot;</span>, <span class="ruby-string">&quot;wb&quot;</span>) { <span class="ruby-operator">|</span><span class="ruby-identifier">f</span><span class="ruby-operator">|</span> <span class="ruby-identifier">f</span>.<span class="ruby-identifier">print</span> <span class="ruby-identifier">cert</span>.<span class="ruby-identifier">to_der</span> }
+</pre>
 
 <p>or in PEM format</p>
 
-<pre>cert = ...
-File.open(&quot;cert.pem&quot;, &quot;wb&quot;) { |f| f.print cert.to_pem }</pre>
+<pre class="ruby"><span class="ruby-identifier">cert</span> = <span class="ruby-operator">...</span>
+<span class="ruby-constant">File</span>.<span class="ruby-identifier">open</span>(<span class="ruby-string">&quot;cert.pem&quot;</span>, <span class="ruby-string">&quot;wb&quot;</span>) { <span class="ruby-operator">|</span><span class="ruby-identifier">f</span><span class="ruby-operator">|</span> <span class="ruby-identifier">f</span>.<span class="ruby-identifier">print</span> <span class="ruby-identifier">cert</span>.<span class="ruby-identifier">to_pem</span> }
+</pre>
 
-<p>X.509 certificates are associated with a private/public key pair, typically
-a RSA, DSA or ECC key (see also <a
-href="../PKey/RSA.html">OpenSSL::PKey::RSA</a>, <a
-href="../PKey/DSA.html">OpenSSL::PKey::DSA</a> and <a
-href="../PKey/EC.html">OpenSSL::PKey::EC</a>), the public key itself is
-stored within the certificate and can be accessed in form of an <a
-href="../PKey.html">OpenSSL::PKey</a>. Certificates are typically used to
-be able to associate some form of identity with a key pair, for example web
-servers serving pages over HTTPs use certificates to authenticate
-themselves to the user.</p>
+<p>X.509 certificates are associated with a private/public key pair, typically a RSA, DSA or ECC key (see also <a href="../PKey/RSA.html"><code>OpenSSL::PKey::RSA</code></a>, <a href="../PKey/DSA.html"><code>OpenSSL::PKey::DSA</code></a> and <a href="../PKey/EC.html"><code>OpenSSL::PKey::EC</code></a>), the public key itself is stored within the certificate and can be accessed in form of an <a href="../PKey.html"><code>OpenSSL::PKey</code></a>. Certificates are typically used to be able to associate some form of identity with a key pair, for example web servers serving pages over HTTPs use certificates to authenticate themselves to the user.</p>
 
-<p>The public key infrastructure (PKI) model relies on trusted certificate
-authorities (“root CAs”) that issue these certificates, so that end users
-need to base their trust just on a selected few authorities that themselves
-again vouch for subordinate CAs issuing their certificates to end users.</p>
+<p>The public key infrastructure (PKI) model relies on trusted certificate authorities (“root CAs”) that issue these certificates, so that end users need to base their trust just on a selected few authorities that themselves again vouch for subordinate CAs issuing their certificates to end users.</p>
 
-<p>The <a href="../X509.html">OpenSSL::X509</a> module provides the tools to
-set up an independent PKI, similar to scenarios where the &#39;openssl&#39;
-command line tool is used for issuing certificates in a private PKI.</p>
+<p>The <a href="../X509.html"><code>OpenSSL::X509</code></a> module provides the tools to set up an independent PKI, similar to scenarios where the &#39;openssl&#39; command line tool is used for issuing certificates in a private PKI.</p>
 
 <h3 id="class-OpenSSL::X509::Certificate-label-Creating+a+root+CA+certificate+and+an+end-entity+certificate">Creating a root CA certificate and an end-entity certificate<span><a href="#class-OpenSSL::X509::Certificate-label-Creating+a+root+CA+certificate+and+an+end-entity+certificate">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
-<p>First, we need to create a “self-signed” root certificate. To do so, we
-need to generate a key first. Please note that the choice of “1” as a
-serial number is considered a security flaw for real certificates. Secure
-choices are integers in the two-digit byte range and ideally not sequential
-but secure random numbers, steps omitted here to keep the example concise.</p>
+<p>First, we need to create a “self-signed” root certificate. To do so, we need to generate a key first. Please note that the choice of “1” as a serial number is considered a security flaw for real certificates. Secure choices are integers in the two-digit byte range and ideally not sequential but secure random numbers, steps omitted here to keep the example concise.</p>
 
 <pre class="ruby"><span class="ruby-identifier">root_key</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">RSA</span>.<span class="ruby-identifier">new</span> <span class="ruby-value">2048</span> <span class="ruby-comment"># the CA&#39;s public/private key</span>
 <span class="ruby-identifier">root_ca</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">Certificate</span>.<span class="ruby-identifier">new</span>
@@ -226,11 +235,10 @@ but secure random numbers, steps omitted here to keep the example concise.</p>
 <span class="ruby-identifier">root_ca</span>.<span class="ruby-identifier">add_extension</span>(<span class="ruby-identifier">ef</span>.<span class="ruby-identifier">create_extension</span>(<span class="ruby-string">&quot;keyUsage&quot;</span>,<span class="ruby-string">&quot;keyCertSign, cRLSign&quot;</span>, <span class="ruby-keyword">true</span>))
 <span class="ruby-identifier">root_ca</span>.<span class="ruby-identifier">add_extension</span>(<span class="ruby-identifier">ef</span>.<span class="ruby-identifier">create_extension</span>(<span class="ruby-string">&quot;subjectKeyIdentifier&quot;</span>,<span class="ruby-string">&quot;hash&quot;</span>,<span class="ruby-keyword">false</span>))
 <span class="ruby-identifier">root_ca</span>.<span class="ruby-identifier">add_extension</span>(<span class="ruby-identifier">ef</span>.<span class="ruby-identifier">create_extension</span>(<span class="ruby-string">&quot;authorityKeyIdentifier&quot;</span>,<span class="ruby-string">&quot;keyid:always&quot;</span>,<span class="ruby-keyword">false</span>))
-<span class="ruby-identifier">root_ca</span>.<span class="ruby-identifier">sign</span>(<span class="ruby-identifier">root_key</span>, <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span><span class="ruby-operator">::</span><span class="ruby-constant">SHA256</span>.<span class="ruby-identifier">new</span>)
+<span class="ruby-identifier">root_ca</span>.<span class="ruby-identifier">sign</span>(<span class="ruby-identifier">root_key</span>, <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;SHA256&#39;</span>))
 </pre>
 
-<p>The next step is to create the end-entity certificate using the root CA
-certificate.</p>
+<p>The next step is to create the end-entity certificate using the root CA certificate.</p>
 
 <pre class="ruby"><span class="ruby-identifier">key</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">RSA</span>.<span class="ruby-identifier">new</span> <span class="ruby-value">2048</span>
 <span class="ruby-identifier">cert</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">Certificate</span>.<span class="ruby-identifier">new</span>
@@ -246,7 +254,7 @@ certificate.</p>
 <span class="ruby-identifier">ef</span>.<span class="ruby-identifier">issuer_certificate</span> = <span class="ruby-identifier">root_ca</span>
 <span class="ruby-identifier">cert</span>.<span class="ruby-identifier">add_extension</span>(<span class="ruby-identifier">ef</span>.<span class="ruby-identifier">create_extension</span>(<span class="ruby-string">&quot;keyUsage&quot;</span>,<span class="ruby-string">&quot;digitalSignature&quot;</span>, <span class="ruby-keyword">true</span>))
 <span class="ruby-identifier">cert</span>.<span class="ruby-identifier">add_extension</span>(<span class="ruby-identifier">ef</span>.<span class="ruby-identifier">create_extension</span>(<span class="ruby-string">&quot;subjectKeyIdentifier&quot;</span>,<span class="ruby-string">&quot;hash&quot;</span>,<span class="ruby-keyword">false</span>))
-<span class="ruby-identifier">cert</span>.<span class="ruby-identifier">sign</span>(<span class="ruby-identifier">root_key</span>, <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span><span class="ruby-operator">::</span><span class="ruby-constant">SHA256</span>.<span class="ruby-identifier">new</span>)
+<span class="ruby-identifier">cert</span>.<span class="ruby-identifier">sign</span>(<span class="ruby-identifier">root_key</span>, <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;SHA256&#39;</span>))
 </pre>
 
   </section>
@@ -356,8 +364,7 @@ ossl_x509_initialize(int argc, VALUE *argv, VALUE self)
 
         <div class="method-description">
           
-          <p>Compares the two certificates. Note that this takes into account all
-fields, not just the issuer name and the serial number.</p>
+          <p>Compares the two certificates. Note that this takes into account all fields, not just the issuer name and the serial number.</p>
           
           
 
@@ -447,8 +454,7 @@ ossl_x509_add_extension(VALUE self, VALUE extension)
 
         <div class="method-description">
           
-          <p>Returns <code>true</code> if <em>key</em> is the corresponding private key
-to the Subject Public Key Information, <code>false</code> otherwise.</p>
+          <p>Returns <code>true</code> if <em>key</em> is the corresponding private key to the Subject Public Key Information, <code>false</code> otherwise.</p>
           
           
 
@@ -973,7 +979,7 @@ ossl_x509_set_not_before(VALUE self, VALUE time)
 
           
           <div class="method-source-code" id="pretty_print-source">
-            <pre><span class="ruby-comment"># File lib/openssl/x509.rb, line 182</span>
+            <pre><span class="ruby-comment"># File lib/openssl/x509.rb, line 331</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">pretty_print</span>(<span class="ruby-identifier">q</span>)
   <span class="ruby-identifier">q</span>.<span class="ruby-identifier">object_group</span>(<span class="ruby-keyword">self</span>) {
     <span class="ruby-identifier">q</span>.<span class="ruby-identifier">breakable</span>
@@ -1557,9 +1563,7 @@ ossl_x509_to_text(VALUE self)
 
         <div class="method-description">
           
-          <p>Verifies the signature of the certificate, with the public key
-<em>key</em>. <em>key</em> must be an instance of <a
-href="../PKey.html">OpenSSL::PKey</a>.</p>
+          <p>Verifies the signature of the certificate, with the public key <em>key</em>. <em>key</em> must be an instance of <a href="../PKey.html"><code>OpenSSL::PKey</code></a>.</p>
           
           
 
@@ -1692,7 +1696,7 @@ ossl_x509_set_version(VALUE self, VALUE version)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.4.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

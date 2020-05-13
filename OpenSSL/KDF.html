@@ -11,8 +11,11 @@
   var index_rel_prefix = "../";
 </script>
 
-<script src="../js/jquery.js"></script>
-<script src="../js/darkfish.js"></script>
+<script src="../js/navigation.js" defer></script>
+<script src="../js/search.js" defer></script>
+<script src="../js/search_index.js" defer></script>
+<script src="../js/searcher.js" defer></script>
+<script src="../js/darkfish.js" defer></script>
 
 <link href="../css/fonts.css" rel="stylesheet">
 <link href="../css/rdoc.css" rel="stylesheet">
@@ -97,18 +100,11 @@
     
 <p>Provides functionality of various KDFs (key derivation function).</p>
 
-<p><a href="KDF.html">KDF</a> is typically used for securely deriving
-arbitrary length symmetric keys to be used with an <a
-href="Cipher.html">OpenSSL::Cipher</a> from passwords. Another use case is
-for storing passwords: Due to the ability to tweak the effort of
-computation by increasing the iteration count, computation can be slowed
-down artificially in order to render possible attacks infeasible.</p>
+<p><a href="KDF.html"><code>KDF</code></a> is typically used for securely deriving arbitrary length symmetric keys to be used with an <a href="Cipher.html"><code>OpenSSL::Cipher</code></a> from passwords. Another use case is for storing passwords: Due to the ability to tweak the effort of computation by increasing the iteration count, computation can be slowed down artificially in order to render possible attacks infeasible.</p>
 
-<p>Currently, <a href="KDF.html">OpenSSL::KDF</a> provides implementations for
-the following KDF:</p>
+<p>Currently, <a href="KDF.html"><code>OpenSSL::KDF</code></a> provides implementations for the following KDF:</p>
 <ul><li>
-<p>PKCS #5 PBKDF2 (Password-Based Key Derivation Function 2) in combination
-with <a href="HMAC.html">HMAC</a></p>
+<p>PKCS #5 PBKDF2 (Password-Based Key Derivation Function 2) in combination with <a href="HMAC.html"><code>HMAC</code></a></p>
 </li><li>
 <p>scrypt</p>
 </li><li>
@@ -117,7 +113,7 @@ with <a href="HMAC.html">HMAC</a></p>
 
 <h2 id="module-OpenSSL::KDF-label-Examples">Examples<span><a href="#module-OpenSSL::KDF-label-Examples">&para;</a> <a href="#top">&uarr;</a></span></h2>
 
-<h3 id="module-OpenSSL::KDF-label-Generating+a+128+bit+key+for+a+Cipher+-28e.g.+AES-29">Generating a 128 bit key for a <a href="Cipher.html">Cipher</a> (e.g. AES)<span><a href="#module-OpenSSL::KDF-label-Generating+a+128+bit+key+for+a+Cipher+-28e.g.+AES-29">&para;</a> <a href="#top">&uarr;</a></span></h3>
+<h3 id="module-OpenSSL::KDF-label-Generating+a+128+bit+key+for+a+Cipher+-28e.g.+AES-29">Generating a 128 bit key for a <a href="Cipher.html"><code>Cipher</code></a> (e.g. AES)<span><a href="#module-OpenSSL::KDF-label-Generating+a+128+bit+key+for+a+Cipher+-28e.g.+AES-29">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
 <pre class="ruby"><span class="ruby-identifier">pass</span> = <span class="ruby-string">&quot;secret&quot;</span>
 <span class="ruby-identifier">salt</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Random</span>.<span class="ruby-identifier">random_bytes</span>(<span class="ruby-value">16</span>)
@@ -133,7 +129,7 @@ with <a href="HMAC.html">HMAC</a></p>
 <span class="ruby-comment"># store this with the generated value</span>
 <span class="ruby-identifier">salt</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Random</span>.<span class="ruby-identifier">random_bytes</span>(<span class="ruby-value">16</span>)
 <span class="ruby-identifier">iter</span> = <span class="ruby-value">20_000</span>
-<span class="ruby-identifier">hash</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span><span class="ruby-operator">::</span><span class="ruby-constant">SHA256</span>.<span class="ruby-identifier">new</span>
+<span class="ruby-identifier">hash</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;SHA256&#39;</span>)
 <span class="ruby-identifier">len</span> = <span class="ruby-identifier">hash</span>.<span class="ruby-identifier">digest_length</span>
 <span class="ruby-comment"># the final value to be stored</span>
 <span class="ruby-identifier">value</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">KDF</span>.<span class="ruby-identifier">pbkdf2_hmac</span>(<span class="ruby-identifier">pass</span>, <span class="ruby-value">salt:</span> <span class="ruby-identifier">salt</span>, <span class="ruby-value">iterations:</span> <span class="ruby-identifier">iter</span>,
@@ -142,30 +138,7 @@ with <a href="HMAC.html">HMAC</a></p>
 
 <h2 id="module-OpenSSL::KDF-label-Important+Note+on+Checking+Passwords">Important Note on Checking Passwords<span><a href="#module-OpenSSL::KDF-label-Important+Note+on+Checking+Passwords">&para;</a> <a href="#top">&uarr;</a></span></h2>
 
-<p>When comparing passwords provided by the user with previously stored
-values, a common mistake made is comparing the two values using “==”.
-Typically, “==” short-circuits on evaluation, and is therefore vulnerable
-to timing attacks. The proper way is to use a method that always takes the
-same amount of time when comparing two values, thus not leaking any
-information to potential attackers. To compare two values, the following
-could be used:</p>
-
-<pre class="ruby"><span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">eql_time_cmp</span>(<span class="ruby-identifier">a</span>, <span class="ruby-identifier">b</span>)
-  <span class="ruby-keyword">unless</span> <span class="ruby-identifier">a</span>.<span class="ruby-identifier">length</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">b</span>.<span class="ruby-identifier">length</span>
-    <span class="ruby-keyword">return</span> <span class="ruby-keyword">false</span>
-  <span class="ruby-keyword">end</span>
-  <span class="ruby-identifier">cmp</span> = <span class="ruby-identifier">b</span>.<span class="ruby-identifier">bytes</span>
-  <span class="ruby-identifier">result</span> = <span class="ruby-value">0</span>
-  <span class="ruby-identifier">a</span>.<span class="ruby-identifier">bytes</span>.<span class="ruby-identifier">each_with_index</span> {<span class="ruby-operator">|</span><span class="ruby-identifier">c</span>,<span class="ruby-identifier">i</span><span class="ruby-operator">|</span>
-    <span class="ruby-identifier">result</span> <span class="ruby-operator">|=</span> <span class="ruby-identifier">c</span> <span class="ruby-operator">^</span> <span class="ruby-identifier">cmp</span>[<span class="ruby-identifier">i</span>]
-  }
-  <span class="ruby-identifier">result</span> <span class="ruby-operator">==</span> <span class="ruby-value">0</span>
-<span class="ruby-keyword">end</span>
-</pre>
-
-<p>Please note that the premature return in case of differing lengths
-typically does not leak valuable information - when using PBKDF2, the
-length of the values to be compared is of fixed size.</p>
+<p>When comparing passwords provided by the user with previously stored values, a common mistake made is comparing the two values using “==”. Typically, “==” short-circuits on evaluation, and is therefore vulnerable to timing attacks. The proper way is to use a method that always takes the same amount of time when comparing two values, thus not leaking any information to potential attackers. To do this, use <code>OpenSSL.fixed_length_secure_compare</code>.</p>
 
   </section>
 
@@ -202,10 +175,9 @@ length of the values to be compared is of fixed size.</p>
 
         <div class="method-description">
           
-          <p>HMAC-based Extract-and-Expand Key Derivation Function (HKDF) as specified
-in <a href="https://tools.ietf.org/html/rfc5869">RFC 5869</a>.</p>
+          <p>HMAC-based Extract-and-Expand Key Derivation Function (HKDF) as specified in <a href="https://tools.ietf.org/html/rfc5869">RFC 5869</a>.</p>
 
-<p>New in <a href="../OpenSSL.html">OpenSSL</a> 1.1.0.</p>
+<p>New in <a href="../OpenSSL.html"><code>OpenSSL</code></a> 1.1.0.</p>
 
 <h3 id="method-c-hkdf-label-Parameters">Parameters<span><a href="#method-c-hkdf-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
 <dl class="rdoc-list note-list"><dt><em>ikm</em>
@@ -219,8 +191,7 @@ in <a href="https://tools.ietf.org/html/rfc5869">RFC 5869</a>.</p>
 <p>The context and application specific information.</p>
 </dd><dt><em>length</em>
 <dd>
-<p>The output length in octets. Must be &lt;= <code>255 * HashLen</code>,
-where HashLen is the length of the hash function output in octets.</p>
+<p>The output length in octets. Must be &lt;= <code>255 * HashLen</code>, where HashLen is the length of the hash function output in octets.</p>
 </dd><dt><em>hash</em>
 <dd>
 <p>The hash function.</p>
@@ -322,12 +293,9 @@ kdf_hkdf(int argc, VALUE *argv, VALUE self)
 
         <div class="method-description">
           
-          <p>PKCS #5 PBKDF2 (Password-Based Key Derivation Function 2) in combination
-with <a href="HMAC.html">HMAC</a>. Takes <em>pass</em>, <em>salt</em> and
-<em>iterations</em>, and then derives a key of <em>length</em> bytes.</p>
+          <p>PKCS #5 PBKDF2 (Password-Based Key Derivation Function 2) in combination with <a href="HMAC.html"><code>HMAC</code></a>. Takes <em>pass</em>, <em>salt</em> and <em>iterations</em>, and then derives a key of <em>length</em> bytes.</p>
 
-<p>For more information about PBKDF2, see RFC 2898 Section 5.2 (<a
-href="https://tools.ietf.org/html/rfc2898#section-5.2">tools.ietf.org/html/rfc2898#section-5.2</a>).</p>
+<p>For more information about PBKDF2, see RFC 2898 Section 5.2 (<a href="https://tools.ietf.org/html/rfc2898#section-5.2">tools.ietf.org/html/rfc2898#section-5.2</a>).</p>
 
 <h3 id="method-c-pbkdf2_hmac-label-Parameters">Parameters<span><a href="#method-c-pbkdf2_hmac-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
 <dl class="rdoc-list note-list"><dt>pass       
@@ -335,23 +303,16 @@ href="https://tools.ietf.org/html/rfc2898#section-5.2">tools.ietf.org/html/rfc28
 <p>The passphrase.</p>
 </dd><dt>salt       
 <dd>
-<p>The salt. Salts prevent attacks based on dictionaries of common passwords
-and attacks based on rainbow tables. It is a public value that can be
-safely stored along with the password (e.g. if the derived value is used
-for password storage).</p>
+<p>The salt. Salts prevent attacks based on dictionaries of common passwords and attacks based on rainbow tables. It is a public value that can be safely stored along with the password (e.g. if the derived value is used for password storage).</p>
 </dd><dt>iterations 
 <dd>
-<p>The iteration count. This provides the ability to tune the algorithm. It is
-better to use the highest count possible for the maximum resistance to
-brute-force attacks.</p>
+<p>The iteration count. This provides the ability to tune the algorithm. It is better to use the highest count possible for the maximum resistance to brute-force attacks.</p>
 </dd><dt>length     
 <dd>
 <p>The desired length of the derived key in octets.</p>
 </dd><dt>hash       
 <dd>
-<p>The hash algorithm used with <a href="HMAC.html">HMAC</a> for the PRF. May
-be a String representing the algorithm name, or an instance of <a
-href="Digest.html">OpenSSL::Digest</a>.</p>
+<p>The hash algorithm used with <a href="HMAC.html"><code>HMAC</code></a> for the PRF. May be a String representing the algorithm name, or an instance of <a href="Digest.html"><code>OpenSSL::Digest</code></a>.</p>
 </dd></dl>
           
           
@@ -416,22 +377,13 @@ kdf_pbkdf2_hmac(int argc, VALUE *argv, VALUE self)
 
         <div class="method-description">
           
-          <p>Derives a key from <em>pass</em> using given parameters with the scrypt
-password-based key derivation function. The result can be used for password
-storage.</p>
+          <p>Derives a key from <em>pass</em> using given parameters with the scrypt password-based key derivation function. The result can be used for password storage.</p>
 
-<p>scrypt is designed to be memory-hard and more secure against brute-force
-attacks using custom hardwares than alternative KDFs such as PBKDF2 or
-bcrypt.</p>
+<p>scrypt is designed to be memory-hard and more secure against brute-force attacks using custom hardwares than alternative KDFs such as PBKDF2 or bcrypt.</p>
 
-<p>The keyword arguments <em>N</em>, <em>r</em> and <em>p</em> can be used to
-tune scrypt. RFC 7914 (published on 2016-08, <a
-href="https://tools.ietf.org/html/rfc7914#section-2">tools.ietf.org/html/rfc7914#section-2</a>)
-states that using values r=8 and p=1 appears to yield good results.</p>
+<p>The keyword arguments <em>N</em>, <em>r</em> and <em>p</em> can be used to tune scrypt. RFC 7914 (published on 2016-08, <a href="https://tools.ietf.org/html/rfc7914#section-2">tools.ietf.org/html/rfc7914#section-2</a>) states that using values r=8 and p=1 appears to yield good results.</p>
 
-<p>See RFC 7914 (<a
-href="https://tools.ietf.org/html/rfc7914">tools.ietf.org/html/rfc7914</a>)
-for more information.</p>
+<p>See RFC 7914 (<a href="https://tools.ietf.org/html/rfc7914">tools.ietf.org/html/rfc7914</a>) for more information.</p>
 
 <h3 id="method-c-scrypt-label-Parameters">Parameters<span><a href="#method-c-scrypt-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
 <dl class="rdoc-list note-list"><dt>pass   
@@ -524,7 +476,7 @@ kdf_scrypt(int argc, VALUE *argv, VALUE self)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.4.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

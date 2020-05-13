@@ -11,8 +11,11 @@
   var index_rel_prefix = "../../../";
 </script>
 
-<script src="../../../js/jquery.js"></script>
-<script src="../../../js/darkfish.js"></script>
+<script src="../../../js/navigation.js" defer></script>
+<script src="../../../js/search.js" defer></script>
+<script src="../../../js/search_index.js" defer></script>
+<script src="../../../js/searcher.js" defer></script>
+<script src="../../../js/darkfish.js" defer></script>
 
 <link href="../../../css/fonts.css" rel="stylesheet">
 <link href="../../../css/rdoc.css" rel="stylesheet">
@@ -75,6 +78,8 @@
     <li ><a href="#method-c-new">::new</a>
     
     <li ><a href="#method-i-3D-3D">#==</a>
+    
+    <li ><a href="#method-i-add">#add</a>
     
     <li ><a href="#method-i-eql-3F">#eql?</a>
     
@@ -172,13 +177,9 @@
 
         <div class="method-description">
           
-          <p>Creates a new instance of <a
-href="Point.html">OpenSSL::PKey::EC::Point</a>. If the only argument is an
-instance of <a href="Point.html">EC::Point</a>, a copy is returned.
-Otherwise, creates a point that belongs to <em>group</em>.</p>
+          <p>Creates a new instance of <a href="Point.html"><code>OpenSSL::PKey::EC::Point</code></a>. If the only argument is an instance of <a href="Point.html"><code>EC::Point</code></a>, a copy is returned. Otherwise, creates a point that belongs to <em>group</em>.</p>
 
-<p><em>encoded_point</em> is the octet string representation of the point.
-This must be either a String or an <a href="../../BN.html">OpenSSL::BN</a>.</p>
+<p><em>encoded_point</em> is the octet string representation of the point. This must be either a String or an <a href="../../BN.html"><code>OpenSSL::BN</code></a>.</p>
           
           
 
@@ -274,6 +275,59 @@ This must be either a String or an <a href="../../BN.html">OpenSSL::BN</a>.</p>
         <div class="aliases">
           Alias for: <a href="Point.html#method-i-eql-3F">eql?</a>
         </div>
+        
+      </div>
+
+    
+      <div id="method-i-add" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            add(point) &rarr; point
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Performs elliptic curve point addition.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="add-source">
+            <pre>static VALUE ossl_ec_point_add(VALUE self, VALUE other)
+{
+    EC_POINT *point_self, *point_other, *point_result;
+    const EC_GROUP *group;
+    VALUE group_v = rb_attr_get(self, id_i_group);
+    VALUE result;
+
+    GetECPoint(self, point_self);
+    GetECPoint(other, point_other);
+    GetECGroup(group_v, group);
+
+    result = rb_obj_alloc(cEC_POINT);
+    ossl_ec_point_initialize(1, &amp;group_v, result);
+    GetECPoint(result, point_result);
+
+    if (EC_POINT_add(group, point_result, point_self, point_other, ossl_bn_ctx) != 1) {
+        ossl_raise(eEC_POINT, &quot;EC_POINT_add&quot;);
+    }
+
+    return result;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
         
       </div>
 
@@ -555,18 +609,9 @@ ossl_ec_point_initialize_copy(VALUE self, VALUE other)
           
           <p>Performs elliptic curve point multiplication.</p>
 
-<p>The first form calculates <code>bn1 * point + bn2 * G</code>, where
-<code>G</code> is the generator of the group of <em>point</em>.
-<em>bn2</em> may be omitted, and in that case, the result is just <code>bn1
-* point</code>.</p>
+<p>The first form calculates <code>bn1 * point + bn2 * G</code>, where <code>G</code> is the generator of the group of <em>point</em>. <em>bn2</em> may be omitted, and in that case, the result is just <code>bn1 * point</code>.</p>
 
-<p>The second form calculates <code>bns[0] * point + bns[1] * points[0] + ...
-+ bns[-1] * points[-1] + bn2 * G</code>. <em>bn2</em> may be omitted.
-<em>bns</em> must be an array of <a href="../../BN.html">OpenSSL::BN</a>.
-<em>points</em> must be an array of <a
-href="Point.html">OpenSSL::PKey::EC::Point</a>. Please note that
-<code>points[0]</code> is not multiplied by <code>bns[0]</code>, but
-<code>bns[1]</code>.</p>
+<p>The second form calculates <code>bns[0] * point + bns[1] * points[0] + ... + bns[-1] * points[-1] + bn2 * G</code>. <em>bn2</em> may be omitted. <em>bns</em> must be an array of <a href="../../BN.html"><code>OpenSSL::BN</code></a>. <em>points</em> must be an array of <a href="Point.html"><code>OpenSSL::PKey::EC::Point</code></a>. Please note that <code>points[0]</code> is not multiplied by <code>bns[0]</code>, but <code>bns[1]</code>.</p>
           
           
 
@@ -758,20 +803,17 @@ href="Point.html">OpenSSL::PKey::EC::Point</a>. Please note that
 
         <div class="method-description">
           
-          <p>Returns the octet string representation of the <a href="../EC.html">EC</a>
-point as an instance of <a href="../../BN.html">OpenSSL::BN</a>.</p>
+          <p>Returns the octet string representation of the <a href="../EC.html"><code>EC</code></a> point as an instance of <a href="../../BN.html"><code>OpenSSL::BN</code></a>.</p>
 
-<p>If <em>conversion_form</em> is not given, the
-<em>point_conversion_form</em> attribute set to the group is used.</p>
+<p>If <em>conversion_form</em> is not given, the <em>point_conversion_form</em> attribute set to the group is used.</p>
 
-<p>See <a href="Point.html#method-i-to_octet_string">to_octet_string</a> for
-more information.</p>
+<p>See <a href="Point.html#method-i-to_octet_string"><code>to_octet_string</code></a> for more information.</p>
           
           
 
           
           <div class="method-source-code" id="to_bn-source">
-            <pre><span class="ruby-comment"># File lib/openssl/pkey.rb, line 20</span>
+            <pre><span class="ruby-comment"># File lib/openssl/pkey.rb, line 33</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">to_bn</span>(<span class="ruby-identifier">conversion_form</span> = <span class="ruby-identifier">group</span>.<span class="ruby-identifier">point_conversion_form</span>)
   <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">BN</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">to_octet_string</span>(<span class="ruby-identifier">conversion_form</span>), <span class="ruby-value">2</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -803,8 +845,7 @@ more information.</p>
           
           <p>Returns the octet string representation of the elliptic curve point.</p>
 
-<p><em>conversion_form</em> specifies how the point is converted. Possible
-values are:</p>
+<p><em>conversion_form</em> specifies how the point is converted. Possible values are:</p>
 <ul><li>
 <p><code>:compressed</code></p>
 </li><li>
@@ -859,7 +900,7 @@ ossl_ec_point_to_octet_string(VALUE self, VALUE conversion_form)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.4.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

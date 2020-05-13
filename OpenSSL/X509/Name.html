@@ -11,8 +11,11 @@
   var index_rel_prefix = "../../";
 </script>
 
-<script src="../../js/jquery.js"></script>
-<script src="../../js/darkfish.js"></script>
+<script src="../../js/navigation.js" defer></script>
+<script src="../../js/search.js" defer></script>
+<script src="../../js/search_index.js" defer></script>
+<script src="../../js/searcher.js" defer></script>
+<script src="../../js/darkfish.js" defer></script>
 
 <link href="../../css/fonts.css" rel="stylesheet">
 <link href="../../css/rdoc.css" rel="stylesheet">
@@ -73,6 +76,10 @@
     <li><span class="include">Comparable</span>
   
   
+  
+    <li><a class="include" href="../Marshal.html">OpenSSL::Marshal</a>
+  
+  
   </ul>
 </div>
 
@@ -128,13 +135,11 @@
 
   <section class="description">
     
-<p>An X.509 name represents a hostname, email address or other entity
-associated with a public key.</p>
+<p>An X.509 name represents a hostname, email address or other entity associated with a public key.</p>
 
-<p>You can create a <a href="Name.html">Name</a> by parsing a distinguished
-name String or by supplying the distinguished name as an Array.</p>
+<p>You can create a <a href="Name.html"><code>Name</code></a> by parsing a distinguished name String or by supplying the distinguished name as an Array.</p>
 
-<pre class="ruby"><span class="ruby-identifier">name</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">Name</span>.<span class="ruby-identifier">parse</span> <span class="ruby-string">&#39;CN=nobody/DC=example&#39;</span>
+<pre class="ruby"><span class="ruby-identifier">name</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">Name</span>.<span class="ruby-identifier">parse</span> <span class="ruby-string">&#39;/CN=nobody/DC=example&#39;</span>
 
 <span class="ruby-identifier">name</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">Name</span>.<span class="ruby-identifier">new</span> [[<span class="ruby-string">&#39;CN&#39;</span>, <span class="ruby-string">&#39;nobody&#39;</span>], [<span class="ruby-string">&#39;DC&#39;</span>, <span class="ruby-string">&#39;example&#39;</span>]]
 </pre>
@@ -156,7 +161,7 @@ name String or by supplying the distinguished name as an Array.</p>
       
         <dt id="COMPAT">COMPAT
         
-        <dd><p>A flag for <a href="Name.html#method-i-to_s">to_s</a>.</p>
+        <dd><p>A flag for <a href="Name.html#method-i-to_s"><code>to_s</code></a>.</p>
 
 <p>Breaks the name returned into multiple lines if longer than 80 characters.</p>
         
@@ -168,7 +173,7 @@ name String or by supplying the distinguished name as an Array.</p>
       
         <dt id="MULTILINE">MULTILINE
         
-        <dd><p>A flag for <a href="Name.html#method-i-to_s">to_s</a>.</p>
+        <dd><p>A flag for <a href="Name.html#method-i-to_s"><code>to_s</code></a>.</p>
 
 <p>Returns a multiline format.</p>
         
@@ -180,17 +185,16 @@ name String or by supplying the distinguished name as an Array.</p>
       
         <dt id="ONELINE">ONELINE
         
-        <dd><p>A flag for <a href="Name.html#method-i-to_s">to_s</a>.</p>
+        <dd><p>A flag for <a href="Name.html#method-i-to_s"><code>to_s</code></a>.</p>
 
-<p>Returns a more readable format than <a
-href="Name.html#RFC2253">RFC2253</a>.</p>
+<p>Returns a more readable format than <a href="Name.html#RFC2253"><code>RFC2253</code></a>.</p>
         
       
         <dt id="RFC2253">RFC2253
         
-        <dd><p>A flag for <a href="Name.html#method-i-to_s">to_s</a>.</p>
+        <dd><p>A flag for <a href="Name.html#method-i-to_s"><code>to_s</code></a>.</p>
 
-<p>Returns an <a href="Name.html#RFC2253">RFC2253</a> format name.</p>
+<p>Returns an <a href="Name.html#RFC2253"><code>RFC2253</code></a> format name.</p>
         
       
       </dl>
@@ -243,19 +247,16 @@ href="Name.html#RFC2253">RFC2253</a>.</p>
 
         <div class="method-description">
           
-          <p>Creates a new <a href="Name.html">Name</a>.</p>
+          <p>Creates a new <a href="Name.html"><code>Name</code></a>.</p>
 
-<p>A name may be created from a DER encoded string <em>der</em>, an Array
-representing a <em>distinguished_name</em> or a <em>distinguished_name</em>
-along with a <em>template</em>.</p>
+<p>A name may be created from a DER encoded string <em>der</em>, an Array representing a <em>distinguished_name</em> or a <em>distinguished_name</em> along with a <em>template</em>.</p>
 
 <pre class="ruby"><span class="ruby-identifier">name</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">Name</span>.<span class="ruby-identifier">new</span> [[<span class="ruby-string">&#39;CN&#39;</span>, <span class="ruby-string">&#39;nobody&#39;</span>], [<span class="ruby-string">&#39;DC&#39;</span>, <span class="ruby-string">&#39;example&#39;</span>]]
 
 <span class="ruby-identifier">name</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">Name</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">name</span>.<span class="ruby-identifier">to_der</span>
 </pre>
 
-<p>See <a href="Name.html#method-i-add_entry">#add_entry</a> for a description
-of the <em>distinguished_name</em> Array&#39;s contents</p>
+<p>See <a href="Name.html#method-i-add_entry"><code>add_entry</code></a> for a description of the <em>distinguished_name</em> Array&#39;s contents</p>
           
           
 
@@ -352,7 +353,7 @@ ossl_x509name_initialize(int argc, VALUE *argv, VALUE self)
 
           
           <div class="method-source-code" id="parse_openssl-source">
-            <pre><span class="ruby-comment"># File lib/openssl/x509.rb, line 146</span>
+            <pre><span class="ruby-comment"># File lib/openssl/x509.rb, line 287</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">parse_openssl</span>(<span class="ruby-identifier">str</span>, <span class="ruby-identifier">template</span>=<span class="ruby-constant">OBJECT_TYPE_TEMPLATE</span>)
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">str</span>.<span class="ruby-identifier">start_with?</span>(<span class="ruby-string">&quot;/&quot;</span>)
     <span class="ruby-comment"># /A=B/C=D format</span>
@@ -396,7 +397,7 @@ ossl_x509name_initialize(int argc, VALUE *argv, VALUE self)
 
           
           <div class="method-source-code" id="parse_rfc2253-source">
-            <pre><span class="ruby-comment"># File lib/openssl/x509.rb, line 141</span>
+            <pre><span class="ruby-comment"># File lib/openssl/x509.rb, line 282</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">parse_rfc2253</span>(<span class="ruby-identifier">str</span>, <span class="ruby-identifier">template</span>=<span class="ruby-constant">OBJECT_TYPE_TEMPLATE</span>)
   <span class="ruby-identifier">ary</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">Name</span><span class="ruby-operator">::</span><span class="ruby-constant">RFC2253DN</span>.<span class="ruby-identifier">scan</span>(<span class="ruby-identifier">str</span>)
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">ary</span>, <span class="ruby-identifier">template</span>)
@@ -463,33 +464,28 @@ ossl_x509name_initialize(int argc, VALUE *argv, VALUE self)
 
         <div class="method-description">
           
-          <p>Adds a new entry with the given <em>oid</em> and <em>value</em> to this
-name.  The <em>oid</em> is an object identifier defined in ASN.1.  Some
-common OIDs are:</p>
+          <p>Adds a new entry with the given <em>oid</em> and <em>value</em> to this name.  The <em>oid</em> is an object identifier defined in ASN.1.  Some common OIDs are:</p>
 <dl class="rdoc-list note-list"><dt>C
 <dd>
-<p>Country <a href="Name.html">Name</a></p>
+<p>Country <a href="Name.html"><code>Name</code></a></p>
 </dd><dt>CN
 <dd>
-<p>Common <a href="Name.html">Name</a></p>
+<p>Common <a href="Name.html"><code>Name</code></a></p>
 </dd><dt>DC
 <dd>
 <p>Domain Component</p>
 </dd><dt>O
 <dd>
-<p>Organization <a href="Name.html">Name</a></p>
+<p>Organization <a href="Name.html"><code>Name</code></a></p>
 </dd><dt>OU
 <dd>
-<p>Organizational Unit <a href="Name.html">Name</a></p>
+<p>Organizational Unit <a href="Name.html"><code>Name</code></a></p>
 </dd><dt>ST
 <dd>
-<p>State or Province <a href="Name.html">Name</a></p>
+<p>State or Province <a href="Name.html"><code>Name</code></a></p>
 </dd></dl>
 
-<p>The optional keyword parameters <em>loc</em> and <em>set</em> specify where
-to insert the new attribute. Refer to the manpage of X509_NAME_add_entry(3)
-for details. <em>loc</em> defaults to -1 and <em>set</em> defaults to 0.
-This appends a single-valued RDN to the end.</p>
+<p>The optional keyword parameters <em>loc</em> and <em>set</em> specify where to insert the new attribute. Refer to the manpage of X509_NAME_add_entry(3) for details. <em>loc</em> defaults to -1 and <em>set</em> defaults to 0. This appends a single-valued RDN to the end.</p>
           
           
 
@@ -539,7 +535,7 @@ VALUE ossl_x509name_add_entry(int argc, VALUE *argv, VALUE self)
         
         <div class="method-heading">
           <span class="method-callseq">
-            cmp(other) &rarr; -1 | 0 | 1
+            cmp(other) &rarr; -1 | 0 | 1 | nil
           </span>
           
           <span class="method-click-advice">click to toggle source</span>
@@ -548,7 +544,7 @@ VALUE ossl_x509name_add_entry(int argc, VALUE *argv, VALUE self)
         
         <div class="method-heading">
           <span class="method-callseq">
-            name &lt;=&gt; other  &rarr; -1 | 0 | 1
+            name &lt;=&gt; other  &rarr; -1 | 0 | 1 | nil
           </span>
           
         </div>
@@ -557,9 +553,7 @@ VALUE ossl_x509name_add_entry(int argc, VALUE *argv, VALUE self)
 
         <div class="method-description">
           
-          <p>Compares this <a href="Name.html">Name</a> with <em>other</em> and returns
-<code>0</code> if they are the same and <code>-1</code> or +<code>1</code>
-if they are greater or less than each other respectively.</p>
+          <p>Compares this <a href="Name.html"><code>Name</code></a> with <em>other</em> and returns <code>0</code> if they are the same and <code>-1</code> or +<code>1</code> if they are greater or less than each other respectively. Returns <code>nil</code> if they are not comparable (i.e. different types).</p>
           
           
 
@@ -570,9 +564,12 @@ ossl_x509name_cmp(VALUE self, VALUE other)
 {
     int result;
 
+    if (!rb_obj_is_kind_of(other, cX509Name))
+        return Qnil;
+
     result = ossl_x509name_cmp0(self, other);
     if (result &lt; 0) return INT2FIX(-1);
-    if (result &gt; 1) return INT2FIX(1);
+    if (result &gt; 0) return INT2FIX(1);
 
     return INT2FIX(0);
 }</pre>
@@ -606,8 +603,7 @@ ossl_x509name_cmp(VALUE self, VALUE other)
 
         <div class="method-description">
           
-          <p>Returns true if <em>name</em> and <em>other</em> refer to the same hash
-key.</p>
+          <p>Returns true if <em>name</em> and <em>other</em> refer to the same hash key.</p>
           
           
 
@@ -647,8 +643,7 @@ ossl_x509name_eql(VALUE self, VALUE other)
 
         <div class="method-description">
           
-          <p>The hash value returned is suitable for use as a certificate&#39;s filename
-in a CA path.</p>
+          <p>The hash value returned is suitable for use as a certificate&#39;s filename in a CA path.</p>
           
           
 
@@ -692,8 +687,7 @@ ossl_x509name_hash(VALUE self)
 
         <div class="method-description">
           
-          <p>Returns an MD5 based hash used in <a href="../../OpenSSL.html">OpenSSL</a>
-0.9.X.</p>
+          <p>Returns an MD5 based hash used in <a href="../../OpenSSL.html"><code>OpenSSL</code></a> 0.9.X.</p>
           
           
 
@@ -787,7 +781,7 @@ ossl_x509name_initialize_copy(VALUE self, VALUE other)
 
           
           <div class="method-source-code" id="pretty_print-source">
-            <pre><span class="ruby-comment"># File lib/openssl/x509.rb, line 160</span>
+            <pre><span class="ruby-comment"># File lib/openssl/x509.rb, line 301</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">pretty_print</span>(<span class="ruby-identifier">q</span>)
   <span class="ruby-identifier">q</span>.<span class="ruby-identifier">object_group</span>(<span class="ruby-keyword">self</span>) {
     <span class="ruby-identifier">q</span>.<span class="ruby-identifier">text</span> <span class="ruby-string">&#39; &#39;</span>
@@ -820,8 +814,7 @@ ossl_x509name_initialize_copy(VALUE self, VALUE other)
 
         <div class="method-description">
           
-          <p>Returns an Array representation of the distinguished name suitable for
-passing to <a href="Name.html#method-c-new">::new</a></p>
+          <p>Returns an Array representation of the distinguished name suitable for passing to <a href="Name.html#method-c-new"><code>::new</code></a></p>
           
           
 
@@ -950,20 +943,18 @@ ossl_x509name_to_der(VALUE self)
 
         <div class="method-description">
           
-          <p>Returns a String representation of the Distinguished <a
-href="Name.html">Name</a>. <em>format</em> is one of:</p>
+          <p>Returns a String representation of the Distinguished <a href="Name.html"><code>Name</code></a>. <em>format</em> is one of:</p>
 <ul><li>
-<p><a href="Name.html#COMPAT">OpenSSL::X509::Name::COMPAT</a></p>
+<p><a href="Name.html#COMPAT"><code>OpenSSL::X509::Name::COMPAT</code></a></p>
 </li><li>
-<p><a href="Name.html#RFC2253">OpenSSL::X509::Name::RFC2253</a></p>
+<p><a href="Name.html#RFC2253"><code>OpenSSL::X509::Name::RFC2253</code></a></p>
 </li><li>
-<p><a href="Name.html#ONELINE">OpenSSL::X509::Name::ONELINE</a></p>
+<p><a href="Name.html#ONELINE"><code>OpenSSL::X509::Name::ONELINE</code></a></p>
 </li><li>
-<p><a href="Name.html#MULTILINE">OpenSSL::X509::Name::MULTILINE</a></p>
+<p><a href="Name.html#MULTILINE"><code>OpenSSL::X509::Name::MULTILINE</code></a></p>
 </li></ul>
 
-<p>If <em>format</em> is omitted, the largely broken and traditional <a
-href="../../OpenSSL.html">OpenSSL</a> format is used.</p>
+<p>If <em>format</em> is omitted, the largely broken and traditional <a href="../../OpenSSL.html"><code>OpenSSL</code></a> format is used.</p>
           
           
 
@@ -1005,8 +996,7 @@ ossl_x509name_to_s(int argc, VALUE *argv, VALUE self)
 
         <div class="method-description">
           
-          <p>Returns an UTF-8 representation of the distinguished name, as specified in
-<a href="https://www.ietf.org/rfc/rfc2253.txt">RFC 2253</a>.</p>
+          <p>Returns an UTF-8 representation of the distinguished name, as specified in <a href="https://www.ietf.org/rfc/rfc2253.txt">RFC 2253</a>.</p>
           
           
 
@@ -1038,7 +1028,7 @@ ossl_x509name_to_utf8(VALUE self)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.4.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

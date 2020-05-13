@@ -11,8 +11,11 @@
   var index_rel_prefix = "../../";
 </script>
 
-<script src="../../js/jquery.js"></script>
-<script src="../../js/darkfish.js"></script>
+<script src="../../js/navigation.js" defer></script>
+<script src="../../js/search.js" defer></script>
+<script src="../../js/search_index.js" defer></script>
+<script src="../../js/searcher.js" defer></script>
+<script src="../../js/darkfish.js" defer></script>
 
 <link href="../../css/fonts.css" rel="stylesheet">
 <link href="../../css/rdoc.css" rel="stylesheet">
@@ -117,8 +120,7 @@
 
   <section class="description">
     
-<p>A Simple Public Key Infrastructure implementation (pronounced “spooky”).
-The structure is defined as</p>
+<p>A Simple Public Key Infrastructure implementation (pronounced “spooky”). The structure is defined as</p>
 
 <pre>PublicKeyAndChallenge ::= SEQUENCE {
   spki SubjectPublicKeyInfo,
@@ -131,24 +133,21 @@ SignedPublicKeyAndChallenge ::= SEQUENCE {
   signature BIT STRING
 }</pre>
 
-<p>where the definitions of SubjectPublicKeyInfo and AlgorithmIdentifier can
-be found in RFC5280. <a href="SPKI.html">SPKI</a> is typically used in
-browsers for generating a public/private key pair and a subsequent
-certificate request, using the HTML &lt;keygen&gt; element.</p>
+<p>where the definitions of SubjectPublicKeyInfo and AlgorithmIdentifier can be found in RFC5280. <a href="SPKI.html"><code>SPKI</code></a> is typically used in browsers for generating a public/private key pair and a subsequent certificate request, using the HTML &lt;keygen&gt; element.</p>
 
 <h2 id="class-OpenSSL::Netscape::SPKI-label-Examples">Examples<span><a href="#class-OpenSSL::Netscape::SPKI-label-Examples">&para;</a> <a href="#top">&uarr;</a></span></h2>
 
-<h3 id="class-OpenSSL::Netscape::SPKI-label-Creating+an+SPKI">Creating an <a href="SPKI.html">SPKI</a><span><a href="#class-OpenSSL::Netscape::SPKI-label-Creating+an+SPKI">&para;</a> <a href="#top">&uarr;</a></span></h3>
+<h3 id="class-OpenSSL::Netscape::SPKI-label-Creating+an+SPKI">Creating an <a href="SPKI.html"><code>SPKI</code></a><span><a href="#class-OpenSSL::Netscape::SPKI-label-Creating+an+SPKI">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
 <pre class="ruby"><span class="ruby-identifier">key</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">RSA</span>.<span class="ruby-identifier">new</span> <span class="ruby-value">2048</span>
 <span class="ruby-identifier">spki</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Netscape</span><span class="ruby-operator">::</span><span class="ruby-constant">SPKI</span>.<span class="ruby-identifier">new</span>
 <span class="ruby-identifier">spki</span>.<span class="ruby-identifier">challenge</span> = <span class="ruby-string">&quot;RandomChallenge&quot;</span>
 <span class="ruby-identifier">spki</span>.<span class="ruby-identifier">public_key</span> = <span class="ruby-identifier">key</span>.<span class="ruby-identifier">public_key</span>
-<span class="ruby-identifier">spki</span>.<span class="ruby-identifier">sign</span>(<span class="ruby-identifier">key</span>, <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span><span class="ruby-operator">::</span><span class="ruby-constant">SHA256</span>.<span class="ruby-identifier">new</span>)
+<span class="ruby-identifier">spki</span>.<span class="ruby-identifier">sign</span>(<span class="ruby-identifier">key</span>, <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;SHA256&#39;</span>))
 <span class="ruby-comment">#send a request containing this to a server generating a certificate</span>
 </pre>
 
-<h3 id="class-OpenSSL::Netscape::SPKI-label-Verifying+an+SPKI+request">Verifying an <a href="SPKI.html">SPKI</a> request<span><a href="#class-OpenSSL::Netscape::SPKI-label-Verifying+an+SPKI+request">&para;</a> <a href="#top">&uarr;</a></span></h3>
+<h3 id="class-OpenSSL::Netscape::SPKI-label-Verifying+an+SPKI+request">Verifying an <a href="SPKI.html"><code>SPKI</code></a> request<span><a href="#class-OpenSSL::Netscape::SPKI-label-Verifying+an+SPKI+request">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
 <pre class="ruby"><span class="ruby-identifier">request</span> = <span class="ruby-comment">#...</span>
 <span class="ruby-identifier">spki</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Netscape</span><span class="ruby-operator">::</span><span class="ruby-constant">SPKI</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">request</span>
@@ -259,8 +258,7 @@ ossl_spki_initialize(int argc, VALUE *argv, VALUE self)
 
         <div class="method-description">
           
-          <p>Returns the challenge string associated with this <a
-href="SPKI.html">SPKI</a>.</p>
+          <p>Returns the challenge string associated with this <a href="SPKI.html"><code>SPKI</code></a>.</p>
           
           
 
@@ -311,8 +309,7 @@ ossl_spki_get_challenge(VALUE self)
 <p><em>str</em> - the challenge string to be set for this instance</p>
 </li></ul>
 
-<p>Sets the challenge to be associated with the <a href="SPKI.html">SPKI</a>.
-May be used by the server, e.g. to prevent replay.</p>
+<p>Sets the challenge to be associated with the <a href="SPKI.html"><code>SPKI</code></a>. May be used by the server, e.g. to prevent replay.</p>
           
           
 
@@ -358,8 +355,7 @@ ossl_spki_set_challenge(VALUE self, VALUE str)
 
         <div class="method-description">
           
-          <p>Returns the public key associated with the <a href="SPKI.html">SPKI</a>, an
-instance of <a href="../PKey.html">OpenSSL::PKey</a>.</p>
+          <p>Returns the public key associated with the <a href="SPKI.html"><code>SPKI</code></a>, an instance of <a href="../PKey.html"><code>OpenSSL::PKey</code></a>.</p>
           
           
 
@@ -409,10 +405,7 @@ ossl_spki_get_public_key(VALUE self)
 <p><em>pub</em> - the public key to be set for this instance</p>
 </li></ul>
 
-<p>Sets the public key to be associated with the <a href="SPKI.html">SPKI</a>,
-an instance of <a href="../PKey.html">OpenSSL::PKey</a>. This should be the
-public key corresponding to the private key used for signing the <a
-href="SPKI.html">SPKI</a>.</p>
+<p>Sets the public key to be associated with the <a href="SPKI.html"><code>SPKI</code></a>, an instance of <a href="../PKey.html"><code>OpenSSL::PKey</code></a>. This should be the public key corresponding to the private key used for signing the <a href="SPKI.html"><code>SPKI</code></a>.</p>
           
           
 
@@ -464,11 +457,7 @@ ossl_spki_set_public_key(VALUE self, VALUE key)
 <p><em>digest</em> - the digest to be used for signing this instance</p>
 </li></ul>
 
-<p>To sign an <a href="SPKI.html">SPKI</a>, the private key corresponding to
-the public key set for this instance should be used, in addition to a
-digest algorithm in the form of an <a
-href="../Digest.html">OpenSSL::Digest</a>. The private key should be an
-instance of <a href="../PKey.html">OpenSSL::PKey</a>.</p>
+<p>To sign an <a href="SPKI.html"><code>SPKI</code></a>, the private key corresponding to the public key set for this instance should be used, in addition to a digest algorithm in the form of an <a href="../Digest.html"><code>OpenSSL::Digest</code></a>. The private key should be an instance of <a href="../PKey.html"><code>OpenSSL::PKey</code></a>.</p>
           
           
 
@@ -516,7 +505,7 @@ ossl_spki_sign(VALUE self, VALUE key, VALUE digest)
 
         <div class="method-description">
           
-          <p>Returns the DER encoding of this <a href="SPKI.html">SPKI</a>.</p>
+          <p>Returns the DER encoding of this <a href="SPKI.html"><code>SPKI</code></a>.</p>
           
           
 
@@ -567,7 +556,7 @@ ossl_spki_to_der(VALUE self)
 
         <div class="method-description">
           
-          <p>Returns the PEM encoding of this <a href="SPKI.html">SPKI</a>.</p>
+          <p>Returns the PEM encoding of this <a href="SPKI.html"><code>SPKI</code></a>.</p>
           
           
 
@@ -646,8 +635,7 @@ ossl_spki_to_pem(VALUE self)
 
         <div class="method-description">
           
-          <p>Returns a textual representation of this <a href="SPKI.html">SPKI</a>,
-useful for debugging purposes.</p>
+          <p>Returns a textual representation of this <a href="SPKI.html"><code>SPKI</code></a>, useful for debugging purposes.</p>
           
           
 
@@ -698,13 +686,10 @@ ossl_spki_print(VALUE self)
           
           <h3 id="method-i-verify-label-Parameters">Parameters<span><a href="#method-i-verify-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
 <ul><li>
-<p><em>key</em> - the public key to be used for verifying the <a
-href="SPKI.html">SPKI</a> signature</p>
+<p><em>key</em> - the public key to be used for verifying the <a href="SPKI.html"><code>SPKI</code></a> signature</p>
 </li></ul>
 
-<p>Returns <code>true</code> if the signature is valid, <code>false</code>
-otherwise. To verify an <a href="SPKI.html">SPKI</a>, the public key
-contained within the <a href="SPKI.html">SPKI</a> should be used.</p>
+<p>Returns <code>true</code> if the signature is valid, <code>false</code> otherwise. To verify an <a href="SPKI.html"><code>SPKI</code></a>, the public key contained within the <a href="SPKI.html"><code>SPKI</code></a> should be used.</p>
           
           
 
@@ -748,7 +733,7 @@ ossl_spki_verify(VALUE self, VALUE key)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.4.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

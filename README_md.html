@@ -11,8 +11,11 @@
   var index_rel_prefix = "./";
 </script>
 
-<script src="./js/jquery.js"></script>
-<script src="./js/darkfish.js"></script>
+<script src="./js/navigation.js" defer></script>
+<script src="./js/search.js" defer></script>
+<script src="./js/search_index.js" defer></script>
+<script src="./js/searcher.js" defer></script>
+<script src="./js/darkfish.js" defer></script>
 
 <link href="./css/fonts.css" rel="stylesheet">
 <link href="./css/rdoc.css" rel="stylesheet">
@@ -87,27 +90,20 @@
 
 <main role="main" aria-label="Page README.md">
 
-<h1 id="label-OpenSSL+for+Ruby"><a href="OpenSSL.html">OpenSSL</a> for Ruby<span><a href="#label-OpenSSL+for+Ruby">&para;</a> <a href="#top">&uarr;</a></span></h1>
+<h1 id="label-OpenSSL+for+Ruby"><a href="OpenSSL.html"><code>OpenSSL</code></a> for Ruby<span><a href="#label-OpenSSL+for+Ruby">&para;</a> <a href="#top">&uarr;</a></span></h1>
 
-<p><a href="https://travis-ci.org/ruby/openssl"><img
-src="https://travis-ci.org/ruby/openssl.svg?branch=master"></a> <a
-href="https://ci.appveyor.com/project/ruby/openssl/branch/master"><img
-src="https://ci.appveyor.com/api/projects/status/b8djtmwo7l26f88y/branch/master?svg=true"></a></p>
+<p><a href="https://github.com/ruby/openssl/actions?workflow=CI"><img src="https://github.com/ruby/openssl/workflows/CI/badge.svg"></a></p>
 
-<p><a href="OpenSSL.html">OpenSSL</a> provides SSL, TLS and general purpose
-cryptography. It wraps the <a href="OpenSSL.html">OpenSSL</a> library.</p>
+<p><a href="OpenSSL.html"><code>OpenSSL</code></a> provides SSL, TLS and general purpose cryptography. It wraps the <a href="OpenSSL.html"><code>OpenSSL</code></a> library.</p>
 
 <h2 id="label-Installation">Installation<span><a href="#label-Installation">&para;</a> <a href="#top">&uarr;</a></span></h2>
 
-<p>The openssl gem is available at <a
-href="https://rubygems.org/gems/openssl">rubygems.org</a>. You can install
-with:</p>
+<p>The openssl gem is available at <a href="https://rubygems.org/gems/openssl">rubygems.org</a>. You can install with:</p>
 
 <pre class="ruby"><span class="ruby-identifier">gem</span> <span class="ruby-identifier">install</span> <span class="ruby-identifier">openssl</span>
 </pre>
 
-<p>You may need to specify the path where <a href="OpenSSL.html">OpenSSL</a>
-is installed.</p>
+<p>You may need to specify the path where <a href="OpenSSL.html"><code>OpenSSL</code></a> is installed.</p>
 
 <pre>gem install openssl -- --with-openssl-dir=/opt/openssl</pre>
 
@@ -119,8 +115,7 @@ is installed.</p>
 <span class="ruby-identifier">gem</span> <span class="ruby-string">&#39;openssl&#39;</span>, <span class="ruby-value">git:</span> <span class="ruby-string">&#39;https://github.com/ruby/openssl&#39;</span>
 </pre>
 
-<p>After doing <code>bundle install</code>, you should have the gem installed
-in your bundle.</p>
+<p>After doing <code>bundle install</code>, you should have the gem installed in your bundle.</p>
 
 <h2 id="label-Usage">Usage<span><a href="#label-Usage">&para;</a> <a href="#top">&uarr;</a></span></h2>
 
@@ -129,9 +124,7 @@ in your bundle.</p>
 <pre class="ruby"><span class="ruby-identifier">require</span> <span class="ruby-string">&quot;openssl&quot;</span>
 </pre>
 
-<p><strong>NOTE</strong>: If you are using Ruby 2.3 (and not Bundler), you
-<strong>must</strong> activate the gem version of openssl, otherwise the
-default gem packaged with the Ruby installation will be used:</p>
+<p><strong>NOTE</strong>: If you are using Ruby 2.3 (and not Bundler), you <strong>must</strong> activate the gem version of openssl, otherwise the default gem packaged with the Ruby installation will be used:</p>
 
 <pre class="ruby"><span class="ruby-identifier">gem</span> <span class="ruby-string">&quot;openssl&quot;</span>
 <span class="ruby-identifier">require</span> <span class="ruby-string">&quot;openssl&quot;</span>
@@ -143,15 +136,11 @@ default gem packaged with the Ruby installation will be used:</p>
 
 <h2 id="label-Contributing">Contributing<span><a href="#label-Contributing">&para;</a> <a href="#top">&uarr;</a></span></h2>
 
-<p>Please read our <a
-href="https://github.com/ruby/openssl/tree/master/CONTRIBUTING.md">CONTRIBUTING.md</a>
-for instructions.</p>
+<p>Please read our <a href="https://github.com/ruby/openssl/tree/master/CONTRIBUTING.md">CONTRIBUTING.md</a> for instructions.</p>
 
 <h2 id="label-Security">Security<span><a href="#label-Security">&para;</a> <a href="#top">&uarr;</a></span></h2>
 
-<p>Security issues should be reported to ruby-core by following the process
-described on <a href="https://www.ruby-lang.org/en/security/">“Security at
-ruby-lang.org”</a>.</p>
+<p>Security issues should be reported to ruby-core by following the process described on <a href="https://www.ruby-lang.org/en/security/">“Security at ruby-lang.org”</a>.</p>
 
 </main>
 
@@ -159,7 +148,7 @@ ruby-lang.org”</a>.</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.4.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

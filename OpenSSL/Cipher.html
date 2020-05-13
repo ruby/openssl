@@ -11,8 +11,11 @@
   var index_rel_prefix = "../";
 </script>
 
-<script src="../js/jquery.js"></script>
-<script src="../js/darkfish.js"></script>
+<script src="../js/navigation.js" defer></script>
+<script src="../js/search.js" defer></script>
+<script src="../js/search_index.js" defer></script>
+<script src="../js/searcher.js" defer></script>
+<script src="../js/darkfish.js" defer></script>
 
 <link href="../css/fonts.css" rel="stylesheet">
 <link href="../css/rdoc.css" rel="stylesheet">
@@ -103,6 +106,8 @@
     
     <li ><a href="#method-i-block_size">#block_size</a>
     
+    <li ><a href="#method-i-ccm_data_len-3D">#ccm_data_len=</a>
+    
     <li ><a href="#method-i-decrypt">#decrypt</a>
     
     <li ><a href="#method-i-encrypt">#encrypt</a>
@@ -150,9 +155,7 @@
 
   <section class="description">
     
-<p>Provides symmetric algorithms for encryption and decryption. The algorithms
-that are available depend on the particular version of <a
-href="../OpenSSL.html">OpenSSL</a> that is installed.</p>
+<p>Provides symmetric algorithms for encryption and decryption. The algorithms that are available depend on the particular version of <a href="../OpenSSL.html"><code>OpenSSL</code></a> that is installed.</p>
 
 <h3 id="class-OpenSSL::Cipher-label-Listing+all+supported+algorithms">Listing all supported algorithms<span><a href="#class-OpenSSL::Cipher-label-Listing+all+supported+algorithms">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
@@ -161,50 +164,21 @@ href="../OpenSSL.html">OpenSSL</a> that is installed.</p>
 <pre class="ruby"><span class="ruby-identifier">puts</span> <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">ciphers</span>
 </pre>
 
-<h3 id="class-OpenSSL::Cipher-label-Instantiating+a+Cipher">Instantiating a <a href="Cipher/Cipher.html">Cipher</a><span><a href="#class-OpenSSL::Cipher-label-Instantiating+a+Cipher">&para;</a> <a href="#top">&uarr;</a></span></h3>
+<h3 id="class-OpenSSL::Cipher-label-Instantiating+a+Cipher">Instantiating a <a href="Cipher/Cipher.html"><code>Cipher</code></a><span><a href="#class-OpenSSL::Cipher-label-Instantiating+a+Cipher">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
-<p>There are several ways to create a <a href="Cipher/Cipher.html">Cipher</a>
-instance. Generally, a <a href="Cipher/Cipher.html">Cipher</a> algorithm is
-categorized by its name, the key length in bits and the cipher mode to be
-used. The most generic way to create a <a
-href="Cipher/Cipher.html">Cipher</a> is the following</p>
+<p>There are several ways to create a <a href="Cipher/Cipher.html"><code>Cipher</code></a> instance. Generally, a <a href="Cipher/Cipher.html"><code>Cipher</code></a> algorithm is categorized by its name, the key length in bits and the cipher mode to be used. The most generic way to create a <a href="Cipher/Cipher.html"><code>Cipher</code></a> is the following</p>
 
 <pre class="ruby"><span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;&lt;name&gt;-&lt;key length&gt;-&lt;mode&gt;&#39;</span>)
 </pre>
 
-<p>That is, a string consisting of the hyphenated concatenation of the
-individual components name, key length and mode. Either all uppercase or
-all lowercase strings may be used, for example:</p>
+<p>That is, a string consisting of the hyphenated concatenation of the individual components name, key length and mode. Either all uppercase or all lowercase strings may be used, for example:</p>
 
 <pre class="ruby"><span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;AES-128-CBC&#39;</span>)
 </pre>
 
-<p>For each algorithm supported, there is a class defined under the <a
-href="Cipher/Cipher.html">Cipher</a> class that goes by the name of the
-cipher, e.g. to obtain an instance of AES, you could also use</p>
-
-<pre class="ruby"><span class="ruby-comment"># these are equivalent</span>
-<span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span><span class="ruby-operator">::</span><span class="ruby-constant">AES</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">128</span>, <span class="ruby-value">:CBC</span>)
-<span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span><span class="ruby-operator">::</span><span class="ruby-constant">AES</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">128</span>, <span class="ruby-string">&#39;CBC&#39;</span>)
-<span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span><span class="ruby-operator">::</span><span class="ruby-constant">AES</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;128-CBC&#39;</span>)
-</pre>
-
-<p>Finally, due to its wide-spread use, there are also extra classes defined
-for the different key sizes of AES</p>
-
-<pre class="ruby"><span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span><span class="ruby-operator">::</span><span class="ruby-constant">AES128</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">:CBC</span>)
-<span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span><span class="ruby-operator">::</span><span class="ruby-constant">AES192</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">:CBC</span>)
-<span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span><span class="ruby-operator">::</span><span class="ruby-constant">AES256</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">:CBC</span>)
-</pre>
-
 <h3 id="class-OpenSSL::Cipher-label-Choosing+either+encryption+or+decryption+mode">Choosing either encryption or decryption mode<span><a href="#class-OpenSSL::Cipher-label-Choosing+either+encryption+or+decryption+mode">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
-<p>Encryption and decryption are often very similar operations for symmetric
-algorithms, this is reflected by not having to choose different classes for
-either operation, both can be done using the same class. Still, after
-obtaining a <a href="Cipher/Cipher.html">Cipher</a> instance, we need to
-tell the instance what it is that we intend to do with it, so we need to
-call either</p>
+<p>Encryption and decryption are often very similar operations for symmetric algorithms, this is reflected by not having to choose different classes for either operation, both can be done using the same class. Still, after obtaining a <a href="Cipher/Cipher.html"><code>Cipher</code></a> instance, we need to tell the instance what it is that we intend to do with it, so we need to call either</p>
 
 <pre class="ruby"><span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">encrypt</span>
 </pre>
@@ -214,135 +188,79 @@ call either</p>
 <pre class="ruby"><span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">decrypt</span>
 </pre>
 
-<p>on the <a href="Cipher/Cipher.html">Cipher</a> instance. This should be the
-first call after creating the instance, otherwise configuration that has
-already been set could get lost in the process.</p>
+<p>on the <a href="Cipher/Cipher.html"><code>Cipher</code></a> instance. This should be the first call after creating the instance, otherwise configuration that has already been set could get lost in the process.</p>
 
 <h3 id="class-OpenSSL::Cipher-label-Choosing+a+key">Choosing a key<span><a href="#class-OpenSSL::Cipher-label-Choosing+a+key">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
-<p>Symmetric encryption requires a key that is the same for the encrypting and
-for the decrypting party and after initial key establishment should be kept
-as private information. There are a lot of ways to create insecure keys,
-the most notable is to simply take a password as the key without processing
-the password further. A simple and secure way to create a key for a
-particular <a href="Cipher/Cipher.html">Cipher</a> is</p>
+<p>Symmetric encryption requires a key that is the same for the encrypting and for the decrypting party and after initial key establishment should be kept as private information. There are a lot of ways to create insecure keys, the most notable is to simply take a password as the key without processing the password further. A simple and secure way to create a key for a particular <a href="Cipher/Cipher.html"><code>Cipher</code></a> is</p>
 
-<pre class="ruby"><span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">AES256</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">:CFB</span>)
+<pre class="ruby"><span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;AES-256-CFB&#39;</span>)
 <span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">encrypt</span>
 <span class="ruby-identifier">key</span> = <span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">random_key</span> <span class="ruby-comment"># also sets the generated key on the Cipher</span>
 </pre>
 
-<p>If you absolutely need to use passwords as encryption keys, you should use
-Password-Based Key Derivation Function 2 (PBKDF2) by generating the key
-with the help of the functionality provided by <a
-href="PKCS5.html#method-i-pbkdf2_hmac_sha1">OpenSSL::PKCS5#pbkdf2_hmac_sha1</a>
-or <a
-href="PKCS5.html#method-i-pbkdf2_hmac">OpenSSL::PKCS5#pbkdf2_hmac</a>.</p>
+<p>If you absolutely need to use passwords as encryption keys, you should use Password-Based Key Derivation Function 2 (PBKDF2) by generating the key with the help of the functionality provided by <a href="PKCS5.html#method-i-pbkdf2_hmac_sha1"><code>OpenSSL::PKCS5.pbkdf2_hmac_sha1</code></a> or <a href="PKCS5.html#method-i-pbkdf2_hmac"><code>OpenSSL::PKCS5.pbkdf2_hmac</code></a>.</p>
 
-<p>Although there is <a
-href="Cipher.html#method-i-pkcs5_keyivgen">#pkcs5_keyivgen</a>, its use is
-deprecated and it should only be used in legacy applications because it
-does not use the newer PKCS#5 v2 algorithms.</p>
+<p>Although there is <a href="Cipher.html#method-i-pkcs5_keyivgen"><code>Cipher#pkcs5_keyivgen</code></a>, its use is deprecated and it should only be used in legacy applications because it does not use the newer PKCS#5 v2 algorithms.</p>
 
 <h3 id="class-OpenSSL::Cipher-label-Choosing+an+IV">Choosing an IV<span><a href="#class-OpenSSL::Cipher-label-Choosing+an+IV">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
-<p>The cipher modes CBC, CFB, OFB and CTR all need an “initialization vector”,
-or short, IV. ECB mode is the only mode that does not require an IV, but
-there is almost no legitimate use case for this mode because of the fact
-that it does not sufficiently hide plaintext patterns. Therefore</p>
+<p>The cipher modes CBC, CFB, OFB and CTR all need an “initialization vector”, or short, IV. ECB mode is the only mode that does not require an IV, but there is almost no legitimate use case for this mode because of the fact that it does not sufficiently hide plaintext patterns. Therefore</p>
 
-<p><strong>You should never use ECB mode unless you are absolutely sure that
-you absolutely need it</strong></p>
+<p><strong>You should never use ECB mode unless you are absolutely sure that you absolutely need it</strong></p>
 
-<p>Because of this, you will end up with a mode that explicitly requires an IV
-in any case. Although the IV can be seen as public information, i.e. it may
-be transmitted in public once generated, it should still stay unpredictable
-to prevent certain kinds of attacks. Therefore, ideally</p>
+<p>Because of this, you will end up with a mode that explicitly requires an IV in any case. Although the IV can be seen as public information, i.e. it may be transmitted in public once generated, it should still stay unpredictable to prevent certain kinds of attacks. Therefore, ideally</p>
 
-<p><strong>Always create a secure random IV for every encryption of your <a
-href="Cipher/Cipher.html">Cipher</a></strong></p>
+<p><strong>Always create a secure random IV for every encryption of your <a href="Cipher/Cipher.html"><code>Cipher</code></a></strong></p>
 
-<p>A new, random IV should be created for every encryption of data. Think of
-the IV as a nonce (number used once) - it&#39;s public but random and
-unpredictable. A secure random IV can be created as follows</p>
+<p>A new, random IV should be created for every encryption of data. Think of the IV as a nonce (number used once) - it&#39;s public but random and unpredictable. A secure random IV can be created as follows</p>
 
-<pre>cipher = ...
-cipher.encrypt
-key = cipher.random_key
-iv = cipher.random_iv # also sets the generated IV on the Cipher</pre>
+<pre class="ruby"><span class="ruby-identifier">cipher</span> = <span class="ruby-operator">...</span>
+<span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">encrypt</span>
+<span class="ruby-identifier">key</span> = <span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">random_key</span>
+<span class="ruby-identifier">iv</span> = <span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">random_iv</span> <span class="ruby-comment"># also sets the generated IV on the Cipher</span>
+</pre>
 
-<p>Although the key is generally a random value, too, it is a bad choice as an
-IV. There are elaborate ways how an attacker can take advantage of such an
-IV. As a general rule of thumb, exposing the key directly or indirectly
-should be avoided at all cost and exceptions only be made with good reason.</p>
+<p>Although the key is generally a random value, too, it is a bad choice as an IV. There are elaborate ways how an attacker can take advantage of such an IV. As a general rule of thumb, exposing the key directly or indirectly should be avoided at all cost and exceptions only be made with good reason.</p>
 
-<h3 id="class-OpenSSL::Cipher-label-Calling+Cipher-23final">Calling <a href="Cipher.html#method-i-final">#final</a><span><a href="#class-OpenSSL::Cipher-label-Calling+Cipher-23final">&para;</a> <a href="#top">&uarr;</a></span></h3>
+<h3 id="class-OpenSSL::Cipher-label-Calling+Cipher-23final">Calling <a href="Cipher.html#method-i-final"><code>Cipher#final</code></a><span><a href="#class-OpenSSL::Cipher-label-Calling+Cipher-23final">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
-<p>ECB (which should not be used) and CBC are both block-based modes. This
-means that unlike for the other streaming-based modes, they operate on
-fixed-size blocks of data, and therefore they require a “finalization” step
-to produce or correctly decrypt the last block of data by appropriately
-handling some form of padding. Therefore it is essential to add the output
-of <a href="Cipher.html#method-i-final">#final</a> to your
-encryption/decryption buffer or you will end up with decryption errors or
-truncated data.</p>
+<p>ECB (which should not be used) and CBC are both block-based modes. This means that unlike for the other streaming-based modes, they operate on fixed-size blocks of data, and therefore they require a “finalization” step to produce or correctly decrypt the last block of data by appropriately handling some form of padding. Therefore it is essential to add the output of <a href="Cipher.html#method-i-final"><code>OpenSSL::Cipher#final</code></a> to your encryption/decryption buffer or you will end up with decryption errors or truncated data.</p>
 
-<p>Although this is not really necessary for streaming-mode ciphers, it is
-still recommended to apply the same pattern of adding the output of <a
-href="Cipher.html#method-i-final">#final</a> there as well - it also
-enables you to switch between modes more easily in the future.</p>
+<p>Although this is not really necessary for streaming-mode ciphers, it is still recommended to apply the same pattern of adding the output of <a href="Cipher.html#method-i-final"><code>Cipher#final</code></a> there as well - it also enables you to switch between modes more easily in the future.</p>
 
 <h3 id="class-OpenSSL::Cipher-label-Encrypting+and+decrypting+some+data">Encrypting and decrypting some data<span><a href="#class-OpenSSL::Cipher-label-Encrypting+and+decrypting+some+data">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
-<pre>data = &quot;Very, very confidential data&quot;
+<pre class="ruby"><span class="ruby-identifier">data</span> = <span class="ruby-string">&quot;Very, very confidential data&quot;</span>
 
-cipher = OpenSSL::Cipher::AES.new(128, :CBC)
-cipher.encrypt
-key = cipher.random_key
-iv = cipher.random_iv
+<span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;AES-128-CBC&#39;</span>)
+<span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">encrypt</span>
+<span class="ruby-identifier">key</span> = <span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">random_key</span>
+<span class="ruby-identifier">iv</span> = <span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">random_iv</span>
 
-encrypted = cipher.update(data) + cipher.final
-...
-decipher = OpenSSL::Cipher::AES.new(128, :CBC)
-decipher.decrypt
-decipher.key = key
-decipher.iv = iv
+<span class="ruby-identifier">encrypted</span> = <span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">update</span>(<span class="ruby-identifier">data</span>) <span class="ruby-operator">+</span> <span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">final</span>
+<span class="ruby-operator">...</span>
+<span class="ruby-identifier">decipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;AES-128-CBC&#39;</span>)
+<span class="ruby-identifier">decipher</span>.<span class="ruby-identifier">decrypt</span>
+<span class="ruby-identifier">decipher</span>.<span class="ruby-identifier">key</span> = <span class="ruby-identifier">key</span>
+<span class="ruby-identifier">decipher</span>.<span class="ruby-identifier">iv</span> = <span class="ruby-identifier">iv</span>
 
-plain = decipher.update(encrypted) + decipher.final
+<span class="ruby-identifier">plain</span> = <span class="ruby-identifier">decipher</span>.<span class="ruby-identifier">update</span>(<span class="ruby-identifier">encrypted</span>) <span class="ruby-operator">+</span> <span class="ruby-identifier">decipher</span>.<span class="ruby-identifier">final</span>
 
-puts data == plain #=&gt; true</pre>
+<span class="ruby-identifier">puts</span> <span class="ruby-identifier">data</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">plain</span> <span class="ruby-comment">#=&gt; true</span>
+</pre>
 
 <h3 id="class-OpenSSL::Cipher-label-Authenticated+Encryption+and+Associated+Data+-28AEAD-29">Authenticated Encryption and Associated Data (AEAD)<span><a href="#class-OpenSSL::Cipher-label-Authenticated+Encryption+and+Associated+Data+-28AEAD-29">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
-<p>If the <a href="../OpenSSL.html">OpenSSL</a> version used supports it, an
-Authenticated Encryption mode (such as GCM or CCM) should always be
-preferred over any unauthenticated mode. Currently, <a
-href="../OpenSSL.html">OpenSSL</a> supports AE only in combination with
-Associated Data (AEAD) where additional associated data is included in the
-encryption process to compute a tag at the end of the encryption. This tag
-will also be used in the decryption process and by verifying its validity,
-the authenticity of a given ciphertext is established.</p>
+<p>If the <a href="../OpenSSL.html"><code>OpenSSL</code></a> version used supports it, an Authenticated Encryption mode (such as GCM or CCM) should always be preferred over any unauthenticated mode. Currently, <a href="../OpenSSL.html"><code>OpenSSL</code></a> supports AE only in combination with Associated Data (AEAD) where additional associated data is included in the encryption process to compute a tag at the end of the encryption. This tag will also be used in the decryption process and by verifying its validity, the authenticity of a given ciphertext is established.</p>
 
-<p>This is superior to unauthenticated modes in that it allows to detect if
-somebody effectively changed the ciphertext after it had been encrypted.
-This prevents malicious modifications of the ciphertext that could
-otherwise be exploited to modify ciphertexts in ways beneficial to
-potential attackers.</p>
+<p>This is superior to unauthenticated modes in that it allows to detect if somebody effectively changed the ciphertext after it had been encrypted. This prevents malicious modifications of the ciphertext that could otherwise be exploited to modify ciphertexts in ways beneficial to potential attackers.</p>
 
-<p>An associated data is used where there is additional information, such as
-headers or some metadata, that must be also authenticated but not
-necessarily need to be encrypted. If no associated data is needed for
-encryption and later decryption, the <a href="../OpenSSL.html">OpenSSL</a>
-library still requires a value to be set - “” may be used in case none is
-available.</p>
+<p>An associated data is used where there is additional information, such as headers or some metadata, that must be also authenticated but not necessarily need to be encrypted. If no associated data is needed for encryption and later decryption, the <a href="../OpenSSL.html"><code>OpenSSL</code></a> library still requires a value to be set - “” may be used in case none is available.</p>
 
-<p>An example using the GCM (Galois/Counter Mode). You have 16 bytes
-<em>key</em>, 12 bytes (96 bits) <em>nonce</em> and the associated data
-<em>auth_data</em>. Be sure not to reuse the <em>key</em> and
-<em>nonce</em> pair. Reusing an nonce ruins the security guarantees of GCM
-mode.</p>
+<p>An example using the GCM (Galois/Counter Mode). You have 16 bytes <em>key</em>, 12 bytes (96 bits) <em>nonce</em> and the associated data <em>auth_data</em>. Be sure not to reuse the <em>key</em> and <em>nonce</em> pair. Reusing an nonce ruins the security guarantees of GCM mode.</p>
 
-<pre class="ruby"><span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span><span class="ruby-operator">::</span><span class="ruby-constant">AES</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">128</span>, <span class="ruby-value">:GCM</span>).<span class="ruby-identifier">encrypt</span>
+<pre class="ruby"><span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;AES-128-GCM&#39;</span>).<span class="ruby-identifier">encrypt</span>
 <span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">key</span> = <span class="ruby-identifier">key</span>
 <span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">iv</span> = <span class="ruby-identifier">nonce</span>
 <span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">auth_data</span> = <span class="ruby-identifier">auth_data</span>
@@ -351,16 +269,10 @@ mode.</p>
 <span class="ruby-identifier">tag</span> = <span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">auth_tag</span> <span class="ruby-comment"># produces 16 bytes tag by default</span>
 </pre>
 
-<p>Now you are the receiver. You know the <em>key</em> and have received
-<em>nonce</em>, <em>auth_data</em>, <em>encrypted</em> and <em>tag</em>
-through an untrusted network. Note that GCM accepts an arbitrary length tag
-between 1 and 16 bytes. You may additionally need to check that the
-received tag has the correct length, or you allow attackers to forge a
-valid single byte tag for the tampered ciphertext with a probability of
-1/256.</p>
+<p>Now you are the receiver. You know the <em>key</em> and have received <em>nonce</em>, <em>auth_data</em>, <em>encrypted</em> and <em>tag</em> through an untrusted network. Note that GCM accepts an arbitrary length tag between 1 and 16 bytes. You may additionally need to check that the received tag has the correct length, or you allow attackers to forge a valid single byte tag for the tampered ciphertext with a probability of 1/256.</p>
 
 <pre class="ruby"><span class="ruby-identifier">raise</span> <span class="ruby-string">&quot;tag is truncated!&quot;</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">bytesize</span> <span class="ruby-operator">==</span> <span class="ruby-value">16</span>
-<span class="ruby-identifier">decipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span><span class="ruby-operator">::</span><span class="ruby-constant">AES</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">128</span>, <span class="ruby-value">:GCM</span>).<span class="ruby-identifier">decrypt</span>
+<span class="ruby-identifier">decipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;AES-128-GCM&#39;</span>).<span class="ruby-identifier">decrypt</span>
 <span class="ruby-identifier">decipher</span>.<span class="ruby-identifier">key</span> = <span class="ruby-identifier">key</span>
 <span class="ruby-identifier">decipher</span>.<span class="ruby-identifier">iv</span> = <span class="ruby-identifier">nonce</span>
 <span class="ruby-identifier">decipher</span>.<span class="ruby-identifier">auth_tag</span> = <span class="ruby-identifier">tag</span>
@@ -450,10 +362,9 @@ ossl_s_ciphers(VALUE self)
 
         <div class="method-description">
           
-          <p>The string must be a valid cipher name like “AES-128-CBC” or “3DES”.</p>
+          <p>The string must contain a valid cipher name like “AES-256-CBC”.</p>
 
-<p>A list of cipher names is available by calling <a
-href="Cipher.html#method-c-ciphers">::ciphers</a>.</p>
+<p>A list of cipher names is available by calling <a href="Cipher.html#method-c-ciphers"><code>OpenSSL::Cipher.ciphers</code></a>.</p>
           
           
 
@@ -514,24 +425,9 @@ ossl_cipher_initialize(VALUE self, VALUE str)
 
         <div class="method-description">
           
-          <p>Sets the cipher&#39;s additional authenticated data. This field must be set
-when using AEAD cipher modes such as GCM or CCM. If no associated data
-shall be used, this method must <strong>still</strong> be called with a
-value of “”. The contents of this field should be non-sensitive data which
-will be added to the ciphertext to generate the authentication tag which
-validates the contents of the ciphertext.</p>
+          <p>Sets the cipher&#39;s additional authenticated data. This field must be set when using AEAD cipher modes such as GCM or CCM. If no associated data shall be used, this method must <strong>still</strong> be called with a value of “”. The contents of this field should be non-sensitive data which will be added to the ciphertext to generate the authentication tag which validates the contents of the ciphertext.</p>
 
-<p>The AAD must be set prior to encryption or decryption. In encryption mode,
-it must be set after calling <a
-href="Cipher.html#method-i-encrypt">#encrypt</a> and setting <a
-href="Cipher.html#method-i-key-3D">#key=</a> and <a
-href="Cipher.html#method-i-iv-3D">#iv=</a>. When decrypting, the
-authenticated data must be set after key, iv and especially
-<strong>after</strong> the authentication tag has been set. I.e. set it
-only after calling <a href="Cipher.html#method-i-decrypt">#decrypt</a>, <a
-href="Cipher.html#method-i-key-3D">#key=</a>, <a
-href="Cipher.html#method-i-iv-3D">#iv=</a> and <a
-href="Cipher.html#method-i-auth_tag-3D">#auth_tag=</a> first.</p>
+<p>The AAD must be set prior to encryption or decryption. In encryption mode, it must be set after calling <a href="Cipher.html#method-i-encrypt"><code>Cipher#encrypt</code></a> and setting <a href="Cipher.html#method-i-key-3D"><code>Cipher#key=</code></a> and <a href="Cipher.html#method-i-iv-3D"><code>Cipher#iv=</code></a>. When decrypting, the authenticated data must be set after key, iv and especially <strong>after</strong> the authentication tag has been set. I.e. set it only after calling <a href="Cipher.html#method-i-decrypt"><code>Cipher#decrypt</code></a>, <a href="Cipher.html#method-i-key-3D"><code>Cipher#key=</code></a>, <a href="Cipher.html#method-i-iv-3D"><code>Cipher#iv=</code></a> and <a href="Cipher.html#method-i-auth_tag-3D"><code>Cipher#auth_tag=</code></a> first.</p>
           
           
 
@@ -584,18 +480,9 @@ ossl_cipher_set_auth_data(VALUE self, VALUE data)
 
         <div class="method-description">
           
-          <p>Gets the authentication tag generated by Authenticated Encryption <a
-href="Cipher/Cipher.html">Cipher</a> modes (GCM for example). This tag may
-be stored along with the ciphertext, then set on the decryption cipher to
-authenticate the contents of the ciphertext against changes. If the
-optional integer parameter <em>tag_len</em> is given, the returned tag will
-be <em>tag_len</em> bytes long. If the parameter is omitted, the default
-length of 16 bytes or the length previously set by <a
-href="Cipher.html#method-i-auth_tag_len-3D">auth_tag_len=</a> will be used.
-For maximum security, the longest possible should be chosen.</p>
+          <p>Gets the authentication tag generated by Authenticated Encryption <a href="Cipher/Cipher.html"><code>Cipher</code></a> modes (GCM for example). This tag may be stored along with the ciphertext, then set on the decryption cipher to authenticate the contents of the ciphertext against changes. If the optional integer parameter <em>tag_len</em> is given, the returned tag will be <em>tag_len</em> bytes long. If the parameter is omitted, the default length of 16 bytes or the length previously set by <a href="Cipher.html#method-i-auth_tag_len-3D"><code>auth_tag_len=</code></a> will be used. For maximum security, the longest possible should be chosen.</p>
 
-<p>The tag may only be retrieved after calling <a
-href="Cipher.html#method-i-final">#final</a>.</p>
+<p>The tag may only be retrieved after calling <a href="Cipher.html#method-i-final"><code>Cipher#final</code></a>.</p>
           
           
 
@@ -651,17 +538,9 @@ ossl_cipher_get_auth_tag(int argc, VALUE *argv, VALUE self)
 
         <div class="method-description">
           
-          <p>Sets the authentication tag to verify the integrity of the ciphertext. This
-can be called only when the cipher supports AE. The tag must be set after
-calling <a href="Cipher.html#method-i-decrypt">#decrypt</a>, <a
-href="Cipher.html#method-i-key-3D">#key=</a> and <a
-href="Cipher.html#method-i-iv-3D">#iv=</a>, but before calling <a
-href="Cipher.html#method-i-final">#final</a>. After all decryption is
-performed, the tag is verified automatically in the call to <a
-href="Cipher.html#method-i-final">#final</a>.</p>
+          <p>Sets the authentication tag to verify the integrity of the ciphertext. This can be called only when the cipher supports AE. The tag must be set after calling <a href="Cipher.html#method-i-decrypt"><code>Cipher#decrypt</code></a>, <a href="Cipher.html#method-i-key-3D"><code>Cipher#key=</code></a> and <a href="Cipher.html#method-i-iv-3D"><code>Cipher#iv=</code></a>, but before calling <a href="Cipher.html#method-i-final"><code>Cipher#final</code></a>. After all decryption is performed, the tag is verified automatically in the call to <a href="Cipher.html#method-i-final"><code>Cipher#final</code></a>.</p>
 
-<p>For OCB mode, the tag length must be supplied with <a
-href="Cipher.html#method-i-auth_tag_len-3D">auth_tag_len=</a> beforehand.</p>
+<p>For OCB mode, the tag length must be supplied with <a href="Cipher.html#method-i-auth_tag_len-3D"><code>auth_tag_len=</code></a> beforehand.</p>
           
           
 
@@ -713,12 +592,9 @@ ossl_cipher_set_auth_tag(VALUE self, VALUE vtag)
 
         <div class="method-description">
           
-          <p>Sets the length of the authentication tag to be generated or to be given
-for AEAD ciphers that requires it as in input parameter. Note that not all
-AEAD ciphers support this method.</p>
+          <p>Sets the length of the authentication tag to be generated or to be given for AEAD ciphers that requires it as in input parameter. Note that not all AEAD ciphers support this method.</p>
 
-<p>In OCB mode, the length must be supplied both when encrypting and when
-decrypting, and must be before specifying an IV.</p>
+<p>In OCB mode, the length must be supplied both when encrypting and when decrypting, and must be before specifying an IV.</p>
           
           
 
@@ -768,8 +644,7 @@ ossl_cipher_set_auth_tag_len(VALUE self, VALUE vlen)
 
         <div class="method-description">
           
-          <p>Indicated whether this <a href="Cipher/Cipher.html">Cipher</a> instance
-uses an Authenticated Encryption mode.</p>
+          <p>Indicated whether this <a href="Cipher/Cipher.html"><code>Cipher</code></a> instance uses an Authenticated Encryption mode.</p>
           
           
 
@@ -810,8 +685,7 @@ ossl_cipher_is_authenticated(VALUE self)
 
         <div class="method-description">
           
-          <p>Returns the size in bytes of the blocks on which this <a
-href="Cipher/Cipher.html">Cipher</a> operates on.</p>
+          <p>Returns the size in bytes of the blocks on which this <a href="Cipher/Cipher.html"><code>Cipher</code></a> operates on.</p>
           
           
 
@@ -825,6 +699,54 @@ ossl_cipher_block_size(VALUE self)
     GetCipher(self, ctx);
 
     return INT2NUM(EVP_CIPHER_CTX_block_size(ctx));
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-ccm_data_len-3D" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            ccm_data_len = integer &rarr; integer
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Sets the length of the plaintext / ciphertext message that will be processed in CCM mode. Make sure to call this method after <a href="Cipher.html#method-i-key-3D"><code>key=</code></a> and <a href="Cipher.html#method-i-iv-3D"><code>iv=</code></a> have been set, and before <a href="Cipher.html#method-i-auth_data-3D"><code>auth_data=</code></a>.</p>
+
+<p>Only call this method after calling <a href="Cipher.html#method-i-encrypt"><code>Cipher#encrypt</code></a> or <a href="Cipher.html#method-i-decrypt"><code>Cipher#decrypt</code></a>.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="ccm_data_len-3D-source">
+            <pre>static VALUE
+ossl_cipher_set_ccm_data_len(VALUE self, VALUE data_len)
+{
+    int in_len, out_len;
+    EVP_CIPHER_CTX *ctx;
+
+    in_len = NUM2INT(data_len);
+
+    GetCipher(self, ctx);
+    if (EVP_CipherUpdate(ctx, NULL, &amp;out_len, NULL, in_len) != 1)
+        ossl_raise(eCipherError, NULL);
+
+    return data_len;
 }</pre>
           </div>
           
@@ -852,12 +774,10 @@ ossl_cipher_block_size(VALUE self)
 
         <div class="method-description">
           
-          <p>Initializes the <a href="Cipher/Cipher.html">Cipher</a> for decryption.</p>
+          <p>Initializes the <a href="Cipher/Cipher.html"><code>Cipher</code></a> for decryption.</p>
 
-<p>Make sure to call <a href="Cipher.html#method-i-encrypt">#encrypt</a> or <a
-href="Cipher.html#method-i-decrypt">#decrypt</a> before using any of the
-following methods:</p>
-<ul><li><dl class="rdoc-list label-list"><dt><a href="Cipher.html#method-i-key-3D">key=</a>, <a href="Cipher.html#method-i-iv-3D">iv=</a>, <a href="Cipher.html#method-i-random_key">random_key</a>, <a href="Cipher.html#method-i-random_iv">random_iv</a>, <a href="Cipher.html#method-i-pkcs5_keyivgen">pkcs5_keyivgen</a>
+<p>Make sure to call <a href="Cipher.html#method-i-encrypt"><code>Cipher#encrypt</code></a> or <a href="Cipher.html#method-i-decrypt"><code>Cipher#decrypt</code></a> before using any of the following methods:</p>
+<ul><li><dl class="rdoc-list label-list"><dt><a href="Cipher.html#method-i-key-3D"><code>key=</code></a>, <a href="Cipher.html#method-i-iv-3D"><code>iv=</code></a>, <a href="Cipher.html#method-i-random_key"><code>random_key</code></a>, <a href="Cipher.html#method-i-random_iv"><code>random_iv</code></a>, <a href="Cipher.html#method-i-pkcs5_keyivgen"><code>pkcs5_keyivgen</code></a>
 <dd></dd></dl>
 </li></ul>
 
@@ -898,12 +818,10 @@ ossl_cipher_decrypt(int argc, VALUE *argv, VALUE self)
 
         <div class="method-description">
           
-          <p>Initializes the <a href="Cipher/Cipher.html">Cipher</a> for encryption.</p>
+          <p>Initializes the <a href="Cipher/Cipher.html"><code>Cipher</code></a> for encryption.</p>
 
-<p>Make sure to call <a href="Cipher.html#method-i-encrypt">#encrypt</a> or <a
-href="Cipher.html#method-i-decrypt">#decrypt</a> before using any of the
-following methods:</p>
-<ul><li><dl class="rdoc-list label-list"><dt><a href="Cipher.html#method-i-key-3D">key=</a>, <a href="Cipher.html#method-i-iv-3D">iv=</a>, <a href="Cipher.html#method-i-random_key">random_key</a>, <a href="Cipher.html#method-i-random_iv">random_iv</a>, <a href="Cipher.html#method-i-pkcs5_keyivgen">pkcs5_keyivgen</a>
+<p>Make sure to call <a href="Cipher.html#method-i-encrypt"><code>Cipher#encrypt</code></a> or <a href="Cipher.html#method-i-decrypt"><code>Cipher#decrypt</code></a> before using any of the following methods:</p>
+<ul><li><dl class="rdoc-list label-list"><dt><a href="Cipher.html#method-i-key-3D"><code>key=</code></a>, <a href="Cipher.html#method-i-iv-3D"><code>iv=</code></a>, <a href="Cipher.html#method-i-random_key"><code>random_key</code></a>, <a href="Cipher.html#method-i-random_iv"><code>random_iv</code></a>, <a href="Cipher.html#method-i-pkcs5_keyivgen"><code>pkcs5_keyivgen</code></a>
 <dd></dd></dl>
 </li></ul>
 
@@ -944,18 +862,9 @@ ossl_cipher_encrypt(int argc, VALUE *argv, VALUE self)
 
         <div class="method-description">
           
-          <p>Returns the remaining data held in the cipher object. Further calls to <a
-href="Cipher.html#method-i-update">#update</a> or <a
-href="Cipher.html#method-i-final">#final</a> will return garbage. This call
-should always be made as the last call of an encryption or decryption
-operation, after having fed the entire plaintext or ciphertext to the <a
-href="Cipher/Cipher.html">Cipher</a> instance.</p>
+          <p>Returns the remaining data held in the cipher object. Further calls to <a href="Cipher.html#method-i-update"><code>Cipher#update</code></a> or <a href="Cipher.html#method-i-final"><code>Cipher#final</code></a> will return garbage. This call should always be made as the last call of an encryption or decryption operation, after having fed the entire plaintext or ciphertext to the <a href="Cipher/Cipher.html"><code>Cipher</code></a> instance.</p>
 
-<p>If an authenticated cipher was used, a <a
-href="Cipher/CipherError.html">CipherError</a> is raised if the tag could
-not be authenticated successfully. Only call this method after setting the
-authentication tag and passing the entire contents of the ciphertext into
-the cipher.</p>
+<p>If an authenticated cipher was used, a <a href="Cipher/CipherError.html"><code>CipherError</code></a> is raised if the tag could not be authenticated successfully. Only call this method after setting the authentication tag and passing the entire contents of the ciphertext into the cipher.</p>
           
           
 
@@ -1050,16 +959,9 @@ ossl_cipher_copy(VALUE self, VALUE other)
 
         <div class="method-description">
           
-          <p>Sets the cipher IV. Please note that since you should never be using ECB
-mode, an IV is always explicitly required and should be set prior to
-encryption. The IV itself can be safely transmitted in public, but it
-should be unpredictable to prevent certain kinds of attacks. You may use <a
-href="Cipher.html#method-i-random_iv">#random_iv</a> to create a secure
-random IV.</p>
+          <p>Sets the cipher IV. Please note that since you should never be using ECB mode, an IV is always explicitly required and should be set prior to encryption. The IV itself can be safely transmitted in public, but it should be unpredictable to prevent certain kinds of attacks. You may use <a href="Cipher.html#method-i-random_iv"><code>Cipher#random_iv</code></a> to create a secure random IV.</p>
 
-<p>Only call this method after calling <a
-href="Cipher.html#method-i-encrypt">#encrypt</a> or <a
-href="Cipher.html#method-i-decrypt">#decrypt</a>.</p>
+<p>Only call this method after calling <a href="Cipher.html#method-i-encrypt"><code>Cipher#encrypt</code></a> or <a href="Cipher.html#method-i-decrypt"><code>Cipher#decrypt</code></a>.</p>
           
           
 
@@ -1112,8 +1014,7 @@ ossl_cipher_set_iv(VALUE self, VALUE iv)
 
         <div class="method-description">
           
-          <p>Returns the expected length in bytes for an IV for this <a
-href="Cipher/Cipher.html">Cipher</a>.</p>
+          <p>Returns the expected length in bytes for an IV for this <a href="Cipher/Cipher.html"><code>Cipher</code></a>.</p>
           
           
 
@@ -1159,10 +1060,7 @@ ossl_cipher_iv_length(VALUE self)
 
         <div class="method-description">
           
-          <p>Sets the IV/nonce length of the <a href="Cipher/Cipher.html">Cipher</a>.
-Normally block ciphers don&#39;t allow changing the IV length, but some
-make use of IV for &#39;nonce&#39;. You may need this for interoperability
-with other applications.</p>
+          <p>Sets the IV/nonce length of the <a href="Cipher/Cipher.html"><code>Cipher</code></a>. Normally block ciphers don&#39;t allow changing the IV length, but some make use of IV for &#39;nonce&#39;. You may need this for interoperability with other applications.</p>
           
           
 
@@ -1215,15 +1113,9 @@ ossl_cipher_set_iv_length(VALUE self, VALUE iv_length)
 
         <div class="method-description">
           
-          <p>Sets the cipher key. To generate a key, you should either use a secure
-random byte string or, if the key is to be derived from a password, you
-should rely on PBKDF2 functionality provided by <a
-href="PKCS5.html">OpenSSL::PKCS5</a>. To generate a secure random-based
-key, <a href="Cipher.html#method-i-random_key">#random_key</a> may be used.</p>
+          <p>Sets the cipher key. To generate a key, you should either use a secure random byte string or, if the key is to be derived from a password, you should rely on PBKDF2 functionality provided by <a href="PKCS5.html"><code>OpenSSL::PKCS5</code></a>. To generate a secure random-based key, <a href="Cipher.html#method-i-random_key"><code>Cipher#random_key</code></a> may be used.</p>
 
-<p>Only call this method after calling <a
-href="Cipher.html#method-i-encrypt">#encrypt</a> or <a
-href="Cipher.html#method-i-decrypt">#decrypt</a>.</p>
+<p>Only call this method after calling <a href="Cipher.html#method-i-encrypt"><code>Cipher#encrypt</code></a> or <a href="Cipher.html#method-i-decrypt"><code>Cipher#decrypt</code></a>.</p>
           
           
 
@@ -1275,8 +1167,7 @@ ossl_cipher_set_key(VALUE self, VALUE key)
 
         <div class="method-description">
           
-          <p>Returns the key length in bytes of the <a
-href="Cipher/Cipher.html">Cipher</a>.</p>
+          <p>Returns the key length in bytes of the <a href="Cipher/Cipher.html"><code>Cipher</code></a>.</p>
           
           
 
@@ -1317,12 +1208,9 @@ ossl_cipher_key_length(VALUE self)
 
         <div class="method-description">
           
-          <p>Sets the key length of the cipher.  If the cipher is a fixed length cipher
-then attempting to set the key length to any value other than the fixed
-value is an error.</p>
+          <p>Sets the key length of the cipher.  If the cipher is a fixed length cipher then attempting to set the key length to any value other than the fixed value is an error.</p>
 
-<p>Under normal circumstances you do not need to call this method (and
-probably shouldn&#39;t).</p>
+<p>Under normal circumstances you do not need to call this method (and probably shouldn&#39;t).</p>
 
 <p>See EVP_CIPHER_CTX_set_key_length for further information.</p>
           
@@ -1368,8 +1256,7 @@ ossl_cipher_set_key_length(VALUE self, VALUE key_length)
 
         <div class="method-description">
           
-          <p>Returns the name of the cipher which may differ slightly from the original
-name provided.</p>
+          <p>Returns the name of the cipher which may differ slightly from the original name provided.</p>
           
           
 
@@ -1410,11 +1297,7 @@ ossl_cipher_name(VALUE self)
 
         <div class="method-description">
           
-          <p>Enables or disables padding. By default encryption operations are padded
-using standard block padding and the padding is checked and removed when
-decrypting. If the pad parameter is zero then no padding is performed, the
-total amount of data encrypted or decrypted must then be a multiple of the
-block size or an error will occur.</p>
+          <p>Enables or disables padding. By default encryption operations are padded using standard block padding and the padding is checked and removed when decrypting. If the pad parameter is zero then no padding is performed, the total amount of data encrypted or decrypted must then be a multiple of the block size or an error will occur.</p>
 
 <p>See EVP_CIPHER_CTX_set_padding for further information.</p>
           
@@ -1461,13 +1344,7 @@ ossl_cipher_set_padding(VALUE self, VALUE padding)
           
           <p>Generates and sets the key/IV based on a password.</p>
 
-<p><strong>WARNING</strong>: This method is only <a
-href="PKCS5.html">PKCS5</a> v1.5 compliant when using RC2, RC4-40, or DES
-with MD5 or SHA1. Using anything else (like AES) will generate the key/iv
-using an <a href="../OpenSSL.html">OpenSSL</a> specific method. This method
-is deprecated and should no longer be used. Use a <a
-href="PKCS5.html">PKCS5</a> v2 key generation method from <a
-href="PKCS5.html">OpenSSL::PKCS5</a> instead.</p>
+<p><strong>WARNING</strong>: This method is only <a href="PKCS5.html"><code>PKCS5</code></a> v1.5 compliant when using RC2, RC4-40, or DES with MD5 or SHA1. Using anything else (like AES) will generate the key/iv using an <a href="../OpenSSL.html"><code>OpenSSL</code></a> specific method. This method is deprecated and should no longer be used. Use a <a href="PKCS5.html"><code>PKCS5</code></a> v2 key generation method from <a href="PKCS5.html"><code>OpenSSL::PKCS5</code></a> instead.</p>
 
 <h3 id="method-i-pkcs5_keyivgen-label-Parameters">Parameters<span><a href="#method-i-pkcs5_keyivgen-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
 <ul><li>
@@ -1475,8 +1352,7 @@ href="PKCS5.html">OpenSSL::PKCS5</a> instead.</p>
 </li><li>
 <p><em>iterations</em> is an integer with a default of 2048.</p>
 </li><li>
-<p><em>digest</em> is a <a href="Digest.html">Digest</a> object that defaults
-to &#39;MD5&#39;</p>
+<p><em>digest</em> is a <a href="Digest.html"><code>Digest</code></a> object that defaults to &#39;MD5&#39;</p>
 </li></ul>
 
 <p>A minimum of 1000 iterations is recommended.</p>
@@ -1544,12 +1420,9 @@ ossl_cipher_pkcs5_keyivgen(int argc, VALUE *argv, VALUE self)
 
         <div class="method-description">
           
-          <p>Generate a random IV with <a
-href="Random.html#method-c-random_bytes">OpenSSL::Random.random_bytes</a>
-and sets it to the cipher, and returns it.</p>
+          <p>Generate a random IV with <a href="Random.html#method-c-random_bytes"><code>OpenSSL::Random.random_bytes</code></a> and sets it to the cipher, and returns it.</p>
 
-<p>You must call <a href="Cipher.html#method-i-encrypt">encrypt</a> or <a
-href="Cipher.html#method-i-decrypt">decrypt</a> before calling this method.</p>
+<p>You must call <a href="Cipher.html#method-i-encrypt"><code>encrypt</code></a> or <a href="Cipher.html#method-i-decrypt"><code>decrypt</code></a> before calling this method.</p>
           
           
 
@@ -1586,12 +1459,9 @@ href="Cipher.html#method-i-decrypt">decrypt</a> before calling this method.</p>
 
         <div class="method-description">
           
-          <p>Generate a random key with <a
-href="Random.html#method-c-random_bytes">OpenSSL::Random.random_bytes</a>
-and sets it to the cipher, and returns it.</p>
+          <p>Generate a random key with <a href="Random.html#method-c-random_bytes"><code>OpenSSL::Random.random_bytes</code></a> and sets it to the cipher, and returns it.</p>
 
-<p>You must call <a href="Cipher.html#method-i-encrypt">encrypt</a> or <a
-href="Cipher.html#method-i-decrypt">decrypt</a> before calling this method.</p>
+<p>You must call <a href="Cipher.html#method-i-encrypt"><code>encrypt</code></a> or <a href="Cipher.html#method-i-decrypt"><code>decrypt</code></a> before calling this method.</p>
           
           
 
@@ -1628,10 +1498,7 @@ href="Cipher.html#method-i-decrypt">decrypt</a> before calling this method.</p>
 
         <div class="method-description">
           
-          <p>Fully resets the internal state of the <a
-href="Cipher/Cipher.html">Cipher</a>. By using this, the same <a
-href="Cipher/Cipher.html">Cipher</a> instance may be used several times for
-encryption or decryption tasks.</p>
+          <p>Fully resets the internal state of the <a href="Cipher/Cipher.html"><code>Cipher</code></a>. By using this, the same <a href="Cipher/Cipher.html"><code>Cipher</code></a> instance may be used several times for encryption or decryption tasks.</p>
 
 <p>Internally calls EVP_CipherInit_ex(ctx, NULL, NULL, NULL, NULL, -1).</p>
           
@@ -1676,14 +1543,9 @@ ossl_cipher_reset(VALUE self)
 
         <div class="method-description">
           
-          <p>Encrypts data in a streaming fashion. Hand consecutive blocks of data to
-the <a href="Cipher.html#method-i-update">update</a> method in order to
-encrypt it. Returns the encrypted data chunk. When done, the output of <a
-href="Cipher.html#method-i-final">#final</a> should be additionally added
-to the result.</p>
+          <p>Encrypts data in a streaming fashion. Hand consecutive blocks of data to the <a href="Cipher.html#method-i-update"><code>update</code></a> method in order to encrypt it. Returns the encrypted data chunk. When done, the output of <a href="Cipher.html#method-i-final"><code>Cipher#final</code></a> should be additionally added to the result.</p>
 
-<p>If <em>buffer</em> is given, the encryption/decryption result will be
-written to it. <em>buffer</em> will be resized automatically.</p>
+<p>If <em>buffer</em> is given, the encryption/decryption result will be written to it. <em>buffer</em> will be resized automatically.</p>
           
           
 
@@ -1746,7 +1608,7 @@ ossl_cipher_update(int argc, VALUE *argv, VALUE self)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.4.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

@@ -11,8 +11,11 @@
   var index_rel_prefix = "../";
 </script>
 
-<script src="../js/jquery.js"></script>
-<script src="../js/darkfish.js"></script>
+<script src="../js/navigation.js" defer></script>
+<script src="../js/search.js" defer></script>
+<script src="../js/search_index.js" defer></script>
+<script src="../js/searcher.js" defer></script>
+<script src="../js/darkfish.js" defer></script>
 
 <link href="../css/fonts.css" rel="stylesheet">
 <link href="../css/rdoc.css" rel="stylesheet">
@@ -91,60 +94,26 @@
     
 <h2 id="module-OpenSSL::PKey-label-Asymmetric+Public+Key+Algorithms">Asymmetric Public Key Algorithms<span><a href="#module-OpenSSL::PKey-label-Asymmetric+Public+Key+Algorithms">&para;</a> <a href="#top">&uarr;</a></span></h2>
 
-<p>Asymmetric public key algorithms solve the problem of establishing and
-sharing secret keys to en-/decrypt messages. The key in such an algorithm
-consists of two parts: a public key that may be distributed to others and a
-private key that needs to remain secret.</p>
+<p>Asymmetric public key algorithms solve the problem of establishing and sharing secret keys to en-/decrypt messages. The key in such an algorithm consists of two parts: a public key that may be distributed to others and a private key that needs to remain secret.</p>
 
-<p>Messages encrypted with a public key can only be decrypted by recipients
-that are in possession of the associated private key. Since public key
-algorithms are considerably slower than symmetric key algorithms (cf. <a
-href="Cipher.html">OpenSSL::Cipher</a>) they are often used to establish a
-symmetric key shared between two parties that are in possession of each
-other&#39;s public key.</p>
+<p>Messages encrypted with a public key can only be decrypted by recipients that are in possession of the associated private key. Since public key algorithms are considerably slower than symmetric key algorithms (cf. <a href="Cipher.html"><code>OpenSSL::Cipher</code></a>) they are often used to establish a symmetric key shared between two parties that are in possession of each other&#39;s public key.</p>
 
-<p>Asymmetric algorithms offer a lot of nice features that are used in a lot
-of different areas. A very common application is the creation and
-validation of digital signatures. To sign a document, the signatory
-generally uses a message digest algorithm (cf. <a
-href="Digest.html">OpenSSL::Digest</a>) to compute a digest of the document
-that is then encrypted (i.e. signed) using the private key. Anyone in
-possession of the public key may then verify the signature by computing the
-message digest of the original document on their own, decrypting the
-signature using the signatory&#39;s public key and comparing the result to
-the message digest they previously computed. The signature is valid if and
-only if the decrypted signature is equal to this message digest.</p>
+<p>Asymmetric algorithms offer a lot of nice features that are used in a lot of different areas. A very common application is the creation and validation of digital signatures. To sign a document, the signatory generally uses a message digest algorithm (cf. <a href="Digest.html"><code>OpenSSL::Digest</code></a>) to compute a digest of the document that is then encrypted (i.e. signed) using the private key. Anyone in possession of the public key may then verify the signature by computing the message digest of the original document on their own, decrypting the signature using the signatory&#39;s public key and comparing the result to the message digest they previously computed. The signature is valid if and only if the decrypted signature is equal to this message digest.</p>
 
-<p>The <a href="PKey/PKey.html">PKey</a> module offers support for three
-popular public/private key algorithms:</p>
+<p>The <a href="PKey/PKey.html"><code>PKey</code></a> module offers support for three popular public/private key algorithms:</p>
 <ul><li>
-<p><a href="PKey/RSA.html">RSA</a> (OpenSSL::PKey::RSA)</p>
+<p><a href="PKey/RSA.html"><code>RSA</code></a> (<a href="PKey/RSA.html"><code>OpenSSL::PKey::RSA</code></a>)</p>
 </li><li>
-<p><a href="PKey/DSA.html">DSA</a> (OpenSSL::PKey::DSA)</p>
+<p><a href="PKey/DSA.html"><code>DSA</code></a> (<a href="PKey/DSA.html"><code>OpenSSL::PKey::DSA</code></a>)</p>
 </li><li>
-<p>Elliptic Curve Cryptography (OpenSSL::PKey::EC)</p>
+<p>Elliptic Curve Cryptography (<a href="PKey/EC.html"><code>OpenSSL::PKey::EC</code></a>)</p>
 </li></ul>
 
-<p>Each of these implementations is in fact a sub-class of the abstract <a
-href="PKey/PKey.html">PKey</a> class which offers the interface for
-supporting digital signatures in the form of <a
-href="PKey/PKey.html#method-i-sign">OpenSSL::PKey::PKey#sign</a> and <a
-href="PKey/PKey.html#method-i-verify">OpenSSL::PKey::PKey#verify</a>.</p>
+<p>Each of these implementations is in fact a sub-class of the abstract <a href="PKey/PKey.html"><code>PKey</code></a> class which offers the interface for supporting digital signatures in the form of <a href="PKey/PKey.html#method-i-sign"><code>PKey#sign</code></a> and <a href="PKey/PKey.html#method-i-verify"><code>PKey#verify</code></a>.</p>
 
 <h2 id="module-OpenSSL::PKey-label-Diffie-Hellman+Key+Exchange">Diffie-Hellman Key Exchange<span><a href="#module-OpenSSL::PKey-label-Diffie-Hellman+Key+Exchange">&para;</a> <a href="#top">&uarr;</a></span></h2>
 
-<p>Finally <a href="PKey/PKey.html">PKey</a> also features <a
-href="PKey/DH.html">OpenSSL::PKey::DH</a>, an implementation of the
-Diffie-Hellman key exchange protocol based on discrete logarithms in finite
-fields, the same basis that <a href="PKey/DSA.html">DSA</a> is built on.
-The Diffie-Hellman protocol can be used to exchange (symmetric) keys over
-insecure channels without needing any prior joint knowledge between the
-participating parties. As the security of <a href="PKey/DH.html">DH</a>
-demands relatively long “public keys” (i.e. the part that is overtly
-transmitted between participants) <a href="PKey/DH.html">DH</a> tends to be
-quite slow. If security or speed is your primary concern, <a
-href="PKey/EC.html">OpenSSL::PKey::EC</a> offers another implementation of
-the Diffie-Hellman protocol.</p>
+<p>Finally <a href="PKey/PKey.html"><code>PKey</code></a> also features <a href="PKey/DH.html"><code>OpenSSL::PKey::DH</code></a>, an implementation of the Diffie-Hellman key exchange protocol based on discrete logarithms in finite fields, the same basis that <a href="PKey/DSA.html"><code>DSA</code></a> is built on. The Diffie-Hellman protocol can be used to exchange (symmetric) keys over insecure channels without needing any prior joint knowledge between the participating parties. As the security of <a href="PKey/DH.html"><code>DH</code></a> demands relatively long “public keys” (i.e. the part that is overtly transmitted between participants) <a href="PKey/DH.html"><code>DH</code></a> tends to be quite slow. If security or speed is your primary concern, <a href="PKey/EC.html"><code>OpenSSL::PKey::EC</code></a> offers another implementation of the Diffie-Hellman protocol.</p>
 
   </section>
 
@@ -188,20 +157,15 @@ the Diffie-Hellman protocol.</p>
 
         <div class="method-description">
           
-          <p>Reads a DER or PEM encoded string from <em>string</em> or <em>io</em> and
-returns an instance of the appropriate <a href="PKey/PKey.html">PKey</a>
-class.</p>
+          <p>Reads a DER or PEM encoded string from <em>string</em> or <em>io</em> and returns an instance of the appropriate <a href="PKey/PKey.html"><code>PKey</code></a> class.</p>
 
 <h3 id="method-c-read-label-Parameters">Parameters<span><a href="#method-c-read-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
 <ul><li>
-<p>_string+ is a DER- or PEM-encoded string containing an arbitrary private or
-public key.</p>
+<p>_string+ is a DER- or PEM-encoded string containing an arbitrary private or public key.</p>
 </li><li>
-<p><em>io</em> is an instance of <a href="../IO.html">IO</a> containing a DER-
-or PEM-encoded arbitrary private or public key.</p>
+<p><em>io</em> is an instance of <a href="../IO.html"><code>IO</code></a> containing a DER- or PEM-encoded arbitrary private or public key.</p>
 </li><li>
-<p><em>pwd</em> is an optional password in case <em>string</em> or <em>io</em>
-is an encrypted PEM resource.</p>
+<p><em>pwd</em> is an optional password in case <em>string</em> or <em>io</em> is an encrypted PEM resource.</p>
 </li></ul>
           
           
@@ -219,21 +183,27 @@ ossl_pkey_new_from_data(int argc, VALUE *argv, VALUE self)
     pass = ossl_pem_passwd_value(pass);
 
     bio = ossl_obj2bio(&amp;data);
-    if (!(pkey = d2i_PrivateKey_bio(bio, NULL))) {
-        OSSL_BIO_reset(bio);
-        if (!(pkey = PEM_read_bio_PrivateKey(bio, NULL, ossl_pem_passwd_cb, (void *)pass))) {
-            OSSL_BIO_reset(bio);
-            if (!(pkey = d2i_PUBKEY_bio(bio, NULL))) {
-                OSSL_BIO_reset(bio);
-                pkey = PEM_read_bio_PUBKEY(bio, NULL, ossl_pem_passwd_cb, (void *)pass);
-            }
-        }
-    }
+    if ((pkey = d2i_PrivateKey_bio(bio, NULL)))
+        goto ok;
+    OSSL_BIO_reset(bio);
+    if ((pkey = d2i_PKCS8PrivateKey_bio(bio, NULL, ossl_pem_passwd_cb, (void *)pass)))
+        goto ok;
+    OSSL_BIO_reset(bio);
+    if ((pkey = d2i_PUBKEY_bio(bio, NULL)))
+        goto ok;
+    OSSL_BIO_reset(bio);
+    /* PEM_read_bio_PrivateKey() also parses PKCS #8 formats */
+    if ((pkey = PEM_read_bio_PrivateKey(bio, NULL, ossl_pem_passwd_cb, (void *)pass)))
+        goto ok;
+    OSSL_BIO_reset(bio);
+    if ((pkey = PEM_read_bio_PUBKEY(bio, NULL, NULL, NULL)))
+        goto ok;
 
     BIO_free(bio);
-    if (!pkey)
-        ossl_raise(ePKeyError, &quot;Could not parse PKey&quot;);
+    ossl_raise(ePKeyError, &quot;Could not parse PKey&quot;);
 
+ok:
+    BIO_free(bio);
     return ossl_pkey_new(pkey);
 }</pre>
           </div>
@@ -255,7 +225,7 @@ ossl_pkey_new_from_data(int argc, VALUE *argv, VALUE self)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.4.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

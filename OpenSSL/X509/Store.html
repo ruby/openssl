@@ -11,8 +11,11 @@
   var index_rel_prefix = "../../";
 </script>
 
-<script src="../../js/jquery.js"></script>
-<script src="../../js/darkfish.js"></script>
+<script src="../../js/navigation.js" defer></script>
+<script src="../../js/search.js" defer></script>
+<script src="../../js/search_index.js" defer></script>
+<script src="../../js/searcher.js" defer></script>
+<script src="../../js/darkfish.js" defer></script>
 
 <link href="../../css/fonts.css" rel="stylesheet">
 <link href="../../css/rdoc.css" rel="stylesheet">
@@ -109,8 +112,7 @@
 
   <section class="description">
     
-<p>The <a href="../X509.html">X509</a> certificate store holds trusted CA
-certificates used to verify peer certificates.</p>
+<p>The <a href="../X509.html"><code>X509</code></a> certificate store holds trusted CA certificates used to verify peer certificates.</p>
 
 <p>The easiest way to create a useful certificate store is:</p>
 
@@ -120,15 +122,9 @@ certificates used to verify peer certificates.</p>
 
 <p>This will use your system&#39;s built-in certificates.</p>
 
-<p>If your system does not have a default set of certificates you can obtain a
-set extracted from Mozilla CA certificate store by cURL maintainers here:
-<a
-href="https://curl.haxx.se/docs/caextract.html">curl.haxx.se/docs/caextract.html</a>
-(You may wish to use the firefox-db2pem.sh script to extract the
-certificates from a local install to avoid man-in-the-middle attacks.)</p>
+<p>If your system does not have a default set of certificates you can obtain a set extracted from Mozilla CA certificate store by cURL maintainers here: <a href="https://curl.haxx.se/docs/caextract.html">curl.haxx.se/docs/caextract.html</a> (You may wish to use the firefox-db2pem.sh script to extract the certificates from a local install to avoid man-in-the-middle attacks.)</p>
 
-<p>After downloading or generating a cacert.pem from the above link you can
-create a certificate store from the pem file like this:</p>
+<p>After downloading or generating a cacert.pem from the above link you can create a certificate store from the pem file like this:</p>
 
 <pre class="ruby"><span class="ruby-identifier">cert_store</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">Store</span>.<span class="ruby-identifier">new</span>
 <span class="ruby-identifier">cert_store</span>.<span class="ruby-identifier">add_file</span> <span class="ruby-string">&#39;cacert.pem&#39;</span>
@@ -170,8 +166,7 @@ create a certificate store from the pem file like this:</p>
 
         <div class="method-description">
         
-        <p>The certificate chain constructed by the last call of <a
-href="Store.html#method-i-verify">verify</a>.</p>
+        <p>The certificate chain constructed by the last call of <a href="Store.html#method-i-verify"><code>verify</code></a>.</p>
         
         </div>
       </div>
@@ -184,8 +179,7 @@ href="Store.html#method-i-verify">verify</a>.</p>
 
         <div class="method-description">
         
-        <p>The error code set by the last call of <a
-href="Store.html#method-i-verify">verify</a>.</p>
+        <p>The error code set by the last call of <a href="Store.html#method-i-verify"><code>verify</code></a>.</p>
         
         </div>
       </div>
@@ -198,8 +192,7 @@ href="Store.html#method-i-verify">verify</a>.</p>
 
         <div class="method-description">
         
-        <p>The description for the error code set by the last call of <a
-href="Store.html#method-i-verify">verify</a>.</p>
+        <p>The description for the error code set by the last call of <a href="Store.html#method-i-verify"><code>verify</code></a>.</p>
         
         </div>
       </div>
@@ -212,13 +205,9 @@ href="Store.html#method-i-verify">verify</a>.</p>
 
         <div class="method-description">
         
-        <p>The callback for additional certificate verification. It is invoked for
-each untrusted certificate in the chain.</p>
+        <p>The callback for additional certificate verification. It is invoked for each untrusted certificate in the chain.</p>
 
-<p>The callback is invoked with two values, a boolean that indicates if the
-pre-verification by <a href="../../OpenSSL.html">OpenSSL</a> has succeeded
-or not, and the <a href="StoreContext.html">StoreContext</a> in use. The
-callback must return either true or false.</p>
+<p>The callback is invoked with two values, a boolean that indicates if the pre-verification by <a href="../../OpenSSL.html"><code>OpenSSL</code></a> has succeeded or not, and the <a href="StoreContext.html"><code>StoreContext</code></a> in use. The callback must return either true or false.</p>
         
         </div>
       </div>
@@ -249,7 +238,7 @@ callback must return either true or false.</p>
 
         <div class="method-description">
           
-          <p>Creates a new <a href="Store.html">X509::Store</a>.</p>
+          <p>Creates a new <a href="Store.html"><code>X509::Store</code></a>.</p>
           
           
 
@@ -311,8 +300,7 @@ ossl_x509store_initialize(int argc, VALUE *argv, VALUE self)
 
         <div class="method-description">
           
-          <p>Adds the <a href="Certificate.html">OpenSSL::X509::Certificate</a>
-<em>cert</em> to the certificate store.</p>
+          <p>Adds the <a href="Certificate.html"><code>OpenSSL::X509::Certificate</code></a> <em>cert</em> to the certificate store.</p>
           
           
 
@@ -358,8 +346,7 @@ ossl_x509store_add_cert(VALUE self, VALUE arg)
 
         <div class="method-description">
           
-          <p>Adds the <a href="CRL.html">OpenSSL::X509::CRL</a> <em>crl</em> to the
-store.</p>
+          <p>Adds the <a href="CRL.html"><code>OpenSSL::X509::CRL</code></a> <em>crl</em> to the store.</p>
           
           
 
@@ -405,9 +392,7 @@ ossl_x509store_add_crl(VALUE self, VALUE arg)
 
         <div class="method-description">
           
-          <p>Adds the certificates in <em>file</em> to the certificate store.
-<em>file</em> is the path to the file, and the file contains one or more
-certificates in PEM format concatenated together.</p>
+          <p>Adds the certificates in <em>file</em> to the certificate store. <em>file</em> is the path to the file, and the file contains one or more certificates in PEM format concatenated together.</p>
           
           
 
@@ -421,7 +406,6 @@ ossl_x509store_add_file(VALUE self, VALUE file)
     char *path = NULL;
 
     if(file != Qnil){
-        rb_check_safe_obj(file);
         path = StringValueCStr(file);
     }
     GetX509Store(self, store);
@@ -482,7 +466,6 @@ ossl_x509store_add_path(VALUE self, VALUE dir)
     char *path = NULL;
 
     if(dir != Qnil){
-        rb_check_safe_obj(dir);
         path = StringValueCStr(dir);
     }
     GetX509Store(self, store);
@@ -520,9 +503,7 @@ ossl_x509store_add_path(VALUE self, VALUE dir)
 
         <div class="method-description">
           
-          <p>Sets <em>flags</em> to the <a href="Store.html">Store</a>. <em>flags</em>
-consists of zero or more of the constants defined in with name V_FLAG_*
-or&#39;ed together.</p>
+          <p>Sets <em>flags</em> to the <a href="Store.html"><code>Store</code></a>. <em>flags</em> consists of zero or more of the constants defined in with name V_FLAG_* or&#39;ed together.</p>
           
           
 
@@ -565,10 +546,7 @@ ossl_x509store_set_flags(VALUE self, VALUE flags)
 
         <div class="method-description">
           
-          <p>Sets the store&#39;s purpose to <em>purpose</em>. If specified, the
-verifications on the store will check every untrusted certificate&#39;s
-extensions are consistent with the purpose. The purpose is specified by
-constants:</p>
+          <p>Sets the store&#39;s purpose to <em>purpose</em>. If specified, the verifications on the store will check every untrusted certificate&#39;s extensions are consistent with the purpose. The purpose is specified by constants:</p>
 <ul><li>
 <p>X509::PURPOSE_SSL_CLIENT</p>
 </li><li>
@@ -630,9 +608,7 @@ ossl_x509store_set_purpose(VALUE self, VALUE purpose)
 
         <div class="method-description">
           
-          <p>Configures <em>store</em> to look up CA certificates from the system
-default certificate store as needed basis. The location of the store can
-usually be determined by:</p>
+          <p>Configures <em>store</em> to look up CA certificates from the system default certificate store as needed basis. The location of the store can usually be determined by:</p>
 <ul><li>
 <p>OpenSSL::X509::DEFAULT_CERT_FILE</p>
 </li><li>
@@ -762,21 +738,13 @@ ossl_x509store_set_trust(VALUE self, VALUE trust)
 
         <div class="method-description">
           
-          <p>Performs a certificate verification on the <a
-href="Certificate.html">OpenSSL::X509::Certificate</a> <em>cert</em>.</p>
+          <p>Performs a certificate verification on the <a href="Certificate.html"><code>OpenSSL::X509::Certificate</code></a> <em>cert</em>.</p>
 
-<p><em>chain</em> can be an array of <a
-href="Certificate.html">OpenSSL::X509::Certificate</a> that is used to
-construct the certificate chain.</p>
+<p><em>chain</em> can be an array of <a href="Certificate.html"><code>OpenSSL::X509::Certificate</code></a> that is used to construct the certificate chain.</p>
 
-<p>If a block is given, it overrides the callback set by <a
-href="Store.html#method-i-verify_callback-3D">verify_callback=</a>.</p>
+<p>If a block is given, it overrides the callback set by <a href="Store.html#method-i-verify_callback-3D"><code>verify_callback=</code></a>.</p>
 
-<p>After finishing the verification, the error information can be retrieved by
-<a href="Store.html#attribute-i-error">error</a>, <a
-href="Store.html#attribute-i-error_string">error_string</a>, and the
-resulting complete certificate chain can be retrieved by <a
-href="Store.html#attribute-i-chain">chain</a>.</p>
+<p>After finishing the verification, the error information can be retrieved by <a href="Store.html#attribute-i-error"><code>error</code></a>, <a href="Store.html#attribute-i-error_string"><code>error_string</code></a>, and the resulting complete certificate chain can be retrieved by <a href="Store.html#attribute-i-chain"><code>chain</code></a>.</p>
           
           
 
@@ -824,7 +792,7 @@ ossl_x509store_verify(int argc, VALUE *argv, VALUE self)
 
         <div class="method-description">
           
-          <p>General callback for <a href="../../OpenSSL.html">OpenSSL</a> verify</p>
+          <p>General callback for <a href="../../OpenSSL.html"><code>OpenSSL</code></a> verify</p>
           
           
 
@@ -860,7 +828,7 @@ ossl_x509store_set_vfy_cb(VALUE self, VALUE cb)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.4.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

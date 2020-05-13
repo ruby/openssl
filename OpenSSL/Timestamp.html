@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="UTF-8">
+
+<title>module OpenSSL::Timestamp - RDoc Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "../";
+  var index_rel_prefix = "../";
+</script>
+
+<script src="../js/navigation.js" defer></script>
+<script src="../js/search.js" defer></script>
+<script src="../js/search_index.js" defer></script>
+<script src="../js/searcher.js" defer></script>
+<script src="../js/darkfish.js" defer></script>
+
+<link href="../css/fonts.css" rel="stylesheet">
+<link href="../css/rdoc.css" rel="stylesheet">
+
+
+
+
+<body id="top" role="document" class="module">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="../index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="../table_of_contents.html#pages">Pages</a>
+    <a href="../table_of_contents.html#classes">Classes</a>
+    <a href="../table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+<div class="nav-section">
+  <h3>Table of Contents</h3>
+
+  <ul class="link-list" role="directory">
+    <li><a href="#module-OpenSSL::Timestamp-label-Create+a+Response-3A">Create a Response:</a>
+    <li><a href="#module-OpenSSL::Timestamp-label-Verify+a+timestamp+response-3A">Verify a timestamp response:</a>
+  </ul>
+</div>
+
+
+  <div id="class-metadata">
+    
+    
+    
+    
+    
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="module-OpenSSL::Timestamp">
+  <h1 id="module-OpenSSL::Timestamp" class="module">
+    module OpenSSL::Timestamp
+  </h1>
+
+  <section class="description">
+    
+<p>Provides classes and methods to request, create and validate <a href="http://www.ietf.org/rfc/rfc3161.txt">RFC3161-compliant</a> timestamps. <a href="Timestamp/Request.html"><code>Request</code></a> may be used to either create requests from scratch or to parse existing requests that again can be used to request timestamps from a timestamp server, e.g. via the net/http. The resulting timestamp response may be parsed using <a href="Timestamp/Response.html"><code>Response</code></a>.</p>
+
+<p>Please note that <a href="Timestamp/Response.html"><code>Response</code></a> is read-only and immutable. To create a <a href="Timestamp/Response.html"><code>Response</code></a>, an instance of <a href="Timestamp/Factory.html"><code>Factory</code></a> as well as a valid <a href="Timestamp/Request.html"><code>Request</code></a> are needed.</p>
+
+<h3 id="module-OpenSSL::Timestamp-label-Create+a+Response-3A">Create a Response:<span><a href="#module-OpenSSL::Timestamp-label-Create+a+Response-3A">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby"><span class="ruby-comment">#Assumes ts.p12 is a PKCS#12-compatible file with a private key</span>
+<span class="ruby-comment">#and a certificate that has an extended key usage of &#39;timeStamping&#39;</span>
+<span class="ruby-identifier">p12</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKCS12</span>.<span class="ruby-identifier">new</span>(<span class="ruby-constant">File</span>.<span class="ruby-identifier">open</span>(<span class="ruby-string">&#39;ts.p12&#39;</span>, <span class="ruby-string">&#39;rb&#39;</span>), <span class="ruby-string">&#39;pwd&#39;</span>)
+<span class="ruby-identifier">md</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;SHA1&#39;</span>)
+<span class="ruby-identifier">hash</span> = <span class="ruby-identifier">md</span>.<span class="ruby-identifier">digest</span>(<span class="ruby-identifier">data</span>) <span class="ruby-comment">#some binary data to be timestamped</span>
+<span class="ruby-identifier">req</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Timestamp</span><span class="ruby-operator">::</span><span class="ruby-constant">Request</span>.<span class="ruby-identifier">new</span>
+<span class="ruby-identifier">req</span>.<span class="ruby-identifier">algorithm</span> = <span class="ruby-string">&#39;SHA1&#39;</span>
+<span class="ruby-identifier">req</span>.<span class="ruby-identifier">message_imprint</span> = <span class="ruby-identifier">hash</span>
+<span class="ruby-identifier">req</span>.<span class="ruby-identifier">policy_id</span> = <span class="ruby-string">&quot;1.2.3.4.5&quot;</span>
+<span class="ruby-identifier">req</span>.<span class="ruby-identifier">nonce</span> = <span class="ruby-value">42</span>
+<span class="ruby-identifier">fac</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Timestamp</span><span class="ruby-operator">::</span><span class="ruby-constant">Factory</span>.<span class="ruby-identifier">new</span>
+<span class="ruby-identifier">fac</span>.<span class="ruby-identifier">gen_time</span> = <span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span>
+<span class="ruby-identifier">fac</span>.<span class="ruby-identifier">serial_number</span> = <span class="ruby-value">1</span>
+<span class="ruby-identifier">timestamp</span> = <span class="ruby-identifier">fac</span>.<span class="ruby-identifier">create_timestamp</span>(<span class="ruby-identifier">p12</span>.<span class="ruby-identifier">key</span>, <span class="ruby-identifier">p12</span>.<span class="ruby-identifier">certificate</span>, <span class="ruby-identifier">req</span>)
+</pre>
+
+<h3 id="module-OpenSSL::Timestamp-label-Verify+a+timestamp+response-3A">Verify a timestamp response:<span><a href="#module-OpenSSL::Timestamp-label-Verify+a+timestamp+response-3A">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre>#Assume we have a timestamp token in a file called ts.der
+ts = OpenSSL::Timestamp::Response.new(File.open(&#39;ts.der&#39;, &#39;rb&#39;)
+#Assume we have the Request for this token in a file called req.der
+req = OpenSSL::Timestamp::Request.new(File.open(&#39;req.der&#39;, &#39;rb&#39;)
+# Assume the associated root CA certificate is contained in a
+# DER-encoded file named root.cer
+root = OpenSSL::X509::Certificate.new(File.open(&#39;root.cer&#39;, &#39;rb&#39;)
+# get the necessary intermediate certificates, available in
+# DER-encoded form in inter1.cer and inter2.cer
+inter1 = OpenSSL::X509::Certificate.new(File.open(&#39;inter1.cer&#39;, &#39;rb&#39;)
+inter2 = OpenSSL::X509::Certificate.new(File.open(&#39;inter2.cer&#39;, &#39;rb&#39;)
+ts.verify(req, root, inter1, inter2) -&gt; ts or raises an exception if validation fails</pre>
+
+  </section>
+
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+  </section>
+
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="https://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

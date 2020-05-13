@@ -11,8 +11,11 @@
   var index_rel_prefix = "../../";
 </script>
 
-<script src="../../js/jquery.js"></script>
-<script src="../../js/darkfish.js"></script>
+<script src="../../js/navigation.js" defer></script>
+<script src="../../js/search.js" defer></script>
+<script src="../../js/search_index.js" defer></script>
+<script src="../../js/searcher.js" defer></script>
+<script src="../../js/darkfish.js" defer></script>
 
 <link href="../../css/fonts.css" rel="stylesheet">
 <link href="../../css/rdoc.css" rel="stylesheet">
@@ -133,14 +136,9 @@
 
   <section class="description">
     
-<p>An <a href="SSLContext.html">SSLContext</a> is used to set various options
-regarding certificates, algorithms, verification, session caching, etc. 
-The <a href="SSLContext.html">SSLContext</a> is used to create an <a
-href="SSLSocket.html">SSLSocket</a>.</p>
+<p>An <a href="SSLContext.html"><code>SSLContext</code></a> is used to set various options regarding certificates, algorithms, verification, session caching, etc.  The <a href="SSLContext.html"><code>SSLContext</code></a> is used to create an <a href="SSLSocket.html"><code>SSLSocket</code></a>.</p>
 
-<p>All attributes must be set before creating an <a
-href="SSLSocket.html">SSLSocket</a> as the <a
-href="SSLContext.html">SSLContext</a> will be frozen afterward.</p>
+<p>All attributes must be set before creating an <a href="SSLSocket.html"><code>SSLSocket</code></a> as the <a href="SSLContext.html"><code>SSLContext</code></a> will be frozen afterward.</p>
 
   </section>
 
@@ -164,8 +162,7 @@ href="SSLContext.html">SSLContext</a> will be frozen afterward.</p>
       
         <dt id="METHODS">METHODS
         
-        <dd><p>The list of available SSL/TLS methods. This constant is only provided for
-backwards compatibility.</p>
+        <dd><p>The list of available SSL/TLS methods. This constant is only provided for backwards compatibility.</p>
         
       
         <dt id="SESSION_CACHE_BOTH">SESSION_CACHE_BOTH
@@ -180,25 +177,17 @@ backwards compatibility.</p>
       
         <dt id="SESSION_CACHE_NO_AUTO_CLEAR">SESSION_CACHE_NO_AUTO_CLEAR
         
-        <dd><p>Normally the session cache is checked for expired sessions every 255
-connections.  Since this may lead to a delay that cannot be controlled, the
-automatic flushing may be disabled and <a
-href="SSLContext.html#method-i-flush_sessions">flush_sessions</a> can be
-called explicitly.</p>
+        <dd><p>Normally the session cache is checked for expired sessions every 255 connections.  Since this may lead to a delay that cannot be controlled, the automatic flushing may be disabled and <a href="SSLContext.html#method-i-flush_sessions"><code>flush_sessions</code></a> can be called explicitly.</p>
         
       
         <dt id="SESSION_CACHE_NO_INTERNAL">SESSION_CACHE_NO_INTERNAL
         
-        <dd><p>Enables both <a
-href="SSLContext.html#SESSION_CACHE_NO_INTERNAL_LOOKUP">SESSION_CACHE_NO_INTERNAL_LOOKUP</a>
-and <a
-href="SSLContext.html#SESSION_CACHE_NO_INTERNAL_STORE">SESSION_CACHE_NO_INTERNAL_STORE</a>.</p>
+        <dd><p>Enables both <a href="SSLContext.html#SESSION_CACHE_NO_INTERNAL_LOOKUP"><code>SESSION_CACHE_NO_INTERNAL_LOOKUP</code></a> and <a href="SSLContext.html#SESSION_CACHE_NO_INTERNAL_STORE"><code>SESSION_CACHE_NO_INTERNAL_STORE</code></a>.</p>
         
       
         <dt id="SESSION_CACHE_NO_INTERNAL_LOOKUP">SESSION_CACHE_NO_INTERNAL_LOOKUP
         
-        <dd><p>Always perform external lookups of sessions even if they are in the
-internal cache.</p>
+        <dd><p>Always perform external lookups of sessions even if they are in the internal cache.</p>
 
 <p>This flag has no effect on clients</p>
         
@@ -237,11 +226,7 @@ internal cache.</p>
 
         <div class="method-description">
         
-        <p>An Enumerable of Strings. Each String represents a protocol to be
-advertised as the list of supported protocols for Application-Layer
-Protocol Negotiation. Supported in <a href="../../OpenSSL.html">OpenSSL</a>
-1.0.2 and higher. Has no effect on the server side. If not set explicitly,
-the ALPN extension will not be included in the handshake.</p>
+        <p>An Enumerable of Strings. Each String represents a protocol to be advertised as the list of supported protocols for Application-Layer Protocol Negotiation. Supported in <a href="../../OpenSSL.html"><code>OpenSSL</code></a> 1.0.2 and higher. Has no effect on the server side. If not set explicitly, the ALPN extension will not be included in the handshake.</p>
 
 <h3 id="attribute-i-alpn_protocols-label-Example">Example<span><a href="#attribute-i-alpn_protocols-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
@@ -259,13 +244,7 @@ the ALPN extension will not be included in the handshake.</p>
 
         <div class="method-description">
         
-        <p>A callback invoked on the server side when the server needs to select a
-protocol from the list sent by the client. Supported in <a
-href="../../OpenSSL.html">OpenSSL</a> 1.0.2 and higher. The callback must
-return a protocol of those advertised by the client. If none is acceptable,
-raising an error in the callback will cause the handshake to fail. Not
-setting this callback explicitly means not supporting the ALPN extension on
-the server - any protocols advertised by the client will be ignored.</p>
+        <p>A callback invoked on the server side when the server needs to select a protocol from the list sent by the client. Supported in <a href="../../OpenSSL.html"><code>OpenSSL</code></a> 1.0.2 and higher. The callback must return a protocol of those advertised by the client. If none is acceptable, raising an error in the callback will cause the handshake to fail. Not setting this callback explicitly means not supporting the ALPN extension on the server - any protocols advertised by the client will be ignored.</p>
 
 <h3 id="attribute-i-alpn_select_cb-label-Example">Example<span><a href="#attribute-i-alpn_select_cb-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
@@ -301,8 +280,7 @@ the server - any protocols advertised by the client will be ignored.</p>
         
         <p>The path to a directory containing CA certificates in PEM format.</p>
 
-<p>Files are looked up by subject&#39;s <a href="../X509.html">X509</a>
-name&#39;s hash value.</p>
+<p>Files are looked up by subject&#39;s <a href="../X509.html"><code>X509</code></a> name&#39;s hash value.</p>
         
         </div>
       </div>
@@ -317,10 +295,7 @@ name&#39;s hash value.</p>
         
         <p>Context certificate</p>
 
-<p>The <em>cert</em>, <em>key</em>, and <em>extra_chain_cert</em> attributes
-are deprecated. It is recommended to use <a
-href="SSLContext.html#method-i-add_certificate">add_certificate</a>
-instead.</p>
+<p>The <em>cert</em>, <em>key</em>, and <em>extra_chain_cert</em> attributes are deprecated. It is recommended to use <a href="SSLContext.html#method-i-add_certificate"><code>add_certificate</code></a> instead.</p>
         
         </div>
       </div>
@@ -333,8 +308,7 @@ instead.</p>
 
         <div class="method-description">
         
-        <p>An <a href="../X509/Store.html">OpenSSL::X509::Store</a> used for
-certificate verification.</p>
+        <p>An <a href="../X509/Store.html"><code>OpenSSL::X509::Store</code></a> used for certificate verification.</p>
         
         </div>
       </div>
@@ -360,14 +334,9 @@ certificate verification.</p>
 
         <div class="method-description">
         
-        <p>A callback invoked when a client certificate is requested by a server and
-no certificate has been set.</p>
+        <p>A callback invoked when a client certificate is requested by a server and no certificate has been set.</p>
 
-<p>The callback is invoked with a <a href="Session.html">Session</a> and must
-return an Array containing an <a
-href="../X509/Certificate.html">OpenSSL::X509::Certificate</a> and an <a
-href="../PKey.html">OpenSSL::PKey</a>.  If any other value is returned the
-handshake is suspended.</p>
+<p>The callback is invoked with a <a href="Session.html"><code>Session</code></a> and must return an Array containing an <a href="../X509/Certificate.html"><code>OpenSSL::X509::Certificate</code></a> and an <a href="../PKey.html"><code>OpenSSL::PKey</code></a>.  If any other value is returned the handshake is suspended.</p>
         
         </div>
       </div>
@@ -380,13 +349,9 @@ handshake is suspended.</p>
 
         <div class="method-description">
         
-        <p>An Array of extra <a href="../X509.html">X509</a> certificates to be added
-to the certificate chain.</p>
+        <p>An Array of extra <a href="../X509.html"><code>X509</code></a> certificates to be added to the certificate chain.</p>
 
-<p>The <em>cert</em>, <em>key</em>, and <em>extra_chain_cert</em> attributes
-are deprecated. It is recommended to use <a
-href="SSLContext.html#method-i-add_certificate">add_certificate</a>
-instead.</p>
+<p>The <em>cert</em>, <em>key</em>, and <em>extra_chain_cert</em> attributes are deprecated. It is recommended to use <a href="SSLContext.html#method-i-add_certificate"><code>add_certificate</code></a> instead.</p>
         
         </div>
       </div>
@@ -401,10 +366,7 @@ instead.</p>
         
         <p>Context private key</p>
 
-<p>The <em>cert</em>, <em>key</em>, and <em>extra_chain_cert</em> attributes
-are deprecated. It is recommended to use <a
-href="SSLContext.html#method-i-add_certificate">add_certificate</a>
-instead.</p>
+<p>The <em>cert</em>, <em>key</em>, and <em>extra_chain_cert</em> attributes are deprecated. It is recommended to use <a href="SSLContext.html#method-i-add_certificate"><code>add_certificate</code></a> instead.</p>
         
         </div>
       </div>
@@ -417,11 +379,7 @@ instead.</p>
 
         <div class="method-description">
         
-        <p>An Enumerable of Strings. Each String represents a protocol to be
-advertised as the list of supported protocols for Next Protocol
-Negotiation. Supported in <a href="../../OpenSSL.html">OpenSSL</a> 1.0.1
-and higher. Has no effect on the client side. If not set explicitly, the
-NPN extension will not be sent by the server in the handshake.</p>
+        <p>An Enumerable of Strings. Each String represents a protocol to be advertised as the list of supported protocols for Next Protocol Negotiation. Supported in <a href="../../OpenSSL.html"><code>OpenSSL</code></a> 1.0.1 and higher. Has no effect on the client side. If not set explicitly, the NPN extension will not be sent by the server in the handshake.</p>
 
 <h3 id="attribute-i-npn_protocols-label-Example">Example<span><a href="#attribute-i-npn_protocols-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
@@ -439,13 +397,7 @@ NPN extension will not be sent by the server in the handshake.</p>
 
         <div class="method-description">
         
-        <p>A callback invoked on the client side when the client needs to select a
-protocol from the list sent by the server. Supported in <a
-href="../../OpenSSL.html">OpenSSL</a> 1.0.1 and higher. The client MUST
-select a protocol of those advertised by the server. If none is acceptable,
-raising an error in the callback will cause the handshake to fail. Not
-setting this callback explicitly means not supporting the NPN extension on
-the client - any protocols advertised by the server will be ignored.</p>
+        <p>A callback invoked on the client side when the client needs to select a protocol from the list sent by the server. Supported in <a href="../../OpenSSL.html"><code>OpenSSL</code></a> 1.0.1 and higher. The client MUST select a protocol of those advertised by the server. If none is acceptable, raising an error in the callback will cause the handshake to fail. Not setting this callback explicitly means not supporting the NPN extension on the client - any protocols advertised by the server will be ignored.</p>
 
 <h3 id="attribute-i-npn_select_cb-label-Example">Example<span><a href="#attribute-i-npn_select_cb-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
@@ -466,25 +418,16 @@ the client - any protocols advertised by the server will be ignored.</p>
 
         <div class="method-description">
         
-        <p>A callback invoked whenever a new handshake is initiated. May be used to
-disable renegotiation entirely.</p>
+        <p>A callback invoked whenever a new handshake is initiated on an established connection. May be used to disable renegotiation entirely.</p>
 
-<p>The callback is invoked with the active <a
-href="SSLSocket.html">SSLSocket</a>. The callback&#39;s return value is
-irrelevant, normal return indicates “approval” of the renegotiation and
-will continue the process. To forbid renegotiation and to cancel the
-process, an Error may be raised within the callback.</p>
+<p>The callback is invoked with the active <a href="SSLSocket.html"><code>SSLSocket</code></a>. The callback&#39;s return value is ignored. A normal return indicates “approval” of the renegotiation and will continue the process. To forbid renegotiation and to cancel the process, raise an exception within the callback.</p>
 
 <h3 id="attribute-i-renegotiation_cb-label-Disable+client+renegotiation">Disable client renegotiation<span><a href="#attribute-i-renegotiation_cb-label-Disable+client+renegotiation">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
-<p>When running a server, it is often desirable to disable client
-renegotiation entirely. You may use a callback as follows to implement this
-feature:</p>
+<p>When running a server, it is often desirable to disable client renegotiation entirely. You may use a callback as follows to implement this feature:</p>
 
-<pre class="ruby"><span class="ruby-identifier">num_handshakes</span> = <span class="ruby-value">0</span>
-<span class="ruby-identifier">ctx</span>.<span class="ruby-identifier">renegotiation_cb</span> = <span class="ruby-identifier">lambda</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">ssl</span><span class="ruby-operator">|</span>
-  <span class="ruby-identifier">num_handshakes</span> <span class="ruby-operator">+=</span> <span class="ruby-value">1</span>
-  <span class="ruby-identifier">raise</span> <span class="ruby-constant">RuntimeError</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&quot;Client renegotiation disabled&quot;</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">num_handshakes</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">1</span>
+<pre class="ruby"><span class="ruby-identifier">ctx</span>.<span class="ruby-identifier">renegotiation_cb</span> = <span class="ruby-identifier">lambda</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">ssl</span><span class="ruby-operator">|</span>
+  <span class="ruby-identifier">raise</span> <span class="ruby-constant">RuntimeError</span>, <span class="ruby-string">&quot;Client renegotiation disabled&quot;</span>
 <span class="ruby-keyword">end</span>
 </pre>
         
@@ -499,12 +442,9 @@ feature:</p>
 
         <div class="method-description">
         
-        <p>A callback invoked at connect time to distinguish between multiple server
-names.</p>
+        <p>A callback invoked at connect time to distinguish between multiple server names.</p>
 
-<p>The callback is invoked with an <a href="SSLSocket.html">SSLSocket</a> and
-a server name.  The callback must return an <a
-href="SSLContext.html">SSLContext</a> for the server name or nil.</p>
+<p>The callback is invoked with an <a href="SSLSocket.html"><code>SSLSocket</code></a> and a server name.  The callback must return an <a href="SSLContext.html"><code>SSLContext</code></a> for the server name or nil.</p>
         
         </div>
       </div>
@@ -517,12 +457,9 @@ href="SSLContext.html">SSLContext</a> for the server name or nil.</p>
 
         <div class="method-description">
         
-        <p>A callback invoked on a server when a session is proposed by the client but
-the session could not be found in the server&#39;s internal cache.</p>
+        <p>A callback invoked on a server when a session is proposed by the client but the session could not be found in the server&#39;s internal cache.</p>
 
-<p>The callback is invoked with the <a href="SSLSocket.html">SSLSocket</a> and
-session id.  The callback may return a <a href="Session.html">Session</a>
-from an external cache.</p>
+<p>The callback is invoked with the <a href="SSLSocket.html"><code>SSLSocket</code></a> and session id.  The callback may return a <a href="Session.html"><code>Session</code></a> from an external cache.</p>
         
         </div>
       </div>
@@ -535,8 +472,7 @@ from an external cache.</p>
 
         <div class="method-description">
         
-        <p>Sets the context in which a session can be reused.  This allows sessions
-for multiple applications to be distinguished, for example, by name.</p>
+        <p>Sets the context in which a session can be reused.  This allows sessions for multiple applications to be distinguished, for example, by name.</p>
         
         </div>
       </div>
@@ -551,9 +487,7 @@ for multiple applications to be distinguished, for example, by name.</p>
         
         <p>A callback invoked when a new session was negotiated.</p>
 
-<p>The callback is invoked with an <a href="SSLSocket.html">SSLSocket</a>.  If
-<code>false</code> is returned the session will be removed from the
-internal cache.</p>
+<p>The callback is invoked with an <a href="SSLSocket.html"><code>SSLSocket</code></a>.  If <code>false</code> is returned the session will be removed from the internal cache.</p>
         
         </div>
       </div>
@@ -568,12 +502,9 @@ internal cache.</p>
         
         <p>A callback invoked when a session is removed from the internal cache.</p>
 
-<p>The callback is invoked with an <a href="SSLContext.html">SSLContext</a>
-and a <a href="Session.html">Session</a>.</p>
+<p>The callback is invoked with an <a href="SSLContext.html"><code>SSLContext</code></a> and a <a href="Session.html"><code>Session</code></a>.</p>
 
-<p>IMPORTANT NOTE: It is currently not possible to use this safely in a
-multi-threaded application. The callback is called inside a global lock and
-it can randomly cause deadlock on Ruby thread switching.</p>
+<p>IMPORTANT NOTE: It is currently not possible to use this safely in a multi-threaded application. The callback is called inside a global lock and it can randomly cause deadlock on Ruby thread switching.</p>
         
         </div>
       </div>
@@ -614,12 +545,9 @@ it can randomly cause deadlock on Ruby thread switching.</p>
         
         <p>A callback invoked when DH parameters are required.</p>
 
-<p>The callback is invoked with the <a href="Session.html">Session</a> for the
-key exchange, an flag indicating the use of an export cipher and the
-keylength required.</p>
+<p>The callback is invoked with the <a href="Session.html"><code>Session</code></a> for the key exchange, an flag indicating the use of an export cipher and the keylength required.</p>
 
-<p>The callback must return an <a href="../PKey/DH.html">OpenSSL::PKey::DH</a>
-instance of the correct key length.</p>
+<p>The callback must return an <a href="../PKey/DH.html"><code>OpenSSL::PKey::DH</code></a> instance of the correct key length.</p>
         
         </div>
       </div>
@@ -634,13 +562,9 @@ instance of the correct key length.</p>
         
         <p>A callback invoked when ECDH parameters are required.</p>
 
-<p>The callback is invoked with the <a href="Session.html">Session</a> for the
-key exchange, an flag indicating the use of an export cipher and the
-keylength required.</p>
+<p>The callback is invoked with the <a href="Session.html"><code>Session</code></a> for the key exchange, an flag indicating the use of an export cipher and the keylength required.</p>
 
-<p>The callback is deprecated. This does not work with recent versions of <a
-href="../../OpenSSL.html">OpenSSL</a>. Use <a
-href="SSLContext.html#method-i-ecdh_curves-3D">#ecdh_curves=</a> instead.</p>
+<p>The callback is deprecated. This does not work with recent versions of <a href="../../OpenSSL.html"><code>OpenSSL</code></a>. Use <a href="SSLContext.html#method-i-ecdh_curves-3D"><code>OpenSSL::SSL::SSLContext#ecdh_curves=</code></a> instead.</p>
         
         </div>
       </div>
@@ -653,17 +577,11 @@ href="SSLContext.html#method-i-ecdh_curves-3D">#ecdh_curves=</a> instead.</p>
 
         <div class="method-description">
         
-        <p>A callback for additional certificate verification.  The callback is
-invoked for each certificate in the chain.</p>
+        <p>A callback for additional certificate verification.  The callback is invoked for each certificate in the chain.</p>
 
-<p>The callback is invoked with two values.  <em>preverify_ok</em> indicates
-indicates if the verification was passed (<code>true</code>) or not
-(<code>false</code>). <em>store_context</em> is an <a
-href="../X509/StoreContext.html">OpenSSL::X509::StoreContext</a> containing
-the context used for certificate verification.</p>
+<p>The callback is invoked with two values.  <em>preverify_ok</em> indicates indicates if the verification was passed (<code>true</code>) or not (<code>false</code>). <em>store_context</em> is an <a href="../X509/StoreContext.html"><code>OpenSSL::X509::StoreContext</code></a> containing the context used for certificate verification.</p>
 
-<p>If the callback returns <code>false</code>, the chain verification is
-immediately stopped and a bad_certificate alert is then sent.</p>
+<p>If the callback returns <code>false</code>, the chain verification is immediately stopped and a bad_certificate alert is then sent.</p>
         
         </div>
       </div>
@@ -691,10 +609,7 @@ immediately stopped and a bad_certificate alert is then sent.</p>
         
         <p>Whether to check the server certificate is valid for the hostname.</p>
 
-<p>In order to make this work, <a
-href="SSLContext.html#attribute-i-verify_mode">#verify_mode</a> must be set
-to VERIFY_PEER and the server hostname must be given by <a
-href="SSLSocket.html#method-i-hostname-3D">OpenSSL::SSL::SSLSocket#hostname=</a>.</p>
+<p>In order to make this work, <a href="SSLContext.html#attribute-i-verify_mode"><code>verify_mode</code></a> must be set to VERIFY_PEER and the server hostname must be given by <a href="SSLSocket.html#method-i-hostname-3D"><code>OpenSSL::SSL::SSLSocket#hostname=</code></a>.</p>
         
         </div>
       </div>
@@ -707,14 +622,11 @@ href="SSLSocket.html#method-i-hostname-3D">OpenSSL::SSL::SSLSocket#hostname=</a>
 
         <div class="method-description">
         
-        <p><a href="Session.html">Session</a> verification mode.</p>
+        <p><a href="Session.html"><code>Session</code></a> verification mode.</p>
 
-<p>Valid modes are VERIFY_NONE, VERIFY_PEER, VERIFY_CLIENT_ONCE,
-VERIFY_FAIL_IF_NO_PEER_CERT and defined on <a
-href="../SSL.html">OpenSSL::SSL</a></p>
+<p>Valid modes are VERIFY_NONE, VERIFY_PEER, VERIFY_CLIENT_ONCE, VERIFY_FAIL_IF_NO_PEER_CERT and defined on <a href="../SSL.html"><code>OpenSSL::SSL</code></a></p>
 
-<p>The default mode is VERIFY_NONE, which does not perform any verification at
-all.</p>
+<p>The default mode is VERIFY_NONE, which does not perform any verification at all.</p>
 
 <p>See SSL_CTX_set_verify(3) for details.</p>
         
@@ -761,20 +673,15 @@ all.</p>
 
         <div class="method-description">
           
-          <p>Creates a new <a href="../SSL.html">SSL</a> context.</p>
+          <p>Creates a new <a href="../SSL.html"><code>SSL</code></a> context.</p>
 
-<p>If an argument is given, <a
-href="SSLContext.html#method-i-ssl_version-3D">ssl_version=</a> is called
-with the value. Note that this form is deprecated. New applications should
-use <a href="SSLContext.html#method-i-min_version-3D">min_version=</a> and
-<a href="SSLContext.html#method-i-max_version-3D">max_version=</a> as
-necessary.</p>
+<p>If an argument is given, <a href="SSLContext.html#method-i-ssl_version-3D"><code>ssl_version=</code></a> is called with the value. Note that this form is deprecated. New applications should use <a href="SSLContext.html#method-i-min_version-3D"><code>min_version=</code></a> and <a href="SSLContext.html#method-i-max_version-3D"><code>max_version=</code></a> as necessary.</p>
           
           
 
           
           <div class="method-source-code" id="new-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 120</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 122</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">initialize</span>(<span class="ruby-identifier">version</span> = <span class="ruby-keyword">nil</span>)
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">options</span> <span class="ruby-operator">|=</span> <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">OP_ALL</span>
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">ssl_version</span> = <span class="ruby-identifier">version</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">version</span>
@@ -813,34 +720,22 @@ necessary.</p>
 
         <div class="method-description">
           
-          <p>Adds a certificate to the context. <em>pkey</em> must be a corresponding
-private key with <em>certificate</em>.</p>
+          <p>Adds a certificate to the context. <em>pkey</em> must be a corresponding private key with <em>certificate</em>.</p>
 
-<p>Multiple certificates with different public key type can be added by
-repeated calls of this method, and <a href="../../OpenSSL.html">OpenSSL</a>
-will choose the most appropriate certificate during the handshake.</p>
+<p>Multiple certificates with different public key type can be added by repeated calls of this method, and <a href="../../OpenSSL.html"><code>OpenSSL</code></a> will choose the most appropriate certificate during the handshake.</p>
 
-<p><a href="SSLContext.html#attribute-i-cert">cert=</a>, <a
-href="SSLContext.html#attribute-i-key">key=</a>, and <a
-href="SSLContext.html#attribute-i-extra_chain_cert">extra_chain_cert=</a>
-are old accessor methods for setting certificate and internally call this
-method.</p>
+<p><a href="SSLContext.html#attribute-i-cert"><code>cert=</code></a>, <a href="SSLContext.html#attribute-i-key"><code>key=</code></a>, and <a href="SSLContext.html#attribute-i-extra_chain_cert"><code>extra_chain_cert=</code></a> are old accessor methods for setting certificate and internally call this method.</p>
 
 <h3 id="method-i-add_certificate-label-Parameters">Parameters<span><a href="#method-i-add_certificate-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
 <dl class="rdoc-list note-list"><dt><em>certificate</em>
 <dd>
-<p>A certificate. An instance of <a
-href="../X509/Certificate.html">OpenSSL::X509::Certificate</a>.</p>
+<p>A certificate. An instance of <a href="../X509/Certificate.html"><code>OpenSSL::X509::Certificate</code></a>.</p>
 </dd><dt><em>pkey</em>
 <dd>
-<p>The private key for <em>certificate</em>. An instance of <a
-href="../PKey/PKey.html">OpenSSL::PKey::PKey</a>.</p>
+<p>The private key for <em>certificate</em>. An instance of <a href="../PKey/PKey.html"><code>OpenSSL::PKey::PKey</code></a>.</p>
 </dd><dt><em>extra_certs</em>
 <dd>
-<p>Optional. An array of <a
-href="../X509/Certificate.html">OpenSSL::X509::Certificate</a>. When
-sending a certificate chain, the certificates specified by this are sent
-following <em>certificate</em>, in the order in the array.</p>
+<p>Optional. An array of <a href="../X509/Certificate.html"><code>OpenSSL::X509::Certificate</code></a>. When sending a certificate chain, the certificates specified by this are sent following <em>certificate</em>, in the order in the array.</p>
 </dd></dl>
 
 <h3 id="method-i-add_certificate-label-Example">Example<span><a href="#method-i-add_certificate-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
@@ -857,9 +752,7 @@ ctx.add_certificate(ecdsa_cert, ecdsa_pkey, [another_ca_cert])</pre>
 
 <h3 id="method-i-add_certificate-label-Note">Note<span><a href="#method-i-add_certificate-label-Note">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
-<p><a href="../../OpenSSL.html">OpenSSL</a> before the version 1.0.2 could
-handle only one extra chain across all key types. Calling this method
-discards the chain set previously.</p>
+<p><a href="../../OpenSSL.html"><code>OpenSSL</code></a> before the version 1.0.2 could handle only one extra chain across all key types. Calling this method discards the chain set previously.</p>
           
           
 
@@ -1027,10 +920,7 @@ ossl_sslctx_get_ciphers(VALUE self)
 
         <div class="method-description">
           
-          <p>Sets the list of available cipher suites for this context.  Note in a
-server context some ciphers require the appropriate certificates.  For
-example, an RSA cipher suite can only be chosen when an RSA certificate is
-available.</p>
+          <p>Sets the list of available cipher suites for this context.  Note in a server context some ciphers require the appropriate certificates.  For example, an RSA cipher suite can only be chosen when an RSA certificate is available.</p>
           
           
 
@@ -1095,15 +985,9 @@ ossl_sslctx_set_ciphers(VALUE self, VALUE v)
           
           <p>Sets the list of “supported elliptic curves” for this context.</p>
 
-<p>For a TLS client, the list is directly used in the Supported Elliptic
-Curves Extension. For a server, the list is used by <a
-href="../../OpenSSL.html">OpenSSL</a> to determine the set of shared
-curves. <a href="../../OpenSSL.html">OpenSSL</a> will pick the most
-appropriate one from it.</p>
+<p>For a TLS client, the list is directly used in the Supported Elliptic Curves Extension. For a server, the list is used by <a href="../../OpenSSL.html"><code>OpenSSL</code></a> to determine the set of shared curves. <a href="../../OpenSSL.html"><code>OpenSSL</code></a> will pick the most appropriate one from it.</p>
 
-<p>Note that this works differently with old <a
-href="../../OpenSSL.html">OpenSSL</a> (&lt;= 1.0.1). Only one curve can be
-set, and this has no effect for TLS clients.</p>
+<p>Note that this works differently with old <a href="../../OpenSSL.html"><code>OpenSSL</code></a> (&lt;= 1.0.1). Only one curve can be set, and this has no effect for TLS clients.</p>
 
 <h3 id="method-i-ecdh_curves-3D-label-Example">Example<span><a href="#method-i-ecdh_curves-3D-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
@@ -1343,15 +1227,13 @@ ossl_sslctx_flush_sessions(int argc, VALUE *argv, VALUE self)
 
         <div class="method-description">
           
-          <p>Sets the upper bound of the supported SSL/TLS protocol version. See <a
-href="SSLContext.html#method-i-min_version-3D">min_version=</a> for the
-possible values.</p>
+          <p>Sets the upper bound of the supported SSL/TLS protocol version. See <a href="SSLContext.html#method-i-min_version-3D"><code>min_version=</code></a> for the possible values.</p>
           
           
 
           
           <div class="method-source-code" id="max_version-3D-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 181</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 183</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">max_version=</span>(<span class="ruby-identifier">version</span>)
   <span class="ruby-identifier">set_minmax_proto_version</span>(<span class="ruby-ivar">@min_proto_version</span> <span class="ruby-operator">||=</span> <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">version</span>)
   <span class="ruby-ivar">@max_proto_version</span> = <span class="ruby-identifier">version</span>
@@ -1396,15 +1278,9 @@ possible values.</p>
 
         <div class="method-description">
           
-          <p>Sets the lower bound on the supported SSL/TLS protocol version. The version
-may be specified by an integer constant named OpenSSL::SSL::*_VERSION, a
-Symbol, or <code>nil</code> which means “any version”.</p>
+          <p>Sets the lower bound on the supported SSL/TLS protocol version. The version may be specified by an integer constant named OpenSSL::SSL::*_VERSION, a Symbol, or <code>nil</code> which means “any version”.</p>
 
-<p>Be careful that you don&#39;t overwrite OpenSSL::SSL::OP_NO_{SSL,TLS}v*
-options by <a href="SSLContext.html#method-i-options-3D">options=</a> once
-you have called <a
-href="SSLContext.html#method-i-min_version-3D">min_version=</a> or <a
-href="SSLContext.html#method-i-max_version-3D">max_version=</a>.</p>
+<p>Be careful that you don&#39;t overwrite OpenSSL::SSL::OP_NO_{SSL,TLS}v* options by <a href="SSLContext.html#method-i-options-3D"><code>options=</code></a> once you have called <a href="SSLContext.html#method-i-min_version-3D"><code>min_version=</code></a> or <a href="SSLContext.html#method-i-max_version-3D"><code>max_version=</code></a>.</p>
 
 <h3 id="method-i-min_version-3D-label-Example">Example<span><a href="#method-i-min_version-3D-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
@@ -1420,7 +1296,7 @@ href="SSLContext.html#method-i-max_version-3D">max_version=</a>.</p>
 
           
           <div class="method-source-code" id="min_version-3D-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 169</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 171</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">min_version=</span>(<span class="ruby-identifier">version</span>)
   <span class="ruby-identifier">set_minmax_proto_version</span>(<span class="ruby-identifier">version</span>, <span class="ruby-ivar">@max_proto_version</span> <span class="ruby-operator">||=</span> <span class="ruby-keyword">nil</span>)
   <span class="ruby-ivar">@min_proto_version</span> = <span class="ruby-identifier">version</span>
@@ -1448,7 +1324,7 @@ href="SSLContext.html#method-i-max_version-3D">max_version=</a>.</p>
 
         <div class="method-description">
           
-          <p>Gets various <a href="../../OpenSSL.html">OpenSSL</a> options.</p>
+          <p>Gets various <a href="../../OpenSSL.html"><code>OpenSSL</code></a> options.</p>
           
           
 
@@ -1488,7 +1364,7 @@ ossl_sslctx_get_options(VALUE self)
 
         <div class="method-description">
           
-          <p>Sets various <a href="../../OpenSSL.html">OpenSSL</a> options.</p>
+          <p>Sets various <a href="../../OpenSSL.html"><code>OpenSSL</code></a> options.</p>
           
           
 
@@ -1540,8 +1416,7 @@ ossl_sslctx_set_options(VALUE self, VALUE options)
           
           <p>Returns the security level for the context.</p>
 
-<p>See also <a
-href="SSLContext.html#method-i-security_level-3D">#security_level=</a>.</p>
+<p>See also <a href="SSLContext.html#method-i-security_level-3D"><code>OpenSSL::SSL::SSLContext#security_level=</code></a>.</p>
           
           
 
@@ -1587,20 +1462,11 @@ ossl_sslctx_get_security_level(VALUE self)
 
         <div class="method-description">
           
-          <p>Sets the security level for the context. <a
-href="../../OpenSSL.html">OpenSSL</a> limits parameters according to the
-level. The “parameters” include: ciphersuites, curves, key sizes,
-certificate signature algorithms, protocol version and so on. For example,
-level 1 rejects parameters offering below 80 bits of security, such as
-ciphersuites using MD5 for the MAC or RSA keys shorter than 1024 bits.</p>
+          <p>Sets the security level for the context. <a href="../../OpenSSL.html"><code>OpenSSL</code></a> limits parameters according to the level. The “parameters” include: ciphersuites, curves, key sizes, certificate signature algorithms, protocol version and so on. For example, level 1 rejects parameters offering below 80 bits of security, such as ciphersuites using MD5 for the MAC or RSA keys shorter than 1024 bits.</p>
 
-<p>Note that attempts to set such parameters with insufficient security are
-also blocked. You need to lower the level first.</p>
+<p>Note that attempts to set such parameters with insufficient security are also blocked. You need to lower the level first.</p>
 
-<p>This feature is not supported in <a href="../../OpenSSL.html">OpenSSL</a>
-&lt; 1.1.0, and setting the level to other than 0 will raise
-NotImplementedError. Level 0 means everything is permitted, the same
-behavior as previous versions of <a href="../../OpenSSL.html">OpenSSL</a>.</p>
+<p>This feature is not supported in <a href="../../OpenSSL.html"><code>OpenSSL</code></a> &lt; 1.1.0, and setting the level to other than 0 will raise NotImplementedError. Level 0 means everything is permitted, the same behavior as previous versions of <a href="../../OpenSSL.html"><code>OpenSSL</code></a>.</p>
 
 <p>See the manpage of SSL_CTX_set_security_level(3) for details.</p>
           
@@ -1737,9 +1603,7 @@ ossl_sslctx_get_session_cache_mode(VALUE self)
 
         <div class="method-description">
           
-          <p>Sets the <a href="../SSL.html">SSL</a> session cache mode.  Bitwise-or
-together the desired SESSION_CACHE_* constants to set.  See
-SSL_CTX_set_session_cache_mode(3) for details.</p>
+          <p>Sets the <a href="../SSL.html"><code>SSL</code></a> session cache mode.  Bitwise-or together the desired SESSION_CACHE_* constants to set.  See SSL_CTX_set_session_cache_mode(3) for details.</p>
           
           
 
@@ -1782,8 +1646,7 @@ ossl_sslctx_set_session_cache_mode(VALUE self, VALUE arg)
 
         <div class="method-description">
           
-          <p>Returns the current session cache size.  Zero is used to represent an
-unlimited cache size.</p>
+          <p>Returns the current session cache size.  Zero is used to represent an unlimited cache size.</p>
           
           
 
@@ -1824,8 +1687,7 @@ ossl_sslctx_get_session_cache_size(VALUE self)
 
         <div class="method-description">
           
-          <p>Sets the session cache size.  Returns the previously valid session cache
-size.  Zero is used to represent an unlimited session cache size.</p>
+          <p>Sets the session cache size.  Returns the previously valid session cache size.  Zero is used to represent an unlimited session cache size.</p>
           
           
 
@@ -1904,8 +1766,7 @@ ossl_sslctx_set_session_cache_size(VALUE self, VALUE arg)
 <p>Number of start renegotiations in client mode</p>
 </dd><dt>:timeouts
 <dd>
-<p>Number of sessions proposed by clients that were found in the cache but had
-expired due to timeouts</p>
+<p>Number of sessions proposed by clients that were found in the cache but had expired due to timeouts</p>
 </dd></dl>
           
           
@@ -2007,22 +1868,15 @@ ossl_sslctx_session_remove(VALUE self, VALUE arg)
           
           <p>Sets saner defaults optimized for the use with HTTP-like protocols.</p>
 
-<p>If a Hash <em>params</em> is given, the parameters are overridden with it.
-The keys in <em>params</em> must be assignment methods on <a
-href="SSLContext.html">SSLContext</a>.</p>
+<p>If a Hash <em>params</em> is given, the parameters are overridden with it. The keys in <em>params</em> must be assignment methods on <a href="SSLContext.html"><code>SSLContext</code></a>.</p>
 
-<p>If the <a href="SSLContext.html#attribute-i-verify_mode">#verify_mode</a>
-is not VERIFY_NONE and <a
-href="SSLContext.html#attribute-i-ca_file">#ca_file</a>, <a
-href="SSLContext.html#attribute-i-ca_path">#ca_path</a> and <a
-href="SSLContext.html#attribute-i-cert_store">#cert_store</a> are not set
-then the system default certificate store is used.</p>
+<p>If the <a href="SSLContext.html#attribute-i-verify_mode"><code>verify_mode</code></a> is not VERIFY_NONE and <a href="SSLContext.html#attribute-i-ca_file"><code>ca_file</code></a>, <a href="SSLContext.html#attribute-i-ca_path"><code>ca_path</code></a> and <a href="SSLContext.html#attribute-i-cert_store"><code>cert_store</code></a> are not set then the system default certificate store is used.</p>
           
           
 
           
           <div class="method-source-code" id="set_params-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 137</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 139</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">set_params</span>(<span class="ruby-identifier">params</span>={})
   <span class="ruby-identifier">params</span> = <span class="ruby-constant">DEFAULT_PARAMS</span>.<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">params</span>)
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">options</span> = <span class="ruby-identifier">params</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-value">:options</span>) <span class="ruby-comment"># set before min_version/max_version</span>
@@ -2067,10 +1921,7 @@ then the system default certificate store is used.</p>
 
         <div class="method-description">
           
-          <p>This method is called automatically when a new <a
-href="SSLSocket.html">SSLSocket</a> is created. However, it is not
-thread-safe and must be called before creating <a
-href="SSLSocket.html">SSLSocket</a> objects in a multi-threaded program.</p>
+          <p>This method is called automatically when a new <a href="SSLSocket.html"><code>SSLSocket</code></a> is created. However, it is not thread-safe and must be called before creating <a href="SSLSocket.html"><code>SSLSocket</code></a> objects in a multi-threaded program.</p>
           
           
 
@@ -2113,6 +1964,10 @@ ossl_sslctx_setup(VALUE self)
 # endif
     }
 #endif /* OPENSSL_NO_EC */
+
+#ifdef HAVE_SSL_CTX_SET_POST_HANDSHAKE_AUTH
+    SSL_CTX_set_post_handshake_auth(ctx, 1);
+#endif
 
     val = rb_attr_get(self, id_i_cert_store);
     if (!NIL_P(val)) {
@@ -2296,26 +2151,17 @@ ossl_sslctx_setup(VALUE self)
 
         <div class="method-description">
           
-          <p>Sets the SSL/TLS protocol version for the context. This forces connections
-to use only the specified protocol version. This is deprecated and only
-provided for backwards compatibility. Use <a
-href="SSLContext.html#method-i-min_version-3D">min_version=</a> and <a
-href="SSLContext.html#method-i-max_version-3D">max_version=</a> instead.</p>
+          <p>Sets the SSL/TLS protocol version for the context. This forces connections to use only the specified protocol version. This is deprecated and only provided for backwards compatibility. Use <a href="SSLContext.html#method-i-min_version-3D"><code>min_version=</code></a> and <a href="SSLContext.html#method-i-max_version-3D"><code>max_version=</code></a> instead.</p>
 
 <h3 id="method-i-ssl_version-3D-label-History"><a href="../../History_md.html">History</a><span><a href="#method-i-ssl_version-3D-label-History">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
-<p>As the name hints, this used to call the SSL_CTX_set_ssl_version() function
-which sets the <a href="../SSL.html">SSL</a> method used for connections
-created from the context. As of Ruby/OpenSSL 2.1, this accessor method is
-implemented to call <a
-href="SSLContext.html#method-i-min_version-3D">min_version=</a> and <a
-href="SSLContext.html#method-i-max_version-3D">max_version=</a> instead.</p>
+<p>As the name hints, this used to call the SSL_CTX_set_ssl_version() function which sets the <a href="../SSL.html"><code>SSL</code></a> method used for connections created from the context. As of Ruby/OpenSSL 2.1, this accessor method is implemented to call <a href="SSLContext.html#method-i-min_version-3D"><code>min_version=</code></a> and <a href="SSLContext.html#method-i-max_version-3D"><code>max_version=</code></a> instead.</p>
           
           
 
           
           <div class="method-source-code" id="ssl_version-3D-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 200</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 202</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">ssl_version=</span>(<span class="ruby-identifier">meth</span>)
   <span class="ruby-identifier">meth</span> = <span class="ruby-identifier">meth</span>.<span class="ruby-identifier">to_s</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">meth</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Symbol</span>)
   <span class="ruby-keyword">if</span> <span class="ruby-regexp">/(?&lt;type&gt;_client|_server)\z/</span> <span class="ruby-operator">=~</span> <span class="ruby-identifier">meth</span>
@@ -2348,7 +2194,7 @@ href="SSLContext.html#method-i-max_version-3D">max_version=</a> instead.</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.4.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

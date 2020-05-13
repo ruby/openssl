@@ -11,8 +11,11 @@
   var index_rel_prefix = "./";
 </script>
 
-<script src="./js/jquery.js"></script>
-<script src="./js/darkfish.js"></script>
+<script src="./js/navigation.js" defer></script>
+<script src="./js/search.js" defer></script>
+<script src="./js/search_index.js" defer></script>
+<script src="./js/searcher.js" defer></script>
+<script src="./js/darkfish.js" defer></script>
 
 <link href="./css/fonts.css" rel="stylesheet">
 <link href="./css/rdoc.css" rel="stylesheet">
@@ -57,8 +60,16 @@
   <h3>Table of Contents</h3>
 
   <ul class="link-list" role="directory">
+    <li><a href="#label-Version+2.2.0">Version 2.2.0</a>
+    <li><a href="#label-Compatibility+notes">Compatibility notes</a>
+    <li><a href="#label-Notable+changes">Notable changes</a>
+    <li><a href="#label-Version+2.1.2">Version 2.1.2</a>
+    <li><a href="#label-Version+2.1.1">Version 2.1.1</a>
     <li><a href="#label-Version+2.1.0">Version 2.1.0</a>
     <li><a href="#label-Notable+changes">Notable changes</a>
+    <li><a href="#label-Version+2.0.9">Version 2.0.9</a>
+    <li><a href="#label-Security+fixes">Security fixes</a>
+    <li><a href="#label-Bug+fixes">Bug fixes</a>
     <li><a href="#label-Version+2.0.8">Version 2.0.8</a>
     <li><a href="#label-Bug+fixes">Bug fixes</a>
     <li><a href="#label-Version+2.0.7">Version 2.0.7</a>
@@ -105,175 +116,163 @@
 
 <main role="main" aria-label="Page History.md">
 
+<h1 id="label-Version+2.2.0">Version 2.2.0<span><a href="#label-Version+2.2.0">&para;</a> <a href="#top">&uarr;</a></span></h1>
+
+<h2 id="label-Compatibility+notes">Compatibility notes<span><a href="#label-Compatibility+notes">&para;</a> <a href="#top">&uarr;</a></span></h2>
+<ul><li>
+<p>Remove unsupported MDC2, DSS, DSS1, and SHA algorithms.</p>
+</li><li>
+<p>Remove <code>OpenSSL::PKCS7::SignerInfo#name</code> alias for <code>#issuer</code>.  <a href="https://github.com/ruby/openssl/pull/266">[GitHub #266]</a></p>
+</li><li>
+<p>Deprecate <code>OpenSSL::Config#add_value</code> and <code>#[]=</code> for future removal.  <a href="https://github.com/ruby/openssl/pull/322">[GitHub #322]</a></p>
+</li></ul>
+
+<h2 id="label-Notable+changes">Notable changes<span><a href="#label-Notable+changes">&para;</a> <a href="#top">&uarr;</a></span></h2>
+<ul><li>
+<p>Change default <code>OpenSSL::SSL::SSLServer#listen</code> backlog argument from  5 to <code>Socket::SOMAXCONN</code>.  <a href="https://github.com/ruby/openssl/issues/286">[GitHub #286]</a></p>
+</li><li>
+<p>Make <code>OpenSSL::HMAC#==</code> use a timing safe string comparison.  <a href="https://github.com/ruby/openssl/pull/284">[GitHub #284]</a></p>
+</li><li>
+<p>Add support for SHA3 and BLAKE digests.  <a href="https://github.com/ruby/openssl/pull/282">[GitHub #282]</a></p>
+</li><li>
+<p>Add <code>OpenSSL::SSL::SSLSocket.open</code> for opening a <code>TCPSocket</code> and  returning an <code>OpenSSL::SSL::SSLSocket</code> for it.  <a href="https://github.com/ruby/openssl/issues/225">[GitHub #225]</a></p>
+</li><li>
+<p>Support marshalling of <code>OpenSSL::X509</code> and <code>OpenSSL::PKey</code> objects.  <a href="https://github.com/ruby/openssl/pull/281">[GitHub #281]</a>  <a href="https://github.com/ruby/openssl/pull/363">[GitHub #363]</a></p>
+</li><li>
+<p>Add <code>OpenSSL.secure_compare</code> for timing safe string comparison for  strings of possibly unequal length.  <a href="https://github.com/ruby/openssl/pull/280">[GitHub #280]</a></p>
+</li><li>
+<p>Add <code>OpenSSL.fixed_length_secure_compare</code> for timing safe string  comparison for strings of equal length.  <a href="https://github.com/ruby/openssl/pull/269">[GitHub #269]</a></p>
+</li><li>
+<p>Add <code>OpenSSL::SSL::SSLSocket#{finished_message,peer_finished_message}  for last finished message sent and received.  {[GitHub #250]}[https://github.com/ruby/openssl/pull/250]</code></p>
+</li><li>
+<p>Add <code>OpenSSL::Timestamp</code> module for handing timestamp requests and  responses.  <a href="https://github.com/ruby/openssl/pull/204">[GitHub #204]</a></p>
+</li><li>
+<p>Add helper methods for <code>OpenSSL::X509::Certificate</code>:  <code>find_extension</code>, <code>subject_key_identifier</code>,  <code>authority_key_identifier</code>, <code>crl_uris</code>, <code>ca_issuer_uris</code> and  <code>ocsp_uris</code>, and for <code>OpenSSL::X509::CRL</code>:  <code>find_extension</code> and <code>subject_key_identifier</code>.  <a href="https://github.com/ruby/openssl/pull/260">[GitHub #260]</a>  <a href="https://github.com/ruby/openssl/pull/275">[GitHub #275]</a>  <a href="https://github.com/ruby/openssl/pull/293">[GitHub #293]</a></p>
+</li><li>
+<p>Add <code>OpenSSL::ECPoint#add</code> for performing elliptic curve point addition.  <a href="https://github.com/ruby/openssl/pull/261">[GitHub #261]</a></p>
+</li><li>
+<p>Make <code>OpenSSL::PKey::RSA#{export,to_der} check key, factors, and  crt_params to do proper private key serialization.  {[GitHub #258]}[https://github.com/ruby/openssl/pull/258]</code></p>
+</li><li>
+<p>Add <code>OpenSSL::SSL::{SSLSocket,SSLServer}#fileno, returning the  underlying socket file descriptor number.  {[GitHub #247]}[https://github.com/ruby/openssl/pull/247]</code></p>
+</li><li>
+<p>Support client certificates with TLS 1.3, and support post-handshake  authentication with <a href="OpenSSL.html"><code>OpenSSL</code></a> 1.1.1+.  <a href="https://github.com/ruby/openssl/pull/239">[GitHub #239]</a></p>
+</li><li>
+<p>Add <code>OpenSSL::ASN1::ObjectId#==</code> for equality testing.</p>
+</li><li>
+<p>Add <code>OpenSSL::X509::Extension#value_der</code> for the raw value of  the extension.  <a href="https://github.com/ruby/openssl/pull/234">[GitHub #234]</a></p>
+</li><li>
+<p>Significantly reduce allocated memory in <code>OpenSSL::Buffering#do_write</code>.  <a href="https://github.com/ruby/openssl/pull/212">[GitHub #212]</a></p>
+</li><li>
+<p>Ensure all valid IPv6 addresses are considered valid as elements  of subjectAlternativeName in certificates.  <a href="https://github.com/ruby/openssl/pull/185">[GitHub #185]</a></p>
+</li><li>
+<p>Allow recipient&#39;s certificate to be omitted in PCKS7#decrypt.  <a href="https://github.com/ruby/openssl/pull/183">[GitHub #183]</a></p>
+</li><li>
+<p>Add support for reading keys in PKCS #8 format and export via instance methods  added to <code>OpenSSL::PKey</code> classes: <code>private_to_der</code>, <code>private_to_pem</code>,  <code>public_to_der</code> and <code>public_to_pem</code>.  <a href="https://github.com/ruby/openssl/pull/297">[GitHub #297]</a></p>
+</li></ul>
+
+<h1 id="label-Version+2.1.2">Version 2.1.2<span><a href="#label-Version+2.1.2">&para;</a> <a href="#top">&uarr;</a></span></h1>
+
+<p>Merged changes in 2.0.9.</p>
+
+<h1 id="label-Version+2.1.1">Version 2.1.1<span><a href="#label-Version+2.1.1">&para;</a> <a href="#top">&uarr;</a></span></h1>
+
+<p>Merged changes in 2.0.8.</p>
+
 <h1 id="label-Version+2.1.0">Version 2.1.0<span><a href="#label-Version+2.1.0">&para;</a> <a href="#top">&uarr;</a></span></h1>
 
 <h2 id="label-Notable+changes">Notable changes<span><a href="#label-Notable+changes">&para;</a> <a href="#top">&uarr;</a></span></h2>
 <ul><li>
-<p>Support for <a href="OpenSSL.html">OpenSSL</a> versions before 1.0.1 and
-LibreSSL versions before 2.5  is removed.  <a
-href="https://github.com/ruby/openssl/pull/86">[GitHub #86]</a></p>
+<p>Support for <a href="OpenSSL.html"><code>OpenSSL</code></a> versions before 1.0.1 and LibreSSL versions before 2.5  is removed.  <a href="https://github.com/ruby/openssl/pull/86">[GitHub #86]</a></p>
 </li><li>
-<p><a href="OpenSSL/BN.html#method-i-negative-3F">OpenSSL::BN#negative?</a>,
-#+@, and #-@ are added.</p>
+<p><a href="OpenSSL/BN.html#method-i-negative-3F"><code>OpenSSL::BN#negative?</code></a>, +@, and -@ are added.</p>
 </li><li>
-<p><a
-href="OpenSSL/SSL/SSLSocket.html#method-i-connect">OpenSSL::SSL::SSLSocket#connect</a>
-raises a more informative exception when  certificate verification fails. 
-<a href="https://github.com/ruby/openssl/pull/99">[GitHub #99]</a></p>
+<p><a href="OpenSSL/SSL/SSLSocket.html#method-i-connect"><code>OpenSSL::SSL::SSLSocket#connect</code></a> raises a more informative exception when  certificate verification fails.  <a href="https://github.com/ruby/openssl/pull/99">[GitHub #99]</a></p>
 </li><li>
-<p><a href="OpenSSL/KDF.html">OpenSSL::KDF</a> module is newly added. In
-addition to PBKDF2-HMAC that has moved  from <a
-href="OpenSSL/PKCS5.html">OpenSSL::PKCS5</a>, scrypt and HKDF are
-supported.  <a href="https://github.com/ruby/openssl/pull/109">[GitHub
-#109]</a>  <a href="https://github.com/ruby/openssl/pull/173">[GitHub
-#173]</a></p>
+<p><a href="OpenSSL/KDF.html"><code>OpenSSL::KDF</code></a> module is newly added. In addition to PBKDF2-HMAC that has moved  from <a href="OpenSSL/PKCS5.html"><code>OpenSSL::PKCS5</code></a>, scrypt and HKDF are supported.  <a href="https://github.com/ruby/openssl/pull/109">[GitHub #109]</a>  <a href="https://github.com/ruby/openssl/pull/173">[GitHub #173]</a></p>
 </li><li>
-<p><a href="OpenSSL.html#method-c-fips_mode">OpenSSL.fips_mode</a> is added.
-We had the setter, but not the getter.  <a
-href="https://github.com/ruby/openssl/pull/125">[GitHub #125]</a></p>
+<p><a href="OpenSSL.html#method-c-fips_mode"><code>OpenSSL.fips_mode</code></a> is added. We had the setter, but not the getter.  <a href="https://github.com/ruby/openssl/pull/125">[GitHub #125]</a></p>
 </li><li>
-<p><a
-href="OpenSSL/OCSP/Request.html#method-i-signed-3F">OpenSSL::OCSP::Request#signed?</a>
-is added.</p>
+<p><a href="OpenSSL/OCSP/Request.html#method-i-signed-3F"><code>OpenSSL::OCSP::Request#signed?</code></a> is added.</p>
 </li><li>
-<p><a href="OpenSSL/ASN1.html">OpenSSL::ASN1</a> handles the indefinite length
-form better. <a
-href="OpenSSL/ASN1.html#method-c-decode">OpenSSL::ASN1.decode</a>  no
-longer wrongly treats the end-of-contents octets as part of the content. 
-<a
-href="OpenSSL/ASN1/ASN1Data.html#attribute-i-infinite_length">OpenSSL::ASN1::ASN1Data#infinite_length</a>
-is renamed to indefinite_length.  <a
-href="https://github.com/ruby/openssl/pull/98">[GitHub #98]</a></p>
+<p><a href="OpenSSL/ASN1.html"><code>OpenSSL::ASN1</code></a> handles the indefinite length form better. <a href="OpenSSL/ASN1.html#method-c-decode"><code>OpenSSL::ASN1.decode</code></a>  no longer wrongly treats the end-of-contents octets as part of the content.  <a href="OpenSSL/ASN1/ASN1Data.html#attribute-i-infinite_length"><code>OpenSSL::ASN1::ASN1Data#infinite_length</code></a> is renamed to indefinite_length.  <a href="https://github.com/ruby/openssl/pull/98">[GitHub #98]</a></p>
 </li><li>
-<p><a
-href="OpenSSL/X509/Name.html#method-i-add_entry">OpenSSL::X509::Name#add_entry</a>
-now accepts two additional keyword arguments  &#39;loc&#39; and
-&#39;set&#39;.  <a href="https://github.com/ruby/openssl/issues/94">[GitHub
-#94]</a></p>
+<p><a href="OpenSSL/X509/Name.html#method-i-add_entry"><code>OpenSSL::X509::Name#add_entry</code></a> now accepts two additional keyword arguments  &#39;loc&#39; and &#39;set&#39;.  <a href="https://github.com/ruby/openssl/issues/94">[GitHub #94]</a></p>
 </li><li>
-<p><a
-href="OpenSSL/SSL/SSLContext.html#method-i-min_version-3D">OpenSSL::SSL::SSLContext#min_version=</a>
-and max_version= are added to replace  ssl_version= that was built on top
-of the deprecated <a href="OpenSSL.html">OpenSSL</a> C API. Use of  that
-method and the constant OpenSSL::SSL::SSLContext::METHODS is now 
-deprecated.  <a href="https://github.com/ruby/openssl/pull/142">[GitHub
-#142]</a></p>
+<p><a href="OpenSSL/SSL/SSLContext.html#method-i-min_version-3D"><code>OpenSSL::SSL::SSLContext#min_version=</code></a> and max_version= are added to replace  ssl_version= that was built on top of the deprecated <a href="OpenSSL.html"><code>OpenSSL</code></a> C API. Use of  that method and the constant OpenSSL::SSL::SSLContext::METHODS is now  deprecated.  <a href="https://github.com/ruby/openssl/pull/142">[GitHub #142]</a></p>
 </li><li>
-<p><a
-href="OpenSSL/X509/Name.html#method-i-to_utf8">OpenSSL::X509::Name#to_utf8</a>
-is added.  <a href="https://github.com/ruby/openssl/issues/26">[GitHub
-#26]</a>  <a href="https://github.com/ruby/openssl/pull/143">[GitHub
-#143]</a></p>
+<p><a href="OpenSSL/X509/Name.html#method-i-to_utf8"><code>OpenSSL::X509::Name#to_utf8</code></a> is added.  <a href="https://github.com/ruby/openssl/issues/26">[GitHub #26]</a>  <a href="https://github.com/ruby/openssl/pull/143">[GitHub #143]</a></p>
 </li><li>
-<p>OpenSSL::X509::<a
-href="https://github.com/ruby/openssl/pull/161">Extension,Attribute,Certificate,CRL,Revoked,Request}
-can be  compared with == operator.  {[GitHub #161]</a></p>
+<p>OpenSSL::X509::<a href="https://github.com/ruby/openssl/pull/161">Extension,Attribute,Certificate,CRL,Revoked,Request} can be  compared with == operator.  {[GitHub #161]</a></p>
 </li><li>
-<p>TLS Fallback Signaling Cipher Suite Value (SCSV) support is added.  <a
-href="https://github.com/ruby/openssl/pull/165">[GitHub #165]</a></p>
+<p>TLS Fallback Signaling Cipher Suite Value (SCSV) support is added.  <a href="https://github.com/ruby/openssl/pull/165">[GitHub #165]</a></p>
 </li><li>
-<p>Build failure with <a href="OpenSSL.html">OpenSSL</a> 1.1 built with
-no-deprecated is fixed.  <a
-href="https://github.com/ruby/openssl/pull/160">[GitHub #160]</a></p>
+<p>Build failure with <a href="OpenSSL.html"><code>OpenSSL</code></a> 1.1 built with no-deprecated is fixed.  <a href="https://github.com/ruby/openssl/pull/160">[GitHub #160]</a></p>
 </li><li>
-<p><a
-href="OpenSSL/Buffering.html#method-i-write">OpenSSL::Buffering#write</a>
-accepts an arbitrary number of arguments.  <a
-href="https://bugs.ruby-lang.org/issues/9323">[Feature #9323]</a>  <a
-href="https://github.com/ruby/openssl/pull/162">[GitHub #162]</a></p>
+<p><a href="OpenSSL/Buffering.html#method-i-write"><code>OpenSSL::Buffering#write</code></a> accepts an arbitrary number of arguments.  <a href="https://bugs.ruby-lang.org/issues/9323">[Feature #9323]</a>  <a href="https://github.com/ruby/openssl/pull/162">[GitHub #162]</a></p>
 </li><li>
-<p><a
-href="OpenSSL/PKey/RSA.html#method-i-sign_pss">OpenSSL::PKey::RSA#sign_pss</a>
-and verify_pss are added. They perform RSA-PSS  signature and verification.
-<a href="https://github.com/ruby/openssl/issues/75">[GitHub #75]</a>  <a
-href="https://github.com/ruby/openssl/pull/76">[GitHub #76]</a>  <a
-href="https://github.com/ruby/openssl/pull/169">[GitHub #169]</a></p>
+<p><a href="OpenSSL/PKey/RSA.html#method-i-sign_pss"><code>OpenSSL::PKey::RSA#sign_pss</code></a> and verify_pss are added. They perform RSA-PSS  signature and verification.  <a href="https://github.com/ruby/openssl/issues/75">[GitHub #75]</a>  <a href="https://github.com/ruby/openssl/pull/76">[GitHub #76]</a>  <a href="https://github.com/ruby/openssl/pull/169">[GitHub #169]</a></p>
 </li><li>
-<p><a
-href="OpenSSL/SSL/SSLContext.html#method-i-add_certificate">OpenSSL::SSL::SSLContext#add_certificate</a>
-is added.  <a href="https://github.com/ruby/openssl/pull/167">[GitHub
-#167]</a></p>
+<p><a href="OpenSSL/SSL/SSLContext.html#method-i-add_certificate"><code>OpenSSL::SSL::SSLContext#add_certificate</code></a> is added.  <a href="https://github.com/ruby/openssl/pull/167">[GitHub #167]</a></p>
 </li><li>
-<p><a
-href="OpenSSL/PKey/EC/Point.html#method-i-to_octet_string">OpenSSL::PKey::EC::Point#to_octet_string</a>
-is added.  <a
-href="OpenSSL/PKey/EC/Point.html#method-c-new">OpenSSL::PKey::EC::Point.new</a>
-can now take String as the second argument.  <a
-href="https://github.com/ruby/openssl/pull/177">[GitHub #177]</a></p>
+<p><a href="OpenSSL/PKey/EC/Point.html#method-i-to_octet_string"><code>OpenSSL::PKey::EC::Point#to_octet_string</code></a> is added.  <a href="OpenSSL/PKey/EC/Point.html#method-c-new"><code>OpenSSL::PKey::EC::Point.new</code></a> can now take String as the second argument.  <a href="https://github.com/ruby/openssl/pull/177">[GitHub #177]</a></p>
+</li></ul>
+
+<h1 id="label-Version+2.0.9">Version 2.0.9<span><a href="#label-Version+2.0.9">&para;</a> <a href="#top">&uarr;</a></span></h1>
+
+<h2 id="label-Security+fixes">Security fixes<span><a href="#label-Security+fixes">&para;</a> <a href="#top">&uarr;</a></span></h2>
+<ul><li>
+<p>OpenSSL::X509::Name#&lt;=&gt; could incorrectly return 0 (= equal) for non-equal  objects. CVE-2018-16395 is assigned for this issue.  <a href="https://hackerone.com/reports/387250">hackerone.com/reports/387250</a></p>
+</li></ul>
+
+<h2 id="label-Bug+fixes">Bug fixes<span><a href="#label-Bug+fixes">&para;</a> <a href="#top">&uarr;</a></span></h2>
+<ul><li>
+<p>Fixed OpenSSL::PKey::*.<a href="https://bugs.ruby-lang.org/issues/14882">new,generate} immediately aborting if the thread is  interrupted.  {[Bug #14882]</a>  <a href="https://github.com/ruby/openssl/pull/205">[GitHub #205]</a></p>
+</li><li>
+<p>Fixed <a href="OpenSSL/X509/Name.html#method-i-to_s"><code>OpenSSL::X509::Name#to_s</code></a> failing with <a href="OpenSSL/X509/NameError.html"><code>OpenSSL::X509::NameError</code></a> if  called against an empty instance.  <a href="https://github.com/ruby/openssl/issues/200">[GitHub #200]</a>  <a href="https://github.com/ruby/openssl/pull/211">[GitHub #211]</a></p>
 </li></ul>
 
 <h1 id="label-Version+2.0.8">Version 2.0.8<span><a href="#label-Version+2.0.8">&para;</a> <a href="#top">&uarr;</a></span></h1>
 
 <h2 id="label-Bug+fixes">Bug fixes<span><a href="#label-Bug+fixes">&para;</a> <a href="#top">&uarr;</a></span></h2>
 <ul><li>
-<p><a
-href="OpenSSL/Cipher.html#method-i-pkcs5_keyivgen">OpenSSL::Cipher#pkcs5_keyivgen</a>
-raises an error when a negative iteration  count is given.  <a
-href="https://github.com/ruby/openssl/pull/184">[GitHub #184]</a></p>
+<p><a href="OpenSSL/Cipher.html#method-i-pkcs5_keyivgen"><code>OpenSSL::Cipher#pkcs5_keyivgen</code></a> raises an error when a negative iteration  count is given.  <a href="https://github.com/ruby/openssl/pull/184">[GitHub #184]</a></p>
 </li><li>
-<p>Fixed build with LibreSSL 2.7.  <a
-href="https://github.com/ruby/openssl/issues/192">[GitHub #192]</a>  <a
-href="https://github.com/ruby/openssl/pull/193">[GitHub #193]</a></p>
+<p>Fixed build with LibreSSL 2.7.  <a href="https://github.com/ruby/openssl/issues/192">[GitHub #192]</a>  <a href="https://github.com/ruby/openssl/pull/193">[GitHub #193]</a></p>
 </li></ul>
 
 <h1 id="label-Version+2.0.7">Version 2.0.7<span><a href="#label-Version+2.0.7">&para;</a> <a href="#top">&uarr;</a></span></h1>
 
 <h2 id="label-Bug+fixes">Bug fixes<span><a href="#label-Bug+fixes">&para;</a> <a href="#top">&uarr;</a></span></h2>
 <ul><li>
-<p><a
-href="OpenSSL/Cipher.html#method-i-auth_data-3D">OpenSSL::Cipher#auth_data=</a>
-could segfault if called against a non-AEAD cipher.  <a
-href="https://bugs.ruby-lang.org/issues/14024">[Bug #14024]</a></p>
+<p><a href="OpenSSL/Cipher.html#method-i-auth_data-3D"><code>OpenSSL::Cipher#auth_data=</code></a> could segfault if called against a non-AEAD cipher.  <a href="https://bugs.ruby-lang.org/issues/14024">[Bug #14024]</a></p>
 </li><li>
-<p><a
-href="OpenSSL/X509/Certificate.html#method-i-public_key-3D">OpenSSL::X509::Certificate#public_key=</a>
-(and similar methods) could segfault  when an instance of <a
-href="OpenSSL/PKey/PKey.html">OpenSSL::PKey::PKey</a> with no public key
-components is  passed.  <a
-href="https://bugs.ruby-lang.org/issues/14087">[Bug #14087]</a>  <a
-href="https://github.com/ruby/openssl/pull/168">[GitHub #168]</a></p>
+<p><a href="OpenSSL/X509/Certificate.html#method-i-public_key-3D"><code>OpenSSL::X509::Certificate#public_key=</code></a> (and similar methods) could segfault  when an instance of <a href="OpenSSL/PKey/PKey.html"><code>OpenSSL::PKey::PKey</code></a> with no public key components is  passed.  <a href="https://bugs.ruby-lang.org/issues/14087">[Bug #14087]</a>  <a href="https://github.com/ruby/openssl/pull/168">[GitHub #168]</a></p>
 </li></ul>
 
 <h1 id="label-Version+2.0.6">Version 2.0.6<span><a href="#label-Version+2.0.6">&para;</a> <a href="#top">&uarr;</a></span></h1>
 
 <h2 id="label-Bug+fixes">Bug fixes<span><a href="#label-Bug+fixes">&para;</a> <a href="#top">&uarr;</a></span></h2>
 <ul><li>
-<p>The session_remove_cb set to an <a
-href="OpenSSL/SSL/SSLContext.html">OpenSSL::SSL::SSLContext</a> is no
-longer called  during GC.</p>
+<p>The session_remove_cb set to an <a href="OpenSSL/SSL/SSLContext.html"><code>OpenSSL::SSL::SSLContext</code></a> is no longer called  during GC.</p>
 </li><li>
-<p>A possible deadlock in <a
-href="OpenSSL/SSL/SSLSocket.html#method-i-sysread">OpenSSL::SSL::SSLSocket#sysread</a>
-is fixed.  <a href="https://github.com/ruby/openssl/pull/139">[GitHub
-#139]</a></p>
+<p>A possible deadlock in <a href="OpenSSL/SSL/SSLSocket.html#method-i-sysread"><code>OpenSSL::SSL::SSLSocket#sysread</code></a> is fixed.  <a href="https://github.com/ruby/openssl/pull/139">[GitHub #139]</a></p>
 </li><li>
-<p><a href="OpenSSL/BN.html#method-i-hash">OpenSSL::BN#hash</a> could return
-an unnormalized fixnum value on Windows.  <a
-href="https://bugs.ruby-lang.org/issues/13877">[Bug #13877]</a></p>
+<p><a href="OpenSSL/BN.html#method-i-hash"><code>OpenSSL::BN#hash</code></a> could return an unnormalized fixnum value on Windows.  <a href="https://bugs.ruby-lang.org/issues/13877">[Bug #13877]</a></p>
 </li><li>
-<p><a
-href="OpenSSL/SSL/SSLSocket.html#method-i-sysread">OpenSSL::SSL::SSLSocket#sysread</a>
-and sysread_nonblock set the length of the  destination buffer String to 0
-on error.  <a href="https://github.com/ruby/openssl/pull/153">[GitHub
-#153]</a></p>
+<p><a href="OpenSSL/SSL/SSLSocket.html#method-i-sysread"><code>OpenSSL::SSL::SSLSocket#sysread</code></a> and sysread_nonblock set the length of the  destination buffer String to 0 on error.  <a href="https://github.com/ruby/openssl/pull/153">[GitHub #153]</a></p>
 </li><li>
-<p>Possible deadlock is fixed. This happened only when built with older
-versions  of <a href="OpenSSL.html">OpenSSL</a> (before 1.1.0) or LibreSSL.
-<a href="https://github.com/ruby/openssl/pull/155">[GitHub #155]</a></p>
+<p>Possible deadlock is fixed. This happened only when built with older versions  of <a href="OpenSSL.html"><code>OpenSSL</code></a> (before 1.1.0) or LibreSSL.  <a href="https://github.com/ruby/openssl/pull/155">[GitHub #155]</a></p>
 </li></ul>
 
 <h1 id="label-Version+2.0.5">Version 2.0.5<span><a href="#label-Version+2.0.5">&para;</a> <a href="#top">&uarr;</a></span></h1>
 
 <h2 id="label-Bug+fixes">Bug fixes<span><a href="#label-Bug+fixes">&para;</a> <a href="#top">&uarr;</a></span></h2>
 <ul><li>
-<p>Reading a PEM/DER-encoded private key or certificate from an <a
-href="IO.html">IO</a> object did  not work properly on mswin platforms.  <a
-href="https://github.com/ruby/openssl/issues/128">[ruby/openssl#128]</a></p>
+<p>Reading a PEM/DER-encoded private key or certificate from an <a href="IO.html"><code>IO</code></a> object did  not work properly on mswin platforms.  <a href="https://github.com/ruby/openssl/issues/128">[ruby/openssl#128]</a></p>
 </li><li>
 <p>Broken length check in the PEM passphrase callback is fixed.</p>
 </li><li>
-<p>It failed to compile when <a href="OpenSSL.html">OpenSSL</a> is configured
-without TLS 1.0 support.</p>
+<p>It failed to compile when <a href="OpenSSL.html"><code>OpenSSL</code></a> is configured without TLS 1.0 support.</p>
 </li></ul>
 
 <h1 id="label-Version+2.0.4">Version 2.0.4<span><a href="#label-Version+2.0.4">&para;</a> <a href="#top">&uarr;</a></span></h1>
@@ -282,70 +281,50 @@ without TLS 1.0 support.</p>
 <ul><li>
 <p>It now compiles with LibreSSL without renaming on Windows (mswin).</p>
 </li><li>
-<p>A workaround for the error queue leak of X509_load_cert_crl_file() that 
-causes random errors is added.  <a
-href="https://bugs.ruby-lang.org/issues/11033">[Bug #11033]</a></p>
+<p>A workaround for the error queue leak of X509_load_cert_crl_file() that  causes random errors is added.  <a href="https://bugs.ruby-lang.org/issues/11033">[Bug #11033]</a></p>
 </li></ul>
 
 <h1 id="label-Version+2.0.3">Version 2.0.3<span><a href="#label-Version+2.0.3">&para;</a> <a href="#top">&uarr;</a></span></h1>
 
 <h2 id="label-Bug+fixes">Bug fixes<span><a href="#label-Bug+fixes">&para;</a> <a href="#top">&uarr;</a></span></h2>
 <ul><li>
-<p><a
-href="OpenSSL/ASN1/Constructive.html#method-i-each">OpenSSL::ASN1::Constructive#each</a>
-which was broken by 2.0.0 is fixed.  <a
-href="https://github.com/ruby/openssl/pull/96">[ruby/openssl#96]</a></p>
+<p><a href="OpenSSL/ASN1/Constructive.html#method-i-each"><code>OpenSSL::ASN1::Constructive#each</code></a> which was broken by 2.0.0 is fixed.  <a href="https://github.com/ruby/openssl/pull/96">[ruby/openssl#96]</a></p>
 </li><li>
-<p>Fixed build with static <a href="OpenSSL.html">OpenSSL</a> libraries on
-Windows.  <a href="https://bugs.ruby-lang.org/issues/13080">[Bug
-#13080]</a></p>
+<p>Fixed build with static <a href="OpenSSL.html"><code>OpenSSL</code></a> libraries on Windows.  <a href="https://bugs.ruby-lang.org/issues/13080">[Bug #13080]</a></p>
 </li><li>
-<p><a
-href="OpenSSL/X509/Name.html#method-i-eql-3F">OpenSSL::X509::Name#eql?</a>
-which was broken by 2.0.0 is fixed.</p>
+<p><a href="OpenSSL/X509/Name.html#method-i-eql-3F"><code>OpenSSL::X509::Name#eql?</code></a> which was broken by 2.0.0 is fixed.</p>
 </li></ul>
 
 <h1 id="label-Version+2.0.2">Version 2.0.2<span><a href="#label-Version+2.0.2">&para;</a> <a href="#top">&uarr;</a></span></h1>
 
 <h2 id="label-Bug+fixes">Bug fixes<span><a href="#label-Bug+fixes">&para;</a> <a href="#top">&uarr;</a></span></h2>
 <ul><li>
-<p>Fix build with early 0.9.8 series which did not have
-SSL_CTX_clear_options().  [ruby-core:78693]</p>
+<p>Fix build with early 0.9.8 series which did not have SSL_CTX_clear_options().  [ruby-core:78693]</p>
 </li></ul>
 
 <h1 id="label-Version+2.0.1">Version 2.0.1<span><a href="#label-Version+2.0.1">&para;</a> <a href="#top">&uarr;</a></span></h1>
 
 <h2 id="label-Bug+fixes">Bug fixes<span><a href="#label-Bug+fixes">&para;</a> <a href="#top">&uarr;</a></span></h2>
 <ul><li>
-<p>A GC issue around <a href="OpenSSL/BN.html">OpenSSL::BN</a> is fixed.  <a
-href="https://github.com/ruby/openssl/issues/87">[ruby/openssl#87]</a></p>
+<p>A GC issue around <a href="OpenSSL/BN.html"><code>OpenSSL::BN</code></a> is fixed.  <a href="https://github.com/ruby/openssl/issues/87">[ruby/openssl#87]</a></p>
 </li><li>
-<p><a href="OpenSSL/ASN1.html">OpenSSL::ASN1</a> now parses BER encoding of
-GeneralizedTime without seconds.  <a
-href="https://github.com/ruby/openssl/pull/88">[ruby/openssl#88]</a></p>
+<p><a href="OpenSSL/ASN1.html"><code>OpenSSL::ASN1</code></a> now parses BER encoding of GeneralizedTime without seconds.  <a href="https://github.com/ruby/openssl/pull/88">[ruby/openssl#88]</a></p>
 </li></ul>
 
 <h1 id="label-Version+2.0.0">Version 2.0.0<span><a href="#label-Version+2.0.0">&para;</a> <a href="#top">&uarr;</a></span></h1>
 
-<p>This is the first release of openssl gem, formerly a standard library of
-Ruby, ext/openssl. This is the successor of the version included in Ruby
-2.3.</p>
+<p>This is the first release of openssl gem, formerly a standard library of Ruby, ext/openssl. This is the successor of the version included in Ruby 2.3.</p>
 
 <h2 id="label-Compatibility+notes">Compatibility notes<span><a href="#label-Compatibility+notes">&para;</a> <a href="#top">&uarr;</a></span></h2>
 <ul><li>
-<p>Support for <a href="OpenSSL.html">OpenSSL</a> version 0.9.6 and 0.9.7 is
-completely removed. openssl gem  still works with <a
-href="OpenSSL.html">OpenSSL</a> 0.9.8, but users are strongly encouraged to
-upgrade  to at least 1.0.1, as <a href="OpenSSL.html">OpenSSL</a> &lt;
-1.0.1 will not receive any security fixes from  the <a
-href="OpenSSL.html">OpenSSL</a> development team.</p>
+<p>Support for <a href="OpenSSL.html"><code>OpenSSL</code></a> version 0.9.6 and 0.9.7 is completely removed. openssl gem  still works with <a href="OpenSSL.html"><code>OpenSSL</code></a> 0.9.8, but users are strongly encouraged to upgrade  to at least 1.0.1, as <a href="OpenSSL.html"><code>OpenSSL</code></a> &lt; 1.0.1 will not receive any security fixes from  the <a href="OpenSSL.html"><code>OpenSSL</code></a> development team.</p>
 </li></ul>
 
 <h2 id="label-Supported+platforms">Supported platforms<span><a href="#label-Supported+platforms">&para;</a> <a href="#top">&uarr;</a></span></h2>
 <ul><li>
-<p><a href="OpenSSL.html">OpenSSL</a> 1.0.0, 1.0.1, 1.0.2, 1.1.0</p>
+<p><a href="OpenSSL.html"><code>OpenSSL</code></a> 1.0.0, 1.0.1, 1.0.2, 1.1.0</p>
 </li><li>
-<p><a href="OpenSSL.html">OpenSSL</a> &lt; 0.9.8 is no longer supported.</p>
+<p><a href="OpenSSL.html"><code>OpenSSL</code></a> &lt; 0.9.8 is no longer supported.</p>
 </li><li>
 <p>LibreSSL 2.3, 2.4, 2.5</p>
 </li><li>
@@ -354,154 +333,77 @@ href="OpenSSL.html">OpenSSL</a> development team.</p>
 
 <h2 id="label-Notable+changes">Notable changes<span><a href="#label-Notable+changes">&para;</a> <a href="#top">&uarr;</a></span></h2>
 <ul><li>
-<p>Add support for <a href="OpenSSL.html">OpenSSL</a> 1.1.0.  <a
-href="https://bugs.ruby-lang.org/issues/12324">[Feature #12324]</a></p>
+<p>Add support for <a href="OpenSSL.html"><code>OpenSSL</code></a> 1.1.0.  <a href="https://bugs.ruby-lang.org/issues/12324">[Feature #12324]</a></p>
 </li><li>
 <p>Add support for LibreSSL</p>
 </li><li>
-<p><a href="OpenSSL/Cipher.html">OpenSSL::Cipher</a></p>
+<p><a href="OpenSSL/Cipher.html"><code>OpenSSL::Cipher</code></a></p>
 </li><li>
-<p><a href="OpenSSL/Cipher.html#method-i-key-3D">OpenSSL::Cipher#key=</a> and
-iv= reject too long inputs. They used to truncate silently. <a
-href="https://bugs.ruby-lang.org/issues/12561">[Bug #12561]</a></p>
+<p><a href="OpenSSL/Cipher.html#method-i-key-3D"><code>OpenSSL::Cipher#key=</code></a> and iv= reject too long inputs. They used to truncate silently. <a href="https://bugs.ruby-lang.org/issues/12561">[Bug #12561]</a></p>
 </li><li>
-<p><a
-href="OpenSSL/Cipher.html#method-i-iv_len-3D">OpenSSL::Cipher#iv_len=</a>
-is added. It allows changing IV (nonce) length if using AEAD ciphers. <a
-href="https://bugs.ruby-lang.org/issues/8667">[Bug #8667]</a>, <a
-href="https://bugs.ruby-lang.org/issues/10420">[Bug #10420]</a>, <a
-href="https://github.com/ruby/ruby/pull/569">[GH ruby/ruby#569]</a>, <a
-href="https://github.com/ruby/openssl/pull/58">[GH ruby/openssl#58]</a></p>
+<p><a href="OpenSSL/Cipher.html#method-i-iv_len-3D"><code>OpenSSL::Cipher#iv_len=</code></a> is added. It allows changing IV (nonce) length if using AEAD ciphers. <a href="https://bugs.ruby-lang.org/issues/8667">[Bug #8667]</a>, <a href="https://bugs.ruby-lang.org/issues/10420">[Bug #10420]</a>, <a href="https://github.com/ruby/ruby/pull/569">[GH ruby/ruby#569]</a>, <a href="https://github.com/ruby/openssl/pull/58">[GH ruby/openssl#58]</a></p>
 </li><li>
-<p><a
-href="OpenSSL/Cipher.html#method-i-auth_tag_len-3D">OpenSSL::Cipher#auth_tag_len=</a>
-is added. This sets the authentication tag length to be generated by an
-AEAD cipher.</p>
+<p><a href="OpenSSL/Cipher.html#method-i-auth_tag_len-3D"><code>OpenSSL::Cipher#auth_tag_len=</code></a> is added. This sets the authentication tag length to be generated by an AEAD cipher.</p>
 </li><li>
-<p><a href="OpenSSL/OCSP.html">OpenSSL::OCSP</a></p>
+<p><a href="OpenSSL/OCSP.html"><code>OpenSSL::OCSP</code></a></p>
 </li><li>
-<p>Accessor methods are added to <a
-href="OpenSSL/OCSP/CertificateId.html">OpenSSL::OCSP::CertificateId</a>. <a
-href="https://bugs.ruby-lang.org/issues/7181">[Feature #7181]</a></p>
+<p>Accessor methods are added to <a href="OpenSSL/OCSP/CertificateId.html"><code>OpenSSL::OCSP::CertificateId</code></a>. <a href="https://bugs.ruby-lang.org/issues/7181">[Feature #7181]</a></p>
 </li><li>
-<p><a href="OpenSSL/OCSP/Request.html">OpenSSL::OCSP::Request</a> and
-BasicResponse can be signed with non-SHA-1 hash algorithm. <a
-href="https://bugs.ruby-lang.org/issues/11552">[Feature #11552]</a></p>
+<p><a href="OpenSSL/OCSP/Request.html"><code>OpenSSL::OCSP::Request</code></a> and BasicResponse can be signed with non-SHA-1 hash algorithm. <a href="https://bugs.ruby-lang.org/issues/11552">[Feature #11552]</a></p>
 </li><li>
-<p><a href="OpenSSL/OCSP/CertificateId.html">OpenSSL::OCSP::CertificateId</a>
-and BasicResponse can be encoded into DER.</p>
+<p><a href="OpenSSL/OCSP/CertificateId.html"><code>OpenSSL::OCSP::CertificateId</code></a> and BasicResponse can be encoded into DER.</p>
 </li><li>
-<p>A new class <a
-href="OpenSSL/OCSP/SingleResponse.html">OpenSSL::OCSP::SingleResponse</a>
-is added for convenience.</p>
+<p>A new class <a href="OpenSSL/OCSP/SingleResponse.html"><code>OpenSSL::OCSP::SingleResponse</code></a> is added for convenience.</p>
 </li><li>
-<p><a
-href="OpenSSL/OCSP/BasicResponse.html#method-i-add_status">OpenSSL::OCSP::BasicResponse#add_status</a>
-accepts absolute times. They used to accept only relative seconds from the
-current time.</p>
+<p><a href="OpenSSL/OCSP/BasicResponse.html#method-i-add_status"><code>OpenSSL::OCSP::BasicResponse#add_status</code></a> accepts absolute times. They used to accept only relative seconds from the current time.</p>
 </li><li>
-<p><a href="OpenSSL/PKey.html">OpenSSL::PKey</a></p>
+<p><a href="OpenSSL/PKey.html"><code>OpenSSL::PKey</code></a></p>
 </li><li>
-<p><a href="OpenSSL/PKey/EC.html">OpenSSL::PKey::EC</a> follows the general
-PKey interface. <a href="https://bugs.ruby-lang.org/issues/6567">[Bug
-#6567]</a></p>
+<p><a href="OpenSSL/PKey/EC.html"><code>OpenSSL::PKey::EC</code></a> follows the general PKey interface. <a href="https://bugs.ruby-lang.org/issues/6567">[Bug #6567]</a></p>
 </li><li>
-<p><a href="OpenSSL/PKey.html#method-c-read">OpenSSL::PKey.read</a> raises <a
-href="OpenSSL/PKey/PKeyError.html">OpenSSL::PKey::PKeyError</a> instead of
-ArgumentError for consistency with OpenSSL::PKey::<a
-href="https://bugs.ruby-lang.org/issues/11774">DH,DSA,RSA,EC}#new. {[Bug
-#11774]</a>, <a href="https://github.com/ruby/openssl/pull/55">[GH
-ruby/openssl#55]</a></p>
+<p><a href="OpenSSL/PKey.html#method-c-read"><code>OpenSSL::PKey.read</code></a> raises <a href="OpenSSL/PKey/PKeyError.html"><code>OpenSSL::PKey::PKeyError</code></a> instead of ArgumentError for consistency with OpenSSL::PKey::<a href="https://bugs.ruby-lang.org/issues/11774">DH,DSA,RSA,EC}#new. {[Bug #11774]</a>, <a href="https://github.com/ruby/openssl/pull/55">[GH ruby/openssl#55]</a></p>
 </li><li>
-<p><a href="OpenSSL/PKey/EC/Group.html">OpenSSL::PKey::EC::Group</a> retrieved
-by <a
-href="OpenSSL/PKey/EC.html#method-i-group">OpenSSL::PKey::EC#group</a> is
-no longer linked with the EC key. Modifications to the EC::Group have no
-effect on the key. <a href="https://github.com/ruby/openssl/pull/71">[GH
-ruby/openssl#71]</a></p>
+<p><a href="OpenSSL/PKey/EC/Group.html"><code>OpenSSL::PKey::EC::Group</code></a> retrieved by <a href="OpenSSL/PKey/EC.html#method-i-group"><code>OpenSSL::PKey::EC#group</code></a> is no longer linked with the EC key. Modifications to the EC::Group have no effect on the key. <a href="https://github.com/ruby/openssl/pull/71">[GH ruby/openssl#71]</a></p>
 </li><li>
-<p><a
-href="OpenSSL/PKey/EC/Point.html#method-i-to_bn">OpenSSL::PKey::EC::Point#to_bn</a>
-allows specifying the point conversion form by the optional argument.</p>
+<p><a href="OpenSSL/PKey/EC/Point.html#method-i-to_bn"><code>OpenSSL::PKey::EC::Point#to_bn</code></a> allows specifying the point conversion form by the optional argument.</p>
 </li><li>
-<p><a href="OpenSSL/SSL.html">OpenSSL::SSL</a></p>
+<p><a href="OpenSSL/SSL.html"><code>OpenSSL::SSL</code></a></p>
 </li><li>
-<p><a
-href="OpenSSL/SSL/SSLSocket.html#method-i-tmp_key">OpenSSL::SSL::SSLSocket#tmp_key</a>
-is added. A client can call it after the connection is established to
-retrieve the ephemeral key. <a
-href="https://github.com/ruby/ruby/pull/1318">[GH ruby/ruby#1318]</a></p>
+<p><a href="OpenSSL/SSL/SSLSocket.html#method-i-tmp_key"><code>OpenSSL::SSL::SSLSocket#tmp_key</code></a> is added. A client can call it after the connection is established to retrieve the ephemeral key. <a href="https://github.com/ruby/ruby/pull/1318">[GH ruby/ruby#1318]</a></p>
 </li><li>
-<p>The automatic ephemeral ECDH curve selection is enabled by default when
-built with <a href="OpenSSL.html">OpenSSL</a> &gt;= 1.0.2 or LibreSSL.</p>
+<p>The automatic ephemeral ECDH curve selection is enabled by default when built with <a href="OpenSSL.html"><code>OpenSSL</code></a> &gt;= 1.0.2 or LibreSSL.</p>
 </li><li>
-<p><a
-href="OpenSSL/SSL/SSLContext.html#method-i-security_level-3D">OpenSSL::SSL::SSLContext#security_level=</a>
-is added. You can set the “security level” of the SSL context. This is
-effective only when built with <a href="OpenSSL.html">OpenSSL</a> 1.1.0.</p>
+<p><a href="OpenSSL/SSL/SSLContext.html#method-i-security_level-3D"><code>OpenSSL::SSL::SSLContext#security_level=</code></a> is added. You can set the “security level” of the SSL context. This is effective only when built with <a href="OpenSSL.html"><code>OpenSSL</code></a> 1.1.0.</p>
 </li><li>
-<p>A new option &#39;verify_hostname&#39; is added to <a
-href="OpenSSL/SSL/SSLContext.html">OpenSSL::SSL::SSLContext</a>. When it is
-enabled, and the SNI hostname is also set, the hostname verification on the
-server certificate is automatically performed. It is now enabled by <a
-href="OpenSSL/SSL/SSLContext.html#method-i-set_params">OpenSSL::SSL::SSLContext#set_params</a>.
-<a href="https://github.com/ruby/openssl/pull/60">[GH ruby/openssl#60]</a></p>
+<p>A new option &#39;verify_hostname&#39; is added to <a href="OpenSSL/SSL/SSLContext.html"><code>OpenSSL::SSL::SSLContext</code></a>. When it is enabled, and the SNI hostname is also set, the hostname verification on the server certificate is automatically performed. It is now enabled by <a href="OpenSSL/SSL/SSLContext.html#method-i-set_params"><code>OpenSSL::SSL::SSLContext#set_params</code></a>. <a href="https://github.com/ruby/openssl/pull/60">[GH ruby/openssl#60]</a></p>
 </li></ul>
 
 <h2 id="label-Removals">Removals<span><a href="#label-Removals">&para;</a> <a href="#top">&uarr;</a></span></h2>
 <ul><li>
-<p><a href="OpenSSL/Engine.html">OpenSSL::Engine</a></p>
+<p><a href="OpenSSL/Engine.html"><code>OpenSSL::Engine</code></a></p>
 </li><li>
-<p><a href="OpenSSL/Engine.html#method-c-cleanup">OpenSSL::Engine.cleanup</a>
-does nothing when built with <a href="OpenSSL.html">OpenSSL</a> 1.1.0.</p>
+<p><a href="OpenSSL/Engine.html#method-c-cleanup"><code>OpenSSL::Engine.cleanup</code></a> does nothing when built with <a href="OpenSSL.html"><code>OpenSSL</code></a> 1.1.0.</p>
 </li><li>
-<p><a href="OpenSSL/SSL.html">OpenSSL::SSL</a></p>
+<p><a href="OpenSSL/SSL.html"><code>OpenSSL::SSL</code></a></p>
 </li><li>
-<p>OpenSSL::PKey::DH::DEFAULT_512 is removed. Hence servers no longer use
-512-bit DH group by default. It is considered too weak nowadays. <a
-href="https://bugs.ruby-lang.org/issues/11968">[Bug #11968]</a>, <a
-href="https://github.com/ruby/ruby/pull/1196">[GH ruby/ruby#1196]</a></p>
+<p>OpenSSL::PKey::DH::DEFAULT_512 is removed. Hence servers no longer use 512-bit DH group by default. It is considered too weak nowadays. <a href="https://bugs.ruby-lang.org/issues/11968">[Bug #11968]</a>, <a href="https://github.com/ruby/ruby/pull/1196">[GH ruby/ruby#1196]</a></p>
 </li><li>
-<p>RC4 cipher suites are removed from
-OpenSSL::SSL::SSLContext::DEFAULT_PARAMS. RC4 is now considered to be weak.
-<a href="https://github.com/ruby/openssl/pull/50">[GH ruby/openssl#50]</a></p>
+<p>RC4 cipher suites are removed from OpenSSL::SSL::SSLContext::DEFAULT_PARAMS. RC4 is now considered to be weak. <a href="https://github.com/ruby/openssl/pull/50">[GH ruby/openssl#50]</a></p>
 </li></ul>
 
 <h2 id="label-Deprecations">Deprecations<span><a href="#label-Deprecations">&para;</a> <a href="#top">&uarr;</a></span></h2>
 <ul><li>
-<p><a href="OpenSSL/PKey.html">OpenSSL::PKey</a></p>
+<p><a href="OpenSSL/PKey.html"><code>OpenSSL::PKey</code></a></p>
 </li><li>
-<p>OpenSSL::PKey::RSA#n=, e=, d=, p=, q=, dmp1=, dmq1=, iqmp=,
-OpenSSL::PKey::DSA#p=, q=, g=, priv_key=, pub_key=, OpenSSL::PKey::DH#p=,
-g=, priv_key= and pub_key= are deprecated. They are disabled when built
-with <a href="OpenSSL.html">OpenSSL</a> 1.1.0, due to its API change.
-Instead, <a
-href="OpenSSL/PKey/RSA.html#method-i-set_key">OpenSSL::PKey::RSA#set_key</a>,
-set_factors, set_crt_params, <a
-href="OpenSSL/PKey/DSA.html#method-i-set_pqg">OpenSSL::PKey::DSA#set_pqg</a>,
-set_key, <a
-href="OpenSSL/PKey/DH.html#method-i-set_pqg">OpenSSL::PKey::DH#set_pqg</a>
-and set_key are added.</p>
+<p>OpenSSL::PKey::RSA#n=, e=, d=, p=, q=, dmp1=, dmq1=, iqmp=, OpenSSL::PKey::DSA#p=, q=, g=, priv_key=, pub_key=, OpenSSL::PKey::DH#p=, g=, priv_key= and pub_key= are deprecated. They are disabled when built with <a href="OpenSSL.html"><code>OpenSSL</code></a> 1.1.0, due to its API change. Instead, <a href="OpenSSL/PKey/RSA.html#method-i-set_key"><code>OpenSSL::PKey::RSA#set_key</code></a>, set_factors, set_crt_params, <a href="OpenSSL/PKey/DSA.html#method-i-set_pqg"><code>OpenSSL::PKey::DSA#set_pqg</code></a>, set_key, <a href="OpenSSL/PKey/DH.html#method-i-set_pqg"><code>OpenSSL::PKey::DH#set_pqg</code></a> and set_key are added.</p>
 </li><li>
-<p><a href="OpenSSL/Random.html">OpenSSL::Random</a></p>
+<p><a href="OpenSSL/Random.html"><code>OpenSSL::Random</code></a></p>
 </li><li>
-<p><a
-href="OpenSSL/Random.html#method-c-pseudo_bytes">OpenSSL::Random.pseudo_bytes</a>
-is deprecated, and not defined when built with <a
-href="OpenSSL.html">OpenSSL</a> 1.1.0. Use <a
-href="OpenSSL/Random.html#method-c-random_bytes">OpenSSL::Random.random_bytes</a>
-instead.</p>
+<p>OpenSSL::Random.pseudo_bytes is deprecated, and not defined when built with <a href="OpenSSL.html"><code>OpenSSL</code></a> 1.1.0. Use <a href="OpenSSL/Random.html#method-c-random_bytes"><code>OpenSSL::Random.random_bytes</code></a> instead.</p>
 </li><li>
-<p><a href="OpenSSL/SSL.html">OpenSSL::SSL</a></p>
+<p><a href="OpenSSL/SSL.html"><code>OpenSSL::SSL</code></a></p>
 </li><li>
-<p><a
-href="OpenSSL/SSL/SSLContext.html#attribute-i-tmp_ecdh_callback">OpenSSL::SSL::SSLContext#tmp_ecdh_callback</a>
-is deprecated, as the underlying API SSL_CTX_set_tmp_ecdh_callback() is
-removed in <a href="OpenSSL.html">OpenSSL</a> 1.1.0. It was first added in
-Ruby 2.3.0. To specify the curve to be used in ephemeral ECDH, use <a
-href="OpenSSL/SSL/SSLContext.html#method-i-ecdh_curves-3D">OpenSSL::SSL::SSLContext#ecdh_curves=</a>.
-The automatic curve selection is also now enabled by default when built
-with a capable <a href="OpenSSL.html">OpenSSL</a>.</p>
+<p><a href="OpenSSL/SSL/SSLContext.html#attribute-i-tmp_ecdh_callback"><code>OpenSSL::SSL::SSLContext#tmp_ecdh_callback</code></a> is deprecated, as the underlying API SSL_CTX_set_tmp_ecdh_callback() is removed in <a href="OpenSSL.html"><code>OpenSSL</code></a> 1.1.0. It was first added in Ruby 2.3.0. To specify the curve to be used in ephemeral ECDH, use <a href="OpenSSL/SSL/SSLContext.html#method-i-ecdh_curves-3D"><code>OpenSSL::SSL::SSLContext#ecdh_curves=</code></a>. The automatic curve selection is also now enabled by default when built with a capable <a href="OpenSSL.html"><code>OpenSSL</code></a>.</p>
 </li></ul>
 
 </main>
@@ -510,7 +412,7 @@ with a capable <a href="OpenSSL.html">OpenSSL</a>.</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.4.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

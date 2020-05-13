@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="UTF-8">
+
+<title>class OpenSSL::Timestamp::Response - RDoc Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "../../";
+  var index_rel_prefix = "../../";
+</script>
+
+<script src="../../js/navigation.js" defer></script>
+<script src="../../js/search.js" defer></script>
+<script src="../../js/search_index.js" defer></script>
+<script src="../../js/searcher.js" defer></script>
+<script src="../../js/darkfish.js" defer></script>
+
+<link href="../../css/fonts.css" rel="stylesheet">
+<link href="../../css/rdoc.css" rel="stylesheet">
+
+
+
+
+<body id="top" role="document" class="class">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="../../index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="../../table_of_contents.html#pages">Pages</a>
+    <a href="../../table_of_contents.html#classes">Classes</a>
+    <a href="../../table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    <div id="parent-class-section" class="nav-section">
+  <h3>Parent</h3>
+
+  
+  <p class="link">Object
+  
+</div>
+
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-c-new">::new</a>
+    
+    <li ><a href="#method-i-failure_info">#failure_info</a>
+    
+    <li ><a href="#method-i-status">#status</a>
+    
+    <li ><a href="#method-i-status_text">#status_text</a>
+    
+    <li ><a href="#method-i-to_der">#to_der</a>
+    
+    <li ><a href="#method-i-token">#token</a>
+    
+    <li ><a href="#method-i-token_info">#token_info</a>
+    
+    <li ><a href="#method-i-tsa_certificate">#tsa_certificate</a>
+    
+    <li ><a href="#method-i-verify">#verify</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="class-OpenSSL::Timestamp::Response">
+  <h1 id="class-OpenSSL::Timestamp::Response" class="class">
+    class OpenSSL::Timestamp::Response
+  </h1>
+
+  <section class="description">
+    
+<p>Immutable and read-only representation of a timestamp response returned from a timestamp server after receiving an associated <a href="Request.html"><code>Request</code></a>. Allows access to specific information about the response but also allows to verify the <a href="Response.html"><code>Response</code></a>.</p>
+
+  </section>
+
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+    <section class="constants-list">
+      <header>
+        <h3>Constants</h3>
+      </header>
+      <dl>
+      
+        <dt id="GRANTED">GRANTED
+        
+        <dd><p>Indicates a successful response. Equal to <code>0</code>.</p>
+        
+      
+        <dt id="GRANTED_WITH_MODS">GRANTED_WITH_MODS
+        
+        <dd><p>Indicates a successful response that probably contains modifications from the initial request. Equal to <code>1</code>.</p>
+        
+      
+        <dt id="REJECTION">REJECTION
+        
+        <dd><p>Indicates a failure. No timestamp token was created. Equal to <code>2</code>.</p>
+        
+      
+        <dt id="REVOCATION_NOTIFICATION">REVOCATION_NOTIFICATION
+        
+        <dd><p>Indicates a failure. No timestamp token was created. A certificate has been revoked. Equal to <code>5</code>.</p>
+        
+      
+        <dt id="REVOCATION_WARNING">REVOCATION_WARNING
+        
+        <dd><p>Indicates a failure. No timestamp token was created. Revocation of a certificate is imminent. Equal to <code>4</code>.</p>
+        
+      
+        <dt id="WAITING">WAITING
+        
+        <dd><p>Indicates a failure. No timestamp token was created. Equal to <code>3</code>.</p>
+        
+      
+      </dl>
+    </section>
+    
+
+    
+
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-new" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            OpenSSL::Timestamp::Response.new(file)    &rarr; response
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            OpenSSL::Timestamp::Response.new(string)  &rarr; response
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Creates a <a href="Response.html"><code>Response</code></a> from a <code>File</code> or <code>string</code> parameter, the corresponding <code>File</code> or <code>string</code> must be DER-encoded. Please note that <a href="Response.html"><code>Response</code></a> is an immutable read-only class. If you&#39;d like to create timestamps please refer to <a href="Factory.html"><code>Factory</code></a> instead.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="new-source">
+            <pre>static VALUE
+ossl_ts_resp_initialize(VALUE self, VALUE der)
+{
+    TS_RESP *ts_resp = DATA_PTR(self);
+    BIO *in;
+
+    der = ossl_to_der_if_possible(der);
+    in  = ossl_obj2bio(&amp;der);
+    ts_resp = d2i_TS_RESP_bio(in, &amp;ts_resp);
+    BIO_free(in);
+    if (!ts_resp)
+        ossl_raise(eTimestampError, &quot;Error when decoding the timestamp response&quot;);
+    DATA_PTR(self) = ts_resp;
+
+    return self;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-failure_info" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            failure_info &rarr; nil or symbol
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>In cases no timestamp token has been created, this field contains further info about the reason why response creation failed. The method returns either nil (the request was successful and a timestamp token was created) or one of the following:</p>
+<ul><li>
+<p>:BAD_ALG - Indicates that the timestamp server rejects the message imprint algorithm used in the <a href="Request.html"><code>Request</code></a></p>
+</li><li>
+<p>:BAD_REQUEST - Indicates that the timestamp server was not able to process the <a href="Request.html"><code>Request</code></a> properly</p>
+</li><li>
+<p>:BAD_DATA_FORMAT - Indicates that the timestamp server was not able to parse certain data in the <a href="Request.html"><code>Request</code></a></p>
+</li><li>
+<p>:TIME_NOT_AVAILABLE - Indicates that the server could not access its time source</p>
+</li><li>
+<p>:UNACCEPTED_POLICY - Indicates that the requested policy identifier is not recognized or supported by the timestamp server</p>
+</li><li>
+<p>:UNACCEPTED_EXTENSIION - Indicates that an extension in the <a href="Request.html"><code>Request</code></a> is not supported by the timestamp server</p>
+</li><li>
+<p>:ADD_INFO_NOT_AVAILABLE -Indicates that additional information requested is either not understood or currently not available</p>
+</li><li>
+<p>:SYSTEM_FAILURE - <a href="../Timestamp.html"><code>Timestamp</code></a> creation failed due to an internal error that occurred on the timestamp server</p>
+</li></ul>
+          
+          
+
+          
+          <div class="method-source-code" id="failure_info-source">
+            <pre>static VALUE
+ossl_ts_resp_get_failure_info(VALUE self)
+{
+    TS_RESP *resp;
+    TS_STATUS_INFO *si;
+
+    /* The ASN1_BIT_STRING_get_bit changed from 1.0.0. to 1.1.0, making this
+     * const. */
+    #if defined(HAVE_TS_STATUS_INFO_GET0_FAILURE_INFO)
+    const ASN1_BIT_STRING *fi;
+    #else
+    ASN1_BIT_STRING *fi;
+    #endif
+
+    GetTSResponse(self, resp);
+    si = TS_RESP_get_status_info(resp);
+    fi = TS_STATUS_INFO_get0_failure_info(si);
+    if (!fi)
+        return Qnil;
+    if (ASN1_BIT_STRING_get_bit(fi, TS_INFO_BAD_ALG))
+        return sBAD_ALG;
+    if (ASN1_BIT_STRING_get_bit(fi, TS_INFO_BAD_REQUEST))
+        return sBAD_REQUEST;
+    if (ASN1_BIT_STRING_get_bit(fi, TS_INFO_BAD_DATA_FORMAT))
+        return sBAD_DATA_FORMAT;
+    if (ASN1_BIT_STRING_get_bit(fi, TS_INFO_TIME_NOT_AVAILABLE))
+        return sTIME_NOT_AVAILABLE;
+    if (ASN1_BIT_STRING_get_bit(fi, TS_INFO_UNACCEPTED_POLICY))
+        return sUNACCEPTED_POLICY;
+    if (ASN1_BIT_STRING_get_bit(fi, TS_INFO_UNACCEPTED_EXTENSION))
+        return sUNACCEPTED_EXTENSION;
+    if (ASN1_BIT_STRING_get_bit(fi, TS_INFO_ADD_INFO_NOT_AVAILABLE))
+        return sADD_INFO_NOT_AVAILABLE;
+    if (ASN1_BIT_STRING_get_bit(fi, TS_INFO_SYSTEM_FAILURE))
+        return sSYSTEM_FAILURE;
+
+    ossl_raise(eTimestampError, &quot;Unrecognized failure info.&quot;);
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-status" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            status &rarr; BN (never nil)
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Returns one of <a href="Response.html#GRANTED"><code>GRANTED</code></a>, <a href="Response.html#GRANTED_WITH_MODS"><code>GRANTED_WITH_MODS</code></a>, <a href="Response.html#REJECTION"><code>REJECTION</code></a>, <a href="Response.html#WAITING"><code>WAITING</code></a>, <a href="Response.html#REVOCATION_WARNING"><code>REVOCATION_WARNING</code></a> or <a href="Response.html#REVOCATION_NOTIFICATION"><code>REVOCATION_NOTIFICATION</code></a>. A timestamp token has been created only in case <code>status</code> is equal to <a href="Response.html#GRANTED"><code>GRANTED</code></a> or <a href="Response.html#GRANTED_WITH_MODS"><code>GRANTED_WITH_MODS</code></a>.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="status-source">
+            <pre>static VALUE
+ossl_ts_resp_get_status(VALUE self)
+{
+    TS_RESP *resp;
+    TS_STATUS_INFO *si;
+    const ASN1_INTEGER *st;
+
+    GetTSResponse(self, resp);
+    si = TS_RESP_get_status_info(resp);
+    st = TS_STATUS_INFO_get0_status(si);
+
+    return asn1integer_to_num(st);
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-status_text" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            status_text &rarr; Array of strings or nil
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>In cases of failure this field may contain an array of strings further describing the origin of the failure.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="status_text-source">
+            <pre>static VALUE
+ossl_ts_resp_get_status_text(VALUE self)
+{
+    TS_RESP *resp;
+    TS_STATUS_INFO *si;
+    const STACK_OF(ASN1_UTF8STRING) *text;
+    ASN1_UTF8STRING *current;
+    int i;
+    VALUE ret = rb_ary_new();
+
+    GetTSResponse(self, resp);
+    si = TS_RESP_get_status_info(resp);
+    if ((text = TS_STATUS_INFO_get0_text(si))) {
+        for (i = 0; i &lt; sk_ASN1_UTF8STRING_num(text); i++) {
+            current = sk_ASN1_UTF8STRING_value(text, i);
+            rb_ary_push(ret, asn1str_to_str(current));
+        }
+    }
+
+    return ret;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-to_der" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            to_der &rarr; string
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Returns the <a href="Response.html"><code>Response</code></a> in DER-encoded form.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="to_der-source">
+            <pre>static VALUE
+ossl_ts_resp_to_der(VALUE self)
+{
+    TS_RESP *resp;
+
+    GetTSResponse(self, resp);
+    return asn1_to_der((void *)resp, (int (*)(void *, unsigned char **))i2d_TS_RESP);
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-token" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            token &rarr; nil or OpenSSL::PKCS7
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>If a timestamp token is present, this returns it in the form of a <a href="../PKCS7.html"><code>OpenSSL::PKCS7</code></a>.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="token-source">
+            <pre>static VALUE
+ossl_ts_resp_get_token(VALUE self)
+{
+    TS_RESP *resp;
+    PKCS7 *p7, *copy;
+    VALUE obj;
+
+    GetTSResponse(self, resp);
+    if (!(p7 = TS_RESP_get_token(resp)))
+        return Qnil;
+
+    obj = NewPKCS7(cPKCS7);
+
+    if (!(copy = PKCS7_dup(p7)))
+        ossl_raise(eTimestampError, NULL);
+
+    SetPKCS7(obj, copy);
+
+    return obj;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-token_info" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            token_info &rarr; nil or OpenSSL::Timestamp::TokenInfo
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Get the response&#39;s token info if present.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="token_info-source">
+            <pre>static VALUE
+ossl_ts_resp_get_token_info(VALUE self)
+{
+    TS_RESP *resp;
+    TS_TST_INFO *info, *copy;
+    VALUE obj;
+
+    GetTSResponse(self, resp);
+    if (!(info = TS_RESP_get_tst_info(resp)))
+        return Qnil;
+
+    obj = NewTSTokenInfo(cTimestampTokenInfo);
+
+    if (!(copy = TS_TST_INFO_dup(info)))
+        ossl_raise(eTimestampError, NULL);
+
+    SetTSTokenInfo(obj, copy);
+
+    return obj;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-tsa_certificate" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            tsa_certificate &rarr; OpenSSL::X509::Certificate or nil
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>If the <a href="Request.html"><code>Request</code></a> specified to request the TSA certificate (Request#cert_requested = true), then this field contains the certificate of the timestamp authority.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="tsa_certificate-source">
+            <pre>static VALUE
+ossl_ts_resp_get_tsa_certificate(VALUE self)
+{
+    TS_RESP *resp;
+    PKCS7 *p7;
+    PKCS7_SIGNER_INFO *ts_info;
+    X509 *cert;
+
+    GetTSResponse(self, resp);
+    if (!(p7 = TS_RESP_get_token(resp)))
+        return Qnil;
+    ts_info = sk_PKCS7_SIGNER_INFO_value(p7-&gt;d.sign-&gt;signer_info, 0);
+    cert = PKCS7_cert_from_signer_info(p7, ts_info);
+    if (!cert)
+        return Qnil;
+    return ossl_x509_new(cert);
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-verify" class="method-detail ">
+        
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            verify(Request, root_store) &rarr; Response
+          </span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+        <div class="method-heading">
+          <span class="method-callseq">
+            verify(Request, root_store, [intermediate_cert]) &rarr; Response
+          </span>
+          
+        </div>
+        
+        
+
+        <div class="method-description">
+          
+          <p>Verifies a timestamp token by checking the signature, validating the certificate chain implied by <a href="Response.html#method-i-tsa_certificate"><code>tsa_certificate</code></a> and by checking conformance to a given <a href="Request.html"><code>Request</code></a>. Mandatory parameters are the <a href="Request.html"><code>Request</code></a> associated to this <a href="Response.html"><code>Response</code></a>, and an <a href="../X509/Store.html"><code>OpenSSL::X509::Store</code></a> of trusted roots.</p>
+
+<p>Intermediate certificates can optionally be supplied for creating the certificate chain. These intermediate certificates must all be instances of <a href="../X509/Certificate.html"><code>OpenSSL::X509::Certificate</code></a>.</p>
+
+<p>If validation fails, several kinds of exceptions can be raised:</p>
+<ul><li>
+<p>TypeError if types don&#39;t fit</p>
+</li><li>
+<p><a href="TimestampError.html"><code>TimestampError</code></a> if something is wrong with the timestamp token itself, if it is not conformant to the <a href="Request.html"><code>Request</code></a>, or if validation of the timestamp certificate chain fails.</p>
+</li></ul>
+          
+          
+
+          
+          <div class="method-source-code" id="verify-source">
+            <pre>static VALUE
+ossl_ts_resp_verify(int argc, VALUE *argv, VALUE self)
+{
+    VALUE ts_req, store, intermediates;
+    TS_RESP *resp;
+    TS_REQ *req;
+    X509_STORE *x509st;
+    TS_VERIFY_CTX *ctx;
+    STACK_OF(X509) *x509inter = NULL;
+    PKCS7* p7;
+    X509 *cert;
+    int status, i, ok;
+
+    rb_scan_args(argc, argv, &quot;21&quot;, &amp;ts_req, &amp;store, &amp;intermediates);
+
+    GetTSResponse(self, resp);
+    GetTSRequest(ts_req, req);
+    x509st = GetX509StorePtr(store);
+
+    if (!(ctx = TS_REQ_to_TS_VERIFY_CTX(req, NULL))) {
+        ossl_raise(eTimestampError, &quot;Error when creating the verification context.&quot;);
+    }
+
+    if (!NIL_P(intermediates)) {
+        x509inter = ossl_protect_x509_ary2sk(intermediates, &amp;status);
+        if (status) {
+            TS_VERIFY_CTX_free(ctx);
+            rb_jump_tag(status);
+        }
+    } else if (!(x509inter = sk_X509_new_null())) {
+        TS_VERIFY_CTX_free(ctx);
+        ossl_raise(eTimestampError, &quot;sk_X509_new_null&quot;);
+    }
+
+    if (!(p7 = TS_RESP_get_token(resp))) {
+        TS_VERIFY_CTX_free(ctx);
+        sk_X509_pop_free(x509inter, X509_free);
+        ossl_raise(eTimestampError, &quot;TS_RESP_get_token&quot;);
+    }
+    for (i=0; i &lt; sk_X509_num(p7-&gt;d.sign-&gt;cert); i++) {
+        cert = sk_X509_value(p7-&gt;d.sign-&gt;cert, i);
+        if (!sk_X509_push(x509inter, cert)) {
+            sk_X509_pop_free(x509inter, X509_free);
+            TS_VERIFY_CTX_free(ctx);
+            ossl_raise(eTimestampError, &quot;sk_X509_push&quot;);
+        }
+        X509_up_ref(cert);
+    }
+
+    TS_VERIFY_CTS_set_certs(ctx, x509inter);
+    TS_VERIFY_CTX_add_flags(ctx, TS_VFY_SIGNATURE);
+    TS_VERIFY_CTX_set_store(ctx, x509st);
+
+    ok = TS_RESP_verify_response(ctx, resp);
+
+    /* WORKAROUND:
+     *   X509_STORE can count references, but X509_STORE_free() doesn&#39;t check
+     *   this. To prevent our X509_STORE from being freed with our
+     *   TS_VERIFY_CTX we set the store to NULL first.
+     *   Fixed in OpenSSL 1.0.2; bff9ce4db38b (master), 5b4b9ce976fc (1.0.2)
+     */
+    TS_VERIFY_CTX_set_store(ctx, NULL);
+    TS_VERIFY_CTX_free(ctx);
+
+    if (!ok)
+        ossl_raise(eTimestampError, &quot;TS_RESP_verify_response&quot;);
+
+    return self;
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="https://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

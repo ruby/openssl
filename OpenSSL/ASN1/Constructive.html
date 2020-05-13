@@ -11,8 +11,11 @@
   var index_rel_prefix = "../../";
 </script>
 
-<script src="../../js/jquery.js"></script>
-<script src="../../js/darkfish.js"></script>
+<script src="../../js/navigation.js" defer></script>
+<script src="../../js/search.js" defer></script>
+<script src="../../js/search_index.js" defer></script>
+<script src="../../js/searcher.js" defer></script>
+<script src="../../js/darkfish.js" defer></script>
 
 <link href="../../css/fonts.css" rel="stylesheet">
 <link href="../../css/rdoc.css" rel="stylesheet">
@@ -112,24 +115,18 @@
 
   <section class="description">
     
-<p>The parent class for all constructed encodings. The <em>value</em>
-attribute of a <a href="Constructive.html">Constructive</a> is always an
-Array. Attributes are the same as for <a href="ASN1Data.html">ASN1Data</a>,
-with the addition of <em>tagging</em>.</p>
+<p>The parent class for all constructed encodings. The <em>value</em> attribute of a <a href="Constructive.html"><code>Constructive</code></a> is always an Array. Attributes are the same as for <a href="ASN1Data.html"><code>ASN1Data</code></a>, with the addition of <em>tagging</em>.</p>
 
 <h2 id="class-OpenSSL::ASN1::Constructive-label-SET+and+SEQUENCE">SET and SEQUENCE<span><a href="#class-OpenSSL::ASN1::Constructive-label-SET+and+SEQUENCE">&para;</a> <a href="#top">&uarr;</a></span></h2>
 
-<p>Most constructed encodings come in the form of a SET or a SEQUENCE. These
-encodings are represented by one of the two sub-classes of Constructive:</p>
+<p>Most constructed encodings come in the form of a SET or a SEQUENCE. These encodings are represented by one of the two sub-classes of Constructive:</p>
 <ul><li>
 <p>OpenSSL::ASN1::Set</p>
 </li><li>
 <p>OpenSSL::ASN1::Sequence</p>
 </li></ul>
 
-<p>Please note that tagged sequences and sets are still parsed as instances of
-<a href="ASN1Data.html">ASN1Data</a>. Find further details on tagged values
-there.</p>
+<p>Please note that tagged sequences and sets are still parsed as instances of <a href="ASN1Data.html"><code>ASN1Data</code></a>. Find further details on tagged values there.</p>
 
 <h3 id="class-OpenSSL::ASN1::Constructive-label-Example+-+constructing+a+SEQUENCE">Example - constructing a SEQUENCE<span><a href="#class-OpenSSL::ASN1::Constructive-label-Example+-+constructing+a+SEQUENCE">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
@@ -170,11 +167,7 @@ there.</p>
 
         <div class="method-description">
         
-        <p>May be used as a hint for encoding a value either implicitly or explicitly
-by setting it either to <code>:IMPLICIT</code> or to
-<code>:EXPLICIT</code>. <em>tagging</em> is not set when a ASN.1 structure
-is parsed using <a
-href="../ASN1.html#method-c-decode">OpenSSL::ASN1.decode</a>.</p>
+        <p>May be used as a hint for encoding a value either implicitly or explicitly by setting it either to <code>:IMPLICIT</code> or to <code>:EXPLICIT</code>. <em>tagging</em> is not set when a ASN.1 structure is parsed using <a href="../ASN1.html#method-c-decode"><code>OpenSSL::ASN1.decode</code></a>.</p>
         
         </div>
       </div>
@@ -207,19 +200,11 @@ href="../ASN1.html#method-c-decode">OpenSSL::ASN1.decode</a>.</p>
           
           <p><em>value</em>: is mandatory.</p>
 
-<p><em>tag</em>: optional, may be specified for tagged values. If no
-<em>tag</em> is specified, the UNIVERSAL tag corresponding to the <a
-href="Primitive.html">Primitive</a> sub-class is used by default.</p>
+<p><em>tag</em>: optional, may be specified for tagged values. If no <em>tag</em> is specified, the UNIVERSAL tag corresponding to the <a href="Primitive.html"><code>Primitive</code></a> sub-class is used by default.</p>
 
-<p><em>tagging</em>: may be used as an encoding hint to encode a value either
-explicitly or implicitly, see <a href="../ASN1.html">ASN1</a> for possible
-values.</p>
+<p><em>tagging</em>: may be used as an encoding hint to encode a value either explicitly or implicitly, see <a href="../ASN1.html"><code>ASN1</code></a> for possible values.</p>
 
-<p><em>tag_class</em>: if <em>tag</em> and <em>tagging</em> are
-<code>nil</code> then this is set to <code>:UNIVERSAL</code> by default. If
-either <em>tag</em> or <em>tagging</em> are set then
-<code>:CONTEXT_SPECIFIC</code> is used as the default. For possible values
-please cf. <a href="../ASN1.html">ASN1</a>.</p>
+<p><em>tag_class</em>: if <em>tag</em> and <em>tagging</em> are <code>nil</code> then this is set to <code>:UNIVERSAL</code> by default. If either <em>tag</em> or <em>tagging</em> are set then <code>:CONTEXT_SPECIFIC</code> is used as the default. For possible values please cf. <a href="../ASN1.html"><code>ASN1</code></a>.</p>
 
 <h2 id="method-c-new-label-Example">Example<span><a href="#method-c-new-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h2>
 
@@ -304,9 +289,7 @@ ossl_asn1_initialize(int argc, VALUE *argv, VALUE self)
 
         <div class="method-description">
           
-          <p>Calls the given block once for each element in self, passing that element
-as parameter <em>asn1</em>. If no block is given, an enumerator is returned
-instead.</p>
+          <p>Calls the given block once for each element in self, passing that element as parameter <em>asn1</em>. If no block is given, an enumerator is returned instead.</p>
 
 <h2 id="method-i-each-label-Example">Example<span><a href="#method-i-each-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h2>
 
@@ -352,9 +335,7 @@ ossl_asn1cons_each(VALUE self)
 
         <div class="method-description">
           
-          <p>See <a
-href="ASN1Data.html#method-i-to_der">OpenSSL::ASN1::ASN1Data#to_der</a> for
-details.</p>
+          <p>See <a href="ASN1Data.html#method-i-to_der"><code>ASN1Data#to_der</code></a> for details.</p>
           
           
 
@@ -410,7 +391,7 @@ ossl_asn1cons_to_der(VALUE self)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.4.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

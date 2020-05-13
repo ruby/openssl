@@ -11,8 +11,11 @@
   var index_rel_prefix = "../";
 </script>
 
-<script src="../js/jquery.js"></script>
-<script src="../js/darkfish.js"></script>
+<script src="../js/navigation.js" defer></script>
+<script src="../js/search.js" defer></script>
+<script src="../js/search_index.js" defer></script>
+<script src="../js/searcher.js" defer></script>
+<script src="../js/darkfish.js" defer></script>
 
 <link href="../css/fonts.css" rel="stylesheet">
 <link href="../css/rdoc.css" rel="stylesheet">
@@ -115,11 +118,9 @@
 
   <section class="description">
     
-<p>This class is the access to openssl&#39;s ENGINE cryptographic module
-implementation.</p>
+<p>This class is the access to openssl&#39;s ENGINE cryptographic module implementation.</p>
 
-<p>See also, <a
-href="https://www.openssl.org/docs/crypto/engine.html">www.openssl.org/docs/crypto/engine.html</a></p>
+<p>See also, <a href="https://www.openssl.org/docs/crypto/engine.html">www.openssl.org/docs/crypto/engine.html</a></p>
 
   </section>
 
@@ -161,8 +162,7 @@ href="https://www.openssl.org/docs/crypto/engine.html">www.openssl.org/docs/cryp
 <pre>OpenSSL::Engine.by_id(&quot;openssl&quot;)
  =&gt; #&lt;OpenSSL::Engine id=&quot;openssl&quot; name=&quot;Software engine support&quot;&gt;</pre>
 
-<p>See <a href="Engine.html#method-c-engines">::engines</a> for the currently
-loaded engines.</p>
+<p>See <a href="Engine.html#method-c-engines"><code>OpenSSL::Engine.engines</code></a> for the currently loaded engines.</p>
           
           
 
@@ -215,12 +215,9 @@ ossl_engine_s_by_id(VALUE klass, VALUE id)
 
         <div class="method-description">
           
-          <p>It is only necessary to run cleanup when engines are loaded via <a
-href="Engine.html#method-c-load">::load</a>. However, running cleanup
-before exit is recommended.</p>
+          <p>It is only necessary to run cleanup when engines are loaded via <a href="Engine.html#method-c-load"><code>OpenSSL::Engine.load</code></a>. However, running cleanup before exit is recommended.</p>
 
-<p>Note that this is needed and works only in <a
-href="../OpenSSL.html">OpenSSL</a> &lt; 1.1.0.</p>
+<p>Note that this is needed and works only in <a href="../OpenSSL.html"><code>OpenSSL</code></a> &lt; 1.1.0.</p>
           
           
 
@@ -311,10 +308,7 @@ ossl_engine_s_engines(VALUE klass)
 
         <div class="method-description">
           
-          <p>This method loads engines. If <em>name</em> is nil, then all builtin
-engines are loaded. Otherwise, the given <em>name</em>, as a String,  is
-loaded if available to your runtime, and returns true. If <em>name</em> is
-not found, then nil is returned.</p>
+          <p>This method loads engines. If <em>name</em> is nil, then all builtin engines are loaded. Otherwise, the given <em>name</em>, as a String,  is loaded if available to your runtime, and returns true. If <em>name</em> is not found, then nil is returned.</p>
           
           
 
@@ -323,9 +317,6 @@ not found, then nil is returned.</p>
             <pre>static VALUE
 ossl_engine_s_load(int argc, VALUE *argv, VALUE klass)
 {
-#if !defined(HAVE_ENGINE_LOAD_BUILTIN_ENGINES)
-    return Qnil;
-#else
     VALUE name;
 
     rb_scan_args(argc, argv, &quot;01&quot;, &amp;name);
@@ -334,10 +325,10 @@ ossl_engine_s_load(int argc, VALUE *argv, VALUE klass)
         return Qtrue;
     }
     StringValueCStr(name);
-#ifndef OPENSSL_NO_STATIC_ENGINE
 #if HAVE_ENGINE_LOAD_DYNAMIC
     OSSL_ENGINE_LOAD_IF_MATCH(dynamic, DYNAMIC);
 #endif
+#ifndef OPENSSL_NO_STATIC_ENGINE
 #if HAVE_ENGINE_LOAD_4758CCA
     OSSL_ENGINE_LOAD_IF_MATCH(4758cca, 4758CCA);
 #endif
@@ -374,20 +365,13 @@ ossl_engine_s_load(int argc, VALUE *argv, VALUE klass)
 #if HAVE_ENGINE_LOAD_GOST
     OSSL_ENGINE_LOAD_IF_MATCH(gost, GOST);
 #endif
+#endif
 #if HAVE_ENGINE_LOAD_CRYPTODEV
     OSSL_ENGINE_LOAD_IF_MATCH(cryptodev, CRYPTODEV);
-#endif
-#if HAVE_ENGINE_LOAD_AESNI
-    OSSL_ENGINE_LOAD_IF_MATCH(aesni, AESNI);
-#endif
-#endif
-#ifdef HAVE_ENGINE_LOAD_OPENBSD_DEV_CRYPTO
-    OSSL_ENGINE_LOAD_IF_MATCH(openbsd_dev_crypto, OPENBSD_DEV_CRYPTO);
 #endif
     OSSL_ENGINE_LOAD_IF_MATCH(openssl, OPENSSL);
     rb_warning(&quot;no such builtin loader for `%&quot;PRIsVALUE&quot;&#39;&quot;, name);
     return Qnil;
-#endif /* HAVE_ENGINE_LOAD_BUILTIN_ENGINES */
 }</pre>
           </div>
           
@@ -423,11 +407,9 @@ ossl_engine_s_load(int argc, VALUE *argv, VALUE klass)
 
         <div class="method-description">
           
-          <p>Returns a new instance of <a href="Cipher.html">OpenSSL::Cipher</a> by
-<em>name</em>, if it is available in this engine.</p>
+          <p>Returns a new instance of <a href="Cipher.html"><code>OpenSSL::Cipher</code></a> by <em>name</em>, if it is available in this engine.</p>
 
-<p>An <a href="Engine/EngineError.html">EngineError</a> will be raised if the
-cipher is unavailable.</p>
+<p>An <a href="Engine/EngineError.html"><code>EngineError</code></a> will be raised if the cipher is unavailable.</p>
 
 <pre>e = OpenSSL::Engine.by_id(&quot;openssl&quot;)
  =&gt; #&lt;OpenSSL::Engine id=&quot;openssl&quot; name=&quot;Software engine support&quot;&gt;
@@ -535,8 +517,7 @@ ossl_engine_get_cmds(VALUE self)
           
           <p>Sends the given <em>command</em> to this engine.</p>
 
-<p>Raises an <a href="Engine/EngineError.html">EngineError</a> if the command
-fails.</p>
+<p>Raises an <a href="Engine/EngineError.html"><code>EngineError</code></a> if the command fails.</p>
           
           
 
@@ -583,11 +564,9 @@ ossl_engine_ctrl_cmd(int argc, VALUE *argv, VALUE self)
 
         <div class="method-description">
           
-          <p>Returns a new instance of <a href="Digest.html">OpenSSL::Digest</a> by
-<em>name</em>.</p>
+          <p>Returns a new instance of <a href="Digest.html"><code>OpenSSL::Digest</code></a> by <em>name</em>.</p>
 
-<p>Will raise an <a href="Engine/EngineError.html">EngineError</a> if the
-digest is unavailable.</p>
+<p>Will raise an <a href="Engine/EngineError.html"><code>EngineError</code></a> if the digest is unavailable.</p>
 
 <pre class="ruby"><span class="ruby-identifier">e</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Engine</span>.<span class="ruby-identifier">by_id</span>(<span class="ruby-string">&quot;openssl&quot;</span>)
   <span class="ruby-comment">#=&gt; #&lt;OpenSSL::Engine id=&quot;openssl&quot; name=&quot;Software engine support&quot;&gt;</span>
@@ -645,8 +624,7 @@ ossl_engine_get_digest(VALUE self, VALUE name)
           
           <p>Releases all internal structural references for this engine.</p>
 
-<p>May raise an <a href="Engine/EngineError.html">EngineError</a> if the
-engine is unavailable</p>
+<p>May raise an <a href="Engine/EngineError.html"><code>EngineError</code></a> if the engine is unavailable</p>
           
           
 
@@ -776,8 +754,7 @@ ossl_engine_inspect(VALUE self)
           
           <p>Loads the given private key identified by <em>id</em> and <em>data</em>.</p>
 
-<p>An <a href="Engine/EngineError.html">EngineError</a> is raised of the <a
-href="PKey.html">OpenSSL::PKey</a> is unavailable.</p>
+<p>An <a href="Engine/EngineError.html"><code>EngineError</code></a> is raised of the <a href="PKey.html"><code>OpenSSL::PKey</code></a> is unavailable.</p>
           
           
 
@@ -830,8 +807,7 @@ ossl_engine_load_privkey(int argc, VALUE *argv, VALUE self)
           
           <p>Loads the given public key identified by <em>id</em> and <em>data</em>.</p>
 
-<p>An <a href="Engine/EngineError.html">EngineError</a> is raised of the <a
-href="PKey.html">OpenSSL::PKey</a> is unavailable.</p>
+<p>An <a href="Engine/EngineError.html"><code>EngineError</code></a> is raised of the <a href="PKey.html"><code>OpenSSL::PKey</code></a> is unavailable.</p>
           
           
 
@@ -929,8 +905,7 @@ ossl_engine_get_name(VALUE self)
 
 <p>These flags are used to control combinations of algorithm methods.</p>
 
-<p><em>flag</em> can be one of the following, other flags are available
-depending on your OS.</p>
+<p><em>flag</em> can be one of the following, other flags are available depending on your OS.</p>
 <dl class="rdoc-list label-list"><dt>All flags
 <dd>
 <p>0xFFFF</p>
@@ -975,7 +950,7 @@ ossl_engine_set_default(VALUE self, VALUE flag)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.4.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

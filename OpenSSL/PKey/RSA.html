@@ -11,8 +11,11 @@
   var index_rel_prefix = "../../";
 </script>
 
-<script src="../../js/jquery.js"></script>
-<script src="../../js/darkfish.js"></script>
+<script src="../../js/navigation.js" defer></script>
+<script src="../../js/search.js" defer></script>
+<script src="../../js/search_index.js" defer></script>
+<script src="../../js/searcher.js" defer></script>
+<script src="../../js/darkfish.js" defer></script>
 
 <link href="../../css/fonts.css" rel="stylesheet">
 <link href="../../css/rdoc.css" rel="stylesheet">
@@ -64,7 +67,18 @@
   
 </div>
 
-    
+    <div id="includes-section" class="nav-section">
+  <h3>Included Modules</h3>
+
+  <ul class="link-list">
+  
+  
+    <li><a class="include" href="../Marshal.html">OpenSSL::Marshal</a>
+  
+  
+  </ul>
+</div>
+
     
     <!-- Method Quickref -->
 <div id="method-list-section" class="nav-section">
@@ -131,14 +145,7 @@
 
   <section class="description">
     
-<p><a href="RSA.html">RSA</a> is an asymmetric public key algorithm that has
-been formalized in RFC 3447. It is in widespread use in public key
-infrastructures (PKI) where certificates (cf. <a
-href="../X509/Certificate.html">OpenSSL::X509::Certificate</a>) often are
-issued on the basis of a public/private <a href="RSA.html">RSA</a> key
-pair. <a href="RSA.html">RSA</a> is used in a wide field of applications
-such as secure (symmetric) key exchange, e.g. when establishing a secure
-TLS/SSL connection. It is also used in various digital signature schemes.</p>
+<p><a href="RSA.html"><code>RSA</code></a> is an asymmetric public key algorithm that has been formalized in RFC 3447. It is in widespread use in public key infrastructures (PKI) where certificates (cf. <a href="../X509/Certificate.html"><code>OpenSSL::X509::Certificate</code></a>) often are issued on the basis of a public/private <a href="RSA.html"><code>RSA</code></a> key pair. <a href="RSA.html"><code>RSA</code></a> is used in a wide field of applications such as secure (symmetric) key exchange, e.g. when establishing a secure TLS/SSL connection. It is also used in various digital signature schemes.</p>
 
   </section>
 
@@ -182,10 +189,7 @@ TLS/SSL connection. It is also used in various digital signature schemes.</p>
 
         <div class="method-description">
           
-          <p>Generates an <a href="RSA.html">RSA</a> keypair.  <em>size</em> is an
-integer representing the desired key size.  Keys smaller than 1024 should
-be considered insecure.  <em>exponent</em> is an odd number normally 3, 17,
-or 65537.</p>
+          <p>Generates an <a href="RSA.html"><code>RSA</code></a> keypair.  <em>size</em> is an integer representing the desired key size.  Keys smaller than 1024 should be considered insecure.  <em>exponent</em> is an odd number normally 3, 17, or 65537.</p>
           
           
 
@@ -251,14 +255,9 @@ ossl_rsa_s_generate(int argc, VALUE *argv, VALUE klass)
 
         <div class="method-description">
           
-          <p>Generates or loads an <a href="RSA.html">RSA</a> keypair.  If an integer
-<em>key_size</em> is given it represents the desired key size.  Keys less
-than 1024 bits should be considered insecure.</p>
+          <p>Generates or loads an <a href="RSA.html"><code>RSA</code></a> keypair.  If an integer <em>key_size</em> is given it represents the desired key size.  Keys less than 1024 bits should be considered insecure.</p>
 
-<p>A key can instead be loaded from an <em>encoded_key</em> which must be PEM
-or DER encoded.  A <em>pass_phrase</em> can be used to decrypt the key.  If
-none is given <a href="../../OpenSSL.html">OpenSSL</a> will prompt for the
-pass phrase.</p>
+<p>A key can instead be loaded from an <em>encoded_key</em> which must be PEM or DER encoded.  A <em>pass_phrase</em> can be used to decrypt the key.  If none is given <a href="../../OpenSSL.html"><code>OpenSSL</code></a> will prompt for the pass phrase.</p>
 
 <h1 id="method-c-new-label-Examples">Examples<span><a href="#method-c-new-label-Examples">&para;</a> <a href="#top">&uarr;</a></span></h1>
 
@@ -452,10 +451,7 @@ ossl_rsa_blinding_on(VALUE self)
 
         <div class="method-description">
           
-          <p>Outputs this keypair in PEM encoding.  If <em>cipher</em> and
-<em>pass_phrase</em> are given they will be used to encrypt the key. 
-<em>cipher</em> must be an <a href="../Cipher.html">OpenSSL::Cipher</a>
-instance.</p>
+          <p>Outputs this keypair in PEM encoding.  If <em>cipher</em> and <em>pass_phrase</em> are given they will be used to encrypt the key.  <em>cipher</em> must be an <a href="../Cipher.html"><code>OpenSSL::Cipher</code></a> instance.</p>
           
           
 
@@ -465,6 +461,7 @@ instance.</p>
 ossl_rsa_export(int argc, VALUE *argv, VALUE self)
 {
     RSA *rsa;
+    const BIGNUM *n, *e, *d, *p, *q, *dmp1, *dmq1, *iqmp;
     BIO *out;
     const EVP_CIPHER *ciph = NULL;
     VALUE cipher, pass, str;
@@ -480,7 +477,10 @@ ossl_rsa_export(int argc, VALUE *argv, VALUE self)
     if (!(out = BIO_new(BIO_s_mem()))) {
         ossl_raise(eRSAError, NULL);
     }
-    if (RSA_HAS_PRIVATE(rsa)) {
+    RSA_get0_key(rsa, &amp;n, &amp;e, &amp;d);
+    RSA_get0_factors(rsa, &amp;p, &amp;q);
+    RSA_get0_crt_params(rsa, &amp;dmp1, &amp;dmq1, &amp;iqmp);
+    if (n &amp;&amp; e &amp;&amp; d &amp;&amp; p &amp;&amp; q &amp;&amp; dmp1 &amp;&amp; dmq1 &amp;&amp; iqmp) {
         if (!PEM_write_bio_RSAPrivateKey(out, rsa, ciph, NULL, 0,
                                          ossl_pem_passwd_cb, (void *)pass)) {
             BIO_free(out);
@@ -576,9 +576,7 @@ ossl_rsa_initialize_copy(VALUE self, VALUE other)
           
           <p>THIS METHOD IS INSECURE, PRIVATE INFORMATION CAN LEAK OUT!!!</p>
 
-<p>Stores all parameters of key to the hash.  The hash has keys &#39;n&#39;,
-&#39;e&#39;, &#39;d&#39;, &#39;p&#39;, &#39;q&#39;, &#39;dmp1&#39;,
-&#39;dmq1&#39;, &#39;iqmp&#39;.</p>
+<p>Stores all parameters of key to the hash.  The hash has keys &#39;n&#39;, &#39;e&#39;, &#39;d&#39;, &#39;p&#39;, &#39;q&#39;, &#39;dmp1&#39;, &#39;dmq1&#39;, &#39;iqmp&#39;.</p>
 
 <p>Don&#39;t use :-)) (It&#39;s up to you)</p>
           
@@ -684,8 +682,7 @@ ossl_rsa_is_private(VALUE self)
 
         <div class="method-description">
           
-          <p>Decrypt <em>string</em>, which has been encrypted with the public key, with
-the private key.  <em>padding</em> defaults to PKCS1_PADDING.</p>
+          <p>Decrypt <em>string</em>, which has been encrypted with the public key, with the private key.  <em>padding</em> defaults to PKCS1_PADDING.</p>
           
           
 
@@ -749,9 +746,7 @@ ossl_rsa_private_decrypt(int argc, VALUE *argv, VALUE self)
 
         <div class="method-description">
           
-          <p>Encrypt <em>string</em> with the private key.  <em>padding</em> defaults to
-PKCS1_PADDING. The encrypted string output can be decrypted using <a
-href="RSA.html#method-i-public_decrypt">public_decrypt</a>.</p>
+          <p>Encrypt <em>string</em> with the private key.  <em>padding</em> defaults to PKCS1_PADDING. The encrypted string output can be decrypted using <a href="RSA.html#method-i-public_decrypt"><code>public_decrypt</code></a>.</p>
           
           
 
@@ -808,8 +803,7 @@ ossl_rsa_private_encrypt(int argc, VALUE *argv, VALUE self)
 
         <div class="method-description">
           
-          <p>The return value is always <code>true</code> since every private key is
-also a public key.</p>
+          <p>The return value is always <code>true</code> since every private key is also a public key.</p>
           
           
 
@@ -860,8 +854,7 @@ ossl_rsa_is_public(VALUE self)
 
         <div class="method-description">
           
-          <p>Decrypt <em>string</em>, which has been encrypted with the private key,
-with the public key.  <em>padding</em> defaults to PKCS1_PADDING.</p>
+          <p>Decrypt <em>string</em>, which has been encrypted with the private key, with the public key.  <em>padding</em> defaults to PKCS1_PADDING.</p>
           
           
 
@@ -923,9 +916,7 @@ ossl_rsa_public_decrypt(int argc, VALUE *argv, VALUE self)
 
         <div class="method-description">
           
-          <p>Encrypt <em>string</em> with the public key.  <em>padding</em> defaults to
-PKCS1_PADDING. The encrypted string output can be decrypted using <a
-href="RSA.html#method-i-private_decrypt">private_decrypt</a>.</p>
+          <p>Encrypt <em>string</em> with the public key.  <em>padding</em> defaults to PKCS1_PADDING. The encrypted string output can be decrypted using <a href="RSA.html#method-i-private_decrypt"><code>private_decrypt</code></a>.</p>
           
           
 
@@ -980,8 +971,7 @@ ossl_rsa_public_encrypt(int argc, VALUE *argv, VALUE self)
 
         <div class="method-description">
           
-          <p>Makes new <a href="RSA.html">RSA</a> instance containing the public key
-from the private key.</p>
+          <p>Makes new <a href="RSA.html"><code>RSA</code></a> instance containing the public key from the private key.</p>
           
           
 
@@ -1028,10 +1018,7 @@ ossl_rsa_to_public_key(VALUE self)
 
         <div class="method-description">
           
-          <p>Sets <em>dmp1</em>, <em>dmq1</em>, <em>iqmp</em> for the <a
-href="RSA.html">RSA</a> instance. They are calculated by <code>d mod (p -
-1)</code>, <code>d mod (q - 1)</code> and <code>q^(-1) mod p</code>
-respectively.</p>
+          <p>Sets <em>dmp1</em>, <em>dmq1</em>, <em>iqmp</em> for the <a href="RSA.html"><code>RSA</code></a> instance. They are calculated by <code>d mod (p - 1)</code>, <code>d mod (q - 1)</code> and <code>q^(-1) mod p</code> respectively.</p>
           
           
 
@@ -1058,7 +1045,7 @@ respectively.</p>
 
         <div class="method-description">
           
-          <p>Sets <em>p</em>, <em>q</em> for the <a href="RSA.html">RSA</a> instance.</p>
+          <p>Sets <em>p</em>, <em>q</em> for the <a href="RSA.html"><code>RSA</code></a> instance.</p>
           
           
 
@@ -1085,8 +1072,7 @@ respectively.</p>
 
         <div class="method-description">
           
-          <p>Sets <em>n</em>, <em>e</em>, <em>d</em> for the <a href="RSA.html">RSA</a>
-instance.</p>
+          <p>Sets <em>n</em>, <em>e</em>, <em>d</em> for the <a href="RSA.html"><code>RSA</code></a> instance.</p>
           
           
 
@@ -1115,13 +1101,11 @@ instance.</p>
 
         <div class="method-description">
           
-          <p>Signs <em>data</em> using the Probabilistic Signature Scheme (RSA-PSS) and
-returns the calculated signature.</p>
+          <p>Signs <em>data</em> using the Probabilistic Signature Scheme (RSA-PSS) and returns the calculated signature.</p>
 
-<p><a href="RSAError.html">RSAError</a> will be raised if an error occurs.</p>
+<p><a href="RSAError.html"><code>RSAError</code></a> will be raised if an error occurs.</p>
 
-<p>See <a href="RSA.html#method-i-verify_pss">verify_pss</a> for the
-verification operation.</p>
+<p>See <a href="RSA.html#method-i-verify_pss"><code>verify_pss</code></a> for the verification operation.</p>
 
 <h3 id="method-i-sign_pss-label-Parameters">Parameters<span><a href="#method-i-sign_pss-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
 <dl class="rdoc-list note-list"><dt><em>digest</em>
@@ -1132,14 +1116,10 @@ verification operation.</p>
 <p>A String. The data to be signed.</p>
 </dd><dt><em>salt_length</em>
 <dd>
-<p>The length in octets of the salt. Two special values are reserved:
-<code>:digest</code> means the digest length, and <code>:max</code> means
-the maximum possible length for the combination of the private key and the
-selected message digest algorithm.</p>
+<p>The length in octets of the salt. Two special values are reserved: <code>:digest</code> means the digest length, and <code>:max</code> means the maximum possible length for the combination of the private key and the selected message digest algorithm.</p>
 </dd><dt><em>mgf1_hash</em>
 <dd>
-<p>The hash algorithm used in MGF1 (the currently supported mask generation
-function (MGF)).</p>
+<p>The hash algorithm used in MGF1 (the currently supported mask generation function (MGF)).</p>
 </dd></dl>
 
 <h3 id="method-i-sign_pss-label-Example">Example<span><a href="#method-i-sign_pss-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
@@ -1255,23 +1235,27 @@ ossl_rsa_sign_pss(int argc, VALUE *argv, VALUE self)
 ossl_rsa_to_der(VALUE self)
 {
     RSA *rsa;
+    const BIGNUM *n, *e, *d, *p, *q, *dmp1, *dmq1, *iqmp;
     int (*i2d_func)(const RSA *, unsigned char **);
-    unsigned char *p;
+    unsigned char *ptr;
     long len;
     VALUE str;
 
     GetRSA(self, rsa);
-    if (RSA_HAS_PRIVATE(rsa))
+    RSA_get0_key(rsa, &amp;n, &amp;e, &amp;d);
+    RSA_get0_factors(rsa, &amp;p, &amp;q);
+    RSA_get0_crt_params(rsa, &amp;dmp1, &amp;dmq1, &amp;iqmp);
+    if (n &amp;&amp; e &amp;&amp; d &amp;&amp; p &amp;&amp; q &amp;&amp; dmp1 &amp;&amp; dmq1 &amp;&amp; iqmp)
         i2d_func = i2d_RSAPrivateKey;
     else
         i2d_func = (int (*)(const RSA *, unsigned char **))i2d_RSA_PUBKEY;
     if((len = i2d_func(rsa, NULL)) &lt;= 0)
         ossl_raise(eRSAError, NULL);
     str = rb_str_new(0, len);
-    p = (unsigned char *)RSTRING_PTR(str);
-    if(i2d_func(rsa, &amp;p) &lt; 0)
+    ptr = (unsigned char *)RSTRING_PTR(str);
+    if(i2d_func(rsa, &amp;ptr) &lt; 0)
         ossl_raise(eRSAError, NULL);
-    ossl_str_adjust(str, p);
+    ossl_str_adjust(str, ptr);
 
     return str;
 }</pre>
@@ -1414,12 +1398,9 @@ ossl_rsa_to_text(VALUE self)
           
           <p>Verifies <em>data</em> using the Probabilistic Signature Scheme (RSA-PSS).</p>
 
-<p>The return value is <code>true</code> if the signature is valid,
-<code>false</code> otherwise. <a href="RSAError.html">RSAError</a> will be
-raised if an error occurs.</p>
+<p>The return value is <code>true</code> if the signature is valid, <code>false</code> otherwise. <a href="RSAError.html"><code>RSAError</code></a> will be raised if an error occurs.</p>
 
-<p>See <a href="RSA.html#method-i-sign_pss">sign_pss</a> for the signing
-operation and an example code.</p>
+<p>See <a href="RSA.html#method-i-sign_pss"><code>sign_pss</code></a> for the signing operation and an example code.</p>
 
 <h3 id="method-i-verify_pss-label-Parameters">Parameters<span><a href="#method-i-verify_pss-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
 <dl class="rdoc-list note-list"><dt><em>digest</em>
@@ -1430,9 +1411,7 @@ operation and an example code.</p>
 <p>A String. The data to be signed.</p>
 </dd><dt><em>salt_length</em>
 <dd>
-<p>The length in octets of the salt. Two special values are reserved:
-<code>:digest</code> means the digest length, and <code>:auto</code> means
-automatically determining the length based on the signature.</p>
+<p>The length in octets of the salt. Two special values are reserved: <code>:digest</code> means the digest length, and <code>:auto</code> means automatically determining the length based on the signature.</p>
 </dd><dt><em>mgf1_hash</em>
 <dd>
 <p>The hash algorithm used in MGF1.</p>
@@ -1530,7 +1509,7 @@ ossl_rsa_verify_pss(int argc, VALUE *argv, VALUE self)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.4.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

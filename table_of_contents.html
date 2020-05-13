@@ -11,8 +11,11 @@
   var index_rel_prefix = "./";
 </script>
 
-<script src="./js/jquery.js"></script>
-<script src="./js/darkfish.js"></script>
+<script src="./js/navigation.js" defer></script>
+<script src="./js/search.js" defer></script>
+<script src="./js/search_index.js" defer></script>
+<script src="./js/searcher.js" defer></script>
+<script src="./js/darkfish.js" defer></script>
 
 <link href="./css/fonts.css" rel="stylesheet">
 <link href="./css/rdoc.css" rel="stylesheet">
@@ -59,9 +62,25 @@
 
     <ul>
 
+      <li><a href="History_md.html#label-Version+2.2.0">Version 2.2.0</a>
+
+      <li><a href="History_md.html#label-Compatibility+notes">Compatibility notes</a>
+
+      <li><a href="History_md.html#label-Notable+changes">Notable changes</a>
+
+      <li><a href="History_md.html#label-Version+2.1.2">Version 2.1.2</a>
+
+      <li><a href="History_md.html#label-Version+2.1.1">Version 2.1.1</a>
+
       <li><a href="History_md.html#label-Version+2.1.0">Version 2.1.0</a>
 
       <li><a href="History_md.html#label-Notable+changes">Notable changes</a>
+
+      <li><a href="History_md.html#label-Version+2.0.9">Version 2.0.9</a>
+
+      <li><a href="History_md.html#label-Security+fixes">Security fixes</a>
+
+      <li><a href="History_md.html#label-Bug+fixes">Bug fixes</a>
 
       <li><a href="History_md.html#label-Version+2.0.8">Version 2.0.8</a>
 
@@ -343,6 +362,11 @@
   </li>
 
   <li class="class">
+    <a href="OpenSSL/Buffering/Buffer.html">OpenSSL::Buffering::Buffer</a>
+
+  </li>
+
+  <li class="class">
     <a href="OpenSSL/Cipher.html">OpenSSL::Cipher</a>
 
     <ul>
@@ -397,26 +421,6 @@
     <a href="OpenSSL/Digest.html">OpenSSL::Digest</a>
 
     <ul>
-
-      <li><a href="OpenSSL/Digest.html#label-Mapping+between+Digest+class+and+sn-2Fln">Mapping between Digest class and sn/ln</a>
-
-      <li><a href="OpenSSL/Digest.html#label-MD2">MD2</a>
-
-      <li><a href="OpenSSL/Digest.html#label-MD4">MD4</a>
-
-      <li><a href="OpenSSL/Digest.html#label-MD5">MD5</a>
-
-      <li><a href="OpenSSL/Digest.html#label-SHA">SHA</a>
-
-      <li><a href="OpenSSL/Digest.html#label-SHA-1">SHA-1</a>
-
-      <li><a href="OpenSSL/Digest.html#label-SHA-224">SHA-224</a>
-
-      <li><a href="OpenSSL/Digest.html#label-SHA-256">SHA-256</a>
-
-      <li><a href="OpenSSL/Digest.html#label-SHA-384">SHA-384</a>
-
-      <li><a href="OpenSSL/Digest.html#label-SHA-512">SHA-512</a>
 
       <li><a href="OpenSSL/Digest.html#label-Hashing+a+file">Hashing a file</a>
 
@@ -493,6 +497,16 @@
 
   <li class="class">
     <a href="OpenSSL/KDF/KDFError.html">OpenSSL::KDF::KDFError</a>
+
+  </li>
+
+  <li class="module">
+    <a href="OpenSSL/Marshal.html">OpenSSL::Marshal</a>
+
+  </li>
+
+  <li class="module">
+    <a href="OpenSSL/Marshal/ClassMethods.html">OpenSSL::Marshal::ClassMethods</a>
 
   </li>
 
@@ -754,6 +768,62 @@
   </li>
 
   <li class="module">
+    <a href="OpenSSL/Timestamp.html">OpenSSL::Timestamp</a>
+
+    <ul>
+
+      <li><a href="OpenSSL/Timestamp.html#label-Create+a+Response-3A">Create a Response:</a>
+
+      <li><a href="OpenSSL/Timestamp.html#label-Verify+a+timestamp+response-3A">Verify a timestamp response:</a>
+
+    </ul>
+
+  </li>
+
+  <li class="class">
+    <a href="OpenSSL/Timestamp/Factory.html">OpenSSL::Timestamp::Factory</a>
+
+    <ul>
+
+      <li><a href="OpenSSL/Timestamp/Factory.html#label-Example-3A+Inclusion+of+-28untrusted-29+intermediate+certificates">Example: Inclusion of (untrusted) intermediate certificates</a>
+
+      <li><a href="OpenSSL/Timestamp/Factory.html#label-Attributes">Attributes</a>
+
+      <li><a href="OpenSSL/Timestamp/Factory.html#label-default_policy_id">default_policy_id</a>
+
+      <li><a href="OpenSSL/Timestamp/Factory.html#label-serial_number">serial_number</a>
+
+      <li><a href="OpenSSL/Timestamp/Factory.html#label-gen_time">gen_time</a>
+
+      <li><a href="OpenSSL/Timestamp/Factory.html#label-additional_certs">additional_certs</a>
+
+      <li><a href="OpenSSL/Timestamp/Factory.html#label-allowed_digests">allowed_digests</a>
+
+    </ul>
+
+  </li>
+
+  <li class="class">
+    <a href="OpenSSL/Timestamp/Request.html">OpenSSL::Timestamp::Request</a>
+
+  </li>
+
+  <li class="class">
+    <a href="OpenSSL/Timestamp/Response.html">OpenSSL::Timestamp::Response</a>
+
+  </li>
+
+  <li class="class">
+    <a href="OpenSSL/Timestamp/TimestampError.html">OpenSSL::Timestamp::TimestampError</a>
+
+  </li>
+
+  <li class="class">
+    <a href="OpenSSL/Timestamp/TokenInfo.html">OpenSSL::Timestamp::TokenInfo</a>
+
+  </li>
+
+  <li class="module">
     <a href="OpenSSL/X509.html">OpenSSL::X509</a>
 
   </li>
@@ -800,6 +870,31 @@
 
   <li class="class">
     <a href="OpenSSL/X509/Extension.html">OpenSSL::X509::Extension</a>
+
+  </li>
+
+  <li class="module">
+    <a href="OpenSSL/X509/Extension/AuthorityInfoAccess.html">OpenSSL::X509::Extension::AuthorityInfoAccess</a>
+
+  </li>
+
+  <li class="module">
+    <a href="OpenSSL/X509/Extension/AuthorityKeyIdentifier.html">OpenSSL::X509::Extension::AuthorityKeyIdentifier</a>
+
+  </li>
+
+  <li class="module">
+    <a href="OpenSSL/X509/Extension/CRLDistributionPoints.html">OpenSSL::X509::Extension::CRLDistributionPoints</a>
+
+  </li>
+
+  <li class="module">
+    <a href="OpenSSL/X509/Extension/Helpers.html">OpenSSL::X509::Extension::Helpers</a>
+
+  </li>
+
+  <li class="module">
+    <a href="OpenSSL/X509/Extension/SubjectKeyIdentifier.html">OpenSSL::X509::Extension::SubjectKeyIdentifier</a>
 
   </li>
 
@@ -860,11 +955,6 @@
 
   <li class="class">
     <a href="OpenSSL/X509/StoreError.html">OpenSSL::X509::StoreError</a>
-
-  </li>
-
-  <li class="class">
-    <a href="unknown.html">unknown</a>
 
   </li>
 
@@ -974,6 +1064,11 @@
     <span class="container">OpenSSL</span>
 
   <li class="method">
+    <a href="OpenSSL.html#method-c-fixed_length_secure_compare">::fixed_length_secure_compare</a>
+    &mdash;
+    <span class="container">OpenSSL</span>
+
+  <li class="method">
     <a href="OpenSSL/PKey/DH.html#method-c-generate">::generate</a>
     &mdash;
     <span class="container">OpenSSL::PKey::DH</span>
@@ -1007,6 +1102,11 @@
     <a href="OpenSSL/KDF.html#method-c-hkdf">::hkdf</a>
     &mdash;
     <span class="container">OpenSSL::KDF</span>
+
+  <li class="method">
+    <a href="OpenSSL/Marshal.html#method-c-included">::included</a>
+    &mdash;
+    <span class="container">OpenSSL::Marshal</span>
 
   <li class="method">
     <a href="OpenSSL/Engine.html#method-c-load">::load</a>
@@ -1164,6 +1264,21 @@
     <span class="container">OpenSSL::SSL::Session</span>
 
   <li class="method">
+    <a href="OpenSSL/Timestamp/Response.html#method-c-new">::new</a>
+    &mdash;
+    <span class="container">OpenSSL::Timestamp::Response</span>
+
+  <li class="method">
+    <a href="OpenSSL/Timestamp/TokenInfo.html#method-c-new">::new</a>
+    &mdash;
+    <span class="container">OpenSSL::Timestamp::TokenInfo</span>
+
+  <li class="method">
+    <a href="OpenSSL/Timestamp/Request.html#method-c-new">::new</a>
+    &mdash;
+    <span class="container">OpenSSL::Timestamp::Request</span>
+
+  <li class="method">
     <a href="OpenSSL/X509/Attribute.html#method-c-new">::new</a>
     &mdash;
     <span class="container">OpenSSL::X509::Attribute</span>
@@ -1214,6 +1329,11 @@
     <span class="container">OpenSSL::X509::StoreContext</span>
 
   <li class="method">
+    <a href="OpenSSL/Buffering/Buffer.html#method-c-new">::new</a>
+    &mdash;
+    <span class="container">OpenSSL::Buffering::Buffer</span>
+
+  <li class="method">
     <a href="OpenSSL/SSL/SSLServer.html#method-c-new">::new</a>
     &mdash;
     <span class="container">OpenSSL::SSL::SSLServer</span>
@@ -1259,11 +1379,6 @@
     <span class="container">OpenSSL</span>
 
   <li class="method">
-    <a href="OpenSSL/Random.html#method-c-pseudo_bytes">::pseudo_bytes</a>
-    &mdash;
-    <span class="container">OpenSSL::Random</span>
-
-  <li class="method">
     <a href="OpenSSL/Random.html#method-c-random_add">::random_add</a>
     &mdash;
     <span class="container">OpenSSL::Random</span>
@@ -1292,6 +1407,11 @@
     <a href="OpenSSL/KDF.html#method-c-scrypt">::scrypt</a>
     &mdash;
     <span class="container">OpenSSL::KDF</span>
+
+  <li class="method">
+    <a href="OpenSSL.html#method-c-secure_compare">::secure_compare</a>
+    &mdash;
+    <span class="container">OpenSSL</span>
 
   <li class="method">
     <a href="OpenSSL/Random.html#method-c-seed">::seed</a>
@@ -1384,6 +1504,11 @@
     <span class="container">OpenSSL::HMAC</span>
 
   <li class="method">
+    <a href="OpenSSL/Buffering/Buffer.html#method-i-3C-3C">#&lt;&lt;</a>
+    &mdash;
+    <span class="container">OpenSSL::Buffering::Buffer</span>
+
+  <li class="method">
     <a href="OpenSSL/Buffering.html#method-i-3C-3C">#&lt;&lt;</a>
     &mdash;
     <span class="container">OpenSSL::Buffering</span>
@@ -1399,9 +1524,19 @@
     <span class="container">OpenSSL::X509::Name</span>
 
   <li class="method">
+    <a href="OpenSSL/ASN1/ObjectId.html#method-i-3D-3D">#==</a>
+    &mdash;
+    <span class="container">OpenSSL::ASN1::ObjectId</span>
+
+  <li class="method">
     <a href="OpenSSL/BN.html#method-i-3D-3D">#==</a>
     &mdash;
     <span class="container">OpenSSL::BN</span>
+
+  <li class="method">
+    <a href="OpenSSL/HMAC.html#method-i-3D-3D">#==</a>
+    &mdash;
+    <span class="container">OpenSSL::HMAC</span>
 
   <li class="method">
     <a href="OpenSSL/PKey/EC/Group.html#method-i-3D-3D">#==</a>
@@ -1469,6 +1604,16 @@
     <span class="container">OpenSSL::Config</span>
 
   <li class="method">
+    <a href="OpenSSL/Marshal.html#method-i-_dump">#_dump</a>
+    &mdash;
+    <span class="container">OpenSSL::Marshal</span>
+
+  <li class="method">
+    <a href="OpenSSL/Marshal/ClassMethods.html#method-i-_load">#_load</a>
+    &mdash;
+    <span class="container">OpenSSL::Marshal::ClassMethods</span>
+
+  <li class="method">
     <a href="OpenSSL/SSL/SSLSocket.html#method-i-accept">#accept</a>
     &mdash;
     <span class="container">OpenSSL::SSL::SSLSocket</span>
@@ -1482,6 +1627,11 @@
     <a href="OpenSSL/SSL/SSLSocket.html#method-i-accept_nonblock">#accept_nonblock</a>
     &mdash;
     <span class="container">OpenSSL::SSL::SSLSocket</span>
+
+  <li class="method">
+    <a href="OpenSSL/PKey/EC/Point.html#method-i-add">#add</a>
+    &mdash;
+    <span class="container">OpenSSL::PKey::EC::Point</span>
 
   <li class="method">
     <a href="OpenSSL/X509/Request.html#method-i-add_attribute">#add_attribute</a>
@@ -1594,6 +1744,21 @@
     <span class="container">OpenSSL::SSL::SocketForwarder</span>
 
   <li class="method">
+    <a href="OpenSSL/Timestamp/TokenInfo.html#method-i-algorithm">#algorithm</a>
+    &mdash;
+    <span class="container">OpenSSL::Timestamp::TokenInfo</span>
+
+  <li class="method">
+    <a href="OpenSSL/Timestamp/Request.html#method-i-algorithm">#algorithm</a>
+    &mdash;
+    <span class="container">OpenSSL::Timestamp::Request</span>
+
+  <li class="method">
+    <a href="OpenSSL/Timestamp/Request.html#method-i-algorithm-3D">#algorithm=</a>
+    &mdash;
+    <span class="container">OpenSSL::Timestamp::Request</span>
+
+  <li class="method">
     <a href="OpenSSL/SSL/SSLSocket.html#method-i-alpn_protocol">#alpn_protocol</a>
     &mdash;
     <span class="container">OpenSSL::SSL::SSLSocket</span>
@@ -1644,6 +1809,11 @@
     <span class="container">OpenSSL::Cipher</span>
 
   <li class="method">
+    <a href="OpenSSL/X509/Extension/AuthorityKeyIdentifier.html#method-i-authority_key_identifier">#authority_key_identifier</a>
+    &mdash;
+    <span class="container">OpenSSL::X509::Extension::AuthorityKeyIdentifier</span>
+
+  <li class="method">
     <a href="OpenSSL/OCSP/Response.html#method-i-basic">#basic</a>
     &mdash;
     <span class="container">OpenSSL::OCSP::Response</span>
@@ -1674,9 +1844,29 @@
     <span class="container">OpenSSL::Cipher</span>
 
   <li class="method">
+    <a href="OpenSSL/X509/Extension/AuthorityInfoAccess.html#method-i-ca_issuer_uris">#ca_issuer_uris</a>
+    &mdash;
+    <span class="container">OpenSSL::X509::Extension::AuthorityInfoAccess</span>
+
+  <li class="method">
+    <a href="OpenSSL/Cipher.html#method-i-ccm_data_len-3D">#ccm_data_len=</a>
+    &mdash;
+    <span class="container">OpenSSL::Cipher</span>
+
+  <li class="method">
     <a href="OpenSSL/SSL/SSLSocket.html#method-i-cert">#cert</a>
     &mdash;
     <span class="container">OpenSSL::SSL::SSLSocket</span>
+
+  <li class="method">
+    <a href="OpenSSL/Timestamp/Request.html#method-i-cert_requested-3D">#cert_requested=</a>
+    &mdash;
+    <span class="container">OpenSSL::Timestamp::Request</span>
+
+  <li class="method">
+    <a href="OpenSSL/Timestamp/Request.html#method-i-cert_requested-3F">#cert_requested?</a>
+    &mdash;
+    <span class="container">OpenSSL::Timestamp::Request</span>
 
   <li class="method">
     <a href="OpenSSL/OCSP/SingleResponse.html#method-i-cert_status">#cert_status</a>
@@ -1834,6 +2024,11 @@
     <span class="container">OpenSSL::PKey::DH</span>
 
   <li class="method">
+    <a href="OpenSSL/Buffering/Buffer.html#method-i-concat">#concat</a>
+    &mdash;
+    <span class="container">OpenSSL::Buffering::Buffer</span>
+
+  <li class="method">
     <a href="OpenSSL/SSL/SSLSocket.html#method-i-connect">#connect</a>
     &mdash;
     <span class="container">OpenSSL::SSL::SSLSocket</span>
@@ -1879,6 +2074,11 @@
     <span class="container">OpenSSL::X509::ExtensionFactory</span>
 
   <li class="method">
+    <a href="OpenSSL/Timestamp/Factory.html#method-i-create_timestamp">#create_timestamp</a>
+    &mdash;
+    <span class="container">OpenSSL::Timestamp::Factory</span>
+
+  <li class="method">
     <a href="OpenSSL/X509/Extension.html#method-i-critical-3D">#critical=</a>
     &mdash;
     <span class="container">OpenSSL::X509::Extension</span>
@@ -1892,6 +2092,11 @@
     <a href="OpenSSL/X509/ExtensionFactory.html#method-i-crl-3D">#crl=</a>
     &mdash;
     <span class="container">OpenSSL::X509::ExtensionFactory</span>
+
+  <li class="method">
+    <a href="OpenSSL/X509/Extension/CRLDistributionPoints.html#method-i-crl_uris">#crl_uris</a>
+    &mdash;
+    <span class="container">OpenSSL::X509::Extension::CRLDistributionPoints</span>
 
   <li class="method">
     <a href="OpenSSL/PKCS7.html#method-i-crls">#crls</a>
@@ -2159,7 +2364,17 @@
     <span class="container">OpenSSL::X509::Revoked</span>
 
   <li class="method">
+    <a href="OpenSSL/Timestamp/Response.html#method-i-failure_info">#failure_info</a>
+    &mdash;
+    <span class="container">OpenSSL::Timestamp::Response</span>
+
+  <li class="method">
     <a href="OpenSSL/SSL/SocketForwarder.html#method-i-fcntl">#fcntl</a>
+    &mdash;
+    <span class="container">OpenSSL::SSL::SocketForwarder</span>
+
+  <li class="method">
+    <a href="OpenSSL/SSL/SocketForwarder.html#method-i-fileno">#fileno</a>
     &mdash;
     <span class="container">OpenSSL::SSL::SocketForwarder</span>
 
@@ -2167,6 +2382,11 @@
     <a href="OpenSSL/Cipher.html#method-i-final">#final</a>
     &mdash;
     <span class="container">OpenSSL::Cipher</span>
+
+  <li class="method">
+    <a href="OpenSSL/X509/Extension/Helpers.html#method-i-find_extension">#find_extension</a>
+    &mdash;
+    <span class="container">OpenSSL::X509::Extension::Helpers</span>
 
   <li class="method">
     <a href="OpenSSL/OCSP/BasicResponse.html#method-i-find_response">#find_response</a>
@@ -2177,6 +2397,11 @@
     <a href="OpenSSL/Engine.html#method-i-finish">#finish</a>
     &mdash;
     <span class="container">OpenSSL::Engine</span>
+
+  <li class="method">
+    <a href="OpenSSL/SSL/SSLSocket.html#method-i-finished_message">#finished_message</a>
+    &mdash;
+    <span class="container">OpenSSL::SSL::SSLSocket</span>
 
   <li class="method">
     <a href="OpenSSL/X509/Store.html#method-i-flags-3D">#flags=</a>
@@ -2207,6 +2432,11 @@
     <a href="OpenSSL/BN.html#method-i-gcd">#gcd</a>
     &mdash;
     <span class="container">OpenSSL::BN</span>
+
+  <li class="method">
+    <a href="OpenSSL/Timestamp/TokenInfo.html#method-i-gen_time">#gen_time</a>
+    &mdash;
+    <span class="container">OpenSSL::Timestamp::TokenInfo</span>
 
   <li class="method">
     <a href="OpenSSL/PKey/EC.html#method-i-generate_key">#generate_key</a>
@@ -2444,6 +2674,11 @@
     <span class="container">OpenSSL::HMAC</span>
 
   <li class="method">
+    <a href="OpenSSL/PKey/PKey.html#method-i-inspect">#inspect</a>
+    &mdash;
+    <span class="container">OpenSSL::PKey::PKey</span>
+
+  <li class="method">
     <a href="OpenSSL/X509/Certificate.html#method-i-inspect">#inspect</a>
     &mdash;
     <span class="container">OpenSSL::X509::Certificate</span>
@@ -2579,6 +2814,21 @@
     <span class="container">OpenSSL::SSL::SSLContext</span>
 
   <li class="method">
+    <a href="OpenSSL/Timestamp/TokenInfo.html#method-i-message_imprint">#message_imprint</a>
+    &mdash;
+    <span class="container">OpenSSL::Timestamp::TokenInfo</span>
+
+  <li class="method">
+    <a href="OpenSSL/Timestamp/Request.html#method-i-message_imprint">#message_imprint</a>
+    &mdash;
+    <span class="container">OpenSSL::Timestamp::Request</span>
+
+  <li class="method">
+    <a href="OpenSSL/Timestamp/Request.html#method-i-message_imprint-3D">#message_imprint=</a>
+    &mdash;
+    <span class="container">OpenSSL::Timestamp::Request</span>
+
+  <li class="method">
     <a href="OpenSSL/SSL/SSLContext.html#method-i-min_version-3D">#min_version=</a>
     &mdash;
     <span class="container">OpenSSL::SSL::SSLContext</span>
@@ -2634,11 +2884,6 @@
     <span class="container">OpenSSL::Engine</span>
 
   <li class="method">
-    <a href="OpenSSL/PKCS7/SignerInfo.html#method-i-name">#name</a>
-    &mdash;
-    <span class="container">OpenSSL::PKCS7::SignerInfo</span>
-
-  <li class="method">
     <a href="OpenSSL/BN.html#method-i-negative-3F">#negative?</a>
     &mdash;
     <span class="container">OpenSSL::BN</span>
@@ -2657,6 +2902,21 @@
     <a href="OpenSSL/X509/CRL.html#method-i-next_update-3D">#next_update=</a>
     &mdash;
     <span class="container">OpenSSL::X509::CRL</span>
+
+  <li class="method">
+    <a href="OpenSSL/Timestamp/TokenInfo.html#method-i-nonce">#nonce</a>
+    &mdash;
+    <span class="container">OpenSSL::Timestamp::TokenInfo</span>
+
+  <li class="method">
+    <a href="OpenSSL/Timestamp/Request.html#method-i-nonce">#nonce</a>
+    &mdash;
+    <span class="container">OpenSSL::Timestamp::Request</span>
+
+  <li class="method">
+    <a href="OpenSSL/Timestamp/Request.html#method-i-nonce-3D">#nonce=</a>
+    &mdash;
+    <span class="container">OpenSSL::Timestamp::Request</span>
 
   <li class="method">
     <a href="OpenSSL/X509/Certificate.html#method-i-not_after">#not_after</a>
@@ -2694,6 +2954,11 @@
     <span class="container">OpenSSL::BN</span>
 
   <li class="method">
+    <a href="OpenSSL/X509/Extension/AuthorityInfoAccess.html#method-i-ocsp_uris">#ocsp_uris</a>
+    &mdash;
+    <span class="container">OpenSSL::X509::Extension::AuthorityInfoAccess</span>
+
+  <li class="method">
     <a href="OpenSSL/BN.html#method-i-odd-3F">#odd?</a>
     &mdash;
     <span class="container">OpenSSL::BN</span>
@@ -2702,6 +2967,11 @@
     <a href="OpenSSL/ASN1/ObjectId.html#method-i-oid">#oid</a>
     &mdash;
     <span class="container">OpenSSL::ASN1::ObjectId</span>
+
+  <li class="method">
+    <a href="OpenSSL/PKey/PKey.html#method-i-oid">#oid</a>
+    &mdash;
+    <span class="container">OpenSSL::PKey::PKey</span>
 
   <li class="method">
     <a href="OpenSSL/X509/Attribute.html#method-i-oid">#oid</a>
@@ -2749,6 +3019,11 @@
     <span class="container">OpenSSL::PKey::EC::Group</span>
 
   <li class="method">
+    <a href="OpenSSL/Timestamp/TokenInfo.html#method-i-ordering">#ordering</a>
+    &mdash;
+    <span class="container">OpenSSL::Timestamp::TokenInfo</span>
+
+  <li class="method">
     <a href="OpenSSL/Cipher.html#method-i-padding-3D">#padding=</a>
     &mdash;
     <span class="container">OpenSSL::Cipher</span>
@@ -2794,6 +3069,11 @@
     <span class="container">OpenSSL::SSL::SSLSocket</span>
 
   <li class="method">
+    <a href="OpenSSL/SSL/SSLSocket.html#method-i-peer_finished_message">#peer_finished_message</a>
+    &mdash;
+    <span class="container">OpenSSL::SSL::SSLSocket</span>
+
+  <li class="method">
     <a href="OpenSSL/SSL/SocketForwarder.html#method-i-peeraddr">#peeraddr</a>
     &mdash;
     <span class="container">OpenSSL::SSL::SocketForwarder</span>
@@ -2817,6 +3097,21 @@
     <a href="OpenSSL/PKey/EC/Group.html#method-i-point_conversion_form-3D">#point_conversion_form=</a>
     &mdash;
     <span class="container">OpenSSL::PKey::EC::Group</span>
+
+  <li class="method">
+    <a href="OpenSSL/Timestamp/TokenInfo.html#method-i-policy_id">#policy_id</a>
+    &mdash;
+    <span class="container">OpenSSL::Timestamp::TokenInfo</span>
+
+  <li class="method">
+    <a href="OpenSSL/Timestamp/Request.html#method-i-policy_id">#policy_id</a>
+    &mdash;
+    <span class="container">OpenSSL::Timestamp::Request</span>
+
+  <li class="method">
+    <a href="OpenSSL/Timestamp/Request.html#method-i-policy_id-3D">#policy_id=</a>
+    &mdash;
+    <span class="container">OpenSSL::Timestamp::Request</span>
 
   <li class="method">
     <a href="OpenSSL/SSL/SSLSocket.html#method-i-post_connection_check">#post_connection_check</a>
@@ -2902,6 +3197,16 @@
     <a href="OpenSSL/PKey/EC.html#method-i-private_key-3F">#private_key?</a>
     &mdash;
     <span class="container">OpenSSL::PKey::EC</span>
+
+  <li class="method">
+    <a href="OpenSSL/PKey/PKey.html#method-i-private_to_der">#private_to_der</a>
+    &mdash;
+    <span class="container">OpenSSL::PKey::PKey</span>
+
+  <li class="method">
+    <a href="OpenSSL/PKey/PKey.html#method-i-private_to_pem">#private_to_pem</a>
+    &mdash;
+    <span class="container">OpenSSL::PKey::PKey</span>
 
   <li class="method">
     <a href="OpenSSL/PKey/DH.html#method-i-public-3F">#public?</a>
@@ -2992,6 +3297,16 @@
     <a href="OpenSSL/PKey/EC.html#method-i-public_key-3F">#public_key?</a>
     &mdash;
     <span class="container">OpenSSL::PKey::EC</span>
+
+  <li class="method">
+    <a href="OpenSSL/PKey/PKey.html#method-i-public_to_der">#public_to_der</a>
+    &mdash;
+    <span class="container">OpenSSL::PKey::PKey</span>
+
+  <li class="method">
+    <a href="OpenSSL/PKey/PKey.html#method-i-public_to_pem">#public_to_pem</a>
+    &mdash;
+    <span class="container">OpenSSL::PKey::PKey</span>
 
   <li class="method">
     <a href="OpenSSL/X509/Store.html#method-i-purpose-3D">#purpose=</a>
@@ -3162,6 +3477,11 @@
     <a href="OpenSSL/X509/Revoked.html#method-i-serial-3D">#serial=</a>
     &mdash;
     <span class="container">OpenSSL::X509::Revoked</span>
+
+  <li class="method">
+    <a href="OpenSSL/Timestamp/TokenInfo.html#method-i-serial_number">#serial_number</a>
+    &mdash;
+    <span class="container">OpenSSL::Timestamp::TokenInfo</span>
 
   <li class="method">
     <a href="OpenSSL/SSL/SSLSocket.html#method-i-session">#session</a>
@@ -3404,9 +3724,19 @@
     <span class="container">OpenSSL::OCSP::BasicResponse</span>
 
   <li class="method">
+    <a href="OpenSSL/Timestamp/Response.html#method-i-status">#status</a>
+    &mdash;
+    <span class="container">OpenSSL::Timestamp::Response</span>
+
+  <li class="method">
     <a href="OpenSSL/OCSP/Response.html#method-i-status_string">#status_string</a>
     &mdash;
     <span class="container">OpenSSL::OCSP::Response</span>
+
+  <li class="method">
+    <a href="OpenSSL/Timestamp/Response.html#method-i-status_text">#status_text</a>
+    &mdash;
+    <span class="container">OpenSSL::Timestamp::Response</span>
 
   <li class="method">
     <a href="OpenSSL/X509/Certificate.html#method-i-subject">#subject</a>
@@ -3432,6 +3762,11 @@
     <a href="OpenSSL/X509/ExtensionFactory.html#method-i-subject_certificate-3D">#subject_certificate=</a>
     &mdash;
     <span class="container">OpenSSL::X509::ExtensionFactory</span>
+
+  <li class="method">
+    <a href="OpenSSL/X509/Extension/SubjectKeyIdentifier.html#method-i-subject_key_identifier">#subject_key_identifier</a>
+    &mdash;
+    <span class="container">OpenSSL::X509::Extension::SubjectKeyIdentifier</span>
 
   <li class="method">
     <a href="OpenSSL/X509/ExtensionFactory.html#method-i-subject_request-3D">#subject_request=</a>
@@ -3622,6 +3957,21 @@
     <a href="OpenSSL/SSL/Session.html#method-i-to_der">#to_der</a>
     &mdash;
     <span class="container">OpenSSL::SSL::Session</span>
+
+  <li class="method">
+    <a href="OpenSSL/Timestamp/Response.html#method-i-to_der">#to_der</a>
+    &mdash;
+    <span class="container">OpenSSL::Timestamp::Response</span>
+
+  <li class="method">
+    <a href="OpenSSL/Timestamp/TokenInfo.html#method-i-to_der">#to_der</a>
+    &mdash;
+    <span class="container">OpenSSL::Timestamp::TokenInfo</span>
+
+  <li class="method">
+    <a href="OpenSSL/Timestamp/Request.html#method-i-to_der">#to_der</a>
+    &mdash;
+    <span class="container">OpenSSL::Timestamp::Request</span>
 
   <li class="method">
     <a href="OpenSSL/X509/Attribute.html#method-i-to_der">#to_der</a>
@@ -3859,6 +4209,16 @@
     <span class="container">OpenSSL::X509::Name</span>
 
   <li class="method">
+    <a href="OpenSSL/Timestamp/Response.html#method-i-token">#token</a>
+    &mdash;
+    <span class="container">OpenSSL::Timestamp::Response</span>
+
+  <li class="method">
+    <a href="OpenSSL/Timestamp/Response.html#method-i-token_info">#token_info</a>
+    &mdash;
+    <span class="container">OpenSSL::Timestamp::Response</span>
+
+  <li class="method">
     <a href="OpenSSL/X509/Store.html#method-i-trust-3D">#trust=</a>
     &mdash;
     <span class="container">OpenSSL::X509::Store</span>
@@ -3867,6 +4227,11 @@
     <a href="OpenSSL/X509/StoreContext.html#method-i-trust-3D">#trust=</a>
     &mdash;
     <span class="container">OpenSSL::X509::StoreContext</span>
+
+  <li class="method">
+    <a href="OpenSSL/Timestamp/Response.html#method-i-tsa_certificate">#tsa_certificate</a>
+    &mdash;
+    <span class="container">OpenSSL::Timestamp::Response</span>
 
   <li class="method">
     <a href="OpenSSL/PKCS7.html#method-i-type">#type</a>
@@ -3924,6 +4289,11 @@
     <span class="container">OpenSSL::X509::Extension</span>
 
   <li class="method">
+    <a href="OpenSSL/X509/Extension.html#method-i-value_der">#value_der</a>
+    &mdash;
+    <span class="container">OpenSSL::X509::Extension</span>
+
+  <li class="method">
     <a href="OpenSSL/Netscape/SPKI.html#method-i-verify">#verify</a>
     &mdash;
     <span class="container">OpenSSL::Netscape::SPKI</span>
@@ -3947,6 +4317,11 @@
     <a href="OpenSSL/PKey/PKey.html#method-i-verify">#verify</a>
     &mdash;
     <span class="container">OpenSSL::PKey::PKey</span>
+
+  <li class="method">
+    <a href="OpenSSL/Timestamp/Response.html#method-i-verify">#verify</a>
+    &mdash;
+    <span class="container">OpenSSL::Timestamp::Response</span>
 
   <li class="method">
     <a href="OpenSSL/X509/Certificate.html#method-i-verify">#verify</a>
@@ -3989,6 +4364,16 @@
     <span class="container">OpenSSL::SSL::SSLSocket</span>
 
   <li class="method">
+    <a href="OpenSSL/Timestamp/TokenInfo.html#method-i-version">#version</a>
+    &mdash;
+    <span class="container">OpenSSL::Timestamp::TokenInfo</span>
+
+  <li class="method">
+    <a href="OpenSSL/Timestamp/Request.html#method-i-version">#version</a>
+    &mdash;
+    <span class="container">OpenSSL::Timestamp::Request</span>
+
+  <li class="method">
     <a href="OpenSSL/X509/Certificate.html#method-i-version">#version</a>
     &mdash;
     <span class="container">OpenSSL::X509::Certificate</span>
@@ -4002,6 +4387,11 @@
     <a href="OpenSSL/X509/Request.html#method-i-version">#version</a>
     &mdash;
     <span class="container">OpenSSL::X509::Request</span>
+
+  <li class="method">
+    <a href="OpenSSL/Timestamp/Request.html#method-i-version-3D">#version=</a>
+    &mdash;
+    <span class="container">OpenSSL::Timestamp::Request</span>
 
   <li class="method">
     <a href="OpenSSL/X509/Certificate.html#method-i-version-3D">#version=</a>
@@ -4039,7 +4429,7 @@
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.4.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

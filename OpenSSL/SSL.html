@@ -11,8 +11,11 @@
   var index_rel_prefix = "../";
 </script>
 
-<script src="../js/jquery.js"></script>
-<script src="../js/darkfish.js"></script>
+<script src="../js/navigation.js" defer></script>
+<script src="../js/search.js" defer></script>
+<script src="../js/search_index.js" defer></script>
+<script src="../js/searcher.js" defer></script>
+<script src="../js/darkfish.js" defer></script>
 
 <link href="../css/fonts.css" rel="stylesheet">
 <link href="../css/rdoc.css" rel="stylesheet">
@@ -80,13 +83,7 @@
 
   <section class="description">
     
-<p>Use <a href="SSL/SSLContext.html">SSLContext</a> to set up the parameters
-for a TLS (former <a href="SSL.html">SSL</a>) connection. Both client and
-server TLS connections are supported, <a
-href="SSL/SSLSocket.html">SSLSocket</a> and <a
-href="SSL/SSLServer.html">SSLServer</a> may be used in conjunction with an
-instance of <a href="SSL/SSLContext.html">SSLContext</a> to set up
-connections.</p>
+<p>Use <a href="SSL/SSLContext.html"><code>SSLContext</code></a> to set up the parameters for a TLS (former <a href="SSL.html"><code>SSL</code></a>) connection. Both client and server TLS connections are supported, <a href="SSL/SSLSocket.html"><code>SSLSocket</code></a> and <a href="SSL/SSLServer.html"><code>SSLServer</code></a> may be used in conjunction with an instance of <a href="SSL/SSLContext.html"><code>SSLContext</code></a> to set up connections.</p>
 
   </section>
 
@@ -145,7 +142,7 @@ connections.</p>
       
         <dt id="OP_EPHEMERAL_RSA">OP_EPHEMERAL_RSA
         
-        <dd><p>Deprecated in <a href="../OpenSSL.html">OpenSSL</a> 1.0.1k and 1.0.2.</p>
+        <dd><p>Deprecated in <a href="../OpenSSL.html"><code>OpenSSL</code></a> 1.0.1k and 1.0.2.</p>
         
       
         <dt id="OP_LEGACY_SERVER_CONNECT">OP_LEGACY_SERVER_CONNECT
@@ -155,37 +152,37 @@ connections.</p>
       
         <dt id="OP_MICROSOFT_BIG_SSLV3_BUFFER">OP_MICROSOFT_BIG_SSLV3_BUFFER
         
-        <dd><p>Deprecated in <a href="../OpenSSL.html">OpenSSL</a> 1.1.0.</p>
+        <dd><p>Deprecated in <a href="../OpenSSL.html"><code>OpenSSL</code></a> 1.1.0.</p>
         
       
         <dt id="OP_MICROSOFT_SESS_ID_BUG">OP_MICROSOFT_SESS_ID_BUG
         
-        <dd><p>Deprecated in <a href="../OpenSSL.html">OpenSSL</a> 1.1.0.</p>
+        <dd><p>Deprecated in <a href="../OpenSSL.html"><code>OpenSSL</code></a> 1.1.0.</p>
         
       
         <dt id="OP_MSIE_SSLV2_RSA_PADDING">OP_MSIE_SSLV2_RSA_PADDING
         
-        <dd><p>Deprecated in <a href="../OpenSSL.html">OpenSSL</a> 0.9.7h and 0.9.8b.</p>
+        <dd><p>Deprecated in <a href="../OpenSSL.html"><code>OpenSSL</code></a> 0.9.7h and 0.9.8b.</p>
         
       
         <dt id="OP_NETSCAPE_CA_DN_BUG">OP_NETSCAPE_CA_DN_BUG
         
-        <dd><p>Deprecated in <a href="../OpenSSL.html">OpenSSL</a> 1.1.0.</p>
+        <dd><p>Deprecated in <a href="../OpenSSL.html"><code>OpenSSL</code></a> 1.1.0.</p>
         
       
         <dt id="OP_NETSCAPE_CHALLENGE_BUG">OP_NETSCAPE_CHALLENGE_BUG
         
-        <dd><p>Deprecated in <a href="../OpenSSL.html">OpenSSL</a> 1.1.0.</p>
+        <dd><p>Deprecated in <a href="../OpenSSL.html"><code>OpenSSL</code></a> 1.1.0.</p>
         
       
         <dt id="OP_NETSCAPE_DEMO_CIPHER_CHANGE_BUG">OP_NETSCAPE_DEMO_CIPHER_CHANGE_BUG
         
-        <dd><p>Deprecated in <a href="../OpenSSL.html">OpenSSL</a> 1.1.0.</p>
+        <dd><p>Deprecated in <a href="../OpenSSL.html"><code>OpenSSL</code></a> 1.1.0.</p>
         
       
         <dt id="OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG">OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG
         
-        <dd><p>Deprecated in <a href="../OpenSSL.html">OpenSSL</a> 0.9.8q and 1.0.0c.</p>
+        <dd><p>Deprecated in <a href="../OpenSSL.html"><code>OpenSSL</code></a> 0.9.8q and 1.0.0c.</p>
         
       
         <dt id="OP_NO_COMPRESSION">OP_NO_COMPRESSION
@@ -215,7 +212,7 @@ connections.</p>
       
         <dt id="OP_NO_SSLv2">OP_NO_SSLv2
         
-        <dd><p>Deprecated in <a href="../OpenSSL.html">OpenSSL</a> 1.1.0.</p>
+        <dd><p>Deprecated in <a href="../OpenSSL.html"><code>OpenSSL</code></a> 1.1.0.</p>
         
       
         <dt id="OP_NO_SSLv3">OP_NO_SSLv3
@@ -250,12 +247,12 @@ connections.</p>
       
         <dt id="OP_PKCS1_CHECK_1">OP_PKCS1_CHECK_1
         
-        <dd><p>Deprecated in <a href="../OpenSSL.html">OpenSSL</a> 1.0.1.</p>
+        <dd><p>Deprecated in <a href="../OpenSSL.html"><code>OpenSSL</code></a> 1.0.1.</p>
         
       
         <dt id="OP_PKCS1_CHECK_2">OP_PKCS1_CHECK_2
         
-        <dd><p>Deprecated in <a href="../OpenSSL.html">OpenSSL</a> 1.0.1.</p>
+        <dd><p>Deprecated in <a href="../OpenSSL.html"><code>OpenSSL</code></a> 1.0.1.</p>
         
       
         <dt id="OP_SAFARI_ECDHE_ECDSA_BUG">OP_SAFARI_ECDHE_ECDSA_BUG
@@ -265,22 +262,22 @@ connections.</p>
       
         <dt id="OP_SINGLE_DH_USE">OP_SINGLE_DH_USE
         
-        <dd><p>Deprecated in <a href="../OpenSSL.html">OpenSSL</a> 1.1.0.</p>
+        <dd><p>Deprecated in <a href="../OpenSSL.html"><code>OpenSSL</code></a> 1.1.0.</p>
         
       
         <dt id="OP_SINGLE_ECDH_USE">OP_SINGLE_ECDH_USE
         
-        <dd><p>Deprecated in <a href="../OpenSSL.html">OpenSSL</a> 1.1.0.</p>
+        <dd><p>Deprecated in <a href="../OpenSSL.html"><code>OpenSSL</code></a> 1.1.0.</p>
         
       
         <dt id="OP_SSLEAY_080_CLIENT_DH_BUG">OP_SSLEAY_080_CLIENT_DH_BUG
         
-        <dd><p>Deprecated in <a href="../OpenSSL.html">OpenSSL</a> 1.1.0.</p>
+        <dd><p>Deprecated in <a href="../OpenSSL.html"><code>OpenSSL</code></a> 1.1.0.</p>
         
       
         <dt id="OP_SSLREF2_REUSE_CERT_TYPE_BUG">OP_SSLREF2_REUSE_CERT_TYPE_BUG
         
-        <dd><p>Deprecated in <a href="../OpenSSL.html">OpenSSL</a> 1.0.1h and 1.0.2.</p>
+        <dd><p>Deprecated in <a href="../OpenSSL.html"><code>OpenSSL</code></a> 1.0.1h and 1.0.2.</p>
         
       
         <dt id="OP_TLSEXT_PADDING">OP_TLSEXT_PADDING
@@ -290,12 +287,12 @@ connections.</p>
       
         <dt id="OP_TLS_BLOCK_PADDING_BUG">OP_TLS_BLOCK_PADDING_BUG
         
-        <dd><p>Deprecated in <a href="../OpenSSL.html">OpenSSL</a> 1.1.0.</p>
+        <dd><p>Deprecated in <a href="../OpenSSL.html"><code>OpenSSL</code></a> 1.1.0.</p>
         
       
         <dt id="OP_TLS_D5_BUG">OP_TLS_D5_BUG
         
-        <dd><p>Deprecated in <a href="../OpenSSL.html">OpenSSL</a> 1.1.0.</p>
+        <dd><p>Deprecated in <a href="../OpenSSL.html"><code>OpenSSL</code></a> 1.1.0.</p>
         
       
         <dt id="OP_TLS_ROLLBACK_BUG">OP_TLS_ROLLBACK_BUG
@@ -305,12 +302,12 @@ connections.</p>
       
         <dt id="SSL2_VERSION">SSL2_VERSION
         
-        <dd><p><a href="SSL.html">SSL</a> 2.0</p>
+        <dd><p><a href="SSL.html"><code>SSL</code></a> 2.0</p>
         
       
         <dt id="SSL3_VERSION">SSL3_VERSION
         
-        <dd><p><a href="SSL.html">SSL</a> 3.0</p>
+        <dd><p><a href="SSL.html"><code>SSL</code></a> 3.0</p>
         
       
         <dt id="TLS1_1_VERSION">TLS1_1_VERSION
@@ -385,7 +382,7 @@ connections.</p>
 
           
           <div class="method-source-code" id="verify_certificate_identity-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 262</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 269</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">verify_certificate_identity</span>(<span class="ruby-identifier">cert</span>, <span class="ruby-identifier">hostname</span>)
   <span class="ruby-identifier">should_verify_common_name</span> = <span class="ruby-keyword">true</span>
   <span class="ruby-identifier">cert</span>.<span class="ruby-identifier">extensions</span>.<span class="ruby-identifier">each</span>{<span class="ruby-operator">|</span><span class="ruby-identifier">ext</span><span class="ruby-operator">|</span>
@@ -399,11 +396,11 @@ connections.</p>
         <span class="ruby-keyword">return</span> <span class="ruby-keyword">true</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">verify_hostname</span>(<span class="ruby-identifier">hostname</span>, <span class="ruby-identifier">san</span>.<span class="ruby-identifier">value</span>)
       <span class="ruby-keyword">when</span> <span class="ruby-value">7</span> <span class="ruby-comment"># iPAddress in GeneralName (RFC5280)</span>
         <span class="ruby-identifier">should_verify_common_name</span> = <span class="ruby-keyword">false</span>
-        <span class="ruby-comment"># follows GENERAL_NAME_print() in x509v3/v3_alt.c</span>
-        <span class="ruby-keyword">if</span> <span class="ruby-identifier">san</span>.<span class="ruby-identifier">value</span>.<span class="ruby-identifier">size</span> <span class="ruby-operator">==</span> <span class="ruby-value">4</span>
-          <span class="ruby-keyword">return</span> <span class="ruby-keyword">true</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">san</span>.<span class="ruby-identifier">value</span>.<span class="ruby-identifier">unpack</span>(<span class="ruby-string">&#39;C*&#39;</span>).<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39;.&#39;</span>) <span class="ruby-operator">==</span> <span class="ruby-identifier">hostname</span>
-        <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">san</span>.<span class="ruby-identifier">value</span>.<span class="ruby-identifier">size</span> <span class="ruby-operator">==</span> <span class="ruby-value">16</span>
-          <span class="ruby-keyword">return</span> <span class="ruby-keyword">true</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">san</span>.<span class="ruby-identifier">value</span>.<span class="ruby-identifier">unpack</span>(<span class="ruby-string">&#39;n*&#39;</span>).<span class="ruby-identifier">map</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">e</span><span class="ruby-operator">|</span> <span class="ruby-identifier">sprintf</span>(<span class="ruby-string">&quot;%X&quot;</span>, <span class="ruby-identifier">e</span>) }.<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39;:&#39;</span>) <span class="ruby-operator">==</span> <span class="ruby-identifier">hostname</span>
+        <span class="ruby-keyword">if</span> <span class="ruby-identifier">san</span>.<span class="ruby-identifier">value</span>.<span class="ruby-identifier">size</span> <span class="ruby-operator">==</span> <span class="ruby-value">4</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">san</span>.<span class="ruby-identifier">value</span>.<span class="ruby-identifier">size</span> <span class="ruby-operator">==</span> <span class="ruby-value">16</span>
+          <span class="ruby-keyword">begin</span>
+            <span class="ruby-keyword">return</span> <span class="ruby-keyword">true</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">san</span>.<span class="ruby-identifier">value</span> <span class="ruby-operator">==</span> <span class="ruby-constant">IPAddr</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">hostname</span>).<span class="ruby-identifier">hton</span>
+          <span class="ruby-keyword">rescue</span> <span class="ruby-constant">IPAddr</span><span class="ruby-operator">::</span><span class="ruby-constant">InvalidAddressError</span>
+          <span class="ruby-keyword">end</span>
         <span class="ruby-keyword">end</span>
       <span class="ruby-keyword">end</span>
     }
@@ -436,7 +433,7 @@ connections.</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.4.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

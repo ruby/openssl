@@ -11,8 +11,11 @@
   var index_rel_prefix = "../../";
 </script>
 
-<script src="../../js/jquery.js"></script>
-<script src="../../js/darkfish.js"></script>
+<script src="../../js/navigation.js" defer></script>
+<script src="../../js/search.js" defer></script>
+<script src="../../js/search_index.js" defer></script>
+<script src="../../js/searcher.js" defer></script>
+<script src="../../js/darkfish.js" defer></script>
 
 <link href="../../css/fonts.css" rel="stylesheet">
 <link href="../../css/rdoc.css" rel="stylesheet">
@@ -73,7 +76,18 @@
   
 </div>
 
-    
+    <div id="includes-section" class="nav-section">
+  <h3>Included Modules</h3>
+
+  <ul class="link-list">
+  
+  
+    <li><a class="include" href="../Marshal.html">OpenSSL::Marshal</a>
+  
+  
+  </ul>
+</div>
+
     
     <!-- Method Quickref -->
 <div id="method-list-section" class="nav-section">
@@ -128,27 +142,21 @@
 
   <section class="description">
     
-<p>An implementation of the Diffie-Hellman key exchange protocol based on
-discrete logarithms in finite fields, the same basis that <a
-href="DSA.html">DSA</a> is built on.</p>
+<p>An implementation of the Diffie-Hellman key exchange protocol based on discrete logarithms in finite fields, the same basis that <a href="DSA.html"><code>DSA</code></a> is built on.</p>
 
 <h3 id="class-OpenSSL::PKey::DH-label-Accessor+methods+for+the+Diffie-Hellman+parameters">Accessor methods for the Diffie-Hellman parameters<span><a href="#class-OpenSSL::PKey::DH-label-Accessor+methods+for+the+Diffie-Hellman+parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
 <dl class="rdoc-list note-list"><dt>DH#p
 <dd>
-<p>The prime (an <a href="../BN.html">OpenSSL::BN</a>) of the Diffie-Hellman
-parameters.</p>
+<p>The prime (an <a href="../BN.html"><code>OpenSSL::BN</code></a>) of the Diffie-Hellman parameters.</p>
 </dd><dt>DH#g
 <dd>
-<p>The generator (an <a href="../BN.html">OpenSSL::BN</a>) g of the
-Diffie-Hellman parameters.</p>
+<p>The generator (an <a href="../BN.html"><code>OpenSSL::BN</code></a>) g of the Diffie-Hellman parameters.</p>
 </dd><dt>DH#pub_key
 <dd>
-<p>The per-session public key (an <a href="../BN.html">OpenSSL::BN</a>)
-matching the private key. This needs to be passed to <a
-href="DH.html#method-i-compute_key">#compute_key</a>.</p>
+<p>The per-session public key (an <a href="../BN.html"><code>OpenSSL::BN</code></a>) matching the private key. This needs to be passed to <a href="DH.html#method-i-compute_key"><code>DH#compute_key</code></a>.</p>
 </dd><dt>DH#priv_key
 <dd>
-<p>The per-session private key, an <a href="../BN.html">OpenSSL::BN</a>.</p>
+<p>The per-session private key, an <a href="../BN.html"><code>OpenSSL::BN</code></a>.</p>
 </dd></dl>
 
 <h3 id="class-OpenSSL::PKey::DH-label-Example+of+a+key+exchange">Example of a key exchange<span><a href="#class-OpenSSL::PKey::DH-label-Example+of+a+key+exchange">&para;</a> <a href="#top">&uarr;</a></span></h3>
@@ -198,13 +206,11 @@ href="DH.html#method-i-compute_key">#compute_key</a>.</p>
 
         <div class="method-description">
           
-          <p>Creates a new <a href="DH.html">DH</a> instance from scratch by generating
-the private and public components alike.</p>
+          <p>Creates a new <a href="DH.html"><code>DH</code></a> instance from scratch by generating the private and public components alike.</p>
 
 <h3 id="method-c-generate-label-Parameters">Parameters<span><a href="#method-c-generate-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
 <ul><li>
-<p><em>size</em> is an integer representing the desired key size. Keys smaller
-than 1024 bits should be considered insecure.</p>
+<p><em>size</em> is an integer representing the desired key size. Keys smaller than 1024 bits should be considered insecure.</p>
 </li><li>
 <p><em>generator</em> is a small number &gt; 1, typically 2 or 5.</p>
 </li></ul>
@@ -272,20 +278,11 @@ ossl_dh_s_generate(int argc, VALUE *argv, VALUE klass)
 
         <div class="method-description">
           
-          <p>Either generates a <a href="DH.html">DH</a> instance from scratch or by
-reading already existing <a href="DH.html">DH</a> parameters from
-<em>string</em>. Note that when reading a <a href="DH.html">DH</a> instance
-from data that was encoded from a <a href="DH.html">DH</a> instance by
-using <a href="DH.html#method-i-to_pem">#to_pem</a> or <a
-href="DH.html#method-i-to_der">#to_der</a> the result will
-<strong>not</strong> contain a public/private key pair yet. This needs to
-be generated using <a
-href="DH.html#method-i-generate_key-21">#generate_key!</a> first.</p>
+          <p>Either generates a <a href="DH.html"><code>DH</code></a> instance from scratch or by reading already existing <a href="DH.html"><code>DH</code></a> parameters from <em>string</em>. Note that when reading a <a href="DH.html"><code>DH</code></a> instance from data that was encoded from a <a href="DH.html"><code>DH</code></a> instance by using <a href="DH.html#method-i-to_pem"><code>DH#to_pem</code></a> or <a href="DH.html#method-i-to_der"><code>DH#to_der</code></a> the result will <strong>not</strong> contain a public/private key pair yet. This needs to be generated using <a href="DH.html#method-i-generate_key-21"><code>DH#generate_key!</code></a> first.</p>
 
 <h3 id="method-c-new-label-Parameters">Parameters<span><a href="#method-c-new-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
 <ul><li>
-<p><em>size</em> is an integer representing the desired key size. Keys smaller
-than 1024 bits should be considered insecure.</p>
+<p><em>size</em> is an integer representing the desired key size. Keys smaller than 1024 bits should be considered insecure.</p>
 </li><li>
 <p><em>generator</em> is a small number &gt; 1, typically 2 or 5.</p>
 </li><li>
@@ -380,15 +377,11 @@ ossl_dh_initialize(int argc, VALUE *argv, VALUE self)
 
         <div class="method-description">
           
-          <p>Returns a String containing a shared secret computed from the other
-party&#39;s public value. See DH_compute_key() for further information.</p>
+          <p>Returns a String containing a shared secret computed from the other party&#39;s public value. See DH_compute_key() for further information.</p>
 
 <h3 id="method-i-compute_key-label-Parameters">Parameters<span><a href="#method-i-compute_key-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
 <ul><li>
-<p><em>pub_bn</em> is a <a href="../BN.html">OpenSSL::BN</a>,
-<strong>not</strong> the <a href="DH.html">DH</a> instance returned by <a
-href="DH.html#method-i-public_key">#public_key</a> as that contains the <a
-href="DH.html">DH</a> parameters only.</p>
+<p><em>pub_bn</em> is a <a href="../BN.html"><code>OpenSSL::BN</code></a>, <strong>not</strong> the <a href="DH.html"><code>DH</code></a> instance returned by <a href="DH.html#method-i-public_key"><code>DH#public_key</code></a> as that contains the <a href="DH.html"><code>DH</code></a> parameters only.</p>
 </li></ul>
           
           
@@ -457,9 +450,7 @@ ossl_dh_compute_key(VALUE self, VALUE pub)
 
         <div class="method-description">
           
-          <p>Encodes this <a href="DH.html">DH</a> to its PEM encoding. Note that any
-existing per-session public/private keys will <strong>not</strong> get
-encoded, just the Diffie-Hellman parameters will be encoded.</p>
+          <p>Encodes this <a href="DH.html"><code>DH</code></a> to its PEM encoding. Note that any existing per-session public/private keys will <strong>not</strong> get encoded, just the Diffie-Hellman parameters will be encoded.</p>
           
           
 
@@ -514,12 +505,7 @@ ossl_dh_export(VALUE self)
 
         <div class="method-description">
           
-          <p>Generates a private and public key unless a private key already exists. If
-this <a href="DH.html">DH</a> instance was generated from public <a
-href="DH.html">DH</a> parameters (e.g. by encoding the result of <a
-href="DH.html#method-i-public_key">#public_key</a>), then this method needs
-to be called first in order to generate the per-session keys before
-performing the actual key exchange.</p>
+          <p>Generates a private and public key unless a private key already exists. If this <a href="DH.html"><code>DH</code></a> instance was generated from public <a href="DH.html"><code>DH</code></a> parameters (e.g. by encoding the result of <a href="DH.html#method-i-public_key"><code>DH#public_key</code></a>), then this method needs to be called first in order to generate the per-session keys before performing the actual key exchange.</p>
 
 <h3 id="method-i-generate_key-21-label-Example">Example<span><a href="#method-i-generate_key-21-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
@@ -594,7 +580,7 @@ ossl_dh_initialize_copy(VALUE self, VALUE other)
         BIGNUM *pub2 = BN_dup(pub);
         BIGNUM *priv2 = BN_dup(priv);
 
-        if (!pub2 || priv &amp;&amp; !priv2) {
+        if (!pub2 || (priv &amp;&amp; !priv2)) {
             BN_clear_free(pub2);
             BN_clear_free(priv2);
             ossl_raise(eDHError, &quot;BN_dup&quot;);
@@ -630,8 +616,7 @@ ossl_dh_initialize_copy(VALUE self, VALUE other)
 
         <div class="method-description">
           
-          <p>Stores all parameters of key to the hash INSECURE: PRIVATE INFORMATIONS CAN
-LEAK OUT!!! Don&#39;t use :-)) (I&#39;s up to you)</p>
+          <p>Stores all parameters of key to the hash INSECURE: PRIVATE INFORMATIONS CAN LEAK OUT!!! Don&#39;t use :-)) (I&#39;s up to you)</p>
           
           
 
@@ -683,9 +668,7 @@ ossl_dh_get_params(VALUE self)
 
         <div class="method-description">
           
-          <p>Validates the Diffie-Hellman parameters associated with this instance. It
-checks whether a safe prime and a suitable generator are used. If this is
-not the case, <code>false</code> is returned.</p>
+          <p>Validates the Diffie-Hellman parameters associated with this instance. It checks whether a safe prime and a suitable generator are used. If this is not the case, <code>false</code> is returned.</p>
           
           
 
@@ -730,9 +713,7 @@ ossl_dh_check_params(VALUE self)
 
         <div class="method-description">
           
-          <p>Indicates whether this <a href="DH.html">DH</a> instance has a private key
-associated with it or not. The private key may be retrieved with
-DH#priv_key.</p>
+          <p>Indicates whether this <a href="DH.html"><code>DH</code></a> instance has a private key associated with it or not. The private key may be retrieved with DH#priv_key.</p>
           
           
 
@@ -779,8 +760,7 @@ ossl_dh_is_private(VALUE self)
 
         <div class="method-description">
           
-          <p>Indicates whether this <a href="DH.html">DH</a> instance has a public key
-associated with it or not. The public key may be retrieved with DH#pub_key.</p>
+          <p>Indicates whether this <a href="DH.html"><code>DH</code></a> instance has a public key associated with it or not. The public key may be retrieved with DH#pub_key.</p>
           
           
 
@@ -823,19 +803,7 @@ ossl_dh_is_public(VALUE self)
 
         <div class="method-description">
           
-          <p>Returns a new <a href="DH.html">DH</a> instance that carries just the
-public information, i.e. the prime <em>p</em> and the generator <em>g</em>,
-but no public/private key yet. Such a pair may be generated using <a
-href="DH.html#method-i-generate_key-21">#generate_key!</a>. The “public
-key” needed for a key exchange with <a
-href="DH.html#method-i-compute_key">#compute_key</a> is considered as
-per-session information and may be retrieved with DH#pub_key once a key
-pair has been generated. If the current instance already contains private
-information (and thus a valid public/private key pair), this information
-will no longer be present in the new instance generated by <a
-href="DH.html#method-i-public_key">#public_key</a>. This feature is helpful
-for publishing the Diffie-Hellman parameters without leaking any of the
-private per-session information.</p>
+          <p>Returns a new <a href="DH.html"><code>DH</code></a> instance that carries just the public information, i.e. the prime <em>p</em> and the generator <em>g</em>, but no public/private key yet. Such a pair may be generated using <a href="DH.html#method-i-generate_key-21"><code>DH#generate_key!</code></a>. The “public key” needed for a key exchange with <a href="DH.html#method-i-compute_key"><code>DH#compute_key</code></a> is considered as per-session information and may be retrieved with DH#pub_key once a key pair has been generated. If the current instance already contains private information (and thus a valid public/private key pair), this information will no longer be present in the new instance generated by <a href="DH.html#method-i-public_key"><code>DH#public_key</code></a>. This feature is helpful for publishing the Diffie-Hellman parameters without leaking any of the private per-session information.</p>
 
 <h3 id="method-i-public_key-label-Example">Example<span><a href="#method-i-public_key-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
@@ -888,8 +856,7 @@ ossl_dh_to_public_key(VALUE self)
 
         <div class="method-description">
           
-          <p>Sets <em>pub_key</em> and <em>priv_key</em> for the <a
-href="DH.html">DH</a> instance. <em>priv_key</em> may be <code>nil</code>.</p>
+          <p>Sets <em>pub_key</em> and <em>priv_key</em> for the <a href="DH.html"><code>DH</code></a> instance. <em>priv_key</em> may be <code>nil</code>.</p>
           
           
 
@@ -916,8 +883,7 @@ href="DH.html">DH</a> instance. <em>priv_key</em> may be <code>nil</code>.</p>
 
         <div class="method-description">
           
-          <p>Sets <em>p</em>, <em>q</em>, <em>g</em> to the <a href="DH.html">DH</a>
-instance.</p>
+          <p>Sets <em>p</em>, <em>q</em>, <em>g</em> to the <a href="DH.html"><code>DH</code></a> instance.</p>
           
           
 
@@ -946,9 +912,7 @@ instance.</p>
 
         <div class="method-description">
           
-          <p>Encodes this <a href="DH.html">DH</a> to its DER encoding. Note that any
-existing per-session public/private keys will <strong>not</strong> get
-encoded, just the Diffie-Hellman parameters will be encoded.</p>
+          <p>Encodes this <a href="DH.html"><code>DH</code></a> to its DER encoding. Note that any existing per-session public/private keys will <strong>not</strong> get encoded, just the Diffie-Hellman parameters will be encoded.</p>
           
           
 
@@ -1055,8 +1019,7 @@ ossl_dh_to_der(VALUE self)
 
         <div class="method-description">
           
-          <p>Prints all parameters of key to buffer INSECURE: PRIVATE INFORMATIONS CAN
-LEAK OUT!!! Don&#39;t use :-)) (I&#39;s up to you)</p>
+          <p>Prints all parameters of key to buffer INSECURE: PRIVATE INFORMATIONS CAN LEAK OUT!!! Don&#39;t use :-)) (I&#39;s up to you)</p>
           
           
 
@@ -1100,7 +1063,7 @@ ossl_dh_to_text(VALUE self)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.4.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

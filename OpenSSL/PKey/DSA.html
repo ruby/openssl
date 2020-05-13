@@ -11,8 +11,11 @@
   var index_rel_prefix = "../../";
 </script>
 
-<script src="../../js/jquery.js"></script>
-<script src="../../js/darkfish.js"></script>
+<script src="../../js/navigation.js" defer></script>
+<script src="../../js/search.js" defer></script>
+<script src="../../js/search_index.js" defer></script>
+<script src="../../js/searcher.js" defer></script>
+<script src="../../js/darkfish.js" defer></script>
 
 <link href="../../css/fonts.css" rel="stylesheet">
 <link href="../../css/rdoc.css" rel="stylesheet">
@@ -64,7 +67,18 @@
   
 </div>
 
-    
+    <div id="includes-section" class="nav-section">
+  <h3>Included Modules</h3>
+
+  <ul class="link-list">
+  
+  
+    <li><a class="include" href="../Marshal.html">OpenSSL::Marshal</a>
+  
+  
+  </ul>
+</div>
+
     
     <!-- Method Quickref -->
 <div id="method-list-section" class="nav-section">
@@ -117,9 +131,7 @@
 
   <section class="description">
     
-<p><a href="DSA.html">DSA</a>, the Digital Signature Algorithm, is specified
-in NIST&#39;s FIPS 186-3. It is an asymmetric public key algorithm that may
-be used similar to e.g. <a href="RSA.html">RSA</a>.</p>
+<p><a href="DSA.html"><code>DSA</code></a>, the Digital Signature Algorithm, is specified in NIST&#39;s FIPS 186-3. It is an asymmetric public key algorithm that may be used similar to e.g. <a href="RSA.html"><code>RSA</code></a>.</p>
 
   </section>
 
@@ -156,8 +168,7 @@ be used similar to e.g. <a href="RSA.html">RSA</a>.</p>
 
         <div class="method-description">
           
-          <p>Creates a new <a href="DSA.html">DSA</a> instance by generating a
-private/public key pair from scratch.</p>
+          <p>Creates a new <a href="DSA.html"><code>DSA</code></a> instance by generating a private/public key pair from scratch.</p>
 
 <h3 id="method-c-generate-label-Parameters">Parameters<span><a href="#method-c-generate-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
 <ul><li>
@@ -221,8 +232,7 @@ ossl_dsa_s_generate(VALUE klass, VALUE size)
 
         <div class="method-description">
           
-          <p>Creates a new <a href="DSA.html">DSA</a> instance by reading an existing
-key from <em>string</em>.</p>
+          <p>Creates a new <a href="DSA.html"><code>DSA</code></a> instance by reading an existing key from <em>string</em>.</p>
 
 <h3 id="method-c-new-label-Parameters">Parameters<span><a href="#method-c-new-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
 <ul><li>
@@ -346,11 +356,11 @@ ossl_dsa_initialize(int argc, VALUE *argv, VALUE self)
 
         <div class="method-description">
           
-          <p>Encodes this <a href="DSA.html">DSA</a> to its PEM encoding.</p>
+          <p>Encodes this <a href="DSA.html"><code>DSA</code></a> to its PEM encoding.</p>
 
 <h3 id="method-i-export-label-Parameters">Parameters<span><a href="#method-i-export-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
 <ul><li>
-<p><em>cipher</em> is an <a href="../Cipher.html">OpenSSL::Cipher</a>.</p>
+<p><em>cipher</em> is an <a href="../Cipher.html"><code>OpenSSL::Cipher</code></a>.</p>
 </li><li>
 <p><em>password</em> is a string containing your password.</p>
 </li></ul>
@@ -475,8 +485,7 @@ ossl_dsa_initialize_copy(VALUE self, VALUE other)
 
         <div class="method-description">
           
-          <p>Stores all parameters of key to the hash INSECURE: PRIVATE INFORMATIONS CAN
-LEAK OUT!!! Don&#39;t use :-)) (I&#39;s up to you)</p>
+          <p>Stores all parameters of key to the hash INSECURE: PRIVATE INFORMATIONS CAN LEAK OUT!!! Don&#39;t use :-)) (I&#39;s up to you)</p>
           
           
 
@@ -528,9 +537,7 @@ ossl_dsa_get_params(VALUE self)
 
         <div class="method-description">
           
-          <p>Indicates whether this <a href="DSA.html">DSA</a> instance has a private
-key associated with it or not. The private key may be retrieved with
-DSA#private_key.</p>
+          <p>Indicates whether this <a href="DSA.html"><code>DSA</code></a> instance has a private key associated with it or not. The private key may be retrieved with DSA#private_key.</p>
           
           
 
@@ -571,9 +578,7 @@ ossl_dsa_is_private(VALUE self)
 
         <div class="method-description">
           
-          <p>Indicates whether this <a href="DSA.html">DSA</a> instance has a public key
-associated with it or not. The public key may be retrieved with <a
-href="DSA.html#method-i-public_key">#public_key</a>.</p>
+          <p>Indicates whether this <a href="DSA.html"><code>DSA</code></a> instance has a public key associated with it or not. The public key may be retrieved with <a href="DSA.html#method-i-public_key"><code>DSA#public_key</code></a>.</p>
           
           
 
@@ -616,11 +621,7 @@ ossl_dsa_is_public(VALUE self)
 
         <div class="method-description">
           
-          <p>Returns a new <a href="DSA.html">DSA</a> instance that carries just the
-public key information. If the current instance has also private key
-information, this will no longer be present in the new instance. This
-feature is helpful for publishing the public key information without
-leaking any of the private information.</p>
+          <p>Returns a new <a href="DSA.html"><code>DSA</code></a> instance that carries just the public key information. If the current instance has also private key information, this will no longer be present in the new instance. This feature is helpful for publishing the public key information without leaking any of the private information.</p>
 
 <h3 id="method-i-public_key-label-Example">Example<span><a href="#method-i-public_key-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
@@ -677,9 +678,7 @@ ossl_dsa_to_public_key(VALUE self)
 
         <div class="method-description">
           
-          <p>Sets <em>pub_key</em> and <em>priv_key</em> for the <a
-href="DSA.html">DSA</a> instance. <em>priv_key</em> may be
-<code>nil</code>.</p>
+          <p>Sets <em>pub_key</em> and <em>priv_key</em> for the <a href="DSA.html"><code>DSA</code></a> instance. <em>priv_key</em> may be <code>nil</code>.</p>
           
           
 
@@ -706,8 +705,7 @@ href="DSA.html">DSA</a> instance. <em>priv_key</em> may be
 
         <div class="method-description">
           
-          <p>Sets <em>p</em>, <em>q</em>, <em>g</em> to the <a href="DSA.html">DSA</a>
-instance.</p>
+          <p>Sets <em>p</em>, <em>q</em>, <em>g</em> to the <a href="DSA.html"><code>DSA</code></a> instance.</p>
           
           
 
@@ -736,23 +734,18 @@ instance.</p>
 
         <div class="method-description">
           
-          <p>Computes and returns the <a href="DSA.html">DSA</a> signature of
-<em>string</em>, where <em>string</em> is expected to be an
-already-computed message digest of the original input data. The signature
-is issued using the private key of this <a href="DSA.html">DSA</a>
-instance.</p>
+          <p>Computes and returns the <a href="DSA.html"><code>DSA</code></a> signature of <em>string</em>, where <em>string</em> is expected to be an already-computed message digest of the original input data. The signature is issued using the private key of this <a href="DSA.html"><code>DSA</code></a> instance.</p>
 
 <h3 id="method-i-syssign-label-Parameters">Parameters<span><a href="#method-i-syssign-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
 <ul><li>
-<p><em>string</em> is a message digest of the original input data to be
-signed.</p>
+<p><em>string</em> is a message digest of the original input data to be signed.</p>
 </li></ul>
 
 <h3 id="method-i-syssign-label-Example">Example<span><a href="#method-i-syssign-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
 <pre class="ruby"><span class="ruby-identifier">dsa</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">DSA</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">2048</span>)
 <span class="ruby-identifier">doc</span> = <span class="ruby-string">&quot;Sign me&quot;</span>
-<span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span><span class="ruby-operator">::</span><span class="ruby-constant">SHA1</span>.<span class="ruby-identifier">digest</span>(<span class="ruby-identifier">doc</span>)
+<span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">digest</span>(<span class="ruby-string">&#39;SHA1&#39;</span>, <span class="ruby-identifier">doc</span>)
 <span class="ruby-identifier">sig</span> = <span class="ruby-identifier">dsa</span>.<span class="ruby-identifier">syssign</span>(<span class="ruby-identifier">digest</span>)
 </pre>
           
@@ -811,22 +804,20 @@ ossl_dsa_sign(VALUE self, VALUE data)
 
         <div class="method-description">
           
-          <p>Verifies whether the signature is valid given the message digest input. It
-does so by validating <em>sig</em> using the public key of this <a
-href="DSA.html">DSA</a> instance.</p>
+          <p>Verifies whether the signature is valid given the message digest input. It does so by validating <em>sig</em> using the public key of this <a href="DSA.html"><code>DSA</code></a> instance.</p>
 
 <h3 id="method-i-sysverify-label-Parameters">Parameters<span><a href="#method-i-sysverify-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
 <ul><li>
 <p><em>digest</em> is a message digest of the original input data to be signed</p>
 </li><li>
-<p><em>sig</em> is a <a href="DSA.html">DSA</a> signature value</p>
+<p><em>sig</em> is a <a href="DSA.html"><code>DSA</code></a> signature value</p>
 </li></ul>
 
 <h3 id="method-i-sysverify-label-Example">Example<span><a href="#method-i-sysverify-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
 <pre class="ruby"><span class="ruby-identifier">dsa</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">DSA</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">2048</span>)
 <span class="ruby-identifier">doc</span> = <span class="ruby-string">&quot;Sign me&quot;</span>
-<span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span><span class="ruby-operator">::</span><span class="ruby-constant">SHA1</span>.<span class="ruby-identifier">digest</span>(<span class="ruby-identifier">doc</span>)
+<span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">digest</span>(<span class="ruby-string">&#39;SHA1&#39;</span>, <span class="ruby-identifier">doc</span>)
 <span class="ruby-identifier">sig</span> = <span class="ruby-identifier">dsa</span>.<span class="ruby-identifier">syssign</span>(<span class="ruby-identifier">digest</span>)
 <span class="ruby-identifier">puts</span> <span class="ruby-identifier">dsa</span>.<span class="ruby-identifier">sysverify</span>(<span class="ruby-identifier">digest</span>, <span class="ruby-identifier">sig</span>) <span class="ruby-comment"># =&gt; true</span>
 </pre>
@@ -882,7 +873,7 @@ ossl_dsa_verify(VALUE self, VALUE digest, VALUE sig)
 
         <div class="method-description">
           
-          <p>Encodes this <a href="DSA.html">DSA</a> to its DER encoding.</p>
+          <p>Encodes this <a href="DSA.html"><code>DSA</code></a> to its DER encoding.</p>
           
           
 
@@ -994,8 +985,7 @@ ossl_dsa_to_der(VALUE self)
 
         <div class="method-description">
           
-          <p>Prints all parameters of key to buffer INSECURE: PRIVATE INFORMATIONS CAN
-LEAK OUT!!! Don&#39;t use :-)) (I&#39;s up to you)</p>
+          <p>Prints all parameters of key to buffer INSECURE: PRIVATE INFORMATIONS CAN LEAK OUT!!! Don&#39;t use :-)) (I&#39;s up to you)</p>
           
           
 
@@ -1039,7 +1029,7 @@ ossl_dsa_to_text(VALUE self)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.4.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

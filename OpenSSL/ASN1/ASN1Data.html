@@ -11,8 +11,11 @@
   var index_rel_prefix = "../../";
 </script>
 
-<script src="../../js/jquery.js"></script>
-<script src="../../js/darkfish.js"></script>
+<script src="../../js/navigation.js" defer></script>
+<script src="../../js/search.js" defer></script>
+<script src="../../js/search_index.js" defer></script>
+<script src="../../js/searcher.js" defer></script>
+<script src="../../js/darkfish.js" defer></script>
 
 <link href="../../css/fonts.css" rel="stylesheet">
 <link href="../../css/rdoc.css" rel="stylesheet">
@@ -101,49 +104,34 @@
 
   <section class="description">
     
-<p>The top-level class representing any ASN.1 object. When parsed by <a
-href="../ASN1.html#method-c-decode">OpenSSL::ASN1.decode</a>, tagged values
-are always represented by an instance of <a
-href="ASN1Data.html">ASN1Data</a>.</p>
+<p>The top-level class representing any ASN.1 object. When parsed by <a href="../ASN1.html#method-c-decode"><code>ASN1.decode</code></a>, tagged values are always represented by an instance of <a href="ASN1Data.html"><code>ASN1Data</code></a>.</p>
 
-<h2 id="class-OpenSSL::ASN1::ASN1Data-label-The+role+of+ASN1Data+for+parsing+tagged+values">The role of <a href="ASN1Data.html">ASN1Data</a> for parsing tagged values<span><a href="#class-OpenSSL::ASN1::ASN1Data-label-The+role+of+ASN1Data+for+parsing+tagged+values">&para;</a> <a href="#top">&uarr;</a></span></h2>
+<h2 id="class-OpenSSL::ASN1::ASN1Data-label-The+role+of+ASN1Data+for+parsing+tagged+values">The role of <a href="ASN1Data.html"><code>ASN1Data</code></a> for parsing tagged values<span><a href="#class-OpenSSL::ASN1::ASN1Data-label-The+role+of+ASN1Data+for+parsing+tagged+values">&para;</a> <a href="#top">&uarr;</a></span></h2>
 
-<p>When encoding an ASN.1 type it is inherently clear what original type (e.g.
-INTEGER, OCTET STRING etc.) this value has, regardless of its tagging. But
-opposed to the time an ASN.1 type is to be encoded, when parsing them it is
-not possible to deduce the “real type” of tagged values. This is why tagged
-values are generally parsed into <a href="ASN1Data.html">ASN1Data</a>
-instances, but with a different outcome for implicit and explicit tagging.</p>
+<p>When encoding an ASN.1 type it is inherently clear what original type (e.g. INTEGER, OCTET STRING etc.) this value has, regardless of its tagging. But opposed to the time an ASN.1 type is to be encoded, when parsing them it is not possible to deduce the “real type” of tagged values. This is why tagged values are generally parsed into <a href="ASN1Data.html"><code>ASN1Data</code></a> instances, but with a different outcome for implicit and explicit tagging.</p>
 
 <h3 id="class-OpenSSL::ASN1::ASN1Data-label-Example+of+a+parsed+implicitly+tagged+value">Example of a parsed implicitly tagged value<span><a href="#class-OpenSSL::ASN1::ASN1Data-label-Example+of+a+parsed+implicitly+tagged+value">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
-<p>An implicitly 1-tagged INTEGER value will be parsed as an <a
-href="ASN1Data.html">ASN1Data</a> with</p>
+<p>An implicitly 1-tagged INTEGER value will be parsed as an <a href="ASN1Data.html"><code>ASN1Data</code></a> with</p>
 <ul><li>
 <p><em>tag</em> equal to 1</p>
 </li><li>
 <p><em>tag_class</em> equal to <code>:CONTEXT_SPECIFIC</code></p>
 </li><li>
-<p><em>value</em> equal to a String that carries the raw encoding of the
-INTEGER.</p>
+<p><em>value</em> equal to a String that carries the raw encoding of the INTEGER.</p>
 </li></ul>
 
-<p>This implies that a subsequent decoding step is required to completely
-decode implicitly tagged values.</p>
+<p>This implies that a subsequent decoding step is required to completely decode implicitly tagged values.</p>
 
 <h3 id="class-OpenSSL::ASN1::ASN1Data-label-Example+of+a+parsed+explicitly+tagged+value">Example of a parsed explicitly tagged value<span><a href="#class-OpenSSL::ASN1::ASN1Data-label-Example+of+a+parsed+explicitly+tagged+value">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
-<p>An explicitly 1-tagged INTEGER value will be parsed as an <a
-href="ASN1Data.html">ASN1Data</a> with</p>
+<p>An explicitly 1-tagged INTEGER value will be parsed as an <a href="ASN1Data.html"><code>ASN1Data</code></a> with</p>
 <ul><li>
 <p><em>tag</em> equal to 1</p>
 </li><li>
 <p><em>tag_class</em> equal to <code>:CONTEXT_SPECIFIC</code></p>
 </li><li>
-<p><em>value</em> equal to an Array with one single element, an instance of
-OpenSSL::ASN1::Integer, i.e. the inner element is the non-tagged primitive
-value, and the tagging is represented in the outer <a
-href="ASN1Data.html">ASN1Data</a></p>
+<p><em>value</em> equal to an Array with one single element, an instance of OpenSSL::ASN1::Integer, i.e. the inner element is the non-tagged primitive value, and the tagging is represented in the outer <a href="ASN1Data.html"><code>ASN1Data</code></a></p>
 </li></ul>
 
 <h2 id="class-OpenSSL::ASN1::ASN1Data-label-Example+-+Decoding+an+implicitly+tagged+INTEGER">Example - Decoding an implicitly tagged INTEGER<span><a href="#class-OpenSSL::ASN1::ASN1Data-label-Example+-+Decoding+an+implicitly+tagged+INTEGER">&para;</a> <a href="#top">&uarr;</a></span></h2>
@@ -223,19 +211,7 @@ href="ASN1Data.html">ASN1Data</a></p>
 
         <div class="method-description">
         
-        <p>Never <code>nil</code>. A boolean value indicating whether the encoding
-uses indefinite length (in the case of parsing) or whether an indefinite
-length form shall be used (in the encoding case). In DER, every value uses
-definite length form. But in scenarios where large amounts of data need to
-be transferred it might be desirable to have some kind of streaming support
-available. For example, huge OCTET STRINGs are preferably sent in
-smaller-sized chunks, each at a time. This is possible in BER by setting
-the length bytes of an encoding to zero and by this indicating that the
-following value will be sent in chunks. Indefinite length encodings are
-always constructed. The end of such a stream of chunks is indicated by
-sending a EOC (End of Content) tag. SETs and SEQUENCEs may use an
-indefinite length encoding, but also primitive types such as e.g. OCTET
-STRINGS or BIT STRINGS may leverage this functionality (cf. ITU-T X.690).</p>
+        <p>Never <code>nil</code>. A boolean value indicating whether the encoding uses indefinite length (in the case of parsing) or whether an indefinite length form shall be used (in the encoding case). In DER, every value uses definite length form. But in scenarios where large amounts of data need to be transferred it might be desirable to have some kind of streaming support available. For example, huge OCTET STRINGs are preferably sent in smaller-sized chunks, each at a time. This is possible in BER by setting the length bytes of an encoding to zero and by this indicating that the following value will be sent in chunks. Indefinite length encodings are always constructed. The end of such a stream of chunks is indicated by sending a EOC (End of Content) tag. SETs and SEQUENCEs may use an indefinite length encoding, but also primitive types such as e.g. OCTET STRINGS or BIT STRINGS may leverage this functionality (cf. ITU-T X.690).</p>
         
         </div>
       </div>
@@ -248,19 +224,7 @@ STRINGS or BIT STRINGS may leverage this functionality (cf. ITU-T X.690).</p>
 
         <div class="method-description">
         
-        <p>Never <code>nil</code>. A boolean value indicating whether the encoding
-uses indefinite length (in the case of parsing) or whether an indefinite
-length form shall be used (in the encoding case). In DER, every value uses
-definite length form. But in scenarios where large amounts of data need to
-be transferred it might be desirable to have some kind of streaming support
-available. For example, huge OCTET STRINGs are preferably sent in
-smaller-sized chunks, each at a time. This is possible in BER by setting
-the length bytes of an encoding to zero and by this indicating that the
-following value will be sent in chunks. Indefinite length encodings are
-always constructed. The end of such a stream of chunks is indicated by
-sending a EOC (End of Content) tag. SETs and SEQUENCEs may use an
-indefinite length encoding, but also primitive types such as e.g. OCTET
-STRINGS or BIT STRINGS may leverage this functionality (cf. ITU-T X.690).</p>
+        <p>Never <code>nil</code>. A boolean value indicating whether the encoding uses indefinite length (in the case of parsing) or whether an indefinite length form shall be used (in the encoding case). In DER, every value uses definite length form. But in scenarios where large amounts of data need to be transferred it might be desirable to have some kind of streaming support available. For example, huge OCTET STRINGs are preferably sent in smaller-sized chunks, each at a time. This is possible in BER by setting the length bytes of an encoding to zero and by this indicating that the following value will be sent in chunks. Indefinite length encodings are always constructed. The end of such a stream of chunks is indicated by sending a EOC (End of Content) tag. SETs and SEQUENCEs may use an indefinite length encoding, but also primitive types such as e.g. OCTET STRINGS or BIT STRINGS may leverage this functionality (cf. ITU-T X.690).</p>
         
         </div>
       </div>
@@ -273,8 +237,7 @@ STRINGS or BIT STRINGS may leverage this functionality (cf. ITU-T X.690).</p>
 
         <div class="method-description">
         
-        <p>An <a href="../../Integer.html">Integer</a> representing the tag number of
-this <a href="ASN1Data.html">ASN1Data</a>. Never <code>nil</code>.</p>
+        <p>An <a href="../../Integer.html"><code>Integer</code></a> representing the tag number of this <a href="ASN1Data.html"><code>ASN1Data</code></a>. Never <code>nil</code>.</p>
         
         </div>
       </div>
@@ -287,9 +250,7 @@ this <a href="ASN1Data.html">ASN1Data</a>. Never <code>nil</code>.</p>
 
         <div class="method-description">
         
-        <p>A Symbol representing the tag class of this <a
-href="ASN1Data.html">ASN1Data</a>. Never <code>nil</code>. See <a
-href="ASN1Data.html">ASN1Data</a> for possible values.</p>
+        <p>A Symbol representing the tag class of this <a href="ASN1Data.html"><code>ASN1Data</code></a>. Never <code>nil</code>. See <a href="ASN1Data.html"><code>ASN1Data</code></a> for possible values.</p>
         
         </div>
       </div>
@@ -302,10 +263,7 @@ href="ASN1Data.html">ASN1Data</a> for possible values.</p>
 
         <div class="method-description">
         
-        <p>Carries the value of a ASN.1 type. Please confer <a
-href="Constructive.html">Constructive</a> and <a
-href="Primitive.html">Primitive</a> for the mappings between ASN.1 data
-types and Ruby classes.</p>
+        <p>Carries the value of a ASN.1 type. Please confer <a href="Constructive.html"><code>Constructive</code></a> and <a href="Primitive.html"><code>Primitive</code></a> for the mappings between ASN.1 data types and Ruby classes.</p>
         
         </div>
       </div>
@@ -336,16 +294,11 @@ types and Ruby classes.</p>
 
         <div class="method-description">
           
-          <p><em>value</em>: Please have a look at <a
-href="Constructive.html">Constructive</a> and <a
-href="Primitive.html">Primitive</a> to see how Ruby types are mapped to
-ASN.1 types and vice versa.</p>
+          <p><em>value</em>: Please have a look at <a href="Constructive.html"><code>Constructive</code></a> and <a href="Primitive.html"><code>Primitive</code></a> to see how Ruby types are mapped to ASN.1 types and vice versa.</p>
 
-<p><em>tag</em>: An <a href="../../Integer.html">Integer</a> indicating the
-tag number.</p>
+<p><em>tag</em>: An <a href="../../Integer.html"><code>Integer</code></a> indicating the tag number.</p>
 
-<p><em>tag_class</em>: A Symbol indicating the tag class. Please cf. <a
-href="../ASN1.html">ASN1</a> for possible values.</p>
+<p><em>tag_class</em>: A Symbol indicating the tag class. Please cf. <a href="../ASN1.html"><code>ASN1</code></a> for possible values.</p>
 
 <h2 id="method-c-new-label-Example">Example<span><a href="#method-c-new-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h2>
 
@@ -403,10 +356,7 @@ ossl_asn1data_initialize(VALUE self, VALUE value, VALUE tag, VALUE tag_class)
 
         <div class="method-description">
           
-          <p>Encodes this <a href="ASN1Data.html">ASN1Data</a> into a DER-encoded String
-value. The result is DER-encoded except for the possibility of indefinite
-length forms. Indefinite length forms are not allowed in strict DER, so
-strictly speaking the result of such an encoding would be a BER-encoding.</p>
+          <p>Encodes this <a href="ASN1Data.html"><code>ASN1Data</code></a> into a DER-encoded String value. The result is DER-encoded except for the possibility of indefinite length forms. Indefinite length forms are not allowed in strict DER, so strictly speaking the result of such an encoding would be a BER-encoding.</p>
           
           
 
@@ -445,7 +395,7 @@ ossl_asn1data_to_der(VALUE self)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.4.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

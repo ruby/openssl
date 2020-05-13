@@ -11,8 +11,11 @@
   var index_rel_prefix = "../../";
 </script>
 
-<script src="../../js/jquery.js"></script>
-<script src="../../js/darkfish.js"></script>
+<script src="../../js/navigation.js" defer></script>
+<script src="../../js/search.js" defer></script>
+<script src="../../js/search_index.js" defer></script>
+<script src="../../js/searcher.js" defer></script>
+<script src="../../js/darkfish.js" defer></script>
 
 <link href="../../css/fonts.css" rel="stylesheet">
 <link href="../../css/rdoc.css" rel="stylesheet">
@@ -108,8 +111,7 @@
 
   <section class="description">
     
-<p><a href="SSLServer.html">SSLServer</a> represents a TCP/IP server socket
-with Secure Sockets Layer.</p>
+<p><a href="SSLServer.html"><code>SSLServer</code></a> represents a TCP/IP server socket with Secure Sockets Layer.</p>
 
   </section>
 
@@ -136,8 +138,7 @@ with Secure Sockets Layer.</p>
 
         <div class="method-description">
         
-        <p>When true then <a href="SSLServer.html#method-i-accept">accept</a> works
-exactly the same as TCPServer#accept</p>
+        <p>When true then <a href="SSLServer.html#method-i-accept"><code>accept</code></a> works exactly the same as TCPServer#accept</p>
         
         </div>
       </div>
@@ -165,19 +166,18 @@ exactly the same as TCPServer#accept</p>
 
         <div class="method-description">
           
-          <p>Creates a new instance of <a href="SSLServer.html">SSLServer</a>.</p>
+          <p>Creates a new instance of <a href="SSLServer.html"><code>SSLServer</code></a>.</p>
 <ul><li>
 <p><em>srv</em> is an instance of TCPServer.</p>
 </li><li>
-<p><em>ctx</em> is an instance of <a
-href="SSLContext.html">OpenSSL::SSL::SSLContext</a>.</p>
+<p><em>ctx</em> is an instance of <a href="SSLContext.html"><code>OpenSSL::SSL::SSLContext</code></a>.</p>
 </li></ul>
           
           
 
           
           <div class="method-source-code" id="new-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 449</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 488</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">initialize</span>(<span class="ruby-identifier">svr</span>, <span class="ruby-identifier">ctx</span>)
   <span class="ruby-ivar">@svr</span> = <span class="ruby-identifier">svr</span>
   <span class="ruby-ivar">@ctx</span> = <span class="ruby-identifier">ctx</span>
@@ -226,7 +226,7 @@ href="SSLContext.html">OpenSSL::SSL::SSLContext</a>.</p>
 
           
           <div class="method-source-code" id="accept-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 477</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 516</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">accept</span>
   <span class="ruby-comment"># Socket#accept returns [socket, addrinfo].</span>
   <span class="ruby-comment"># TCPServer#accept returns a socket.</span>
@@ -275,7 +275,7 @@ href="SSLContext.html">OpenSSL::SSL::SSLContext</a>.</p>
 
           
           <div class="method-source-code" id="close-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 498</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 537</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">close</span>
   <span class="ruby-ivar">@svr</span>.<span class="ruby-identifier">close</span>
 <span class="ruby-keyword">end</span></pre>
@@ -293,7 +293,7 @@ href="SSLContext.html">OpenSSL::SSL::SSLContext</a>.</p>
         
         <div class="method-heading">
           <span class="method-name">listen</span><span
-            class="method-args">(backlog=5)</span>
+            class="method-args">(backlog=Socket::SOMAXCONN)</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -308,8 +308,8 @@ href="SSLContext.html">OpenSSL::SSL::SSLContext</a>.</p>
 
           
           <div class="method-source-code" id="listen-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 467</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">listen</span>(<span class="ruby-identifier">backlog</span>=<span class="ruby-value">5</span>)
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 506</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">listen</span>(<span class="ruby-identifier">backlog</span>=<span class="ruby-constant">Socket</span><span class="ruby-operator">::</span><span class="ruby-constant">SOMAXCONN</span>)
   <span class="ruby-ivar">@svr</span>.<span class="ruby-identifier">listen</span>(<span class="ruby-identifier">backlog</span>)
 <span class="ruby-keyword">end</span></pre>
           </div>
@@ -341,7 +341,7 @@ href="SSLContext.html">OpenSSL::SSL::SSLContext</a>.</p>
 
           
           <div class="method-source-code" id="shutdown-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 472</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 511</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">shutdown</span>(<span class="ruby-identifier">how</span>=<span class="ruby-constant">Socket</span><span class="ruby-operator">::</span><span class="ruby-constant">SHUT_RDWR</span>)
   <span class="ruby-ivar">@svr</span>.<span class="ruby-identifier">shutdown</span>(<span class="ruby-identifier">how</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -368,14 +368,13 @@ href="SSLContext.html">OpenSSL::SSL::SSLContext</a>.</p>
 
         <div class="method-description">
           
-          <p>Returns the TCPServer passed to the <a href="SSLServer.html">SSLServer</a>
-when initialized.</p>
+          <p>Returns the TCPServer passed to the <a href="SSLServer.html"><code>SSLServer</code></a> when initialized.</p>
           
           
 
           
           <div class="method-source-code" id="to_io-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 462</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 501</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">to_io</span>
   <span class="ruby-ivar">@svr</span>
 <span class="ruby-keyword">end</span></pre>
@@ -398,7 +397,7 @@ when initialized.</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.4.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

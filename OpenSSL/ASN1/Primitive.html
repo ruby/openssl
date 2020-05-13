@@ -11,8 +11,11 @@
   var index_rel_prefix = "../../";
 </script>
 
-<script src="../../js/jquery.js"></script>
-<script src="../../js/darkfish.js"></script>
+<script src="../../js/navigation.js" defer></script>
+<script src="../../js/search.js" defer></script>
+<script src="../../js/search_index.js" defer></script>
+<script src="../../js/searcher.js" defer></script>
+<script src="../../js/darkfish.js" defer></script>
 
 <link href="../../css/fonts.css" rel="stylesheet">
 <link href="../../css/rdoc.css" rel="stylesheet">
@@ -104,35 +107,25 @@
 
   <section class="description">
     
-<p>The parent class for all primitive encodings. Attributes are the same as
-for <a href="ASN1Data.html">ASN1Data</a>, with the addition of
-<em>tagging</em>. <a href="Primitive.html">Primitive</a> values can never
-be encoded with indefinite length form, thus it is not possible to set the
-<em>indefinite_length</em> attribute for <a
-href="Primitive.html">Primitive</a> and its sub-classes.</p>
+<p>The parent class for all primitive encodings. Attributes are the same as for <a href="ASN1Data.html"><code>ASN1Data</code></a>, with the addition of <em>tagging</em>. <a href="Primitive.html"><code>Primitive</code></a> values can never be encoded with indefinite length form, thus it is not possible to set the <em>indefinite_length</em> attribute for <a href="Primitive.html"><code>Primitive</code></a> and its sub-classes.</p>
 
-<h2 id="class-OpenSSL::ASN1::Primitive-label-Primitive+sub-classes+and+their+mapping+to+Ruby+classes"><a href="Primitive.html">Primitive</a> sub-classes and their mapping to Ruby classes<span><a href="#class-OpenSSL::ASN1::Primitive-label-Primitive+sub-classes+and+their+mapping+to+Ruby+classes">&para;</a> <a href="#top">&uarr;</a></span></h2>
+<h2 id="class-OpenSSL::ASN1::Primitive-label-Primitive+sub-classes+and+their+mapping+to+Ruby+classes"><a href="Primitive.html"><code>Primitive</code></a> sub-classes and their mapping to Ruby classes<span><a href="#class-OpenSSL::ASN1::Primitive-label-Primitive+sub-classes+and+their+mapping+to+Ruby+classes">&para;</a> <a href="#top">&uarr;</a></span></h2>
 <ul><li>
-<p>OpenSSL::ASN1::EndOfContent    &lt;=&gt; <em>value</em> is always
-<code>nil</code></p>
+<p>OpenSSL::ASN1::EndOfContent    &lt;=&gt; <em>value</em> is always <code>nil</code></p>
 </li><li>
-<p>OpenSSL::ASN1::Boolean         &lt;=&gt; <em>value</em> is
-<code>true</code> or <code>false</code></p>
+<p>OpenSSL::ASN1::Boolean         &lt;=&gt; <em>value</em> is <code>true</code> or <code>false</code></p>
 </li><li>
-<p>OpenSSL::ASN1::Integer         &lt;=&gt; <em>value</em> is an <a
-href="../BN.html">OpenSSL::BN</a></p>
+<p>OpenSSL::ASN1::Integer         &lt;=&gt; <em>value</em> is an <a href="../BN.html"><code>OpenSSL::BN</code></a></p>
 </li><li>
 <p>OpenSSL::ASN1::BitString       &lt;=&gt; <em>value</em> is a String</p>
 </li><li>
 <p>OpenSSL::ASN1::OctetString     &lt;=&gt; <em>value</em> is a String</p>
 </li><li>
-<p>OpenSSL::ASN1::Null            &lt;=&gt; <em>value</em> is always
-<code>nil</code></p>
+<p>OpenSSL::ASN1::Null            &lt;=&gt; <em>value</em> is always <code>nil</code></p>
 </li><li>
 <p>OpenSSL::ASN1::Object          &lt;=&gt; <em>value</em> is a String</p>
 </li><li>
-<p>OpenSSL::ASN1::Enumerated      &lt;=&gt; <em>value</em> is an <a
-href="../BN.html">OpenSSL::BN</a></p>
+<p>OpenSSL::ASN1::Enumerated      &lt;=&gt; <em>value</em> is an <a href="../BN.html"><code>OpenSSL::BN</code></a></p>
 </li><li>
 <p>OpenSSL::ASN1::UTF8String      &lt;=&gt; <em>value</em> is a String</p>
 </li><li>
@@ -165,17 +158,11 @@ href="../BN.html">OpenSSL::BN</a></p>
 
 <h3 id="class-OpenSSL::ASN1::Primitive-label-Additional+attributes">Additional attributes<span><a href="#class-OpenSSL::ASN1::Primitive-label-Additional+attributes">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
-<p><em>unused_bits</em>: if the underlying BIT STRING&#39;s length is a
-multiple of 8 then <em>unused_bits</em> is 0. Otherwise
-<em>unused_bits</em> indicates the number of bits that are to be ignored in
-the final octet of the BitString&#39;s <em>value</em>.</p>
+<p><em>unused_bits</em>: if the underlying BIT STRING&#39;s length is a multiple of 8 then <em>unused_bits</em> is 0. Otherwise <em>unused_bits</em> indicates the number of bits that are to be ignored in the final octet of the BitString&#39;s <em>value</em>.</p>
 
-<h2 id="class-OpenSSL::ASN1::Primitive-label-OpenSSL-3A-3AASN1-3A-3AObjectId"><a href="ObjectId.html">OpenSSL::ASN1::ObjectId</a><span><a href="#class-OpenSSL::ASN1::Primitive-label-OpenSSL-3A-3AASN1-3A-3AObjectId">&para;</a> <a href="#top">&uarr;</a></span></h2>
+<h2 id="class-OpenSSL::ASN1::Primitive-label-OpenSSL-3A-3AASN1-3A-3AObjectId"><a href="ObjectId.html"><code>OpenSSL::ASN1::ObjectId</code></a><span><a href="#class-OpenSSL::ASN1::Primitive-label-OpenSSL-3A-3AASN1-3A-3AObjectId">&para;</a> <a href="#top">&uarr;</a></span></h2>
 
-<p>NOTE: While <a href="Primitive.html#method-c-new">::new</a> will allocate a
-new <a href="ObjectId.html">ObjectId</a>, it is not typically allocated
-this way, but rather that are received from parsed <a
-href="../ASN1.html">ASN1</a> encodings.</p>
+<p>NOTE: While <a href="Primitive.html#method-c-new"><code>OpenSSL::ASN1::ObjectId.new</code></a> will allocate a new <a href="ObjectId.html"><code>ObjectId</code></a>, it is not typically allocated this way, but rather that are received from parsed <a href="../ASN1.html"><code>ASN1</code></a> encodings.</p>
 
 <h3 id="class-OpenSSL::ASN1::Primitive-label-Additional+attributes">Additional attributes<span><a href="#class-OpenSSL::ASN1::Primitive-label-Additional+attributes">&para;</a> <a href="#top">&uarr;</a></span></h3>
 <ul><li>
@@ -192,16 +179,14 @@ href="../ASN1.html">ASN1</a> encodings.</p>
 
 <h2 id="class-OpenSSL::ASN1::Primitive-label-Examples">Examples<span><a href="#class-OpenSSL::ASN1::Primitive-label-Examples">&para;</a> <a href="#top">&uarr;</a></span></h2>
 
-<p>With the Exception of OpenSSL::ASN1::EndOfContent, each <a
-href="Primitive.html">Primitive</a> class constructor takes at least one
-parameter, the <em>value</em>.</p>
+<p>With the Exception of OpenSSL::ASN1::EndOfContent, each <a href="Primitive.html"><code>Primitive</code></a> class constructor takes at least one parameter, the <em>value</em>.</p>
 
 <h3 id="class-OpenSSL::ASN1::Primitive-label-Creating+EndOfContent">Creating EndOfContent<span><a href="#class-OpenSSL::ASN1::Primitive-label-Creating+EndOfContent">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
 <pre class="ruby"><span class="ruby-identifier">eoc</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span><span class="ruby-operator">::</span><span class="ruby-constant">EndOfContent</span>.<span class="ruby-identifier">new</span>
 </pre>
 
-<h3 id="class-OpenSSL::ASN1::Primitive-label-Creating+any+other+Primitive">Creating any other <a href="Primitive.html">Primitive</a><span><a href="#class-OpenSSL::ASN1::Primitive-label-Creating+any+other+Primitive">&para;</a> <a href="#top">&uarr;</a></span></h3>
+<h3 id="class-OpenSSL::ASN1::Primitive-label-Creating+any+other+Primitive">Creating any other <a href="Primitive.html"><code>Primitive</code></a><span><a href="#class-OpenSSL::ASN1::Primitive-label-Creating+any+other+Primitive">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
 <pre>prim = &lt;class&gt;.new(value) # &lt;class&gt; being one of the sub-classes except EndOfContent
 prim_zero_tagged_implicit = &lt;class&gt;.new(value, 0, :IMPLICIT)
@@ -232,11 +217,7 @@ prim_zero_tagged_explicit = &lt;class&gt;.new(value, 0, :EXPLICIT)</pre>
 
         <div class="method-description">
         
-        <p>May be used as a hint for encoding a value either implicitly or explicitly
-by setting it either to <code>:IMPLICIT</code> or to
-<code>:EXPLICIT</code>. <em>tagging</em> is not set when a ASN.1 structure
-is parsed using <a
-href="../ASN1.html#method-c-decode">OpenSSL::ASN1.decode</a>.</p>
+        <p>May be used as a hint for encoding a value either implicitly or explicitly by setting it either to <code>:IMPLICIT</code> or to <code>:EXPLICIT</code>. <em>tagging</em> is not set when a ASN.1 structure is parsed using <a href="../ASN1.html#method-c-decode"><code>OpenSSL::ASN1.decode</code></a>.</p>
         
         </div>
       </div>
@@ -269,19 +250,11 @@ href="../ASN1.html#method-c-decode">OpenSSL::ASN1.decode</a>.</p>
           
           <p><em>value</em>: is mandatory.</p>
 
-<p><em>tag</em>: optional, may be specified for tagged values. If no
-<em>tag</em> is specified, the UNIVERSAL tag corresponding to the <a
-href="Primitive.html">Primitive</a> sub-class is used by default.</p>
+<p><em>tag</em>: optional, may be specified for tagged values. If no <em>tag</em> is specified, the UNIVERSAL tag corresponding to the <a href="Primitive.html"><code>Primitive</code></a> sub-class is used by default.</p>
 
-<p><em>tagging</em>: may be used as an encoding hint to encode a value either
-explicitly or implicitly, see <a href="../ASN1.html">ASN1</a> for possible
-values.</p>
+<p><em>tagging</em>: may be used as an encoding hint to encode a value either explicitly or implicitly, see <a href="../ASN1.html"><code>ASN1</code></a> for possible values.</p>
 
-<p><em>tag_class</em>: if <em>tag</em> and <em>tagging</em> are
-<code>nil</code> then this is set to <code>:UNIVERSAL</code> by default. If
-either <em>tag</em> or <em>tagging</em> are set then
-<code>:CONTEXT_SPECIFIC</code> is used as the default. For possible values
-please cf. <a href="../ASN1.html">ASN1</a>.</p>
+<p><em>tag_class</em>: if <em>tag</em> and <em>tagging</em> are <code>nil</code> then this is set to <code>:UNIVERSAL</code> by default. If either <em>tag</em> or <em>tagging</em> are set then <code>:CONTEXT_SPECIFIC</code> is used as the default. For possible values please cf. <a href="../ASN1.html"><code>ASN1</code></a>.</p>
 
 <h2 id="method-c-new-label-Example">Example<span><a href="#method-c-new-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h2>
 
@@ -366,9 +339,7 @@ ossl_asn1_initialize(int argc, VALUE *argv, VALUE self)
 
         <div class="method-description">
           
-          <p>See <a
-href="ASN1Data.html#method-i-to_der">OpenSSL::ASN1::ASN1Data#to_der</a> for
-details.</p>
+          <p>See <a href="ASN1Data.html#method-i-to_der"><code>ASN1Data#to_der</code></a> for details.</p>
           
           
 
@@ -430,7 +401,7 @@ ossl_asn1prim_to_der(VALUE self)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.4.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

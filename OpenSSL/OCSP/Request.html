@@ -11,8 +11,11 @@
   var index_rel_prefix = "../../";
 </script>
 
-<script src="../../js/jquery.js"></script>
-<script src="../../js/darkfish.js"></script>
+<script src="../../js/navigation.js" defer></script>
+<script src="../../js/search.js" defer></script>
+<script src="../../js/search_index.js" defer></script>
+<script src="../../js/searcher.js" defer></script>
+<script src="../../js/darkfish.js" defer></script>
 
 <link href="../../css/fonts.css" rel="stylesheet">
 <link href="../../css/rdoc.css" rel="stylesheet">
@@ -105,10 +108,7 @@
 
   <section class="description">
     
-<p>An <a href="Request.html">OpenSSL::OCSP::Request</a> contains the
-certificate information for determining if a certificate has been revoked
-or not.  A <a href="Request.html">Request</a> can be created for a
-certificate or from a DER-encoded request created elsewhere.</p>
+<p>An <a href="Request.html"><code>OpenSSL::OCSP::Request</code></a> contains the certificate information for determining if a certificate has been revoked or not.  A <a href="Request.html"><code>Request</code></a> can be created for a certificate or from a DER-encoded request created elsewhere.</p>
 
   </section>
 
@@ -152,8 +152,7 @@ certificate or from a DER-encoded request created elsewhere.</p>
 
         <div class="method-description">
           
-          <p>Creates a new <a href="Request.html">OpenSSL::OCSP::Request</a>.  The
-request may be created empty or from a <em>request_der</em> string.</p>
+          <p>Creates a new <a href="Request.html"><code>OpenSSL::OCSP::Request</code></a>.  The request may be created empty or from a <em>request_der</em> string.</p>
           
           
 
@@ -265,11 +264,9 @@ ossl_ocspreq_add_certid(VALUE self, VALUE certid)
 
         <div class="method-description">
           
-          <p>Adds a <em>nonce</em> to the <a href="../OCSP.html">OCSP</a> request.  If
-no nonce is given a random one will be generated.</p>
+          <p>Adds a <em>nonce</em> to the <a href="../OCSP.html"><code>OCSP</code></a> request.  If no nonce is given a random one will be generated.</p>
 
-<p>The nonce is used to prevent replay attacks but some servers do not support
-it.</p>
+<p>The nonce is used to prevent replay attacks but some servers do not support it.</p>
           
           
 
@@ -397,9 +394,7 @@ ossl_ocspreq_get_certid(VALUE self)
 <p>nonce present in response only.</p>
 </dd></dl>
 
-<p>For most responses, clients can check <em>result</em> &gt; 0.  If a
-responder doesn&#39;t handle nonces <code>result.nonzero?</code> may be
-necessary.  A result of <code>0</code> is always an error.</p>
+<p>For most responses, clients can check <em>result</em> &gt; 0.  If a responder doesn&#39;t handle nonces <code>result.nonzero?</code> may be necessary.  A result of <code>0</code> is always an error.</p>
           
           
 
@@ -491,19 +486,12 @@ ossl_ocspreq_initialize_copy(VALUE self, VALUE other)
 
         <div class="method-description">
           
-          <p>Signs this <a href="../OCSP.html">OCSP</a> request using <em>cert</em>,
-<em>key</em> and optional <em>digest</em>. If <em>digest</em> is not
-specified, SHA-1 is used. <em>certs</em> is an optional Array of additional
-certificates which are included in the request in addition to the signer
-certificate. Note that if <em>certs</em> is <code>nil</code> or not given,
-flag OpenSSL::OCSP::NOCERTS is enabled. Pass an empty array to include only
-the signer certificate.</p>
+          <p>Signs this <a href="../OCSP.html"><code>OCSP</code></a> request using <em>cert</em>, <em>key</em> and optional <em>digest</em>. If <em>digest</em> is not specified, SHA-1 is used. <em>certs</em> is an optional Array of additional certificates which are included in the request in addition to the signer certificate. Note that if <em>certs</em> is <code>nil</code> or not given, flag OpenSSL::OCSP::NOCERTS is enabled. Pass an empty array to include only the signer certificate.</p>
 
 <p><em>flags</em> is a bitwise OR of the following constants:</p>
 <dl class="rdoc-list note-list"><dt>OpenSSL::OCSP::NOCERTS
 <dd>
-<p>Don&#39;t include any certificates in the request. <em>certs</em> will be
-ignored.</p>
+<p>Don&#39;t include any certificates in the request. <em>certs</em> will be ignored.</p>
 </dd></dl>
           
           
@@ -569,10 +557,7 @@ ossl_ocspreq_sign(int argc, VALUE *argv, VALUE self)
 
         <div class="method-description">
           
-          <p>Returns <code>true</code> if the request is signed, <code>false</code>
-otherwise. Note that the validity of the signature is <strong>not</strong>
-checked. Use <a href="Request.html#method-i-verify">verify</a> to verify
-that.</p>
+          <p>Returns <code>true</code> if the request is signed, <code>false</code> otherwise. Note that the validity of the signature is <strong>not</strong> checked. Use <a href="Request.html#method-i-verify"><code>verify</code></a> to verify that.</p>
           
           
 
@@ -660,14 +645,9 @@ ossl_ocspreq_to_der(VALUE self)
 
         <div class="method-description">
           
-          <p>Verifies this request using the given <em>certificates</em> and
-<em>store</em>. <em>certificates</em> is an array of <a
-href="../X509/Certificate.html">OpenSSL::X509::Certificate</a>,
-<em>store</em> is an <a href="../X509/Store.html">OpenSSL::X509::Store</a>.</p>
+          <p>Verifies this request using the given <em>certificates</em> and <em>store</em>. <em>certificates</em> is an array of <a href="../X509/Certificate.html"><code>OpenSSL::X509::Certificate</code></a>, <em>store</em> is an <a href="../X509/Store.html"><code>OpenSSL::X509::Store</code></a>.</p>
 
-<p>Note that <code>false</code> is returned if the request does not have a
-signature. Use <a href="Request.html#method-i-signed-3F">signed?</a> to
-check whether the request is signed or not.</p>
+<p>Note that <code>false</code> is returned if the request does not have a signature. Use <a href="Request.html#method-i-signed-3F"><code>signed?</code></a> to check whether the request is signed or not.</p>
           
           
 
@@ -713,7 +693,7 @@ ossl_ocspreq_verify(int argc, VALUE *argv, VALUE self)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.4.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

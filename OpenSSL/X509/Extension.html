@@ -11,8 +11,11 @@
   var index_rel_prefix = "../../";
 </script>
 
-<script src="../../js/jquery.js"></script>
-<script src="../../js/darkfish.js"></script>
+<script src="../../js/navigation.js" defer></script>
+<script src="../../js/search.js" defer></script>
+<script src="../../js/search_index.js" defer></script>
+<script src="../../js/searcher.js" defer></script>
+<script src="../../js/darkfish.js" defer></script>
 
 <link href="../../css/fonts.css" rel="stylesheet">
 <link href="../../css/rdoc.css" rel="stylesheet">
@@ -64,7 +67,18 @@
   
 </div>
 
-    
+    <div id="includes-section" class="nav-section">
+  <h3>Included Modules</h3>
+
+  <ul class="link-list">
+  
+  
+    <li><a class="include" href="../Marshal.html">OpenSSL::Marshal</a>
+  
+  
+  </ul>
+</div>
+
     
     <!-- Method Quickref -->
 <div id="method-list-section" class="nav-section">
@@ -97,6 +111,8 @@
     <li ><a href="#method-i-value">#value</a>
     
     <li ><a href="#method-i-value-3D">#value=</a>
+    
+    <li ><a href="#method-i-value_der">#value_der</a>
     
   </ul>
 </div>
@@ -160,12 +176,9 @@
 
         <div class="method-description">
           
-          <p>Creates an <a href="../X509.html">X509</a> extension.</p>
+          <p>Creates an <a href="../X509.html"><code>X509</code></a> extension.</p>
 
-<p>The extension may be created from <em>der</em> data or from an extension
-<em>oid</em> and <em>value</em>.  The <em>oid</em> may be either an OID or
-an extension name.  If <em>critical</em> is <code>true</code> the extension
-is marked critical.</p>
+<p>The extension may be created from <em>der</em> data or from an extension <em>oid</em> and <em>value</em>.  The <em>oid</em> may be either an OID or an extension name.  If <em>critical</em> is <code>true</code> the extension is marked critical.</p>
           
           
 
@@ -232,7 +245,7 @@ ossl_x509ext_initialize(int argc, VALUE *argv, VALUE self)
 
           
           <div class="method-source-code" id="3D-3D-source">
-            <pre><span class="ruby-comment"># File lib/openssl/x509.rb, line 44</span>
+            <pre><span class="ruby-comment"># File lib/openssl/x509.rb, line 48</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">==</span>(<span class="ruby-identifier">other</span>)
   <span class="ruby-keyword">return</span> <span class="ruby-keyword">false</span> <span class="ruby-keyword">unless</span> <span class="ruby-constant">Extension</span> <span class="ruby-operator">===</span> <span class="ruby-identifier">other</span>
   <span class="ruby-identifier">to_der</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">other</span>.<span class="ruby-identifier">to_der</span>
@@ -487,7 +500,7 @@ ossl_x509ext_set_oid(VALUE self, VALUE oid)
 
           
           <div class="method-source-code" id="to_a-source">
-            <pre><span class="ruby-comment"># File lib/openssl/x509.rb, line 60</span>
+            <pre><span class="ruby-comment"># File lib/openssl/x509.rb, line 64</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">to_a</span>
   [ <span class="ruby-keyword">self</span>.<span class="ruby-identifier">oid</span>, <span class="ruby-keyword">self</span>.<span class="ruby-identifier">value</span>, <span class="ruby-keyword">self</span>.<span class="ruby-identifier">critical?</span> ]
 <span class="ruby-keyword">end</span></pre>
@@ -568,7 +581,7 @@ ossl_x509ext_to_der(VALUE obj)
 
           
           <div class="method-source-code" id="to_h-source">
-            <pre><span class="ruby-comment"># File lib/openssl/x509.rb, line 56</span>
+            <pre><span class="ruby-comment"># File lib/openssl/x509.rb, line 60</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">to_h</span> <span class="ruby-comment"># {&quot;oid&quot;=&gt;sn|ln, &quot;value&quot;=&gt;value, &quot;critical&quot;=&gt;true|false}</span>
   {<span class="ruby-string">&quot;oid&quot;</span><span class="ruby-operator">=&gt;</span><span class="ruby-keyword">self</span>.<span class="ruby-identifier">oid</span>,<span class="ruby-string">&quot;value&quot;</span><span class="ruby-operator">=&gt;</span><span class="ruby-keyword">self</span>.<span class="ruby-identifier">value</span>,<span class="ruby-string">&quot;critical&quot;</span><span class="ruby-operator">=&gt;</span><span class="ruby-keyword">self</span>.<span class="ruby-identifier">critical?</span>}
 <span class="ruby-keyword">end</span></pre>
@@ -601,7 +614,7 @@ ossl_x509ext_to_der(VALUE obj)
 
           
           <div class="method-source-code" id="to_s-source">
-            <pre><span class="ruby-comment"># File lib/openssl/x509.rb, line 49</span>
+            <pre><span class="ruby-comment"># File lib/openssl/x509.rb, line 53</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">to_s</span> <span class="ruby-comment"># &quot;oid = critical, value&quot;</span>
   <span class="ruby-identifier">str</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">oid</span>
   <span class="ruby-identifier">str</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-string">&quot; = &quot;</span>
@@ -710,6 +723,47 @@ ossl_x509ext_set_value(VALUE self, VALUE data)
       </div>
 
     
+      <div id="method-i-value_der" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">value_der</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="value_der-source">
+            <pre>static VALUE
+ossl_x509ext_get_value_der(VALUE obj)
+{
+    X509_EXTENSION *ext;
+    ASN1_OCTET_STRING *value;
+
+    GetX509Ext(obj, ext);
+    if ((value = X509_EXTENSION_get_data(ext)) == NULL)
+        ossl_raise(eX509ExtError, NULL);
+
+    return rb_str_new((const char *)value-&gt;data, value-&gt;length);
+}</pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
     </section>
   
   </section>
@@ -719,7 +773,7 @@ ossl_x509ext_set_value(VALUE self, VALUE data)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.4.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

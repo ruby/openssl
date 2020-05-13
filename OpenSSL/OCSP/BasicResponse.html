@@ -11,8 +11,11 @@
   var index_rel_prefix = "../../";
 </script>
 
-<script src="../../js/jquery.js"></script>
-<script src="../../js/darkfish.js"></script>
+<script src="../../js/navigation.js" defer></script>
+<script src="../../js/search.js" defer></script>
+<script src="../../js/search_index.js" defer></script>
+<script src="../../js/searcher.js" defer></script>
+<script src="../../js/darkfish.js" defer></script>
 
 <link href="../../css/fonts.css" rel="stylesheet">
 <link href="../../css/rdoc.css" rel="stylesheet">
@@ -107,11 +110,7 @@
 
   <section class="description">
     
-<p>An <a href="BasicResponse.html">OpenSSL::OCSP::BasicResponse</a> contains
-the status of a certificate check which is created from an <a
-href="Request.html">OpenSSL::OCSP::Request</a>.  A <a
-href="BasicResponse.html">BasicResponse</a> is more detailed than a <a
-href="Response.html">Response</a>.</p>
+<p>An <a href="BasicResponse.html"><code>OpenSSL::OCSP::BasicResponse</code></a> contains the status of a certificate check which is created from an <a href="Request.html"><code>OpenSSL::OCSP::Request</code></a>.  A <a href="BasicResponse.html"><code>BasicResponse</code></a> is more detailed than a <a href="Response.html"><code>Response</code></a>.</p>
 
   </section>
 
@@ -148,8 +147,7 @@ href="Response.html">Response</a>.</p>
 
         <div class="method-description">
           
-          <p>Creates a new <a href="BasicResponse.html">BasicResponse</a>. If
-<em>der_string</em> is given, decodes <em>der_string</em> as DER.</p>
+          <p>Creates a new <a href="BasicResponse.html"><code>BasicResponse</code></a>. If <em>der_string</em> is given, decodes <em>der_string</em> as DER.</p>
           
           
 
@@ -211,8 +209,7 @@ ossl_ocspbres_initialize(int argc, VALUE *argv, VALUE self)
 
         <div class="method-description">
           
-          <p>Adds <em>nonce</em> to this response.  If no nonce was provided a random
-nonce will be added.</p>
+          <p>Adds <em>nonce</em> to this response.  If no nonce was provided a random nonce will be added.</p>
           
           
 
@@ -265,8 +262,7 @@ ossl_ocspbres_add_nonce(int argc, VALUE *argv, VALUE self)
 
         <div class="method-description">
           
-          <p>Adds a certificate status for <em>certificate_id</em>. <em>status</em> is
-the status, and must be one of these:</p>
+          <p>Adds a certificate status for <em>certificate_id</em>. <em>status</em> is the status, and must be one of these:</p>
 <ul><li>
 <p>OpenSSL::OCSP::V_CERTSTATUS_GOOD</p>
 </li><li>
@@ -275,27 +271,13 @@ the status, and must be one of these:</p>
 <p>OpenSSL::OCSP::V_CERTSTATUS_UNKNOWN</p>
 </li></ul>
 
-<p><em>reason</em> and <em>revocation_time</em> can be given only when
-<em>status</em> is OpenSSL::OCSP::V_CERTSTATUS_REVOKED. <em>reason</em>
-describes the reason for the revocation, and must be one of
-OpenSSL::OCSP::REVOKED_STATUS_* constants. <em>revocation_time</em> is the
-time when the certificate is revoked.</p>
+<p><em>reason</em> and <em>revocation_time</em> can be given only when <em>status</em> is OpenSSL::OCSP::V_CERTSTATUS_REVOKED. <em>reason</em> describes the reason for the revocation, and must be one of OpenSSL::OCSP::REVOKED_STATUS_* constants. <em>revocation_time</em> is the time when the certificate is revoked.</p>
 
-<p><em>this_update</em> and <em>next_update</em> indicate the time at which
-ths status is verified to be correct and the time at or before which newer
-information will be available, respectively. <em>next_update</em> is
-optional.</p>
+<p><em>this_update</em> and <em>next_update</em> indicate the time at which ths status is verified to be correct and the time at or before which newer information will be available, respectively. <em>next_update</em> is optional.</p>
 
-<p><em>extensions</em> is an Array of <a
-href="../X509/Extension.html">OpenSSL::X509::Extension</a> to be included
-in the <a href="SingleResponse.html">SingleResponse</a>. This is also
-optional.</p>
+<p><em>extensions</em> is an Array of <a href="../X509/Extension.html"><code>OpenSSL::X509::Extension</code></a> to be included in the <a href="SingleResponse.html"><code>SingleResponse</code></a>. This is also optional.</p>
 
-<p>Note that the times, <em>revocation_time</em>, <em>this_update</em> and
-<em>next_update</em> can be specified in either of <a
-href="../../Integer.html">Integer</a> or Time object. If they are <a
-href="../../Integer.html">Integer</a>, it is treated as the relative
-seconds from the current time.</p>
+<p>Note that the times, <em>revocation_time</em>, <em>this_update</em> and <em>next_update</em> can be specified in either of <a href="../../Integer.html"><code>Integer</code></a> or Time object. If they are <a href="../../Integer.html"><code>Integer</code></a>, it is treated as the relative seconds from the current time.</p>
           
           
 
@@ -392,8 +374,7 @@ ossl_ocspbres_add_status(VALUE self, VALUE cid, VALUE status,
 
         <div class="method-description">
           
-          <p>Copies the nonce from <em>request</em> into this response.  Returns 1 on
-success and 0 on failure.</p>
+          <p>Copies the nonce from <em>request</em> into this response.  Returns 1 on success and 0 on failure.</p>
           
           
 
@@ -438,9 +419,7 @@ ossl_ocspbres_copy_nonce(VALUE self, VALUE request)
 
         <div class="method-description">
           
-          <p>Returns a <a href="SingleResponse.html">SingleResponse</a> whose CertId
-matches with <em>certificate_id</em>, or <code>nil</code> if this <a
-href="BasicResponse.html">BasicResponse</a> does not contain it.</p>
+          <p>Returns a <a href="SingleResponse.html"><code>SingleResponse</code></a> whose CertId matches with <em>certificate_id</em>, or <code>nil</code> if this <a href="BasicResponse.html"><code>BasicResponse</code></a> does not contain it.</p>
           
           
 
@@ -540,8 +519,7 @@ ossl_ocspbres_initialize_copy(VALUE self, VALUE other)
 
         <div class="method-description">
           
-          <p>Returns an Array of <a href="SingleResponse.html">SingleResponse</a> for
-this <a href="BasicResponse.html">BasicResponse</a>.</p>
+          <p>Returns an Array of <a href="SingleResponse.html"><code>SingleResponse</code></a> for this <a href="BasicResponse.html"><code>BasicResponse</code></a>.</p>
           
           
 
@@ -597,10 +575,7 @@ ossl_ocspbres_get_responses(VALUE self)
 
         <div class="method-description">
           
-          <p>Signs this <a href="../OCSP.html">OCSP</a> response using the
-<em>cert</em>, <em>key</em> and optional <em>digest</em>. This behaves in
-the similar way as <a
-href="Request.html#method-i-sign">OpenSSL::OCSP::Request#sign</a>.</p>
+          <p>Signs this <a href="../OCSP.html"><code>OCSP</code></a> response using the <em>cert</em>, <em>key</em> and optional <em>digest</em>. This behaves in the similar way as <a href="Request.html#method-i-sign"><code>OpenSSL::OCSP::Request#sign</code></a>.</p>
 
 <p><em>flags</em> can include:</p>
 <dl class="rdoc-list note-list"><dt>OpenSSL::OCSP::NOCERTS
@@ -677,16 +652,9 @@ ossl_ocspbres_sign(int argc, VALUE *argv, VALUE self)
 
         <div class="method-description">
           
-          <p>Returns an Array of statuses for this response.  Each status contains a <a
-href="CertificateId.html">CertificateId</a>, the status (0 for good, 1 for
-revoked, 2 for unknown), the reason for the status, the revocation time,
-the time of this update, the time for the next update and a list of <a
-href="../X509/Extension.html">OpenSSL::X509::Extension</a>.</p>
+          <p>Returns an Array of statuses for this response.  Each status contains a <a href="CertificateId.html"><code>CertificateId</code></a>, the status (0 for good, 1 for revoked, 2 for unknown), the reason for the status, the revocation time, the time of this update, the time for the next update and a list of <a href="../X509/Extension.html"><code>OpenSSL::X509::Extension</code></a>.</p>
 
-<p>This should be superseded by <a
-href="BasicResponse.html#method-i-responses">#responses</a> and <a
-href="BasicResponse.html#method-i-find_response">find_response</a> that
-return <a href="SingleResponse.html">SingleResponse</a>.</p>
+<p>This should be superseded by <a href="BasicResponse.html#method-i-responses"><code>BasicResponse#responses</code></a> and <a href="BasicResponse.html#method-i-find_response"><code>find_response</code></a> that return <a href="SingleResponse.html"><code>SingleResponse</code></a>.</p>
           
           
 
@@ -813,9 +781,7 @@ ossl_ocspbres_to_der(VALUE self)
 
         <div class="method-description">
           
-          <p>Verifies the signature of the response using the given
-<em>certificates</em> and <em>store</em>. This works in the similar way as
-<a href="Request.html#method-i-verify">OpenSSL::OCSP::Request#verify</a>.</p>
+          <p>Verifies the signature of the response using the given <em>certificates</em> and <em>store</em>. This works in the similar way as <a href="Request.html#method-i-verify"><code>OpenSSL::OCSP::Request#verify</code></a>.</p>
           
           
 
@@ -909,7 +875,7 @@ ossl_ocspbres_verify(int argc, VALUE *argv, VALUE self)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.4.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

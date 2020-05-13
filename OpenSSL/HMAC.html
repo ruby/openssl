@@ -11,8 +11,11 @@
   var index_rel_prefix = "../";
 </script>
 
-<script src="../js/jquery.js"></script>
-<script src="../js/darkfish.js"></script>
+<script src="../js/navigation.js" defer></script>
+<script src="../js/search.js" defer></script>
+<script src="../js/search_index.js" defer></script>
+<script src="../js/searcher.js" defer></script>
+<script src="../js/darkfish.js" defer></script>
 
 <link href="../css/fonts.css" rel="stylesheet">
 <link href="../css/rdoc.css" rel="stylesheet">
@@ -89,6 +92,8 @@
     
     <li ><a href="#method-i-3C-3C">#&lt;&lt;</a>
     
+    <li ><a href="#method-i-3D-3D">#==</a>
+    
     <li ><a href="#method-i-digest">#digest</a>
     
     <li ><a href="#method-i-hexdigest">#hexdigest</a>
@@ -116,14 +121,9 @@
 
   <section class="description">
     
-<p><a href="HMAC.html">OpenSSL::HMAC</a> allows computing Hash-based Message
-Authentication Code (HMAC). It is a type of message authentication code
-(MAC) involving a hash function in combination with a key. <a
-href="HMAC.html">HMAC</a> can be used to verify the integrity of a message
-as well as the authenticity.</p>
+<p><a href="HMAC.html"><code>OpenSSL::HMAC</code></a> allows computing Hash-based Message Authentication Code (<a href="HMAC.html"><code>HMAC</code></a>). It is a type of message authentication code (MAC) involving a hash function in combination with a key. <a href="HMAC.html"><code>HMAC</code></a> can be used to verify the integrity of a message as well as the authenticity.</p>
 
-<p><a href="HMAC.html">OpenSSL::HMAC</a> has a similar interface to <a
-href="Digest.html">OpenSSL::Digest</a>.</p>
+<p><a href="HMAC.html"><code>OpenSSL::HMAC</code></a> has a similar interface to <a href="Digest.html"><code>OpenSSL::Digest</code></a>.</p>
 
 <h3 id="class-OpenSSL::HMAC-label-HMAC-SHA256+using+one-shot+interface">HMAC-SHA256 using one-shot interface<span><a href="#class-OpenSSL::HMAC-label-HMAC-SHA256+using+one-shot+interface">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
@@ -138,7 +138,7 @@ href="Digest.html">OpenSSL::Digest</a>.</p>
 <pre class="ruby"><span class="ruby-identifier">data1</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span>(<span class="ruby-string">&quot;file1&quot;</span>)
 <span class="ruby-identifier">data2</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span>(<span class="ruby-string">&quot;file2&quot;</span>)
 <span class="ruby-identifier">key</span> = <span class="ruby-string">&quot;key&quot;</span>
-<span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span><span class="ruby-operator">::</span><span class="ruby-constant">SHA256</span>.<span class="ruby-identifier">new</span>
+<span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;SHA256&#39;</span>)
 <span class="ruby-identifier">hmac</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">HMAC</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">key</span>, <span class="ruby-identifier">digest</span>)
 <span class="ruby-identifier">hmac</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">data1</span>
 <span class="ruby-identifier">hmac</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">data2</span>
@@ -180,10 +180,7 @@ href="Digest.html">OpenSSL::Digest</a>.</p>
 
         <div class="method-description">
           
-          <p>Returns the authentication code as a binary string. The <em>digest</em>
-parameter specifies the digest algorithm to use. This may be a String
-representing the algorithm name or an instance of <a
-href="Digest.html">OpenSSL::Digest</a>.</p>
+          <p>Returns the authentication code as a binary string. The <em>digest</em> parameter specifies the digest algorithm to use. This may be a String representing the algorithm name or an instance of <a href="Digest.html"><code>OpenSSL::Digest</code></a>.</p>
 
 <h3 id="method-c-digest-label-Example">Example<span><a href="#method-c-digest-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
@@ -238,10 +235,7 @@ ossl_hmac_s_digest(VALUE klass, VALUE digest, VALUE key, VALUE data)
 
         <div class="method-description">
           
-          <p>Returns the authentication code as a hex-encoded string. The
-<em>digest</em> parameter specifies the digest algorithm to use. This may
-be a String representing the algorithm name or an instance of <a
-href="Digest.html">OpenSSL::Digest</a>.</p>
+          <p>Returns the authentication code as a hex-encoded string. The <em>digest</em> parameter specifies the digest algorithm to use. This may be a String representing the algorithm name or an instance of <a href="Digest.html"><code>OpenSSL::Digest</code></a>.</p>
 
 <h3 id="method-c-hexdigest-label-Example">Example<span><a href="#method-c-hexdigest-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
@@ -302,11 +296,7 @@ ossl_hmac_s_hexdigest(VALUE klass, VALUE digest, VALUE key, VALUE data)
 
         <div class="method-description">
           
-          <p>Returns an instance of <a href="HMAC.html">OpenSSL::HMAC</a> set with the
-key and digest algorithm to be used. The instance represents the initial
-state of the message authentication code before any data has been
-processed. To process data with it, use the instance method <a
-href="HMAC.html#method-i-update">update</a> with your data as an argument.</p>
+          <p>Returns an instance of <a href="HMAC.html"><code>OpenSSL::HMAC</code></a> set with the key and digest algorithm to be used. The instance represents the initial state of the message authentication code before any data has been processed. To process data with it, use the instance method <a href="HMAC.html#method-i-update"><code>update</code></a> with your data as an argument.</p>
 
 <h3 id="method-c-new-label-Example">Example<span><a href="#method-c-new-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
@@ -320,18 +310,11 @@ href="HMAC.html#method-i-update">update</a> with your data as an argument.</p>
 
 <h3 id="method-c-new-label-A+note+about+comparisons">A note about comparisons<span><a href="#method-c-new-label-A+note+about+comparisons">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
-<p>Two instances won&#39;t be equal when they&#39;re compared, even if they
-have the same value. Use <a href="HMAC.html#method-i-to_s">to_s</a> or <a
-href="HMAC.html#method-i-hexdigest">hexdigest</a> to return the
-authentication code that the instance represents. For example:</p>
+<p>Two instances can be securely compared with #== in constant time:</p>
 
-<pre class="ruby"><span class="ruby-identifier">other_instance</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">HMAC</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;key&#39;</span>, <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;sha1&#39;</span>))
-<span class="ruby-comment">#=&gt; f42bb0eeb018ebbd4597ae7213711ec60760843f</span>
-<span class="ruby-identifier">instance</span>
+<pre class="ruby">    <span class="ruby-identifier">other_instance</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">HMAC</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;key&#39;</span>, <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;sha1&#39;</span>))
 <span class="ruby-comment">#=&gt; f42bb0eeb018ebbd4597ae7213711ec60760843f</span>
 <span class="ruby-identifier">instance</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">other_instance</span>
-<span class="ruby-comment">#=&gt; false</span>
-<span class="ruby-identifier">instance</span>.<span class="ruby-identifier">to_s</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">other_instance</span>.<span class="ruby-identifier">to_s</span>
 <span class="ruby-comment">#=&gt; true</span>
 </pre>
           
@@ -393,6 +376,42 @@ ossl_hmac_initialize(VALUE self, VALUE key, VALUE digest)
         <div class="aliases">
           Alias for: <a href="HMAC.html#method-i-update">update</a>
         </div>
+        
+      </div>
+
+    
+      <div id="method-i-3D-3D" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">==</span><span
+            class="method-args">(other)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Securely compare with another <a href="HMAC.html"><code>HMAC</code></a> instance in constant time.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="3D-3D-source">
+            <pre><span class="ruby-comment"># File lib/openssl/hmac.rb, line 6</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">==</span>(<span class="ruby-identifier">other</span>)
+  <span class="ruby-keyword">return</span> <span class="ruby-keyword">false</span> <span class="ruby-keyword">unless</span> <span class="ruby-constant">HMAC</span> <span class="ruby-operator">===</span> <span class="ruby-identifier">other</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-keyword">false</span> <span class="ruby-keyword">unless</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">digest</span>.<span class="ruby-identifier">bytesize</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">other</span>.<span class="ruby-identifier">digest</span>.<span class="ruby-identifier">bytesize</span>
+
+  <span class="ruby-constant">OpenSSL</span>.<span class="ruby-identifier">fixed_length_secure_compare</span>(<span class="ruby-keyword">self</span>.<span class="ruby-identifier">digest</span>, <span class="ruby-identifier">other</span>.<span class="ruby-identifier">digest</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
         
       </div>
 
@@ -468,8 +487,7 @@ ossl_hmac_digest(VALUE self)
 
         <div class="method-description">
           
-          <p>Returns the authentication code an instance represents as a hex-encoded
-string.</p>
+          <p>Returns the authentication code an instance represents as a hex-encoded string.</p>
           
           
 
@@ -592,8 +610,7 @@ ossl_hmac_copy(VALUE self, VALUE other)
 
         <div class="method-description">
           
-          <p>Returns <em>hmac</em> as it was when it was first initialized, with all
-processed data cleared from it.</p>
+          <p>Returns <em>hmac</em> as it was when it was first initialized, with all processed data cleared from it.</p>
 
 <h3 id="method-i-reset-label-Example">Example<span><a href="#method-i-reset-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
@@ -675,8 +692,7 @@ ossl_hmac_reset(VALUE self)
 
         <div class="method-description">
           
-          <p>Returns <em>hmac</em> updated with the message to be authenticated. Can be
-called repeatedly with chunks of the message.</p>
+          <p>Returns <em>hmac</em> updated with the message to be authenticated. Can be called repeatedly with chunks of the message.</p>
 
 <h3 id="method-i-update-label-Example">Example<span><a href="#method-i-update-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
@@ -727,7 +743,7 @@ ossl_hmac_update(VALUE self, VALUE data)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.4.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

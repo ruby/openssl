@@ -11,8 +11,11 @@
   var index_rel_prefix = "../../../";
 </script>
 
-<script src="../../../js/jquery.js"></script>
-<script src="../../../js/darkfish.js"></script>
+<script src="../../../js/navigation.js" defer></script>
+<script src="../../../js/search.js" defer></script>
+<script src="../../../js/search_index.js" defer></script>
+<script src="../../../js/searcher.js" defer></script>
+<script src="../../../js/darkfish.js" defer></script>
 
 <link href="../../../css/fonts.css" rel="stylesheet">
 <link href="../../../css/rdoc.css" rel="stylesheet">
@@ -186,10 +189,9 @@
 
         <div class="method-description">
           
-          <p>Creates a new <a href="Group.html">EC::Group</a> object.</p>
+          <p>Creates a new <a href="Group.html"><code>EC::Group</code></a> object.</p>
 
-<p><em>ec_method</em> is a symbol that represents an EC_METHOD. Currently the
-following are supported:</p>
+<p><em>ec_method</em> is a symbol that represents an EC_METHOD. Currently the following are supported:</p>
 <ul><li>
 <p>:GFp_simple</p>
 </li><li>
@@ -200,8 +202,7 @@ following are supported:</p>
 <p>:GF2m_simple</p>
 </li></ul>
 
-<p>If the first argument is :GFp or :GF2m, creates a new curve with given
-parameters.</p>
+<p>If the first argument is :GFp or :GF2m, creates a new curve with given parameters.</p>
           
           
 
@@ -374,7 +375,7 @@ parameters.</p>
           
           <p>Returns the flags set on the group.</p>
 
-<p>See also <a href="Group.html#method-i-asn1_flag-3D">asn1_flag=</a>.</p>
+<p>See also <a href="Group.html#method-i-asn1_flag-3D"><code>asn1_flag=</code></a>.</p>
           
           
 
@@ -416,8 +417,7 @@ parameters.</p>
 
         <div class="method-description">
           
-          <p>Sets flags on the group. The flag value is used to determine how to encode
-the group: encode explicit parameters or named curve using an OID.</p>
+          <p>Sets flags on the group. The flag value is used to determine how to encode the group: encode explicit parameters or named curve using an OID.</p>
 
 <p>The flag value can be either of:</p>
 <ul><li>
@@ -426,8 +426,7 @@ the group: encode explicit parameters or named curve using an OID.</p>
 <p>EC::EXPLICIT_CURVE</p>
 </li></ul>
 
-<p>See the <a href="../../../OpenSSL.html">OpenSSL</a> documentation for
-EC_GROUP_set_asn1_flag().</p>
+<p>See the <a href="../../../OpenSSL.html"><code>OpenSSL</code></a> documentation for EC_GROUP_set_asn1_flag().</p>
           
           
 
@@ -470,8 +469,7 @@ EC_GROUP_set_asn1_flag().</p>
           
           <p>Returns the cofactor of the group.</p>
 
-<p>See the <a href="../../../OpenSSL.html">OpenSSL</a> documentation for
-EC_GROUP_get_cofactor()</p>
+<p>See the <a href="../../../OpenSSL.html"><code>OpenSSL</code></a> documentation for EC_GROUP_get_cofactor()</p>
           
           
 
@@ -521,8 +519,7 @@ EC_GROUP_get_cofactor()</p>
           
           <p>Returns the curve name (sn).</p>
 
-<p>See the <a href="../../../OpenSSL.html">OpenSSL</a> documentation for
-EC_GROUP_get_curve_name()</p>
+<p>See the <a href="../../../OpenSSL.html"><code>OpenSSL</code></a> documentation for EC_GROUP_get_curve_name()</p>
           
           
 
@@ -568,8 +565,7 @@ EC_GROUP_get_curve_name()</p>
 
         <div class="method-description">
           
-          <p>See the <a href="../../../OpenSSL.html">OpenSSL</a> documentation for
-EC_GROUP_get_degree()</p>
+          <p>See the <a href="../../../OpenSSL.html"><code>OpenSSL</code></a> documentation for EC_GROUP_get_degree()</p>
           
           
 
@@ -616,8 +612,7 @@ EC_GROUP_get_degree()</p>
 
         <div class="method-description">
           
-          <p>Returns <code>true</code> if the two groups use the same curve and have the
-same parameters, <code>false</code> otherwise.</p>
+          <p>Returns <code>true</code> if the two groups use the same curve and have the same parameters, <code>false</code> otherwise.</p>
           
           
 
@@ -667,8 +662,7 @@ same parameters, <code>false</code> otherwise.</p>
           
           <p>Returns the generator of the group.</p>
 
-<p>See the <a href="../../../OpenSSL.html">OpenSSL</a> documentation for
-EC_GROUP_get0_generator()</p>
+<p>See the <a href="../../../OpenSSL.html"><code>OpenSSL</code></a> documentation for EC_GROUP_get0_generator()</p>
           
           
 
@@ -760,8 +754,7 @@ ossl_ec_group_initialize_copy(VALUE self, VALUE other)
           
           <p>Returns the order of the group.</p>
 
-<p>See the <a href="../../../OpenSSL.html">OpenSSL</a> documentation for
-EC_GROUP_get_order()</p>
+<p>See the <a href="../../../OpenSSL.html"><code>OpenSSL</code></a> documentation for EC_GROUP_get_order()</p>
           
           
 
@@ -809,11 +802,9 @@ EC_GROUP_get_order()</p>
 
         <div class="method-description">
           
-          <p>Returns the form how <a href="Point.html">EC::Point</a> data is encoded as
-ASN.1.</p>
+          <p>Returns the form how <a href="Point.html"><code>EC::Point</code></a> data is encoded as ASN.1.</p>
 
-<p>See also <a
-href="Group.html#method-i-point_conversion_form-3D">point_conversion_form=</a>.</p>
+<p>See also <a href="Group.html#method-i-point_conversion_form-3D"><code>point_conversion_form=</code></a>.</p>
           
           
 
@@ -863,25 +854,21 @@ href="Group.html#method-i-point_conversion_form-3D">point_conversion_form=</a>.<
 
         <div class="method-description">
           
-          <p>Sets the form how <a href="Point.html">EC::Point</a> data is encoded as
-ASN.1 as defined in X9.62.</p>
+          <p>Sets the form how <a href="Point.html"><code>EC::Point</code></a> data is encoded as ASN.1 as defined in X9.62.</p>
 
 <p><em>format</em> can be one of these:</p>
 <dl class="rdoc-list note-list"><dt><code>:compressed</code>
 <dd>
-<p>Encoded as z||x, where z is an octet indicating which solution of the
-equation y is. z will be 0x02 or 0x03.</p>
+<p>Encoded as z||x, where z is an octet indicating which solution of the equation y is. z will be 0x02 or 0x03.</p>
 </dd><dt><code>:uncompressed</code>
 <dd>
 <p>Encoded as z||x||y, where z is an octet 0x04.</p>
 </dd><dt><code>:hybrid</code>
 <dd>
-<p>Encodes as z||x||y, where z is an octet indicating which solution of the
-equation y is. z will be 0x06 or 0x07.</p>
+<p>Encodes as z||x||y, where z is an octet indicating which solution of the equation y is. z will be 0x06 or 0x07.</p>
 </dd></dl>
 
-<p>See the <a href="../../../OpenSSL.html">OpenSSL</a> documentation for
-EC_GROUP_set_point_conversion_form()</p>
+<p>See the <a href="../../../OpenSSL.html"><code>OpenSSL</code></a> documentation for EC_GROUP_set_point_conversion_form()</p>
           
           
 
@@ -926,8 +913,7 @@ ossl_ec_group_set_point_conversion_form(VALUE self, VALUE form_v)
 
         <div class="method-description">
           
-          <p>See the <a href="../../../OpenSSL.html">OpenSSL</a> documentation for
-EC_GROUP_get0_seed()</p>
+          <p>See the <a href="../../../OpenSSL.html"><code>OpenSSL</code></a> documentation for EC_GROUP_get0_seed()</p>
           
           
 
@@ -972,8 +958,7 @@ EC_GROUP_get0_seed()</p>
 
         <div class="method-description">
           
-          <p>See the <a href="../../../OpenSSL.html">OpenSSL</a> documentation for
-EC_GROUP_set_seed()</p>
+          <p>See the <a href="../../../OpenSSL.html"><code>OpenSSL</code></a> documentation for EC_GROUP_set_seed()</p>
           
           
 
@@ -1017,12 +1002,9 @@ EC_GROUP_set_seed()</p>
 
         <div class="method-description">
           
-          <p>Sets the curve parameters. <em>generator</em> must be an instance of <a
-href="Point.html">EC::Point</a> that is on the curve. <em>order</em> and
-<em>cofactor</em> are integers.</p>
+          <p>Sets the curve parameters. <em>generator</em> must be an instance of <a href="Point.html"><code>EC::Point</code></a> that is on the curve. <em>order</em> and <em>cofactor</em> are integers.</p>
 
-<p>See the <a href="../../../OpenSSL.html">OpenSSL</a> documentation for
-EC_GROUP_set_generator()</p>
+<p>See the <a href="../../../OpenSSL.html"><code>OpenSSL</code></a> documentation for EC_GROUP_set_generator()</p>
           
           
 
@@ -1070,8 +1052,7 @@ EC_GROUP_set_generator()</p>
 
         <div class="method-description">
           
-          <p>See the <a href="../../../OpenSSL.html">OpenSSL</a> documentation for
-i2d_ECPKParameters_bio()</p>
+          <p>See the <a href="../../../OpenSSL.html"><code>OpenSSL</code></a> documentation for i2d_ECPKParameters_bio()</p>
           
           
 
@@ -1107,8 +1088,7 @@ i2d_ECPKParameters_bio()</p>
 
         <div class="method-description">
           
-          <p>See the <a href="../../../OpenSSL.html">OpenSSL</a> documentation for
-PEM_write_bio_ECPKParameters()</p>
+          <p>See the <a href="../../../OpenSSL.html"><code>OpenSSL</code></a> documentation for PEM_write_bio_ECPKParameters()</p>
           
           
 
@@ -1144,8 +1124,7 @@ PEM_write_bio_ECPKParameters()</p>
 
         <div class="method-description">
           
-          <p>See the <a href="../../../OpenSSL.html">OpenSSL</a> documentation for
-ECPKParameters_print()</p>
+          <p>See the <a href="../../../OpenSSL.html"><code>OpenSSL</code></a> documentation for ECPKParameters_print()</p>
           
           
 
@@ -1188,7 +1167,7 @@ ECPKParameters_print()</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.4.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

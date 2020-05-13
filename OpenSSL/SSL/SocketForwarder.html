@@ -11,8 +11,11 @@
   var index_rel_prefix = "../../";
 </script>
 
-<script src="../../js/jquery.js"></script>
-<script src="../../js/darkfish.js"></script>
+<script src="../../js/navigation.js" defer></script>
+<script src="../../js/search.js" defer></script>
+<script src="../../js/search_index.js" defer></script>
+<script src="../../js/searcher.js" defer></script>
+<script src="../../js/darkfish.js" defer></script>
 
 <link href="../../css/fonts.css" rel="stylesheet">
 <link href="../../css/rdoc.css" rel="stylesheet">
@@ -73,6 +76,8 @@
     
     <li ><a href="#method-i-fcntl">#fcntl</a>
     
+    <li ><a href="#method-i-fileno">#fileno</a>
+    
     <li ><a href="#method-i-getsockopt">#getsockopt</a>
     
     <li ><a href="#method-i-peeraddr">#peeraddr</a>
@@ -130,7 +135,7 @@
 
           
           <div class="method-source-code" id="addr-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 233</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 240</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">addr</span>
   <span class="ruby-identifier">to_io</span>.<span class="ruby-identifier">addr</span>
 <span class="ruby-keyword">end</span></pre>
@@ -163,7 +168,7 @@
 
           
           <div class="method-source-code" id="closed-3F-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 253</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 260</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">closed?</span>
   <span class="ruby-identifier">to_io</span>.<span class="ruby-identifier">closed?</span>
 <span class="ruby-keyword">end</span></pre>
@@ -196,7 +201,7 @@
 
           
           <div class="method-source-code" id="do_not_reverse_lookup-3D-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 257</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 264</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">do_not_reverse_lookup=</span>(<span class="ruby-identifier">flag</span>)
   <span class="ruby-identifier">to_io</span>.<span class="ruby-identifier">do_not_reverse_lookup</span> = <span class="ruby-identifier">flag</span>
 <span class="ruby-keyword">end</span></pre>
@@ -229,9 +234,42 @@
 
           
           <div class="method-source-code" id="fcntl-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 249</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 256</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">fcntl</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">args</span>)
   <span class="ruby-identifier">to_io</span>.<span class="ruby-identifier">fcntl</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">args</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-fileno" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">fileno</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>The file descriptor for the socket.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="fileno-source">
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 236</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">fileno</span>
+  <span class="ruby-identifier">to_io</span>.<span class="ruby-identifier">fileno</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -262,7 +300,7 @@
 
           
           <div class="method-source-code" id="getsockopt-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 245</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 252</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">getsockopt</span>(<span class="ruby-identifier">level</span>, <span class="ruby-identifier">optname</span>)
   <span class="ruby-identifier">to_io</span>.<span class="ruby-identifier">getsockopt</span>(<span class="ruby-identifier">level</span>, <span class="ruby-identifier">optname</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -295,7 +333,7 @@
 
           
           <div class="method-source-code" id="peeraddr-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 237</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 244</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">peeraddr</span>
   <span class="ruby-identifier">to_io</span>.<span class="ruby-identifier">peeraddr</span>
 <span class="ruby-keyword">end</span></pre>
@@ -328,7 +366,7 @@
 
           
           <div class="method-source-code" id="setsockopt-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 241</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 248</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">setsockopt</span>(<span class="ruby-identifier">level</span>, <span class="ruby-identifier">optname</span>, <span class="ruby-identifier">optval</span>)
   <span class="ruby-identifier">to_io</span>.<span class="ruby-identifier">setsockopt</span>(<span class="ruby-identifier">level</span>, <span class="ruby-identifier">optname</span>, <span class="ruby-identifier">optval</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -351,7 +389,7 @@
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.0.4.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 
