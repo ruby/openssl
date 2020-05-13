@@ -95,7 +95,7 @@ const rb_data_type_t ossl_evp_pkey_type = {
 static VALUE
 pkey_new0(EVP_PKEY *pkey)
 {
-    VALUE obj;
+    VALUE klass, obj;
     int type;
 
     if (!pkey || (type = EVP_PKEY_base_id(pkey)) == EVP_PKEY_NONE)
@@ -103,26 +103,22 @@ pkey_new0(EVP_PKEY *pkey)
 
     switch (type) {
 #if !defined(OPENSSL_NO_RSA)
-    case EVP_PKEY_RSA:
-	return ossl_rsa_new(pkey);
+      case EVP_PKEY_RSA: klass = cRSA; break;
 #endif
 #if !defined(OPENSSL_NO_DSA)
-    case EVP_PKEY_DSA:
-	return ossl_dsa_new(pkey);
+      case EVP_PKEY_DSA: klass = cDSA; break;
 #endif
 #if !defined(OPENSSL_NO_DH)
-    case EVP_PKEY_DH:
-	return ossl_dh_new(pkey);
+      case EVP_PKEY_DH:  klass = cDH; break;
 #endif
 #if !defined(OPENSSL_NO_EC)
-    case EVP_PKEY_EC:
-	return ossl_ec_new(pkey);
+      case EVP_PKEY_EC:  klass = cEC; break;
 #endif
-    default:
-	obj = NewPKey(cPKey);
-	SetPKey(obj, pkey);
-	return obj;
+      default:           klass = cPKey; break;
     }
+    obj = NewPKey(klass);
+    SetPKey(obj, pkey);
+    return obj;
 }
 
 VALUE
@@ -138,6 +134,35 @@ ossl_pkey_new(EVP_PKEY *pkey)
     }
 
     return obj;
+}
+
+EVP_PKEY *
+ossl_pkey_read_generic(BIO *bio, VALUE pass)
+{
+    void *ppass = (void *)pass;
+    EVP_PKEY *pkey;
+
+    if ((pkey = d2i_PrivateKey_bio(bio, NULL)))
+	goto out;
+    OSSL_BIO_reset(bio);
+    if ((pkey = d2i_PKCS8PrivateKey_bio(bio, NULL, ossl_pem_passwd_cb, ppass)))
+	goto out;
+    OSSL_BIO_reset(bio);
+    if ((pkey = d2i_PUBKEY_bio(bio, NULL)))
+	goto out;
+    OSSL_BIO_reset(bio);
+    /* PEM_read_bio_PrivateKey() also parses PKCS #8 formats */
+    if ((pkey = PEM_read_bio_PrivateKey(bio, NULL, ossl_pem_passwd_cb, ppass)))
+	goto out;
+    OSSL_BIO_reset(bio);
+    if ((pkey = PEM_read_bio_PUBKEY(bio, NULL, NULL, NULL)))
+	goto out;
+    OSSL_BIO_reset(bio);
+    if ((pkey = PEM_read_bio_Parameters(bio, NULL)))
+	goto out;
+
+  out:
+    return pkey;
 }
 
 /*
@@ -164,30 +189,11 @@ ossl_pkey_new_from_data(int argc, VALUE *argv, VALUE self)
     VALUE data, pass;
 
     rb_scan_args(argc, argv, "11", &data, &pass);
-    pass = ossl_pem_passwd_value(pass);
-
     bio = ossl_obj2bio(&data);
-    if ((pkey = d2i_PrivateKey_bio(bio, NULL)))
-	goto ok;
-    OSSL_BIO_reset(bio);
-    if ((pkey = d2i_PKCS8PrivateKey_bio(bio, NULL, ossl_pem_passwd_cb, (void *)pass)))
-	goto ok;
-    OSSL_BIO_reset(bio);
-    if ((pkey = d2i_PUBKEY_bio(bio, NULL)))
-	goto ok;
-    OSSL_BIO_reset(bio);
-    /* PEM_read_bio_PrivateKey() also parses PKCS #8 formats */
-    if ((pkey = PEM_read_bio_PrivateKey(bio, NULL, ossl_pem_passwd_cb, (void *)pass)))
-	goto ok;
-    OSSL_BIO_reset(bio);
-    if ((pkey = PEM_read_bio_PUBKEY(bio, NULL, NULL, NULL)))
-	goto ok;
-
+    pkey = ossl_pkey_read_generic(bio, ossl_pem_passwd_value(pass));
     BIO_free(bio);
-    ossl_raise(ePKeyError, "Could not parse PKey");
-
-ok:
-    BIO_free(bio);
+    if (!pkey)
+	ossl_raise(ePKeyError, "Could not parse PKey");
     return ossl_pkey_new(pkey);
 }
 
@@ -335,6 +341,52 @@ ossl_pkey_inspect(VALUE self)
                       OBJ_nid2sn(nid));
 }
 
+VALUE
+ossl_pkey_export_traditional(int argc, VALUE *argv, VALUE self, int to_der)
+{
+    EVP_PKEY *pkey;
+    VALUE cipher, pass;
+    const EVP_CIPHER *enc = NULL;
+    BIO *bio;
+
+    GetPKey(self, pkey);
+    rb_scan_args(argc, argv, "02", &cipher, &pass);
+    if (!NIL_P(cipher)) {
+	enc = ossl_evp_get_cipherbyname(cipher);
+	pass = ossl_pem_passwd_value(pass);
+    }
+
+    bio = BIO_new(BIO_s_mem());
+    if (!bio)
+	ossl_raise(ePKeyError, "BIO_new");
+    if (to_der) {
+	if (!i2d_PrivateKey_bio(bio, pkey)) {
+	    BIO_free(bio);
+	    ossl_raise(ePKeyError, "i2d_PrivateKey_bio");
+	}
+    }
+    else {
+#if OPENSSL_VERSION_NUMBER >= 0x10100000 && !defined(LIBRESSL_VERSION_NUMBER)
+	if (!PEM_write_bio_PrivateKey_traditional(bio, pkey, enc, NULL, 0,
+						  ossl_pem_passwd_cb,
+						  (void *)pass)) {
+#else
+	char pem_str[80];
+	const char *aname;
+
+	EVP_PKEY_asn1_get0_info(NULL, NULL, NULL, NULL, &aname, pkey->ameth);
+	snprintf(pem_str, sizeof(pem_str), "%s PRIVATE KEY", aname);
+	if (!PEM_ASN1_write_bio((i2d_of_void *)i2d_PrivateKey, pem_str, bio,
+				pkey, enc, NULL, 0, ossl_pem_passwd_cb,
+				(void *)pass)) {
+#endif
+	    BIO_free(bio);
+	    ossl_raise(ePKeyError, "PEM_write_bio_PrivateKey_traditional");
+	}
+    }
+    return ossl_membio2str(bio);
+}
+
 static VALUE
 do_pkcs8_export(int argc, VALUE *argv, VALUE self, int to_der)
 {
@@ -404,8 +456,8 @@ ossl_pkey_private_to_pem(int argc, VALUE *argv, VALUE self)
     return do_pkcs8_export(argc, argv, self, 0);
 }
 
-static VALUE
-do_spki_export(VALUE self, int to_der)
+VALUE
+ossl_pkey_export_spki(VALUE self, int to_der)
 {
     EVP_PKEY *pkey;
     BIO *bio;
@@ -438,7 +490,7 @@ do_spki_export(VALUE self, int to_der)
 static VALUE
 ossl_pkey_public_to_der(VALUE self)
 {
-    return do_spki_export(self, 1);
+    return ossl_pkey_export_spki(self, 1);
 }
 
 /*
@@ -450,7 +502,7 @@ ossl_pkey_public_to_der(VALUE self)
 static VALUE
 ossl_pkey_public_to_pem(VALUE self)
 {
-    return do_spki_export(self, 0);
+    return ossl_pkey_export_spki(self, 0);
 }
 
 /*
