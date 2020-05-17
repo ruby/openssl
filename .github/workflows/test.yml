@@ -94,3 +94,40 @@ jobs:
 
       - name: test
         run:  rake test TESTOPTS="-v --no-show-detail-immediately" OSSL_MDEBUG=1
+
+  test-openssl-master:
+    name: OpenSSL master
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest ]
+        ruby: [ 2.7 ]
+    steps:
+      - name: repo checkout
+        uses: actions/checkout@v2
+
+      - name: prepare openssl
+        run: |
+          mkdir -p tmp/build-openssl && cd tmp/build-openssl
+          git clone https://github.com/openssl/openssl.git --depth=1
+          cd openssl
+          ./Configure --prefix=$HOME/.openssl/master --libdir=lib \
+              linux-x86_64
+          make depend
+          make -j4
+          make install_sw
+
+      - name: load ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+
+      - name: depends
+        run:  bundle install
+
+      - name: compile
+        run:  rake compile -- --enable-debug --with-openssl-dir=$HOME/.openssl/master
+
+      - name: test
+        run:  rake test TESTOPTS="-v --no-show-detail-immediately"
