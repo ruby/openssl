@@ -69,6 +69,20 @@ module OpenSSL::PKey
   end
   end
 
+  class PKey
+    def self._load(string)
+      OpenSSL::PKey.read(string)
+    end
+
+    def _dump(_level)
+      if private?
+        private_to_der
+      else
+        public_to_der
+      end
+    end
+  end
+
   class RSA
     include OpenSSL::Marshal
   end

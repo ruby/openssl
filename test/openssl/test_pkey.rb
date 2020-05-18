@@ -103,8 +103,18 @@ class OpenSSL::TestPKey < OpenSSL::PKeyTestCase
     assert_instance_of OpenSSL::PKey::PKey, priv
     assert_instance_of OpenSSL::PKey::PKey, pub
     assert_equal priv_pem, priv.private_to_pem
+    assert_equal true, priv.private?
+    assert_equal true, priv.public?
+    priv_deserialized = Marshal.load(Marshal.dump(priv))
+    assert_equal priv.private_to_der, priv_deserialized.private_to_der
+
     assert_equal pub_pem, priv.public_to_pem
     assert_equal pub_pem, pub.public_to_pem
+    assert_equal false, pub.private?
+    assert_equal true, pub.public?
+    pub_deserialized = Marshal.load(Marshal.dump(pub))
+    assert_equal pub.public_to_der, pub_deserialized.public_to_der
+
 
     sig = [<<~EOF.gsub(/[^0-9a-f]/, "")].pack("H*")
     92a009a9f0d4cab8720e820b5f642540
@@ -150,5 +160,9 @@ class OpenSSL::TestPKey < OpenSSL::PKeyTestCase
     assert_equal alice_pem, alice.private_to_pem
     assert_equal bob_pem, bob.public_to_pem
     assert_equal [shared_secret].pack("H*"), alice.derive(bob)
+    alice_deserialized = Marshal.load(Marshal.dump(alice))
+    assert_equal alice.private_to_der, alice_deserialized.private_to_der
+    bob_deserialized = Marshal.load(Marshal.dump(bob))
+    assert_equal bob.public_to_der, bob_deserialized.public_to_der
   end
 end
