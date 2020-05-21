@@ -533,6 +533,56 @@ ossl_pkey_initialize(VALUE self)
 }
 
 /*
+ *  call-seq:
+ *      OpenSSL::PKey.private_new(algo, string) -> PKey
+ *
+ * See the OpenSSL documentation for EVP_PKEY_new_raw_private_key()
+ */
+
+static VALUE
+ossl_pkey_initialize_private(VALUE self, VALUE type, VALUE key)
+{
+    EVP_PKEY *pkey;
+    int nid;
+    size_t keylen;
+
+    nid = OBJ_sn2nid(StringValueCStr(type));
+    if(!nid) ossl_raise(ePKeyError, "unknown OID `%"PRIsVALUE"'", type);
+
+    keylen = RSTRING_LEN(key);
+    pkey = EVP_PKEY_new_raw_private_key(nid, NULL, (unsigned char *)RSTRING_PTR(key), keylen);
+    if (!pkey)
+        ossl_raise(ePKeyError, "Could not parse PKey");
+
+    return ossl_pkey_new(pkey);
+}
+
+/*
+ *  call-seq:
+ *      OpenSSL::PKey.public_new(algo, string) -> PKey
+ *
+ * See the OpenSSL documentation for EVP_PKEY_new_raw_public_key()
+ */
+
+static VALUE
+ossl_pkey_initialize_public(VALUE self, VALUE type, VALUE key)
+{
+    EVP_PKEY *pkey;
+    int nid;
+    size_t keylen;
+
+    nid = OBJ_sn2nid(StringValueCStr(type));
+    if(!nid) ossl_raise(ePKeyError, "unknown OID `%"PRIsVALUE"'", type);
+
+    keylen = RSTRING_LEN(key);
+    pkey = EVP_PKEY_new_raw_public_key(nid, NULL, (unsigned char *)RSTRING_PTR(key), keylen);
+    if (!pkey)
+        ossl_raise(ePKeyError, "Could not parse PKey");
+
+    return ossl_pkey_new(pkey);
+}
+
+/*
  * call-seq:
  *    pkey.oid -> string
  *
@@ -702,6 +752,30 @@ ossl_pkey_private_to_pem(int argc, VALUE *argv, VALUE self)
     return do_pkcs8_export(argc, argv, self, 0);
 }
 
+/*
+ *  call-seq:
+ *     key.private_to_raw   => string
+ *
+ *  See the OpenSSL documentation for EVP_PKEY_get_raw_private_key()
+ */
+static VALUE ossl_pkey_private_to_raw(VALUE self)
+{
+    EVP_PKEY *pkey;
+    VALUE str;
+    size_t len;
+
+    GetPKey(self, pkey);
+    EVP_PKEY_get_raw_private_key(pkey, NULL, &len);
+    str = rb_str_new(NULL, len);
+
+    if (EVP_PKEY_get_raw_private_key(pkey, (unsigned char *)RSTRING_PTR(str), &len) != 1)
+        ossl_raise(ePKeyError, "EVP_PKEY_get_raw_private_key");
+
+    rb_str_set_len(str, len);
+
+    return str;
+}
+
 VALUE
 ossl_pkey_export_spki(VALUE self, int to_der)
 {
@@ -768,6 +842,30 @@ static VALUE
 ossl_pkey_public_to_pem(VALUE self)
 {
     return ossl_pkey_export_spki(self, 0);
+}
+
+/*
+ *  call-seq:
+ *     key.public_to_raw   => string
+ *
+ *  See the OpenSSL documentation for EVP_PKEY_get_raw_public_key()
+ */
+static VALUE ossl_pkey_public_to_raw(VALUE self)
+{
+    EVP_PKEY *pkey;
+    VALUE str;
+    size_t len;
+
+    GetPKey(self, pkey);
+    EVP_PKEY_get_raw_public_key(pkey, NULL, &len);
+    str = rb_str_new(NULL, len);
+
+    if (EVP_PKEY_get_raw_public_key(pkey, (unsigned char *)RSTRING_PTR(str), &len) != 1)
+        ossl_raise(ePKeyError, "EVP_PKEY_get_raw_public_key");
+
+    rb_str_set_len(str, len);
+
+    return str;
 }
 
 /*
@@ -1060,6 +1158,8 @@ Init_ossl_pkey(void)
     rb_define_module_function(mPKey, "read", ossl_pkey_new_from_data, -1);
     rb_define_module_function(mPKey, "generate_parameters", ossl_pkey_s_generate_parameters, -1);
     rb_define_module_function(mPKey, "generate_key", ossl_pkey_s_generate_key, -1);
+    rb_define_module_function(mPKey, "private_new", ossl_pkey_initialize_private, 2);
+    rb_define_module_function(mPKey, "public_new", ossl_pkey_initialize_public, 2);
 
     rb_define_alloc_func(cPKey, ossl_pkey_alloc);
     rb_define_method(cPKey, "initialize", ossl_pkey_initialize, 0);
@@ -1068,9 +1168,11 @@ Init_ossl_pkey(void)
     rb_define_method(cPKey, "private?", ossl_pkey_is_private, 0);
     rb_define_method(cPKey, "private_to_der", ossl_pkey_private_to_der, -1);
     rb_define_method(cPKey, "private_to_pem", ossl_pkey_private_to_pem, -1);
+    rb_define_method(cPKey, "private_to_raw", ossl_pkey_private_to_raw, 0);
     rb_define_method(cPKey, "public?", ossl_pkey_is_public, 0);
     rb_define_method(cPKey, "public_to_der", ossl_pkey_public_to_der, 0);
     rb_define_method(cPKey, "public_to_pem", ossl_pkey_public_to_pem, 0);
+    rb_define_method(cPKey, "public_to_raw", ossl_pkey_public_to_raw, 0);
 
     rb_define_method(cPKey, "sign", ossl_pkey_sign, 2);
     rb_define_method(cPKey, "verify", ossl_pkey_verify, 3);

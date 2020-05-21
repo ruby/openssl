@@ -107,6 +107,10 @@ class OpenSSL::TestPKey < OpenSSL::PKeyTestCase
     assert_equal true, priv.public?
     priv_deserialized = Marshal.load(Marshal.dump(priv))
     assert_equal priv.private_to_der, priv_deserialized.private_to_der
+    assert_equal "4ccd089b28ff96da9db6c346ec114e0f5b8a319f35aba624da8cf6ed4fb8a6fb",
+      priv.private_to_raw.unpack1("H*")
+    assert_equal OpenSSL::PKey.private_new("ED25519", priv.private_to_raw).private_to_pem,
+      priv.private_to_pem
 
     assert_equal pub_pem, priv.public_to_pem
     assert_equal pub_pem, pub.public_to_pem
@@ -114,6 +118,10 @@ class OpenSSL::TestPKey < OpenSSL::PKeyTestCase
     assert_equal true, pub.public?
     pub_deserialized = Marshal.load(Marshal.dump(pub))
     assert_equal pub.public_to_der, pub_deserialized.public_to_der
+    assert_equal "3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c",
+      priv.public_to_raw.unpack1("H*")
+    assert_equal OpenSSL::PKey.public_new("ED25519", priv.public_to_raw).public_to_pem,
+      pub.public_to_pem
 
 
     sig = [<<~EOF.gsub(/[^0-9a-f]/, "")].pack("H*")
@@ -164,5 +172,22 @@ class OpenSSL::TestPKey < OpenSSL::PKeyTestCase
     assert_equal alice.private_to_der, alice_deserialized.private_to_der
     bob_deserialized = Marshal.load(Marshal.dump(bob))
     assert_equal bob.public_to_der, bob_deserialized.public_to_der
+    assert_equal "77076d0a7318a57d3c16c17251b26645df4c2f87ebc0992ab177fba51db92c2a",
+      alice.private_to_raw.unpack1("H*")
+    assert_equal OpenSSL::PKey.private_new("X25519", alice.private_to_raw).private_to_pem,
+      alice.private_to_pem
+    assert_equal "de9edb7d7b7dc1b4d35b61c2ece435373f8343c85b78674dadfc7e146f882b4f",
+      bob.public_to_raw.unpack1("H*")
+    assert_equal OpenSSL::PKey.public_new("X25519", bob.public_to_raw).public_to_pem,
+      bob.public_to_pem
+  end
+
+  def raw_initialize
+    pend "Ed25519 is not implemented" unless OpenSSL::OPENSSL_VERSION_NUMBER >= 0x10101000 && # >= v1.1.1
+
+    assert_raise(OpenSSL::PKey::PKeyError) { OpenSSL::PKey.private_new("foo123", "xxx") }
+    assert_raise(OpenSSL::PKey::PKeyError) { OpenSSL::PKey.private_new("ED25519", "xxx") }
+    assert_raise(OpenSSL::PKey::PKeyError) { OpenSSL::PKey.public_new("foo123", "xxx") }
+    assert_raise(OpenSSL::PKey::PKeyError) { OpenSSL::PKey.public_new("ED25519", "xxx") }
   end
 end
