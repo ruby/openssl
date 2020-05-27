@@ -61,6 +61,13 @@ class OpenSSL::TestDigest < OpenSSL::TestCase
     end
   end
 
+  def test_toplevel_digest_constants
+    assert_same(OpenSSL::Digest::RIPEMD160, Digest::RMD160)
+    %w{MD5 SHA1 SHA256 SHA384 SHA512}.each do |name|
+      assert_same(OpenSSL::Digest.const_get(name), Digest.const_get(name))
+    end
+  end
+
   def test_digest_by_oid_and_name
     check_digest(OpenSSL::ASN1::ObjectId.new("MD5"))
     check_digest(OpenSSL::ASN1::ObjectId.new("SHA1"))

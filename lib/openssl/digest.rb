@@ -71,3 +71,43 @@ module OpenSSL
   module_function :Digest
 
 end # OpenSSL
+
+# The 'digest' standard library providesa ::Digest, a framework for message
+# digest algorithms and bundles basic implementations of commonly used
+# algorithms.
+#
+# Ruby/OpenSSL provides a more efficient implementation of those algorithms
+# in OpenSSL::Digest, which also inherts from Digest::Class and has the
+# same interface as ::Digest.
+#
+# This redefines the constants in ::Digest with the OpenSSL implementations.
+# The original constants are renamed to add "_DEFAULT" to their original name.
+module Digest
+  rename_builtin = proc { |name|
+    begin
+      default = const_get(name)
+    rescue LoadError
+    else
+      const_set(:"#{name}_DEFAULT", default)
+      remove_const(name)
+    end
+  }
+
+  # OpenSSL::Digest.new("RIPEMD160")
+  RMD160 = OpenSSL::Digest::RIPEMD160 if rename_builtin.(:RMD160)
+
+  # OpenSSL::Digest.new("MD5")
+  MD5 = OpenSSL::Digest::MD5 if rename_builtin.(:MD5)
+
+  # OpenSSL::Digest.new("SHA1")
+  SHA1 = OpenSSL::Digest::SHA1 if rename_builtin.(:SHA1)
+
+  # OpenSSL::Digest.new("SHA256")
+  SHA256 = OpenSSL::Digest::SHA256 if rename_builtin.(:SHA256)
+
+  # OpenSSL::Digest.new("SHA384")
+  SHA384 = OpenSSL::Digest::SHA384 if rename_builtin.(:SHA384)
+
+  # OpenSSL::Digest.new("SHA512")
+  SHA512 = OpenSSL::Digest::SHA512 if rename_builtin.(:SHA512)
+end
