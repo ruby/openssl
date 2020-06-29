@@ -220,6 +220,7 @@ YoaOffgTf5qxiwkjnlVZQc3whgnEt9FpVMvQ9eknyeGB5KHfayAc3+hUAvI3/Cr3
         TLSv1: OpenSSL::SSL::TLS1_VERSION,
         TLSv1_1: OpenSSL::SSL::TLS1_1_VERSION,
         TLSv1_2: OpenSSL::SSL::TLS1_2_VERSION,
+        TLSv1_3: OpenSSL::SSL::TLS1_3_VERSION
       }.freeze
       private_constant :METHODS_MAP
 
@@ -236,7 +237,7 @@ YoaOffgTf5qxiwkjnlVZQc3whgnEt9FpVMvQ9eknyeGB5KHfayAc3+hUAvI3/Cr3
       def fileno
         to_io.fileno
       end
-      
+
       def addr
         to_io.addr
       end
