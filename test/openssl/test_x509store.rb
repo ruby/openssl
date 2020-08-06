@@ -206,6 +206,31 @@ class OpenSSL::TestX509Store < OpenSSL::TestCase
     assert_equal(false, store.verify(ee1_cert))
     assert_equal(OpenSSL::X509::V_ERR_CRL_HAS_EXPIRED, store.error)
     assert_equal(false, store.verify(ee2_cert))
+
+    ca1_cert_rsa = issue_cert(@ca1, @rsa2048, 1, ca_exts, nil, nil)
+    ca1_cert_dsa = issue_cert(@ca1, @dsa512, 2, ca_exts, nil, nil)
+    ee1_cert = issue_cert(@ee1, @dsa512, 30,  ee_exts, ca1_cert_rsa, @rsa2048)
+    ee2_cert = issue_cert(@ee2, @dsa512, 30,  ee_exts, ca1_cert_dsa, @dsa512)
+
+    store = OpenSSL::X509::Store.new
+    store.add_cert(ca1_cert_rsa)
+    store.add_cert(ca1_cert_dsa)
+
+    assert_equal(true, store.verify(ee1_cert))
+    assert_equal(OpenSSL::X509::V_OK, store.error)
+    assert_equal("ok", store.error_string)
+    chain = store.chain
+    assert_equal(2, chain.size)
+    assert_equal(@ee1.to_der, chain[0].subject.to_der)
+    assert_equal(@ca1.to_der, chain[1].subject.to_der)
+
+    assert_equal(true, store.verify(ee2_cert))
+    assert_equal(OpenSSL::X509::V_OK, store.error)
+    assert_equal("ok", store.error_string)
+    chain = store.chain
+    assert_equal(2, chain.size)
+    assert_equal(@ee2.to_der, chain[0].subject.to_der)
+    assert_equal(@ca1.to_der, chain[1].subject.to_der)
   end
 
   def test_set_errors
