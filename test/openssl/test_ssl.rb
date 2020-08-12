@@ -246,7 +246,56 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     end
   end
 
-  def test_client_auth_failure
+  def test_verify_mode_default
+    ctx = OpenSSL::SSL::SSLContext.new
+    assert_equal OpenSSL::SSL::VERIFY_NONE, ctx.verify_mode
+  end
+
+  def test_verify_mode_server_cert
+    start_server(ignore_listener_error: true) { |port|
+      populated_store = OpenSSL::X509::Store.new
+      populated_store.add_cert(@ca_cert)
+      empty_store = OpenSSL::X509::Store.new
+
+      # Valid certificate, SSL_VERIFY_PEER
+      assert_nothing_raised {
+        ctx = OpenSSL::SSL::SSLContext.new
+        ctx.verify_mode = OpenSSL::SSL::VERIFY_PEER
+        ctx.cert_store = populated_store
+        server_connect(port, ctx) { |ssl| ssl.puts("abc"); ssl.gets }
+      }
+
+      # Invalid certificate, SSL_VERIFY_NONE
+      assert_nothing_raised {
+        ctx = OpenSSL::SSL::SSLContext.new
+        ctx.verify_mode = OpenSSL::SSL::VERIFY_NONE
+        ctx.cert_store = empty_store
+        server_connect(port, ctx) { |ssl| ssl.puts("abc"); ssl.gets }
+      }
+
+      # Invalid certificate, SSL_VERIFY_PEER
+      assert_handshake_error {
+        ctx = OpenSSL::SSL::SSLContext.new
+        ctx.verify_mode = OpenSSL::SSL::VERIFY_PEER
+        ctx.cert_store = empty_store
+        server_connect(port, ctx) { |ssl| ssl.puts("abc"); ssl.gets }
+      }
+    }
+  end
+
+  def test_verify_mode_client_cert_required
+    # Optional, client certificate not supplied
+    vflag = OpenSSL::SSL::VERIFY_PEER
+    accept_proc = -> ssl {
+      assert_equal nil, ssl.peer_cert
+    }
+    start_server(verify_mode: vflag, accept_proc: accept_proc) { |port|
+      assert_nothing_raised {
+        server_connect(port) { |ssl| ssl.puts("abc"); ssl.gets }
+      }
+    }
+
+    # Required, client certificate not supplied
     vflag = OpenSSL::SSL::VERIFY_PEER|OpenSSL::SSL::VERIFY_FAIL_IF_NO_PEER_CERT
     start_server(verify_mode: vflag, ignore_listener_error: true) { |port|
       assert_handshake_error {
@@ -282,20 +331,16 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     }
   end
 
-  def test_client_auth_public_key
+  def test_client_cert_cb_ignore_error
     vflag = OpenSSL::SSL::VERIFY_PEER|OpenSSL::SSL::VERIFY_FAIL_IF_NO_PEER_CERT
     start_server(verify_mode: vflag, ignore_listener_error: true) do |port|
-      assert_raise(ArgumentError) {
-        ctx = OpenSSL::SSL::SSLContext.new
-        ctx.key = @cli_key.public_key
-        ctx.cert = @cli_cert
-        server_connect(port, ctx) { |ssl| ssl.puts("abc"); ssl.gets }
-      }
-
       ctx = OpenSSL::SSL::SSLContext.new
-      ctx.client_cert_cb = Proc.new{ |ssl|
-        [@cli_cert, @cli_key.public_key]
+      ctx.client_cert_cb = -> ssl {
+        raise "exception in client_cert_cb must be suppressed"
       }
+      # 1. Exception in client_cert_cb is suppressed
+      # 2. No client certificate will be sent to the server
+      # 3. SSL_VERIFY_FAIL_IF_NO_PEER_CERT causes the handshake to fail
       assert_handshake_error {
         server_connect(port, ctx) { |ssl| ssl.puts("abc"); ssl.gets }
       }
@@ -879,6 +924,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
 
     start_server(ctx_proc: ctx_proc, ignore_listener_error: true) do |port|
       ctx = OpenSSL::SSL::SSLContext.new
+      assert_equal false, ctx.verify_hostname
       ctx.verify_hostname = true
       ctx.cert_store = OpenSSL::X509::Store.new
       ctx.cert_store.add_cert(@ca_cert)
