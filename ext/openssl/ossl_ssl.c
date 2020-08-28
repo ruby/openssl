@@ -43,7 +43,7 @@ static ID id_i_cert_store, id_i_ca_file, id_i_ca_path, id_i_verify_mode,
 	  id_i_session_id_context, id_i_session_get_cb, id_i_session_new_cb,
 	  id_i_session_remove_cb, id_i_npn_select_cb, id_i_npn_protocols,
 	  id_i_alpn_select_cb, id_i_alpn_protocols, id_i_servername_cb,
-	  id_i_verify_hostname;
+	  id_i_verify_hostname, id_i_status_cb;
 static ID id_i_io, id_i_context, id_i_hostname;
 
 static int ossl_ssl_ex_vcb_idx;
@@ -553,6 +553,68 @@ ssl_servername_cb(SSL *ssl, int *ad, void *arg)
     return SSL_TLSEXT_ERR_OK;
 }
 
+static VALUE
+ossl_call_status_cb(VALUE ary)
+{
+    VALUE ssl_obj, ssl_ctx_obj, arg, cb;
+
+    Check_Type(ary, T_ARRAY);
+    
+    ssl_obj = rb_ary_entry(ary, 0);
+    ssl_ctx_obj = rb_ary_entry(ary, 1);
+    arg = rb_ary_entry(ary, 2);
+
+    cb = rb_attr_get(ssl_ctx_obj, id_i_status_cb);
+    if (NIL_P(cb)) return Qtrue;
+    return rb_funcall(cb, id_call, 2, ssl_obj, arg);
+}
+
+static int
+ossl_sslctx_status_cb(SSL *ssl, void *status_arg)
+{
+    VALUE ary, ssl_obj, sslctx_obj;
+    int state = 0;
+    int rv;
+    VALUE result;
+    unsigned char *ocsp_response_raw;
+    VALUE ocsp_response_str;
+
+    OSSL_Debug("SSL status callback entered");
+
+    ssl_obj = (VALUE)SSL_get_ex_data(ssl, ossl_ssl_ex_ptr_idx);
+    sslctx_obj = rb_attr_get(ssl_obj, id_i_context);
+
+    ary = rb_ary_new2(3);
+    rb_ary_push(ary, ssl_obj);
+    rb_ary_push(ary, sslctx_obj);
+    
+    rv = SSL_get_tlsext_status_ocsp_resp(ssl, &ocsp_response_raw);
+    if (rv <= 0) {
+        /* No OCSP stapled response */
+        rb_ary_push(ary, Qnil);
+    } else {
+        VALUE resp;
+        ocsp_response_str = rb_str_new((char *) ocsp_response_raw, rv);
+        resp = rb_funcall(cOCSPRes, rb_intern("new"), 1, ocsp_response_str);
+        rb_ary_push(ary, resp);
+        RB_GC_GUARD(ocsp_response_str);
+        RB_GC_GUARD(resp);
+    }
+    
+    result = rb_protect(ossl_call_status_cb, ary, &state);
+
+    if (state) {
+        rb_ivar_set(ssl_obj, ID_callback_state, INT2NUM(state));
+        return -1;
+    }
+    
+    if (RTEST(result)) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
 static void
 ssl_renegotiation_cb(const SSL *ssl)
 {
@@ -912,6 +974,13 @@ ossl_sslctx_setup(VALUE self)
     if (!NIL_P(val)) {
         SSL_CTX_set_tlsext_servername_callback(ctx, ssl_servername_cb);
 	OSSL_Debug("SSL TLSEXT servername callback added");
+    }
+
+    if (RTEST(rb_attr_get(self, id_i_status_cb))) {
+	SSL_CTX_set_tlsext_status_cb(ctx, ossl_sslctx_status_cb);
+	OSSL_Debug("SSL status callback added");
+    } else {
+        puts("fail");
     }
 
     return Qtrue;
@@ -2245,6 +2314,34 @@ ossl_ssl_set_hostname(VALUE self, VALUE arg)
 
 /*
  * call-seq:
+ *    ssl.status_type = status_type -> status_type
+ *
+ * Set to 1 to request that the server staples an OCSP response to the 
+ * certificate it presents to the client. Set to nil to request no OCSP
+ * response stapling. This needs to be set before SSLSocket#connect.
+ *
+ * Provide a callback via status_cb to verify the server's stapled OCSP
+ * response.
+ */
+static VALUE
+ossl_ssl_set_status_type(VALUE self, VALUE arg)
+{
+    SSL *ssl;
+    int status_type = -1;
+
+    GetSSL(self, ssl);
+
+    if (!NIL_P(arg))
+	status_type = FIX2INT(arg);
+
+    printf("%d\n",status_type);
+    printf("%ld\n",SSL_set_tlsext_status_type(ssl, status_type));
+
+    return arg;
+}
+
+/*
+ * call-seq:
  *    ssl.verify_result => Integer
  *
  * Returns the result of the peer certificates verification.  See verify(1)
@@ -2703,6 +2800,22 @@ Init_ossl_ssl(void)
     rb_attr(cSSLContext, rb_intern("alpn_select_cb"), 1, 1, Qfalse);
 #endif
 
+    /*
+     * A callback invoked when a stapled OCSP response is received.
+     *
+     * The callback is invoked with an SSLSocket and an instance of
+     * OpenSSL::OCSP::Response. If the callback returns false or nil, the
+     * connection will be aborted.
+     *
+     * To request that the server sends a stapled OCSP response, set
+     * status_type to 1 on the SSLSocket.
+     *
+     * If the server does not provide a stapled OCSP response, this callback
+     * is not invoked even if the stapled OCSP response is requested, and
+     * connection establishment continues to the next step.
+     */
+    rb_attr(cSSLContext, rb_intern("status_cb"), 1, 1, Qfalse);
+
     rb_define_alias(cSSLContext, "ssl_timeout", "timeout");
     rb_define_alias(cSSLContext, "ssl_timeout=", "timeout=");
     rb_define_private_method(cSSLContext, "set_minmax_proto_version",
@@ -2813,6 +2926,7 @@ Init_ossl_ssl(void)
     rb_define_method(cSSLSocket, "client_ca", ossl_ssl_get_client_ca_list, 0);
     /* #hostname is defined in lib/openssl/ssl.rb */
     rb_define_method(cSSLSocket, "hostname=", ossl_ssl_set_hostname, 1);
+    rb_define_method(cSSLSocket, "status_type=", ossl_ssl_set_status_type, 1);
     rb_define_method(cSSLSocket, "finished_message", ossl_ssl_get_finished, 0);
     rb_define_method(cSSLSocket, "peer_finished_message", ossl_ssl_get_peer_finished, 0);
 # ifdef HAVE_SSL_GET_SERVER_TMP_KEY
@@ -2961,6 +3075,7 @@ Init_ossl_ssl(void)
     DefIVarID(alpn_select_cb);
     DefIVarID(servername_cb);
     DefIVarID(verify_hostname);
+    DefIVarID(status_cb);
 
     DefIVarID(io);
     DefIVarID(context);
