@@ -24,35 +24,33 @@ class OpenSSL::TestX509Store < OpenSSL::TestCase
     cert2 = issue_cert(cert2_subj, cert2_key, 1, ca_exts, nil, nil)
 
     # X509::Store#add_file reads concatenated PEM file
-    Tempfile.open { |tmpfile|
-      tmpfile << cert1.to_pem << cert2.to_pem
-      tmpfile.close
+    tmpfile = Tempfile.open { |f| f << cert1.to_pem << cert2.to_pem; f }
+    store = OpenSSL::X509::Store.new
+    assert_equal false, store.verify(cert1)
+    assert_equal false, store.verify(cert2)
+    store.add_file(tmpfile.path)
+    assert_equal true, store.verify(cert1)
+    assert_equal true, store.verify(cert2)
 
+    # X509::Store#add_path
+    Dir.mktmpdir do |dir|
+      hash1 = "%08x.%d" % [cert1_subj.hash, 0]
+      File.write(File.join(dir, hash1), cert1.to_pem)
       store = OpenSSL::X509::Store.new
-      assert_equal false, store.verify(cert1)
-      assert_equal false, store.verify(cert2)
-      store.add_file(tmpfile.path)
+      store.add_path(dir)
+
       assert_equal true, store.verify(cert1)
-      assert_equal true, store.verify(cert2)
+      assert_equal false, store.verify(cert2)
+    end
 
-      # X509::Store#add_path
-      Dir.mktmpdir do |dir|
-        hash1 = "%08x.%d" % [cert1_subj.hash, 0]
-        File.write(File.join(dir, hash1), cert1.to_pem)
-        store = OpenSSL::X509::Store.new
-        store.add_path(dir)
+    # OpenSSL < 1.1.1 leaks an error on a duplicate certificate
+    assert_nothing_raised { store.add_file(tmpfile.path) }
+    assert_equal [], OpenSSL.errors
 
-        assert_equal true, store.verify(cert1)
-        assert_equal false, store.verify(cert2)
-      end
-
-      # OpenSSL < 1.1.1 leaks an error on a duplicate certificate
-      assert_nothing_raised { store.add_file(tmpfile.path) }
-      assert_equal [], OpenSSL.errors
-
-      # Non-String is given
-      assert_raise(TypeError) { store.add_file(nil) }
-    }
+    # Non-String is given
+    assert_raise(TypeError) { store.add_file(nil) }
+  ensure
+    tmpfile and tmpfile.close!
   end
 
   def test_verify_simple
