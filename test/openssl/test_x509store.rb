@@ -123,11 +123,11 @@ class OpenSSL::TestX509Store < OpenSSL::TestCase
     }
     store.add_cert(ca1_cert)
     assert_equal(true, store.verify(ee1_cert, [ca2_cert]))
-    assert_include([3, 4], cb_calls.size)
-    assert_equal([true, ca1_cert], cb_calls[0])
-    assert_equal([true, ca2_cert], cb_calls[1])
-    assert_equal([true, ee1_cert], cb_calls[2])
-    assert_equal([true, ee1_cert], cb_calls[3]) if cb_calls.size == 4
+    assert_include([2, 3, 4], cb_calls.size)
+    cb_calls.each do |pre_ok, cert|
+      assert_equal(true, pre_ok)
+      assert_include([ca1_cert, ca2_cert, ee1_cert], cert)
+    end
 
     # verify_callback can change verification result
     store = OpenSSL::X509::Store.new
