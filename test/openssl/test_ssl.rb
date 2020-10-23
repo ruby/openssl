@@ -924,11 +924,13 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
 
   def test_verify_hostname_on_connect
     ctx_proc = proc { |ctx|
+      san = "DNS:a.example.com,DNS:*.b.example.com"
+      san += ",DNS:c*.example.com,DNS:d.*.example.com" unless libressl?(3, 2, 2)
       exts = [
         ["keyUsage", "keyEncipherment,digitalSignature", true],
-        ["subjectAltName", "DNS:a.example.com,DNS:*.b.example.com," \
-                           "DNS:c*.example.com,DNS:d.*.example.com"],
+        ["subjectAltName", san],
       ]
+ 
       ctx.cert = issue_cert(@svr, @svr_key, 4, exts, @ca_cert, @ca_key)
       ctx.key = @svr_key
     }
@@ -950,6 +952,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
         ["cx.example.com", true],
         ["d.x.example.com", false],
       ].each do |name, expected_ok|
+        next if name.start_with?('cx') if libressl?(3, 2, 2)
         begin
           sock = TCPSocket.new("127.0.0.1", port)
           ssl = OpenSSL::SSL::SSLSocket.new(sock, ctx)
