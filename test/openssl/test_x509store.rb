@@ -123,7 +123,7 @@ class OpenSSL::TestX509Store < OpenSSL::TestCase
     }
     store.add_cert(ca1_cert)
     assert_equal(true, store.verify(ee1_cert, [ca2_cert]))
-    assert_include([2, 3, 4], cb_calls.size)
+    assert_include([2, 3, 4, 5], cb_calls.size)
     cb_calls.each do |pre_ok, cert|
       assert_equal(true, pre_ok)
       assert_include([ca1_cert, ca2_cert, ee1_cert], cert)
@@ -326,7 +326,7 @@ class OpenSSL::TestX509Store < OpenSSL::TestCase
     store.add_crl(ca2_crl2) # issued by ca2 but expired
     if libressl?(3, 2, 2)
       assert_equal(false, store.verify(ca2_cert))
-      assert_equal(OpenSSL::X509::V_ERR_UNSPECIFIED, store.error)
+      assert_include([OpenSSL::X509::V_ERR_CRL_SIGNATURE_FAILURE, OpenSSL::X509::V_ERR_UNSPECIFIED], store.error)
     else
       assert_equal(true, store.verify(ca2_cert))
     end
