@@ -52,10 +52,11 @@ jobs:
       - name: depends
         run:  rake install_dependencies
 
+      # pkg-config is disabled because it can pick up the different OpenSSL installation
       # SSL_DIR is set as needed by MSP-Greg/setup-ruby-pkgs
       # only used with mswin
       - name: compile
-        run:  rake compile -- --enable-debug $env:SSL_DIR
+        run:  rake compile -- --enable-debug --without-pkg-config $env:SSL_DIR
 
       - name: test
         run:  rake test TESTOPTS="-v --no-show-detail-immediately" OSSL_MDEBUG=1
