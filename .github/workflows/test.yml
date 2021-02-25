@@ -11,7 +11,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest, macos-latest ]
-        ruby: [ head, 2.7, 2.6, 2.5, 2.4, 2.3 ]
+        ruby: [ head, "3.0", "2.7", "2.6", "2.5", "2.4", "2.3" ]
     steps:
       - name: repo checkout
         uses: actions/checkout@v2
@@ -38,7 +38,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ windows-latest ]
-        ruby: [ mswin, mingw, 2.7, 2.6, 2.5, 2.4, 2.3 ]
+        ruby: [ mswin, mingw, "3.0", "2.7", "2.6", "2.5", "2.4", "2.3" ]
     steps:
       - name: repo checkout
         uses: actions/checkout@v2
@@ -69,14 +69,14 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest ]
-        ruby: [ 2.7 ]
+        ruby: [ "3.0" ]
         openssl:
           - openssl-1.0.1u # EOL
           - openssl-1.0.2u # EOL
           - openssl-1.1.0l # EOL
-          - openssl-1.1.1g
+          - openssl-1.1.1j
           - libressl-2.5.5 # EOL
-          - libressl-3.1.3
+          - libressl-3.1.5
           - libressl-3.2.0
     steps:
       - name: repo checkout
