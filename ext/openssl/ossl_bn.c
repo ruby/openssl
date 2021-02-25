@@ -403,7 +403,7 @@ ossl_bn_is_negative(VALUE self)
 	if (!(result = BN_new())) {			\
 	    ossl_raise(eBNError, NULL);			\
 	}						\
-	if (!BN_##func(result, bn, ossl_bn_ctx)) {	\
+	if (BN_##func(result, bn, ossl_bn_ctx) <= 0) {	\
 	    BN_free(result);				\
 	    ossl_raise(eBNError, NULL);			\
 	}						\
@@ -429,7 +429,7 @@ BIGNUM_1c(sqr)
 	if (!(result = BN_new())) {			\
 	    ossl_raise(eBNError, NULL);			\
 	}						\
-	if (!BN_##func(result, bn1, bn2)) {		\
+	if (BN_##func(result, bn1, bn2) <= 0) {		\
 	    BN_free(result);				\
 	    ossl_raise(eBNError, NULL);			\
 	}						\
@@ -462,7 +462,7 @@ BIGNUM_2(sub)
 	if (!(result = BN_new())) {				\
 	    ossl_raise(eBNError, NULL);				\
 	}							\
-	if (!BN_##func(result, bn1, bn2, ossl_bn_ctx)) {	\
+	if (BN_##func(result, bn1, bn2, ossl_bn_ctx) <= 0) {	\
 	    BN_free(result);					\
 	    ossl_raise(eBNError, NULL);				\
 	}							\
@@ -506,11 +506,21 @@ BIGNUM_2c(gcd)
 BIGNUM_2c(mod_sqr)
 
 /*
- * Document-method: OpenSSL::BN#mod_inverse
  * call-seq:
- *   bn.mod_inverse(bn2) => aBN
+ *    bn.mod_inverse(bn2) => aBN
  */
-BIGNUM_2c(mod_inverse)
+static VALUE
+ossl_bn_mod_inverse(VALUE self, VALUE other)
+{
+    BIGNUM *bn1, *bn2 = GetBNPtr(other), *result;
+    VALUE obj;
+    GetBN(self, bn1);
+    obj = NewBN(rb_obj_class(self));
+    if (!(result = BN_mod_inverse(NULL, bn1, bn2, ossl_bn_ctx)))
+        ossl_raise(eBNError, "BN_mod_inverse");
+    SetBN(obj, result);
+    return obj;
+}
 
 /*
  * call-seq:
@@ -559,7 +569,7 @@ ossl_bn_div(VALUE self, VALUE other)
 	if (!(result = BN_new())) {				\
 	    ossl_raise(eBNError, NULL);				\
 	}							\
-	if (!BN_##func(result, bn1, bn2, bn3, ossl_bn_ctx)) {	\
+	if (BN_##func(result, bn1, bn2, bn3, ossl_bn_ctx) <= 0) { \
 	    BN_free(result);					\
 	    ossl_raise(eBNError, NULL);				\
 	}							\
@@ -601,7 +611,7 @@ BIGNUM_3c(mod_exp)
     {							\
 	BIGNUM *bn;					\
 	GetBN(self, bn);				\
-	if (!BN_##func(bn, NUM2INT(bit))) {		\
+	if (BN_##func(bn, NUM2INT(bit)) <= 0) {		\
 	    ossl_raise(eBNError, NULL);			\
 	}						\
 	return self;					\
@@ -661,7 +671,7 @@ ossl_bn_is_bit_set(VALUE self, VALUE bit)
 	if (!(result = BN_new())) {			\
 		ossl_raise(eBNError, NULL);		\
 	}						\
-	if (!BN_##func(result, bn, b)) {		\
+	if (BN_##func(result, bn, b) <= 0) {		\
 		BN_free(result);			\
 		ossl_raise(eBNError, NULL);		\
 	}						\
@@ -691,7 +701,7 @@ BIGNUM_SHIFT(rshift)
 	int b;						\
 	b = NUM2INT(bits);				\
 	GetBN(self, bn);				\
-	if (!BN_##func(bn, bn, b))			\
+	if (BN_##func(bn, bn, b) <= 0)			\
 		ossl_raise(eBNError, NULL);		\
 	return self;					\
     }
@@ -730,7 +740,7 @@ BIGNUM_SELF_SHIFT(rshift)
 	if (!(result = BN_new())) {				\
 	    ossl_raise(eBNError, NULL);				\
 	}							\
-	if (!BN_##func(result, b, top, bottom)) {		\
+	if (BN_##func(result, b, top, bottom) <= 0) {		\
 	    BN_free(result);					\
 	    ossl_raise(eBNError, NULL);				\
 	}							\
@@ -759,7 +769,7 @@ BIGNUM_RAND(pseudo_rand)
 	if (!(result = BN_new())) {				\
 	    ossl_raise(eBNError, NULL);				\
 	}							\
-	if (!BN_##func##_range(result, bn)) {			\
+	if (BN_##func##_range(result, bn) <= 0) {		\
 	    BN_free(result);					\
 	    ossl_raise(eBNError, NULL);				\
 	}							\

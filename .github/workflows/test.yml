@@ -11,7 +11,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest, macos-latest ]
-        ruby: [ head, 2.7, 2.6, 2.5, 2.4, 2.3 ]
+        ruby: [ head, "3.0", "2.7", "2.6", "2.5", "2.4", "2.3" ]
     steps:
       - name: repo checkout
         uses: actions/checkout@v2
@@ -38,7 +38,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ windows-latest ]
-        ruby: [ mswin, mingw, 2.7, 2.6, 2.5, 2.4, 2.3 ]
+        ruby: [ mswin, mingw, "3.0", "2.7", "2.6", "2.5", "2.4", "2.3" ]
     steps:
       - name: repo checkout
         uses: actions/checkout@v2
@@ -52,10 +52,11 @@ jobs:
       - name: depends
         run:  rake install_dependencies
 
+      # pkg-config is disabled because it can pick up the different OpenSSL installation
       # SSL_DIR is set as needed by MSP-Greg/setup-ruby-pkgs
       # only used with mswin
       - name: compile
-        run:  rake compile -- --enable-debug $env:SSL_DIR
+        run:  rake compile -- --enable-debug --without-pkg-config $env:SSL_DIR
 
       - name: test
         run:  rake test TESTOPTS="-v --no-show-detail-immediately" OSSL_MDEBUG=1
@@ -68,21 +69,15 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest ]
-        ruby: [ 2.7 ]
+        ruby: [ "3.0" ]
         openssl:
           - openssl-1.0.1u # EOL
           - openssl-1.0.2u # EOL
           - openssl-1.1.0l # EOL
-          - openssl-1.1.1g
-          # - libressl-2.3.7 # EOL
-          # - libressl-2.4.5 # EOL
-          # - libressl-2.5.5 # EOL
-          # - libressl-2.6.5 # EOL
-          # - libressl-2.7.5 # EOL
-          # - libressl-2.8.3 # EOL
+          - openssl-1.1.1j
           - libressl-2.9.2 # EOL
-          - libressl-3.0.2
-          - libressl-3.1.1
+          - libressl-3.1.5
+          - libressl-3.2.0
     steps:
       - name: repo checkout
         uses: actions/checkout@v2
