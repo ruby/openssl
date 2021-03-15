@@ -230,12 +230,16 @@ ossl_pkcs7_s_sign(int argc, VALUE *argv, VALUE klass)
     pkey = GetPrivPKeyPtr(key); /* NO NEED TO DUP */
     flg = NIL_P(flags) ? 0 : NUM2INT(flags);
     ret = NewPKCS7(cPKCS7);
-    in = ossl_obj2bio(&data);
+
+    if (!(flg & PKCS7_PARTIAL))
+        in = ossl_obj2bio(&data);
+
     if(NIL_P(certs)) x509s = NULL;
     else{
 	x509s = ossl_protect_x509_ary2sk(certs, &status);
 	if(status){
-	    BIO_free(in);
+        if (!(flg & PKCS7_PARTIAL))
+	        BIO_free(in);
 	    rb_jump_tag(status);
 	}
     }
@@ -244,10 +248,17 @@ ossl_pkcs7_s_sign(int argc, VALUE *argv, VALUE klass)
 	sk_X509_pop_free(x509s, X509_free);
 	ossl_raise(ePKCS7Error, NULL);
     }
+
     SetPKCS7(ret, pkcs7);
-    ossl_pkcs7_set_data(ret, data);
+
+    if (!(flg & PKCS7_PARTIAL))
+        ossl_pkcs7_set_data(ret, data);
+
     ossl_pkcs7_set_err_string(ret, Qnil);
-    BIO_free(in);
+
+    if (!(flg & PKCS7_PARTIAL))
+        BIO_free(in);
+
     sk_X509_pop_free(x509s, X509_free);
 
     return ret;
@@ -1080,4 +1091,5 @@ Init_ossl_pkcs7(void)
     DefPKCS7Const(BINARY);
     DefPKCS7Const(NOATTR);
     DefPKCS7Const(NOSMIMECAP);
+    DefPKCS7Const(PARTIAL);
 }
