@@ -874,6 +874,24 @@ ossl_pkcs7_to_pem(VALUE self)
     return str;
 }
 
+static VALUE
+ossl_pkcs7_finalize(VALUE self, VALUE data, VALUE flags)
+{
+    PKCS7 *pkcs7;
+    BIO *in;
+
+    GetPKCS7(self, pkcs7);
+
+    int flg = NIL_P(flags) ? 0 : NUM2INT(flags);
+    in = ossl_obj2bio(&data);
+
+    if (!PKCS7_final(pkcs7, in, flg)) {
+	    ossl_raise(ePKCS7Error, NULL);
+    };
+
+    return self;
+}
+
 /*
  * SIGNER INFO
  */
@@ -1063,6 +1081,7 @@ Init_ossl_pkcs7(void)
     rb_define_method(cPKCS7, "to_pem", ossl_pkcs7_to_pem, 0);
     rb_define_alias(cPKCS7,  "to_s", "to_pem");
     rb_define_method(cPKCS7, "to_der", ossl_pkcs7_to_der, 0);
+    rb_define_method(cPKCS7, "finalize", ossl_pkcs7_finalize, 2);
 
     cPKCS7Signer = rb_define_class_under(cPKCS7, "SignerInfo", rb_cObject);
     rb_define_const(cPKCS7, "Signer", cPKCS7Signer);
