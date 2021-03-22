@@ -973,87 +973,26 @@ ossl_pkcs7si_get_signed_time(VALUE self)
 }
 
 static VALUE
-ossl_pkcs7si_add_signed_attribute(VALUE self, VALUE oid, VALUE value) {
-    // PKCS7_add_signed_attribute(PKCS7_SIGNER_INFO *si, int nid, int attrtype, void *value)
-    //
-    // argument sources:
-    // si       - signer_info from OpenSSL, OpenSSL::PKCS7#signers.first, then rubyobj -> OpenSSL struct
-    // nid      - "numerical id" of OID, how to pivot from OpenSSL::ASN1::ObjectId???
-    //          - nightmare
-    //          - ObjectId has little connection with reality, it's a subclass of Primitive
-    // attrtype - "and it adds a new ASN.1 ANY object of type attrtype with the given value to the new attribute."
-    //          - what is this?
-    // value    - void PTR, ossl_asn1_get_asn1type has a case statement that produces a correct value
-
+ossl_pkcs7si_set_signed_attributes(VALUE self, VALUE ary)
+{
     PKCS7_SIGNER_INFO *p7si;
-    ASN1_OBJECT *a1obj;
-    ASN1_TYPE *value_as_type; // hacks to use ossl_asn1_get_asn1type's case statement
-    int nid, tag = 0;
+    STACK_OF(X509_ATTRIBUTE) *sk;
+    int status, result;
 
     GetPKCS7si(self, p7si);
+    Check_Type(ary, T_ARRAY);
 
-    // convert OpenSSL::ASN1::ObjectId to a nid
-    a1obj = obj_to_asn1obj(ossl_asn1_get_value(oid)); // TODO: error check
-    nid = OBJ_obj2nid(a1obj);                         // TODO: error check (NID_undef)
-                                                      // it's completely possible someone's using an unknown NID here
-                                                      // we should raise an informative error if this happens
+    // TODO: reset attributes
 
-    // so about attrtype...
-    // i'm assuming this would be something like "OpenSSL::ASN1::Sequence" in Ruby
-    // we can determine attrtype from the "value", as essentially the "value" is an attrtype plus value
-    // so attrtype is eventually passed into ASN1_TYPE_set
-    // ASN1_type_set docs makes explicit references to "V_ASN1_SEQUENCE"/"V_ASN1_BOOLEAN"/"V_ASN1_OTHER"
-    // so i'm now pretty convinced i should be able to get this from a1obj
+    // build list of x509 attrs of length RARRAY_LEN(ary)
+    sk = ossl_protect_x509_attr_ary2sk(ary, &status);
 
-    // though should we use ossl_asn1_get_tag?
-    // ossl_asn1_tag takes VALUE obj -> int
-    tag = ossl_asn1_tag(value); // TODO: error check
+    result = PKCS7_set_signed_attributes(p7si, sk);
 
-    // how tf do we go from value -> ruby -> openssl somehow? -> "value pointer"
-    // maybe this:
-    // value = ossl_asn1_get_value(obj); // no, becaue value is a ruby — ossl_asn1_get_asn1type might have something useful
+    fprintf(stderr, "set signed attributes result is: '%d'\n", result);
 
-    // struct asn1_object_st {
-    //   const char *sn, *ln;
-    //   int nid;
-    //   int length;
-    //   const unsigned char *data;
-    //   int flags;
-    // }
-
-
-    // "void *value" goes PKCS7_signed_attribute -> add_attribute -> X509_ATTRIBUTE_create (x_attrib.c)
-    // -> ASN1_TYPE_set(val, atrtype, value)
-    // -> a->value.ptr = value;
-    //    a is an ASN1_TYPE struct (asn1_type_st)
-    //    include/openssl/asn1.h.in as:
-    //
-    // struct asn1_type_st {
-    //   int type;
-    //   union {
-    //     char *ptr;
-    //     // a bunch of other specifically typed attributes like:
-    //     ASN1_BOOLEAN boolean;
-    //     ASN1_UNIVERSALSTRING *universalstring;
-    //   }
-    // very unclear on if this matters though?
-    //
-    // so what do we need? i'm still no closer to actually answering that question
-    // i can get an ASN1_OBJECT but that's still not much use to me
-    //
-    // i can actually get an ASN1_TYPE from ossl_asn1_get_asn1type, which calls
-    // ASN1_TYPE_set under the hood via a crazy case statement.
-    value_as_type = ossl_asn1_get_asn1type(value);
-
-    // method sig would be .add_signed_attribute(oid/type, value)
-    // where ObjectId is actually a Primitive (???) so how do I handle that?
-    // both oid and value are ultimately primitives tbh
-    PKCS7_add_signed_attribute(p7si, nid, tag, value_as_type.value);
-
-    // return the value of the attribute we've just stuck in
-    return value;
+    return Qtrue;
 }
-
 
 /*
  * RECIPIENT INFO
@@ -1173,7 +1112,7 @@ Init_ossl_pkcs7(void)
     rb_define_method(cPKCS7Signer, "issuer", ossl_pkcs7si_get_issuer, 0);
     rb_define_method(cPKCS7Signer, "serial", ossl_pkcs7si_get_serial,0);
     rb_define_method(cPKCS7Signer,"signed_time",ossl_pkcs7si_get_signed_time,0);
-    rb_define_method(cPKCS7Signer, "add_signed_attribute", ossl_pkcs7si_add_signed_attribute, 2);
+    rb_define_method(cPKCS7Signer, "signed_attributes=", ossl_pkcs7si_set_signed_attributes, 1);
 
     cPKCS7Recipient = rb_define_class_under(cPKCS7,"RecipientInfo",rb_cObject);
     rb_define_alloc_func(cPKCS7Recipient, ossl_pkcs7ri_alloc);

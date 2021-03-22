@@ -77,6 +77,21 @@ GetX509AttrPtr(VALUE obj)
     return attr;
 }
 
+X509_ATTRIBUTE *
+DupX509AttrPtr(VALUE obj)
+{
+    X509_ATTRIBUTE *attr, *new;
+
+    GetX509Attr(obj, attr);
+
+    // XXX: maybe missing an up_ref here?
+    if (!(new = X509_ATTRIBUTE_dup(attr))) {
+      fprintf(stderr, "dup failed unlucky\n");
+    }
+
+    return new;
+}
+
 /*
  * Private
  */
