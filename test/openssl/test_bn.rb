@@ -114,6 +114,19 @@ class OpenSSL::TestBN < OpenSSL::TestCase
     assert_equal(100, 10.to_bn.sqr)
   end
 
+  def test_abs
+    assert_equal(@e1, @e2.abs)
+    assert_equal(@e3, @e4.abs)
+    assert_not_equal(@e2, @e2.abs)
+    assert_not_equal(@e4, @e4.abs)
+    assert_false(@e2.abs.negative?)
+    assert_false(@e4.abs.negative?)
+    assert_true((-@e1.abs).negative?)
+    assert_true((-@e2.abs).negative?)
+    assert_true((-@e3.abs).negative?)
+    assert_true((-@e4.abs).negative?)
+  end
+
   def test_four_ops
     assert_equal(3, 1.to_bn + 2)
     assert_equal(-1, 1.to_bn + -2)

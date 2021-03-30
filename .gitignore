@@ -8,3 +8,5 @@
 ext/openssl/mkmf.log
 ext/openssl/Makefile
 ext/openssl/extconf.h
+.DS_Store
+.idea/
