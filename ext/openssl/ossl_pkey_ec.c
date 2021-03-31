@@ -1021,6 +1021,100 @@ static VALUE ossl_ec_group_set_seed(VALUE self, VALUE seed)
 
 /* get/set curve GFp, GF2m */
 
+
+
+/*
+ * call-seq:
+ *   group.field_type   => Symbol
+ *
+ * See the OpenSSL documentation for EC_METHOD_get_field_type()
+ */
+static VALUE ossl_ec_group_get_field_type(VALUE self)
+{
+    EC_GROUP *group;
+    GetECGroup(self, group);
+    if (!group) {
+        rb_raise(eEC_GROUP, "EC_GROUP is not initialized");
+        return Qnil;
+    }
+
+    const EC_METHOD *method = EC_GROUP_method_of(group);
+    int field_type_id = EC_METHOD_get_field_type(method);
+    if (field_type_id == NID_X9_62_prime_field) {
+        return ID2SYM(s_GFp);
+    } else if (field_type_id == NID_X9_62_characteristic_two_field) {
+        return ID2SYM(s_GF2m);
+    }
+
+    return INT2NUM(field_type_id);
+}
+
+/*
+ * call-seq:
+ *   group.curve_params   => Array
+ *
+ * See the OpenSSL documentation for EC_GROUP_get_curve_GFp() and EC_GROUP_set_curve_GF2m()
+ */
+static VALUE ossl_ec_group_get_curve_params(VALUE self)
+{
+    EC_GROUP *group;
+    VALUE pBN, aBN, bBN;
+    BIGNUM *p, *a, *b;
+
+    GetECGroup(self, group);
+    if (!group) {
+        rb_raise(eEC_GROUP, "EC_GROUP not initialized");
+        return Qnil;
+    }
+
+    pBN = ossl_bn_new(NULL);
+    aBN = ossl_bn_new(NULL);
+    bBN = ossl_bn_new(NULL);
+
+    p = GetBNPtr(pBN);
+    a = GetBNPtr(aBN);
+    b = GetBNPtr(bBN);
+
+    VALUE result = rb_ary_new_capa(4);
+    VALUE field_type = SYM2ID(ossl_ec_group_get_field_type(self));
+
+    if (field_type == s_GFp) {
+        EC_GROUP_get_curve_GFp(group, p, a, b, NULL);
+    }
+    else if (field_type == s_GF2m) {
+        EC_GROUP_set_curve_GF2m(group, p, a, b, NULL);
+    }
+    else {
+        rb_raise(eEC_GROUP, "EC_GROUP field_type was not GFp or GF2m");
+        return Qnil;
+    }
+
+    rb_ary_store(result, 0, ID2SYM(field_type));
+    rb_ary_store(result, 1, pBN);
+    rb_ary_store(result, 2, aBN);
+    rb_ary_store(result, 3, bBN);
+
+    return result;
+}
+
+/*
+ * call-seq:
+ *   group.field   => aBN
+ *
+ * See the OpenSSL documentation for EC_GROUP_get_curve_GFp() and EC_GROUP_set_curve_GF2m() for parameter *p
+ */
+static VALUE ossl_ec_group_get_field(VALUE self)
+{
+    VALUE curve_params = ossl_ec_group_get_curve_params(self);
+
+    if (RARRAY_LEN(curve_params) < 2) {
+        rb_raise(cEC_GROUP, "EC_CURVE parameters malformed");
+        return Qnil;
+    }
+
+    return rb_ary_entry(curve_params, 1);
+}
+
 /*
  * call-seq:
  *   group.degree   => integer
@@ -1628,7 +1722,11 @@ void Init_ossl_ec(void)
     rb_define_method(cEC_GROUP, "seed", ossl_ec_group_get_seed, 0);
     rb_define_method(cEC_GROUP, "seed=", ossl_ec_group_set_seed, 1);
 
-/* get/set GFp, GF2m */
+    rb_define_method(cEC_GROUP, "field", ossl_ec_group_get_field, 0);
+    rb_define_method(cEC_GROUP, "field_type", ossl_ec_group_get_field_type, 0);
+    rb_define_method(cEC_GROUP, "curve_params", ossl_ec_group_get_curve_params, 0);
+
+/* set GFp, GF2m */
 
     rb_define_method(cEC_GROUP, "degree", ossl_ec_group_get_degree, 0);
 
