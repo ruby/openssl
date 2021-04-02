@@ -1025,9 +1025,12 @@ static VALUE ossl_ec_group_set_seed(VALUE self, VALUE seed)
 
 /*
  * call-seq:
- *   group.field_type   => Symbol
+ *   group.field_type   => Symbol or Integer
  *
- * See the OpenSSL documentation for EC_METHOD_get_field_type()
+ * See the OpenSSL documentation for EC_METHOD_get_field_type().
+ * If the field type is GFp (NID_X9_62_prime_field) it will return :GFp
+ * If the field type is GF2m (NID_X9_62_characteristic_two_field) it will return :GF2m
+ * If OpenSSL returns any other value it will return the raw NID_X9_62 value
  */
 static VALUE ossl_ec_group_get_field_type(VALUE self)
 {
@@ -1035,7 +1038,6 @@ static VALUE ossl_ec_group_get_field_type(VALUE self)
     GetECGroup(self, group);
     if (!group) {
         rb_raise(eEC_GROUP, "EC_GROUP is not initialized");
-        return Qnil;
     }
 
     const EC_METHOD *method = EC_GROUP_method_of(group);
@@ -1058,41 +1060,39 @@ static VALUE ossl_ec_group_get_field_type(VALUE self)
 static VALUE ossl_ec_group_get_curve_params(VALUE self)
 {
     EC_GROUP *group;
-    VALUE pBN, aBN, bBN;
-    BIGNUM *p, *a, *b;
+    VALUE p, a, b, result, field_type;
+    BIGNUM *pBN, *aBN, *bBN;
 
     GetECGroup(self, group);
     if (!group) {
         rb_raise(eEC_GROUP, "EC_GROUP not initialized");
-        return Qnil;
     }
 
-    pBN = ossl_bn_new(NULL);
-    aBN = ossl_bn_new(NULL);
-    bBN = ossl_bn_new(NULL);
+    p = ossl_bn_new(NULL);
+    a = ossl_bn_new(NULL);
+    b = ossl_bn_new(NULL);
 
-    p = GetBNPtr(pBN);
-    a = GetBNPtr(aBN);
-    b = GetBNPtr(bBN);
+    pBN = GetBNPtr(p);
+    aBN = GetBNPtr(a);
+    bBN = GetBNPtr(b);
 
-    VALUE result = rb_ary_new_capa(4);
-    VALUE field_type = SYM2ID(ossl_ec_group_get_field_type(self));
+    result = rb_ary_new_capa(4);
+    field_type = SYM2ID(ossl_ec_group_get_field_type(self));
 
     if (field_type == s_GFp) {
-        EC_GROUP_get_curve_GFp(group, p, a, b, NULL);
+        EC_GROUP_get_curve_GFp(group, pBN, aBN, bBN, NULL);
     }
     else if (field_type == s_GF2m) {
-        EC_GROUP_set_curve_GF2m(group, p, a, b, NULL);
+        EC_GROUP_set_curve_GF2m(group, pBN, aBN, bBN, NULL);
     }
     else {
         rb_raise(eEC_GROUP, "EC_GROUP field_type was not GFp or GF2m");
-        return Qnil;
     }
 
     rb_ary_store(result, 0, ID2SYM(field_type));
-    rb_ary_store(result, 1, pBN);
-    rb_ary_store(result, 2, aBN);
-    rb_ary_store(result, 3, bBN);
+    rb_ary_store(result, 1, p);
+    rb_ary_store(result, 2, a);
+    rb_ary_store(result, 3, b);
 
     return result;
 }
@@ -1105,11 +1105,12 @@ static VALUE ossl_ec_group_get_curve_params(VALUE self)
  */
 static VALUE ossl_ec_group_get_field(VALUE self)
 {
-    VALUE curve_params = ossl_ec_group_get_curve_params(self);
+    VALUE curve_params;
+
+    curve_params = ossl_ec_group_get_curve_params(self);
 
     if (RARRAY_LEN(curve_params) < 2) {
         rb_raise(cEC_GROUP, "EC_CURVE parameters malformed");
-        return Qnil;
     }
 
     return rb_ary_entry(curve_params, 1);
