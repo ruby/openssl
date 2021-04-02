@@ -385,6 +385,19 @@ class OpenSSL::TestEC < OpenSSL::PKeyTestCase
     assert_raise(TypeError) { point.mul(nil) }
   end
 
+  def test_ecdsa_generate_from_k
+    group = OpenSSL::PKey::EC::Group.new 'prime192v1'
+
+    k = OpenSSL::BN.new '0758753A5254759C7CFBAD2E2D9B0792EEE44136C9480527', 16
+    expected_r = OpenSSL::BN.new 'FE4F4AE86A58B6507946715934FE2D8FF9D95B6B098FE739', 16
+
+    inverse_k, r = group.send(:ecdsa_generate_signature_params, k)
+
+    assert_equal(expected_r, r)
+    assert_not_equal(inverse_k, k)
+    assert_equal(0.to_bn, group.order.mod_mul(inverse_k, group.order))
+  end
+
 # test Group: asn1_flag, point_conversion
 
   private

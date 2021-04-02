@@ -1521,6 +1521,97 @@ static VALUE ossl_ec_point_mul(int argc, VALUE *argv, VALUE self)
     return result;
 }
 
+
+/*
+ *  Private method: creates inverse_k and r from k suitable for ECDSA
+ *
+ *  call-seq:
+ *     group.ecdsa_generate_signature_params(k)   => [ inverse_k, r ]
+ *
+ *  Params:
+ *    k : a OpenSSL::BN in the range of 0 < k < order
+ *
+ *  Return: two values in a decomposable array
+ *    inverse_k : the multiplicative inverse of k
+ *    r : the X value for the ephemeral point R
+ *
+ *  This uses `k` as the ephemeral private key to generate point R.
+ *  The return is an array with the multiplicative inverse of k known as
+ *  `inverse_k` and the X value of point R known as `r`.  These are used
+ *  as parameters to the ECDSA signature operation where a random `k` is
+ *  not desired such as rfc6979
+ *
+ */
+static VALUE ossl_ec_group_gen_ecdsa_params(VALUE self, VALUE k)
+{
+    VALUE result, order, point_r, inverse_k, r, reduceR;
+    BIGNUM *kBN, *rBN, *invkBN, *orderBN, *reduceBN;
+    BN_CTX *bnCtx;
+    const EC_GROUP *ecGroup;
+    EC_POINT *pointR;
+
+    if (NIL_P(k)) {
+        rb_raise(eECError, "value for k must not be nil");
+    }
+
+    kBN = GetBNPtr(k);
+    if (kBN == NULL) {
+        rb_raise(eECError, "value for k must be an OpenSSL::BN");
+    }
+
+    order = ossl_ec_group_get_order(self);
+    orderBN = GetBNPtr(order);
+
+    if (BN_cmp(kBN, orderBN) == 1) {
+        rb_raise(eECError, "value for k must be less then group order");
+    }
+
+    GetECGroup(self, ecGroup);
+    point_r = ossl_ec_point_alloc(cEC_POINT);
+    point_r = ossl_ec_point_initialize(1, &self, point_r);
+    GetECPoint(point_r, pointR);
+
+    if (pointR == NULL) {
+        rb_raise(eECError, "unable to allocate point R");
+    }
+
+    if (!EC_POINT_mul(ecGroup, pointR, kBN, NULL, NULL, NULL)) {
+        rb_raise(eECError, "unable to multiply generator by k to produce R");
+    }
+
+    r = ossl_bn_new(NULL);
+    rBN = GetBNPtr(r);
+
+    if (!EC_POINT_get_affine_coordinates(ecGroup, pointR, rBN, NULL, NULL)) {
+        rb_raise(eECError, "unable to get coordinates for R");
+    }
+
+    reduceR = ossl_bn_new(NULL);
+    reduceBN = GetBNPtr(reduceR);
+
+    bnCtx = BN_CTX_new();
+
+    if (!BN_nnmod(reduceBN, rBN, orderBN, bnCtx)) {
+        BN_CTX_free(bnCtx);
+        rb_raise(eECError, "unable to reduce r to order");
+    }
+
+    inverse_k = ossl_bn_new(NULL);
+    invkBN = GetBNPtr(inverse_k);
+    if (!BN_mod_inverse(invkBN, kBN, orderBN, bnCtx)) {
+        BN_CTX_free(bnCtx);
+        rb_raise(eECError, "unable to inverse k");
+    }
+
+    BN_CTX_free(bnCtx);
+
+    result = rb_ary_new_capa(2);
+    rb_ary_store(result, 0, inverse_k);
+    rb_ary_store(result, 1, reduceR);
+
+    return result;
+}
+
 void Init_ossl_ec(void)
 {
 #undef rb_intern
@@ -1638,6 +1729,7 @@ void Init_ossl_ec(void)
     rb_define_method(cEC_GROUP, "to_pem", ossl_ec_group_to_pem, 0);
     rb_define_method(cEC_GROUP, "to_der", ossl_ec_group_to_der, 0);
     rb_define_method(cEC_GROUP, "to_text", ossl_ec_group_to_text, 0);
+    rb_define_private_method(cEC_GROUP, "ecdsa_generate_signature_params", ossl_ec_group_gen_ecdsa_params, 1);
 
 
     rb_define_alloc_func(cEC_POINT, ossl_ec_point_alloc);
