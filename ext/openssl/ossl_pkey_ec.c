@@ -57,6 +57,7 @@ static ID id_i_group;
 
 static VALUE ec_group_new(const EC_GROUP *group);
 static VALUE ec_point_new(const EC_POINT *point, const EC_GROUP *group);
+static VALUE ossl_ec_group_gen_ecdsa_params(VALUE self, VALUE k);
 
 /*
  * Creates a new EC_KEY on the EC group obj. arg can be an EC::Group or a String
@@ -485,24 +486,54 @@ static VALUE ossl_ec_key_check_key(VALUE self)
 /*
  *  call-seq:
  *     key.dsa_sign_asn1(data)   => String
+ *     key.dsa_sign_asn1(data, k)   => String
+ *     key.dsa_sign_asn1(data, inverse_k, r)    => String
  *
- *  See the OpenSSL documentation for ECDSA_sign()
+ *  See the OpenSSL documentation for ECDSA_sign() and ECDSA_sign_ex()
  */
-static VALUE ossl_ec_key_dsa_sign_asn1(VALUE self, VALUE data)
+static VALUE ossl_ec_key_dsa_sign_asn1(int argc, VALUE argv[], VALUE self)
 {
     EC_KEY *ec;
+    BIGNUM *invkBN, *rBN;
     unsigned int buf_len;
-    VALUE str;
+    VALUE str, group, params, r, inverse_k;
 
     GetEC(self, ec);
-    StringValue(data);
+    StringValue(argv[0]);
 
     if (EC_KEY_get0_private_key(ec) == NULL)
 	ossl_raise(eECError, "Private EC key needed!");
 
     str = rb_str_new(0, ECDSA_size(ec));
-    if (ECDSA_sign(0, (unsigned char *) RSTRING_PTR(data), RSTRING_LENINT(data), (unsigned char *) RSTRING_PTR(str), &buf_len, ec) != 1)
-	ossl_raise(eECError, "ECDSA_sign");
+    if (argc == 1) {
+        if (ECDSA_sign(0, (unsigned char *) RSTRING_PTR(argv[0]), RSTRING_LENINT(argv[0]), (unsigned char *) RSTRING_PTR(str), &buf_len, ec) != 1)
+	    ossl_raise(eECError, "ECDSA_sign");
+	}
+	else if (argc == 2 || argc == 3) {
+	    if (argc == 2) {
+	        group = ossl_ec_key_get_group(self);
+	        params = ossl_ec_group_gen_ecdsa_params(group, argv[1]);
+	        inverse_k = RARRAY_AREF(params, 0);
+	        invkBN = GetBNPtr(inverse_k);
+	        r = RARRAY_AREF(params, 1);
+	        rBN = GetBNPtr(r);
+	    }
+	    else {
+	        invkBN = GetBNPtr(argv[1]);
+	        rBN = GetBNPtr(argv[2]);
+	    }
+
+	    if (invkBN == NULL || rBN == NULL) {
+	        rb_raise(eECError, "inverse_k and r must both be OpenSSL::BN");
+	    }
+
+        if (ECDSA_sign_ex(0, (unsigned char *) RSTRING_PTR(argv[0]), RSTRING_LENINT(argv[0]), (unsigned char *) RSTRING_PTR(str), &buf_len, invkBN, rBN, ec) != 1)
+        ossl_raise(eECError, "ECDSA_sign");
+	}
+	else {
+	    rb_raise(eECError, "invalid arguments");
+	}
+
     rb_str_set_len(str, buf_len);
 
     return str;
@@ -1685,7 +1716,7 @@ void Init_ossl_ec(void)
     rb_define_alias(cEC, "generate_key", "generate_key!");
     rb_define_method(cEC, "check_key", ossl_ec_key_check_key, 0);
 
-    rb_define_method(cEC, "dsa_sign_asn1", ossl_ec_key_dsa_sign_asn1, 1);
+    rb_define_method(cEC, "dsa_sign_asn1", ossl_ec_key_dsa_sign_asn1, -1);
     rb_define_method(cEC, "dsa_verify_asn1", ossl_ec_key_dsa_verify_asn1, 2);
 /* do_sign/do_verify */
 
