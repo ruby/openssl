@@ -119,8 +119,7 @@ integer_to_bnptr(VALUE obj, BIGNUM *orig)
     return bn;
 }
 
-static VALUE
-try_convert_to_bn(VALUE obj)
+VALUE try_convert_to_bn(VALUE obj)
 {
     BIGNUM *bn;
     VALUE newobj = Qnil;
