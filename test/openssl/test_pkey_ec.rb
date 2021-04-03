@@ -286,6 +286,14 @@ class OpenSSL::TestEC < OpenSSL::PKeyTestCase
       assert_equal(point2_y_bn, point2_y)
     end
 
+    if point2.respond_to? :affine_coords=
+      point2_explicit_set = OpenSSL::PKey::EC::Point.new group
+      point2_explicit_set.affine_coords = [point2_x_bn, point2_y_bn]
+
+      assert_equal(point2, point2_explicit_set)
+      assert_equal(point2_string, point2_explicit_set.to_octet_string(:uncompressed))
+    end
+
     point3 = OpenSSL::PKey::EC::Point.new(group,
                                           point.to_octet_string(:uncompressed))
     assert_equal point, point3

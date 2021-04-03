@@ -1402,7 +1402,7 @@ ossl_ec_point_get_affine_coords(VALUE self)
     yBN = GetBNPtr(y);
 
     if (!EC_POINT_get_affine_coordinates(group, point, xBN, yBN, NULL)) {
-        rb_raise(eEC_POINT, "EC_POINT_get_affine_coordinates");
+        ossl_raise(eEC_POINT, "EC_POINT_get_affine_coordinates");
     }
 
     result = rb_ary_new2(2);
@@ -1411,6 +1411,46 @@ ossl_ec_point_get_affine_coords(VALUE self)
 
     return result;
 }
+#endif
+
+#ifdef HAVE_EC_POINT_SET_AFFINE_COORDINATES
+
+/*
+ * call-seq:
+ *   point.affine_coords = [ xBN, yBN ]
+ */
+static VALUE
+ossl_ec_point_set_affine_coords(VALUE self, VALUE coords)
+{
+    VALUE x, y;
+    EC_POINT *point;
+    BIGNUM *xBN, *yBN;
+    const EC_GROUP *group;
+
+    GetECPoint(self, point);
+    GetECPointGroup(self, group);
+
+    if (point == NULL || group == NULL) {
+        rb_raise(eEC_POINT, "unable to get point and group");
+    }
+
+    if (TYPE(coords) != T_ARRAY || RARRAY_LEN(coords) != 2) {
+        rb_raise(eEC_POINT, "argument must be an array of [ x, y ]");
+    }
+
+    x = try_convert_to_bn(RARRAY_AREF(coords, 0));
+    y = try_convert_to_bn(RARRAY_AREF(coords, 1));
+
+    xBN = GetBNPtr(x);
+    yBN = GetBNPtr(y);
+
+    if (!EC_POINT_set_affine_coordinates(group, point, xBN, yBN, NULL)) {
+        ossl_raise(eEC_POINT, "EC_POINT_set_affine_coordinates");
+    }
+
+    return self;
+}
+
 #endif
 
 /*
@@ -1710,6 +1750,9 @@ void Init_ossl_ec(void)
 
 #ifdef HAVE_EC_POINT_GET_AFFINE_COORDINATES
     rb_define_method(cEC_POINT, "affine_coords", ossl_ec_point_get_affine_coords, 0);
+#endif
+#ifdef HAVE_EC_POINT_SET_AFFINE_COORDINATES
+    rb_define_method(cEC_POINT, "affine_coords=", ossl_ec_point_set_affine_coords, 1);
 #endif
 
     rb_define_method(cEC_POINT, "to_octet_string", ossl_ec_point_to_octet_string, 1);
