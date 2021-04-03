@@ -1438,8 +1438,8 @@ ossl_ec_point_set_affine_coords(VALUE self, VALUE coords)
         rb_raise(eEC_POINT, "argument must be an array of [ x, y ]");
     }
 
-    x = try_convert_to_bn(RARRAY_AREF(coords, 0));
-    y = try_convert_to_bn(RARRAY_AREF(coords, 1));
+    x = ossl_try_convert_to_bn(RARRAY_AREF(coords, 0));
+    y = ossl_try_convert_to_bn(RARRAY_AREF(coords, 1));
 
     xBN = GetBNPtr(x);
     yBN = GetBNPtr(y);
