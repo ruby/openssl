@@ -47,11 +47,13 @@ VALUE eEC_GROUP;
 VALUE cEC_POINT;
 VALUE eEC_POINT;
 
-static ID s_GFp, s_GF2m;
+static ID id_GFp, id_GF2m;
 
-static ID ID_uncompressed;
-static ID ID_compressed;
-static ID ID_hybrid;
+static ID id_odd, id_even;
+
+static ID id_uncompressed;
+static ID id_compressed;
+static ID id_hybrid;
 
 static ID id_i_group;
 
@@ -637,10 +639,10 @@ static VALUE ossl_ec_group_initialize(int argc, VALUE *argv, VALUE self)
             const BIGNUM *a = GetBNPtr(arg3);
             const BIGNUM *b = GetBNPtr(arg4);
 
-            if (id == s_GFp) {
+            if (id == id_GFp) {
                 new_curve = EC_GROUP_new_curve_GFp;
 #if !defined(OPENSSL_NO_EC2M)
-            } else if (id == s_GF2m) {
+            } else if (id == id_GF2m) {
                 new_curve = EC_GROUP_new_curve_GF2m;
 #endif
             } else {
@@ -922,9 +924,9 @@ static VALUE ossl_ec_group_get_point_conversion_form(VALUE self)
     form = EC_GROUP_get_point_conversion_form(group);
 
     switch (form) {
-    case POINT_CONVERSION_UNCOMPRESSED:	ret = ID_uncompressed; break;
-    case POINT_CONVERSION_COMPRESSED:	ret = ID_compressed; break;
-    case POINT_CONVERSION_HYBRID:	ret = ID_hybrid; break;
+    case POINT_CONVERSION_UNCOMPRESSED:	ret = id_uncompressed; break;
+    case POINT_CONVERSION_COMPRESSED:	ret = id_compressed; break;
+    case POINT_CONVERSION_HYBRID:	ret = id_hybrid; break;
     default:	ossl_raise(eEC_GROUP, "unsupported point conversion form: %d, this module should be updated", form);
     }
 
@@ -936,11 +938,11 @@ parse_point_conversion_form_symbol(VALUE sym)
 {
     ID id = SYM2ID(sym);
 
-    if (id == ID_uncompressed)
+    if (id == id_uncompressed)
 	return POINT_CONVERSION_UNCOMPRESSED;
-    else if (id == ID_compressed)
+    else if (id == id_compressed)
 	return POINT_CONVERSION_COMPRESSED;
-    else if (id == ID_hybrid)
+    else if (id == id_hybrid)
 	return POINT_CONVERSION_HYBRID;
     else
 	ossl_raise(rb_eArgError, "unsupported point conversion form %+"PRIsVALUE
@@ -1554,12 +1556,15 @@ void Init_ossl_ec(void)
     eEC_GROUP = rb_define_class_under(cEC_GROUP, "Error", eOSSLError);
     eEC_POINT = rb_define_class_under(cEC_POINT, "Error", eOSSLError);
 
-    s_GFp = rb_intern("GFp");
-    s_GF2m = rb_intern("GF2m");
+    id_GFp = rb_intern("GFp");
+    id_GF2m = rb_intern("GF2m");
 
-    ID_uncompressed = rb_intern("uncompressed");
-    ID_compressed = rb_intern("compressed");
-    ID_hybrid = rb_intern("hybrid");
+    id_even = rb_intern("even");
+    id_odd = rb_intern("odd");
+
+    id_uncompressed = rb_intern("uncompressed");
+    id_compressed = rb_intern("compressed");
+    id_hybrid = rb_intern("hybrid");
 
     rb_define_const(cEC, "NAMED_CURVE", INT2NUM(OPENSSL_EC_NAMED_CURVE));
 #if defined(OPENSSL_EC_EXPLICIT_CURVE)

@@ -174,6 +174,11 @@ have_func("TS_RESP_CTX_set_time_cb")
 have_func("EVP_PBE_scrypt")
 have_func("SSL_CTX_set_post_handshake_auth")
 
+# added in 1.1.1
+have_func("EC_POINT_get_affine_coordinates")
+have_func("EC_POINT_set_affine_coordinates")
+have_func("EC_POINT_set_compressed_coordinates")
+
 Logging::message "=== Checking done. ===\n"
 
 create_header
