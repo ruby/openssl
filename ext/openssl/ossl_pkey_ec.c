@@ -1245,6 +1245,14 @@ ossl_ec_point_initialize_copy(VALUE self, VALUE other)
     return self;
 }
 
+static VALUE
+ossl_ec_point_dup(VALUE self)
+{
+    VALUE other;
+    other = ossl_ec_point_alloc(eEC_POINT);
+    return ossl_ec_point_initialize_copy(other, self);
+}
+
 /*
  * call-seq:
  *   point1.eql?(point2) => true | false
@@ -1648,7 +1656,10 @@ void Init_ossl_ec(void)
     rb_define_alloc_func(cEC_POINT, ossl_ec_point_alloc);
     rb_define_method(cEC_POINT, "initialize", ossl_ec_point_initialize, -1);
     rb_define_method(cEC_POINT, "initialize_copy", ossl_ec_point_initialize_copy, 1);
+    rb_define_method(cEC_POINT, "dup", ossl_ec_point_dup, 0);
+
     rb_attr(cEC_POINT, rb_intern("group"), 1, 0, 0);
+
     rb_define_method(cEC_POINT, "eql?", ossl_ec_point_eql, 1);
     rb_define_alias(cEC_POINT, "==", "eql?");
 

@@ -261,6 +261,10 @@ class OpenSSL::TestEC < OpenSSL::PKeyTestCase
     assert_equal point.to_octet_string(:uncompressed),
       point2.to_octet_string(:uncompressed)
 
+    point2_dup = point2.dup
+    assert_equal point2, point2_dup
+    assert_equal false, point2.equal?(point2_dup)
+
     point3 = OpenSSL::PKey::EC::Point.new(group,
                                           point.to_octet_string(:uncompressed))
     assert_equal point, point3
