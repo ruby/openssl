@@ -1374,6 +1374,45 @@ static VALUE ossl_ec_point_set_to_infinity(VALUE self)
     return self;
 }
 
+#ifdef HAVE_EC_POINT_GET_AFFINE_COORDINATES
+
+/*
+ * call-seq:
+ *   point.affine_coords => [ xBN, yBN ]
+ */
+static VALUE
+ossl_ec_point_get_affine_coords(VALUE self)
+{
+    VALUE x, y, result;
+    EC_POINT *point;
+    BIGNUM *xBN, *yBN;
+    const EC_GROUP *group;
+
+    GetECPoint(self, point);
+    GetECPointGroup(self, group);
+
+    if (point == NULL || group == NULL) {
+        rb_raise(eEC_POINT, "unable to get point and group");
+    }
+
+    x = ossl_bn_new(NULL);
+    y = ossl_bn_new(NULL);
+
+    xBN = GetBNPtr(x);
+    yBN = GetBNPtr(y);
+
+    if (!EC_POINT_get_affine_coordinates(group, point, xBN, yBN, NULL)) {
+        rb_raise(eEC_POINT, "EC_POINT_get_affine_coordinates");
+    }
+
+    result = rb_ary_new2(2);
+    rb_ary_push(result, x);
+    rb_ary_push(result, y);
+
+    return result;
+}
+#endif
+
 /*
  * call-seq:
  *    point.to_octet_string(conversion_form) -> String
@@ -1668,7 +1707,10 @@ void Init_ossl_ec(void)
     rb_define_method(cEC_POINT, "make_affine!", ossl_ec_point_make_affine, 0);
     rb_define_method(cEC_POINT, "invert!", ossl_ec_point_invert, 0);
     rb_define_method(cEC_POINT, "set_to_infinity!", ossl_ec_point_set_to_infinity, 0);
-/* all the other methods */
+
+#ifdef HAVE_EC_POINT_GET_AFFINE_COORDINATES
+    rb_define_method(cEC_POINT, "affine_coords", ossl_ec_point_get_affine_coords, 0);
+#endif
 
     rb_define_method(cEC_POINT, "to_octet_string", ossl_ec_point_to_octet_string, 1);
     rb_define_method(cEC_POINT, "add", ossl_ec_point_add, 1);

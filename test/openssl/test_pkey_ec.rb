@@ -265,6 +265,27 @@ class OpenSSL::TestEC < OpenSSL::PKeyTestCase
     assert_equal point2, point2_dup
     assert_equal false, point2.equal?(point2_dup)
 
+    point2_string = point2.to_octet_string(:uncompressed)
+    assert_equal 65, point2_string.size
+    assert_equal point2_string[0], "\x04"
+    point2_x_str = point2_string[1..32]
+    point2_y_str = point2_string[33..-1]
+
+    assert_not_equal(nil, point2_x_str)
+    assert_not_equal(nil, point2_y_str)
+    assert_equal(32, point2_x_str.size)
+    assert_equal(32, point2_y_str.size)
+
+    point2_x_bn = OpenSSL::BN.new point2_x_str, 2
+    point2_y_bn = OpenSSL::BN.new point2_y_str, 2
+
+    if point2.respond_to? :affine_coords
+      point2_x, point2_y = point2.affine_coords
+
+      assert_equal(point2_x_bn, point2_x)
+      assert_equal(point2_y_bn, point2_y)
+    end
+
     point3 = OpenSSL::PKey::EC::Point.new(group,
                                           point.to_octet_string(:uncompressed))
     assert_equal point, point3
