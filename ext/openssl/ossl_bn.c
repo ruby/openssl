@@ -448,6 +448,22 @@ BIGNUM_BOOL1(is_one)
  */
 BIGNUM_BOOL1(is_odd)
 
+static VALUE
+ossl_bn_is_even(VALUE self)
+{
+    VALUE is_odd;
+
+    is_odd = ossl_bn_is_odd(self);
+    if (is_odd == Qtrue) {
+        return Qfalse;
+    }
+    else if (is_odd == Qfalse) {
+        return Qtrue;
+    }
+
+    rb_raise(eBNError, "ossl_bn_is_odd didn't return a boolean");
+}
+
 /*
  * call-seq:
  *   bn.negative? => true | false
@@ -1260,6 +1276,7 @@ Init_ossl_bn(void)
     rb_define_method(cBN, "one?", ossl_bn_is_one, 0);
     /* is_word */
     rb_define_method(cBN, "odd?", ossl_bn_is_odd, 0);
+    rb_define_method(cBN, "even?", ossl_bn_is_even, 0);
     rb_define_method(cBN, "negative?", ossl_bn_is_negative, 0);
 
     /* zero
