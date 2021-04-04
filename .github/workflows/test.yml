@@ -71,11 +71,9 @@ jobs:
         os: [ ubuntu-latest ]
         ruby: [ "3.0" ]
         openssl:
-          - openssl-1.0.1u # EOL
           - openssl-1.0.2u # EOL
           - openssl-1.1.0l # EOL
           - openssl-1.1.1j
-          - libressl-2.9.2 # EOL
           - libressl-3.1.5
           - libressl-3.2.4
     steps:
