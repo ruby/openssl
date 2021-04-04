@@ -1414,7 +1414,6 @@ ossl_ec_point_get_affine_coords(VALUE self)
 #endif
 
 #ifdef HAVE_EC_POINT_SET_AFFINE_COORDINATES
-
 /*
  * call-seq:
  *   point.affine_coords = [ xBN, yBN ]
@@ -1450,7 +1449,43 @@ ossl_ec_point_set_affine_coords(VALUE self, VALUE coords)
 
     return self;
 }
+#endif
 
+#ifdef HAVE_EC_POINT_SET_COMPRESSED_COORDINATES
+/*
+ * call-seq:
+ *   point.set_compressed_coords x, y_bit
+ */
+static VALUE
+ossl_ec_point_set_compressed_coords(VALUE self, VALUE x, VALUE y_bit)
+{
+    EC_POINT *point;
+    BIGNUM *xBN;
+    const EC_GROUP *group;
+    int y;
+
+    GetECPoint(self, point);
+    GetECPointGroup(self, group);
+
+    if (point == NULL || group == NULL) {
+        rb_raise(eEC_POINT, "unable to get point and group");
+    }
+
+    if (RB_INTEGER_TYPE_P(y_bit)) {
+        y = NUM2INT(y_bit);
+    } else {
+        rb_raise(eEC_POINT, "y_bit must be Integer");
+    }
+
+    x = ossl_try_convert_to_bn(x);
+    xBN = GetBNPtr(x);
+
+    if (!EC_POINT_set_compressed_coordinates(group, point, xBN, y, NULL)) {
+        ossl_raise(eEC_POINT, "EC_POINT_set_affine_coordinates");
+    }
+
+    return self;
+}
 #endif
 
 /*
@@ -1753,6 +1788,9 @@ void Init_ossl_ec(void)
 #endif
 #ifdef HAVE_EC_POINT_SET_AFFINE_COORDINATES
     rb_define_method(cEC_POINT, "affine_coords=", ossl_ec_point_set_affine_coords, 1);
+#endif
+#ifdef HAVE_EC_POINT_SET_COMPRESSED_COORDINATES
+    rb_define_method(cEC_POINT, "set_compressed_coords", ossl_ec_point_set_compressed_coords, 2);
 #endif
 
     rb_define_method(cEC_POINT, "to_octet_string", ossl_ec_point_to_octet_string, 1);

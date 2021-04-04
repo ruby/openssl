@@ -294,6 +294,21 @@ class OpenSSL::TestEC < OpenSSL::PKeyTestCase
       assert_equal(point2_string, point2_explicit_set.to_octet_string(:uncompressed))
     end
 
+    if point2.respond_to? :set_compressed_coords
+      point2_x, point2_y = point2.affine_coords
+
+      y_bit = point2_y.even? ? 0 : 1
+      inverse_y_bit = point2_y.odd? ? 0 : 1
+
+      point2_from_compressed = OpenSSL::PKey::EC::Point.new group
+      point2_from_compressed.set_compressed_coords point2_x, y_bit
+      assert_equal(point2, point2_from_compressed)
+
+      point2_from_compressed_inverse = OpenSSL::PKey::EC::Point.new group
+      point2_from_compressed_inverse.set_compressed_coords point2_x, inverse_y_bit
+      assert_not_equal(point2, point2_from_compressed_inverse)
+    end
+
     point3 = OpenSSL::PKey::EC::Point.new(group,
                                           point.to_octet_string(:uncompressed))
     assert_equal point, point3
