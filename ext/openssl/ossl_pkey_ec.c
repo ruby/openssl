@@ -1405,9 +1405,7 @@ ossl_ec_point_get_affine_coords(VALUE self)
         ossl_raise(eEC_POINT, "EC_POINT_get_affine_coordinates");
     }
 
-    result = rb_ary_new2(2);
-    rb_ary_push(result, x);
-    rb_ary_push(result, y);
+    result = rb_ary_new_from_args(2, x, y)
 
     return result;
 }
