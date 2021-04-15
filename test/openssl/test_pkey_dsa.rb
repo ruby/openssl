@@ -223,6 +223,35 @@ fWLOqqkzFeRrYMDzUpl36XktY6Yq8EJYlW9pCMmBVNy/dQ==
     assert_equal key.to_der, deserialized.to_der
   end
 
+  def test_to_data
+    dsa = Fixtures.pkey("dsa1024")
+
+    # #params and gettters
+    params_keys = %w{p q g pub_key priv_key}
+    params = dsa.params
+    assert_equal [], params_keys - params.keys
+
+    # #to_data; may contain additional entries
+    data_keys = %w{p q g pub priv}
+    data = dsa.to_data
+    assert_equal [], data_keys.map(&:intern) - data.keys
+
+    # Check value
+    assert_equal dsa.p, params["p"]
+    assert_equal dsa.p, data[:p]
+    assert_equal 1024, dsa.p.num_bits
+    assert_equal true, dsa.p.prime?
+
+    params_keys.each_with_index do |pk, i|
+      dk = data_keys[i]
+      getter_value = dsa.public_send(pk)
+
+      assert_kind_of OpenSSL::BN, getter_value
+      assert_equal getter_value, params[pk]
+      assert_equal getter_value, data[dk.intern]
+    end
+  end
+
   private
   def assert_same_dsa(expected, key)
     check_component(expected, key, [:p, :q, :g, :pub_key, :priv_key])

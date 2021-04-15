@@ -645,6 +645,79 @@ ossl_pkey_to_text(VALUE self)
     return ossl_membio2str(bio);
 }
 
+#ifdef HAVE_EVP_PKEY_TODATA
+static VALUE
+ossl_params_to_hash(VALUE paramsv)
+{
+    const OSSL_PARAM *params = (void *)paramsv;
+    VALUE hash = rb_hash_new();
+    size_t i;
+
+    for (i = 0; params[i].key; i++) {
+        const OSSL_PARAM *p = &params[i];
+        VALUE key = ID2SYM(rb_intern(p->key)), value = Qundef;
+
+        switch (p->data_type) {
+          case OSSL_PARAM_INTEGER:
+            // FIXME
+            value = ossl_bn_new_from_native(p->data, p->data_size);
+            break;
+          case OSSL_PARAM_UNSIGNED_INTEGER:
+            value = ossl_bn_new_from_native(p->data, p->data_size);
+            break;
+          case OSSL_PARAM_UTF8_STRING:
+            value = rb_enc_str_new(p->data, p->data_size, rb_utf8_encoding());
+            break;
+          case OSSL_PARAM_OCTET_STRING:
+            value = rb_str_new(p->data, p->data_size);
+            break;
+          default:
+            OSSL_Debug("ossl_params_to_hash: " \
+                       "unsupported data type %d for key %s",
+                       (int)p->data_type, p->key);
+            break;
+        }
+        if (value != Qundef)
+            rb_hash_aset(hash, key, value);
+    }
+    return hash;
+}
+#endif
+
+/*
+ * call-seq:
+ *    pkey.to_data -> hash
+ *
+ * Returns all information about the key in a Hash. This includes the key
+ * parameters, public and private key components, and all other miscellaneous
+ * information returned by the algorithm implementation.
+ *
+ * The key names vary depending on the algorithm and also the implementation.
+ *
+ * See also the man page EVP_PKEY_todata(3).
+ */
+static VALUE
+ossl_pkey_to_data(VALUE self)
+{
+#ifdef HAVE_EVP_PKEY_TODATA
+    EVP_PKEY *pkey;
+    OSSL_PARAM *params;
+    VALUE hash;
+    int state;
+
+    GetPKey(self, pkey);
+    if (EVP_PKEY_todata(pkey, OSSL_KEYMGMT_SELECT_ALL, &params) != 1)
+        ossl_raise(ePKeyError, "EVP_PKEY_todata");
+    hash = rb_protect(ossl_params_to_hash, (VALUE)params, &state);
+    OSSL_PARAM_free(params);
+    if (state)
+        rb_jump_tag(state);
+    return hash;
+#else
+    return rb_hash_new();
+#endif
+}
+
 VALUE
 ossl_pkey_export_traditional(int argc, VALUE *argv, VALUE self, int to_der)
 {
@@ -1557,6 +1630,7 @@ Init_ossl_pkey(void)
     rb_define_method(cPKey, "oid", ossl_pkey_oid, 0);
     rb_define_method(cPKey, "inspect", ossl_pkey_inspect, 0);
     rb_define_method(cPKey, "to_text", ossl_pkey_to_text, 0);
+    rb_define_method(cPKey, "to_data", ossl_pkey_to_data, 0);
     rb_define_method(cPKey, "private_to_der", ossl_pkey_private_to_der, -1);
     rb_define_method(cPKey, "private_to_pem", ossl_pkey_private_to_pem, -1);
     rb_define_method(cPKey, "public_to_der", ossl_pkey_public_to_der, 0);

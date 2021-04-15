@@ -269,16 +269,10 @@ ossl_dh_to_der(VALUE self)
     return str;
 }
 
-/*
- *  call-seq:
- *     dh.params -> hash
- *
- * Stores all parameters of key to the hash
- * INSECURE: PRIVATE INFORMATIONS CAN LEAK OUT!!!
- * Don't use :-)) (I's up to you)
- */
+#ifndef HAVE_EVP_PKEY_TODATA
+/* :nodoc: */
 static VALUE
-ossl_dh_get_params(VALUE self)
+ossl_dh_to_data(VALUE self)
 {
     DH *dh;
     VALUE hash;
@@ -289,14 +283,15 @@ ossl_dh_get_params(VALUE self)
     DH_get0_key(dh, &pub_key, &priv_key);
 
     hash = rb_hash_new();
-    rb_hash_aset(hash, rb_str_new2("p"), ossl_bn_new(p));
-    rb_hash_aset(hash, rb_str_new2("q"), ossl_bn_new(q));
-    rb_hash_aset(hash, rb_str_new2("g"), ossl_bn_new(g));
-    rb_hash_aset(hash, rb_str_new2("pub_key"), ossl_bn_new(pub_key));
-    rb_hash_aset(hash, rb_str_new2("priv_key"), ossl_bn_new(priv_key));
+    rb_hash_aset(hash, ID2SYM(rb_intern("p")), p ? ossl_bn_new(p) : Qnil);
+    rb_hash_aset(hash, ID2SYM(rb_intern("q")), q ? ossl_bn_new(q) : Qnil);
+    rb_hash_aset(hash, ID2SYM(rb_intern("g")), g ? ossl_bn_new(g) : Qnil);
+    rb_hash_aset(hash, ID2SYM(rb_intern("pub")), pub_key ? ossl_bn_new(pub_key) : Qnil);
+    rb_hash_aset(hash, ID2SYM(rb_intern("priv")), priv_key ? ossl_bn_new(priv_key) : Qnil);
 
     return hash;
 }
+#endif
 
 /*
  *  call-seq:
@@ -429,7 +424,9 @@ Init_ossl_dh(void)
     rb_define_method(cDH, "set_pqg", ossl_dh_set_pqg, 3);
     rb_define_method(cDH, "set_key", ossl_dh_set_key, 2);
 
-    rb_define_method(cDH, "params", ossl_dh_get_params, 0);
+#ifndef HAVE_EVP_PKEY_TODATA
+    rb_define_method(cDH, "to_data", ossl_dh_to_data, 0);
+#endif
 }
 
 #else /* defined NO_DH */

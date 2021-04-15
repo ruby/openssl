@@ -19,6 +19,9 @@ BN_CTX *ossl_bn_ctx_get(void);
 #define GetBNPtr(obj) ossl_bn_value_ptr(&(obj))
 
 VALUE ossl_bn_new(const BIGNUM *);
+#ifdef HAVE_EVP_PKEY_TODATA
+VALUE ossl_bn_new_from_native(const void *data, size_t data_size);
+#endif
 BIGNUM *ossl_bn_value_ptr(volatile VALUE *);
 void Init_ossl_bn(void);
 

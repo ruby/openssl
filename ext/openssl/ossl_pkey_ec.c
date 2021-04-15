@@ -500,6 +500,31 @@ static VALUE ossl_ec_key_check_key(VALUE self)
     return Qtrue;
 }
 
+#ifndef HAVE_EVP_PKEY_TODATA
+/* :nodoc: */
+static VALUE
+ossl_ec_key_to_data(VALUE self)
+{
+    EC_KEY *ec;
+    const EC_GROUP *group;
+    const BIGNUM *priv;
+    int nid;
+    VALUE hash;
+
+    /* FIXME: INCOMPLETE: What about non-named curves? Other components? */
+    GetEC(self, ec);
+    group = EC_KEY_get0_group(ec);
+    nid = EC_GROUP_get_curve_name(group);
+    priv = EC_KEY_get0_private_key(ec);
+
+    hash = rb_hash_new();
+    rb_hash_aset(hash, ID2SYM(rb_intern("group")), rb_str_new2(OBJ_nid2sn(nid)));
+    rb_hash_aset(hash, ID2SYM(rb_intern("priv")), priv ? ossl_bn_new(priv) : Qnil);
+
+    return hash;
+}
+#endif
+
 /*
  * OpenSSL::PKey::EC::Group
  */
@@ -1570,6 +1595,9 @@ void Init_ossl_ec(void)
     rb_define_alias(cEC, "to_pem", "export");
     rb_define_method(cEC, "to_der", ossl_ec_key_to_der, 0);
 
+#ifndef HAVE_EVP_PKEY_TODATA
+    rb_define_method(cEC, "to_data", ossl_ec_key_to_data, 0);
+#endif
 
     rb_define_alloc_func(cEC_GROUP, ossl_ec_group_alloc);
     rb_define_method(cEC_GROUP, "initialize", ossl_ec_group_initialize, -1);

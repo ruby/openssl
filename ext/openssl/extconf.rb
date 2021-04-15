@@ -181,6 +181,7 @@ have_func("EVP_MD_CTX_get0_md")
 have_func("EVP_MD_CTX_get_pkey_ctx")
 have_func("EVP_PKEY_eq")
 have_func("EVP_PKEY_dup")
+have_func("EVP_PKEY_todata")
 
 Logging::message "=== Checking done. ===\n"
 

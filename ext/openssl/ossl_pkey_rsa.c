@@ -439,19 +439,10 @@ ossl_rsa_verify_pss(int argc, VALUE *argv, VALUE self)
     ossl_raise(eRSAError, NULL);
 }
 
-/*
- * call-seq:
- *   rsa.params => hash
- *
- * THIS METHOD IS INSECURE, PRIVATE INFORMATION CAN LEAK OUT!!!
- *
- * Stores all parameters of key to the hash.  The hash has keys 'n', 'e', 'd',
- * 'p', 'q', 'dmp1', 'dmq1', 'iqmp'.
- *
- * Don't use :-)) (It's up to you)
- */
+#ifndef HAVE_EVP_PKEY_TODATA
+/* :nodoc: */
 static VALUE
-ossl_rsa_get_params(VALUE self)
+ossl_rsa_to_data(VALUE self)
 {
     RSA *rsa;
     VALUE hash;
@@ -463,17 +454,18 @@ ossl_rsa_get_params(VALUE self)
     RSA_get0_crt_params(rsa, &dmp1, &dmq1, &iqmp);
 
     hash = rb_hash_new();
-    rb_hash_aset(hash, rb_str_new2("n"), ossl_bn_new(n));
-    rb_hash_aset(hash, rb_str_new2("e"), ossl_bn_new(e));
-    rb_hash_aset(hash, rb_str_new2("d"), ossl_bn_new(d));
-    rb_hash_aset(hash, rb_str_new2("p"), ossl_bn_new(p));
-    rb_hash_aset(hash, rb_str_new2("q"), ossl_bn_new(q));
-    rb_hash_aset(hash, rb_str_new2("dmp1"), ossl_bn_new(dmp1));
-    rb_hash_aset(hash, rb_str_new2("dmq1"), ossl_bn_new(dmq1));
-    rb_hash_aset(hash, rb_str_new2("iqmp"), ossl_bn_new(iqmp));
+    rb_hash_aset(hash, ID2SYM(rb_intern("n")), n ? ossl_bn_new(n) : Qnil);
+    rb_hash_aset(hash, ID2SYM(rb_intern("e")), e ? ossl_bn_new(e) : Qnil);
+    rb_hash_aset(hash, ID2SYM(rb_intern("d")), d ? ossl_bn_new(d) : Qnil);
+    rb_hash_aset(hash, ID2SYM(rb_intern("rsa-factor1")), p ? ossl_bn_new(p) : Qnil);
+    rb_hash_aset(hash, ID2SYM(rb_intern("rsa-factor2")), q ? ossl_bn_new(q) : Qnil);
+    rb_hash_aset(hash, ID2SYM(rb_intern("rsa-exponent1")), dmp1 ? ossl_bn_new(dmp1) : Qnil);
+    rb_hash_aset(hash, ID2SYM(rb_intern("rsa-exponent2")), dmq1 ? ossl_bn_new(dmq1) : Qnil);
+    rb_hash_aset(hash, ID2SYM(rb_intern("rsa-coefficient1")), iqmp ? ossl_bn_new(iqmp) : Qnil);
 
     return hash;
 }
+#endif
 
 /*
  * Document-method: OpenSSL::PKey::RSA#set_key
@@ -562,7 +554,9 @@ Init_ossl_rsa(void)
     rb_define_method(cRSA, "set_factors", ossl_rsa_set_factors, 2);
     rb_define_method(cRSA, "set_crt_params", ossl_rsa_set_crt_params, 3);
 
-    rb_define_method(cRSA, "params", ossl_rsa_get_params, 0);
+#ifndef HAVE_EVP_PKEY_TODATA
+    rb_define_method(cRSA, "to_data", ossl_rsa_to_data, 0);
+#endif
 
 /*
  * TODO: Test it

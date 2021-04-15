@@ -10,6 +10,17 @@ module OpenSSL::PKey
   class DH
     include OpenSSL::Marshal
 
+    def params
+      data = to_data
+      {
+        "p" => data[:p] || 0.to_bn,
+        "q" => data[:q] || 0.to_bn,
+        "g" => data[:g] || 0.to_bn,
+        "pub_key" => data[:pub] || 0.to_bn,
+        "priv_key" => data[:priv] || 0.to_bn,
+      }
+    end
+
     # :call-seq:
     #    dh.public_key -> dhnew
     #
@@ -137,6 +148,17 @@ module OpenSSL::PKey
 
   class DSA
     include OpenSSL::Marshal
+
+    def params
+      data = to_data
+      {
+        "p" => data[:p] || 0.to_bn,
+        "q" => data[:q] || 0.to_bn,
+        "g" => data[:g] || 0.to_bn,
+        "pub_key" => data[:pub] || 0.to_bn,
+        "priv_key" => data[:priv] || 0.to_bn,
+      }
+    end
 
     # :call-seq:
     #    dsa.public_key -> dsanew
@@ -304,6 +326,20 @@ module OpenSSL::PKey
 
   class RSA
     include OpenSSL::Marshal
+
+    def params
+      data = to_data
+      {
+        "n" => data[:n] || 0.to_bn,
+        "e" => data[:e] || 0.to_bn,
+        "d" => data[:d] || 0.to_bn,
+        "p" => data[:"rsa-factor1"] || 0.to_bn,
+        "q" => data[:"rsa-factor2"] || 0.to_bn,
+        "dmp1" => data[:"rsa-exponent1"] || 0.to_bn,
+        "dmq1" => data[:"rsa-exponent2"] || 0.to_bn,
+        "iqmp" => data[:"rsa-coefficient1"] || 0.to_bn,
+      }
+    end
 
     # :call-seq:
     #    rsa.public_key -> rsanew

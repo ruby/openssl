@@ -535,6 +535,54 @@ class OpenSSL::TestPKeyRSA < OpenSSL::PKeyTestCase
     assert_equal key.to_der, deserialized.to_der
   end
 
+  def test_to_data
+    rsa = Fixtures.pkey("rsa2048")
+
+    # #params
+    params_keys = %w{n e d p q dmp1 dmq1 iqmp}
+    params = rsa.params
+    assert_equal [], params_keys - params.keys
+
+    # #to_data; may contain additional keys
+    data_keys = %w{n e d rsa-factor1 rsa-factor2 rsa-exponent1 rsa-exponent2 rsa-coefficient1}
+    data = rsa.to_data
+    assert_equal [], data_keys.map(&:intern) - data.keys
+
+    # Check value
+    assert_equal rsa.n, params["n"]
+    assert_equal rsa.n, data[:n]
+    assert_equal 2048, rsa.n.num_bits
+
+    params_keys.each_with_index do |pk, i|
+      dk = data_keys[i]
+      getter_value = rsa.public_send(pk)
+
+      assert_kind_of OpenSSL::BN, getter_value
+      assert_equal getter_value, params[pk]
+      assert_equal getter_value, data[dk.intern]
+    end
+  end
+
+  def test_to_data_public
+    rsa = OpenSSL::PKey.read(Fixtures.pkey("rsa2048").public_to_der)
+
+    # params: missing components will be BN 0
+    params = rsa.params
+    assert_equal %w{n e d p q dmp1 dmq1 iqmp}, params.keys
+    assert_equal 65537.to_bn, params["e"]
+    assert_equal 0.to_bn, params["d"]
+
+    # to_data
+    data = rsa.to_data
+    assert_equal [], %i{n e} - data.keys
+    assert_equal nil, data[:d]
+    assert_equal 65537.to_bn, data[:e]
+
+    # #d returns nil
+    assert_equal 65537.to_bn, rsa.e
+    assert_equal nil, rsa.d
+  end
+
   private
   def assert_same_rsa(expected, key)
     check_component(expected, key, [:n, :e, :d, :p, :q, :dmp1, :dmq1, :iqmp])

@@ -135,11 +135,50 @@ class OpenSSL::TestPKeyDH < OpenSSL::PKeyTestCase
     assert_equal [dh3.pub_key, dh3.priv_key], [dh4.pub_key, dh4.priv_key]
   end
 
+  def test_set_components
+    dh1 = Fixtures.pkey("dh-1")
+    dh2 = Fixtures.pkey("dh1024")
+    assert_not_equal dh1.to_der, dh2.to_der
+
+    dh2.set_pqg(dh1.p, dh1.q, dh1.g)
+    assert_equal dh1.to_der, dh2.to_der
+  end if !openssl?(3, 0, 0)
+
   def test_marshal
     dh = Fixtures.pkey("dh1024")
     deserialized = Marshal.load(Marshal.dump(dh))
 
     assert_equal dh.to_der, deserialized.to_der
+  end
+
+  def test_to_data
+    # PKCS #3 DH - q does not exist
+    dh = OpenSSL::PKey.generate_key(Fixtures.pkey("dh1024"))
+
+    # #params
+    params_keys = %w{p g pub_key priv_key}
+    params = dh.params
+    assert_equal [], params_keys - params.keys
+
+    # #to_data; may contain additional entries
+    data_keys = %w{p g pub priv}
+    data = dh.to_data
+    assert_equal [], data_keys.map(&:intern) - data.keys
+
+    # Check value
+    assert_equal dh.p, params["p"]
+    assert_equal dh.p, data[:p]
+    assert_equal 1024, dh.p.num_bits
+    assert_equal true, dh.p.prime?
+
+    params_keys.each_with_index do |pk, i|
+      dk = data_keys[i]
+      getter_value = dh.public_send(pk)
+
+      assert_kind_of OpenSSL::BN, getter_value
+      assert_equal getter_value, params[pk]
+      assert_equal getter_value, data[dk.intern]
+    end
   end
 
   private

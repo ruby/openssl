@@ -74,6 +74,23 @@ ossl_bn_new(const BIGNUM *bn)
     return obj;
 }
 
+#ifdef HAVE_EVP_PKEY_TODATA
+VALUE
+ossl_bn_new_from_native(const void *data, size_t data_size)
+{
+    BIGNUM *bn;
+    VALUE obj;
+
+    obj = NewBN(cBN);
+    bn = BN_native2bn(data, data_size, NULL);
+    if (!bn)
+        ossl_raise(eBNError, "BN_native2bn");
+    SetBN(obj, bn);
+
+    return obj;
+}
+#endif
+
 static BIGNUM *
 integer_to_bnptr(VALUE obj, BIGNUM *orig)
 {
