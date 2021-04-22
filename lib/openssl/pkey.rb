@@ -21,6 +21,14 @@ module OpenSSL::PKey
       }
     end
 
+    def p; get_bn_param(:p) end
+    def q; get_bn_param(:q) end
+    def g; get_bn_param(:g) end
+    def pub_key; get_bn_param(:pub) end
+    def priv_key; get_bn_param(:priv) end
+    def get_pqg; [p, q, g] end
+    def get_key; [pub_key, priv_key] end
+
     # :call-seq:
     #    dh.public_key -> dhnew
     #
@@ -159,6 +167,14 @@ module OpenSSL::PKey
         "priv_key" => data[:priv] || 0.to_bn,
       }
     end
+
+    def p; get_bn_param(:p) end
+    def q; get_bn_param(:q) end
+    def g; get_bn_param(:g) end
+    def pub_key; get_bn_param(:pub) end
+    def priv_key; get_bn_param(:priv) end
+    def get_pqg; [p, q, g] end
+    def get_key; [pub_key, priv_key] end
 
     # :call-seq:
     #    dsa.public_key -> dsanew
@@ -340,6 +356,18 @@ module OpenSSL::PKey
         "iqmp" => data[:"rsa-coefficient1"] || 0.to_bn,
       }
     end
+
+    def n; get_bn_param(:n) end
+    def e; get_bn_param(:e) end
+    def d; get_bn_param(:d) end
+    def p; get_bn_param(:"rsa-factor1") end
+    def q; get_bn_param(:"rsa-factor2") end
+    def dmp1; get_bn_param(:"rsa-exponent1") end
+    def dmq1; get_bn_param(:"rsa-exponent2") end
+    def iqmp; get_bn_param(:"rsa-coefficient1") end
+    def get_key; [n, e, d] end
+    def get_factors; [p, q] end
+    def get_crt_params; [dmp1, dmq1, iqmp] end
 
     # :call-seq:
     #    rsa.public_key -> rsanew

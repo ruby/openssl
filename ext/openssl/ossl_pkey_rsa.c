@@ -542,14 +542,6 @@ Init_ossl_rsa(void)
     rb_define_method(cRSA, "sign_pss", ossl_rsa_sign_pss, -1);
     rb_define_method(cRSA, "verify_pss", ossl_rsa_verify_pss, -1);
 
-    DEF_OSSL_PKEY_BN(cRSA, rsa, n);
-    DEF_OSSL_PKEY_BN(cRSA, rsa, e);
-    DEF_OSSL_PKEY_BN(cRSA, rsa, d);
-    DEF_OSSL_PKEY_BN(cRSA, rsa, p);
-    DEF_OSSL_PKEY_BN(cRSA, rsa, q);
-    DEF_OSSL_PKEY_BN(cRSA, rsa, dmp1);
-    DEF_OSSL_PKEY_BN(cRSA, rsa, dmq1);
-    DEF_OSSL_PKEY_BN(cRSA, rsa, iqmp);
     rb_define_method(cRSA, "set_key", ossl_rsa_set_key, 3);
     rb_define_method(cRSA, "set_factors", ossl_rsa_set_factors, 2);
     rb_define_method(cRSA, "set_crt_params", ossl_rsa_set_crt_params, 3);

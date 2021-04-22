@@ -85,37 +85,6 @@ extern VALUE eEC_POINT;
 VALUE ossl_ec_new(EVP_PKEY *);
 void Init_ossl_ec(void);
 
-#define OSSL_PKEY_BN_DEF_GETTER0(_keytype, _type, _name, _get)		\
-/*									\
- *  call-seq:								\
- *     _keytype##.##_name -> aBN					\
- */									\
-static VALUE ossl_##_keytype##_get_##_name(VALUE self)			\
-{									\
-	_type *obj;							\
-	const BIGNUM *bn;						\
-									\
-	Get##_type(self, obj);						\
-	_get;								\
-	if (bn == NULL)							\
-		return Qnil;						\
-	return ossl_bn_new(bn);						\
-}
-
-#define OSSL_PKEY_BN_DEF_GETTER3(_keytype, _type, _group, a1, a2, a3)	\
-	OSSL_PKEY_BN_DEF_GETTER0(_keytype, _type, a1,			\
-		_type##_get0_##_group(obj, &bn, NULL, NULL))		\
-	OSSL_PKEY_BN_DEF_GETTER0(_keytype, _type, a2,			\
-		_type##_get0_##_group(obj, NULL, &bn, NULL))		\
-	OSSL_PKEY_BN_DEF_GETTER0(_keytype, _type, a3,			\
-		_type##_get0_##_group(obj, NULL, NULL, &bn))
-
-#define OSSL_PKEY_BN_DEF_GETTER2(_keytype, _type, _group, a1, a2)	\
-	OSSL_PKEY_BN_DEF_GETTER0(_keytype, _type, a1,			\
-		_type##_get0_##_group(obj, &bn, NULL))			\
-	OSSL_PKEY_BN_DEF_GETTER0(_keytype, _type, a2,			\
-		_type##_get0_##_group(obj, NULL, &bn))
-
 #if !OSSL_OPENSSL_PREREQ(3, 0, 0)
 #define OSSL_PKEY_BN_DEF_SETTER3(_keytype, _type, _group, a1, a2, a3)	\
 /*									\
@@ -191,14 +160,9 @@ static VALUE ossl_##_keytype##_set_##_group(VALUE self, VALUE v1, VALUE v2) \
 #endif
 
 #define OSSL_PKEY_BN_DEF3(_keytype, _type, _group, a1, a2, a3)		\
-	OSSL_PKEY_BN_DEF_GETTER3(_keytype, _type, _group, a1, a2, a3)	\
 	OSSL_PKEY_BN_DEF_SETTER3(_keytype, _type, _group, a1, a2, a3)
 
 #define OSSL_PKEY_BN_DEF2(_keytype, _type, _group, a1, a2)		\
-	OSSL_PKEY_BN_DEF_GETTER2(_keytype, _type, _group, a1, a2)	\
 	OSSL_PKEY_BN_DEF_SETTER2(_keytype, _type, _group, a1, a2)
-
-#define DEF_OSSL_PKEY_BN(class, keytype, name)				\
-	rb_define_method((class), #name, ossl_##keytype##_get_##name, 0)
 
 #endif /* OSSL_PKEY_H */

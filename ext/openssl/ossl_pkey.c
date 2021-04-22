@@ -718,6 +718,77 @@ ossl_pkey_to_data(VALUE self)
 #endif
 }
 
+/*
+ * :nodoc:
+ *
+ * call-seq:
+ *    pkey.get_bn_param(key, default) -> bn
+ *
+ * Retrieves a BIGNUM value associated with a name of +key+.
+ *
+ * See also #to_data, which returns all available parameters.
+ *
+ * See also the man page EVP_PKEY_get_bn_param(3).
+ */
+static VALUE
+ossl_pkey_get_bn_param(VALUE self, VALUE key)
+{
+#ifdef HAVE_EVP_PKEY_TODATA
+    EVP_PKEY *pkey;
+    OSSL_PARAM params[2];
+    const OSSL_PARAM *gettable, *found;
+    unsigned char buf[2048];
+    BIGNUM *bn;
+    VALUE ret, tmp = Qnil;
+
+    GetPKey(self, pkey);
+    ret = ossl_bn_new(NULL);
+    bn = GetBNPtr(ret);
+    if (SYMBOL_P(key))
+        key = rb_sym2str(key);
+
+    gettable = EVP_PKEY_gettable_params(pkey);
+    if (!gettable)
+        ossl_raise(ePKeyError, "EVP_PKEY_gettable_params");
+    found = OSSL_PARAM_locate_const(gettable, StringValueCStr(key));
+    if (!found)
+        ossl_raise(ePKeyError, "OSSL_PARAM_locate_const");
+    if (found->data_type != OSSL_PARAM_INTEGER &&
+        found->data_type != OSSL_PARAM_UNSIGNED_INTEGER)
+        ossl_raise(ePKeyError, "OSSL_PARAM_locate_const: unsupported param type");
+
+    memset(buf, 0, sizeof(buf));
+    params[0] = OSSL_PARAM_construct_BN(StringValueCStr(key), buf, sizeof(buf));
+    params[1] = OSSL_PARAM_construct_end();
+    if (!EVP_PKEY_get_params(pkey, params)) {
+        size_t size = params[0].return_size;
+        if (!OSSL_PARAM_modified(params) || size == 0)
+            return Qnil;
+
+        /* It might have failed because the buffer was too small */
+        params[0].data = ALLOCV_N(unsigned char, tmp, size);
+        params[0].data_size = size;
+
+        if (!EVP_PKEY_get_params(pkey, params) || !OSSL_PARAM_modified(params))
+            ossl_raise(ePKeyError, "EVP_PKEY_get_params");
+    }
+    if (!OSSL_PARAM_get_BN(params, &bn))
+        ossl_raise(ePKeyError, "OSSL_PARAM_get_BN");
+
+    return ret;
+#else
+    VALUE ret, hash;
+
+    /* Let's assume the subclass implements #to_data */
+    hash = rb_funcall(self, rb_intern("to_data"), 0);
+    Check_Type(hash, T_HASH);
+    ret = rb_hash_lookup2(hash, key, Qundef);
+    if (NIL_P(ret) || rb_obj_is_kind_of(ret, cBN))
+        return ret;
+    rb_raise(ePKeyError, "key not found");
+#endif
+}
+
 VALUE
 ossl_pkey_export_traditional(int argc, VALUE *argv, VALUE self, int to_der)
 {
@@ -1631,6 +1702,7 @@ Init_ossl_pkey(void)
     rb_define_method(cPKey, "inspect", ossl_pkey_inspect, 0);
     rb_define_method(cPKey, "to_text", ossl_pkey_to_text, 0);
     rb_define_method(cPKey, "to_data", ossl_pkey_to_data, 0);
+    rb_define_method(cPKey, "get_bn_param", ossl_pkey_get_bn_param, 1);
     rb_define_method(cPKey, "private_to_der", ossl_pkey_private_to_der, -1);
     rb_define_method(cPKey, "private_to_pem", ossl_pkey_private_to_pem, -1);
     rb_define_method(cPKey, "public_to_der", ossl_pkey_public_to_der, 0);

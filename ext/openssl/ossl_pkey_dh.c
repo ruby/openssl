@@ -416,11 +416,6 @@ Init_ossl_dh(void)
     rb_define_method(cDH, "to_der", ossl_dh_to_der, 0);
     rb_define_method(cDH, "params_ok?", ossl_dh_check_params, 0);
 
-    DEF_OSSL_PKEY_BN(cDH, dh, p);
-    DEF_OSSL_PKEY_BN(cDH, dh, q);
-    DEF_OSSL_PKEY_BN(cDH, dh, g);
-    DEF_OSSL_PKEY_BN(cDH, dh, pub_key);
-    DEF_OSSL_PKEY_BN(cDH, dh, priv_key);
     rb_define_method(cDH, "set_pqg", ossl_dh_set_pqg, 3);
     rb_define_method(cDH, "set_key", ossl_dh_set_key, 2);
 

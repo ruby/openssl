@@ -335,11 +335,6 @@ Init_ossl_dsa(void)
     rb_define_alias(cDSA, "to_s", "export");
     rb_define_method(cDSA, "to_der", ossl_dsa_to_der, 0);
 
-    DEF_OSSL_PKEY_BN(cDSA, dsa, p);
-    DEF_OSSL_PKEY_BN(cDSA, dsa, q);
-    DEF_OSSL_PKEY_BN(cDSA, dsa, g);
-    DEF_OSSL_PKEY_BN(cDSA, dsa, pub_key);
-    DEF_OSSL_PKEY_BN(cDSA, dsa, priv_key);
     rb_define_method(cDSA, "set_pqg", ossl_dsa_set_pqg, 3);
     rb_define_method(cDSA, "set_key", ossl_dsa_set_key, 2);
 
