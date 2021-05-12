@@ -704,57 +704,81 @@ ossl_x509_eq(VALUE self, VALUE other)
     return !X509_cmp(a, b) ? Qtrue : Qfalse;
 }
 
+static VALUE
+load_chained_certificates(VALUE _io) {
+    BIO *in = (BIO*)_io;
+    VALUE certificates = rb_ary_new();
+
+    X509 *x509 = NULL;
+
+    // Check the certificate format is PEM or DER:
+
+    // Case 1: certificate format is PEM:
+    if ((x509 = PEM_read_bio_X509(in, NULL, NULL, NULL)) != NULL) {
+        do {
+            rb_ary_push(certificates, ossl_x509_new(x509));
+            X509_free(x509);
+        } while (!BIO_eof(in) && (x509 = PEM_read_bio_X509(in, NULL, NULL, NULL)) != NULL);
+
+        if (ERR_GET_REASON(ERR_peek_last_error()) == PEM_R_NO_START_LINE) {
+            ERR_clear_error();
+        }
+
+        return certificates;
+    }
+
+    OSSL_BIO_reset(in);
+
+    // Case 2: certificate format is DER:
+    if ((x509 = d2i_X509_bio(in, NULL)) != NULL) {
+        do {
+            rb_ary_push(certificates, ossl_x509_new(x509));
+            X509_free(x509);
+        } while (!BIO_eof(in) && (x509 = d2i_X509_bio(in, NULL)) != NULL);
+
+        return certificates;
+    }
+
+    // If we got to the end of the file, we are done:
+    if (BIO_eof(in)) {
+        ERR_clear_error();
+        return certificates;
+    } else {
+        // Otherwise we couldn't read everything so fail:
+        ossl_raise(eX509CertError, NULL);
+    }
+}
+
+static VALUE
+load_chained_certificates_ensure(VALUE _io) {
+    BIO *in = (BIO*)_io;
+    BIO_free(in);
+
+    return Qnil;
+}
+
 /*
  * call-seq:
- *    cert.load_chained_cert_from_file(path) -> [certs...]
+ *    OpenSSL::X509::Certificate.load(path) -> [certs...]
  *
  * Read the chained certificates from specified file path.
  */
 static VALUE
-ossl_x509_load_chained_cert_from_file(VALUE self, VALUE path)
+ossl_x509_load_chained_certificates(VALUE klass, VALUE path)
 {
-    BIO *in;
-    X509 *x509;
-    VALUE ary = rb_ary_new();
-    VALUE cert;
+    ERR_clear_error();
 
-    in = BIO_new(BIO_s_file());
+    BIO *in = BIO_new(BIO_s_file());
+
     if (in == NULL)
         ossl_raise(eX509CertError, NULL);
 
-    if (BIO_read_filename(in, StringValueCStr(path)) <= 0)
+    if (BIO_read_filename(in, StringValueCStr(path)) <= 0) {
+        BIO_free(in);
         ossl_raise(eX509CertError, NULL);
-    
-    /* check the certificate format is PEM or DER */
-    if ((x509 = PEM_read_bio_X509(in, NULL, NULL, NULL)) != NULL) {
-        /* case 1: certificate format is PEM */
-        do {
-            cert = ossl_x509_new(x509);
-            rb_ary_push(ary, cert);
-            X509_free(x509);
-        } while ((x509 = PEM_read_bio_X509(in, NULL, NULL, NULL)) != NULL);
-
-        BIO_free(in);
-        return ary;
     }
 
-    /* certificate format is not PEM */
-    OSSL_BIO_reset(in);
-    if ((x509 = d2i_X509_bio(in, NULL)) != NULL) {
-        /* case 2: certificate format is DER */
-        do {
-            cert = ossl_x509_new(x509);
-            rb_ary_push(ary, cert);
-            X509_free(x509);
-        } while ((x509 = d2i_X509_bio(in, NULL)) != NULL);
-
-        BIO_free(in);
-        return ary;
-    }
-
-    /* error: certificate format is not both PEM or DER */
-    BIO_free(in);
-    ossl_raise(eX509CertError, NULL);
+    return rb_ensure(load_chained_certificates, (VALUE)in, load_chained_certificates_ensure, (VALUE)in);
 }
 
 
@@ -866,6 +890,8 @@ Init_ossl_x509cert(void)
      */
     cX509Cert = rb_define_class_under(mX509, "Certificate", rb_cObject);
 
+    rb_define_singleton_method(cX509Cert, "load", ossl_x509_load_chained_certificates, 1);
+
     rb_define_alloc_func(cX509Cert, ossl_x509_alloc);
     rb_define_method(cX509Cert, "initialize", ossl_x509_initialize, -1);
     rb_define_method(cX509Cert, "initialize_copy", ossl_x509_copy, 1);
@@ -897,5 +923,4 @@ Init_ossl_x509cert(void)
     rb_define_method(cX509Cert, "add_extension", ossl_x509_add_extension, 1);
     rb_define_method(cX509Cert, "inspect", ossl_x509_inspect, 0);
     rb_define_method(cX509Cert, "==", ossl_x509_eq, 1);
-    rb_define_method(cX509Cert, "load_chained_cert_from_file", ossl_x509_load_chained_cert_from_file, 1);
 }

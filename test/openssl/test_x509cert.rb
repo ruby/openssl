@@ -276,6 +276,18 @@ class OpenSSL::TestX509Certificate < OpenSSL::TestCase
     assert_equal cert.to_der, deserialized.to_der
   end
 
+  def test_load_empty
+    empty_path = Fixtures.file_path("pkey", "empty.pem")
+    certificates = OpenSSL::X509::Certificate.load(empty_path)
+    assert_equal 0, certificates.size
+  end
+
+  def test_load_fullchain
+    fullchain_path = Fixtures.file_path("pkey", "fullchain.pem")
+    certificates = OpenSSL::X509::Certificate.load(fullchain_path)
+    assert_equal 2, certificates.size
+  end
+
   private
 
   def certificate_error_returns_false
