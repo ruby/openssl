@@ -276,16 +276,38 @@ class OpenSSL::TestX509Certificate < OpenSSL::TestCase
     assert_equal cert.to_der, deserialized.to_der
   end
 
-  def test_load_empty
+  def test_load_empty_pem
     empty_path = Fixtures.file_path("pkey", "empty.pem")
     certificates = OpenSSL::X509::Certificate.load(empty_path)
     assert_equal 0, certificates.size
   end
 
-  def test_load_fullchain
+  def test_load_fullchain_pem
     fullchain_path = Fixtures.file_path("pkey", "fullchain.pem")
     certificates = OpenSSL::X509::Certificate.load(fullchain_path)
     assert_equal 2, certificates.size
+  end
+
+  def test_load_empty_der
+    empty_path = Fixtures.file_path("pkey", "empty.der")
+    certificates = OpenSSL::X509::Certificate.load(empty_path)
+    assert_equal 0, certificates.size
+  end
+
+  def test_load_fullchain_der
+    fullchain_path = Fixtures.file_path("pkey", "fullchain.der")
+    certificates = OpenSSL::X509::Certificate.load(fullchain_path)
+
+    # DER encoding can only contain one certificate:
+    assert_equal 1, certificates.size
+  end
+
+  def test_load_fullchain_garbage
+    fullchain_path = Fixtures.file_path("pkey", "garbage.txt")
+
+    assert_raise(OpenSSL::X509::CertificateError) do
+      certificates = OpenSSL::X509::Certificate.load(fullchain_path)
+    end
   end
 
   private
