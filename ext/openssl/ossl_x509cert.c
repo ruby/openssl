@@ -733,10 +733,9 @@ load_chained_certificate_append_ensure(VALUE _arguments) {
 
 inline static VALUE
 load_chained_certificates_append(VALUE certificates, X509 *certificate) {
-    struct load_chained_certificates_arguments arguments = {
-        .certificates = certificates,
-        .certificate = certificate
-    };
+    struct load_chained_certificates_arguments arguments;
+    arguments.certificates = certificates;
+    arguments.certificate = certificate;
 
     rb_ensure(load_chained_certificates_append_push, (VALUE)&arguments, load_chained_certificate_append_ensure, (VALUE)&arguments);
     
@@ -790,7 +789,8 @@ load_chained_certificates_DER(BIO *in) {
     /* If we cannot read one certificate: */
     if (certificate == NULL) {
         if (BIO_eof(in)) {
-            if (ERR_GET_REASON(ERR_peek_last_error()) == ASN1_R_HEADER_TOO_LONG) {
+            /* If we didn't actually read anything: */
+            if (BIO_tell(in) == 0) {
                 ossl_clear_error();
             }
         }
@@ -850,8 +850,6 @@ load_chained_certificates_ensure(VALUE _io) {
 static VALUE
 ossl_x509_load_chained_certificates(VALUE klass, VALUE path)
 {
-    ossl_clear_error();
-
     BIO *in = BIO_new(BIO_s_file());
 
     if (in == NULL)
