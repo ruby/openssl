@@ -704,12 +704,45 @@ ossl_x509_eq(VALUE self, VALUE other)
     return !X509_cmp(a, b) ? Qtrue : Qfalse;
 }
 
+struct load_chained_certificates_arguments {
+    VALUE certificates;
+    X509 *certificate;
+};
+
+static VALUE
+load_chained_certificates_append_push(VALUE _arguments) {
+    struct load_chained_certificates_arguments *arguments = (struct load_chained_certificates_arguments*)_arguments;
+
+    rb_ary_push(arguments->certificates, ossl_x509_new(arguments->certificate));
+
+    return Qnil;
+}
+
+static VALUE
+load_chained_certificate_append_ensure(VALUE _arguments) {
+    struct load_chained_certificates_arguments *arguments = (struct load_chained_certificates_arguments*)_arguments;
+
+    X509_free(arguments->certificate);
+
+    return Qnil;
+}
+
+inline static void
+load_chained_certificates_append(VALUE certificates, X509 *certificate) {
+    struct load_chained_certificates_arguments arguments = {
+        .certificates = certificates,
+        .certificate = certificate
+    };
+
+    rb_ensure(load_chained_certificates_append_push, (VALUE)&arguments, load_chained_certificate_append_ensure, (VALUE)&arguments);
+}
+
 static VALUE
 load_chained_certificates_PEM(BIO *in) {
-    X509 *x509 = PEM_read_bio_X509(in, NULL, NULL, NULL);
+    X509 *certificate = PEM_read_bio_X509(in, NULL, NULL, NULL);
 
     /* If we cannot read even one certificate: */
-    if (x509 == NULL) {
+    if (certificate == NULL) {
         /* If we cannot read one certificate because we could not read the PEM encoding: */
         if (ERR_GET_REASON(ERR_peek_last_error()) == PEM_R_NO_START_LINE) {
             ossl_clear_error();
@@ -722,12 +755,10 @@ load_chained_certificates_PEM(BIO *in) {
     }
 
     VALUE certificates = rb_ary_new();
-    rb_ary_push(certificates, ossl_x509_new(x509));
-    X509_free(x509);
+    load_chained_certificates_append(certificates, certificate);
 
-    while ((x509 = PEM_read_bio_X509(in, NULL, NULL, NULL))) {
-        rb_ary_push(certificates, ossl_x509_new(x509));
-        X509_free(x509);
+    while ((certificate = PEM_read_bio_X509(in, NULL, NULL, NULL))) {
+      load_chained_certificates_append(certificates, certificate);
     }
 
     /* We tried to read one more certificate but could not read start line: */
@@ -749,10 +780,10 @@ load_chained_certificates_PEM(BIO *in) {
 
 static VALUE
 load_chained_certificates_DER(BIO *in) {
-    X509 *x509 = d2i_X509_bio(in, NULL);
+    X509 *certificate = d2i_X509_bio(in, NULL);
 
     /* If we cannot read one certificate: */
-    if (x509 == NULL) {
+    if (certificate == NULL) {
         if (BIO_eof(in)) {
             if (ERR_GET_REASON(ERR_peek_last_error()) == ASN1_R_HEADER_TOO_LONG) {
                 ossl_clear_error();
@@ -766,8 +797,7 @@ load_chained_certificates_DER(BIO *in) {
     }
 
     VALUE certificates = rb_ary_new();
-    rb_ary_push(certificates, ossl_x509_new(x509));
-    X509_free(x509);
+    load_chained_certificates_append(certificates, certificate);
 
     return certificates;
 }
