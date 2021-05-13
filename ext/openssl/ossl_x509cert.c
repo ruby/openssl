@@ -708,11 +708,11 @@ static VALUE
 load_chained_certificates_PEM(BIO *in) {
     X509 *x509 = PEM_read_bio_X509(in, NULL, NULL, NULL);
 
-    // If we cannot read even one certificate:
+    /* If we cannot read even one certificate: */
     if (x509 == NULL) {
-        // If we cannot read one certificate because we could not read the PEM encoding:
+        /* If we cannot read one certificate because we could not read the PEM encoding: */
         if (ERR_GET_REASON(ERR_peek_last_error()) == PEM_R_NO_START_LINE) {
-            ERR_clear_error();
+            ossl_clear_error();
         }
 
         if (ERR_peek_last_error())
@@ -729,19 +729,19 @@ load_chained_certificates_PEM(BIO *in) {
         X509_free(x509);
     }
 
-    // We tried to read one more certificate but could not read start line:
+    /* We tried to read one more certificate but could not read start line: */
     if (ERR_GET_REASON(ERR_peek_last_error()) == PEM_R_NO_START_LINE) {
-        // This is not an error, it means we are finished:
-        ERR_clear_error();
+        /* This is not an error, it means we are finished: */
+        ossl_clear_error();
 
         return certificates;
     }
 
-    // Alternatively, if we reached the end of the file and there was no error:
+    /* Alternatively, if we reached the end of the file and there was no error: */
     if (BIO_eof(in) && !ERR_peek_last_error()) {
         return certificates;
     } else {
-        // Otherwise, we tried to read a certificate but failed somewhere:
+        /* Otherwise, we tried to read a certificate but failed somewhere: */
         ossl_raise(eX509CertError, NULL);
     }
 }
@@ -750,11 +750,11 @@ static VALUE
 load_chained_certificates_DER(BIO *in) {
     X509 *x509 = d2i_X509_bio(in, NULL);
 
-    // If we cannot read one certificate:
+    /* If we cannot read one certificate: */
     if (x509 == NULL) {
         if (BIO_eof(in)) {
           if (ERR_GET_REASON(ERR_peek_last_error()) == ASN1_R_HEADER_TOO_LONG) {
-              ERR_clear_error();
+              ossl_clear_error();
           }
         }
 
@@ -775,13 +775,13 @@ load_chained_certificates(VALUE _io) {
     BIO *in = (BIO*)_io;
     VALUE certificates = Qnil;
 
-    // Case 1: certificate format is PEM:
+    /* Case 1: certificate format is PEM: */
     certificates = load_chained_certificates_PEM(in);
 
     if (certificates != Qnil)
         return certificates;
 
-    // Case 2: certificate format is DER:
+    /* Case 2: certificate format is DER: */
     OSSL_BIO_reset(in);
 
     certificates = load_chained_certificates_DER(in);
@@ -789,12 +789,12 @@ load_chained_certificates(VALUE _io) {
     if (certificates != Qnil)
         return certificates;
 
-    // If we read to the end of the file, and no format matched:
+    /* If we read to the end of the file, and no format matched: */
     if (BIO_eof(in)) {
         return rb_ary_new();
     }
 
-    // Otherwise we couldn't read the output correctly so fail:
+    /* Otherwise we couldn't read the output correctly so fail: */
     ossl_raise(eX509CertError, "Could not detect format of certificate file!");
 }
 
@@ -815,7 +815,7 @@ load_chained_certificates_ensure(VALUE _io) {
 static VALUE
 ossl_x509_load_chained_certificates(VALUE klass, VALUE path)
 {
-    ERR_clear_error();
+    ossl_clear_error();
 
     BIO *in = BIO_new(BIO_s_file());
 
