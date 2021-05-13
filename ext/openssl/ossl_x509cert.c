@@ -723,6 +723,7 @@ load_chained_certificates_PEM(BIO *in) {
 
     VALUE certificates = rb_ary_new();
     rb_ary_push(certificates, ossl_x509_new(x509));
+    X509_free(x509);
 
     while ((x509 = PEM_read_bio_X509(in, NULL, NULL, NULL))) {
         rb_ary_push(certificates, ossl_x509_new(x509));
@@ -753,9 +754,9 @@ load_chained_certificates_DER(BIO *in) {
     /* If we cannot read one certificate: */
     if (x509 == NULL) {
         if (BIO_eof(in)) {
-          if (ERR_GET_REASON(ERR_peek_last_error()) == ASN1_R_HEADER_TOO_LONG) {
-              ossl_clear_error();
-          }
+            if (ERR_GET_REASON(ERR_peek_last_error()) == ASN1_R_HEADER_TOO_LONG) {
+                ossl_clear_error();
+            }
         }
 
         if (ERR_peek_last_error())
@@ -766,6 +767,7 @@ load_chained_certificates_DER(BIO *in) {
 
     VALUE certificates = rb_ary_new();
     rb_ary_push(certificates, ossl_x509_new(x509));
+    X509_free(x509);
 
     return certificates;
 }
@@ -801,6 +803,7 @@ load_chained_certificates(VALUE _io) {
 static VALUE
 load_chained_certificates_ensure(VALUE _io) {
     BIO *in = (BIO*)_io;
+
     BIO_free(in);
 
     return Qnil;
