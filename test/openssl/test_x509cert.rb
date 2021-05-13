@@ -286,6 +286,8 @@ class OpenSSL::TestX509Certificate < OpenSSL::TestCase
     fullchain_path = Fixtures.file_path("pkey", "fullchain.pem")
     certificates = OpenSSL::X509::Certificate.load(fullchain_path)
     assert_equal 2, certificates.size
+    assert_equal "/CN=www.codeotaku.com", certificates[0].subject.to_s
+    assert_equal "/C=US/O=Let's Encrypt/CN=R3", certificates[1].subject.to_s
   end
 
   def test_load_empty_der
@@ -300,6 +302,7 @@ class OpenSSL::TestX509Certificate < OpenSSL::TestCase
 
     # DER encoding can only contain one certificate:
     assert_equal 1, certificates.size
+    assert_equal "/CN=www.codeotaku.com", certificates[0].subject.to_s
   end
 
   def test_load_fullchain_garbage
