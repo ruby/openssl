@@ -744,6 +744,7 @@ load_chained_certificates_append(VALUE certificates, X509 *certificate) {
 
 static VALUE
 load_chained_certificates_PEM(BIO *in) {
+    VALUE certificates = Qnil;
     X509 *certificate = PEM_read_bio_X509(in, NULL, NULL, NULL);
 
     /* If we cannot read even one certificate: */
@@ -759,7 +760,7 @@ load_chained_certificates_PEM(BIO *in) {
             return Qnil;
     }
 
-    VALUE certificates = load_chained_certificates_append(Qnil, certificate);
+    certificates = load_chained_certificates_append(Qnil, certificate);
 
     while ((certificate = PEM_read_bio_X509(in, NULL, NULL, NULL))) {
       load_chained_certificates_append(certificates, certificate);
