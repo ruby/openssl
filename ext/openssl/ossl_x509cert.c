@@ -713,6 +713,10 @@ static VALUE
 load_chained_certificates_append_push(VALUE _arguments) {
     struct load_chained_certificates_arguments *arguments = (struct load_chained_certificates_arguments*)_arguments;
 
+    if (arguments->certificates == Qnil) {
+        arguments->certificates = rb_ary_new();
+    }
+
     rb_ary_push(arguments->certificates, ossl_x509_new(arguments->certificate));
 
     return Qnil;
@@ -727,7 +731,7 @@ load_chained_certificate_append_ensure(VALUE _arguments) {
     return Qnil;
 }
 
-inline static void
+inline static VALUE
 load_chained_certificates_append(VALUE certificates, X509 *certificate) {
     struct load_chained_certificates_arguments arguments = {
         .certificates = certificates,
@@ -735,6 +739,8 @@ load_chained_certificates_append(VALUE certificates, X509 *certificate) {
     };
 
     rb_ensure(load_chained_certificates_append_push, (VALUE)&arguments, load_chained_certificate_append_ensure, (VALUE)&arguments);
+    
+    return arguments.certificates;
 }
 
 static VALUE
@@ -754,8 +760,7 @@ load_chained_certificates_PEM(BIO *in) {
             return Qnil;
     }
 
-    VALUE certificates = rb_ary_new();
-    load_chained_certificates_append(certificates, certificate);
+    VALUE certificates = load_chained_certificates_append(Qnil, certificate);
 
     while ((certificate = PEM_read_bio_X509(in, NULL, NULL, NULL))) {
       load_chained_certificates_append(certificates, certificate);
@@ -796,10 +801,7 @@ load_chained_certificates_DER(BIO *in) {
             return Qnil;
     }
 
-    VALUE certificates = rb_ary_new();
-    load_chained_certificates_append(certificates, certificate);
-
-    return certificates;
+    return load_chained_certificates_append(Qnil, certificate);
 }
 
 static VALUE
