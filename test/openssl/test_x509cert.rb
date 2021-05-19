@@ -291,8 +291,8 @@ class OpenSSL::TestX509Certificate < OpenSSL::TestCase
     assert_equal "/C=US/O=Let's Encrypt/CN=R3", certificates[1].subject.to_s
   end
 
-  def test_load_file_fullchain_der
-    fullchain_path = Fixtures.file_path("pkey", "fullchain.der")
+  def test_load_file_certificate_der
+    fullchain_path = Fixtures.file_path("pkey", "certificate.der")
     certificates = OpenSSL::X509::Certificate.load_file(fullchain_path)
 
     # DER encoding can only contain one certificate:
