@@ -789,6 +789,11 @@ load_chained_certificates_DER(BIO *in) {
 
     /* If we cannot read one certificate: */
     if (certificate == NULL) {
+        /* If we cannot read one certificate because we could not read the DER encoding: */
+        if (ERR_GET_REASON(ERR_peek_last_error()) == ERR_R_NESTED_ASN1_ERROR) {
+            ossl_clear_error();
+        }
+
         if (BIO_eof(in)) {
             /* If we didn't actually read anything: */
             if (BIO_tell(in) == 0) {
@@ -810,16 +815,18 @@ load_chained_certificates(VALUE _io) {
     BIO *in = (BIO*)_io;
     VALUE certificates = Qnil;
 
-    /* Case 1: certificate format is PEM: */
-    certificates = load_chained_certificates_PEM(in);
+    /*
+      DER is a binary format and it may contain octets within it that look like
+      PEM encoded certificates. So we need to check DER first.
+    */
+    certificates = load_chained_certificates_DER(in);
 
     if (certificates != Qnil)
         return certificates;
 
-    /* Case 2: certificate format is DER: */
     OSSL_BIO_reset(in);
 
-    certificates = load_chained_certificates_DER(in);
+    certificates = load_chained_certificates_PEM(in);
 
     if (certificates != Qnil)
         return certificates;
