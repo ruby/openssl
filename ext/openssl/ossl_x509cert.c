@@ -824,13 +824,8 @@ load_chained_certificates(VALUE _io) {
     if (certificates != Qnil)
         return certificates;
 
-    /* If we read to the end of the file, and no format matched: */
-    if (BIO_eof(in)) {
-        return rb_ary_new();
-    }
-
     /* Otherwise we couldn't read the output correctly so fail: */
-    ossl_raise(eX509CertError, "Could not detect format of certificate file!");
+    ossl_raise(eX509CertError, "Could not detect format of certificate data!");
 }
 
 static VALUE

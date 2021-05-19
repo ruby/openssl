@@ -278,8 +278,9 @@ class OpenSSL::TestX509Certificate < OpenSSL::TestCase
 
   def test_load_file_empty_pem
     empty_path = Fixtures.file_path("pkey", "empty.pem")
-    certificates = OpenSSL::X509::Certificate.load_file(empty_path)
-    assert_equal 0, certificates.size
+    assert_raise(OpenSSL::X509::CertificateError) do
+      OpenSSL::X509::Certificate.load_file(empty_path)
+    end
   end
 
   def test_load_file_fullchain_pem
@@ -288,12 +289,6 @@ class OpenSSL::TestX509Certificate < OpenSSL::TestCase
     assert_equal 2, certificates.size
     assert_equal "/CN=www.codeotaku.com", certificates[0].subject.to_s
     assert_equal "/C=US/O=Let's Encrypt/CN=R3", certificates[1].subject.to_s
-  end
-
-  def test_load_file_empty_der
-    empty_path = Fixtures.file_path("pkey", "empty.der")
-    certificates = OpenSSL::X509::Certificate.load_file(empty_path)
-    assert_equal 0, certificates.size
   end
 
   def test_load_file_fullchain_der
