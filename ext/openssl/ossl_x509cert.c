@@ -887,9 +887,6 @@ ossl_x509_load(VALUE klass, VALUE buffer)
 {
     BIO *in = ossl_obj2bio(&buffer);
 
-    if (in == NULL)
-        ossl_raise(eX509CertError, NULL);
-
     return rb_ensure(load_chained_certificates, (VALUE)in, load_chained_certificates_ensure, (VALUE)in);
 }
 
