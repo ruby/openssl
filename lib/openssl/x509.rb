@@ -340,7 +340,7 @@ module OpenSSL
       end
       
       def self.load_file(path)
-        load(File.read(path))
+        load(File.binread(path))
       end
     end
 
