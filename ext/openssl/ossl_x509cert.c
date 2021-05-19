@@ -872,12 +872,8 @@ ossl_x509_load_file(VALUE klass, VALUE path)
  *
  * DER is a binary format and only supports one certificate.
  *
- * If the file is empty, it will return nil/empty array/raise an exception. TBD.
- *
- * If the file contains corruption of any kind or the certificates cannot be
- * processed for some reason, an exception of type
- * +OpenSSL::X509::CertificateError+ will be raised, most likely with an obscure
- * error message from deep within the implementation. Good luck with that.
+ * If the file is empty, or contains only unrelated data, an
+ * +OpenSSL::X509::CertificateError+ exception will be raised.
  */
 static VALUE
 ossl_x509_load(VALUE klass, VALUE buffer)
