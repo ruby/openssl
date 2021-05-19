@@ -844,24 +844,13 @@ load_chained_certificates_ensure(VALUE _io) {
 
 /*
  * call-seq:
- *    OpenSSL::X509::Certificate.load(path) -> [certs...]
+ *    OpenSSL::X509::Certificate.load_file(path) -> [certs...]
  *
- * Read the chained certificates from specified file path. Supports both PEM and
- * DER encoded certificates.
- *
- * PEM is a text format and supports more than one certificate.
- *
- * DER is a binary format and only supports one certificate.
- *
- * If the file is empty, it will return nil/empty array/raise an exception. TBD.
- *
- * If the file contains corruption of any kind or the certificates cannot be
- * processed for some reason, an exception of type
- * +OpenSSL::X509::CertificateError+ will be raised, most likely with an obscure
- * error message from deep within the implementation. Good luck with that.
+ * Read the chained certificates from specified file path. See
+ * +OpenSSL::X509::Certificate.load+ for more details.
  */
 static VALUE
-ossl_x509_load_chained_certificates(VALUE klass, VALUE path)
+ossl_x509_load_file(VALUE klass, VALUE path)
 {
     BIO *in = BIO_new(BIO_s_file());
 
@@ -876,6 +865,35 @@ ossl_x509_load_chained_certificates(VALUE klass, VALUE path)
     return rb_ensure(load_chained_certificates, (VALUE)in, load_chained_certificates_ensure, (VALUE)in);
 }
 
+/*
+ * call-seq:
+ *    OpenSSL::X509::Certificate.load(string) -> [certs...]
+ *    OpenSSL::X509::Certificate.load(file) -> [certs...]
+ *
+ * Read the chained certificates from the given input. Supports both PEM
+ * and DER encoded certificates.
+ *
+ * PEM is a text format and supports more than one certificate.
+ *
+ * DER is a binary format and only supports one certificate.
+ *
+ * If the file is empty, it will return nil/empty array/raise an exception. TBD.
+ *
+ * If the file contains corruption of any kind or the certificates cannot be
+ * processed for some reason, an exception of type
+ * +OpenSSL::X509::CertificateError+ will be raised, most likely with an obscure
+ * error message from deep within the implementation. Good luck with that.
+ */
+static VALUE
+ossl_x509_load(VALUE klass, VALUE buffer)
+{
+    BIO *in = ossl_obj2bio(&buffer);
+
+    if (in == NULL)
+        ossl_raise(eX509CertError, NULL);
+
+    return rb_ensure(load_chained_certificates, (VALUE)in, load_chained_certificates_ensure, (VALUE)in);
+}
 
 /*
  * INIT
@@ -985,7 +1003,8 @@ Init_ossl_x509cert(void)
      */
     cX509Cert = rb_define_class_under(mX509, "Certificate", rb_cObject);
 
-    rb_define_singleton_method(cX509Cert, "load", ossl_x509_load_chained_certificates, 1);
+    rb_define_singleton_method(cX509Cert, "load_file", ossl_x509_load_file, 1);
+    rb_define_singleton_method(cX509Cert, "load", ossl_x509_load, 1);
 
     rb_define_alloc_func(cX509Cert, ossl_x509_alloc);
     rb_define_method(cX509Cert, "initialize", ossl_x509_initialize, -1);
