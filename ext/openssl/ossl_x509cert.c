@@ -789,22 +789,10 @@ load_chained_certificates_DER(BIO *in) {
 
     /* If we cannot read one certificate: */
     if (certificate == NULL) {
-        /* If we cannot read one certificate because we could not read the DER encoding: */
-        if (ERR_GET_REASON(ERR_peek_last_error()) == ERR_R_NESTED_ASN1_ERROR) {
-            ossl_clear_error();
-        }
+        /* Ignore error. We could not load. */
+        ossl_clear_error();
 
-        if (BIO_eof(in)) {
-            /* If we didn't actually read anything: */
-            if (BIO_tell(in) == 0) {
-                ossl_clear_error();
-            }
-        }
-
-        if (ERR_peek_last_error())
-            ossl_raise(eX509CertError, NULL);
-        else
-            return Qnil;
+        return Qnil;
     }
 
     return load_chained_certificates_append(Qnil, certificate);
