@@ -338,6 +338,10 @@ module OpenSSL
           q.text 'not_after='; q.pp self.not_after
         }
       end
+      
+      def self.load_file(path)
+        load(File.read(path))
+      end
     end
 
     class CRL

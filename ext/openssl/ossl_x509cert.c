@@ -846,29 +846,6 @@ load_chained_certificates_ensure(VALUE _io) {
 
 /*
  * call-seq:
- *    OpenSSL::X509::Certificate.load_file(path) -> [certs...]
- *
- * Read the chained certificates from specified file path. See
- * +OpenSSL::X509::Certificate.load+ for more details.
- */
-static VALUE
-ossl_x509_load_file(VALUE klass, VALUE path)
-{
-    BIO *in = BIO_new(BIO_s_file());
-
-    if (in == NULL)
-        ossl_raise(eX509CertError, NULL);
-
-    if (BIO_read_filename(in, StringValueCStr(path)) <= 0) {
-        BIO_free(in);
-        ossl_raise(eX509CertError, NULL);
-    }
-
-    return rb_ensure(load_chained_certificates, (VALUE)in, load_chained_certificates_ensure, (VALUE)in);
-}
-
-/*
- * call-seq:
  *    OpenSSL::X509::Certificate.load(string) -> [certs...]
  *    OpenSSL::X509::Certificate.load(file) -> [certs...]
  *
@@ -998,7 +975,6 @@ Init_ossl_x509cert(void)
      */
     cX509Cert = rb_define_class_under(mX509, "Certificate", rb_cObject);
 
-    rb_define_singleton_method(cX509Cert, "load_file", ossl_x509_load_file, 1);
     rb_define_singleton_method(cX509Cert, "load", ossl_x509_load, 1);
 
     rb_define_alloc_func(cX509Cert, ossl_x509_alloc);
