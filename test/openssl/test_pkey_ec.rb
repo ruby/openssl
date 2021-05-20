@@ -385,6 +385,84 @@ class OpenSSL::TestEC < OpenSSL::PKeyTestCase
     assert_raise(TypeError) { point.mul(nil) }
   end
 
+  def test_ecdsa_generate_from_k
+    group = OpenSSL::PKey::EC::Group.new 'prime192v1'
+
+    k = OpenSSL::BN.new '0758753A5254759C7CFBAD2E2D9B0792EEE44136C9480527', 16
+    expected_r = OpenSSL::BN.new 'FE4F4AE86A58B6507946715934FE2D8FF9D95B6B098FE739', 16
+
+    inverse_k, r = group.send(:ecdsa_generate_signature_params, k)
+
+    assert_equal(expected_r, r)
+    assert_not_equal(inverse_k, k)
+    assert_equal(0.to_bn, group.order.mod_mul(inverse_k, group.order))
+  end
+
+  def test_ecdsa_deterministic_k
+    group = OpenSSL::PKey::EC::Group.new 'prime192v1'
+
+    private_key = OpenSSL::BN.new '6FAB034934E4C0FC9AE67F5B5659A9D7D1FEFD187EE09FD4', 16
+    public_key_encoded = OpenSSL::BN.new '04AC2C77F529F91689FEA0EA5EFEC7F210D8EEA0B9E047ED56' \
+                                 '3BC723E57670BD4887EBC732C523063D0A7C957BC97C1C43', 16
+    public_key = OpenSSL::PKey::EC::Point.new group, public_key_encoded
+    key = OpenSSL::PKey::EC.new group
+    key.private_key = private_key
+    key.public_key = public_key
+
+    hash = OpenSSL::Digest.new('SHA512').digest('test')
+
+    k = OpenSSL::BN.new '0758753A5254759C7CFBAD2E2D9B0792EEE44136C9480527', 16
+    expected_r = OpenSSL::BN.new 'FE4F4AE86A58B6507946715934FE2D8FF9D95B6B098FE739', 16
+    expected_s = OpenSSL::BN.new '74CF5605C98FBA0E1EF34D4B5A1577A7DCF59457CAE52290', 16
+
+    inverse_k, r = group.send(:ecdsa_generate_signature_params, k)
+
+    result = key.dsa_sign_asn1(hash, inverse_k, r)
+    assert_equal(true, key.dsa_verify_asn1(hash, result))
+
+    k_only_result = key.dsa_sign_asn1(hash, k)
+    assert_equal(true, key.dsa_verify_asn1(hash, k_only_result))
+
+    parsed_signature = OpenSSL::ASN1.decode(result)
+    assert_equal(expected_r, parsed_signature.value[0].value)
+    assert_equal(expected_s, parsed_signature.value[1].value)
+  end
+
+  def test_ecdsa_raw_sign
+    group = OpenSSL::PKey::EC::Group.new 'prime192v1'
+
+    private_key = OpenSSL::BN.new '6FAB034934E4C0FC9AE67F5B5659A9D7D1FEFD187EE09FD4', 16
+    public_key_encoded = OpenSSL::BN.new '04AC2C77F529F91689FEA0EA5EFEC7F210D8EEA0B9E047ED56' \
+                                 '3BC723E57670BD4887EBC732C523063D0A7C957BC97C1C43', 16
+    public_key = OpenSSL::PKey::EC::Point.new group, public_key_encoded
+    key = OpenSSL::PKey::EC.new group
+    key.private_key = private_key
+    key.public_key = public_key
+
+    hash = OpenSSL::Digest.new('SHA256').digest('test')
+    degree_bytes = group.degree / 8
+
+    k = OpenSSL::BN.new '5C4CE89CF56D9E7C77C8585339B006B97B5F0680B4306C6C', 16
+    expected_r = OpenSSL::BN.new '3A718BD8B4926C3B52EE6BBE67EF79B18CB6EB62B1AD97AE', 16
+    expected_s = OpenSSL::BN.new '5662E6848A4A19B1F1AE2F72ACD4B8BBE50F1EAC65D9124F', 16
+
+    inverse_k, r = group.send(:ecdsa_generate_signature_params, k)
+    assert_equal(expected_r, r)
+
+    result = key.dsa_sign_asn1(hash, inverse_k, r)
+    assert_equal(true, key.dsa_verify_asn1(hash, result))
+
+    # TODO: pad to degree when hash is smaller
+    e = OpenSSL::BN.new hash[0..(degree_bytes - 1)], 2
+    assert_equal(group.degree, e.num_bits)
+    s = inverse_k.mod_mul(e + (r * private_key), group.order)
+    assert_equal(expected_s, s)
+
+    parsed_signature = OpenSSL::ASN1.decode(result)
+    assert_equal(expected_r, parsed_signature.value[0].value)
+    assert_equal(expected_s, parsed_signature.value[1].value)
+  end
+
 # test Group: asn1_flag, point_conversion
 
   private

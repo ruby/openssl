@@ -33,6 +33,7 @@ require "test/unit"
 require "tempfile"
 require "socket"
 require "envutil"
+require 'yaml'
 
 if defined?(OpenSSL)
 
@@ -44,10 +45,15 @@ module OpenSSL::TestUtils
       OpenSSL::PKey.read(read_file("pkey", name))
     end
 
-    def read_file(category, name)
+    def read_file(category, name, ext = ".pem")
       @file_cache ||= {}
-      @file_cache[[category, name]] ||=
-        File.read(File.join(__dir__, "fixtures", category, name + ".pem"))
+      @file_cache[[category, name, ext]] ||=
+        File.read(File.join(__dir__, "fixtures", category, name + ext))
+    end
+
+    def read_yaml(category, name)
+      @file_cache ||= {}
+      @file_cache[[category, name]] ||= YAML.load_file(file_path(category, name))
     end
 
     def file_path(category, name)
