@@ -799,7 +799,7 @@ ossl_pkey_compare(VALUE self, VALUE other)
  * +options+::
  *   A Hash that contains algorithm specific control operations to \OpenSSL.
  *   See OpenSSL's man page EVP_PKEY_CTX_ctrl_str(3) for details.
- *   +options+ parameter was added in version 2.3.
+ *   +options+ parameter was added in version 3.0.
  *
  * Example:
  *   data = "Sign me!"
@@ -913,7 +913,7 @@ ossl_pkey_sign(int argc, VALUE *argv, VALUE self)
  * +data+::
  *   See #sign.
  * +options+::
- *   See #sign. +options+ parameter was added in version 2.3.
+ *   See #sign. +options+ parameter was added in version 3.0.
  */
 static VALUE
 ossl_pkey_verify(int argc, VALUE *argv, VALUE self)
@@ -975,6 +975,235 @@ ossl_pkey_verify(int argc, VALUE *argv, VALUE self)
 
 /*
  * call-seq:
+ *    pkey.sign_raw(digest, data [, options]) -> string
+ *
+ * Signs +data+ using a private key +pkey+. Unlike #sign, +data+ will not be
+ * hashed by +digest+ automatically.
+ *
+ * See #verify_raw for the verification operation.
+ *
+ * Added in version 3.0. See also the man page EVP_PKEY_sign(3).
+ *
+ * +digest+::
+ *   A String that represents the message digest algorithm name, or +nil+
+ *   if the PKey type requires no digest algorithm.
+ *   Although this method will not hash +data+ with it, this parameter may still
+ *   be required depending on the signature algorithm.
+ * +data+::
+ *   A String. The data to be signed.
+ * +options+::
+ *   A Hash that contains algorithm specific control operations to \OpenSSL.
+ *   See OpenSSL's man page EVP_PKEY_CTX_ctrl_str(3) for details.
+ *
+ * Example:
+ *   data = "Sign me!"
+ *   hash = OpenSSL::Digest.digest("SHA256", data)
+ *   pkey = OpenSSL::PKey.generate_key("RSA", rsa_keygen_bits: 2048)
+ *   signopts = { rsa_padding_mode: "pss" }
+ *   signature = pkey.sign_raw("SHA256", hash, signopts)
+ *
+ *   # Creates a copy of the RSA key pkey, but without the private components
+ *   pub_key = pkey.public_key
+ *   puts pub_key.verify_raw("SHA256", signature, hash, signopts) # => true
+ */
+static VALUE
+ossl_pkey_sign_raw(int argc, VALUE *argv, VALUE self)
+{
+    EVP_PKEY *pkey;
+    VALUE digest, data, options, sig;
+    const EVP_MD *md = NULL;
+    EVP_PKEY_CTX *ctx;
+    size_t outlen;
+    int state;
+
+    GetPKey(self, pkey);
+    rb_scan_args(argc, argv, "21", &digest, &data, &options);
+    if (!NIL_P(digest))
+        md = ossl_evp_get_digestbyname(digest);
+    StringValue(data);
+
+    ctx = EVP_PKEY_CTX_new(pkey, /* engine */NULL);
+    if (!ctx)
+        ossl_raise(ePKeyError, "EVP_PKEY_CTX_new");
+    if (EVP_PKEY_sign_init(ctx) <= 0) {
+        EVP_PKEY_CTX_free(ctx);
+        ossl_raise(ePKeyError, "EVP_PKEY_sign_init");
+    }
+    if (md && EVP_PKEY_CTX_set_signature_md(ctx, md) <= 0) {
+        EVP_PKEY_CTX_free(ctx);
+        ossl_raise(ePKeyError, "EVP_PKEY_CTX_set_signature_md");
+    }
+    if (!NIL_P(options)) {
+        pkey_ctx_apply_options(ctx, options, &state);
+        if (state) {
+            EVP_PKEY_CTX_free(ctx);
+            rb_jump_tag(state);
+        }
+    }
+    if (EVP_PKEY_sign(ctx, NULL, &outlen, (unsigned char *)RSTRING_PTR(data),
+                      RSTRING_LEN(data)) <= 0) {
+        EVP_PKEY_CTX_free(ctx);
+        ossl_raise(ePKeyError, "EVP_PKEY_sign");
+    }
+    if (outlen > LONG_MAX) {
+        EVP_PKEY_CTX_free(ctx);
+        rb_raise(ePKeyError, "signature would be too large");
+    }
+    sig = ossl_str_new(NULL, (long)outlen, &state);
+    if (state) {
+        EVP_PKEY_CTX_free(ctx);
+        rb_jump_tag(state);
+    }
+    if (EVP_PKEY_sign(ctx, (unsigned char *)RSTRING_PTR(sig), &outlen,
+                      (unsigned char *)RSTRING_PTR(data),
+                      RSTRING_LEN(data)) <= 0) {
+        EVP_PKEY_CTX_free(ctx);
+        ossl_raise(ePKeyError, "EVP_PKEY_sign");
+    }
+    EVP_PKEY_CTX_free(ctx);
+    rb_str_set_len(sig, outlen);
+    return sig;
+}
+
+/*
+ * call-seq:
+ *    pkey.verify_raw(digest, signature, data [, options]) -> true or false
+ *
+ * Verifies the +signature+ for the +data+ using a public key +pkey+. Unlike
+ * #verify, this method will not hash +data+ with +digest+ automatically.
+ *
+ * Returns +true+ if the signature is successfully verified, +false+ otherwise.
+ * The caller must check the return value.
+ *
+ * See #sign_raw for the signing operation and an example code.
+ *
+ * Added in version 3.0. See also the man page EVP_PKEY_verify(3).
+ *
+ * +signature+::
+ *   A String containing the signature to be verified.
+ */
+static VALUE
+ossl_pkey_verify_raw(int argc, VALUE *argv, VALUE self)
+{
+    EVP_PKEY *pkey;
+    VALUE digest, sig, data, options;
+    const EVP_MD *md = NULL;
+    EVP_PKEY_CTX *ctx;
+    int state, ret;
+
+    GetPKey(self, pkey);
+    rb_scan_args(argc, argv, "31", &digest, &sig, &data, &options);
+    ossl_pkey_check_public_key(pkey);
+    if (!NIL_P(digest))
+        md = ossl_evp_get_digestbyname(digest);
+    StringValue(sig);
+    StringValue(data);
+
+    ctx = EVP_PKEY_CTX_new(pkey, /* engine */NULL);
+    if (!ctx)
+        ossl_raise(ePKeyError, "EVP_PKEY_CTX_new");
+    if (EVP_PKEY_verify_init(ctx) <= 0) {
+        EVP_PKEY_CTX_free(ctx);
+        ossl_raise(ePKeyError, "EVP_PKEY_verify_init");
+    }
+    if (md && EVP_PKEY_CTX_set_signature_md(ctx, md) <= 0) {
+        EVP_PKEY_CTX_free(ctx);
+        ossl_raise(ePKeyError, "EVP_PKEY_CTX_set_signature_md");
+    }
+    if (!NIL_P(options)) {
+        pkey_ctx_apply_options(ctx, options, &state);
+        if (state) {
+            EVP_PKEY_CTX_free(ctx);
+            rb_jump_tag(state);
+        }
+    }
+    ret = EVP_PKEY_verify(ctx, (unsigned char *)RSTRING_PTR(sig),
+                          RSTRING_LEN(sig),
+                          (unsigned char *)RSTRING_PTR(data),
+                          RSTRING_LEN(data));
+    EVP_PKEY_CTX_free(ctx);
+    if (ret < 0)
+        ossl_raise(ePKeyError, "EVP_PKEY_verify");
+
+    if (ret)
+        return Qtrue;
+    else {
+        ossl_clear_error();
+        return Qfalse;
+    }
+}
+
+/*
+ * call-seq:
+ *    pkey.verify_recover(digest, signature [, options]) -> string
+ *
+ * Recovers the signed data from +signature+ using a public key +pkey+. Not all
+ * signature algorithms support this operation.
+ *
+ * Added in version 3.0. See also the man page EVP_PKEY_verify_recover(3).
+ *
+ * +signature+::
+ *   A String containing the signature to be verified.
+ */
+static VALUE
+ossl_pkey_verify_recover(int argc, VALUE *argv, VALUE self)
+{
+    EVP_PKEY *pkey;
+    VALUE digest, sig, options, out;
+    const EVP_MD *md = NULL;
+    EVP_PKEY_CTX *ctx;
+    int state;
+    size_t outlen;
+
+    GetPKey(self, pkey);
+    rb_scan_args(argc, argv, "21", &digest, &sig, &options);
+    ossl_pkey_check_public_key(pkey);
+    if (!NIL_P(digest))
+        md = ossl_evp_get_digestbyname(digest);
+    StringValue(sig);
+
+    ctx = EVP_PKEY_CTX_new(pkey, /* engine */NULL);
+    if (!ctx)
+        ossl_raise(ePKeyError, "EVP_PKEY_CTX_new");
+    if (EVP_PKEY_verify_recover_init(ctx) <= 0) {
+        EVP_PKEY_CTX_free(ctx);
+        ossl_raise(ePKeyError, "EVP_PKEY_verify_recover_init");
+    }
+    if (md && EVP_PKEY_CTX_set_signature_md(ctx, md) <= 0) {
+        EVP_PKEY_CTX_free(ctx);
+        ossl_raise(ePKeyError, "EVP_PKEY_CTX_set_signature_md");
+    }
+    if (!NIL_P(options)) {
+        pkey_ctx_apply_options(ctx, options, &state);
+        if (state) {
+            EVP_PKEY_CTX_free(ctx);
+            rb_jump_tag(state);
+        }
+    }
+    if (EVP_PKEY_verify_recover(ctx, NULL, &outlen,
+                                (unsigned char *)RSTRING_PTR(sig),
+                                RSTRING_LEN(sig)) <= 0) {
+        EVP_PKEY_CTX_free(ctx);
+        ossl_raise(ePKeyError, "EVP_PKEY_verify_recover");
+    }
+    out = ossl_str_new(NULL, (long)outlen, &state);
+    if (state) {
+        EVP_PKEY_CTX_free(ctx);
+        rb_jump_tag(state);
+    }
+    if (EVP_PKEY_verify_recover(ctx, (unsigned char *)RSTRING_PTR(out), &outlen,
+                                (unsigned char *)RSTRING_PTR(sig),
+                                RSTRING_LEN(sig)) <= 0) {
+        EVP_PKEY_CTX_free(ctx);
+        ossl_raise(ePKeyError, "EVP_PKEY_verify_recover");
+    }
+    EVP_PKEY_CTX_free(ctx);
+    rb_str_set_len(out, outlen);
+    return out;
+}
+
+/*
+ * call-seq:
  *    pkey.derive(peer_pkey) -> string
  *
  * Derives a shared secret from _pkey_ and _peer_pkey_. _pkey_ must contain
@@ -1021,6 +1250,145 @@ ossl_pkey_derive(int argc, VALUE *argv, VALUE self)
     }
     EVP_PKEY_CTX_free(ctx);
     rb_str_set_len(str, keylen);
+    return str;
+}
+
+/*
+ * call-seq:
+ *    pkey.encrypt(data [, options]) -> string
+ *
+ * Performs a public key encryption operation using +pkey+.
+ *
+ * See #decrypt for the reverse operation.
+ *
+ * Added in version 3.0. See also the man page EVP_PKEY_encrypt(3).
+ *
+ * +data+::
+ *   A String to be encrypted.
+ * +options+::
+ *   A Hash that contains algorithm specific control operations to \OpenSSL.
+ *   See OpenSSL's man page EVP_PKEY_CTX_ctrl_str(3) for details.
+ *
+ * Example:
+ *   pkey = OpenSSL::PKey.generate_key("RSA", rsa_keygen_bits: 2048)
+ *   data = "secret data"
+ *   encrypted = pkey.encrypt(data, rsa_padding_mode: "oaep")
+ *   decrypted = pkey.decrypt(data, rsa_padding_mode: "oaep")
+ *   p decrypted #=> "secret data"
+ */
+static VALUE
+ossl_pkey_encrypt(int argc, VALUE *argv, VALUE self)
+{
+    EVP_PKEY *pkey;
+    EVP_PKEY_CTX *ctx;
+    VALUE data, options, str;
+    size_t outlen;
+    int state;
+
+    GetPKey(self, pkey);
+    rb_scan_args(argc, argv, "11", &data, &options);
+    StringValue(data);
+
+    ctx = EVP_PKEY_CTX_new(pkey, /* engine */NULL);
+    if (!ctx)
+        ossl_raise(ePKeyError, "EVP_PKEY_CTX_new");
+    if (EVP_PKEY_encrypt_init(ctx) <= 0) {
+        EVP_PKEY_CTX_free(ctx);
+        ossl_raise(ePKeyError, "EVP_PKEY_encrypt_init");
+    }
+    if (!NIL_P(options)) {
+        pkey_ctx_apply_options(ctx, options, &state);
+        if (state) {
+            EVP_PKEY_CTX_free(ctx);
+            rb_jump_tag(state);
+        }
+    }
+    if (EVP_PKEY_encrypt(ctx, NULL, &outlen,
+                         (unsigned char *)RSTRING_PTR(data),
+                         RSTRING_LEN(data)) <= 0) {
+        EVP_PKEY_CTX_free(ctx);
+        ossl_raise(ePKeyError, "EVP_PKEY_encrypt");
+    }
+    if (outlen > LONG_MAX) {
+        EVP_PKEY_CTX_free(ctx);
+        rb_raise(ePKeyError, "encrypted data would be too large");
+    }
+    str = ossl_str_new(NULL, (long)outlen, &state);
+    if (state) {
+        EVP_PKEY_CTX_free(ctx);
+        rb_jump_tag(state);
+    }
+    if (EVP_PKEY_encrypt(ctx, (unsigned char *)RSTRING_PTR(str), &outlen,
+                         (unsigned char *)RSTRING_PTR(data),
+                         RSTRING_LEN(data)) <= 0) {
+        EVP_PKEY_CTX_free(ctx);
+        ossl_raise(ePKeyError, "EVP_PKEY_encrypt");
+    }
+    EVP_PKEY_CTX_free(ctx);
+    rb_str_set_len(str, outlen);
+    return str;
+}
+
+/*
+ * call-seq:
+ *    pkey.decrypt(data [, options]) -> string
+ *
+ * Performs a public key decryption operation using +pkey+.
+ *
+ * See #encrypt for a description of the parameters and an example.
+ *
+ * Added in version 3.0. See also the man page EVP_PKEY_decrypt(3).
+ */
+static VALUE
+ossl_pkey_decrypt(int argc, VALUE *argv, VALUE self)
+{
+    EVP_PKEY *pkey;
+    EVP_PKEY_CTX *ctx;
+    VALUE data, options, str;
+    size_t outlen;
+    int state;
+
+    GetPKey(self, pkey);
+    rb_scan_args(argc, argv, "11", &data, &options);
+    StringValue(data);
+
+    ctx = EVP_PKEY_CTX_new(pkey, /* engine */NULL);
+    if (!ctx)
+        ossl_raise(ePKeyError, "EVP_PKEY_CTX_new");
+    if (EVP_PKEY_decrypt_init(ctx) <= 0) {
+        EVP_PKEY_CTX_free(ctx);
+        ossl_raise(ePKeyError, "EVP_PKEY_decrypt_init");
+    }
+    if (!NIL_P(options)) {
+        pkey_ctx_apply_options(ctx, options, &state);
+        if (state) {
+            EVP_PKEY_CTX_free(ctx);
+            rb_jump_tag(state);
+        }
+    }
+    if (EVP_PKEY_decrypt(ctx, NULL, &outlen,
+                         (unsigned char *)RSTRING_PTR(data),
+                         RSTRING_LEN(data)) <= 0) {
+        EVP_PKEY_CTX_free(ctx);
+        ossl_raise(ePKeyError, "EVP_PKEY_decrypt");
+    }
+    if (outlen > LONG_MAX) {
+        EVP_PKEY_CTX_free(ctx);
+        rb_raise(ePKeyError, "decrypted data would be too large");
+    }
+    str = ossl_str_new(NULL, (long)outlen, &state);
+    if (state) {
+        EVP_PKEY_CTX_free(ctx);
+        rb_jump_tag(state);
+    }
+    if (EVP_PKEY_decrypt(ctx, (unsigned char *)RSTRING_PTR(str), &outlen,
+                         (unsigned char *)RSTRING_PTR(data),
+                         RSTRING_LEN(data)) <= 0) {
+        EVP_PKEY_CTX_free(ctx);
+        ossl_raise(ePKeyError, "EVP_PKEY_decrypt");
+    }
+    EVP_PKEY_CTX_free(ctx);
+    rb_str_set_len(str, outlen);
     return str;
 }
 
@@ -1123,7 +1491,12 @@ Init_ossl_pkey(void)
 
     rb_define_method(cPKey, "sign", ossl_pkey_sign, -1);
     rb_define_method(cPKey, "verify", ossl_pkey_verify, -1);
+    rb_define_method(cPKey, "sign_raw", ossl_pkey_sign_raw, -1);
+    rb_define_method(cPKey, "verify_raw", ossl_pkey_verify_raw, -1);
+    rb_define_method(cPKey, "verify_recover", ossl_pkey_verify_recover, -1);
     rb_define_method(cPKey, "derive", ossl_pkey_derive, -1);
+    rb_define_method(cPKey, "encrypt", ossl_pkey_encrypt, -1);
+    rb_define_method(cPKey, "decrypt", ossl_pkey_decrypt, -1);
 
     id_private_q = rb_intern("private?");
 
