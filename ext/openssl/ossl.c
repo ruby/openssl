@@ -311,10 +311,10 @@ ossl_clear_error(void)
 {
     if (dOSSL == Qtrue) {
 	unsigned long e;
-	const char *file, *data, *errstr;
+	const char *file, *data, *errstr, *func;
 	int line, flags;
 
-	while ((e = ERR_get_error_line_data(&file, &line, &data, &flags))) {
+	while ((e = ERR_get_error_all(&file, &line, &func, &data, &flags))) {
 	    errstr = ERR_error_string(e, NULL);
 	    if (!errstr)
 		errstr = "(null)";

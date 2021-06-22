@@ -221,4 +221,10 @@ IMPL_PKEY_GETTER(EC_KEY, ec)
     } while (0)
 #endif
 
+#if !defined(HAVE_ERR_GET_ERROR_ALL)
+#  define ERR_get_error_all(file, line, func, data, flags) ERR_get_error_line_data(file, line, data, flags)
+#endif
+
+
+
 #endif /* _OSSL_OPENSSL_MISSING_H_ */
