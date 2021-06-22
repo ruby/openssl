@@ -74,6 +74,7 @@ jobs:
           - openssl-1.0.2u # EOL
           - openssl-1.1.0l # EOL
           - openssl-1.1.1j
+          - openssl-3.0.0-beta1
           - libressl-3.1.5
           - libressl-3.2.4
     steps:
