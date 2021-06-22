@@ -12,6 +12,9 @@
 
 #include "ruby/config.h"
 
+/* added in 3.0.0 */
+/* HAVE_EVP_MD_CTX_GET_PKEY_CTX replaces HAVE_EVP_MD_CTX_PKEY_CTX
+
 /* added in 1.1.0 */
 #if !defined(HAVE_EVP_MD_CTX_NEW)
 #  define EVP_MD_CTX_new EVP_MD_CTX_create
@@ -21,7 +24,7 @@
 #  define EVP_MD_CTX_free EVP_MD_CTX_destroy
 #endif
 
-#if !defined(HAVE_EVP_MD_CTX_PKEY_CTX)
+#if !defined(HAVE_EVP_MD_CTX_PKEY_CTX) && !defined(HAVE_EVP_MD_CTX_GET_PKEY_CTX)
 #  define EVP_MD_CTX_pkey_ctx(x) (x)->pctx
 #endif
 

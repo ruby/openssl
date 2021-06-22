@@ -133,6 +133,7 @@ end
 have_func("EVP_MD_CTX_new")
 have_func("EVP_MD_CTX_free")
 have_func("EVP_MD_CTX_pkey_ctx")
+have_func("EVP_MD_CTX_get_pkey_ctx")
 have_func("X509_STORE_get_ex_data")
 have_func("X509_STORE_set_ex_data")
 have_func("X509_STORE_get_ex_new_index")
