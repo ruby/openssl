@@ -399,6 +399,10 @@ ossl_pkey_check_public_key(const EVP_PKEY *pkey)
 
     /* OpenSSL < 1.1.0 takes non-const pointer */
     ptr = EVP_PKEY_get0((EVP_PKEY *)pkey);
+    if(ptr == NULL) {
+      ossl_raise(ePKeyError, "public key NULL");
+      return;
+    }
     switch (EVP_PKEY_base_id(pkey)) {
       case EVP_PKEY_RSA:
 	RSA_get0_key(ptr, &n, &e, NULL);
@@ -926,8 +930,8 @@ ossl_pkey_verify(int argc, VALUE *argv, VALUE self)
     int state, ret;
 
     GetPKey(self, pkey);
-    rb_scan_args(argc, argv, "31", &digest, &sig, &data, &options);
     ossl_pkey_check_public_key(pkey);
+    rb_scan_args(argc, argv, "31", &digest, &sig, &data, &options);
     if (!NIL_P(digest))
         md = ossl_evp_get_digestbyname(digest);
     StringValue(sig);
