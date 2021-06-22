@@ -13,7 +13,11 @@
 #include "ruby/config.h"
 
 /* added in 3.0.0 */
-/* HAVE_EVP_MD_CTX_GET_PKEY_CTX replaces HAVE_EVP_MD_CTX_PKEY_CTX
+/* Notes:
+   HAVE_EVP_MD_CTX_GET_PKEY_CTX replaces HAVE_EVP_MD_CTX_PKEY_CTX
+
+   HAVE_TS_VERIFY_CTX_SET_CERTS replaces HAVE_TS_VERIFY_CTS_SET_CERTS
+ */
 
 /* added in 1.1.0 */
 #if !defined(HAVE_EVP_MD_CTX_NEW)
@@ -198,7 +202,7 @@ IMPL_PKEY_GETTER(EC_KEY, ec)
 #  define TS_STATUS_INFO_get0_failure_info(a) ((a)->failure_info)
 #endif
 
-#if !defined(HAVE_TS_VERIFY_CTS_SET_CERTS)
+#if !defined(HAVE_TS_VERIFY_CTS_SET_CERTS) && !defined(HAVE_TS_VERIFY_CTX_SET_CERTS)
 #  define TS_VERIFY_CTS_set_certs(ctx, crts) ((ctx)->certs=(crts))
 #endif
 
