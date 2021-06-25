@@ -22,7 +22,7 @@ jobs:
           ruby-version: ${{ matrix.ruby }}
 
       - name: depends
-        run:  rake install_dependencies
+        run:  bundle install
 
       - name: compile
         run:  rake compile -- --enable-debug
@@ -50,7 +50,7 @@ jobs:
           mingw: _upgrade_ openssl
 
       - name: depends
-        run:  rake install_dependencies
+        run:  bundle install
 
       # pkg-config is disabled because it can pick up the different OpenSSL installation
       # SSL_DIR is set as needed by MSP-Greg/setup-ruby-pkgs
@@ -110,7 +110,7 @@ jobs:
           ruby-version: ${{ matrix.ruby }}
 
       - name: depends
-        run:  rake install_dependencies
+        run:  bundle install
 
       - name: compile
         run:  rake compile -- --enable-debug --with-openssl-dir=$HOME/.openssl/${{ matrix.openssl }}
