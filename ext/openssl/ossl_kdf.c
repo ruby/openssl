@@ -169,7 +169,7 @@ kdf_scrypt(int argc, VALUE *argv, VALUE self)
  *   ikm = ["0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b"].pack("H*")
  *   salt = ["000102030405060708090a0b0c"].pack("H*")
  *   info = ["f0f1f2f3f4f5f6f7f8f9"].pack("H*")
- *   p OpenSSL::KDF.hkdf(ikm, salt: salt, info: info, length: 42, hash: OpenSSL::Digest.new('SHA256')).unpack1("B*").to_i(2).to_s(16)
+ *   p OpenSSL::KDF.hkdf(ikm, salt: salt, info: info, length: 42, hash: "SHA256").unpack1("H*")
  *   # => "3cb25f25faacd57a90434f64d0362f2a2d2d0a90cf1a5a4c5db02d56ecc4c5bf34007208d5b887185865"
  */
 static VALUE
