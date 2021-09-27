@@ -74,10 +74,11 @@ jobs:
           - openssl-1.0.1u # EOL
           - openssl-1.0.2u # EOL
           - openssl-1.1.0l # EOL
-          - openssl-1.1.1j
+          - openssl-1.1.1l
           - libressl-2.5.5 # EOL
-          - libressl-3.1.5
-          - libressl-3.2.0
+          - libressl-3.1.5 # EOL
+          - libressl-3.2.6
+          - libressl-3.3.4
     steps:
       - name: repo checkout
         uses: actions/checkout@v2
