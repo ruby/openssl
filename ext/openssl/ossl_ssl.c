@@ -60,6 +60,13 @@ static int ossl_sslctx_ex_store_p;
 #endif
 
 static void
+ossl_sslctx_mark(void *ptr)
+{
+    SSL_CTX *ctx = ptr;
+    rb_gc_mark((VALUE)SSL_CTX_get_ex_data(ctx, ossl_sslctx_ex_ptr_idx));
+}
+
+static void
 ossl_sslctx_free(void *ptr)
 {
     SSL_CTX *ctx = ptr;
@@ -73,7 +80,7 @@ ossl_sslctx_free(void *ptr)
 static const rb_data_type_t ossl_sslctx_type = {
     "OpenSSL/SSL/CTX",
     {
-	0, ossl_sslctx_free,
+        ossl_sslctx_mark, ossl_sslctx_free,
     },
     0, 0, RUBY_TYPED_FREE_IMMEDIATELY,
 };
@@ -1529,6 +1536,14 @@ ssl_started(SSL *ssl)
 }
 
 static void
+ossl_ssl_mark(void *ptr)
+{
+    SSL *ssl = ptr;
+    rb_gc_mark((VALUE)SSL_get_ex_data(ssl, ossl_ssl_ex_ptr_idx));
+    rb_gc_mark((VALUE)SSL_get_ex_data(ssl, ossl_ssl_ex_vcb_idx));
+}
+
+static void
 ossl_ssl_free(void *ssl)
 {
     SSL_free(ssl);
@@ -1537,7 +1552,7 @@ ossl_ssl_free(void *ssl)
 const rb_data_type_t ossl_ssl_type = {
     "OpenSSL/SSL",
     {
-	0, ossl_ssl_free,
+        ossl_ssl_mark, ossl_ssl_free,
     },
     0, 0, RUBY_TYPED_FREE_IMMEDIATELY,
 };
