@@ -21,8 +21,6 @@
 <link href="./css/rdoc.css" rel="stylesheet">
 
 
-
-
 <body id="top" role="document" class="module">
 <nav role="navigation">
   <div id="project-navigation">
@@ -99,32 +97,22 @@
     
     
     
-    <!-- Method Quickref -->
+    
+<!-- Method Quickref -->
 <div id="method-list-section" class="nav-section">
   <h3>Methods</h3>
 
   <ul class="link-list" role="directory">
-    
     <li ><a href="#method-c-Digest">::Digest</a>
-    
     <li ><a href="#method-c-debug">::debug</a>
-    
     <li ><a href="#method-c-debug-3D">::debug=</a>
-    
     <li ><a href="#method-c-errors">::errors</a>
-    
     <li ><a href="#method-c-fips_mode">::fips_mode</a>
-    
     <li ><a href="#method-c-fips_mode-3D">::fips_mode=</a>
-    
     <li ><a href="#method-c-fixed_length_secure_compare">::fixed_length_secure_compare</a>
-    
     <li ><a href="#method-c-mem_check_start">::mem_check_start</a>
-    
     <li ><a href="#method-c-print_mem_leaks">::print_mem_leaks</a>
-    
     <li ><a href="#method-c-secure_compare">::secure_compare</a>
-    
   </ul>
 </div>
 
@@ -208,7 +196,7 @@
 
 <h3 id="module-OpenSSL-label-Encryption+-26+Decryption">Encryption &amp; Decryption<span><a href="#module-OpenSSL-label-Encryption+-26+Decryption">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
-<p>Asymmetric public/private key encryption is slow and victim to attack in cases where it is used without padding or directly to encrypt larger chunks of data. Typical use cases for RSA encryption involve “wrapping” a symmetric key with the public key of the recipient who would “unwrap” that symmetric key again using their private key. The following illustrates a simplified example of such a key transport scheme. It shouldn&#39;t be used in practice, though, standardized protocols should always be preferred.</p>
+<p>Asymmetric public/private key encryption is slow and victim to attack in cases where it is used without padding or directly to encrypt larger chunks of data. Typical use cases for RSA encryption involve “wrapping” a symmetric key with the public key of the recipient who would “unwrap” that symmetric key again using their private key. The following illustrates a simplified example of such a key transport scheme. It shouldn’t be used in practice, though, standardized protocols should always be preferred.</p>
 
 <pre class="ruby"><span class="ruby-identifier">wrapped_key</span> = <span class="ruby-identifier">key</span>.<span class="ruby-identifier">public_encrypt</span> <span class="ruby-identifier">key</span>
 </pre>
@@ -222,7 +210,7 @@
 
 <h3 id="module-OpenSSL-label-Signatures">Signatures<span><a href="#module-OpenSSL-label-Signatures">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
-<p>Using “private_encrypt” to encrypt some data with the private key is equivalent to applying a digital signature to the data. A verifying party may validate the signature by comparing the result of decrypting the signature with “public_decrypt” to the original data. However, <a href="OpenSSL/PKey.html"><code>OpenSSL::PKey</code></a> already has methods “sign” and “verify” that handle digital signatures in a standardized way - “private_encrypt” and “public_decrypt” shouldn&#39;t be used in practice.</p>
+<p>Using “private_encrypt” to encrypt some data with the private key is equivalent to applying a digital signature to the data. A verifying party may validate the signature by comparing the result of decrypting the signature with “public_decrypt” to the original data. However, <a href="OpenSSL/PKey.html"><code>OpenSSL::PKey</code></a> already has methods “sign” and “verify” that handle digital signatures in a standardized way - “private_encrypt” and “public_decrypt” shouldn’t be used in practice.</p>
 
 <p>To sign a document, a cryptographically secure hash of the document is computed first, which is then signed using the private key.</p>
 
@@ -368,7 +356,7 @@ decrypted &lt;&lt; cipher.final</pre>
 
 <h3 id="module-OpenSSL-label-Signing+a+Certificate">Signing a Certificate<span><a href="#module-OpenSSL-label-Signing+a+Certificate">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
-<p>To sign a certificate set the issuer and use <a href="OpenSSL/X509/Certificate.html#method-i-sign"><code>OpenSSL::X509::Certificate#sign</code></a> with a digest algorithm.  This creates a self-signed cert because we&#39;re using the same name and key to sign the certificate as was used to create the certificate.</p>
+<p>To sign a certificate set the issuer and use <a href="OpenSSL/X509/Certificate.html#method-i-sign"><code>OpenSSL::X509::Certificate#sign</code></a> with a digest algorithm.  This creates a self-signed cert because we’re using the same name and key to sign the certificate as was used to create the certificate.</p>
 
 <pre class="ruby"><span class="ruby-identifier">cert</span>.<span class="ruby-identifier">issuer</span> = <span class="ruby-identifier">name</span>
 <span class="ruby-identifier">cert</span>.<span class="ruby-identifier">sign</span> <span class="ruby-identifier">key</span>, <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;SHA1&#39;</span>)
@@ -392,7 +380,7 @@ decrypted &lt;&lt; cipher.final</pre>
 
 <h2 id="module-OpenSSL-label-Certificate+Authority">Certificate Authority<span><a href="#module-OpenSSL-label-Certificate+Authority">&para;</a> <a href="#top">&uarr;</a></span></h2>
 
-<p>A certificate authority (CA) is a trusted third party that allows you to verify the ownership of unknown certificates.  The CA issues key signatures that indicate it trusts the user of that key.  A user encountering the key can verify the signature by using the CA&#39;s public key.</p>
+<p>A certificate authority (CA) is a trusted third party that allows you to verify the ownership of unknown certificates.  The CA issues key signatures that indicate it trusts the user of that key.  A user encountering the key can verify the signature by using the CA’s public key.</p>
 
 <h3 id="module-OpenSSL-label-CA+Key">CA Key<span><a href="#module-OpenSSL-label-CA+Key">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
@@ -432,13 +420,13 @@ decrypted &lt;&lt; cipher.final</pre>
   <span class="ruby-identifier">extension_factory</span>.<span class="ruby-identifier">create_extension</span>(<span class="ruby-string">&#39;subjectKeyIdentifier&#39;</span>, <span class="ruby-string">&#39;hash&#39;</span>)
 </pre>
 
-<p>This extension indicates the CA&#39;s key may be used as a CA.</p>
+<p>This extension indicates the CA’s key may be used as a CA.</p>
 
 <pre class="ruby"><span class="ruby-identifier">ca_cert</span>.<span class="ruby-identifier">add_extension</span> \
   <span class="ruby-identifier">extension_factory</span>.<span class="ruby-identifier">create_extension</span>(<span class="ruby-string">&#39;basicConstraints&#39;</span>, <span class="ruby-string">&#39;CA:TRUE&#39;</span>, <span class="ruby-keyword">true</span>)
 </pre>
 
-<p>This extension indicates the CA&#39;s key may be used to verify signatures on both certificates and certificate revocations.</p>
+<p>This extension indicates the CA’s key may be used to verify signatures on both certificates and certificate revocations.</p>
 
 <pre class="ruby"><span class="ruby-identifier">ca_cert</span>.<span class="ruby-identifier">add_extension</span> \
   <span class="ruby-identifier">extension_factory</span>.<span class="ruby-identifier">create_extension</span>(
@@ -477,7 +465,7 @@ decrypted &lt;&lt; cipher.final</pre>
 
 <h3 id="module-OpenSSL-label-Creating+a+Certificate+from+a+CSR">Creating a Certificate from a CSR<span><a href="#module-OpenSSL-label-Creating+a+Certificate+from+a+CSR">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
-<p>Upon receiving a CSR the CA will verify it before signing it.  A minimal verification would be to check the CSR&#39;s signature.</p>
+<p>Upon receiving a CSR the CA will verify it before signing it.  A minimal verification would be to check the CSR’s signature.</p>
 
 <pre class="ruby"><span class="ruby-identifier">csr</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">Request</span>.<span class="ruby-identifier">new</span> <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span> <span class="ruby-string">&#39;csr.pem&#39;</span>
 
@@ -556,7 +544,7 @@ decrypted &lt;&lt; cipher.final</pre>
 
 <p>An <a href="OpenSSL/SSL.html"><code>SSL</code></a> client is created with a TCP socket and the context. SSLSocket#connect must be called to initiate the <a href="OpenSSL/SSL.html"><code>SSL</code></a> handshake and start encryption.  A key and certificate are not required for the client socket.</p>
 
-<p>Note that SSLSocket#close doesn&#39;t close the underlying socket by default. Set SSLSocket#sync_close to true if you want.</p>
+<p>Note that SSLSocket#close doesn’t close the underlying socket by default. Set SSLSocket#sync_close to true if you want.</p>
 
 <pre class="ruby"><span class="ruby-identifier">require</span> <span class="ruby-string">&#39;socket&#39;</span>
 
@@ -575,7 +563,7 @@ decrypted &lt;&lt; cipher.final</pre>
 
 <p>An unverified <a href="OpenSSL/SSL.html"><code>SSL</code></a> connection does not provide much security.  For enhanced security the client or server can verify the certificate of its peer.</p>
 
-<p>The client can be modified to verify the server&#39;s certificate against the certificate authority&#39;s certificate:</p>
+<p>The client can be modified to verify the server’s certificate against the certificate authority’s certificate:</p>
 
 <pre class="ruby"><span class="ruby-identifier">context</span>.<span class="ruby-identifier">ca_file</span> = <span class="ruby-string">&#39;ca_cert.pem&#39;</span>
 <span class="ruby-identifier">context</span>.<span class="ruby-identifier">verify_mode</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">VERIFY_PEER</span>
@@ -594,70 +582,42 @@ decrypted &lt;&lt; cipher.final</pre>
 
   </section>
 
-  
   <section id="5Buntitled-5D" class="documentation-section">
-    
 
-    
 
-    
     <section class="constants-list">
       <header>
         <h3>Constants</h3>
       </header>
       <dl>
-      
         <dt id="OPENSSL_FIPS">OPENSSL_FIPS
-        
         <dd><p>Boolean indicating whether <a href="OpenSSL.html"><code>OpenSSL</code></a> is FIPS-capable or not</p>
-        
-      
         <dt id="OPENSSL_LIBRARY_VERSION">OPENSSL_LIBRARY_VERSION
-        
         <dd>
-        
-      
         <dt id="OPENSSL_VERSION">OPENSSL_VERSION
-        
         <dd><p>Version of <a href="OpenSSL.html"><code>OpenSSL</code></a> the ruby <a href="OpenSSL.html"><code>OpenSSL</code></a> extension was built with</p>
-        
-      
         <dt id="OPENSSL_VERSION_NUMBER">OPENSSL_VERSION_NUMBER
-        
         <dd><p>Version number of <a href="OpenSSL.html"><code>OpenSSL</code></a> the ruby <a href="OpenSSL.html"><code>OpenSSL</code></a> extension was built with (base 16)</p>
-        
-      
         <dt id="VERSION">VERSION
-        
         <dd>
-        
-      
       </dl>
     </section>
-    
 
-    
 
-    
+
      <section id="public-class-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Class Methods</h3>
        </header>
 
-    
       <div id="method-c-Digest" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">Digest</span><span
             class="method-args">(name)</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
-          
           <p>Returns a <a href="OpenSSL/Digest.html"><code>Digest</code></a> subclass by <em>name</em></p>
 
 <pre class="ruby"><span class="ruby-identifier">require</span> <span class="ruby-string">&#39;openssl&#39;</span>
@@ -668,46 +628,29 @@ decrypted &lt;&lt; cipher.final</pre>
 <span class="ruby-constant">Digest</span>(<span class="ruby-string">&quot;Foo&quot;</span>)
 <span class="ruby-comment"># =&gt; NameError: wrong constant name Foo</span>
 </pre>
-          
-          
 
-          
           <div class="method-source-code" id="Digest-source">
             <pre><span class="ruby-comment"># File lib/openssl/digest.rb, line 67</span>
 <span class="ruby-keyword">def</span> <span class="ruby-constant">Digest</span>(<span class="ruby-identifier ruby-title">name</span>)
   <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">const_get</span>(<span class="ruby-identifier">name</span>)
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-c-debug" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             debug &rarr; true | false
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
           <div class="method-source-code" id="debug-source">
             <pre>static VALUE
 ossl_debug_get(VALUE self)
@@ -715,36 +658,22 @@ ossl_debug_get(VALUE self)
     return dOSSL;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-c-debug-3D" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             debug = boolean &rarr; boolean
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Turns on or off debug mode. With debug mode, all erros added to the <a href="OpenSSL.html"><code>OpenSSL</code></a> error queue will be printed to stderr.</p>
-          
-          
 
-          
           <div class="method-source-code" id="debug-3D-source">
             <pre>static VALUE
 ossl_debug_set(VALUE self, VALUE val)
@@ -754,38 +683,24 @@ ossl_debug_set(VALUE self, VALUE val)
     return val;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-c-errors" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             errors &rarr; [String...]
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>See any remaining errors held in queue.</p>
 
-<p>Any errors you see here are probably due to a bug in Ruby&#39;s <a href="OpenSSL.html"><code>OpenSSL</code></a> implementation.</p>
-          
-          
+<p>Any errors you see here are probably due to a bug in Ruby’s <a href="OpenSSL.html"><code>OpenSSL</code></a> implementation.</p>
 
-          
           <div class="method-source-code" id="errors-source">
             <pre>VALUE
 ossl_get_errors(VALUE _)
@@ -801,36 +716,22 @@ ossl_get_errors(VALUE _)
     return ary;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-c-fips_mode" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             fips_mode &rarr; true | false
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
           <div class="method-source-code" id="fips_mode-source">
             <pre>static VALUE
 ossl_fips_mode_get(VALUE self)
@@ -845,31 +746,20 @@ ossl_fips_mode_get(VALUE self)
 #endif
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-c-fips_mode-3D" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             fips_mode = boolean &rarr; boolean
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Turns FIPS mode on or off. Turning on FIPS mode will obviously only have an effect for FIPS-capable installations of the <a href="OpenSSL.html"><code>OpenSSL</code></a> library. Trying to do so otherwise will result in an error.</p>
 
 <h3 id="method-c-fips_mode-3D-label-Examples">Examples<span><a href="#method-c-fips_mode-3D-label-Examples">&para;</a> <a href="#top">&uarr;</a></span></h3>
@@ -877,10 +767,7 @@ ossl_fips_mode_get(VALUE self)
 <pre class="ruby"><span class="ruby-constant">OpenSSL</span>.<span class="ruby-identifier">fips_mode</span> = <span class="ruby-keyword">true</span>   <span class="ruby-comment"># turn FIPS mode on</span>
 <span class="ruby-constant">OpenSSL</span>.<span class="ruby-identifier">fips_mode</span> = <span class="ruby-keyword">false</span>  <span class="ruby-comment"># and off again</span>
 </pre>
-          
-          
 
-          
           <div class="method-source-code" id="fips_mode-3D-source">
             <pre>static VALUE
 ossl_fips_mode_set(VALUE self, VALUE enabled)
@@ -903,38 +790,24 @@ ossl_fips_mode_set(VALUE self, VALUE enabled)
 #endif
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-c-fixed_length_secure_compare" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             fixed_length_secure_compare(string, string) &rarr; boolean
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Constant time memory comparison for fixed length strings, such as results of <a href="OpenSSL/HMAC.html"><code>HMAC</code></a> calculations.</p>
 
 <p>Returns <code>true</code> if the strings are identical, <code>false</code> if they are of the same length but not identical. If the length is different, <code>ArgumentError</code> is raised.</p>
-          
-          
 
-          
           <div class="method-source-code" id="fixed_length_secure_compare-source">
             <pre>static VALUE
 ossl_crypto_fixed_length_secure_compare(VALUE dummy, VALUE str1, VALUE str2)
@@ -954,38 +827,24 @@ ossl_crypto_fixed_length_secure_compare(VALUE dummy, VALUE str1, VALUE str2)
     }
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-c-mem_check_start" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             mem_check_start &rarr; nil
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Calls CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_ON). Starts tracking memory allocations. See also <a href="OpenSSL.html#method-c-print_mem_leaks"><code>OpenSSL.print_mem_leaks</code></a>.</p>
 
 <p>This is available only when built with a capable <a href="OpenSSL.html"><code>OpenSSL</code></a> and –enable-debug configure option.</p>
-          
-          
 
-          
           <div class="method-source-code" id="mem_check_start-source">
             <pre>static VALUE
 mem_check_start(VALUE self)
@@ -994,31 +853,20 @@ mem_check_start(VALUE self)
         return Qnil;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-c-print_mem_leaks" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             print_mem_leaks &rarr; true | false
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>For debugging the Ruby/OpenSSL library. Calls CRYPTO_mem_leaks_fp(stderr). Prints detected memory leaks to standard error. This cleans the global state up thus you cannot use any methods of the library after calling this.</p>
 
 <p>Returns <code>true</code> if leaks detected, <code>false</code> otherwise.</p>
@@ -1035,10 +883,7 @@ mem_check_start(VALUE self)
   <span class="ruby-constant">OpenSSL</span>.<span class="ruby-identifier">print_mem_leaks</span> <span class="ruby-comment"># will print the leakage</span>
 }
 </pre>
-          
-          
 
-          
           <div class="method-source-code" id="print_mem_leaks-source">
             <pre>static VALUE
 print_mem_leaks(VALUE self)
@@ -1047,8 +892,11 @@ print_mem_leaks(VALUE self)
     int ret;
 #endif
 
-    BN_CTX_free(ossl_bn_ctx);
-    ossl_bn_ctx = NULL;
+#ifndef HAVE_RB_EXT_RACTOR_SAFE
+    // for Ruby 2.x
+    void ossl_bn_ctx_free(void); // ossl_bn.c
+    ossl_bn_ctx_free();
+#endif
 
 #if OPENSSL_VERSION_NUMBER &gt;= 0x10100000
     ret = CRYPTO_mem_leaks_fp(stderr);
@@ -1061,36 +909,22 @@ print_mem_leaks(VALUE self)
 #endif
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-c-secure_compare" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             secure_compare(string, string) &rarr; boolean
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Constant time memory comparison. Inputs are hashed using SHA-256 to mask the length of the secret. Returns <code>true</code> if the strings are identical, <code>false</code> otherwise.</p>
-          
-          
 
-          
           <div class="method-source-code" id="secure_compare-source">
             <pre><span class="ruby-comment"># File lib/openssl.rb, line 33</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier ruby-title">secure_compare</span>(<span class="ruby-identifier">a</span>, <span class="ruby-identifier">b</span>)
@@ -1099,25 +933,20 @@ print_mem_leaks(VALUE self)
   <span class="ruby-constant">OpenSSL</span>.<span class="ruby-identifier">fixed_length_secure_compare</span>(<span class="ruby-identifier">hashed_a</span>, <span class="ruby-identifier">hashed_b</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">a</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">b</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
     </section>
-  
-  </section>
 
+  </section>
 </main>
 
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

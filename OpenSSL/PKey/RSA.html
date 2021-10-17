@@ -21,8 +21,6 @@
 <link href="../../css/rdoc.css" rel="stylesheet">
 
 
-
-
 <body id="top" role="document" class="class">
 <nav role="navigation">
   <div id="project-navigation">
@@ -59,79 +57,52 @@
 
   <div id="class-metadata">
     
-    <div id="parent-class-section" class="nav-section">
+    
+<div id="parent-class-section" class="nav-section">
   <h3>Parent</h3>
 
-  
   <p class="link"><a href="PKey.html">OpenSSL::PKey::PKey</a>
-  
 </div>
 
-    <div id="includes-section" class="nav-section">
+    
+<div id="includes-section" class="nav-section">
   <h3>Included Modules</h3>
 
   <ul class="link-list">
-  
-  
     <li><a class="include" href="../Marshal.html">OpenSSL::Marshal</a>
-  
-  
   </ul>
 </div>
 
     
-    <!-- Method Quickref -->
+    
+<!-- Method Quickref -->
 <div id="method-list-section" class="nav-section">
   <h3>Methods</h3>
 
   <ul class="link-list" role="directory">
-    
     <li ><a href="#method-c-generate">::generate</a>
-    
     <li ><a href="#method-c-new">::new</a>
-    
     <li ><a href="#method-i-blinding_off-21">#blinding_off!</a>
-    
     <li ><a href="#method-i-blinding_on-21">#blinding_on!</a>
-    
     <li ><a href="#method-i-export">#export</a>
-    
     <li ><a href="#method-i-initialize_copy">#initialize_copy</a>
-    
     <li ><a href="#method-i-params">#params</a>
-    
     <li ><a href="#method-i-private-3F">#private?</a>
-    
     <li ><a href="#method-i-private_decrypt">#private_decrypt</a>
-    
     <li ><a href="#method-i-private_encrypt">#private_encrypt</a>
-    
     <li ><a href="#method-i-public-3F">#public?</a>
-    
     <li ><a href="#method-i-public_decrypt">#public_decrypt</a>
-    
     <li ><a href="#method-i-public_encrypt">#public_encrypt</a>
-    
     <li ><a href="#method-i-public_key">#public_key</a>
-    
     <li ><a href="#method-i-set_crt_params">#set_crt_params</a>
-    
     <li ><a href="#method-i-set_factors">#set_factors</a>
-    
     <li ><a href="#method-i-set_key">#set_key</a>
-    
     <li ><a href="#method-i-sign_pss">#sign_pss</a>
-    
     <li ><a href="#method-i-to_der">#to_der</a>
-    
     <li ><a href="#method-i-to_pem">#to_pem</a>
-    
     <li ><a href="#method-i-to_s">#to_s</a>
-    
     <li ><a href="#method-i-to_text">#to_text</a>
-    
     <li ><a href="#method-i-verify_pss">#verify_pss</a>
-    
   </ul>
 </div>
 
@@ -149,51 +120,33 @@
 
   </section>
 
-  
   <section id="5Buntitled-5D" class="documentation-section">
-    
 
-    
 
-    
 
-    
 
-    
+
      <section id="public-class-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Class Methods</h3>
        </header>
 
-    
       <div id="method-c-generate" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             generate(size)           &rarr; RSA instance
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
         <div class="method-heading">
           <span class="method-callseq">
             generate(size, exponent) &rarr; RSA instance
           </span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Generates an <a href="RSA.html"><code>RSA</code></a> keypair.  <em>size</em> is an integer representing the desired key size.  Keys smaller than 1024 should be considered insecure.  <em>exponent</em> is an odd number normally 3, 17, or 65537.</p>
-          
-          
 
-          
           <div class="method-source-code" id="generate-source">
             <pre>static VALUE
 ossl_rsa_s_generate(int argc, VALUE *argv, VALUE klass)
@@ -216,45 +169,30 @@ ossl_rsa_s_generate(int argc, VALUE *argv, VALUE klass)
     return obj;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-c-new" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             new(key_size)                 &rarr; RSA instance
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
         <div class="method-heading">
           <span class="method-callseq">
             new(encoded_key)              &rarr; RSA instance
           </span>
-          
         </div>
-        
         <div class="method-heading">
           <span class="method-callseq">
             new(encoded_key, pass_phrase) &rarr; RSA instance
           </span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Generates or loads an <a href="RSA.html"><code>RSA</code></a> keypair.  If an integer <em>key_size</em> is given it represents the desired key size.  Keys less than 1024 bits should be considered insecure.</p>
 
 <p>A key can instead be loaded from an <em>encoded_key</em> which must be PEM or DER encoded.  A <em>pass_phrase</em> can be used to decrypt the key.  If none is given <a href="../../OpenSSL.html"><code>OpenSSL</code></a> will prompt for the pass phrase.</p>
@@ -265,10 +203,7 @@ ossl_rsa_s_generate(int argc, VALUE *argv, VALUE klass)
 <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">RSA</span>.<span class="ruby-identifier">new</span> <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span> <span class="ruby-string">&#39;rsa.pem&#39;</span>
 <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">RSA</span>.<span class="ruby-identifier">new</span> <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span>(<span class="ruby-string">&#39;rsa.pem&#39;</span>), <span class="ruby-string">&#39;my pass phrase&#39;</span>
 </pre>
-          
-          
 
-          
           <div class="method-source-code" id="new-source">
             <pre>static VALUE
 ossl_rsa_initialize(int argc, VALUE *argv, VALUE self)
@@ -324,41 +259,28 @@ ossl_rsa_initialize(int argc, VALUE *argv, VALUE self)
     return self;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
     </section>
-  
+
      <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Instance Methods</h3>
        </header>
 
-    
       <div id="method-i-blinding_off-21" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">blinding_off!</span><span
             class="method-args">()</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
           <div class="method-source-code" id="blinding_off-21-source">
             <pre>static VALUE
 ossl_rsa_blinding_off(VALUE self)
@@ -371,33 +293,21 @@ ossl_rsa_blinding_off(VALUE self)
     return self;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-blinding_on-21" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">blinding_on!</span><span
             class="method-args">()</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
           <div class="method-source-code" id="blinding_on-21-source">
             <pre>static VALUE
 ossl_rsa_blinding_on(VALUE self)
@@ -412,50 +322,22 @@ ossl_rsa_blinding_on(VALUE self)
     return self;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-export" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             export([cipher, pass_phrase]) &rarr; PEM-format String
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        <div class="method-heading">
-          <span class="method-callseq">
-            to_pem([cipher, pass_phrase]) &rarr; PEM-format String
-          </span>
-          
-        </div>
-        
-        <div class="method-heading">
-          <span class="method-callseq">
-            to_s([cipher, pass_phrase]) &rarr; PEM-format String
-          </span>
-          
-        </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Outputs this keypair in PEM encoding.  If <em>cipher</em> and <em>pass_phrase</em> are given they will be used to encrypt the key.  <em>cipher</em> must be an <a href="../Cipher.html"><code>OpenSSL::Cipher</code></a> instance.</p>
-          
-          
 
-          
           <div class="method-source-code" id="export-source">
             <pre>static VALUE
 ossl_rsa_export(int argc, VALUE *argv, VALUE self)
@@ -497,37 +379,24 @@ ossl_rsa_export(int argc, VALUE *argv, VALUE self)
     return str;
 }</pre>
           </div>
-          
         </div>
 
-        
         <div class="aliases">
           Also aliased as: <a href="RSA.html#method-i-to_pem">to_pem</a>, <a href="RSA.html#method-i-to_s">to_s</a>
         </div>
-        
 
-        
       </div>
 
-    
       <div id="method-i-initialize_copy" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">initialize_copy</span><span
             class="method-args">(p1)</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
           <div class="method-source-code" id="initialize_copy-source">
             <pre>static VALUE
 ossl_rsa_initialize_copy(VALUE self, VALUE other)
@@ -549,40 +418,26 @@ ossl_rsa_initialize_copy(VALUE self, VALUE other)
     return self;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-params" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             params &rarr; hash
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>THIS METHOD IS INSECURE, PRIVATE INFORMATION CAN LEAK OUT!!!</p>
 
-<p>Stores all parameters of key to the hash.  The hash has keys &#39;n&#39;, &#39;e&#39;, &#39;d&#39;, &#39;p&#39;, &#39;q&#39;, &#39;dmp1&#39;, &#39;dmq1&#39;, &#39;iqmp&#39;.</p>
+<p>Stores all parameters of key to the hash.  The hash has keys ‘n’, ‘e’, ‘d’, ‘p’, ‘q’, ‘dmp1’, ‘dmq1’, ‘iqmp’.</p>
 
-<p>Don&#39;t use :-)) (It&#39;s up to you)</p>
-          
-          
+<p>Don’t use :-)) (It’s up to you)</p>
 
-          
           <div class="method-source-code" id="params-source">
             <pre>static VALUE
 ossl_rsa_get_params(VALUE self)
@@ -609,36 +464,22 @@ ossl_rsa_get_params(VALUE self)
     return hash;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-private-3F" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             private? &rarr; true | false
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Does this keypair contain a private key?</p>
-          
-          
 
-          
           <div class="method-source-code" id="private-3F-source">
             <pre>static VALUE
 ossl_rsa_is_private(VALUE self)
@@ -650,43 +491,27 @@ ossl_rsa_is_private(VALUE self)
     return RSA_PRIVATE(self, rsa) ? Qtrue : Qfalse;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-private_decrypt" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             private_decrypt(string)          &rarr; String
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
         <div class="method-heading">
           <span class="method-callseq">
             private_decrypt(string, padding) &rarr; String
           </span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Decrypt <em>string</em>, which has been encrypted with the public key, with the private key.  <em>padding</em> defaults to PKCS1_PADDING.</p>
-          
-          
 
-          
           <div class="method-source-code" id="private_decrypt-source">
             <pre>static VALUE
 ossl_rsa_private_decrypt(int argc, VALUE *argv, VALUE self)
@@ -714,43 +539,27 @@ ossl_rsa_private_decrypt(int argc, VALUE *argv, VALUE self)
     return str;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-private_encrypt" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             private_encrypt(string)          &rarr; String
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
         <div class="method-heading">
           <span class="method-callseq">
             private_encrypt(string, padding) &rarr; String
           </span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Encrypt <em>string</em> with the private key.  <em>padding</em> defaults to PKCS1_PADDING. The encrypted string output can be decrypted using <a href="RSA.html#method-i-public_decrypt"><code>public_decrypt</code></a>.</p>
-          
-          
 
-          
           <div class="method-source-code" id="private_encrypt-source">
             <pre>static VALUE
 ossl_rsa_private_encrypt(int argc, VALUE *argv, VALUE self)
@@ -778,36 +587,22 @@ ossl_rsa_private_encrypt(int argc, VALUE *argv, VALUE self)
     return str;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-public-3F" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             public? &rarr; true
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>The return value is always <code>true</code> since every private key is also a public key.</p>
-          
-          
 
-          
           <div class="method-source-code" id="public-3F-source">
             <pre>static VALUE
 ossl_rsa_is_public(VALUE self)
@@ -822,43 +617,27 @@ ossl_rsa_is_public(VALUE self)
     return Qtrue;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-public_decrypt" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             public_decrypt(string)          &rarr; String
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
         <div class="method-heading">
           <span class="method-callseq">
             public_decrypt(string, padding) &rarr; String
           </span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Decrypt <em>string</em>, which has been encrypted with the private key, with the public key.  <em>padding</em> defaults to PKCS1_PADDING.</p>
-          
-          
 
-          
           <div class="method-source-code" id="public_decrypt-source">
             <pre>static VALUE
 ossl_rsa_public_decrypt(int argc, VALUE *argv, VALUE self)
@@ -884,43 +663,27 @@ ossl_rsa_public_decrypt(int argc, VALUE *argv, VALUE self)
     return str;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-public_encrypt" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             public_encrypt(string)          &rarr; String
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
         <div class="method-heading">
           <span class="method-callseq">
             public_encrypt(string, padding) &rarr; String
           </span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Encrypt <em>string</em> with the public key.  <em>padding</em> defaults to PKCS1_PADDING. The encrypted string output can be decrypted using <a href="RSA.html#method-i-private_decrypt"><code>private_decrypt</code></a>.</p>
-          
-          
 
-          
           <div class="method-source-code" id="public_encrypt-source">
             <pre>static VALUE
 ossl_rsa_public_encrypt(int argc, VALUE *argv, VALUE self)
@@ -946,36 +709,22 @@ ossl_rsa_public_encrypt(int argc, VALUE *argv, VALUE self)
     return str;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-public_key" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             public_key &rarr; RSA
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Makes new <a href="RSA.html"><code>RSA</code></a> instance containing the public key from the private key.</p>
-          
-          
 
-          
           <div class="method-source-code" id="public_key-source">
             <pre>static VALUE
 ossl_rsa_to_public_key(VALUE self)
@@ -995,112 +744,65 @@ ossl_rsa_to_public_key(VALUE self)
     return obj;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-set_crt_params" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             set_crt_params(dmp1, dmq1, iqmp) &rarr; self
           </span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Sets <em>dmp1</em>, <em>dmq1</em>, <em>iqmp</em> for the <a href="RSA.html"><code>RSA</code></a> instance. They are calculated by <code>d mod (p - 1)</code>, <code>d mod (q - 1)</code> and <code>q^(-1) mod p</code> respectively.</p>
-          
-          
 
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-set_factors" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             set_factors(p, q) &rarr; self
           </span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Sets <em>p</em>, <em>q</em> for the <a href="RSA.html"><code>RSA</code></a> instance.</p>
-          
-          
 
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-set_key" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             set_key(n, e, d) &rarr; self
           </span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Sets <em>n</em>, <em>e</em>, <em>d</em> for the <a href="RSA.html"><code>RSA</code></a> instance.</p>
-          
-          
 
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-sign_pss" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             sign_pss(digest, data, salt_length:, mgf1_hash:) &rarr; String
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Signs <em>data</em> using the Probabilistic Signature Scheme (RSA-PSS) and returns the calculated signature.</p>
 
 <p><a href="RSAError.html"><code>RSAError</code></a> will be raised if an error occurs.</p>
@@ -1131,10 +833,7 @@ ossl_rsa_to_public_key(VALUE self)
 <span class="ruby-identifier">puts</span> <span class="ruby-identifier">pub_key</span>.<span class="ruby-identifier">verify_pss</span>(<span class="ruby-string">&quot;SHA256&quot;</span>, <span class="ruby-identifier">signature</span>, <span class="ruby-identifier">data</span>,
                         <span class="ruby-value">salt_length:</span> <span class="ruby-value">:auto</span>, <span class="ruby-value">mgf1_hash:</span> <span class="ruby-string">&quot;SHA256&quot;</span>) <span class="ruby-comment"># =&gt; true</span>
 </pre>
-          
-          
 
-          
           <div class="method-source-code" id="sign_pss-source">
             <pre>static VALUE
 ossl_rsa_sign_pss(int argc, VALUE *argv, VALUE self)
@@ -1200,36 +899,22 @@ ossl_rsa_sign_pss(int argc, VALUE *argv, VALUE self)
     ossl_raise(eRSAError, NULL);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-to_der" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             to_der &rarr; DER-format String
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Outputs this keypair in DER encoding.</p>
-          
-          
 
-          
           <div class="method-source-code" id="to_der-source">
             <pre>static VALUE
 ossl_rsa_to_der(VALUE self)
@@ -1260,96 +945,62 @@ ossl_rsa_to_der(VALUE self)
     return str;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-to_pem" class="method-detail method-alias">
-        
         <div class="method-heading">
-          <span class="method-name">to_pem</span><span
-            class="method-args">(p1 = v1, p2 = v2)</span>
-          
+          <span class="method-callseq">
+            to_pem([cipher, pass_phrase]) &rarr; PEM-format String
+          </span>
         </div>
-        
 
         <div class="method-description">
-          
-          
-          
-          
+          <p>Outputs this keypair in PEM encoding.  If <em>cipher</em> and <em>pass_phrase</em> are given they will be used to encrypt the key.  <em>cipher</em> must be an <a href="../Cipher.html"><code>OpenSSL::Cipher</code></a> instance.</p>
 
-          
         </div>
 
-        
 
-        
         <div class="aliases">
           Alias for: <a href="RSA.html#method-i-export">export</a>
         </div>
-        
       </div>
 
-    
       <div id="method-i-to_s" class="method-detail method-alias">
-        
         <div class="method-heading">
-          <span class="method-name">to_s</span><span
-            class="method-args">(p1 = v1, p2 = v2)</span>
-          
+          <span class="method-callseq">
+            to_s([cipher, pass_phrase]) &rarr; PEM-format String
+          </span>
         </div>
-        
 
         <div class="method-description">
-          
-          
-          
-          
+          <p>Outputs this keypair in PEM encoding.  If <em>cipher</em> and <em>pass_phrase</em> are given they will be used to encrypt the key.  <em>cipher</em> must be an <a href="../Cipher.html"><code>OpenSSL::Cipher</code></a> instance.</p>
 
-          
         </div>
 
-        
 
-        
         <div class="aliases">
           Alias for: <a href="RSA.html#method-i-export">export</a>
         </div>
-        
       </div>
 
-    
       <div id="method-i-to_text" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             to_text &rarr; String
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>THIS METHOD IS INSECURE, PRIVATE INFORMATION CAN LEAK OUT!!!</p>
 
 <p>Dumps all parameters of a keypair to a String</p>
 
-<p>Don&#39;t use :-)) (It&#39;s up to you)</p>
-          
-          
+<p>Don’t use :-)) (It’s up to you)</p>
 
-          
           <div class="method-source-code" id="to_text-source">
             <pre>static VALUE
 ossl_rsa_to_text(VALUE self)
@@ -1371,31 +1022,20 @@ ossl_rsa_to_text(VALUE self)
     return str;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-verify_pss" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             verify_pss(digest, signature, data, salt_length:, mgf1_hash:) &rarr; true | false
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Verifies <em>data</em> using the Probabilistic Signature Scheme (RSA-PSS).</p>
 
 <p>The return value is <code>true</code> if the signature is valid, <code>false</code> otherwise. <a href="RSAError.html"><code>RSAError</code></a> will be raised if an error occurs.</p>
@@ -1416,10 +1056,7 @@ ossl_rsa_to_text(VALUE self)
 <dd>
 <p>The hash algorithm used in MGF1.</p>
 </dd></dl>
-          
-          
 
-          
           <div class="method-source-code" id="verify_pss-source">
             <pre>static VALUE
 ossl_rsa_verify_pss(int argc, VALUE *argv, VALUE self)
@@ -1491,25 +1128,20 @@ ossl_rsa_verify_pss(int argc, VALUE *argv, VALUE self)
     ossl_raise(eRSAError, NULL);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
     </section>
-  
-  </section>
 
+  </section>
 </main>
 
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

@@ -21,8 +21,6 @@
 <link href="../../css/rdoc.css" rel="stylesheet">
 
 
-
-
 <body id="top" role="document" class="class">
 <nav role="navigation">
   <div id="project-navigation">
@@ -59,44 +57,32 @@
 
   <div id="class-metadata">
     
-    <div id="parent-class-section" class="nav-section">
+    
+<div id="parent-class-section" class="nav-section">
   <h3>Parent</h3>
 
-  
   <p class="link">Object
-  
 </div>
 
     
     
-    <!-- Method Quickref -->
+    
+<!-- Method Quickref -->
 <div id="method-list-section" class="nav-section">
   <h3>Methods</h3>
 
   <ul class="link-list" role="directory">
-    
     <li ><a href="#method-c-new">::new</a>
-    
     <li ><a href="#method-i-cert_status">#cert_status</a>
-    
     <li ><a href="#method-i-certid">#certid</a>
-    
     <li ><a href="#method-i-check_validity">#check_validity</a>
-    
     <li ><a href="#method-i-extensions">#extensions</a>
-    
     <li ><a href="#method-i-initialize_copy">#initialize_copy</a>
-    
     <li ><a href="#method-i-next_update">#next_update</a>
-    
     <li ><a href="#method-i-revocation_reason">#revocation_reason</a>
-    
     <li ><a href="#method-i-revocation_time">#revocation_time</a>
-    
     <li ><a href="#method-i-this_update">#this_update</a>
-    
     <li ><a href="#method-i-to_der">#to_der</a>
-    
   </ul>
 </div>
 
@@ -114,44 +100,28 @@
 
   </section>
 
-  
   <section id="5Buntitled-5D" class="documentation-section">
-    
 
-    
 
-    
 
-    
 
-    
+
      <section id="public-class-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Class Methods</h3>
        </header>
 
-    
       <div id="method-c-new" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             OpenSSL::OCSP::SingleResponse.new(der_string) &rarr; SingleResponse
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Creates a new <a href="SingleResponse.html"><code>SingleResponse</code></a> from <em>der_string</em>.</p>
-          
-          
 
-          
           <div class="method-source-code" id="new-source">
             <pre>static VALUE
 ossl_ocspsres_initialize(VALUE self, VALUE arg)
@@ -173,39 +143,27 @@ ossl_ocspsres_initialize(VALUE self, VALUE arg)
     return self;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
     </section>
-  
+
      <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Instance Methods</h3>
        </header>
 
-    
       <div id="method-i-cert_status" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             cert_status &rarr; Integer
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns the status of the certificate identified by the certid. The return value may be one of these constant:</p>
 <ul><li>
 <p>V_CERTSTATUS_GOOD</p>
@@ -216,10 +174,7 @@ ossl_ocspsres_initialize(VALUE self, VALUE arg)
 </li></ul>
 
 <p>When the status is V_CERTSTATUS_REVOKED, the time at which the certificate was revoked can be retrieved by <a href="SingleResponse.html#method-i-revocation_time"><code>revocation_time</code></a>.</p>
-          
-          
 
-          
           <div class="method-source-code" id="cert_status-source">
             <pre>static VALUE
 ossl_ocspsres_get_cert_status(VALUE self)
@@ -235,36 +190,22 @@ ossl_ocspsres_get_cert_status(VALUE self)
     return INT2NUM(status);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-certid" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             certid &rarr; CertificateId
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns the <a href="CertificateId.html"><code>CertificateId</code></a> for which this <a href="SingleResponse.html"><code>SingleResponse</code></a> is.</p>
-          
-          
 
-          
           <div class="method-source-code" id="certid-source">
             <pre>static VALUE
 ossl_ocspsres_get_certid(VALUE self)
@@ -278,40 +219,26 @@ ossl_ocspsres_get_certid(VALUE self)
     return ossl_ocspcertid_new(id);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-check_validity" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             check_validity(nsec = 0, maxsec = -1) &rarr; true | false
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Checks the validity of thisUpdate and nextUpdate fields of this <a href="SingleResponse.html"><code>SingleResponse</code></a>. This checks the current time is within the range thisUpdate to nextUpdate.</p>
 
 <p>It is possible that the <a href="../OCSP.html"><code>OCSP</code></a> request takes a few seconds or the time is not accurate. To avoid rejecting a valid response, this method allows the times to be within <em>nsec</em> seconds of the current time.</p>
 
-<p>Some responders don&#39;t set the nextUpdate field. This may cause a very old response to be considered valid. The <em>maxsec</em> parameter can be used to limit the age of responses.</p>
-          
-          
+<p>Some responders don’t set the nextUpdate field. This may cause a very old response to be considered valid. The <em>maxsec</em> parameter can be used to limit the age of responses.</p>
 
-          
           <div class="method-source-code" id="check_validity-source">
             <pre>static VALUE
 ossl_ocspsres_check_validity(int argc, VALUE *argv, VALUE self)
@@ -340,36 +267,22 @@ ossl_ocspsres_check_validity(int argc, VALUE *argv, VALUE self)
     }
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-extensions" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             extensions &rarr; Array of X509::Extension
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
           <div class="method-source-code" id="extensions-source">
             <pre>static VALUE
 ossl_ocspsres_get_extensions(VALUE self)
@@ -391,33 +304,21 @@ ossl_ocspsres_get_extensions(VALUE self)
     return ary;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-initialize_copy" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">initialize_copy</span><span
             class="method-args">(p1)</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
           <div class="method-source-code" id="initialize_copy-source">
             <pre>static VALUE
 ossl_ocspsres_initialize_copy(VALUE self, VALUE other)
@@ -438,36 +339,22 @@ ossl_ocspsres_initialize_copy(VALUE self, VALUE other)
     return self;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-next_update" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             next_update &rarr; Time | nil
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
           <div class="method-source-code" id="next_update-source">
             <pre>static VALUE
 ossl_ocspsres_get_next_update(VALUE self)
@@ -486,36 +373,22 @@ ossl_ocspsres_get_next_update(VALUE self)
     return asn1time_to_time(time);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-revocation_reason" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             revocation_reason &rarr; Integer | nil
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
           <div class="method-source-code" id="revocation_reason-source">
             <pre>static VALUE
 ossl_ocspsres_get_revocation_reason(VALUE self)
@@ -533,36 +406,22 @@ ossl_ocspsres_get_revocation_reason(VALUE self)
     return INT2NUM(reason);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-revocation_time" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             revocation_time &rarr; Time | nil
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
           <div class="method-source-code" id="revocation_time-source">
             <pre>static VALUE
 ossl_ocspsres_get_revocation_time(VALUE self)
@@ -583,36 +442,22 @@ ossl_ocspsres_get_revocation_time(VALUE self)
     return asn1time_to_time(time);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-this_update" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             this_update &rarr; Time
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
           <div class="method-source-code" id="this_update-source">
             <pre>static VALUE
 ossl_ocspsres_get_this_update(VALUE self)
@@ -631,36 +476,22 @@ ossl_ocspsres_get_this_update(VALUE self)
     return asn1time_to_time(time);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-to_der" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             to_der &rarr; String
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Encodes this <a href="SingleResponse.html"><code>SingleResponse</code></a> into a DER-encoded string.</p>
-          
-          
 
-          
           <div class="method-source-code" id="to_der-source">
             <pre>static VALUE
 ossl_ocspsres_to_der(VALUE self)
@@ -682,25 +513,20 @@ ossl_ocspsres_to_der(VALUE self)
     return str;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
     </section>
-  
-  </section>
 
+  </section>
 </main>
 
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

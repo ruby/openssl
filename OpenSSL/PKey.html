@@ -21,8 +21,6 @@
 <link href="../css/rdoc.css" rel="stylesheet">
 
 
-
-
 <body id="top" role="document" class="module">
 <nav role="navigation">
   <div id="project-navigation">
@@ -71,14 +69,13 @@
     
     
     
-    <!-- Method Quickref -->
+    
+<!-- Method Quickref -->
 <div id="method-list-section" class="nav-section">
   <h3>Methods</h3>
 
   <ul class="link-list" role="directory">
-    
     <li ><a href="#method-c-read">::read</a>
-    
   </ul>
 </div>
 
@@ -96,9 +93,9 @@
 
 <p>Asymmetric public key algorithms solve the problem of establishing and sharing secret keys to en-/decrypt messages. The key in such an algorithm consists of two parts: a public key that may be distributed to others and a private key that needs to remain secret.</p>
 
-<p>Messages encrypted with a public key can only be decrypted by recipients that are in possession of the associated private key. Since public key algorithms are considerably slower than symmetric key algorithms (cf. <a href="Cipher.html"><code>OpenSSL::Cipher</code></a>) they are often used to establish a symmetric key shared between two parties that are in possession of each other&#39;s public key.</p>
+<p>Messages encrypted with a public key can only be decrypted by recipients that are in possession of the associated private key. Since public key algorithms are considerably slower than symmetric key algorithms (cf. <a href="Cipher.html"><code>OpenSSL::Cipher</code></a>) they are often used to establish a symmetric key shared between two parties that are in possession of each other’s public key.</p>
 
-<p>Asymmetric algorithms offer a lot of nice features that are used in a lot of different areas. A very common application is the creation and validation of digital signatures. To sign a document, the signatory generally uses a message digest algorithm (cf. <a href="Digest.html"><code>OpenSSL::Digest</code></a>) to compute a digest of the document that is then encrypted (i.e. signed) using the private key. Anyone in possession of the public key may then verify the signature by computing the message digest of the original document on their own, decrypting the signature using the signatory&#39;s public key and comparing the result to the message digest they previously computed. The signature is valid if and only if the decrypted signature is equal to this message digest.</p>
+<p>Asymmetric algorithms offer a lot of nice features that are used in a lot of different areas. A very common application is the creation and validation of digital signatures. To sign a document, the signatory generally uses a message digest algorithm (cf. <a href="Digest.html"><code>OpenSSL::Digest</code></a>) to compute a digest of the document that is then encrypted (i.e. signed) using the private key. Anyone in possession of the public key may then verify the signature by computing the message digest of the original document on their own, decrypting the signature using the signatory’s public key and comparing the result to the message digest they previously computed. The signature is valid if and only if the decrypted signature is equal to this message digest.</p>
 
 <p>The <a href="PKey/PKey.html"><code>PKey</code></a> module offers support for three popular public/private key algorithms:</p>
 <ul><li>
@@ -117,46 +114,31 @@
 
   </section>
 
-  
   <section id="5Buntitled-5D" class="documentation-section">
-    
 
-    
 
-    
 
-    
 
-    
+
      <section id="public-class-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Class Methods</h3>
        </header>
 
-    
       <div id="method-c-read" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             OpenSSL::PKey.read(string [, pwd ]) &rarr; PKey
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
         <div class="method-heading">
           <span class="method-callseq">
             OpenSSL::PKey.read(io [, pwd ]) &rarr; PKey
           </span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Reads a DER or PEM encoded string from <em>string</em> or <em>io</em> and returns an instance of the appropriate <a href="PKey/PKey.html"><code>PKey</code></a> class.</p>
 
 <h3 id="method-c-read-label-Parameters">Parameters<span><a href="#method-c-read-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
@@ -167,10 +149,7 @@
 </li><li>
 <p><em>pwd</em> is an optional password in case <em>string</em> or <em>io</em> is an encrypted PEM resource.</p>
 </li></ul>
-          
-          
 
-          
           <div class="method-source-code" id="read-source">
             <pre>static VALUE
 ossl_pkey_new_from_data(int argc, VALUE *argv, VALUE self)
@@ -207,25 +186,20 @@ ok:
     return ossl_pkey_new(pkey);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
     </section>
-  
-  </section>
 
+  </section>
 </main>
 
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

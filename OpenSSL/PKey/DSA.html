@@ -21,8 +21,6 @@
 <link href="../../css/rdoc.css" rel="stylesheet">
 
 
-
-
 <body id="top" role="document" class="class">
 <nav role="navigation">
   <div id="project-navigation">
@@ -59,65 +57,45 @@
 
   <div id="class-metadata">
     
-    <div id="parent-class-section" class="nav-section">
+    
+<div id="parent-class-section" class="nav-section">
   <h3>Parent</h3>
 
-  
   <p class="link"><a href="PKey.html">OpenSSL::PKey::PKey</a>
-  
 </div>
 
-    <div id="includes-section" class="nav-section">
+    
+<div id="includes-section" class="nav-section">
   <h3>Included Modules</h3>
 
   <ul class="link-list">
-  
-  
     <li><a class="include" href="../Marshal.html">OpenSSL::Marshal</a>
-  
-  
   </ul>
 </div>
 
     
-    <!-- Method Quickref -->
+    
+<!-- Method Quickref -->
 <div id="method-list-section" class="nav-section">
   <h3>Methods</h3>
 
   <ul class="link-list" role="directory">
-    
     <li ><a href="#method-c-generate">::generate</a>
-    
     <li ><a href="#method-c-new">::new</a>
-    
     <li ><a href="#method-i-export">#export</a>
-    
     <li ><a href="#method-i-initialize_copy">#initialize_copy</a>
-    
     <li ><a href="#method-i-params">#params</a>
-    
     <li ><a href="#method-i-private-3F">#private?</a>
-    
     <li ><a href="#method-i-public-3F">#public?</a>
-    
     <li ><a href="#method-i-public_key">#public_key</a>
-    
     <li ><a href="#method-i-set_key">#set_key</a>
-    
     <li ><a href="#method-i-set_pqg">#set_pqg</a>
-    
     <li ><a href="#method-i-syssign">#syssign</a>
-    
     <li ><a href="#method-i-sysverify">#sysverify</a>
-    
     <li ><a href="#method-i-to_der">#to_der</a>
-    
     <li ><a href="#method-i-to_pem">#to_pem</a>
-    
     <li ><a href="#method-i-to_s">#to_s</a>
-    
     <li ><a href="#method-i-to_text">#to_text</a>
-    
   </ul>
 </div>
 
@@ -131,53 +109,37 @@
 
   <section class="description">
     
-<p><a href="DSA.html"><code>DSA</code></a>, the Digital Signature Algorithm, is specified in NIST&#39;s FIPS 186-3. It is an asymmetric public key algorithm that may be used similar to e.g. <a href="RSA.html"><code>RSA</code></a>.</p>
+<p><a href="DSA.html"><code>DSA</code></a>, the Digital Signature Algorithm, is specified in NIST’s FIPS 186-3. It is an asymmetric public key algorithm that may be used similar to e.g. <a href="RSA.html"><code>RSA</code></a>.</p>
 
   </section>
 
-  
   <section id="5Buntitled-5D" class="documentation-section">
-    
 
-    
 
-    
 
-    
 
-    
+
      <section id="public-class-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Class Methods</h3>
        </header>
 
-    
       <div id="method-c-generate" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             generate(size) &rarr; dsa
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Creates a new <a href="DSA.html"><code>DSA</code></a> instance by generating a private/public key pair from scratch.</p>
 
 <h3 id="method-c-generate-label-Parameters">Parameters<span><a href="#method-c-generate-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
 <ul><li>
 <p><em>size</em> is an integer representing the desired key size.</p>
 </li></ul>
-          
-          
 
-          
           <div class="method-source-code" id="generate-source">
             <pre>static VALUE
 ossl_dsa_s_generate(VALUE klass, VALUE size)
@@ -193,45 +155,30 @@ ossl_dsa_s_generate(VALUE klass, VALUE size)
     return obj;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-c-new" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             new &rarr; dsa
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
         <div class="method-heading">
           <span class="method-callseq">
             new(size) &rarr; dsa
           </span>
-          
         </div>
-        
         <div class="method-heading">
           <span class="method-callseq">
             new(string [, pass]) &rarr; dsa
           </span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Creates a new <a href="DSA.html"><code>DSA</code></a> instance by reading an existing key from <em>string</em>.</p>
 
 <h3 id="method-c-new-label-Parameters">Parameters<span><a href="#method-c-new-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
@@ -249,10 +196,7 @@ ossl_dsa_s_generate(VALUE klass, VALUE size)
 DSA.new(1024) -&gt; dsa
 DSA.new(File.read(&#39;dsa.pem&#39;)) -&gt; dsa
 DSA.new(File.read(&#39;dsa.pem&#39;), &#39;mypassword&#39;) -&gt; dsa</pre>
-          
-          
 
-          
           <div class="method-source-code" id="new-source">
             <pre>static VALUE
 ossl_dsa_initialize(int argc, VALUE *argv, VALUE self)
@@ -309,53 +253,27 @@ ossl_dsa_initialize(int argc, VALUE *argv, VALUE self)
     return self;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
     </section>
-  
+
      <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Instance Methods</h3>
        </header>
 
-    
       <div id="method-i-export" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             export([cipher, password]) &rarr; aString
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        <div class="method-heading">
-          <span class="method-callseq">
-            to_pem([cipher, password]) &rarr; aString
-          </span>
-          
-        </div>
-        
-        <div class="method-heading">
-          <span class="method-callseq">
-            to_s([cipher, password]) &rarr; aString
-          </span>
-          
-        </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Encodes this <a href="DSA.html"><code>DSA</code></a> to its PEM encoding.</p>
 
 <h3 id="method-i-export-label-Parameters">Parameters<span><a href="#method-i-export-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
@@ -369,10 +287,7 @@ ossl_dsa_initialize(int argc, VALUE *argv, VALUE self)
 
 <pre>DSA.to_pem -&gt; aString
 DSA.to_pem(cipher, &#39;mypassword&#39;) -&gt; aString</pre>
-          
-          
 
-          
           <div class="method-source-code" id="export-source">
             <pre>static VALUE
 ossl_dsa_export(int argc, VALUE *argv, VALUE self)
@@ -408,37 +323,24 @@ ossl_dsa_export(int argc, VALUE *argv, VALUE self)
     return str;
 }</pre>
           </div>
-          
         </div>
 
-        
         <div class="aliases">
           Also aliased as: <a href="DSA.html#method-i-to_pem">to_pem</a>, <a href="DSA.html#method-i-to_s">to_s</a>
         </div>
-        
 
-        
       </div>
 
-    
       <div id="method-i-initialize_copy" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">initialize_copy</span><span
             class="method-args">(p1)</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
           <div class="method-source-code" id="initialize_copy-source">
             <pre>static VALUE
 ossl_dsa_initialize_copy(VALUE self, VALUE other)
@@ -460,36 +362,22 @@ ossl_dsa_initialize_copy(VALUE self, VALUE other)
     return self;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-params" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             params &rarr; hash
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
-          <p>Stores all parameters of key to the hash INSECURE: PRIVATE INFORMATIONS CAN LEAK OUT!!! Don&#39;t use :-)) (I&#39;s up to you)</p>
-          
-          
+          <p>Stores all parameters of key to the hash INSECURE: PRIVATE INFORMATIONS CAN LEAK OUT!!! Don’t use :-)) (I’s up to you)</p>
 
-          
           <div class="method-source-code" id="params-source">
             <pre>static VALUE
 ossl_dsa_get_params(VALUE self)
@@ -512,36 +400,22 @@ ossl_dsa_get_params(VALUE self)
     return hash;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-private-3F" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             private? &rarr; true | false
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Indicates whether this <a href="DSA.html"><code>DSA</code></a> instance has a private key associated with it or not. The private key may be retrieved with DSA#private_key.</p>
-          
-          
 
-          
           <div class="method-source-code" id="private-3F-source">
             <pre>static VALUE
 ossl_dsa_is_private(VALUE self)
@@ -553,36 +427,22 @@ ossl_dsa_is_private(VALUE self)
     return DSA_PRIVATE(self, dsa) ? Qtrue : Qfalse;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-public-3F" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             public? &rarr; true | false
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Indicates whether this <a href="DSA.html"><code>DSA</code></a> instance has a public key associated with it or not. The public key may be retrieved with <a href="DSA.html#method-i-public_key"><code>DSA#public_key</code></a>.</p>
-          
-          
 
-          
           <div class="method-source-code" id="public-3F-source">
             <pre>static VALUE
 ossl_dsa_is_public(VALUE self)
@@ -596,31 +456,20 @@ ossl_dsa_is_public(VALUE self)
     return bn ? Qtrue : Qfalse;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-public_key" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             public_key &rarr; aDSA
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns a new <a href="DSA.html"><code>DSA</code></a> instance that carries just the public key information. If the current instance has also private key information, this will no longer be present in the new instance. This feature is helpful for publishing the public key information without leaking any of the private information.</p>
 
 <h3 id="method-i-public_key-label-Example">Example<span><a href="#method-i-public_key-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
@@ -629,10 +478,7 @@ ossl_dsa_is_public(VALUE self)
 <span class="ruby-identifier">pub_key</span> = <span class="ruby-identifier">dsa</span>.<span class="ruby-identifier">public_key</span> <span class="ruby-comment"># has only the public part available</span>
 <span class="ruby-identifier">pub_key_der</span> = <span class="ruby-identifier">pub_key</span>.<span class="ruby-identifier">to_der</span> <span class="ruby-comment"># it&#39;s safe to publish this</span>
 </pre>
-          
-          
 
-          
           <div class="method-source-code" id="public_key-source">
             <pre>static VALUE
 ossl_dsa_to_public_key(VALUE self)
@@ -655,85 +501,50 @@ ossl_dsa_to_public_key(VALUE self)
     return obj;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-set_key" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             set_key(pub_key, priv_key) &rarr; self
           </span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Sets <em>pub_key</em> and <em>priv_key</em> for the <a href="DSA.html"><code>DSA</code></a> instance. <em>priv_key</em> may be <code>nil</code>.</p>
-          
-          
 
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-set_pqg" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             set_pqg(p, q, g) &rarr; self
           </span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Sets <em>p</em>, <em>q</em>, <em>g</em> to the <a href="DSA.html"><code>DSA</code></a> instance.</p>
-          
-          
 
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-syssign" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             syssign(string) &rarr; aString
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Computes and returns the <a href="DSA.html"><code>DSA</code></a> signature of <em>string</em>, where <em>string</em> is expected to be an already-computed message digest of the original input data. The signature is issued using the private key of this <a href="DSA.html"><code>DSA</code></a> instance.</p>
 
 <h3 id="method-i-syssign-label-Parameters">Parameters<span><a href="#method-i-syssign-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
@@ -748,10 +559,7 @@ ossl_dsa_to_public_key(VALUE self)
 <span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">digest</span>(<span class="ruby-string">&#39;SHA1&#39;</span>, <span class="ruby-identifier">doc</span>)
 <span class="ruby-identifier">sig</span> = <span class="ruby-identifier">dsa</span>.<span class="ruby-identifier">syssign</span>(<span class="ruby-identifier">digest</span>)
 </pre>
-          
-          
 
-          
           <div class="method-source-code" id="syssign-source">
             <pre>static VALUE
 ossl_dsa_sign(VALUE self, VALUE data)
@@ -779,31 +587,20 @@ ossl_dsa_sign(VALUE self, VALUE data)
     return str;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-sysverify" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             sysverify(digest, sig) &rarr; true | false
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Verifies whether the signature is valid given the message digest input. It does so by validating <em>sig</em> using the public key of this <a href="DSA.html"><code>DSA</code></a> instance.</p>
 
 <h3 id="method-i-sysverify-label-Parameters">Parameters<span><a href="#method-i-sysverify-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
@@ -821,10 +618,7 @@ ossl_dsa_sign(VALUE self, VALUE data)
 <span class="ruby-identifier">sig</span> = <span class="ruby-identifier">dsa</span>.<span class="ruby-identifier">syssign</span>(<span class="ruby-identifier">digest</span>)
 <span class="ruby-identifier">puts</span> <span class="ruby-identifier">dsa</span>.<span class="ruby-identifier">sysverify</span>(<span class="ruby-identifier">digest</span>, <span class="ruby-identifier">sig</span>) <span class="ruby-comment"># =&gt; true</span>
 </pre>
-          
-          
 
-          
           <div class="method-source-code" id="sysverify-source">
             <pre>static VALUE
 ossl_dsa_verify(VALUE self, VALUE digest, VALUE sig)
@@ -848,36 +642,22 @@ ossl_dsa_verify(VALUE self, VALUE digest, VALUE sig)
     return Qfalse;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-to_der" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             to_der &rarr; aString
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Encodes this <a href="DSA.html"><code>DSA</code></a> to its DER encoding.</p>
-          
-          
 
-          
           <div class="method-source-code" id="to_der-source">
             <pre>static VALUE
 ossl_dsa_to_der(VALUE self)
@@ -904,92 +684,82 @@ ossl_dsa_to_der(VALUE self)
     return str;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-to_pem" class="method-detail method-alias">
-        
         <div class="method-heading">
-          <span class="method-name">to_pem</span><span
-            class="method-args">(p1 = v1, p2 = v2)</span>
-          
+          <span class="method-callseq">
+            to_pem([cipher, password]) &rarr; aString
+          </span>
         </div>
-        
 
         <div class="method-description">
-          
-          
-          
-          
+          <p>Encodes this <a href="DSA.html"><code>DSA</code></a> to its PEM encoding.</p>
 
-          
+<h3 id="method-i-to_pem-label-Parameters">Parameters<span><a href="#method-i-to_pem-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
+<ul><li>
+<p><em>cipher</em> is an <a href="../Cipher.html"><code>OpenSSL::Cipher</code></a>.</p>
+</li><li>
+<p><em>password</em> is a string containing your password.</p>
+</li></ul>
+
+<h3 id="method-i-to_pem-label-Examples">Examples<span><a href="#method-i-to_pem-label-Examples">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre>DSA.to_pem -&gt; aString
+DSA.to_pem(cipher, &#39;mypassword&#39;) -&gt; aString</pre>
+
         </div>
 
-        
 
-        
         <div class="aliases">
           Alias for: <a href="DSA.html#method-i-export">export</a>
         </div>
-        
       </div>
 
-    
       <div id="method-i-to_s" class="method-detail method-alias">
-        
         <div class="method-heading">
-          <span class="method-name">to_s</span><span
-            class="method-args">(p1 = v1, p2 = v2)</span>
-          
+          <span class="method-callseq">
+            to_s([cipher, password]) &rarr; aString
+          </span>
         </div>
-        
 
         <div class="method-description">
-          
-          
-          
-          
+          <p>Encodes this <a href="DSA.html"><code>DSA</code></a> to its PEM encoding.</p>
 
-          
+<h3 id="method-i-to_s-label-Parameters">Parameters<span><a href="#method-i-to_s-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
+<ul><li>
+<p><em>cipher</em> is an <a href="../Cipher.html"><code>OpenSSL::Cipher</code></a>.</p>
+</li><li>
+<p><em>password</em> is a string containing your password.</p>
+</li></ul>
+
+<h3 id="method-i-to_s-label-Examples">Examples<span><a href="#method-i-to_s-label-Examples">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre>DSA.to_pem -&gt; aString
+DSA.to_pem(cipher, &#39;mypassword&#39;) -&gt; aString</pre>
+
         </div>
 
-        
 
-        
         <div class="aliases">
           Alias for: <a href="DSA.html#method-i-export">export</a>
         </div>
-        
       </div>
 
-    
       <div id="method-i-to_text" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             to_text &rarr; aString
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
-          <p>Prints all parameters of key to buffer INSECURE: PRIVATE INFORMATIONS CAN LEAK OUT!!! Don&#39;t use :-)) (I&#39;s up to you)</p>
-          
-          
+          <p>Prints all parameters of key to buffer INSECURE: PRIVATE INFORMATIONS CAN LEAK OUT!!! Don’t use :-)) (I’s up to you)</p>
 
-          
           <div class="method-source-code" id="to_text-source">
             <pre>static VALUE
 ossl_dsa_to_text(VALUE self)
@@ -1011,25 +781,20 @@ ossl_dsa_to_text(VALUE self)
     return str;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
     </section>
-  
-  </section>
 
+  </section>
 </main>
 
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

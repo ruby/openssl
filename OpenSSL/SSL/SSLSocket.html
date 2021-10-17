@@ -21,8 +21,6 @@
 <link href="../../css/rdoc.css" rel="stylesheet">
 
 
-
-
 <body id="top" role="document" class="class">
 <nav role="navigation">
   <div id="project-navigation">
@@ -59,91 +57,57 @@
 
   <div id="class-metadata">
     
-    <div id="parent-class-section" class="nav-section">
+    
+<div id="parent-class-section" class="nav-section">
   <h3>Parent</h3>
 
-  
   <p class="link">Object
-  
 </div>
 
-    <div id="includes-section" class="nav-section">
+    
+<div id="includes-section" class="nav-section">
   <h3>Included Modules</h3>
 
   <ul class="link-list">
-  
-  
     <li><a class="include" href="../Buffering.html">OpenSSL::Buffering</a>
-  
-  
-  
     <li><a class="include" href="SocketForwarder.html">OpenSSL::SSL::SocketForwarder</a>
-  
-  
   </ul>
 </div>
 
     
-    <!-- Method Quickref -->
+    
+<!-- Method Quickref -->
 <div id="method-list-section" class="nav-section">
   <h3>Methods</h3>
 
   <ul class="link-list" role="directory">
-    
     <li ><a href="#method-c-new">::new</a>
-    
     <li ><a href="#method-i-accept">#accept</a>
-    
     <li ><a href="#method-i-accept_nonblock">#accept_nonblock</a>
-    
     <li ><a href="#method-i-alpn_protocol">#alpn_protocol</a>
-    
     <li ><a href="#method-i-cert">#cert</a>
-    
     <li ><a href="#method-i-cipher">#cipher</a>
-    
     <li ><a href="#method-i-client_ca">#client_ca</a>
-    
     <li ><a href="#method-i-connect">#connect</a>
-    
     <li ><a href="#method-i-connect_nonblock">#connect_nonblock</a>
-    
     <li ><a href="#method-i-finished_message">#finished_message</a>
-    
     <li ><a href="#method-i-hostname-3D">#hostname=</a>
-    
     <li ><a href="#method-i-npn_protocol">#npn_protocol</a>
-    
     <li ><a href="#method-i-peer_cert">#peer_cert</a>
-    
     <li ><a href="#method-i-peer_cert_chain">#peer_cert_chain</a>
-    
     <li ><a href="#method-i-peer_finished_message">#peer_finished_message</a>
-    
     <li ><a href="#method-i-pending">#pending</a>
-    
     <li ><a href="#method-i-post_connection_check">#post_connection_check</a>
-    
     <li ><a href="#method-i-session">#session</a>
-    
     <li ><a href="#method-i-session-3D">#session=</a>
-    
     <li ><a href="#method-i-session_reused-3F">#session_reused?</a>
-    
     <li ><a href="#method-i-ssl_version">#ssl_version</a>
-    
     <li ><a href="#method-i-state">#state</a>
-    
     <li ><a href="#method-i-sysclose">#sysclose</a>
-    
     <li ><a href="#method-i-sysread">#sysread</a>
-    
     <li ><a href="#method-i-syswrite">#syswrite</a>
-    
     <li ><a href="#method-i-tmp_key">#tmp_key</a>
-    
     <li ><a href="#method-i-verify_result">#verify_result</a>
-    
   </ul>
 </div>
 
@@ -159,21 +123,15 @@
     
   </section>
 
-  
   <section id="5Buntitled-5D" class="documentation-section">
-    
 
-    
 
-    
 
-    
     <section class="attribute-method-details" class="method-section">
       <header>
         <h3>Attributes</h3>
       </header>
 
-      
       <div id="attribute-i-context" class="method-detail">
         <div class="method-heading attribute-method-heading">
           <span class="method-name">context</span><span
@@ -181,12 +139,9 @@
         </div>
 
         <div class="method-description">
-        
         <p>The <a href="SSLContext.html"><code>SSLContext</code></a> object used in this connection.</p>
-        
         </div>
       </div>
-      
       <div id="attribute-i-hostname" class="method-detail">
         <div class="method-heading attribute-method-heading">
           <span class="method-name">hostname</span><span
@@ -195,11 +150,8 @@
 
         <div class="method-description">
         
-        
-        
         </div>
       </div>
-      
       <div id="attribute-i-io" class="method-detail">
         <div class="method-heading attribute-method-heading">
           <span class="method-name">io</span><span
@@ -207,12 +159,9 @@
         </div>
 
         <div class="method-description">
-        
         <p>The underlying <a href="../../IO.html"><code>IO</code></a> object.</p>
-        
         </div>
       </div>
-      
       <div id="attribute-i-sync_close" class="method-detail">
         <div class="method-heading attribute-method-heading">
           <span class="method-name">sync_close</span><span
@@ -220,12 +169,9 @@
         </div>
 
         <div class="method-description">
-        
         <p>Whether to close the underlying socket as well, when the SSL/TLS connection is shut down. This defaults to <code>false</code>.</p>
-        
         </div>
       </div>
-      
       <div id="attribute-i-to_io" class="method-detail">
         <div class="method-heading attribute-method-heading">
           <span class="method-name">to_io</span><span
@@ -233,45 +179,31 @@
         </div>
 
         <div class="method-description">
-        
         <p>The underlying <a href="../../IO.html"><code>IO</code></a> object.</p>
-        
         </div>
       </div>
-      
     </section>
-    
 
-    
+
      <section id="public-class-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Class Methods</h3>
        </header>
 
-    
       <div id="method-c-new" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             new(io) &rarr; aSSLSocket
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
         <div class="method-heading">
           <span class="method-callseq">
             new(io, ctx) &rarr; aSSLSocket
           </span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Creates a new <a href="../SSL.html"><code>SSL</code></a> socket from <em>io</em> which must be a real <a href="../../IO.html"><code>IO</code></a> object (not an IO-like object that responds to read/write).</p>
 
 <p>If <em>ctx</em> is provided the <a href="../SSL.html"><code>SSL</code></a> Sockets initial params will be taken from the context.</p>
@@ -279,10 +211,7 @@
 <p>The <a href="../Buffering.html"><code>OpenSSL::Buffering</code></a> module provides additional <a href="../../IO.html"><code>IO</code></a> methods.</p>
 
 <p>This method will freeze the <a href="SSLContext.html"><code>SSLContext</code></a> if one is provided; however, session management is still allowed in the frozen <a href="SSLContext.html"><code>SSLContext</code></a>.</p>
-          
-          
 
-          
           <div class="method-source-code" id="new-source">
             <pre>static VALUE
 ossl_ssl_initialize(int argc, VALUE *argv, VALUE self)
@@ -321,44 +250,29 @@ ossl_ssl_initialize(int argc, VALUE *argv, VALUE self)
     return self;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
     </section>
-  
+
      <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Instance Methods</h3>
        </header>
 
-    
       <div id="method-i-accept" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             accept &rarr; self
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Waits for a SSL/TLS client to initiate a handshake.  The handshake may be started after unencrypted data has been sent over the socket.</p>
-          
-          
 
-          
           <div class="method-source-code" id="accept-source">
             <pre>static VALUE
 ossl_ssl_accept(VALUE self)
@@ -368,31 +282,20 @@ ossl_ssl_accept(VALUE self)
     return ossl_start_ssl(self, SSL_accept, &quot;SSL_accept&quot;, Qfalse);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-accept_nonblock" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             accept_nonblock([options]) &rarr; self
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Initiates the SSL/TLS handshake as a server in non-blocking manner.</p>
 
 <pre class="ruby"><span class="ruby-comment"># emulates blocking accept</span>
@@ -408,10 +311,7 @@ ossl_ssl_accept(VALUE self)
 </pre>
 
 <p>By specifying a keyword argument <em>exception</em> to <code>false</code>, you can indicate that <a href="SSLSocket.html#method-i-accept_nonblock"><code>accept_nonblock</code></a> should not raise an <a href="../../IO/WaitReadable.html"><code>IO::WaitReadable</code></a> or <a href="../../IO/WaitWritable.html"><code>IO::WaitWritable</code></a> exception, but return the symbol <code>:wait_readable</code> or <code>:wait_writable</code> instead.</p>
-          
-          
 
-          
           <div class="method-source-code" id="accept_nonblock-source">
             <pre>static VALUE
 ossl_ssl_accept_nonblock(int argc, VALUE *argv, VALUE self)
@@ -424,36 +324,22 @@ ossl_ssl_accept_nonblock(int argc, VALUE *argv, VALUE self)
     return ossl_start_ssl(self, SSL_accept, &quot;SSL_accept&quot;, opts);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-alpn_protocol" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             alpn_protocol &rarr; String | nil
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns the ALPN protocol string that was finally selected by the server during the handshake.</p>
-          
-          
 
-          
           <div class="method-source-code" id="alpn_protocol-source">
             <pre>static VALUE
 ossl_ssl_alpn_protocol(VALUE self)
@@ -471,36 +357,22 @@ ossl_ssl_alpn_protocol(VALUE self)
         return rb_str_new((const char *) out, outlen);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-cert" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             cert &rarr; cert or nil
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>The <a href="../X509.html"><code>X509</code></a> certificate for this socket endpoint.</p>
-          
-          
 
-          
           <div class="method-source-code" id="cert-source">
             <pre>static VALUE
 ossl_ssl_get_cert(VALUE self)
@@ -522,36 +394,22 @@ ossl_ssl_get_cert(VALUE self)
     return ossl_x509_new(cert);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-cipher" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             cipher &rarr; nil or [name, version, bits, alg_bits]
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns the cipher suite actually used in the current session, or nil if no session has been established.</p>
-          
-          
 
-          
           <div class="method-source-code" id="cipher-source">
             <pre>static VALUE
 ossl_ssl_get_cipher(VALUE self)
@@ -564,38 +422,24 @@ ossl_ssl_get_cipher(VALUE self)
     return cipher ? ossl_ssl_cipher_to_ary(cipher) : Qnil;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-client_ca" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             client_ca &rarr; [x509name, ...]
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
-          <p>Returns the list of client CAs. Please note that in contrast to <a href="SSLContext.html#attribute-i-client_ca"><code>SSLContext#client_ca=</code></a> no array of <a href="../X509/Certificate.html"><code>X509::Certificate</code></a> is returned but <a href="../X509/Name.html"><code>X509::Name</code></a> instances of the CA&#39;s subject distinguished name.</p>
+          <p>Returns the list of client CAs. Please note that in contrast to <a href="SSLContext.html#attribute-i-client_ca"><code>SSLContext#client_ca=</code></a> no array of <a href="../X509/Certificate.html"><code>X509::Certificate</code></a> is returned but <a href="../X509/Name.html"><code>X509::Name</code></a> instances of the CA’s subject distinguished name.</p>
 
 <p>In server mode, returns the list set by <a href="SSLContext.html#attribute-i-client_ca"><code>SSLContext#client_ca=</code></a>. In client mode, returns the list of client CAs sent from the server.</p>
-          
-          
 
-          
           <div class="method-source-code" id="client_ca-source">
             <pre>static VALUE
 ossl_ssl_get_client_ca_list(VALUE self)
@@ -609,36 +453,22 @@ ossl_ssl_get_client_ca_list(VALUE self)
     return ossl_x509name_sk2ary(ca);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-connect" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             connect &rarr; self
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Initiates an SSL/TLS handshake with a server.  The handshake may be started after unencrypted data has been sent over the socket.</p>
-          
-          
 
-          
           <div class="method-source-code" id="connect-source">
             <pre>static VALUE
 ossl_ssl_connect(VALUE self)
@@ -648,31 +478,20 @@ ossl_ssl_connect(VALUE self)
     return ossl_start_ssl(self, SSL_connect, &quot;SSL_connect&quot;, Qfalse);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-connect_nonblock" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             connect_nonblock([options]) &rarr; self
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Initiates the SSL/TLS handshake as a client in non-blocking manner.</p>
 
 <pre class="ruby"><span class="ruby-comment"># emulates blocking connect</span>
@@ -688,10 +507,7 @@ ossl_ssl_connect(VALUE self)
 </pre>
 
 <p>By specifying a keyword argument <em>exception</em> to <code>false</code>, you can indicate that <a href="SSLSocket.html#method-i-connect_nonblock"><code>connect_nonblock</code></a> should not raise an <a href="../../IO/WaitReadable.html"><code>IO::WaitReadable</code></a> or <a href="../../IO/WaitWritable.html"><code>IO::WaitWritable</code></a> exception, but return the symbol <code>:wait_readable</code> or <code>:wait_writable</code> instead.</p>
-          
-          
 
-          
           <div class="method-source-code" id="connect_nonblock-source">
             <pre>static VALUE
 ossl_ssl_connect_nonblock(int argc, VALUE *argv, VALUE self)
@@ -704,36 +520,22 @@ ossl_ssl_connect_nonblock(int argc, VALUE *argv, VALUE self)
     return ossl_start_ssl(self, SSL_connect, &quot;SSL_connect&quot;, opts);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-finished_message" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             finished_message &rarr; &quot;finished message&quot;
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns the last <strong>Finished</strong> message sent</p>
-          
-          
 
-          
           <div class="method-source-code" id="finished_message-source">
             <pre>static VALUE
 ossl_ssl_get_finished(VALUE self)
@@ -753,36 +555,22 @@ ossl_ssl_get_finished(VALUE self)
     return rb_str_new(buf, len);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-hostname-3D" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             hostname = hostname &rarr; hostname
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Sets the server hostname used for SNI. This needs to be set before <a href="SSLSocket.html#method-i-connect"><code>SSLSocket#connect</code></a>.</p>
-          
-          
 
-          
           <div class="method-source-code" id="hostname-3D-source">
             <pre>static VALUE
 ossl_ssl_set_hostname(VALUE self, VALUE arg)
@@ -804,36 +592,22 @@ ossl_ssl_set_hostname(VALUE self, VALUE arg)
     return arg;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-npn_protocol" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             npn_protocol &rarr; String | nil
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns the protocol string that was finally selected by the client during the handshake.</p>
-          
-          
 
-          
           <div class="method-source-code" id="npn_protocol-source">
             <pre>static VALUE
 ossl_ssl_npn_protocol(VALUE self)
@@ -851,36 +625,22 @@ ossl_ssl_npn_protocol(VALUE self)
         return rb_str_new((const char *) out, outlen);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-peer_cert" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             peer_cert &rarr; cert or nil
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
-          <p>The <a href="../X509.html"><code>X509</code></a> certificate for this socket&#39;s peer.</p>
-          
-          
+          <p>The <a href="../X509.html"><code>X509</code></a> certificate for this socket’s peer.</p>
 
-          
           <div class="method-source-code" id="peer_cert-source">
             <pre>static VALUE
 ossl_ssl_get_peer_cert(VALUE self)
@@ -902,36 +662,22 @@ ossl_ssl_get_peer_cert(VALUE self)
     return obj;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-peer_cert_chain" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             peer_cert_chain &rarr; [cert, ...] or nil
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
-          <p>The <a href="../X509.html"><code>X509</code></a> certificate chain for this socket&#39;s peer.</p>
-          
-          
+          <p>The <a href="../X509.html"><code>X509</code></a> certificate chain for this socket’s peer.</p>
 
-          
           <div class="method-source-code" id="peer_cert_chain-source">
             <pre>static VALUE
 ossl_ssl_get_peer_cert_chain(VALUE self)
@@ -956,36 +702,22 @@ ossl_ssl_get_peer_cert_chain(VALUE self)
     return ary;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-peer_finished_message" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             peer_finished_message &rarr; &quot;peer finished message&quot;
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns the last <strong>Finished</strong> message received</p>
-          
-          
 
-          
           <div class="method-source-code" id="peer_finished_message-source">
             <pre>static VALUE
 ossl_ssl_get_peer_finished(VALUE self)
@@ -1005,36 +737,22 @@ ossl_ssl_get_peer_finished(VALUE self)
     return rb_str_new(buf, len);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-pending" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             pending &rarr; Integer
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>The number of bytes that are immediately available for reading.</p>
-          
-          
 
-          
           <div class="method-source-code" id="pending-source">
             <pre>static VALUE
 ossl_ssl_pending(VALUE self)
@@ -1046,38 +764,24 @@ ossl_ssl_pending(VALUE self)
     return INT2NUM(SSL_pending(ssl));
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-post_connection_check" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             post_connection_check(hostname) &rarr; true
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Perform hostname verification following RFC 6125.</p>
 
 <p>This method MUST be called after calling <a href="SSLSocket.html#method-i-connect"><code>connect</code></a> to ensure that the hostname of a remote peer has been verified.</p>
-          
-          
 
-          
           <div class="method-source-code" id="post_connection_check-source">
             <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 390</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">post_connection_check</span>(<span class="ruby-identifier">hostname</span>)
@@ -1096,36 +800,22 @@ ossl_ssl_pending(VALUE self)
   <span class="ruby-keyword">return</span> <span class="ruby-keyword">true</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-session" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             session &rarr; aSession
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns the SSLSession object currently used, or nil if the session is not established.</p>
-          
-          
 
-          
           <div class="method-source-code" id="session-source">
             <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 411</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">session</span>
@@ -1134,36 +824,22 @@ ossl_ssl_pending(VALUE self)
   <span class="ruby-keyword">nil</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-session-3D" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             session = session &rarr; session
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Sets the <a href="Session.html"><code>Session</code></a> to be used when the connection is established.</p>
-          
-          
 
-          
           <div class="method-source-code" id="session-3D-source">
             <pre>static VALUE
 ossl_ssl_set_session(VALUE self, VALUE arg1)
@@ -1180,36 +856,22 @@ ossl_ssl_set_session(VALUE self, VALUE arg1)
     return arg1;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-session_reused-3F" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             session_reused? &rarr; true | false
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns <code>true</code> if a reused session was negotiated during the handshake.</p>
-          
-          
 
-          
           <div class="method-source-code" id="session_reused-3F-source">
             <pre>static VALUE
 ossl_ssl_session_reused(VALUE self)
@@ -1221,36 +883,22 @@ ossl_ssl_session_reused(VALUE self)
     return SSL_session_reused(ssl) ? Qtrue : Qfalse;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-ssl_version" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             ssl_version &rarr; String
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns a String representing the SSL/TLS version that was negotiated for the connection, for example “TLSv1.2”.</p>
-          
-          
 
-          
           <div class="method-source-code" id="ssl_version-source">
             <pre>static VALUE
 ossl_ssl_get_version(VALUE self)
@@ -1262,36 +910,22 @@ ossl_ssl_get_version(VALUE self)
     return rb_str_new2(SSL_get_version(ssl));
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-state" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             state &rarr; string
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>A description of the current connection state. This is for diagnostic purposes only.</p>
-          
-          
 
-          
           <div class="method-source-code" id="state-source">
             <pre>static VALUE
 ossl_ssl_get_state(VALUE self)
@@ -1309,38 +943,24 @@ ossl_ssl_get_state(VALUE self)
     return ret;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-sysclose" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             sysclose &rarr; nil
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Sends “close notify” to the peer and tries to shut down the <a href="../SSL.html"><code>SSL</code></a> connection gracefully.</p>
 
 <p>If <a href="SSLSocket.html#attribute-i-sync_close"><code>sync_close</code></a> is set to <code>true</code>, the underlying <a href="../../IO.html"><code>IO</code></a> is also closed.</p>
-          
-          
 
-          
           <div class="method-source-code" id="sysclose-source">
             <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 377</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">sysclose</span>
@@ -1349,43 +969,27 @@ ossl_ssl_get_state(VALUE self)
   <span class="ruby-identifier">io</span>.<span class="ruby-identifier">close</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">sync_close</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-sysread" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             sysread(length) &rarr; string
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
         <div class="method-heading">
           <span class="method-callseq">
             sysread(length, buffer) &rarr; buffer
           </span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Reads <em>length</em> bytes from the <a href="../SSL.html"><code>SSL</code></a> connection.  If a pre-allocated <em>buffer</em> is provided the data will be written into it.</p>
-          
-          
 
-          
           <div class="method-source-code" id="sysread-source">
             <pre>static VALUE
 ossl_ssl_read(int argc, VALUE *argv, VALUE self)
@@ -1393,36 +997,22 @@ ossl_ssl_read(int argc, VALUE *argv, VALUE self)
     return ossl_ssl_read_internal(argc, argv, self, 0);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-syswrite" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             syswrite(string) &rarr; Integer
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Writes <em>string</em> to the <a href="../SSL.html"><code>SSL</code></a> connection.</p>
-          
-          
 
-          
           <div class="method-source-code" id="syswrite-source">
             <pre>static VALUE
 ossl_ssl_write(VALUE self, VALUE str)
@@ -1430,36 +1020,22 @@ ossl_ssl_write(VALUE self, VALUE str)
     return ossl_ssl_write_internal(self, str, Qfalse);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-tmp_key" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             tmp_key &rarr; PKey or nil
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns the ephemeral key used in case of forward secrecy cipher.</p>
-          
-          
 
-          
           <div class="method-source-code" id="tmp_key-source">
             <pre>static VALUE
 ossl_ssl_tmp_key(VALUE self)
@@ -1473,38 +1049,24 @@ ossl_ssl_tmp_key(VALUE self)
     return ossl_pkey_new(key);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-verify_result" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             verify_result &rarr; Integer
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns the result of the peer certificates verification.  See verify(1) for error values and descriptions.</p>
 
 <p>If no peer certificate was presented X509_V_OK is returned.</p>
-          
-          
 
-          
           <div class="method-source-code" id="verify_result-source">
             <pre>static VALUE
 ossl_ssl_get_verify_result(VALUE self)
@@ -1516,25 +1078,20 @@ ossl_ssl_get_verify_result(VALUE self)
     return LONG2NUM(SSL_get_verify_result(ssl));
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
     </section>
-  
-  </section>
 
+  </section>
 </main>
 
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

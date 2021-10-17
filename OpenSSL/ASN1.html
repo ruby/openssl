@@ -21,8 +21,6 @@
 <link href="../css/rdoc.css" rel="stylesheet">
 
 
-
-
 <body id="top" role="document" class="module">
 <nav role="navigation">
   <div id="project-navigation">
@@ -80,18 +78,15 @@
     
     
     
-    <!-- Method Quickref -->
+    
+<!-- Method Quickref -->
 <div id="method-list-section" class="nav-section">
   <h3>Methods</h3>
 
   <ul class="link-list" role="directory">
-    
     <li ><a href="#method-c-decode">::decode</a>
-    
     <li ><a href="#method-c-decode_all">::decode_all</a>
-    
     <li ><a href="#method-c-traverse">::traverse</a>
-    
   </ul>
 </div>
 
@@ -219,53 +214,35 @@
 
   </section>
 
-  
   <section id="5Buntitled-5D" class="documentation-section">
-    
 
-    
 
-    
     <section class="constants-list">
       <header>
         <h3>Constants</h3>
       </header>
       <dl>
-      
         <dt id="UNIVERSAL_TAG_NAME">UNIVERSAL_TAG_NAME
-        
-        <dd><p>Array storing tag names at the tag&#39;s index.</p>
-        
-      
+        <dd><p>Array storing tag names at the tag’s index.</p>
       </dl>
     </section>
-    
 
-    
 
-    
+
      <section id="public-class-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Class Methods</h3>
        </header>
 
-    
       <div id="method-c-decode" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             OpenSSL::ASN1.decode(der) &rarr; ASN1Data
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Decodes a BER- or DER-encoded value and creates an <a href="ASN1/ASN1Data.html"><code>ASN1Data</code></a> instance. <em>der</em> may be a String or any object that features a <code>.to_der</code> method transforming it into a BER-/DER-encoded String+</p>
 
 <h2 id="method-c-decode-label-Example">Example<span><a href="#method-c-decode-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h2>
@@ -273,10 +250,7 @@
 <pre class="ruby"><span class="ruby-identifier">der</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">binread</span>(<span class="ruby-string">&#39;asn1data&#39;</span>)
 <span class="ruby-identifier">asn1</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span>.<span class="ruby-identifier">decode</span>(<span class="ruby-identifier">der</span>)
 </pre>
-          
-          
 
-          
           <div class="method-source-code" id="decode-source">
             <pre>static VALUE
 ossl_asn1_decode(VALUE self, VALUE obj)
@@ -296,31 +270,20 @@ ossl_asn1_decode(VALUE self, VALUE obj)
     return ret;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-c-decode_all" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             OpenSSL::ASN1.decode_all(der) &rarr; Array of ASN1Data
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Similar to decode with the difference that decode expects one distinct value represented in <em>der</em>. decode_all on the contrary decodes a sequence of sequential BER/DER values lined up in <em>der</em> and returns them as an array.</p>
 
 <h2 id="method-c-decode_all-label-Example">Example<span><a href="#method-c-decode_all-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h2>
@@ -328,10 +291,7 @@ ossl_asn1_decode(VALUE self, VALUE obj)
 <pre class="ruby"><span class="ruby-identifier">ders</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">binread</span>(<span class="ruby-string">&#39;asn1data_seq&#39;</span>)
 <span class="ruby-identifier">asn1_ary</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span>.<span class="ruby-identifier">decode_all</span>(<span class="ruby-identifier">ders</span>)
 </pre>
-          
-          
 
-          
           <div class="method-source-code" id="decode_all-source">
             <pre>static VALUE
 ossl_asn1_decode_all(VALUE self, VALUE obj)
@@ -359,31 +319,20 @@ ossl_asn1_decode_all(VALUE self, VALUE obj)
     return ary;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-c-traverse" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             OpenSSL::ASN1.traverse(asn1) &rarr; nil
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>If a block is given, it prints out each of the elements encountered. Block parameters are (in that order):</p>
 <ul><li>
 <p>depth: The recursion depth, plus one with each constructed value being encountered (<a href="../Integer.html"><code>Integer</code></a>)</p>
@@ -409,10 +358,7 @@ ossl_asn1_decode_all(VALUE self, VALUE obj)
   <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;Header length: #{header_len} Tag: #{tag} Tag class: #{tag_class} Constructed: #{constructed}&quot;</span>
 <span class="ruby-keyword">end</span>
 </pre>
-          
-          
 
-          
           <div class="method-source-code" id="traverse-source">
             <pre>static VALUE
 ossl_asn1_traverse(VALUE self, VALUE obj)
@@ -431,25 +377,20 @@ ossl_asn1_traverse(VALUE self, VALUE obj)
     return Qnil;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
     </section>
-  
-  </section>
 
+  </section>
 </main>
 
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

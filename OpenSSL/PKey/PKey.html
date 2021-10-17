@@ -21,8 +21,6 @@
 <link href="../../css/rdoc.css" rel="stylesheet">
 
 
-
-
 <body id="top" role="document" class="class">
 <nav role="navigation">
   <div id="project-navigation">
@@ -59,40 +57,30 @@
 
   <div id="class-metadata">
     
-    <div id="parent-class-section" class="nav-section">
+    
+<div id="parent-class-section" class="nav-section">
   <h3>Parent</h3>
 
-  
   <p class="link">Object
-  
 </div>
 
     
     
-    <!-- Method Quickref -->
+    
+<!-- Method Quickref -->
 <div id="method-list-section" class="nav-section">
   <h3>Methods</h3>
 
   <ul class="link-list" role="directory">
-    
     <li ><a href="#method-c-new">::new</a>
-    
     <li ><a href="#method-i-inspect">#inspect</a>
-    
     <li ><a href="#method-i-oid">#oid</a>
-    
     <li ><a href="#method-i-private_to_der">#private_to_der</a>
-    
     <li ><a href="#method-i-private_to_pem">#private_to_pem</a>
-    
     <li ><a href="#method-i-public_to_der">#public_to_der</a>
-    
     <li ><a href="#method-i-public_to_pem">#public_to_pem</a>
-    
     <li ><a href="#method-i-sign">#sign</a>
-    
     <li ><a href="#method-i-verify">#verify</a>
-    
   </ul>
 </div>
 
@@ -117,44 +105,28 @@
 
   </section>
 
-  
   <section id="5Buntitled-5D" class="documentation-section">
-    
 
-    
 
-    
 
-    
 
-    
+
      <section id="public-class-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Class Methods</h3>
        </header>
 
-    
       <div id="method-c-new" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             new &rarr; self
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Because <a href="PKey.html"><code>PKey</code></a> is an abstract class, actually calling this method explicitly will raise a NotImplementedError.</p>
-          
-          
 
-          
           <div class="method-source-code" id="new-source">
             <pre>static VALUE
 ossl_pkey_initialize(VALUE self)
@@ -165,44 +137,29 @@ ossl_pkey_initialize(VALUE self)
     return self;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
     </section>
-  
+
      <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Instance Methods</h3>
        </header>
 
-    
       <div id="method-i-inspect" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             inspect &rarr; string
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns a string describing the <a href="PKey.html"><code>PKey</code></a> object.</p>
-          
-          
 
-          
           <div class="method-source-code" id="inspect-source">
             <pre>static VALUE
 ossl_pkey_inspect(VALUE self)
@@ -217,36 +174,22 @@ ossl_pkey_inspect(VALUE self)
                       OBJ_nid2sn(nid));
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-oid" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             oid &rarr; string
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns the short name of the OID associated with <em>pkey</em>.</p>
-          
-          
 
-          
           <div class="method-source-code" id="oid-source">
             <pre>static VALUE
 ossl_pkey_oid(VALUE self)
@@ -259,43 +202,27 @@ ossl_pkey_oid(VALUE self)
     return rb_str_new_cstr(OBJ_nid2sn(nid));
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-private_to_der" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             private_to_der                   &rarr; string
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
         <div class="method-heading">
           <span class="method-callseq">
             private_to_der(cipher, password) &rarr; string
           </span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Serializes the private key to DER-encoded PKCS #8 format. If called without arguments, unencrypted PKCS #8 PrivateKeyInfo format is used. If called with a cipher name and a password, PKCS #8 EncryptedPrivateKeyInfo format with PBES2 encryption scheme is used.</p>
-          
-          
 
-          
           <div class="method-source-code" id="private_to_der-source">
             <pre>static VALUE
 ossl_pkey_private_to_der(int argc, VALUE *argv, VALUE self)
@@ -303,43 +230,27 @@ ossl_pkey_private_to_der(int argc, VALUE *argv, VALUE self)
     return do_pkcs8_export(argc, argv, self, 1);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-private_to_pem" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             private_to_pem                   &rarr; string
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
         <div class="method-heading">
           <span class="method-callseq">
             private_to_pem(cipher, password) &rarr; string
           </span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Serializes the private key to PEM-encoded PKCS #8 format. See <a href="PKey.html#method-i-private_to_der"><code>private_to_der</code></a> for more details.</p>
-          
-          
 
-          
           <div class="method-source-code" id="private_to_pem-source">
             <pre>static VALUE
 ossl_pkey_private_to_pem(int argc, VALUE *argv, VALUE self)
@@ -347,36 +258,22 @@ ossl_pkey_private_to_pem(int argc, VALUE *argv, VALUE self)
     return do_pkcs8_export(argc, argv, self, 0);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-public_to_der" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             public_to_der &rarr; string
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Serializes the public key to DER-encoded X.509 SubjectPublicKeyInfo format.</p>
-          
-          
 
-          
           <div class="method-source-code" id="public_to_der-source">
             <pre>static VALUE
 ossl_pkey_public_to_der(VALUE self)
@@ -384,36 +281,22 @@ ossl_pkey_public_to_der(VALUE self)
     return do_spki_export(self, 1);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-public_to_pem" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             public_to_pem &rarr; string
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Serializes the public key to PEM-encoded X.509 SubjectPublicKeyInfo format.</p>
-          
-          
 
-          
           <div class="method-source-code" id="public_to_pem-source">
             <pre>static VALUE
 ossl_pkey_public_to_pem(VALUE self)
@@ -421,31 +304,20 @@ ossl_pkey_public_to_pem(VALUE self)
     return do_spki_export(self, 0);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-sign" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             sign(digest, data) &rarr; String
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>To sign the String <em>data</em>, <em>digest</em>, an instance of <a href="../Digest.html"><code>OpenSSL::Digest</code></a>, must be provided. The return value is again a String containing the signature. A <a href="PKeyError.html"><code>PKeyError</code></a> is raised should errors occur. Any previous state of the <a href="../Digest.html"><code>Digest</code></a> instance is irrelevant to the signature outcome, the digest instance is reset to its initial state during the operation.</p>
 
 <h2 id="method-i-sign-label-Example">Example<span><a href="#method-i-sign-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h2>
@@ -455,10 +327,7 @@ ossl_pkey_public_to_pem(VALUE self)
 <span class="ruby-identifier">pkey</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">RSA</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">2048</span>)
 <span class="ruby-identifier">signature</span> = <span class="ruby-identifier">pkey</span>.<span class="ruby-identifier">sign</span>(<span class="ruby-identifier">digest</span>, <span class="ruby-identifier">data</span>)
 </pre>
-          
-          
 
-          
           <div class="method-source-code" id="sign-source">
             <pre>static VALUE
 ossl_pkey_sign(VALUE self, VALUE digest, VALUE data)
@@ -495,31 +364,20 @@ ossl_pkey_sign(VALUE self, VALUE digest, VALUE data)
     return str;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-verify" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             verify(digest, signature, data) &rarr; String
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>To verify the String <em>signature</em>, <em>digest</em>, an instance of <a href="../Digest.html"><code>OpenSSL::Digest</code></a>, must be provided to re-compute the message digest of the original <em>data</em>, also a String. The return value is <code>true</code> if the signature is valid, <code>false</code> otherwise. A <a href="PKeyError.html"><code>PKeyError</code></a> is raised should errors occur. Any previous state of the <a href="../Digest.html"><code>Digest</code></a> instance is irrelevant to the validation outcome, the digest instance is reset to its initial state during the operation.</p>
 
 <h2 id="method-i-verify-label-Example">Example<span><a href="#method-i-verify-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h2>
@@ -531,10 +389,7 @@ ossl_pkey_sign(VALUE self, VALUE digest, VALUE data)
 <span class="ruby-identifier">pub_key</span> = <span class="ruby-identifier">pkey</span>.<span class="ruby-identifier">public_key</span>
 <span class="ruby-identifier">puts</span> <span class="ruby-identifier">pub_key</span>.<span class="ruby-identifier">verify</span>(<span class="ruby-identifier">digest</span>, <span class="ruby-identifier">signature</span>, <span class="ruby-identifier">data</span>) <span class="ruby-comment"># =&gt; true</span>
 </pre>
-          
-          
 
-          
           <div class="method-source-code" id="verify-source">
             <pre>static VALUE
 ossl_pkey_verify(VALUE self, VALUE digest, VALUE sig, VALUE data)
@@ -575,25 +430,20 @@ ossl_pkey_verify(VALUE self, VALUE digest, VALUE sig, VALUE data)
     }
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
     </section>
-  
-  </section>
 
+  </section>
 </main>
 
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

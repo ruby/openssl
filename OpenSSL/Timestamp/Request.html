@@ -21,8 +21,6 @@
 <link href="../../css/rdoc.css" rel="stylesheet">
 
 
-
-
 <body id="top" role="document" class="class">
 <nav role="navigation">
   <div id="project-navigation">
@@ -59,50 +57,35 @@
 
   <div id="class-metadata">
     
-    <div id="parent-class-section" class="nav-section">
+    
+<div id="parent-class-section" class="nav-section">
   <h3>Parent</h3>
 
-  
   <p class="link">Object
-  
 </div>
 
     
     
-    <!-- Method Quickref -->
+    
+<!-- Method Quickref -->
 <div id="method-list-section" class="nav-section">
   <h3>Methods</h3>
 
   <ul class="link-list" role="directory">
-    
     <li ><a href="#method-c-new">::new</a>
-    
     <li ><a href="#method-i-algorithm">#algorithm</a>
-    
     <li ><a href="#method-i-algorithm-3D">#algorithm=</a>
-    
     <li ><a href="#method-i-cert_requested-3D">#cert_requested=</a>
-    
     <li ><a href="#method-i-cert_requested-3F">#cert_requested?</a>
-    
     <li ><a href="#method-i-message_imprint">#message_imprint</a>
-    
     <li ><a href="#method-i-message_imprint-3D">#message_imprint=</a>
-    
     <li ><a href="#method-i-nonce">#nonce</a>
-    
     <li ><a href="#method-i-nonce-3D">#nonce=</a>
-    
     <li ><a href="#method-i-policy_id">#policy_id</a>
-    
     <li ><a href="#method-i-policy_id-3D">#policy_id=</a>
-    
     <li ><a href="#method-i-to_der">#to_der</a>
-    
     <li ><a href="#method-i-version">#version</a>
-    
     <li ><a href="#method-i-version-3D">#version=</a>
-    
   </ul>
 </div>
 
@@ -127,58 +110,38 @@
 
   </section>
 
-  
   <section id="5Buntitled-5D" class="documentation-section">
-    
 
-    
 
-    
 
-    
 
-    
+
      <section id="public-class-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Class Methods</h3>
        </header>
 
-    
       <div id="method-c-new" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             OpenSSL::Timestamp::Request.new(file)    &rarr; request
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
         <div class="method-heading">
           <span class="method-callseq">
             OpenSSL::Timestamp::Request.new(string)  &rarr; request
           </span>
-          
         </div>
-        
         <div class="method-heading">
           <span class="method-callseq">
             OpenSSL::Timestamp::Request.new          &rarr; empty request
           </span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>When creating a <a href="Request.html"><code>Request</code></a> with the <code>File</code> or <code>string</code> parameter, the corresponding <code>File</code> or <code>string</code> must be DER-encoded.</p>
-          
-          
 
-          
           <div class="method-source-code" id="new-source">
             <pre>static VALUE
 ossl_ts_req_initialize(int argc, VALUE *argv, VALUE self)
@@ -195,51 +158,38 @@ ossl_ts_req_initialize(int argc, VALUE *argv, VALUE self)
     in = ossl_obj2bio(&amp;arg);
     ts_req = d2i_TS_REQ_bio(in, &amp;ts_req);
     BIO_free(in);
-    if (!ts_req)
+    if (!ts_req) {
+        DATA_PTR(self) = NULL;
         ossl_raise(eTimestampError, &quot;Error when decoding the timestamp request&quot;);
+    }
     DATA_PTR(self) = ts_req;
 
     return self;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
     </section>
-  
+
      <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Instance Methods</h3>
        </header>
 
-    
       <div id="method-i-algorithm" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             algorithm    &rarr; string
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
-          <p>Returns the &#39;short name&#39; of the object identifier that represents the algorithm that was used to create the message imprint digest.</p>
-          
-          
+          <p>Returns the ‘short name’ of the object identifier that represents the algorithm that was used to create the message imprint digest.</p>
 
-          
           <div class="method-source-code" id="algorithm-source">
             <pre>static VALUE
 ossl_ts_req_get_algorithm(VALUE self)
@@ -254,41 +204,27 @@ ossl_ts_req_get_algorithm(VALUE self)
     return get_asn1obj(algor-&gt;algorithm);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-algorithm-3D" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             algorithm = &quot;string&quot;    &rarr; string
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
-          <p>Allows to set the object identifier  or the &#39;short name&#39; of the algorithm that was used to create the message imprint digest.</p>
+          <p>Allows to set the object identifier  or the ‘short name’ of the algorithm that was used to create the message imprint digest.</p>
 
 <h3 id="method-i-algorithm-3D-label-Example-3A">Example:<span><a href="#method-i-algorithm-3D-label-Example-3A">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
 <pre class="ruby"><span class="ruby-identifier">request</span>.<span class="ruby-identifier">algorithm</span> = <span class="ruby-string">&quot;SHA1&quot;</span>
 </pre>
-          
-          
 
-          
           <div class="method-source-code" id="algorithm-3D-source">
             <pre>static VALUE
 ossl_ts_req_set_algorithm(VALUE self, VALUE algo)
@@ -310,36 +246,22 @@ ossl_ts_req_set_algorithm(VALUE self, VALUE algo)
     return algo;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-cert_requested-3D" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             cert_requested = boolean &rarr; true or false
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
-          <p>Specify whether the response shall contain the timestamp authority&#39;s certificate or not. The default value is <code>true</code>.</p>
-          
-          
+          <p>Specify whether the response shall contain the timestamp authority’s certificate or not. The default value is <code>true</code>.</p>
 
-          
           <div class="method-source-code" id="cert_requested-3D-source">
             <pre>static VALUE
 ossl_ts_req_set_cert_requested(VALUE self, VALUE requested)
@@ -352,36 +274,22 @@ ossl_ts_req_set_cert_requested(VALUE self, VALUE requested)
     return requested;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-cert_requested-3F" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             cert_requested?  &rarr; true or false
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
-          <p>Indicates whether the response shall contain the timestamp authority&#39;s certificate or not.</p>
-          
-          
+          <p>Indicates whether the response shall contain the timestamp authority’s certificate or not.</p>
 
-          
           <div class="method-source-code" id="cert_requested-3F-source">
             <pre>static VALUE
 ossl_ts_req_get_cert_requested(VALUE self)
@@ -392,36 +300,22 @@ ossl_ts_req_get_cert_requested(VALUE self)
     return TS_REQ_get_cert_req(req) ? Qtrue: Qfalse;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-message_imprint" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             message_imprint    &rarr; string or nil
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns the message imprint (digest) of the data to be timestamped.</p>
-          
-          
 
-          
           <div class="method-source-code" id="message_imprint-source">
             <pre>static VALUE
 ossl_ts_req_get_msg_imprint(VALUE self)
@@ -440,36 +334,22 @@ ossl_ts_req_get_msg_imprint(VALUE self)
     return ret;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-message_imprint-3D" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             message_imprint = &quot;string&quot;    &rarr; string
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Set the message imprint digest.</p>
-          
-          
 
-          
           <div class="method-source-code" id="message_imprint-3D-source">
             <pre>static VALUE
 ossl_ts_req_set_msg_imprint(VALUE self, VALUE hash)
@@ -486,36 +366,22 @@ ossl_ts_req_set_msg_imprint(VALUE self, VALUE hash)
     return hash;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-nonce" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             nonce    &rarr; BN or nil
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns the nonce (number used once) that the server shall include in its response.</p>
-          
-          
 
-          
           <div class="method-source-code" id="nonce-source">
             <pre>static VALUE
 ossl_ts_req_get_nonce(VALUE self)
@@ -529,36 +395,22 @@ ossl_ts_req_get_nonce(VALUE self)
     return asn1integer_to_num(nonce);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-nonce-3D" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             nonce = number    &rarr; BN
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Sets the nonce (number used once) that the server shall include in its response. If the nonce is set, the server must return the same nonce value in a valid <a href="Response.html"><code>Response</code></a>.</p>
-          
-          
 
-          
           <div class="method-source-code" id="nonce-3D-source">
             <pre>static VALUE
 ossl_ts_req_set_nonce(VALUE self, VALUE num)
@@ -576,36 +428,22 @@ ossl_ts_req_set_nonce(VALUE self, VALUE num)
     return num;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-policy_id" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             policy_id    &rarr; string or nil
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
-          <p>Returns the &#39;short name&#39; of the object identifier that represents the timestamp policy under which the server shall create the timestamp.</p>
-          
-          
+          <p>Returns the ‘short name’ of the object identifier that represents the timestamp policy under which the server shall create the timestamp.</p>
 
-          
           <div class="method-source-code" id="policy_id-source">
             <pre>static VALUE
 ossl_ts_req_get_policy_id(VALUE self)
@@ -618,41 +456,27 @@ ossl_ts_req_get_policy_id(VALUE self)
     return get_asn1obj(TS_REQ_get_policy_id(req));
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-policy_id-3D" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             policy_id = &quot;string&quot;   &rarr; string
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Allows to set the object identifier that represents the timestamp policy under which the server shall create the timestamp. This may be left <code>nil</code>, implying that the timestamp server will issue the timestamp using some default policy.</p>
 
 <h3 id="method-i-policy_id-3D-label-Example-3A">Example:<span><a href="#method-i-policy_id-3D-label-Example-3A">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
 <pre class="ruby"><span class="ruby-identifier">request</span>.<span class="ruby-identifier">policy_id</span> = <span class="ruby-string">&quot;1.2.3.4.5&quot;</span>
 </pre>
-          
-          
 
-          
           <div class="method-source-code" id="policy_id-3D-source">
             <pre>static VALUE
 ossl_ts_req_set_policy_id(VALUE self, VALUE oid)
@@ -671,36 +495,22 @@ ossl_ts_req_set_policy_id(VALUE self, VALUE oid)
     return oid;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-to_der" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             to_der    &rarr; DER-encoded string
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>DER-encodes this <a href="Request.html"><code>Request</code></a>.</p>
-          
-          
 
-          
           <div class="method-source-code" id="to_der-source">
             <pre>static VALUE
 ossl_ts_req_to_der(VALUE self)
@@ -724,36 +534,22 @@ ossl_ts_req_to_der(VALUE self)
     return asn1_to_der((void *)req, (int (*)(void *, unsigned char **))i2d_TS_REQ);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-version" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             version &rarr; Integer
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns the version of this request. <code>1</code> is the default value.</p>
-          
-          
 
-          
           <div class="method-source-code" id="version-source">
             <pre>static VALUE
 ossl_ts_req_get_version(VALUE self)
@@ -764,36 +560,22 @@ ossl_ts_req_get_version(VALUE self)
     return LONG2NUM(TS_REQ_get_version(req));
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-version-3D" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             version = number    &rarr; Integer
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Sets the version number for this <a href="Request.html"><code>Request</code></a>. This should be <code>1</code> for compliant servers.</p>
-          
-          
 
-          
           <div class="method-source-code" id="version-3D-source">
             <pre>static VALUE
 ossl_ts_req_set_version(VALUE self, VALUE version)
@@ -810,25 +592,20 @@ ossl_ts_req_set_version(VALUE self, VALUE version)
     return version;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
     </section>
-  
-  </section>
 
+  </section>
 </main>
 
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

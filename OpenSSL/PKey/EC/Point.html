@@ -21,8 +21,6 @@
 <link href="../../../css/rdoc.css" rel="stylesheet">
 
 
-
-
 <body id="top" role="document" class="class">
 <nav role="navigation">
   <div id="project-navigation">
@@ -59,48 +57,34 @@
 
   <div id="class-metadata">
     
-    <div id="parent-class-section" class="nav-section">
+    
+<div id="parent-class-section" class="nav-section">
   <h3>Parent</h3>
 
-  
   <p class="link">Object
-  
 </div>
 
     
     
-    <!-- Method Quickref -->
+    
+<!-- Method Quickref -->
 <div id="method-list-section" class="nav-section">
   <h3>Methods</h3>
 
   <ul class="link-list" role="directory">
-    
     <li ><a href="#method-c-new">::new</a>
-    
     <li ><a href="#method-i-3D-3D">#==</a>
-    
     <li ><a href="#method-i-add">#add</a>
-    
     <li ><a href="#method-i-eql-3F">#eql?</a>
-    
     <li ><a href="#method-i-infinity-3F">#infinity?</a>
-    
     <li ><a href="#method-i-initialize_copy">#initialize_copy</a>
-    
     <li ><a href="#method-i-invert-21">#invert!</a>
-    
     <li ><a href="#method-i-make_affine-21">#make_affine!</a>
-    
     <li ><a href="#method-i-mul">#mul</a>
-    
     <li ><a href="#method-i-on_curve-3F">#on_curve?</a>
-    
     <li ><a href="#method-i-set_to_infinity-21">#set_to_infinity!</a>
-    
     <li ><a href="#method-i-to_bn">#to_bn</a>
-    
     <li ><a href="#method-i-to_octet_string">#to_octet_string</a>
-    
   </ul>
 </div>
 
@@ -116,21 +100,15 @@
     
   </section>
 
-  
   <section id="5Buntitled-5D" class="documentation-section">
-    
 
-    
 
-    
 
-    
     <section class="attribute-method-details" class="method-section">
       <header>
         <h3>Attributes</h3>
       </header>
 
-      
       <div id="attribute-i-group" class="method-detail">
         <div class="method-heading attribute-method-heading">
           <span class="method-name">group</span><span
@@ -139,51 +117,34 @@
 
         <div class="method-description">
         
-        
-        
         </div>
       </div>
-      
     </section>
-    
 
-    
+
      <section id="public-class-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Class Methods</h3>
        </header>
 
-    
       <div id="method-c-new" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             OpenSSL::PKey::EC::Point.new(point)
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
         <div class="method-heading">
           <span class="method-callseq">
             OpenSSL::PKey::EC::Point.new(group [, encoded_point])
           </span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Creates a new instance of <a href="Point.html"><code>OpenSSL::PKey::EC::Point</code></a>. If the only argument is an instance of <a href="Point.html"><code>EC::Point</code></a>, a copy is returned. Otherwise, creates a point that belongs to <em>group</em>.</p>
 
 <p><em>encoded_point</em> is the octet string representation of the point. This must be either a String or an <a href="../../BN.html"><code>OpenSSL::BN</code></a>.</p>
-          
-          
 
-          
           <div class="method-source-code" id="new-source">
             <pre>static VALUE ossl_ec_point_initialize(int argc, VALUE *argv, VALUE self)
 {
@@ -234,72 +195,47 @@
     return self;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
     </section>
-  
+
      <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Instance Methods</h3>
        </header>
 
-    
       <div id="method-i-3D-3D" class="method-detail method-alias">
-        
         <div class="method-heading">
-          <span class="method-name">==</span><span
-            class="method-args">(p1)</span>
-          
+          <span class="method-callseq">
+            point1 == point2 &rarr; true | false
+          </span>
         </div>
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
         </div>
 
-        
 
-        
         <div class="aliases">
           Alias for: <a href="Point.html#method-i-eql-3F">eql?</a>
         </div>
-        
       </div>
 
-    
       <div id="method-i-add" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             add(point) &rarr; point
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Performs elliptic curve point addition.</p>
-          
-          
 
-          
           <div class="method-source-code" id="add-source">
             <pre>static VALUE ossl_ec_point_add(VALUE self, VALUE other)
 {
@@ -323,43 +259,22 @@
     return result;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-eql-3F" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             eql?(point2) &rarr; true | false
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        <div class="method-heading">
-          <span class="method-callseq">
-            point1 == point2 &rarr; true | false
-          </span>
-          
-        </div>
-        
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
           <div class="method-source-code" id="eql-3F-source">
             <pre>static VALUE ossl_ec_point_eql(VALUE a, VALUE b)
 {
@@ -381,40 +296,25 @@
     return Qtrue;
 }</pre>
           </div>
-          
         </div>
 
-        
         <div class="aliases">
           Also aliased as: <a href="Point.html#method-i-3D-3D">==</a>
         </div>
-        
 
-        
       </div>
 
-    
       <div id="method-i-infinity-3F" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             infinity? &rarr; true | false
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
           <div class="method-source-code" id="infinity-3F-source">
             <pre>static VALUE ossl_ec_point_is_at_infinity(VALUE self)
 {
@@ -433,33 +333,21 @@
     UNREACHABLE;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-initialize_copy" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">initialize_copy</span><span
             class="method-args">(p1)</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
           <div class="method-source-code" id="initialize_copy-source">
             <pre>static VALUE
 ossl_ec_point_initialize_copy(VALUE self, VALUE other)
@@ -485,36 +373,22 @@ ossl_ec_point_initialize_copy(VALUE self, VALUE other)
     return self;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-invert-21" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             invert! &rarr; self
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
           <div class="method-source-code" id="invert-21-source">
             <pre>static VALUE ossl_ec_point_invert(VALUE self)
 {
@@ -530,36 +404,22 @@ ossl_ec_point_initialize_copy(VALUE self, VALUE other)
     return self;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-make_affine-21" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             make_affine! &rarr; self
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
           <div class="method-source-code" id="make_affine-21-source">
             <pre>static VALUE ossl_ec_point_make_affine(VALUE self)
 {
@@ -575,47 +435,31 @@ ossl_ec_point_initialize_copy(VALUE self, VALUE other)
     return self;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-mul" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             mul(bn1 [, bn2]) &rarr; point
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
         <div class="method-heading">
           <span class="method-callseq">
             mul(bns, points [, bn2]) &rarr; point
           </span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Performs elliptic curve point multiplication.</p>
 
 <p>The first form calculates <code>bn1 * point + bn2 * G</code>, where <code>G</code> is the generator of the group of <em>point</em>. <em>bn2</em> may be omitted, and in that case, the result is just <code>bn1 * point</code>.</p>
 
 <p>The second form calculates <code>bns[0] * point + bns[1] * points[0] + ... + bns[-1] * points[-1] + bn2 * G</code>. <em>bn2</em> may be omitted. <em>bns</em> must be an array of <a href="../../BN.html"><code>OpenSSL::BN</code></a>. <em>points</em> must be an array of <a href="Point.html"><code>OpenSSL::PKey::EC::Point</code></a>. Please note that <code>points[0]</code> is not multiplied by <code>bns[0]</code>, but <code>bns[1]</code>.</p>
-          
-          
 
-          
           <div class="method-source-code" id="mul-source">
             <pre>static VALUE ossl_ec_point_mul(int argc, VALUE *argv, VALUE self)
 {
@@ -685,36 +529,22 @@ ossl_ec_point_initialize_copy(VALUE self, VALUE other)
     return result;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-on_curve-3F" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             on_curve? &rarr; true | false
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
           <div class="method-source-code" id="on_curve-3F-source">
             <pre>static VALUE ossl_ec_point_is_on_curve(VALUE self)
 {
@@ -733,36 +563,22 @@ ossl_ec_point_initialize_copy(VALUE self, VALUE other)
     UNREACHABLE;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-set_to_infinity-21" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             set_to_infinity! &rarr; self
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
           <div class="method-source-code" id="set_to_infinity-21-source">
             <pre>static VALUE ossl_ec_point_set_to_infinity(VALUE self)
 {
@@ -778,71 +594,46 @@ ossl_ec_point_initialize_copy(VALUE self, VALUE other)
     return self;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-to_bn" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             to_bn([conversion_form]) &rarr; OpenSSL::BN
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns the octet string representation of the <a href="../EC.html"><code>EC</code></a> point as an instance of <a href="../../BN.html"><code>OpenSSL::BN</code></a>.</p>
 
 <p>If <em>conversion_form</em> is not given, the <em>point_conversion_form</em> attribute set to the group is used.</p>
 
 <p>See <a href="Point.html#method-i-to_octet_string"><code>to_octet_string</code></a> for more information.</p>
-          
-          
 
-          
           <div class="method-source-code" id="to_bn-source">
             <pre><span class="ruby-comment"># File lib/openssl/pkey.rb, line 33</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">to_bn</span>(<span class="ruby-identifier">conversion_form</span> = <span class="ruby-identifier">group</span>.<span class="ruby-identifier">point_conversion_form</span>)
   <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">BN</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">to_octet_string</span>(<span class="ruby-identifier">conversion_form</span>), <span class="ruby-value">2</span>)
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-to_octet_string" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             to_octet_string(conversion_form) &rarr; String
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns the octet string representation of the elliptic curve point.</p>
 
 <p><em>conversion_form</em> specifies how the point is converted. Possible values are:</p>
@@ -853,10 +644,7 @@ ossl_ec_point_initialize_copy(VALUE self, VALUE other)
 </li><li>
 <p><code>:hybrid</code></p>
 </li></ul>
-          
-          
 
-          
           <div class="method-source-code" id="to_octet_string-source">
             <pre>static VALUE
 ossl_ec_point_to_octet_string(VALUE self, VALUE conversion_form)
@@ -882,25 +670,20 @@ ossl_ec_point_to_octet_string(VALUE self, VALUE conversion_form)
     return str;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
     </section>
-  
-  </section>
 
+  </section>
 </main>
 
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

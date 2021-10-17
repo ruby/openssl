@@ -21,8 +21,6 @@
 <link href="../css/rdoc.css" rel="stylesheet">
 
 
-
-
 <body id="top" role="document" class="module">
 <nav role="navigation">
   <div id="project-navigation">
@@ -60,71 +58,45 @@
   <div id="class-metadata">
     
     
-    <div id="includes-section" class="nav-section">
+    
+<div id="includes-section" class="nav-section">
   <h3>Included Modules</h3>
 
   <ul class="link-list">
-  
-  
     <li><span class="include">Enumerable</span>
-  
-  
   </ul>
 </div>
 
     
-    <!-- Method Quickref -->
+    
+<!-- Method Quickref -->
 <div id="method-list-section" class="nav-section">
   <h3>Methods</h3>
 
   <ul class="link-list" role="directory">
-    
     <li class="calls-super" ><a href="#method-c-new">::new</a>
-    
     <li ><a href="#method-i-3C-3C">#&lt;&lt;</a>
-    
     <li ><a href="#method-i-close">#close</a>
-    
     <li ><a href="#method-i-each">#each</a>
-    
     <li ><a href="#method-i-each_byte">#each_byte</a>
-    
     <li ><a href="#method-i-each_line">#each_line</a>
-    
     <li ><a href="#method-i-eof">#eof</a>
-    
     <li ><a href="#method-i-eof-3F">#eof?</a>
-    
     <li ><a href="#method-i-flush">#flush</a>
-    
     <li ><a href="#method-i-getc">#getc</a>
-    
     <li ><a href="#method-i-gets">#gets</a>
-    
     <li ><a href="#method-i-print">#print</a>
-    
     <li ><a href="#method-i-printf">#printf</a>
-    
     <li ><a href="#method-i-puts">#puts</a>
-    
     <li ><a href="#method-i-read">#read</a>
-    
     <li ><a href="#method-i-read_nonblock">#read_nonblock</a>
-    
     <li ><a href="#method-i-readchar">#readchar</a>
-    
     <li ><a href="#method-i-readline">#readline</a>
-    
     <li ><a href="#method-i-readlines">#readlines</a>
-    
     <li ><a href="#method-i-readpartial">#readpartial</a>
-    
     <li ><a href="#method-i-ungetc">#ungetc</a>
-    
     <li ><a href="#method-i-write">#write</a>
-    
     <li ><a href="#method-i-write_nonblock">#write_nonblock</a>
-    
   </ul>
 </div>
 
@@ -142,39 +114,28 @@
 
 <p>This module allows an <a href="SSL/SSLSocket.html"><code>OpenSSL::SSL::SSLSocket</code></a> to behave like an <a href="../IO.html"><code>IO</code></a>.</p>
 
-<p>You typically won&#39;t use this module directly, you can see it implemented in <a href="SSL/SSLSocket.html"><code>OpenSSL::SSL::SSLSocket</code></a>.</p>
+<p>You typically won’t use this module directly, you can see it implemented in <a href="SSL/SSLSocket.html"><code>OpenSSL::SSL::SSLSocket</code></a>.</p>
 
   </section>
 
-  
   <section id="5Buntitled-5D" class="documentation-section">
-    
 
-    
 
-    
     <section class="constants-list">
       <header>
         <h3>Constants</h3>
       </header>
       <dl>
-      
         <dt id="BLOCK_SIZE">BLOCK_SIZE
-        
         <dd><p>Default size to read from or write to the SSLSocket for buffer operations.</p>
-        
-      
       </dl>
     </section>
-    
 
-    
     <section class="attribute-method-details" class="method-section">
       <header>
         <h3>Attributes</h3>
       </header>
 
-      
       <div id="attribute-i-sync" class="method-detail">
         <div class="method-heading attribute-method-heading">
           <span class="method-name">sync</span><span
@@ -182,47 +143,33 @@
         </div>
 
         <div class="method-description">
-        
         <p>The “sync mode” of the SSLSocket.</p>
 
 <p>See IO#sync for full details.</p>
-        
         </div>
       </div>
-      
     </section>
-    
 
-    
+
      <section id="public-class-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Class Methods</h3>
        </header>
 
-    
       <div id="method-c-new" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">new</span><span
             class="method-args">(*)</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
-          
-          <p>Creates an instance of OpenSSL&#39;s buffering <a href="../IO.html"><code>IO</code></a> module.</p>
-          
-          
+          <p>Creates an instance of OpenSSL’s buffering <a href="../IO.html"><code>IO</code></a> module.</p>
             <div class="method-calls-super">
               Calls superclass method
               
             </div>
-          
 
-          
           <div class="method-source-code" id="new-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 63</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">initialize</span>(<span class="ruby-operator">*</span>)
@@ -232,41 +179,28 @@
   <span class="ruby-ivar">@sync</span> = <span class="ruby-ivar">@io</span>.<span class="ruby-identifier">sync</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
     </section>
-  
+
      <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Instance Methods</h3>
        </header>
 
-    
       <div id="method-i-3C-3C" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">&lt;&lt;</span><span
             class="method-args">(s)</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
-          
           <p>Writes <em>s</em> to the stream.  <em>s</em> will be converted to a String using <code>.to_s</code> method.</p>
-          
-          
 
-          
           <div class="method-source-code" id="3C-3C-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 413</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">&lt;&lt;</span>(<span class="ruby-identifier">s</span>)
@@ -274,33 +208,21 @@
   <span class="ruby-keyword">self</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-close" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">close</span><span
             class="method-args">()</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
-          
           <p>Closes the SSLSocket and flushes any unwritten data.</p>
-          
-          
 
-          
           <div class="method-source-code" id="close-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 474</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">close</span>
@@ -308,35 +230,23 @@
   <span class="ruby-identifier">sysclose</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-each" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">each</span><span
             class="method-args">(eol=$/) { |line| ... }</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
-          
           <p>Executes the block for every line in the stream where lines are separated by <em>eol</em>.</p>
 
 <p>See also <a href="Buffering.html#method-i-gets"><code>gets</code></a></p>
-          
-          
 
-          
           <div class="method-source-code" id="each-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 250</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">each</span>(<span class="ruby-identifier">eol</span>=<span class="ruby-identifier">$/</span>)
@@ -345,37 +255,24 @@
   <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
         <div class="aliases">
           Also aliased as: <a href="Buffering.html#method-i-each_line">each_line</a>
         </div>
-        
 
-        
       </div>
 
-    
       <div id="method-i-each_byte" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">each_byte</span><span
             class="method-args">() { |byte| ... }</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
-          
           <p>Calls the given block once for each byte in the stream.</p>
-          
-          
 
-          
           <div class="method-source-code" id="each_byte-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 291</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">each_byte</span> <span class="ruby-comment"># :yields: byte</span>
@@ -384,89 +281,55 @@
   <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-each_line" class="method-detail method-alias">
-        
         <div class="method-heading">
           <span class="method-name">each_line</span><span
             class="method-args">(eol=$/)</span>
-          
         </div>
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
         </div>
 
-        
 
-        
         <div class="aliases">
           Alias for: <a href="Buffering.html#method-i-each">each</a>
         </div>
-        
       </div>
 
-    
       <div id="method-i-eof" class="method-detail method-alias">
-        
         <div class="method-heading">
           <span class="method-name">eof</span><span
             class="method-args">()</span>
-          
         </div>
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
         </div>
 
-        
 
-        
         <div class="aliases">
           Alias for: <a href="Buffering.html#method-i-eof-3F">eof?</a>
         </div>
-        
       </div>
 
-    
       <div id="method-i-eof-3F" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">eof?</span><span
             class="method-args">()</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
-          
           <p>Returns true if the stream is at file which means there is no more data to be read.</p>
-          
-          
 
-          
           <div class="method-source-code" id="eof-3F-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 322</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">eof?</span>
@@ -474,37 +337,24 @@
   <span class="ruby-ivar">@eof</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-ivar">@rbuffer</span>.<span class="ruby-identifier">empty?</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
         <div class="aliases">
           Also aliased as: <a href="Buffering.html#method-i-eof">eof</a>
         </div>
-        
 
-        
       </div>
 
-    
       <div id="method-i-flush" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">flush</span><span
             class="method-args">()</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
-          
           <p>Flushes buffered data to the SSLSocket.</p>
-          
-          
 
-          
           <div class="method-source-code" id="flush-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 462</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">flush</span>
@@ -516,61 +366,40 @@
   <span class="ruby-ivar">@sync</span> = <span class="ruby-identifier">osync</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-getc" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">getc</span><span
             class="method-args">()</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
-          
           <p>Reads one character from the stream.  Returns nil if called at end of file.</p>
-          
-          
 
-          
           <div class="method-source-code" id="getc-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 284</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">getc</span>
   <span class="ruby-identifier">read</span>(<span class="ruby-value">1</span>)
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-gets" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">gets</span><span
             class="method-args">(eol=$/, limit=nil)</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
-          
           <p>Reads the next “line” from the stream.  Lines are separated by <em>eol</em>.  If <em>limit</em> is provided the result will not be longer than the given number of bytes.</p>
 
 <p><em>eol</em> may be a String or Regexp.</p>
@@ -578,10 +407,7 @@
 <p>Unlike IO#gets the line read will not be assigned to +$_+.</p>
 
 <p>Unlike IO#gets the separator must be provided if a limit is provided.</p>
-          
-          
 
-          
           <div class="method-source-code" id="gets-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 226</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">gets</span>(<span class="ruby-identifier">eol</span>=<span class="ruby-identifier">$/</span>, <span class="ruby-identifier">limit</span>=<span class="ruby-keyword">nil</span>)
@@ -602,35 +428,23 @@
   <span class="ruby-identifier">consume_rbuff</span>(<span class="ruby-identifier">size</span>)
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-print" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">print</span><span
             class="method-args">(*args)</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
-          
           <p>Writes <em>args</em> to the stream.</p>
 
 <p>See IO#print for full details.</p>
-          
-          
 
-          
           <div class="method-source-code" id="print-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 441</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">print</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">args</span>)
@@ -640,35 +454,23 @@
   <span class="ruby-keyword">nil</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-printf" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">printf</span><span
             class="method-args">(s, *args)</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
-          
           <p>Formats and writes to the stream converting parameters under control of the format string.</p>
 
 <p>See Kernel#sprintf for format string details.</p>
-          
-          
 
-          
           <div class="method-source-code" id="printf-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 454</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">printf</span>(<span class="ruby-identifier">s</span>, <span class="ruby-operator">*</span><span class="ruby-identifier">args</span>)
@@ -676,35 +478,23 @@
   <span class="ruby-keyword">nil</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-puts" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">puts</span><span
             class="method-args">(*args)</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
-          
           <p>Writes <em>args</em> to the stream along with a record separator.</p>
 
 <p>See IO#puts for full details.</p>
-          
-          
 
-          
           <div class="method-source-code" id="puts-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 423</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">puts</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">args</span>)
@@ -720,35 +510,23 @@
   <span class="ruby-keyword">nil</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-read" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">read</span><span
             class="method-args">(size=nil, buf=nil)</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
-          
           <p>Reads <em>size</em> bytes from the stream.  If <em>buf</em> is provided it must reference a string which will receive the data.</p>
 
 <p>See IO#read for full details.</p>
-          
-          
 
-          
           <div class="method-source-code" id="read-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 110</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">read</span>(<span class="ruby-identifier">size</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">buf</span>=<span class="ruby-keyword">nil</span>)
@@ -772,28 +550,19 @@
   (<span class="ruby-identifier">size</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">ret</span>.<span class="ruby-identifier">empty?</span>) <span class="ruby-operator">?</span> <span class="ruby-keyword">nil</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">ret</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-read_nonblock" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">read_nonblock</span><span
             class="method-args">(maxlen, buf=nil, exception: true)</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
-          
           <p>Reads at most <em>maxlen</em> bytes in the non-blocking manner.</p>
 
 <p>When no data can be read without blocking it raises <a href="SSL/SSLError.html"><code>OpenSSL::SSL::SSLError</code></a> extended by <a href="../IO/WaitReadable.html"><code>IO::WaitReadable</code></a> or <a href="../IO/WaitWritable.html"><code>IO::WaitWritable</code></a>.</p>
@@ -819,10 +588,7 @@
 <p>Note that one reason that <a href="Buffering.html#method-i-read_nonblock"><code>read_nonblock</code></a> writes to the underlying <a href="../IO.html"><code>IO</code></a> is when the peer requests a new TLS/SSL handshake.  See openssl the FAQ for more details.  <a href="http://www.openssl.org/support/faq.html">www.openssl.org/support/faq.html</a></p>
 
 <p>By specifying a keyword argument <em>exception</em> to <code>false</code>, you can indicate that <a href="Buffering.html#method-i-read_nonblock"><code>read_nonblock</code></a> should not raise an IO::Wait*able exception, but return the symbol <code>:wait_writable</code> or <code>:wait_readable</code> instead. At EOF, it will return <code>nil</code> instead of raising EOFError.</p>
-          
-          
 
-          
           <div class="method-source-code" id="read_nonblock-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 195</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">read_nonblock</span>(<span class="ruby-identifier">maxlen</span>, <span class="ruby-identifier">buf</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-value">exception:</span> <span class="ruby-keyword">true</span>)
@@ -845,33 +611,21 @@
   <span class="ruby-identifier">ret</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-readchar" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">readchar</span><span
             class="method-args">()</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
-          
           <p>Reads a one-character string from the stream.  Raises an EOFError at end of file.</p>
-          
-          
 
-          
           <div class="method-source-code" id="readchar-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 301</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">readchar</span>
@@ -879,35 +633,23 @@
   <span class="ruby-identifier">getc</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-readline" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">readline</span><span
             class="method-args">(eol=$/)</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
-          
           <p>Reads a line from the stream which is separated by <em>eol</em>.</p>
 
 <p>Raises EOFError if at end of file.</p>
-          
-          
 
-          
           <div class="method-source-code" id="readline-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 275</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">readline</span>(<span class="ruby-identifier">eol</span>=<span class="ruby-identifier">$/</span>)
@@ -915,35 +657,23 @@
   <span class="ruby-identifier">gets</span>(<span class="ruby-identifier">eol</span>)
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-readlines" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">readlines</span><span
             class="method-args">(eol=$/)</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
-          
           <p>Reads lines from the stream which are separated by <em>eol</em>.</p>
 
 <p>See also <a href="Buffering.html#method-i-gets"><code>gets</code></a></p>
-          
-          
 
-          
           <div class="method-source-code" id="readlines-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 262</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">readlines</span>(<span class="ruby-identifier">eol</span>=<span class="ruby-identifier">$/</span>)
@@ -954,35 +684,23 @@
   <span class="ruby-identifier">ary</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-readpartial" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">readpartial</span><span
             class="method-args">(maxlen, buf=nil)</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
-          
           <p>Reads at most <em>maxlen</em> bytes from the stream.  If <em>buf</em> is provided it must reference a string which will receive the data.</p>
 
 <p>See IO#readpartial for full details.</p>
-          
-          
 
-          
           <div class="method-source-code" id="readpartial-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 137</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">readpartial</span>(<span class="ruby-identifier">maxlen</span>, <span class="ruby-identifier">buf</span>=<span class="ruby-keyword">nil</span>)
@@ -1009,70 +727,46 @@
   <span class="ruby-identifier">ret</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-ungetc" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">ungetc</span><span
             class="method-args">(c)</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
-          
           <p>Pushes character <em>c</em> back onto the stream such that a subsequent buffered character read will return it.</p>
 
 <p>Unlike IO#getc multiple bytes may be pushed back onto the stream.</p>
 
 <p>Has no effect on unbuffered reads (such as sysread).</p>
-          
-          
 
-          
           <div class="method-source-code" id="ungetc-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 314</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">ungetc</span>(<span class="ruby-identifier">c</span>)
   <span class="ruby-ivar">@rbuffer</span>[<span class="ruby-value">0</span>,<span class="ruby-value">0</span>] = <span class="ruby-identifier">c</span>.<span class="ruby-identifier">chr</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-write" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">write</span><span
             class="method-args">(*s)</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
-          
           <p>Writes <em>s</em> to the stream.  If the argument is not a String it will be converted using <code>.to_s</code> method.  Returns the number of bytes written.</p>
-          
-          
 
-          
           <div class="method-source-code" id="write-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 360</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">write</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">s</span>)
@@ -1082,28 +776,19 @@
   <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-write_nonblock" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">write_nonblock</span><span
             class="method-args">(s, exception: true)</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
-          
           <p>Writes <em>s</em> in the non-blocking manner.</p>
 
 <p>If there is buffered data, it is flushed first.  This may block.</p>
@@ -1133,10 +818,7 @@
 <p>Note that one reason that <a href="Buffering.html#method-i-write_nonblock"><code>write_nonblock</code></a> reads from the underlying <a href="../IO.html"><code>IO</code></a> is when the peer requests a new TLS/SSL handshake.  See the openssl FAQ for more details.  <a href="http://www.openssl.org/support/faq.html">www.openssl.org/support/faq.html</a></p>
 
 <p>By specifying a keyword argument <em>exception</em> to <code>false</code>, you can indicate that <a href="Buffering.html#method-i-write_nonblock"><code>write_nonblock</code></a> should not raise an IO::Wait*able exception, but return the symbol <code>:wait_writable</code> or <code>:wait_readable</code> instead.</p>
-          
-          
 
-          
           <div class="method-source-code" id="write_nonblock-source">
             <pre><span class="ruby-comment"># File lib/openssl/buffering.rb, line 404</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">write_nonblock</span>(<span class="ruby-identifier">s</span>, <span class="ruby-value">exception:</span> <span class="ruby-keyword">true</span>)
@@ -1144,25 +826,20 @@
   <span class="ruby-identifier">syswrite_nonblock</span>(<span class="ruby-identifier">s</span>, <span class="ruby-value">exception:</span> <span class="ruby-identifier">exception</span>)
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
     </section>
-  
-  </section>
 
+  </section>
 </main>
 
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

@@ -21,8 +21,6 @@
 <link href="../css/rdoc.css" rel="stylesheet">
 
 
-
-
 <body id="top" role="document" class="module">
 <nav role="navigation">
   <div id="project-navigation">
@@ -73,18 +71,15 @@
     
     
     
-    <!-- Method Quickref -->
+    
+<!-- Method Quickref -->
 <div id="method-list-section" class="nav-section">
   <h3>Methods</h3>
 
   <ul class="link-list" role="directory">
-    
     <li ><a href="#method-c-hkdf">::hkdf</a>
-    
     <li ><a href="#method-c-pbkdf2_hmac">::pbkdf2_hmac</a>
-    
     <li ><a href="#method-c-scrypt">::scrypt</a>
-    
   </ul>
 </div>
 
@@ -142,39 +137,26 @@
 
   </section>
 
-  
   <section id="5Buntitled-5D" class="documentation-section">
-    
 
-    
 
-    
 
-    
 
-    
+
      <section id="public-class-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Class Methods</h3>
        </header>
 
-    
       <div id="method-c-hkdf" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             hkdf(ikm, salt:, info:, length:, hash:) &rarr; String
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>HMAC-based Extract-and-Expand Key Derivation Function (HKDF) as specified in <a href="https://tools.ietf.org/html/rfc5869">RFC 5869</a>.</p>
 
 <p>New in <a href="../OpenSSL.html"><code>OpenSSL</code></a> 1.1.0.</p>
@@ -196,10 +178,7 @@
 <dd>
 <p>The hash function.</p>
 </dd></dl>
-          
-          
 
-          
           <div class="method-source-code" id="hkdf-source">
             <pre>static VALUE
 kdf_hkdf(int argc, VALUE *argv, VALUE self)
@@ -268,31 +247,20 @@ kdf_hkdf(int argc, VALUE *argv, VALUE self)
     return str;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-c-pbkdf2_hmac" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             pbkdf2_hmac(pass, salt:, iterations:, length:, hash:) &rarr; aString
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>PKCS #5 PBKDF2 (Password-Based Key Derivation Function 2) in combination with <a href="HMAC.html"><code>HMAC</code></a>. Takes <em>pass</em>, <em>salt</em> and <em>iterations</em>, and then derives a key of <em>length</em> bytes.</p>
 
 <p>For more information about PBKDF2, see RFC 2898 Section 5.2 (<a href="https://tools.ietf.org/html/rfc2898#section-5.2">tools.ietf.org/html/rfc2898#section-5.2</a>).</p>
@@ -314,10 +282,7 @@ kdf_hkdf(int argc, VALUE *argv, VALUE self)
 <dd>
 <p>The hash algorithm used with <a href="HMAC.html"><code>HMAC</code></a> for the PRF. May be a String representing the algorithm name, or an instance of <a href="Digest.html"><code>OpenSSL::Digest</code></a>.</p>
 </dd></dl>
-          
-          
 
-          
           <div class="method-source-code" id="pbkdf2_hmac-source">
             <pre>static VALUE
 kdf_pbkdf2_hmac(int argc, VALUE *argv, VALUE self)
@@ -352,31 +317,20 @@ kdf_pbkdf2_hmac(int argc, VALUE *argv, VALUE self)
     return str;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-c-scrypt" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             scrypt(pass, salt:, N:, r:, p:, length:) &rarr; aString
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Derives a key from <em>pass</em> using given parameters with the scrypt password-based key derivation function. The result can be used for password storage.</p>
 
 <p>scrypt is designed to be memory-hard and more secure against brute-force attacks using custom hardwares than alternative KDFs such as PBKDF2 or bcrypt.</p>
@@ -413,10 +367,7 @@ kdf_pbkdf2_hmac(int argc, VALUE *argv, VALUE self)
 <span class="ruby-identifier">dk</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">KDF</span>.<span class="ruby-identifier">scrypt</span>(<span class="ruby-identifier">pass</span>, <span class="ruby-value">salt:</span> <span class="ruby-identifier">salt</span>, <span class="ruby-value">N:</span> <span class="ruby-value">2</span><span class="ruby-operator">**</span><span class="ruby-value">14</span>, <span class="ruby-value">r:</span> <span class="ruby-value">8</span>, <span class="ruby-value">p:</span> <span class="ruby-value">1</span>, <span class="ruby-value">length:</span> <span class="ruby-value">32</span>)
 <span class="ruby-identifier">p</span> <span class="ruby-identifier">dk</span> <span class="ruby-comment">#=&gt; &quot;\xDA\xE4\xE2...\x7F\xA1\x01T&quot;</span>
 </pre>
-          
-          
 
-          
           <div class="method-source-code" id="scrypt-source">
             <pre>static VALUE
 kdf_scrypt(int argc, VALUE *argv, VALUE self)
@@ -458,25 +409,20 @@ kdf_scrypt(int argc, VALUE *argv, VALUE self)
     return str;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
     </section>
-  
-  </section>
 
+  </section>
 </main>
 
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

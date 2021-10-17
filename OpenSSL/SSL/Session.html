@@ -21,8 +21,6 @@
 <link href="../../css/rdoc.css" rel="stylesheet">
 
 
-
-
 <body id="top" role="document" class="class">
 <nav role="navigation">
   <div id="project-navigation">
@@ -59,44 +57,32 @@
 
   <div id="class-metadata">
     
-    <div id="parent-class-section" class="nav-section">
+    
+<div id="parent-class-section" class="nav-section">
   <h3>Parent</h3>
 
-  
   <p class="link">Object
-  
 </div>
 
     
     
-    <!-- Method Quickref -->
+    
+<!-- Method Quickref -->
 <div id="method-list-section" class="nav-section">
   <h3>Methods</h3>
 
   <ul class="link-list" role="directory">
-    
     <li ><a href="#method-c-new">::new</a>
-    
     <li ><a href="#method-i-3D-3D">#==</a>
-    
     <li ><a href="#method-i-id">#id</a>
-    
     <li ><a href="#method-i-initialize_copy">#initialize_copy</a>
-    
     <li ><a href="#method-i-time">#time</a>
-    
     <li ><a href="#method-i-time-3D">#time=</a>
-    
     <li ><a href="#method-i-timeout">#timeout</a>
-    
     <li ><a href="#method-i-timeout-3D">#timeout=</a>
-    
     <li ><a href="#method-i-to_der">#to_der</a>
-    
     <li ><a href="#method-i-to_pem">#to_pem</a>
-    
     <li ><a href="#method-i-to_text">#to_text</a>
-    
   </ul>
 </div>
 
@@ -112,51 +98,33 @@
     
   </section>
 
-  
   <section id="5Buntitled-5D" class="documentation-section">
-    
 
-    
 
-    
 
-    
 
-    
+
      <section id="public-class-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Class Methods</h3>
        </header>
 
-    
       <div id="method-c-new" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             new(ssl_socket) &rarr; Session
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
         <div class="method-heading">
           <span class="method-callseq">
             new(string) &rarr; Session
           </span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Creates a new <a href="Session.html"><code>Session</code></a> object from an instance of <a href="SSLSocket.html"><code>SSLSocket</code></a> or DER/PEM encoded String.</p>
-          
-          
 
-          
           <div class="method-source-code" id="new-source">
             <pre>static VALUE ossl_ssl_session_initialize(VALUE self, VALUE arg1)
 {
@@ -197,44 +165,29 @@
         return self;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
     </section>
-  
+
      <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Instance Methods</h3>
        </header>
 
-    
       <div id="method-i-3D-3D" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             session1 == session2 &rarr; boolean
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns <code>true</code> if the two <a href="Session.html"><code>Session</code></a> is the same, <code>false</code> if not.</p>
-          
-          
 
-          
           <div class="method-source-code" id="3D-3D-source">
             <pre>static VALUE ossl_ssl_session_eq(VALUE val1, VALUE val2)
 {
@@ -249,36 +202,22 @@
         }
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-id" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             id &rarr; String
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns the <a href="Session.html"><code>Session</code></a> ID.</p>
-          
-          
 
-          
           <div class="method-source-code" id="id-source">
             <pre>static VALUE ossl_ssl_session_get_id(VALUE self)
 {
@@ -293,33 +232,21 @@
         return rb_str_new((const char *) p, i);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-initialize_copy" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">initialize_copy</span><span
             class="method-args">(p1)</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
           <div class="method-source-code" id="initialize_copy-source">
             <pre>static VALUE
 ossl_ssl_session_initialize_copy(VALUE self, VALUE other)
@@ -341,36 +268,22 @@ ossl_ssl_session_initialize_copy(VALUE self, VALUE other)
     return self;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-time" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             time &rarr; Time
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns the time at which the session was established.</p>
-          
-          
 
-          
           <div class="method-source-code" id="time-source">
             <pre>static VALUE
 ossl_ssl_session_get_time(VALUE self)
@@ -386,43 +299,27 @@ ossl_ssl_session_get_time(VALUE self)
     return rb_funcall(rb_cTime, rb_intern(&quot;at&quot;), 1, LONG2NUM(t));
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-time-3D" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             time = time
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
         <div class="method-heading">
           <span class="method-callseq">
             time = integer
           </span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Sets start time of the session. Time resolution is in seconds.</p>
-          
-          
 
-          
           <div class="method-source-code" id="time-3D-source">
             <pre>static VALUE ossl_ssl_session_set_time(VALUE self, VALUE time_v)
 {
@@ -438,36 +335,22 @@ ossl_ssl_session_get_time(VALUE self)
         return ossl_ssl_session_get_time(self);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-timeout" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             timeout &rarr; Integer
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns the timeout value set for the session, in seconds from the established time.</p>
-          
-          
 
-          
           <div class="method-source-code" id="timeout-source">
             <pre>static VALUE
 ossl_ssl_session_get_timeout(VALUE self)
@@ -481,36 +364,22 @@ ossl_ssl_session_get_timeout(VALUE self)
     return LONG2NUM(t);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-timeout-3D" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             timeout = integer
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Sets how long until the session expires in seconds.</p>
-          
-          
 
-          
           <div class="method-source-code" id="timeout-3D-source">
             <pre>static VALUE ossl_ssl_session_set_timeout(VALUE self, VALUE time_v)
 {
@@ -523,36 +392,22 @@ ossl_ssl_session_get_timeout(VALUE self)
         return ossl_ssl_session_get_timeout(self);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-to_der" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             to_der &rarr; String
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns an <a href="../ASN1.html"><code>ASN1</code></a> encoded String that contains the <a href="Session.html"><code>Session</code></a> object.</p>
-          
-          
 
-          
           <div class="method-source-code" id="to_der-source">
             <pre>static VALUE ossl_ssl_session_to_der(VALUE self)
 {
@@ -574,36 +429,22 @@ ossl_ssl_session_get_timeout(VALUE self)
         return str;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-to_pem" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             to_pem &rarr; String
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns a PEM encoded String that contains the <a href="Session.html"><code>Session</code></a> object.</p>
-          
-          
 
-          
           <div class="method-source-code" id="to_pem-source">
             <pre>static VALUE ossl_ssl_session_to_pem(VALUE self)
 {
@@ -625,36 +466,22 @@ ossl_ssl_session_get_timeout(VALUE self)
         return ossl_membio2str(out);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-to_text" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             to_text &rarr; String
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Shows everything in the <a href="Session.html"><code>Session</code></a> object. This is for diagnostic purposes.</p>
-          
-          
 
-          
           <div class="method-source-code" id="to_text-source">
             <pre>static VALUE ossl_ssl_session_to_text(VALUE self)
 {
@@ -675,25 +502,20 @@ ossl_ssl_session_get_timeout(VALUE self)
         return ossl_membio2str(out);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
     </section>
-  
-  </section>
 
+  </section>
 </main>
 
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

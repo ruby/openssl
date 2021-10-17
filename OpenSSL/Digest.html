@@ -21,8 +21,6 @@
 <link href="../css/rdoc.css" rel="stylesheet">
 
 
-
-
 <body id="top" role="document" class="class">
 <nav role="navigation">
   <div id="project-navigation">
@@ -69,40 +67,30 @@
 
   <div id="class-metadata">
     
-    <div id="parent-class-section" class="nav-section">
+    
+<div id="parent-class-section" class="nav-section">
   <h3>Parent</h3>
 
-  
   <p class="link">Digest::Class
-  
 </div>
 
     
     
-    <!-- Method Quickref -->
+    
+<!-- Method Quickref -->
 <div id="method-list-section" class="nav-section">
   <h3>Methods</h3>
 
   <ul class="link-list" role="directory">
-    
     <li class="calls-super" ><a href="#method-c-digest">::digest</a>
-    
     <li ><a href="#method-c-new">::new</a>
-    
     <li ><a href="#method-i-3C-3C">#&lt;&lt;</a>
-    
     <li ><a href="#method-i-block_length">#block_length</a>
-    
     <li ><a href="#method-i-digest_length">#digest_length</a>
-    
     <li ><a href="#method-i-initialize_copy">#initialize_copy</a>
-    
     <li ><a href="#method-i-name">#name</a>
-    
     <li ><a href="#method-i-reset">#reset</a>
-    
     <li ><a href="#method-i-update">#update</a>
-    
   </ul>
 </div>
 
@@ -177,36 +165,25 @@
 
   </section>
 
-  
   <section id="5Buntitled-5D" class="documentation-section">
-    
 
-    
 
-    
 
-    
 
-    
+
      <section id="public-class-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Class Methods</h3>
        </header>
 
-    
       <div id="method-c-digest" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">digest</span><span
             class="method-args">(name, data)</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
-          
           <p>Return the hash value computed with <em>name</em> <a href="Digest.html"><code>Digest</code></a>. <em>name</em> is either the long name or short name of a supported digest algorithm.</p>
 
 <h3 id="method-c-digest-label-Examples">Examples<span><a href="#method-c-digest-label-Examples">&para;</a> <a href="#top">&uarr;</a></span></h3>
@@ -218,46 +195,31 @@
 
 <pre class="ruby"><span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">digest</span>(<span class="ruby-string">&#39;SHA256&#39;</span>, <span class="ruby-string">&quot;abc&quot;</span>)
 </pre>
-          
-          
             <div class="method-calls-super">
               Calls superclass method
               
             </div>
-          
 
-          
           <div class="method-source-code" id="digest-source">
             <pre><span class="ruby-comment"># File lib/openssl/digest.rb, line 29</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier ruby-title">digest</span>(<span class="ruby-identifier">name</span>, <span class="ruby-identifier">data</span>)
   <span class="ruby-keyword">super</span>(<span class="ruby-identifier">data</span>, <span class="ruby-identifier">name</span>)
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-c-new" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             new(string [, data]) &rarr; Digest
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Creates a <a href="Digest.html"><code>Digest</code></a> instance based on <em>string</em>, which is either the ln (long name) or sn (short name) of a supported digest algorithm.</p>
 
 <p>If <em>data</em> (a String) is given, it is used as the initial input to the <a href="Digest.html"><code>Digest</code></a> instance, i.e.</p>
@@ -270,10 +232,7 @@
 <pre class="ruby"><span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;sha256&#39;</span>)
 <span class="ruby-identifier">digest</span>.<span class="ruby-identifier">update</span>(<span class="ruby-string">&#39;digestdata&#39;</span>)
 </pre>
-          
-          
 
-          
           <div class="method-source-code" id="new-source">
             <pre>static VALUE
 ossl_digest_initialize(int argc, VALUE *argv, VALUE self)
@@ -300,67 +259,52 @@ ossl_digest_initialize(int argc, VALUE *argv, VALUE self)
     return self;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
     </section>
-  
+
      <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Instance Methods</h3>
        </header>
 
-    
       <div id="method-i-3C-3C" class="method-detail method-alias">
-        
         <div class="method-heading">
           <span class="method-name">&lt;&lt;</span><span
             class="method-args">(p1)</span>
-          
         </div>
-        
 
         <div class="method-description">
-          
-          
-          
-          
+          <p>Not every message digest can be computed in one single pass. If a message digest is to be computed from several subsequent sources, then each may be passed individually to the <a href="Digest.html"><code>Digest</code></a> instance.</p>
 
-          
+<h3 id="method-i-3C-3C-label-Example">Example<span><a href="#method-i-3C-3C-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby"><span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;SHA256&#39;</span>)
+<span class="ruby-identifier">digest</span>.<span class="ruby-identifier">update</span>(<span class="ruby-string">&#39;First input&#39;</span>)
+<span class="ruby-identifier">digest</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-string">&#39;Second input&#39;</span> <span class="ruby-comment"># equivalent to digest.update(&#39;Second input&#39;)</span>
+<span class="ruby-identifier">result</span> = <span class="ruby-identifier">digest</span>.<span class="ruby-identifier">digest</span>
+</pre>
+
         </div>
 
-        
 
-        
         <div class="aliases">
           Alias for: <a href="Digest.html#method-i-update">update</a>
         </div>
-        
       </div>
 
-    
       <div id="method-i-block_length" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             block_length &rarr; integer
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns the block length of the digest algorithm, i.e. the length in bytes of an individual block. Most modern algorithms partition a message to be digested into a sequence of fix-sized blocks that are processed consecutively.</p>
 
 <h3 id="method-i-block_length-label-Example">Example<span><a href="#method-i-block_length-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
@@ -368,10 +312,7 @@ ossl_digest_initialize(int argc, VALUE *argv, VALUE self)
 <pre class="ruby"><span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;SHA1&#39;</span>)
 <span class="ruby-identifier">puts</span> <span class="ruby-identifier">digest</span>.<span class="ruby-identifier">block_length</span> <span class="ruby-comment"># =&gt; 64</span>
 </pre>
-          
-          
 
-          
           <div class="method-source-code" id="block_length-source">
             <pre>static VALUE
 ossl_digest_block_length(VALUE self)
@@ -383,31 +324,20 @@ ossl_digest_block_length(VALUE self)
     return INT2NUM(EVP_MD_CTX_block_size(ctx));
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-digest_length" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             digest_length &rarr; integer
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns the output size of the digest, i.e. the length in bytes of the final message digest result.</p>
 
 <h3 id="method-i-digest_length-label-Example">Example<span><a href="#method-i-digest_length-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
@@ -415,10 +345,7 @@ ossl_digest_block_length(VALUE self)
 <pre class="ruby"><span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;SHA1&#39;</span>)
 <span class="ruby-identifier">puts</span> <span class="ruby-identifier">digest</span>.<span class="ruby-identifier">digest_length</span> <span class="ruby-comment"># =&gt; 20</span>
 </pre>
-          
-          
 
-          
           <div class="method-source-code" id="digest_length-source">
             <pre>static VALUE
 ossl_digest_size(VALUE self)
@@ -430,33 +357,21 @@ ossl_digest_size(VALUE self)
     return INT2NUM(EVP_MD_CTX_size(ctx));
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-initialize_copy" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">initialize_copy</span><span
             class="method-args">(p1)</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
           <div class="method-source-code" id="initialize_copy-source">
             <pre>static VALUE
 ossl_digest_copy(VALUE self, VALUE other)
@@ -480,31 +395,20 @@ ossl_digest_copy(VALUE self, VALUE other)
     return self;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-name" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             name &rarr; string
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns the sn of this <a href="Digest.html"><code>Digest</code></a> algorithm.</p>
 
 <h3 id="method-i-name-label-Example">Example<span><a href="#method-i-name-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
@@ -512,10 +416,7 @@ ossl_digest_copy(VALUE self, VALUE other)
 <pre class="ruby"><span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;SHA512&#39;</span>)
 <span class="ruby-identifier">puts</span> <span class="ruby-identifier">digest</span>.<span class="ruby-identifier">name</span> <span class="ruby-comment"># =&gt; SHA512</span>
 </pre>
-          
-          
 
-          
           <div class="method-source-code" id="name-source">
             <pre>static VALUE
 ossl_digest_name(VALUE self)
@@ -527,36 +428,22 @@ ossl_digest_name(VALUE self)
     return rb_str_new2(EVP_MD_name(EVP_MD_CTX_md(ctx)));
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-reset" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             reset &rarr; self
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Resets the <a href="Digest.html"><code>Digest</code></a> in the sense that any <a href="Digest.html#method-i-update"><code>Digest#update</code></a> that has been performed is abandoned and the <a href="Digest.html"><code>Digest</code></a> is set to its initial state again.</p>
-          
-          
 
-          
           <div class="method-source-code" id="reset-source">
             <pre>static VALUE
 ossl_digest_reset(VALUE self)
@@ -571,31 +458,20 @@ ossl_digest_reset(VALUE self)
     return self;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-update" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             update(string) &rarr; aString
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Not every message digest can be computed in one single pass. If a message digest is to be computed from several subsequent sources, then each may be passed individually to the <a href="Digest.html"><code>Digest</code></a> instance.</p>
 
 <h3 id="method-i-update-label-Example">Example<span><a href="#method-i-update-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
@@ -605,10 +481,7 @@ ossl_digest_reset(VALUE self)
 <span class="ruby-identifier">digest</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-string">&#39;Second input&#39;</span> <span class="ruby-comment"># equivalent to digest.update(&#39;Second input&#39;)</span>
 <span class="ruby-identifier">result</span> = <span class="ruby-identifier">digest</span>.<span class="ruby-identifier">digest</span>
 </pre>
-          
-          
 
-          
           <div class="method-source-code" id="update-source">
             <pre>VALUE
 ossl_digest_update(VALUE self, VALUE data)
@@ -624,29 +497,23 @@ ossl_digest_update(VALUE self, VALUE data)
     return self;
 }</pre>
           </div>
-          
         </div>
 
-        
         <div class="aliases">
           Also aliased as: <a href="Digest.html#method-i-3C-3C">&lt;&lt;</a>
         </div>
-        
 
-        
       </div>
 
-    
     </section>
-  
-  </section>
 
+  </section>
 </main>
 
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

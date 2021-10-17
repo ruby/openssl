@@ -21,8 +21,6 @@
 <link href="../css/rdoc.css" rel="stylesheet">
 
 
-
-
 <body id="top" role="document" class="class">
 <nav role="navigation">
   <div id="project-navigation">
@@ -68,46 +66,33 @@
 
   <div id="class-metadata">
     
-    <div id="parent-class-section" class="nav-section">
+    
+<div id="parent-class-section" class="nav-section">
   <h3>Parent</h3>
 
-  
   <p class="link">Object
-  
 </div>
 
     
     
-    <!-- Method Quickref -->
+    
+<!-- Method Quickref -->
 <div id="method-list-section" class="nav-section">
   <h3>Methods</h3>
 
   <ul class="link-list" role="directory">
-    
     <li ><a href="#method-c-digest">::digest</a>
-    
     <li ><a href="#method-c-hexdigest">::hexdigest</a>
-    
     <li ><a href="#method-c-new">::new</a>
-    
     <li ><a href="#method-i-3C-3C">#&lt;&lt;</a>
-    
     <li ><a href="#method-i-3D-3D">#==</a>
-    
     <li ><a href="#method-i-digest">#digest</a>
-    
     <li ><a href="#method-i-hexdigest">#hexdigest</a>
-    
     <li ><a href="#method-i-initialize_copy">#initialize_copy</a>
-    
     <li ><a href="#method-i-inspect">#inspect</a>
-    
     <li ><a href="#method-i-reset">#reset</a>
-    
     <li ><a href="#method-i-to_s">#to_s</a>
-    
     <li ><a href="#method-i-update">#update</a>
-    
   </ul>
 </div>
 
@@ -147,39 +132,26 @@
 
   </section>
 
-  
   <section id="5Buntitled-5D" class="documentation-section">
-    
 
-    
 
-    
 
-    
 
-    
+
      <section id="public-class-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Class Methods</h3>
        </header>
 
-    
       <div id="method-c-digest" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             digest(digest, key, data) &rarr; aString
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns the authentication code as a binary string. The <em>digest</em> parameter specifies the digest algorithm to use. This may be a String representing the algorithm name or an instance of <a href="Digest.html"><code>OpenSSL::Digest</code></a>.</p>
 
 <h3 id="method-c-digest-label-Example">Example<span><a href="#method-c-digest-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
@@ -190,10 +162,7 @@
 <span class="ruby-identifier">hmac</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">HMAC</span>.<span class="ruby-identifier">digest</span>(<span class="ruby-string">&#39;sha1&#39;</span>, <span class="ruby-identifier">key</span>, <span class="ruby-identifier">data</span>)
 <span class="ruby-comment">#=&gt; &quot;\xDE|\x9B\x85\xB8\xB7\x8A\xA6\xBC\x8Az6\xF7\n\x90p\x1C\x9D\xB4\xD9&quot;</span>
 </pre>
-          
-          
 
-          
           <div class="method-source-code" id="digest-source">
             <pre>static VALUE
 ossl_hmac_s_digest(VALUE klass, VALUE digest, VALUE key, VALUE data)
@@ -210,31 +179,20 @@ ossl_hmac_s_digest(VALUE klass, VALUE digest, VALUE key, VALUE data)
     return rb_str_new((const char *)buf, buf_len);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-c-hexdigest" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             hexdigest(digest, key, data) &rarr; aString
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns the authentication code as a hex-encoded string. The <em>digest</em> parameter specifies the digest algorithm to use. This may be a String representing the algorithm name or an instance of <a href="Digest.html"><code>OpenSSL::Digest</code></a>.</p>
 
 <h3 id="method-c-hexdigest-label-Example">Example<span><a href="#method-c-hexdigest-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
@@ -245,10 +203,7 @@ ossl_hmac_s_digest(VALUE klass, VALUE digest, VALUE key, VALUE data)
 <span class="ruby-identifier">hmac</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">HMAC</span>.<span class="ruby-identifier">hexdigest</span>(<span class="ruby-string">&#39;sha1&#39;</span>, <span class="ruby-identifier">key</span>, <span class="ruby-identifier">data</span>)
 <span class="ruby-comment">#=&gt; &quot;de7c9b85b8b78aa6bc8a7a36f70a90701c9db4d9&quot;</span>
 </pre>
-          
-          
 
-          
           <div class="method-source-code" id="hexdigest-source">
             <pre>static VALUE
 ossl_hmac_s_hexdigest(VALUE klass, VALUE digest, VALUE key, VALUE data)
@@ -271,31 +226,20 @@ ossl_hmac_s_hexdigest(VALUE klass, VALUE digest, VALUE key, VALUE data)
     return ret;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-c-new" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             new(key, digest) &rarr; hmac
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns an instance of <a href="HMAC.html"><code>OpenSSL::HMAC</code></a> set with the key and digest algorithm to be used. The instance represents the initial state of the message authentication code before any data has been processed. To process data with it, use the instance method <a href="HMAC.html#method-i-update"><code>update</code></a> with your data as an argument.</p>
 
 <h3 id="method-c-new-label-Example">Example<span><a href="#method-c-new-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
@@ -310,17 +254,14 @@ ossl_hmac_s_hexdigest(VALUE klass, VALUE digest, VALUE key, VALUE data)
 
 <h3 id="method-c-new-label-A+note+about+comparisons">A note about comparisons<span><a href="#method-c-new-label-A+note+about+comparisons">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
-<p>Two instances can be securely compared with #== in constant time:</p>
+<p>Two instances can be securely compared with <a href="HMAC.html#method-i-3D-3D"><code>==</code></a> in constant time:</p>
 
 <pre class="ruby">    <span class="ruby-identifier">other_instance</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">HMAC</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;key&#39;</span>, <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;sha1&#39;</span>))
 <span class="ruby-comment">#=&gt; f42bb0eeb018ebbd4597ae7213711ec60760843f</span>
 <span class="ruby-identifier">instance</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">other_instance</span>
 <span class="ruby-comment">#=&gt; true</span>
 </pre>
-          
-          
 
-          
           <div class="method-source-code" id="new-source">
             <pre>static VALUE
 ossl_hmac_initialize(VALUE self, VALUE key, VALUE digest)
@@ -335,69 +276,56 @@ ossl_hmac_initialize(VALUE self, VALUE key, VALUE digest)
     return self;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
     </section>
-  
+
      <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Instance Methods</h3>
        </header>
 
-    
       <div id="method-i-3C-3C" class="method-detail method-alias">
-        
         <div class="method-heading">
           <span class="method-name">&lt;&lt;</span><span
             class="method-args">(p1)</span>
-          
         </div>
-        
 
         <div class="method-description">
-          
-          
-          
-          
+          <p>Returns <em>hmac</em> updated with the message to be authenticated. Can be called repeatedly with chunks of the message.</p>
 
-          
+<h3 id="method-i-3C-3C-label-Example">Example<span><a href="#method-i-3C-3C-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby"><span class="ruby-identifier">first_chunk</span> = <span class="ruby-string">&#39;The quick brown fox jumps &#39;</span>
+<span class="ruby-identifier">second_chunk</span> = <span class="ruby-string">&#39;over the lazy dog&#39;</span>
+
+<span class="ruby-identifier">instance</span>.<span class="ruby-identifier">update</span>(<span class="ruby-identifier">first_chunk</span>)
+<span class="ruby-comment">#=&gt; 5b9a8038a65d571076d97fe783989e52278a492a</span>
+<span class="ruby-identifier">instance</span>.<span class="ruby-identifier">update</span>(<span class="ruby-identifier">second_chunk</span>)
+<span class="ruby-comment">#=&gt; de7c9b85b8b78aa6bc8a7a36f70a90701c9db4d9</span>
+</pre>
+
         </div>
 
-        
 
-        
         <div class="aliases">
           Alias for: <a href="HMAC.html#method-i-update">update</a>
         </div>
-        
       </div>
 
-    
       <div id="method-i-3D-3D" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">==</span><span
             class="method-args">(other)</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
-          
           <p>Securely compare with another <a href="HMAC.html"><code>HMAC</code></a> instance in constant time.</p>
-          
-          
 
-          
           <div class="method-source-code" id="3D-3D-source">
             <pre><span class="ruby-comment"># File lib/openssl/hmac.rb, line 6</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">==</span>(<span class="ruby-identifier">other</span>)
@@ -407,31 +335,20 @@ ossl_hmac_initialize(VALUE self, VALUE key, VALUE digest)
   <span class="ruby-constant">OpenSSL</span>.<span class="ruby-identifier">fixed_length_secure_compare</span>(<span class="ruby-keyword">self</span>.<span class="ruby-identifier">digest</span>, <span class="ruby-identifier">other</span>.<span class="ruby-identifier">digest</span>)
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-digest" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             digest &rarr; string
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns the authentication code an instance represents as a binary string.</p>
 
 <h3 id="method-i-digest-label-Example">Example<span><a href="#method-i-digest-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
@@ -441,10 +358,7 @@ ossl_hmac_initialize(VALUE self, VALUE key, VALUE digest)
 <span class="ruby-identifier">instance</span>.<span class="ruby-identifier">digest</span>
 <span class="ruby-comment">#=&gt; &quot;\xF4+\xB0\xEE\xB0\x18\xEB\xBDE\x97\xAEr\x13q\x1E\xC6\a`\x84?&quot;</span>
 </pre>
-          
-          
 
-          
           <div class="method-source-code" id="digest-source">
             <pre>static VALUE
 ossl_hmac_digest(VALUE self)
@@ -462,36 +376,22 @@ ossl_hmac_digest(VALUE self)
     return ret;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-hexdigest" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             hexdigest &rarr; string
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns the authentication code an instance represents as a hex-encoded string.</p>
-          
-          
 
-          
           <div class="method-source-code" id="hexdigest-source">
             <pre>static VALUE
 ossl_hmac_hexdigest(VALUE self)
@@ -509,37 +409,24 @@ ossl_hmac_hexdigest(VALUE self)
     return ret;
 }</pre>
           </div>
-          
         </div>
 
-        
         <div class="aliases">
           Also aliased as: <a href="HMAC.html#method-i-inspect">inspect</a>, <a href="HMAC.html#method-i-to_s">to_s</a>
         </div>
-        
 
-        
       </div>
 
-    
       <div id="method-i-initialize_copy" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">initialize_copy</span><span
             class="method-args">(p1)</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
           <div class="method-source-code" id="initialize_copy-source">
             <pre>static VALUE
 ossl_hmac_copy(VALUE self, VALUE other)
@@ -557,59 +444,46 @@ ossl_hmac_copy(VALUE self, VALUE other)
     return self;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-inspect" class="method-detail method-alias">
-        
         <div class="method-heading">
           <span class="method-name">inspect</span><span
             class="method-args">()</span>
-          
         </div>
-        
 
         <div class="method-description">
-          
-          
-          
-          
+          <p>Returns the authentication code as a hex-encoded string. The <em>digest</em> parameter specifies the digest algorithm to use. This may be a String representing the algorithm name or an instance of <a href="Digest.html"><code>OpenSSL::Digest</code></a>.</p>
 
-          
+<h3 id="method-i-inspect-label-Example">Example<span><a href="#method-i-inspect-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby"><span class="ruby-identifier">key</span> = <span class="ruby-string">&#39;key&#39;</span>
+<span class="ruby-identifier">data</span> = <span class="ruby-string">&#39;The quick brown fox jumps over the lazy dog&#39;</span>
+
+<span class="ruby-identifier">hmac</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">HMAC</span>.<span class="ruby-identifier">hexdigest</span>(<span class="ruby-string">&#39;sha1&#39;</span>, <span class="ruby-identifier">key</span>, <span class="ruby-identifier">data</span>)
+<span class="ruby-comment">#=&gt; &quot;de7c9b85b8b78aa6bc8a7a36f70a90701c9db4d9&quot;</span>
+</pre>
+
         </div>
 
-        
 
-        
         <div class="aliases">
           Alias for: <a href="HMAC.html#method-i-hexdigest">hexdigest</a>
         </div>
-        
       </div>
 
-    
       <div id="method-i-reset" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             reset &rarr; self
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns <em>hmac</em> as it was when it was first initialized, with all processed data cleared from it.</p>
 
 <h3 id="method-i-reset-label-Example">Example<span><a href="#method-i-reset-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
@@ -623,10 +497,7 @@ ossl_hmac_copy(VALUE self, VALUE other)
 <span class="ruby-identifier">instance</span>.<span class="ruby-identifier">reset</span>
 <span class="ruby-comment">#=&gt; f42bb0eeb018ebbd4597ae7213711ec60760843f</span>
 </pre>
-          
-          
 
-          
           <div class="method-source-code" id="reset-source">
             <pre>static VALUE
 ossl_hmac_reset(VALUE self)
@@ -639,59 +510,46 @@ ossl_hmac_reset(VALUE self)
     return self;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-to_s" class="method-detail method-alias">
-        
         <div class="method-heading">
           <span class="method-name">to_s</span><span
             class="method-args">()</span>
-          
         </div>
-        
 
         <div class="method-description">
-          
-          
-          
-          
+          <p>Returns the authentication code as a hex-encoded string. The <em>digest</em> parameter specifies the digest algorithm to use. This may be a String representing the algorithm name or an instance of <a href="Digest.html"><code>OpenSSL::Digest</code></a>.</p>
 
-          
+<h3 id="method-i-to_s-label-Example">Example<span><a href="#method-i-to_s-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby"><span class="ruby-identifier">key</span> = <span class="ruby-string">&#39;key&#39;</span>
+<span class="ruby-identifier">data</span> = <span class="ruby-string">&#39;The quick brown fox jumps over the lazy dog&#39;</span>
+
+<span class="ruby-identifier">hmac</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">HMAC</span>.<span class="ruby-identifier">hexdigest</span>(<span class="ruby-string">&#39;sha1&#39;</span>, <span class="ruby-identifier">key</span>, <span class="ruby-identifier">data</span>)
+<span class="ruby-comment">#=&gt; &quot;de7c9b85b8b78aa6bc8a7a36f70a90701c9db4d9&quot;</span>
+</pre>
+
         </div>
 
-        
 
-        
         <div class="aliases">
           Alias for: <a href="HMAC.html#method-i-hexdigest">hexdigest</a>
         </div>
-        
       </div>
 
-    
       <div id="method-i-update" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             update(string) &rarr; self
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns <em>hmac</em> updated with the message to be authenticated. Can be called repeatedly with chunks of the message.</p>
 
 <h3 id="method-i-update-label-Example">Example<span><a href="#method-i-update-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
@@ -704,10 +562,7 @@ ossl_hmac_reset(VALUE self)
 <span class="ruby-identifier">instance</span>.<span class="ruby-identifier">update</span>(<span class="ruby-identifier">second_chunk</span>)
 <span class="ruby-comment">#=&gt; de7c9b85b8b78aa6bc8a7a36f70a90701c9db4d9</span>
 </pre>
-          
-          
 
-          
           <div class="method-source-code" id="update-source">
             <pre>static VALUE
 ossl_hmac_update(VALUE self, VALUE data)
@@ -721,29 +576,23 @@ ossl_hmac_update(VALUE self, VALUE data)
     return self;
 }</pre>
           </div>
-          
         </div>
 
-        
         <div class="aliases">
           Also aliased as: <a href="HMAC.html#method-i-3C-3C">&lt;&lt;</a>
         </div>
-        
 
-        
       </div>
 
-    
     </section>
-  
-  </section>
 
+  </section>
 </main>
 
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

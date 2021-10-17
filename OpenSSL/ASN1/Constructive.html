@@ -21,8 +21,6 @@
 <link href="../../css/rdoc.css" rel="stylesheet">
 
 
-
-
 <body id="top" role="document" class="class">
 <nav role="navigation">
   <div id="project-navigation">
@@ -69,39 +67,32 @@
 
   <div id="class-metadata">
     
-    <div id="parent-class-section" class="nav-section">
+    
+<div id="parent-class-section" class="nav-section">
   <h3>Parent</h3>
 
-  
   <p class="link"><a href="ASN1Data.html">OpenSSL::ASN1::ASN1Data</a>
-  
 </div>
 
-    <div id="includes-section" class="nav-section">
+    
+<div id="includes-section" class="nav-section">
   <h3>Included Modules</h3>
 
   <ul class="link-list">
-  
-  
     <li><span class="include">Enumerable</span>
-  
-  
   </ul>
 </div>
 
     
-    <!-- Method Quickref -->
+    
+<!-- Method Quickref -->
 <div id="method-list-section" class="nav-section">
   <h3>Methods</h3>
 
   <ul class="link-list" role="directory">
-    
     <li ><a href="#method-c-new">::new</a>
-    
     <li ><a href="#method-i-each">#each</a>
-    
     <li ><a href="#method-i-to_der">#to_der</a>
-    
   </ul>
 </div>
 
@@ -144,21 +135,15 @@
 
   </section>
 
-  
   <section id="5Buntitled-5D" class="documentation-section">
-    
 
-    
 
-    
 
-    
     <section class="attribute-method-details" class="method-section">
       <header>
         <h3>Attributes</h3>
       </header>
 
-      
       <div id="attribute-i-tagging" class="method-detail">
         <div class="method-heading attribute-method-heading">
           <span class="method-name">tagging</span><span
@@ -166,38 +151,26 @@
         </div>
 
         <div class="method-description">
-        
         <p>May be used as a hint for encoding a value either implicitly or explicitly by setting it either to <code>:IMPLICIT</code> or to <code>:EXPLICIT</code>. <em>tagging</em> is not set when a ASN.1 structure is parsed using <a href="../ASN1.html#method-c-decode"><code>OpenSSL::ASN1.decode</code></a>.</p>
-        
         </div>
       </div>
-      
     </section>
-    
 
-    
+
      <section id="public-class-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Class Methods</h3>
        </header>
 
-    
       <div id="method-c-new" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             OpenSSL::ASN1::Primitive.new(value [, tag, tagging, tag_class ]) &rarr; Primitive
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p><em>value</em>: is mandatory.</p>
 
 <p><em>tag</em>: optional, may be specified for tagged values. If no <em>tag</em> is specified, the UNIVERSAL tag corresponding to the <a href="Primitive.html"><code>Primitive</code></a> sub-class is used by default.</p>
@@ -212,10 +185,7 @@
 <span class="ruby-identifier">zero_tagged_int</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span><span class="ruby-operator">::</span><span class="ruby-constant">Integer</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">42</span>, <span class="ruby-value">0</span>, <span class="ruby-value">:IMPLICIT</span>)
 <span class="ruby-identifier">private_explicit_zero_tagged_int</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span><span class="ruby-operator">::</span><span class="ruby-constant">Integer</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">42</span>, <span class="ruby-value">0</span>, <span class="ruby-value">:EXPLICIT</span>, <span class="ruby-value">:PRIVATE</span>)
 </pre>
-          
-          
 
-          
           <div class="method-source-code" id="new-source">
             <pre>static VALUE
 ossl_asn1_initialize(int argc, VALUE *argv, VALUE self)
@@ -256,39 +226,27 @@ ossl_asn1_initialize(int argc, VALUE *argv, VALUE self)
     return self;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
     </section>
-  
+
      <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Instance Methods</h3>
        </header>
 
-    
       <div id="method-i-each" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             each { |asn1| block } &rarr; asn1_ary
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Calls the given block once for each element in self, passing that element as parameter <em>asn1</em>. If no block is given, an enumerator is returned instead.</p>
 
 <h2 id="method-i-each-label-Example">Example<span><a href="#method-i-each-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h2>
@@ -297,10 +255,7 @@ ossl_asn1_initialize(int argc, VALUE *argv, VALUE self)
   <span class="ruby-identifier">puts</span> <span class="ruby-identifier">asn1</span>
 <span class="ruby-keyword">end</span>
 </pre>
-          
-          
 
-          
           <div class="method-source-code" id="each-source">
             <pre>static VALUE
 ossl_asn1cons_each(VALUE self)
@@ -310,36 +265,22 @@ ossl_asn1cons_each(VALUE self)
     return self;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-to_der" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             to_der &rarr; DER-encoded String
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>See <a href="ASN1Data.html#method-i-to_der"><code>ASN1Data#to_der</code></a> for details.</p>
-          
-          
 
-          
           <div class="method-source-code" id="to_der-source">
             <pre>static VALUE
 ossl_asn1cons_to_der(VALUE self)
@@ -373,25 +314,20 @@ ossl_asn1cons_to_der(VALUE self)
     return to_der_internal(self, 1, indef_len, str);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
     </section>
-  
-  </section>
 
+  </section>
 </main>
 
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

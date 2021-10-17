@@ -21,8 +21,6 @@
 <link href="../../css/rdoc.css" rel="stylesheet">
 
 
-
-
 <body id="top" role="document" class="class">
 <nav role="navigation">
   <div id="project-navigation">
@@ -59,61 +57,43 @@
 
   <div id="class-metadata">
     
-    <div id="parent-class-section" class="nav-section">
+    
+<div id="parent-class-section" class="nav-section">
   <h3>Parent</h3>
 
-  
   <p class="link">Object
-  
 </div>
 
-    <div id="includes-section" class="nav-section">
+    
+<div id="includes-section" class="nav-section">
   <h3>Included Modules</h3>
 
   <ul class="link-list">
-  
-  
     <li><a class="include" href="../Marshal.html">OpenSSL::Marshal</a>
-  
-  
   </ul>
 </div>
 
     
-    <!-- Method Quickref -->
+    
+<!-- Method Quickref -->
 <div id="method-list-section" class="nav-section">
   <h3>Methods</h3>
 
   <ul class="link-list" role="directory">
-    
     <li ><a href="#method-c-new">::new</a>
-    
     <li ><a href="#method-i-3D-3D">#==</a>
-    
     <li ><a href="#method-i-critical-3D">#critical=</a>
-    
     <li ><a href="#method-i-critical-3F">#critical?</a>
-    
     <li ><a href="#method-i-initialize_copy">#initialize_copy</a>
-    
     <li ><a href="#method-i-oid">#oid</a>
-    
     <li ><a href="#method-i-oid-3D">#oid=</a>
-    
     <li ><a href="#method-i-to_a">#to_a</a>
-    
     <li ><a href="#method-i-to_der">#to_der</a>
-    
     <li ><a href="#method-i-to_h">#to_h</a>
-    
     <li ><a href="#method-i-to_s">#to_s</a>
-    
     <li ><a href="#method-i-value">#value</a>
-    
     <li ><a href="#method-i-value-3D">#value=</a>
-    
     <li ><a href="#method-i-value_der">#value_der</a>
-    
   </ul>
 </div>
 
@@ -129,60 +109,40 @@
     
   </section>
 
-  
   <section id="5Buntitled-5D" class="documentation-section">
-    
 
-    
 
-    
 
-    
 
-    
+
      <section id="public-class-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Class Methods</h3>
        </header>
 
-    
       <div id="method-c-new" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             OpenSSL::X509::Extension.new(der)
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
         <div class="method-heading">
           <span class="method-callseq">
             OpenSSL::X509::Extension.new(oid, value)
           </span>
-          
         </div>
-        
         <div class="method-heading">
           <span class="method-callseq">
             OpenSSL::X509::Extension.new(oid, value, critical)
           </span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Creates an <a href="../X509.html"><code>X509</code></a> extension.</p>
 
 <p>The extension may be created from <em>der</em> data or from an extension <em>oid</em> and <em>value</em>.  The <em>oid</em> may be either an OID or an extension name.  If <em>critical</em> is <code>true</code> the extension is marked critical.</p>
-          
-          
 
-          
           <div class="method-source-code" id="new-source">
             <pre>static VALUE
 ossl_x509ext_initialize(int argc, VALUE *argv, VALUE self)
@@ -209,41 +169,28 @@ ossl_x509ext_initialize(int argc, VALUE *argv, VALUE self)
     return self;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
     </section>
-  
+
      <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Instance Methods</h3>
        </header>
 
-    
       <div id="method-i-3D-3D" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">==</span><span
             class="method-args">(other)</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
           <div class="method-source-code" id="3D-3D-source">
             <pre><span class="ruby-comment"># File lib/openssl/x509.rb, line 48</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">==</span>(<span class="ruby-identifier">other</span>)
@@ -251,33 +198,21 @@ ossl_x509ext_initialize(int argc, VALUE *argv, VALUE self)
   <span class="ruby-identifier">to_der</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">other</span>.<span class="ruby-identifier">to_der</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-critical-3D" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">critical=</span><span
             class="method-args">(p1)</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
           <div class="method-source-code" id="critical-3D-source">
             <pre>static VALUE
 ossl_x509ext_set_critical(VALUE self, VALUE flag)
@@ -290,33 +225,21 @@ ossl_x509ext_set_critical(VALUE self, VALUE flag)
     return flag;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-critical-3F" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">critical?</span><span
             class="method-args">()</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
           <div class="method-source-code" id="critical-3F-source">
             <pre>static VALUE
 ossl_x509ext_get_critical(VALUE obj)
@@ -327,33 +250,21 @@ ossl_x509ext_get_critical(VALUE obj)
     return X509_EXTENSION_get_critical(ext) ? Qtrue : Qfalse;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-initialize_copy" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">initialize_copy</span><span
             class="method-args">(p1)</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
           <div class="method-source-code" id="initialize_copy-source">
             <pre>static VALUE
 ossl_x509ext_initialize_copy(VALUE self, VALUE other)
@@ -374,33 +285,21 @@ ossl_x509ext_initialize_copy(VALUE self, VALUE other)
     return self;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-oid" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">oid</span><span
             class="method-args">()</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
           <div class="method-source-code" id="oid-source">
             <pre>static VALUE
 ossl_x509ext_get_oid(VALUE obj)
@@ -425,33 +324,21 @@ ossl_x509ext_get_oid(VALUE obj)
     return ret;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-oid-3D" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">oid=</span><span
             class="method-args">(p1)</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
           <div class="method-source-code" id="oid-3D-source">
             <pre>static VALUE
 ossl_x509ext_set_oid(VALUE self, VALUE oid)
@@ -472,66 +359,42 @@ ossl_x509ext_set_oid(VALUE self, VALUE oid)
     return oid;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-to_a" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">to_a</span><span
             class="method-args">()</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
           <div class="method-source-code" id="to_a-source">
             <pre><span class="ruby-comment"># File lib/openssl/x509.rb, line 64</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">to_a</span>
   [ <span class="ruby-keyword">self</span>.<span class="ruby-identifier">oid</span>, <span class="ruby-keyword">self</span>.<span class="ruby-identifier">value</span>, <span class="ruby-keyword">self</span>.<span class="ruby-identifier">critical?</span> ]
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-to_der" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">to_der</span><span
             class="method-args">()</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
           <div class="method-source-code" id="to_der-source">
             <pre>static VALUE
 ossl_x509ext_to_der(VALUE obj)
@@ -553,66 +416,42 @@ ossl_x509ext_to_der(VALUE obj)
     return str;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-to_h" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">to_h</span><span
             class="method-args">()</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
           <div class="method-source-code" id="to_h-source">
             <pre><span class="ruby-comment"># File lib/openssl/x509.rb, line 60</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">to_h</span> <span class="ruby-comment"># {&quot;oid&quot;=&gt;sn|ln, &quot;value&quot;=&gt;value, &quot;critical&quot;=&gt;true|false}</span>
   {<span class="ruby-string">&quot;oid&quot;</span><span class="ruby-operator">=&gt;</span><span class="ruby-keyword">self</span>.<span class="ruby-identifier">oid</span>,<span class="ruby-string">&quot;value&quot;</span><span class="ruby-operator">=&gt;</span><span class="ruby-keyword">self</span>.<span class="ruby-identifier">value</span>,<span class="ruby-string">&quot;critical&quot;</span><span class="ruby-operator">=&gt;</span><span class="ruby-keyword">self</span>.<span class="ruby-identifier">critical?</span>}
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-to_s" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">to_s</span><span
             class="method-args">()</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
           <div class="method-source-code" id="to_s-source">
             <pre><span class="ruby-comment"># File lib/openssl/x509.rb, line 53</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">to_s</span> <span class="ruby-comment"># &quot;oid = critical, value&quot;</span>
@@ -622,33 +461,21 @@ ossl_x509ext_to_der(VALUE obj)
   <span class="ruby-identifier">str</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">value</span>.<span class="ruby-identifier">gsub</span>(<span class="ruby-regexp">/\n/</span>, <span class="ruby-string">&quot;, &quot;</span>)
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-value" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">value</span><span
             class="method-args">()</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
           <div class="method-source-code" id="value-source">
             <pre>static VALUE
 ossl_x509ext_get_value(VALUE obj)
@@ -667,33 +494,21 @@ ossl_x509ext_get_value(VALUE obj)
     return ret;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-value-3D" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">value=</span><span
             class="method-args">(p1)</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
           <div class="method-source-code" id="value-3D-source">
             <pre>static VALUE
 ossl_x509ext_set_value(VALUE self, VALUE data)
@@ -714,33 +529,21 @@ ossl_x509ext_set_value(VALUE self, VALUE data)
     return data;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-value_der" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">value_der</span><span
             class="method-args">()</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
           <div class="method-source-code" id="value_der-source">
             <pre>static VALUE
 ossl_x509ext_get_value_der(VALUE obj)
@@ -755,25 +558,20 @@ ossl_x509ext_get_value_der(VALUE obj)
     return rb_str_new((const char *)value-&gt;data, value-&gt;length);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
     </section>
-  
-  </section>
 
+  </section>
 </main>
 
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

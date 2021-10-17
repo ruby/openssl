@@ -21,8 +21,6 @@
 <link href="../../css/rdoc.css" rel="stylesheet">
 
 
-
-
 <body id="top" role="document" class="class">
 <nav role="navigation">
   <div id="project-navigation">
@@ -59,81 +57,53 @@
 
   <div id="class-metadata">
     
-    <div id="parent-class-section" class="nav-section">
+    
+<div id="parent-class-section" class="nav-section">
   <h3>Parent</h3>
 
-  
   <p class="link"><a href="PKey.html">OpenSSL::PKey::PKey</a>
-  
 </div>
 
-    <div id="includes-section" class="nav-section">
+    
+<div id="includes-section" class="nav-section">
   <h3>Included Modules</h3>
 
   <ul class="link-list">
-  
-  
     <li><a class="include" href="../Marshal.html">OpenSSL::Marshal</a>
-  
-  
   </ul>
 </div>
 
     
-    <!-- Method Quickref -->
+    
+<!-- Method Quickref -->
 <div id="method-list-section" class="nav-section">
   <h3>Methods</h3>
 
   <ul class="link-list" role="directory">
-    
     <li ><a href="#method-c-builtin_curves">::builtin_curves</a>
-    
     <li ><a href="#method-c-generate">::generate</a>
-    
     <li ><a href="#method-c-new">::new</a>
-    
     <li ><a href="#method-i-check_key">#check_key</a>
-    
     <li ><a href="#method-i-dh_compute_key">#dh_compute_key</a>
-    
     <li ><a href="#method-i-dsa_sign_asn1">#dsa_sign_asn1</a>
-    
     <li ><a href="#method-i-dsa_verify_asn1">#dsa_verify_asn1</a>
-    
     <li ><a href="#method-i-export">#export</a>
-    
     <li ><a href="#method-i-generate_key">#generate_key</a>
-    
     <li ><a href="#method-i-generate_key-21">#generate_key!</a>
-    
     <li ><a href="#method-i-group">#group</a>
-    
     <li ><a href="#method-i-group-3D">#group=</a>
-    
     <li ><a href="#method-i-initialize_copy">#initialize_copy</a>
-    
     <li ><a href="#method-i-private-3F">#private?</a>
-    
     <li ><a href="#method-i-private_key">#private_key</a>
-    
     <li ><a href="#method-i-private_key-3D">#private_key=</a>
-    
     <li ><a href="#method-i-private_key-3F">#private_key?</a>
-    
     <li ><a href="#method-i-public-3F">#public?</a>
-    
     <li ><a href="#method-i-public_key">#public_key</a>
-    
     <li ><a href="#method-i-public_key-3D">#public_key=</a>
-    
     <li ><a href="#method-i-public_key-3F">#public_key?</a>
-    
     <li ><a href="#method-i-to_der">#to_der</a>
-    
     <li ><a href="#method-i-to_pem">#to_pem</a>
-    
     <li ><a href="#method-i-to_text">#to_text</a>
-    
   </ul>
 </div>
 
@@ -162,65 +132,41 @@
 
   </section>
 
-  
   <section id="5Buntitled-5D" class="documentation-section">
-    
 
-    
 
-    
     <section class="constants-list">
       <header>
         <h3>Constants</h3>
       </header>
       <dl>
-      
         <dt id="EXPLICIT_CURVE">EXPLICIT_CURVE
-        
         <dd>
-        
-      
         <dt id="NAMED_CURVE">NAMED_CURVE
-        
         <dd>
-        
-      
       </dl>
     </section>
-    
 
-    
 
-    
+
      <section id="public-class-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Class Methods</h3>
        </header>
 
-    
       <div id="method-c-builtin_curves" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             builtin_curves &rarr; [[sn, comment], ...]
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Obtains a list of all predefined curves by the <a href="../../OpenSSL.html"><code>OpenSSL</code></a>. Curve names are returned as sn.</p>
 
 <p>See the <a href="../../OpenSSL.html"><code>OpenSSL</code></a> documentation for EC_get_builtin_curves().</p>
-          
-          
 
-          
           <div class="method-source-code" id="builtin_curves-source">
             <pre>static VALUE ossl_s_builtin_curves(VALUE self)
 {
@@ -250,43 +196,27 @@
     return ret;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-c-generate" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             generate(ec_group) &rarr; ec
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
         <div class="method-heading">
           <span class="method-callseq">
             generate(string) &rarr; ec
           </span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Creates a new <a href="EC.html"><code>EC</code></a> instance with a new random private and public key.</p>
-          
-          
 
-          
           <div class="method-source-code" id="generate-source">
             <pre>static VALUE
 ossl_ec_key_s_generate(VALUE klass, VALUE arg)
@@ -308,71 +238,47 @@ ossl_ec_key_s_generate(VALUE klass, VALUE arg)
     return obj;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-c-new" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             OpenSSL::PKey::EC.new
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
         <div class="method-heading">
           <span class="method-callseq">
             OpenSSL::PKey::EC.new(ec_key)
           </span>
-          
         </div>
-        
         <div class="method-heading">
           <span class="method-callseq">
             OpenSSL::PKey::EC.new(ec_group)
           </span>
-          
         </div>
-        
         <div class="method-heading">
           <span class="method-callseq">
             OpenSSL::PKey::EC.new(&quot;secp112r1&quot;)
           </span>
-          
         </div>
-        
         <div class="method-heading">
           <span class="method-callseq">
             OpenSSL::PKey::EC.new(pem_string [, pwd])
           </span>
-          
         </div>
-        
         <div class="method-heading">
           <span class="method-callseq">
             OpenSSL::PKey::EC.new(der_string)
           </span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Creates a new <a href="EC.html"><code>EC</code></a> object from given arguments.</p>
-          
-          
 
-          
           <div class="method-source-code" id="new-source">
             <pre>static VALUE ossl_ec_key_initialize(int argc, VALUE *argv, VALUE self)
 {
@@ -432,46 +338,31 @@ ossl_ec_key_s_generate(VALUE klass, VALUE arg)
     return self;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
     </section>
-  
+
      <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Instance Methods</h3>
        </header>
 
-    
       <div id="method-i-check_key" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             check_key   &rarr; true
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Raises an exception if the key is invalid.</p>
 
 <p>See the <a href="../../OpenSSL.html"><code>OpenSSL</code></a> documentation for EC_KEY_check_key()</p>
-          
-          
 
-          
           <div class="method-source-code" id="check_key-source">
             <pre>static VALUE ossl_ec_key_check_key(VALUE self)
 {
@@ -484,36 +375,22 @@ ossl_ec_key_s_generate(VALUE klass, VALUE arg)
     return Qtrue;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-dh_compute_key" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             dh_compute_key(pubkey)   &rarr; String
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>See the <a href="../../OpenSSL.html"><code>OpenSSL</code></a> documentation for ECDH_compute_key()</p>
-          
-          
 
-          
           <div class="method-source-code" id="dh_compute_key-source">
             <pre>static VALUE ossl_ec_key_dh_compute_key(VALUE self, VALUE pubkey)
 {
@@ -538,36 +415,22 @@ ossl_ec_key_s_generate(VALUE klass, VALUE arg)
     return str;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-dsa_sign_asn1" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             dsa_sign_asn1(data)   &rarr; String
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>See the <a href="../../OpenSSL.html"><code>OpenSSL</code></a> documentation for ECDSA_sign()</p>
-          
-          
 
-          
           <div class="method-source-code" id="dsa_sign_asn1-source">
             <pre>static VALUE ossl_ec_key_dsa_sign_asn1(VALUE self, VALUE data)
 {
@@ -589,36 +452,22 @@ ossl_ec_key_s_generate(VALUE klass, VALUE arg)
     return str;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-dsa_verify_asn1" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             dsa_verify_asn1(data, sig)   &rarr; true or false
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>See the <a href="../../OpenSSL.html"><code>OpenSSL</code></a> documentation for ECDSA_verify()</p>
-          
-          
 
-          
           <div class="method-source-code" id="dsa_verify_asn1-source">
             <pre>static VALUE ossl_ec_key_dsa_verify_asn1(VALUE self, VALUE data, VALUE sig)
 {
@@ -628,54 +477,33 @@ ossl_ec_key_s_generate(VALUE klass, VALUE arg)
     StringValue(data);
     StringValue(sig);
 
-    switch (ECDSA_verify(0, (unsigned char *) RSTRING_PTR(data), RSTRING_LENINT(data), (unsigned char *) RSTRING_PTR(sig), (int)RSTRING_LEN(sig), ec)) {
-    case 1:     return Qtrue;
-    case 0:     return Qfalse;
-    default:    break;
+    switch (ECDSA_verify(0, (unsigned char *)RSTRING_PTR(data), RSTRING_LENINT(data),
+                         (unsigned char *)RSTRING_PTR(sig), RSTRING_LENINT(sig), ec)) {
+      case 1:
+        return Qtrue;
+      case 0:
+        return Qfalse;
+      default:
+        ossl_raise(eECError, &quot;ECDSA_verify&quot;);
     }
-
-    ossl_raise(eECError, &quot;ECDSA_verify&quot;);
-
-    UNREACHABLE;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-export" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             export([cipher, pass_phrase]) &rarr; String
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        <div class="method-heading">
-          <span class="method-callseq">
-            to_pem([cipher, pass_phrase]) &rarr; String
-          </span>
-          
-        </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Outputs the <a href="EC.html"><code>EC</code></a> key in PEM encoding.  If <em>cipher</em> and <em>pass_phrase</em> are given they will be used to encrypt the key.  <em>cipher</em> must be an <a href="../Cipher.html"><code>OpenSSL::Cipher</code></a> instance. Note that encryption will only be effective for a private key, public keys will always be encoded in plain text.</p>
-          
-          
 
-          
           <div class="method-source-code" id="export-source">
             <pre>static VALUE ossl_ec_key_export(int argc, VALUE *argv, VALUE self)
 {
@@ -684,63 +512,49 @@ ossl_ec_key_s_generate(VALUE klass, VALUE arg)
     return ossl_ec_key_to_string(self, cipher, passwd, EXPORT_PEM);
 }</pre>
           </div>
-          
         </div>
 
-        
         <div class="aliases">
           Also aliased as: <a href="EC.html#method-i-to_pem">to_pem</a>
         </div>
-        
 
-        
       </div>
 
-    
       <div id="method-i-generate_key" class="method-detail method-alias">
-        
         <div class="method-heading">
           <span class="method-name">generate_key</span><span
             class="method-args">()</span>
-          
         </div>
-        
 
         <div class="method-description">
-          
-          
-          
-          
+          <p>Generates a new random private and public key.</p>
 
-          
+<p>See also the <a href="../../OpenSSL.html"><code>OpenSSL</code></a> documentation for EC_KEY_generate_key()</p>
+
+<h3 id="method-i-generate_key-label-Example">Example<span><a href="#method-i-generate_key-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby"><span class="ruby-identifier">ec</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">EC</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&quot;prime256v1&quot;</span>)
+<span class="ruby-identifier">p</span> <span class="ruby-identifier">ec</span>.<span class="ruby-identifier">private_key</span> <span class="ruby-comment"># =&gt; nil</span>
+<span class="ruby-identifier">ec</span>.<span class="ruby-identifier">generate_key!</span>
+<span class="ruby-identifier">p</span> <span class="ruby-identifier">ec</span>.<span class="ruby-identifier">private_key</span> <span class="ruby-comment"># =&gt; #&lt;OpenSSL::BN XXXXXX&gt;</span>
+</pre>
+
         </div>
 
-        
 
-        
         <div class="aliases">
           Alias for: <a href="EC.html#method-i-generate_key-21">generate_key!</a>
         </div>
-        
       </div>
 
-    
       <div id="method-i-generate_key-21" class="method-detail ">
-        
-        
         <div class="method-heading">
-          <span class="method-callseq">
-            generate_key!   &rarr; self
-          </span>
-          
+          <span class="method-name">generate_key!</span><span
+            class="method-args">   =&gt; self</span>
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Generates a new random private and public key.</p>
 
 <p>See also the <a href="../../OpenSSL.html"><code>OpenSSL</code></a> documentation for EC_KEY_generate_key()</p>
@@ -752,10 +566,7 @@ ossl_ec_key_s_generate(VALUE klass, VALUE arg)
 <span class="ruby-identifier">ec</span>.<span class="ruby-identifier">generate_key!</span>
 <span class="ruby-identifier">p</span> <span class="ruby-identifier">ec</span>.<span class="ruby-identifier">private_key</span> <span class="ruby-comment"># =&gt; #&lt;OpenSSL::BN XXXXXX&gt;</span>
 </pre>
-          
-          
 
-          
           <div class="method-source-code" id="generate_key-21-source">
             <pre>static VALUE ossl_ec_key_generate_key(VALUE self)
 {
@@ -768,40 +579,25 @@ ossl_ec_key_s_generate(VALUE klass, VALUE arg)
     return self;
 }</pre>
           </div>
-          
         </div>
 
-        
         <div class="aliases">
           Also aliased as: <a href="EC.html#method-i-generate_key">generate_key</a>
         </div>
-        
 
-        
       </div>
 
-    
       <div id="method-i-group" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             group   &rarr; group
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns the <a href="EC/Group.html"><code>EC::Group</code></a> that the key is associated with. Modifying the returned group does not affect <em>key</em>.</p>
-          
-          
 
-          
           <div class="method-source-code" id="group-source">
             <pre>static VALUE
 ossl_ec_key_get_group(VALUE self)
@@ -817,36 +613,22 @@ ossl_ec_key_get_group(VALUE self)
     return ec_group_new(group);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-group-3D" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             group = group
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Sets the <a href="EC/Group.html"><code>EC::Group</code></a> for the key. The group structure is internally copied so modification to <em>group</em> after assigning to a key has no effect on the key.</p>
-          
-          
 
-          
           <div class="method-source-code" id="group-3D-source">
             <pre>static VALUE
 ossl_ec_key_set_group(VALUE self, VALUE group_v)
@@ -863,33 +645,21 @@ ossl_ec_key_set_group(VALUE self, VALUE group_v)
     return group_v;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-initialize_copy" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">initialize_copy</span><span
             class="method-args">(p1)</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
           <div class="method-source-code" id="initialize_copy-source">
             <pre>static VALUE
 ossl_ec_key_initialize_copy(VALUE self, VALUE other)
@@ -913,36 +683,22 @@ ossl_ec_key_initialize_copy(VALUE self, VALUE other)
     return self;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-private-3F" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             private? &rarr; true or false
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns whether this <a href="EC.html"><code>EC</code></a> instance has a private key. The private key (<a href="../BN.html"><code>BN</code></a>) can be retrieved with <a href="EC.html#method-i-private_key"><code>EC#private_key</code></a>.</p>
-          
-          
 
-          
           <div class="method-source-code" id="private-3F-source">
             <pre>static VALUE ossl_ec_key_is_private(VALUE self)
 {
@@ -953,40 +709,25 @@ ossl_ec_key_initialize_copy(VALUE self, VALUE other)
     return EC_KEY_get0_private_key(ec) ? Qtrue : Qfalse;
 }</pre>
           </div>
-          
         </div>
 
-        
         <div class="aliases">
           Also aliased as: <a href="EC.html#method-i-private_key-3F">private_key?</a>
         </div>
-        
 
-        
       </div>
 
-    
       <div id="method-i-private_key" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             private_key   &rarr; OpenSSL::BN
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>See the <a href="../../OpenSSL.html"><code>OpenSSL</code></a> documentation for EC_KEY_get0_private_key()</p>
-          
-          
 
-          
           <div class="method-source-code" id="private_key-source">
             <pre>static VALUE ossl_ec_key_get_private_key(VALUE self)
 {
@@ -1000,36 +741,22 @@ ossl_ec_key_initialize_copy(VALUE self, VALUE other)
     return ossl_bn_new(bn);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-private_key-3D" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             private_key = openssl_bn
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>See the <a href="../../OpenSSL.html"><code>OpenSSL</code></a> documentation for EC_KEY_set_private_key()</p>
-          
-          
 
-          
           <div class="method-source-code" id="private_key-3D-source">
             <pre>static VALUE ossl_ec_key_set_private_key(VALUE self, VALUE private_key)
 {
@@ -1053,64 +780,39 @@ ossl_ec_key_initialize_copy(VALUE self, VALUE other)
     return private_key;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-private_key-3F" class="method-detail method-alias">
-        
         <div class="method-heading">
           <span class="method-name">private_key?</span><span
             class="method-args">()</span>
-          
         </div>
-        
 
         <div class="method-description">
-          
-          
-          
-          
+          <p>Returns whether this <a href="EC.html"><code>EC</code></a> instance has a private key. The private key (<a href="../BN.html"><code>BN</code></a>) can be retrieved with <a href="EC.html#method-i-private_key"><code>EC#private_key</code></a>.</p>
 
-          
         </div>
 
-        
 
-        
         <div class="aliases">
           Alias for: <a href="EC.html#method-i-private-3F">private?</a>
         </div>
-        
       </div>
 
-    
       <div id="method-i-public-3F" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             public? &rarr; true or false
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns whether this <a href="EC.html"><code>EC</code></a> instance has a public key. The public key (<a href="EC/Point.html"><code>EC::Point</code></a>) can be retrieved with <a href="EC.html#method-i-public_key"><code>EC#public_key</code></a>.</p>
-          
-          
 
-          
           <div class="method-source-code" id="public-3F-source">
             <pre>static VALUE ossl_ec_key_is_public(VALUE self)
 {
@@ -1121,40 +823,25 @@ ossl_ec_key_initialize_copy(VALUE self, VALUE other)
     return EC_KEY_get0_public_key(ec) ? Qtrue : Qfalse;
 }</pre>
           </div>
-          
         </div>
 
-        
         <div class="aliases">
           Also aliased as: <a href="EC.html#method-i-public_key-3F">public_key?</a>
         </div>
-        
 
-        
       </div>
 
-    
       <div id="method-i-public_key" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             public_key   &rarr; OpenSSL::PKey::EC::Point
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>See the <a href="../../OpenSSL.html"><code>OpenSSL</code></a> documentation for EC_KEY_get0_public_key()</p>
-          
-          
 
-          
           <div class="method-source-code" id="public_key-source">
             <pre>static VALUE ossl_ec_key_get_public_key(VALUE self)
 {
@@ -1168,36 +855,22 @@ ossl_ec_key_initialize_copy(VALUE self, VALUE other)
     return ec_point_new(point, EC_KEY_get0_group(ec));
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-public_key-3D" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             public_key = ec_point
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>See the <a href="../../OpenSSL.html"><code>OpenSSL</code></a> documentation for EC_KEY_set_public_key()</p>
-          
-          
 
-          
           <div class="method-source-code" id="public_key-3D-source">
             <pre>static VALUE ossl_ec_key_set_public_key(VALUE self, VALUE public_key)
 {
@@ -1221,128 +894,79 @@ ossl_ec_key_initialize_copy(VALUE self, VALUE other)
     return public_key;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-public_key-3F" class="method-detail method-alias">
-        
         <div class="method-heading">
           <span class="method-name">public_key?</span><span
             class="method-args">()</span>
-          
         </div>
-        
 
         <div class="method-description">
-          
-          
-          
-          
+          <p>Returns whether this <a href="EC.html"><code>EC</code></a> instance has a public key. The public key (<a href="EC/Point.html"><code>EC::Point</code></a>) can be retrieved with <a href="EC.html#method-i-public_key"><code>EC#public_key</code></a>.</p>
 
-          
         </div>
 
-        
 
-        
         <div class="aliases">
           Alias for: <a href="EC.html#method-i-public-3F">public?</a>
         </div>
-        
       </div>
 
-    
       <div id="method-i-to_der" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             to_der   &rarr; String
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>See the <a href="../../OpenSSL.html"><code>OpenSSL</code></a> documentation for i2d_ECPrivateKey_bio()</p>
-          
-          
 
-          
           <div class="method-source-code" id="to_der-source">
             <pre>static VALUE ossl_ec_key_to_der(VALUE self)
 {
     return ossl_ec_key_to_string(self, Qnil, Qnil, EXPORT_DER);
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-to_pem" class="method-detail method-alias">
-        
         <div class="method-heading">
-          <span class="method-name">to_pem</span><span
-            class="method-args">(p1 = v1, p2 = v2)</span>
-          
+          <span class="method-callseq">
+            to_pem([cipher, pass_phrase]) &rarr; String
+          </span>
         </div>
-        
 
         <div class="method-description">
-          
-          
-          
-          
+          <p>Outputs the <a href="EC.html"><code>EC</code></a> key in PEM encoding.  If <em>cipher</em> and <em>pass_phrase</em> are given they will be used to encrypt the key.  <em>cipher</em> must be an <a href="../Cipher.html"><code>OpenSSL::Cipher</code></a> instance. Note that encryption will only be effective for a private key, public keys will always be encoded in plain text.</p>
 
-          
         </div>
 
-        
 
-        
         <div class="aliases">
           Alias for: <a href="EC.html#method-i-export">export</a>
         </div>
-        
       </div>
 
-    
       <div id="method-i-to_text" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             to_text   &rarr; String
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>See the <a href="../../OpenSSL.html"><code>OpenSSL</code></a> documentation for EC_KEY_print()</p>
-          
-          
 
-          
           <div class="method-source-code" id="to_text-source">
             <pre>static VALUE ossl_ec_key_to_text(VALUE self)
 {
@@ -1363,25 +987,20 @@ ossl_ec_key_initialize_copy(VALUE self, VALUE other)
     return str;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
     </section>
-  
-  </section>
 
+  </section>
 </main>
 
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

@@ -21,8 +21,6 @@
 <link href="../../css/rdoc.css" rel="stylesheet">
 
 
-
-
 <body id="top" role="document" class="class">
 <nav role="navigation">
   <div id="project-navigation">
@@ -68,67 +66,46 @@
 
   <div id="class-metadata">
     
-    <div id="parent-class-section" class="nav-section">
+    
+<div id="parent-class-section" class="nav-section">
   <h3>Parent</h3>
 
-  
   <p class="link"><a href="PKey.html">OpenSSL::PKey::PKey</a>
-  
 </div>
 
-    <div id="includes-section" class="nav-section">
+    
+<div id="includes-section" class="nav-section">
   <h3>Included Modules</h3>
 
   <ul class="link-list">
-  
-  
     <li><a class="include" href="../Marshal.html">OpenSSL::Marshal</a>
-  
-  
   </ul>
 </div>
 
     
-    <!-- Method Quickref -->
+    
+<!-- Method Quickref -->
 <div id="method-list-section" class="nav-section">
   <h3>Methods</h3>
 
   <ul class="link-list" role="directory">
-    
     <li ><a href="#method-c-generate">::generate</a>
-    
     <li ><a href="#method-c-new">::new</a>
-    
     <li ><a href="#method-i-compute_key">#compute_key</a>
-    
     <li ><a href="#method-i-export">#export</a>
-    
     <li ><a href="#method-i-generate_key-21">#generate_key!</a>
-    
     <li ><a href="#method-i-initialize_copy">#initialize_copy</a>
-    
     <li ><a href="#method-i-params">#params</a>
-    
     <li ><a href="#method-i-params_ok-3F">#params_ok?</a>
-    
     <li ><a href="#method-i-private-3F">#private?</a>
-    
     <li ><a href="#method-i-public-3F">#public?</a>
-    
     <li ><a href="#method-i-public_key">#public_key</a>
-    
     <li ><a href="#method-i-set_key">#set_key</a>
-    
     <li ><a href="#method-i-set_pqg">#set_pqg</a>
-    
     <li ><a href="#method-i-to_der">#to_der</a>
-    
     <li ><a href="#method-i-to_pem">#to_pem</a>
-    
     <li ><a href="#method-i-to_s">#to_s</a>
-    
     <li ><a href="#method-i-to_text">#to_text</a>
-    
   </ul>
 </div>
 
@@ -173,39 +150,26 @@
 
   </section>
 
-  
   <section id="5Buntitled-5D" class="documentation-section">
-    
 
-    
 
-    
 
-    
 
-    
+
      <section id="public-class-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Class Methods</h3>
        </header>
 
-    
       <div id="method-c-generate" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             generate(size [, generator]) &rarr; dh
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Creates a new <a href="DH.html"><code>DH</code></a> instance from scratch by generating the private and public components alike.</p>
 
 <h3 id="method-c-generate-label-Parameters">Parameters<span><a href="#method-c-generate-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
@@ -214,10 +178,7 @@
 </li><li>
 <p><em>generator</em> is a small number &gt; 1, typically 2 or 5.</p>
 </li></ul>
-          
-          
 
-          
           <div class="method-source-code" id="generate-source">
             <pre>static VALUE
 ossl_dh_s_generate(int argc, VALUE *argv, VALUE klass)
@@ -239,45 +200,30 @@ ossl_dh_s_generate(int argc, VALUE *argv, VALUE klass)
     return obj;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-c-new" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             new &rarr; dh
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
         <div class="method-heading">
           <span class="method-callseq">
             new(string) &rarr; dh
           </span>
-          
         </div>
-        
         <div class="method-heading">
           <span class="method-callseq">
             new(size [, generator]) &rarr; dh
           </span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Either generates a <a href="DH.html"><code>DH</code></a> instance from scratch or by reading already existing <a href="DH.html"><code>DH</code></a> parameters from <em>string</em>. Note that when reading a <a href="DH.html"><code>DH</code></a> instance from data that was encoded from a <a href="DH.html"><code>DH</code></a> instance by using <a href="DH.html#method-i-to_pem"><code>DH#to_pem</code></a> or <a href="DH.html#method-i-to_der"><code>DH#to_der</code></a> the result will <strong>not</strong> contain a public/private key pair yet. This needs to be generated using <a href="DH.html#method-i-generate_key-21"><code>DH#generate_key!</code></a> first.</p>
 
 <h3 id="method-c-new-label-Parameters">Parameters<span><a href="#method-c-new-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
@@ -298,10 +244,7 @@ ossl_dh_s_generate(int argc, VALUE *argv, VALUE klass)
 <span class="ruby-identifier">dh</span> = <span class="ruby-constant">DH</span>.<span class="ruby-identifier">new</span>(<span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span>(<span class="ruby-string">&#39;parameters.pem&#39;</span>)) <span class="ruby-comment"># -&gt; dh, but no public/private key yet</span>
 <span class="ruby-identifier">dh</span>.<span class="ruby-identifier">generate_key!</span> <span class="ruby-comment"># -&gt; dh with public and private key</span>
 </pre>
-          
-          
 
-          
           <div class="method-source-code" id="new-source">
             <pre>static VALUE
 ossl_dh_initialize(int argc, VALUE *argv, VALUE self)
@@ -344,49 +287,34 @@ ossl_dh_initialize(int argc, VALUE *argv, VALUE self)
     return self;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
     </section>
-  
+
      <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Instance Methods</h3>
        </header>
 
-    
       <div id="method-i-compute_key" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             compute_key(pub_bn) &rarr; aString
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
-          <p>Returns a String containing a shared secret computed from the other party&#39;s public value. See DH_compute_key() for further information.</p>
+          <p>Returns a String containing a shared secret computed from the other party’s public value. See DH_compute_key() for further information.</p>
 
 <h3 id="method-i-compute_key-label-Parameters">Parameters<span><a href="#method-i-compute_key-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
 <ul><li>
 <p><em>pub_bn</em> is a <a href="../BN.html"><code>OpenSSL::BN</code></a>, <strong>not</strong> the <a href="DH.html"><code>DH</code></a> instance returned by <a href="DH.html#method-i-public_key"><code>DH#public_key</code></a> as that contains the <a href="DH.html"><code>DH</code></a> parameters only.</p>
 </li></ul>
-          
-          
 
-          
           <div class="method-source-code" id="compute_key-source">
             <pre>static VALUE
 ossl_dh_compute_key(VALUE self, VALUE pub)
@@ -411,50 +339,22 @@ ossl_dh_compute_key(VALUE self, VALUE pub)
     return str;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-export" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             export &rarr; aString
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        <div class="method-heading">
-          <span class="method-callseq">
-            to_pem &rarr; aString
-          </span>
-          
-        </div>
-        
-        <div class="method-heading">
-          <span class="method-callseq">
-            to_s &rarr; aString
-          </span>
-          
-        </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Encodes this <a href="DH.html"><code>DH</code></a> to its PEM encoding. Note that any existing per-session public/private keys will <strong>not</strong> get encoded, just the Diffie-Hellman parameters will be encoded.</p>
-          
-          
 
-          
           <div class="method-source-code" id="export-source">
             <pre>static VALUE
 ossl_dh_export(VALUE self)
@@ -476,35 +376,23 @@ ossl_dh_export(VALUE self)
     return str;
 }</pre>
           </div>
-          
         </div>
 
-        
         <div class="aliases">
           Also aliased as: <a href="DH.html#method-i-to_pem">to_pem</a>, <a href="DH.html#method-i-to_s">to_s</a>
         </div>
-        
 
-        
       </div>
 
-    
       <div id="method-i-generate_key-21" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             generate_key! &rarr; self
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Generates a private and public key unless a private key already exists. If this <a href="DH.html"><code>DH</code></a> instance was generated from public <a href="DH.html"><code>DH</code></a> parameters (e.g. by encoding the result of <a href="DH.html#method-i-public_key"><code>DH#public_key</code></a>), then this method needs to be called first in order to generate the per-session keys before performing the actual key exchange.</p>
 
 <h3 id="method-i-generate_key-21-label-Example">Example<span><a href="#method-i-generate_key-21-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
@@ -514,10 +402,7 @@ ossl_dh_export(VALUE self)
 <span class="ruby-identifier">public_key</span>.<span class="ruby-identifier">generate_key!</span>
 <span class="ruby-identifier">puts</span> <span class="ruby-identifier">public_key</span>.<span class="ruby-identifier">private?</span> <span class="ruby-comment"># =&gt; true</span>
 </pre>
-          
-          
 
-          
           <div class="method-source-code" id="generate_key-21-source">
             <pre>static VALUE
 ossl_dh_generate_key(VALUE self)
@@ -530,33 +415,21 @@ ossl_dh_generate_key(VALUE self)
     return self;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-initialize_copy" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">initialize_copy</span><span
             class="method-args">(p1)</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
           
-          
-          
-          
 
-          
           <div class="method-source-code" id="initialize_copy-source">
             <pre>static VALUE
 ossl_dh_initialize_copy(VALUE self, VALUE other)
@@ -591,36 +464,22 @@ ossl_dh_initialize_copy(VALUE self, VALUE other)
     return self;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-params" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             params &rarr; hash
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
-          <p>Stores all parameters of key to the hash INSECURE: PRIVATE INFORMATIONS CAN LEAK OUT!!! Don&#39;t use :-)) (I&#39;s up to you)</p>
-          
-          
+          <p>Stores all parameters of key to the hash INSECURE: PRIVATE INFORMATIONS CAN LEAK OUT!!! Don’t use :-)) (I’s up to you)</p>
 
-          
           <div class="method-source-code" id="params-source">
             <pre>static VALUE
 ossl_dh_get_params(VALUE self)
@@ -643,36 +502,22 @@ ossl_dh_get_params(VALUE self)
     return hash;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-params_ok-3F" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             params_ok? &rarr; true | false
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Validates the Diffie-Hellman parameters associated with this instance. It checks whether a safe prime and a suitable generator are used. If this is not the case, <code>false</code> is returned.</p>
-          
-          
 
-          
           <div class="method-source-code" id="params_ok-3F-source">
             <pre>static VALUE
 ossl_dh_check_params(VALUE self)
@@ -688,36 +533,22 @@ ossl_dh_check_params(VALUE self)
     return codes == 0 ? Qtrue : Qfalse;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-private-3F" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             private? &rarr; true | false
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Indicates whether this <a href="DH.html"><code>DH</code></a> instance has a private key associated with it or not. The private key may be retrieved with DH#priv_key.</p>
-          
-          
 
-          
           <div class="method-source-code" id="private-3F-source">
             <pre>static VALUE
 ossl_dh_is_private(VALUE self)
@@ -735,36 +566,22 @@ ossl_dh_is_private(VALUE self)
 #endif
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-public-3F" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             public? &rarr; true | false
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Indicates whether this <a href="DH.html"><code>DH</code></a> instance has a public key associated with it or not. The public key may be retrieved with DH#pub_key.</p>
-          
-          
 
-          
           <div class="method-source-code" id="public-3F-source">
             <pre>static VALUE
 ossl_dh_is_public(VALUE self)
@@ -778,31 +595,20 @@ ossl_dh_is_public(VALUE self)
     return bn ? Qtrue : Qfalse;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-public_key" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             public_key &rarr; aDH
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Returns a new <a href="DH.html"><code>DH</code></a> instance that carries just the public information, i.e. the prime <em>p</em> and the generator <em>g</em>, but no public/private key yet. Such a pair may be generated using <a href="DH.html#method-i-generate_key-21"><code>DH#generate_key!</code></a>. The “public key” needed for a key exchange with <a href="DH.html#method-i-compute_key"><code>DH#compute_key</code></a> is considered as per-session information and may be retrieved with DH#pub_key once a key pair has been generated. If the current instance already contains private information (and thus a valid public/private key pair), this information will no longer be present in the new instance generated by <a href="DH.html#method-i-public_key"><code>DH#public_key</code></a>. This feature is helpful for publishing the Diffie-Hellman parameters without leaking any of the private per-session information.</p>
 
 <h3 id="method-i-public_key-label-Example">Example<span><a href="#method-i-public_key-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
@@ -811,10 +617,7 @@ ossl_dh_is_public(VALUE self)
 <span class="ruby-identifier">public_key</span> = <span class="ruby-identifier">dh</span>.<span class="ruby-identifier">public_key</span> <span class="ruby-comment"># contains only prime and generator</span>
 <span class="ruby-identifier">parameters</span> = <span class="ruby-identifier">public_key</span>.<span class="ruby-identifier">to_der</span> <span class="ruby-comment"># it&#39;s safe to publish this</span>
 </pre>
-          
-          
 
-          
           <div class="method-source-code" id="public_key-source">
             <pre>static VALUE
 ossl_dh_to_public_key(VALUE self)
@@ -833,90 +636,52 @@ ossl_dh_to_public_key(VALUE self)
     return obj;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-set_key" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             set_key(pub_key, priv_key) &rarr; self
           </span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Sets <em>pub_key</em> and <em>priv_key</em> for the <a href="DH.html"><code>DH</code></a> instance. <em>priv_key</em> may be <code>nil</code>.</p>
-          
-          
 
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-set_pqg" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             set_pqg(p, q, g) &rarr; self
           </span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Sets <em>p</em>, <em>q</em>, <em>g</em> to the <a href="DH.html"><code>DH</code></a> instance.</p>
-          
-          
 
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-to_der" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             to_der &rarr; aString
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
           <p>Encodes this <a href="DH.html"><code>DH</code></a> to its DER encoding. Note that any existing per-session public/private keys will <strong>not</strong> get encoded, just the Diffie-Hellman parameters will be encoded.</p>
-          
-          
 
-          
           <div class="method-source-code" id="to_der-source">
             <pre>static VALUE
 ossl_dh_to_der(VALUE self)
@@ -938,92 +703,58 @@ ossl_dh_to_der(VALUE self)
     return str;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-to_pem" class="method-detail method-alias">
-        
         <div class="method-heading">
-          <span class="method-name">to_pem</span><span
-            class="method-args">()</span>
-          
+          <span class="method-callseq">
+            to_pem &rarr; aString
+          </span>
         </div>
-        
 
         <div class="method-description">
-          
-          
-          
-          
+          <p>Encodes this <a href="DH.html"><code>DH</code></a> to its PEM encoding. Note that any existing per-session public/private keys will <strong>not</strong> get encoded, just the Diffie-Hellman parameters will be encoded.</p>
 
-          
         </div>
 
-        
 
-        
         <div class="aliases">
           Alias for: <a href="DH.html#method-i-export">export</a>
         </div>
-        
       </div>
 
-    
       <div id="method-i-to_s" class="method-detail method-alias">
-        
         <div class="method-heading">
-          <span class="method-name">to_s</span><span
-            class="method-args">()</span>
-          
+          <span class="method-callseq">
+            to_s &rarr; aString
+          </span>
         </div>
-        
 
         <div class="method-description">
-          
-          
-          
-          
+          <p>Encodes this <a href="DH.html"><code>DH</code></a> to its PEM encoding. Note that any existing per-session public/private keys will <strong>not</strong> get encoded, just the Diffie-Hellman parameters will be encoded.</p>
 
-          
         </div>
 
-        
 
-        
         <div class="aliases">
           Alias for: <a href="DH.html#method-i-export">export</a>
         </div>
-        
       </div>
 
-    
       <div id="method-i-to_text" class="method-detail ">
-        
-        
         <div class="method-heading">
           <span class="method-callseq">
             to_text &rarr; aString
           </span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
-        
 
         <div class="method-description">
-          
-          <p>Prints all parameters of key to buffer INSECURE: PRIVATE INFORMATIONS CAN LEAK OUT!!! Don&#39;t use :-)) (I&#39;s up to you)</p>
-          
-          
+          <p>Prints all parameters of key to buffer INSECURE: PRIVATE INFORMATIONS CAN LEAK OUT!!! Don’t use :-)) (I’s up to you)</p>
 
-          
           <div class="method-source-code" id="to_text-source">
             <pre>static VALUE
 ossl_dh_to_text(VALUE self)
@@ -1045,25 +776,20 @@ ossl_dh_to_text(VALUE self)
     return str;
 }</pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
     </section>
-  
-  </section>
 
+  </section>
 </main>
 
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

@@ -21,8 +21,6 @@
 <link href="../css/rdoc.css" rel="stylesheet">
 
 
-
-
 <body id="top" role="document" class="module">
 <nav role="navigation">
   <div id="project-navigation">
@@ -108,7 +106,7 @@
 <span class="ruby-identifier">ocsp_uri</span> = <span class="ruby-constant">URI</span> <span class="ruby-identifier">ocsp_uris</span>[<span class="ruby-value">0</span>]
 </pre>
 
-<p>To submit the request we&#39;ll POST the request to the <a href="OCSP.html"><code>OCSP</code></a> URI (per RFC 2560).  Note that we only handle HTTP requests and don&#39;t handle any redirects in this example, so this is insufficient for serious use.</p>
+<p>To submit the request we’ll POST the request to the <a href="OCSP.html"><code>OCSP</code></a> URI (per RFC 2560).  Note that we only handle HTTP requests and don’t handle any redirects in this example, so this is insufficient for serious use.</p>
 
 <pre class="ruby"><span class="ruby-identifier">require</span> <span class="ruby-string">&#39;net/http&#39;</span>
 
@@ -168,194 +166,90 @@ end</pre>
 
   </section>
 
-  
   <section id="5Buntitled-5D" class="documentation-section">
-    
 
-    
 
-    
     <section class="constants-list">
       <header>
         <h3>Constants</h3>
       </header>
       <dl>
-      
         <dt id="NOCASIGN">NOCASIGN
-        
         <dd><p>(This flag is not used by <a href="../OpenSSL.html"><code>OpenSSL</code></a> 1.0.1g)</p>
-        
-      
         <dt id="NOCERTS">NOCERTS
-        
         <dd><p>Do not include certificates in the response</p>
-        
-      
         <dt id="NOCHAIN">NOCHAIN
-        
         <dd><p>Do not verify the certificate chain on the response</p>
-        
-      
         <dt id="NOCHECKS">NOCHECKS
-        
         <dd><p>Do not make additional signing certificate checks</p>
-        
-      
         <dt id="NODELEGATED">NODELEGATED
-        
         <dd><p>(This flag is not used by <a href="../OpenSSL.html"><code>OpenSSL</code></a> 1.0.1g)</p>
-        
-      
         <dt id="NOEXPLICIT">NOEXPLICIT
-        
         <dd><p>Do not check trust</p>
-        
-      
         <dt id="NOINTERN">NOINTERN
-        
         <dd><p>Do not search certificates contained in the response for a signer</p>
-        
-      
         <dt id="NOSIGS">NOSIGS
-        
         <dd><p>Do not check the signature on the response</p>
-        
-      
         <dt id="NOTIME">NOTIME
-        
         <dd><p>Do not include producedAt time in response</p>
-        
-      
         <dt id="NOVERIFY">NOVERIFY
-        
         <dd><p>Do not verify the response at all</p>
-        
-      
         <dt id="RESPID_KEY">RESPID_KEY
-        
         <dd><p>Identify the response by signing the certificate key ID</p>
-        
-      
         <dt id="RESPONSE_STATUS_INTERNALERROR">RESPONSE_STATUS_INTERNALERROR
-        
         <dd><p>Internal error in issuer</p>
-        
-      
         <dt id="RESPONSE_STATUS_MALFORMEDREQUEST">RESPONSE_STATUS_MALFORMEDREQUEST
-        
         <dd><p>Illegal confirmation request</p>
-        
-      
         <dt id="RESPONSE_STATUS_SIGREQUIRED">RESPONSE_STATUS_SIGREQUIRED
-        
         <dd><p>You must sign the request and resubmit</p>
-        
-      
         <dt id="RESPONSE_STATUS_SUCCESSFUL">RESPONSE_STATUS_SUCCESSFUL
-        
         <dd><p><a href="OCSP/Response.html"><code>Response</code></a> has valid confirmations</p>
-        
-      
         <dt id="RESPONSE_STATUS_TRYLATER">RESPONSE_STATUS_TRYLATER
-        
         <dd><p>Try again later</p>
-        
-      
         <dt id="RESPONSE_STATUS_UNAUTHORIZED">RESPONSE_STATUS_UNAUTHORIZED
-        
         <dd><p>Your request is unauthorized.</p>
-        
-      
         <dt id="REVOKED_STATUS_AFFILIATIONCHANGED">REVOKED_STATUS_AFFILIATIONCHANGED
-        
-        <dd><p>The certificate subject&#39;s name or other information changed</p>
-        
-      
+        <dd><p>The certificate subject’s name or other information changed</p>
         <dt id="REVOKED_STATUS_CACOMPROMISE">REVOKED_STATUS_CACOMPROMISE
-        
         <dd><p>This CA certificate was revoked due to a key compromise</p>
-        
-      
         <dt id="REVOKED_STATUS_CERTIFICATEHOLD">REVOKED_STATUS_CERTIFICATEHOLD
-        
         <dd><p>The certificate is on hold</p>
-        
-      
         <dt id="REVOKED_STATUS_CESSATIONOFOPERATION">REVOKED_STATUS_CESSATIONOFOPERATION
-        
         <dd><p>The certificate is no longer needed</p>
-        
-      
         <dt id="REVOKED_STATUS_KEYCOMPROMISE">REVOKED_STATUS_KEYCOMPROMISE
-        
         <dd><p>The certificate was revoked due to a key compromise</p>
-        
-      
         <dt id="REVOKED_STATUS_NOSTATUS">REVOKED_STATUS_NOSTATUS
-        
         <dd><p>The certificate was revoked for an unknown reason</p>
-        
-      
         <dt id="REVOKED_STATUS_REMOVEFROMCRL">REVOKED_STATUS_REMOVEFROMCRL
-        
         <dd><p>The certificate was previously on hold and should now be removed from the CRL</p>
-        
-      
         <dt id="REVOKED_STATUS_SUPERSEDED">REVOKED_STATUS_SUPERSEDED
-        
         <dd><p>The certificate was superseded by a new certificate</p>
-        
-      
         <dt id="REVOKED_STATUS_UNSPECIFIED">REVOKED_STATUS_UNSPECIFIED
-        
         <dd><p>The certificate was revoked for an unspecified reason</p>
-        
-      
         <dt id="TRUSTOTHER">TRUSTOTHER
-        
         <dd><p>Do not verify additional certificates</p>
-        
-      
         <dt id="V_CERTSTATUS_GOOD">V_CERTSTATUS_GOOD
-        
-        <dd><p>Indicates the certificate is not revoked but does not necessarily mean the certificate was issued or that this response is within the certificate&#39;s validity interval</p>
-        
-      
+        <dd><p>Indicates the certificate is not revoked but does not necessarily mean the certificate was issued or that this response is within the certificate’s validity interval</p>
         <dt id="V_CERTSTATUS_REVOKED">V_CERTSTATUS_REVOKED
-        
         <dd><p>Indicates the certificate has been revoked either permanently or temporarily (on hold).</p>
-        
-      
         <dt id="V_CERTSTATUS_UNKNOWN">V_CERTSTATUS_UNKNOWN
-        
         <dd><p>Indicates the responder does not know about the certificate being requested.</p>
-        
-      
         <dt id="V_RESPID_KEY">V_RESPID_KEY
-        
         <dd><p>The responder ID is based on the public key.</p>
-        
-      
         <dt id="V_RESPID_NAME">V_RESPID_NAME
-        
         <dd><p>The responder ID is based on the key name.</p>
-        
-      
       </dl>
     </section>
-    
 
-    
 
-    
+
   </section>
-
 </main>
 
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

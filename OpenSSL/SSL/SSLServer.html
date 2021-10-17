@@ -21,8 +21,6 @@
 <link href="../../css/rdoc.css" rel="stylesheet">
 
 
-
-
 <body id="top" role="document" class="class">
 <nav role="navigation">
   <div id="project-navigation">
@@ -59,45 +57,35 @@
 
   <div id="class-metadata">
     
-    <div id="parent-class-section" class="nav-section">
+    
+<div id="parent-class-section" class="nav-section">
   <h3>Parent</h3>
 
-  
   <p class="link">Object
-  
 </div>
 
-    <div id="includes-section" class="nav-section">
+    
+<div id="includes-section" class="nav-section">
   <h3>Included Modules</h3>
 
   <ul class="link-list">
-  
-  
     <li><a class="include" href="SocketForwarder.html">OpenSSL::SSL::SocketForwarder</a>
-  
-  
   </ul>
 </div>
 
     
-    <!-- Method Quickref -->
+    
+<!-- Method Quickref -->
 <div id="method-list-section" class="nav-section">
   <h3>Methods</h3>
 
   <ul class="link-list" role="directory">
-    
     <li ><a href="#method-c-new">::new</a>
-    
     <li ><a href="#method-i-accept">#accept</a>
-    
     <li ><a href="#method-i-close">#close</a>
-    
     <li ><a href="#method-i-listen">#listen</a>
-    
     <li ><a href="#method-i-shutdown">#shutdown</a>
-    
     <li ><a href="#method-i-to_io">#to_io</a>
-    
   </ul>
 </div>
 
@@ -115,21 +103,15 @@
 
   </section>
 
-  
   <section id="5Buntitled-5D" class="documentation-section">
-    
 
-    
 
-    
 
-    
     <section class="attribute-method-details" class="method-section">
       <header>
         <h3>Attributes</h3>
       </header>
 
-      
       <div id="attribute-i-start_immediately" class="method-detail">
         <div class="method-heading attribute-method-heading">
           <span class="method-name">start_immediately</span><span
@@ -137,45 +119,32 @@
         </div>
 
         <div class="method-description">
-        
         <p>When true then <a href="SSLServer.html#method-i-accept"><code>accept</code></a> works exactly the same as TCPServer#accept</p>
-        
         </div>
       </div>
-      
     </section>
-    
 
-    
+
      <section id="public-class-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Class Methods</h3>
        </header>
 
-    
       <div id="method-c-new" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">new</span><span
             class="method-args">(svr, ctx)</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
-          
           <p>Creates a new instance of <a href="SSLServer.html"><code>SSLServer</code></a>.</p>
 <ul><li>
 <p><em>srv</em> is an instance of TCPServer.</p>
 </li><li>
 <p><em>ctx</em> is an instance of <a href="SSLContext.html"><code>OpenSSL::SSL::SSLContext</code></a>.</p>
 </li></ul>
-          
-          
 
-          
           <div class="method-source-code" id="new-source">
             <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 488</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">initialize</span>(<span class="ruby-identifier">svr</span>, <span class="ruby-identifier">ctx</span>)
@@ -190,41 +159,28 @@
   <span class="ruby-ivar">@start_immediately</span> = <span class="ruby-keyword">true</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
     </section>
-  
+
      <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Instance Methods</h3>
        </header>
 
-    
       <div id="method-i-accept" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">accept</span><span
             class="method-args">()</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
-          
           <p>Works similar to TCPServer#accept.</p>
-          
-          
 
-          
           <div class="method-source-code" id="accept-source">
             <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 516</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">accept</span>
@@ -247,157 +203,104 @@
   <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-close" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">close</span><span
             class="method-args">()</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
-          
           <p>See IO#close for details.</p>
-          
-          
 
-          
           <div class="method-source-code" id="close-source">
             <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 537</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">close</span>
   <span class="ruby-ivar">@svr</span>.<span class="ruby-identifier">close</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-listen" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">listen</span><span
             class="method-args">(backlog=Socket::SOMAXCONN)</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
-          
           <p>See TCPServer#listen for details.</p>
-          
-          
 
-          
           <div class="method-source-code" id="listen-source">
             <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 506</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">listen</span>(<span class="ruby-identifier">backlog</span>=<span class="ruby-constant">Socket</span><span class="ruby-operator">::</span><span class="ruby-constant">SOMAXCONN</span>)
   <span class="ruby-ivar">@svr</span>.<span class="ruby-identifier">listen</span>(<span class="ruby-identifier">backlog</span>)
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-shutdown" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">shutdown</span><span
             class="method-args">(how=Socket::SHUT_RDWR)</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
-          
           <p>See BasicSocket#shutdown for details.</p>
-          
-          
 
-          
           <div class="method-source-code" id="shutdown-source">
             <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 511</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">shutdown</span>(<span class="ruby-identifier">how</span>=<span class="ruby-constant">Socket</span><span class="ruby-operator">::</span><span class="ruby-constant">SHUT_RDWR</span>)
   <span class="ruby-ivar">@svr</span>.<span class="ruby-identifier">shutdown</span>(<span class="ruby-identifier">how</span>)
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
       <div id="method-i-to_io" class="method-detail ">
-        
         <div class="method-heading">
           <span class="method-name">to_io</span><span
             class="method-args">()</span>
-          
           <span class="method-click-advice">click to toggle source</span>
-          
         </div>
-        
 
         <div class="method-description">
-          
           <p>Returns the TCPServer passed to the <a href="SSLServer.html"><code>SSLServer</code></a> when initialized.</p>
-          
-          
 
-          
           <div class="method-source-code" id="to_io-source">
             <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 501</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">to_io</span>
   <span class="ruby-ivar">@svr</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
-          
         </div>
 
-        
 
-        
       </div>
 
-    
     </section>
-  
-  </section>
 
+  </section>
 </main>
 
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.2.1.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 
