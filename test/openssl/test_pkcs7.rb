@@ -135,7 +135,7 @@ class OpenSSL::TestPKCS7 < OpenSSL::TestCase
 
   def test_enveloped
     certs = [@ee1_cert, @ee2_cert]
-    cipher = OpenSSL::Cipher::AES.new("128-CBC")
+    cipher = OpenSSL::Cipher.new("AES-128-CBC")
     data = "aaaaa\nbbbbb\nccccc\n"
 
     tmp = OpenSSL::PKCS7.encrypt(certs, data, cipher, OpenSSL::PKCS7::BINARY)
