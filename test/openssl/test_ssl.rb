@@ -124,9 +124,6 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   end
 
   def test_add_certificate_multiple_certs
-    pend "EC is not supported" unless defined?(OpenSSL::PKey::EC)
-    pend "TLS 1.2 is not supported" unless tls12_supported?
-
     ca2_key = Fixtures.pkey("rsa-3")
     ca2_exts = [
       ["basicConstraints", "CA:TRUE", true],
@@ -554,11 +551,10 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   end
 
   def test_post_connect_check_with_anon_ciphers
-    pend "TLS 1.2 is not supported" unless tls12_supported?
-
     ctx_proc = -> ctx {
       ctx.ssl_version = :TLSv1_2
       ctx.ciphers = "aNULL"
+      ctx.tmp_dh = Fixtures.pkey("dh-1")
       ctx.security_level = 0
     }
 
@@ -597,8 +593,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
 
     exts = [
       ["keyUsage","keyEncipherment,digitalSignature",true],
-      ["subjectAltName","DNS:localhost.localdomain",false],
-      ["subjectAltName","IP:127.0.0.1",false],
+      ["subjectAltName","DNS:localhost.localdomain,IP:127.0.0.1",false],
     ]
     @svr_cert = issue_cert(@svr, @svr_key, 4, exts, @ca_cert, @ca_key)
     start_server { |port|
@@ -833,7 +828,6 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
 
   def test_tlsext_hostname
     fooctx = OpenSSL::SSL::SSLContext.new
-    fooctx.tmp_dh_callback = proc { Fixtures.pkey("dh-1") }
     fooctx.cert = @cli_cert
     fooctx.key = @cli_key
 
@@ -885,7 +879,6 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     ctx2 = OpenSSL::SSL::SSLContext.new
     ctx2.cert = @svr_cert
     ctx2.key = @svr_key
-    ctx2.tmp_dh_callback = proc { Fixtures.pkey("dh-1") }
     ctx2.servername_cb = lambda { |args| Object.new }
 
     sock1, sock2 = socketpair
@@ -1029,7 +1022,9 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     start_server(ignore_listener_error: true) { |port|
       ctx = OpenSSL::SSL::SSLContext.new
       ctx.set_params
-      assert_raise_with_message(OpenSSL::SSL::SSLError, /self signed/) {
+      # OpenSSL <= 1.1.0: "self signed certificate in certificate chain"
+      # OpenSSL >= 3.0.0: "self-signed certificate in certificate chain"
+      assert_raise_with_message(OpenSSL::SSL::SSLError, /self.signed/) {
         server_connect(port, ctx)
       }
     }
@@ -1332,7 +1327,6 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     ctx1 = OpenSSL::SSL::SSLContext.new
     ctx1.cert = @svr_cert
     ctx1.key = @svr_key
-    ctx1.tmp_dh_callback = proc { Fixtures.pkey("dh-1") }
     ctx1.alpn_select_cb = -> (protocols) { nil }
     ssl1 = OpenSSL::SSL::SSLSocket.new(sock1, ctx1)
 
@@ -1355,7 +1349,6 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   end
 
   def test_npn_protocol_selection_ary
-    pend "TLS 1.2 is not supported" unless tls12_supported?
     pend "NPN is not supported" unless \
       OpenSSL::SSL::SSLContext.method_defined?(:npn_select_cb)
     pend "LibreSSL 2.6 has broken NPN functions" if libressl?(2, 6, 1)
@@ -1376,7 +1369,6 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   end
 
   def test_npn_protocol_selection_enum
-    pend "TLS 1.2 is not supported" unless tls12_supported?
     pend "NPN is not supported" unless \
       OpenSSL::SSL::SSLContext.method_defined?(:npn_select_cb)
     pend "LibreSSL 2.6 has broken NPN functions" if libressl?(2, 6, 1)
@@ -1401,7 +1393,6 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   end
 
   def test_npn_protocol_selection_cancel
-    pend "TLS 1.2 is not supported" unless tls12_supported?
     pend "NPN is not supported" unless \
       OpenSSL::SSL::SSLContext.method_defined?(:npn_select_cb)
     pend "LibreSSL 2.6 has broken NPN functions" if libressl?(2, 6, 1)
@@ -1415,7 +1406,6 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   end
 
   def test_npn_advertised_protocol_too_long
-    pend "TLS 1.2 is not supported" unless tls12_supported?
     pend "NPN is not supported" unless \
       OpenSSL::SSL::SSLContext.method_defined?(:npn_select_cb)
     pend "LibreSSL 2.6 has broken NPN functions" if libressl?(2, 6, 1)
@@ -1429,7 +1419,6 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   end
 
   def test_npn_selected_protocol_too_long
-    pend "TLS 1.2 is not supported" unless tls12_supported?
     pend "NPN is not supported" unless \
       OpenSSL::SSL::SSLContext.method_defined?(:npn_select_cb)
     pend "LibreSSL 2.6 has broken NPN functions" if libressl?(2, 6, 1)
@@ -1470,56 +1459,51 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   end
 
   def test_get_ephemeral_key
-    if tls12_supported?
-      # kRSA
-      ctx_proc1 = proc { |ctx|
-        ctx.ssl_version = :TLSv1_2
-        ctx.ciphers = "kRSA"
-      }
-      start_server(ctx_proc: ctx_proc1, ignore_listener_error: true) do |port|
-        ctx = OpenSSL::SSL::SSLContext.new
-        ctx.ssl_version = :TLSv1_2
-        ctx.ciphers = "kRSA"
-        begin
-          server_connect(port, ctx) { |ssl| assert_nil ssl.tmp_key }
-        rescue OpenSSL::SSL::SSLError
-          # kRSA seems disabled
-          raise unless $!.message =~ /no cipher/
-        end
+    # kRSA
+    ctx_proc1 = proc { |ctx|
+      ctx.ssl_version = :TLSv1_2
+      ctx.ciphers = "kRSA"
+    }
+    start_server(ctx_proc: ctx_proc1, ignore_listener_error: true) do |port|
+      ctx = OpenSSL::SSL::SSLContext.new
+      ctx.ssl_version = :TLSv1_2
+      ctx.ciphers = "kRSA"
+      begin
+        server_connect(port, ctx) { |ssl| assert_nil ssl.tmp_key }
+      rescue OpenSSL::SSL::SSLError
+        # kRSA seems disabled
+        raise unless $!.message =~ /no cipher/
       end
     end
 
-    if defined?(OpenSSL::PKey::DH) && tls12_supported?
-      # DHE
-      # TODO: How to test this with TLS 1.3?
-      ctx_proc2 = proc { |ctx|
-        ctx.ssl_version = :TLSv1_2
-        ctx.ciphers = "EDH"
+    # DHE
+    # TODO: How to test this with TLS 1.3?
+    ctx_proc2 = proc { |ctx|
+      ctx.ssl_version = :TLSv1_2
+      ctx.ciphers = "EDH"
+      ctx.tmp_dh = Fixtures.pkey("dh-1")
+    }
+    start_server(ctx_proc: ctx_proc2) do |port|
+      ctx = OpenSSL::SSL::SSLContext.new
+      ctx.ssl_version = :TLSv1_2
+      ctx.ciphers = "EDH"
+      server_connect(port, ctx) { |ssl|
+        assert_instance_of OpenSSL::PKey::DH, ssl.tmp_key
       }
-      start_server(ctx_proc: ctx_proc2) do |port|
-        ctx = OpenSSL::SSL::SSLContext.new
-        ctx.ssl_version = :TLSv1_2
-        ctx.ciphers = "EDH"
-        server_connect(port, ctx) { |ssl|
-          assert_instance_of OpenSSL::PKey::DH, ssl.tmp_key
-        }
-      end
     end
 
-    if defined?(OpenSSL::PKey::EC)
-      # ECDHE
-      ctx_proc3 = proc { |ctx|
-        ctx.ciphers = "DEFAULT:!kRSA:!kEDH"
-        ctx.ecdh_curves = "P-256"
+    # ECDHE
+    ctx_proc3 = proc { |ctx|
+      ctx.ciphers = "DEFAULT:!kRSA:!kEDH"
+      ctx.ecdh_curves = "P-256"
+    }
+    start_server(ctx_proc: ctx_proc3) do |port|
+      ctx = OpenSSL::SSL::SSLContext.new
+      ctx.ciphers = "DEFAULT:!kRSA:!kEDH"
+      server_connect(port, ctx) { |ssl|
+        assert_instance_of OpenSSL::PKey::EC, ssl.tmp_key
+        ssl.puts "abc"; assert_equal "abc\n", ssl.gets
       }
-      start_server(ctx_proc: ctx_proc3) do |port|
-        ctx = OpenSSL::SSL::SSLContext.new
-        ctx.ciphers = "DEFAULT:!kRSA:!kEDH"
-        server_connect(port, ctx) { |ssl|
-          assert_instance_of OpenSSL::PKey::EC, ssl.tmp_key
-          ssl.puts "abc"; assert_equal "abc\n", ssl.gets
-        }
-      end
     end
   end
 
@@ -1633,8 +1617,6 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   end
 
   def test_ecdh_curves_tls12
-    pend "EC is disabled" unless defined?(OpenSSL::PKey::EC)
-
     ctx_proc = -> ctx {
       # Enable both ECDHE (~ TLS 1.2) cipher suites and TLS 1.3
       ctx.max_version = OpenSSL::SSL::TLS1_2_VERSION
@@ -1670,7 +1652,6 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   end
 
   def test_ecdh_curves_tls13
-    pend "EC is disabled" unless defined?(OpenSSL::PKey::EC)
     pend "TLS 1.3 not supported" unless tls13_supported?
 
     ctx_proc = -> ctx {
