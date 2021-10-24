@@ -828,10 +828,17 @@ ossl_sslctx_setup(VALUE self)
     ca_file = NIL_P(val) ? NULL : StringValueCStr(val);
     val = rb_attr_get(self, id_i_ca_path);
     ca_path = NIL_P(val) ? NULL : StringValueCStr(val);
+#ifdef HAVE_SSL_CTX_LOAD_VERIFY_FILE
+    if (ca_file && !SSL_CTX_load_verify_file(ctx, ca_file))
+        ossl_raise(eSSLError, "SSL_CTX_load_verify_file");
+    if (ca_path && !SSL_CTX_load_verify_dir(ctx, ca_path))
+        ossl_raise(eSSLError, "SSL_CTX_load_verify_dir");
+#else
     if(ca_file || ca_path){
 	if (!SSL_CTX_load_verify_locations(ctx, ca_file, ca_path))
 	    rb_warning("can't set verify locations");
     }
+#endif
 
     val = rb_attr_get(self, id_i_verify_mode);
     verify_mode = NIL_P(val) ? SSL_VERIFY_NONE : NUM2INT(val);
@@ -1222,7 +1229,7 @@ ossl_sslctx_add_certificate(int argc, VALUE *argv, VALUE self)
     EVP_PKEY_free(pub_pkey);
     if (!pub_pkey)
 	rb_raise(rb_eArgError, "certificate does not contain public key");
-    if (EVP_PKEY_cmp(pub_pkey, pkey) != 1)
+    if (EVP_PKEY_eq(pub_pkey, pkey) != 1)
 	rb_raise(rb_eArgError, "public key mismatch");
 
     if (argc >= 3)
@@ -1436,8 +1443,8 @@ ossl_sslctx_flush_sessions(int argc, VALUE *argv, VALUE self)
 static inline int
 ssl_started(SSL *ssl)
 {
-    /* the FD is set in ossl_ssl_setup(), called by #connect or #accept */
-    return SSL_get_fd(ssl) >= 0;
+    /* BIO is created through ossl_ssl_setup(), called by #connect or #accept */
+    return SSL_get_rbio(ssl) != NULL;
 }
 
 static void

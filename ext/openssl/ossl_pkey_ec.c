@@ -479,7 +479,7 @@ static VALUE ossl_ec_key_check_key(VALUE self)
 static void
 ossl_ec_group_free(void *ptr)
 {
-    EC_GROUP_clear_free(ptr);
+    EC_GROUP_free(ptr);
 }
 
 static const rb_data_type_t ossl_ec_group_type = {
@@ -1252,6 +1252,8 @@ static VALUE ossl_ec_point_is_on_curve(VALUE self)
 /*
  * call-seq:
  *   point.make_affine! => self
+ *
+ * This method is deprecated and should not be used. This is a no-op.
  */
 static VALUE ossl_ec_point_make_affine(VALUE self)
 {
@@ -1261,8 +1263,11 @@ static VALUE ossl_ec_point_make_affine(VALUE self)
     GetECPoint(self, point);
     GetECPointGroup(self, group);
 
+    rb_warn("OpenSSL::PKey::EC::Point#make_affine! is deprecated");
+#if !OSSL_OPENSSL_PREREQ(3, 0, 0)
     if (EC_POINT_make_affine(group, point, ossl_bn_ctx) != 1)
         ossl_raise(cEC_POINT, "EC_POINT_make_affine");
+#endif
 
     return self;
 }
