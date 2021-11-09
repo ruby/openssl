@@ -583,6 +583,12 @@ class OpenSSL::TestPKeyRSA < OpenSSL::PKeyTestCase
     assert_equal nil, rsa.d
   end
 
+  def test_from_data
+    pkey = Fixtures.pkey("rsa2048")
+
+    rsa1 = OpenSSL::PKey.from_data("RSA", OpenSSL::PKey::KEYPAIR, data)
+  end
+
   private
   def assert_same_rsa(expected, key)
     check_component(expected, key, [:n, :e, :d, :p, :q, :dmp1, :dmq1, :iqmp])
