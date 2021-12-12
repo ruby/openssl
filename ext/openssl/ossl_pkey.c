@@ -39,12 +39,8 @@ pkey_new0(VALUE arg)
 {
     EVP_PKEY *pkey = (EVP_PKEY *)arg;
     VALUE klass, obj;
-    int type;
 
-    if (!pkey || (type = EVP_PKEY_base_id(pkey)) == EVP_PKEY_NONE)
-	ossl_raise(rb_eRuntimeError, "pkey is empty");
-
-    switch (type) {
+    switch (EVP_PKEY_base_id(pkey)) {
 #if !defined(OPENSSL_NO_RSA)
       case EVP_PKEY_RSA: klass = cRSA; break;
 #endif
@@ -59,8 +55,8 @@ pkey_new0(VALUE arg)
 #endif
       default:           klass = cPKey; break;
     }
-    obj = NewPKey(klass);
-    SetPKey(obj, pkey);
+    obj = rb_obj_alloc(klass);
+    RTYPEDDATA_DATA(obj) = pkey;
     return obj;
 }
 
@@ -516,16 +512,7 @@ DupPKeyPtr(VALUE obj)
 static VALUE
 ossl_pkey_alloc(VALUE klass)
 {
-    EVP_PKEY *pkey;
-    VALUE obj;
-
-    obj = NewPKey(klass);
-    if (!(pkey = EVP_PKEY_new())) {
-	ossl_raise(ePKeyError, NULL);
-    }
-    SetPKey(obj, pkey);
-
-    return obj;
+    return TypedData_Wrap_Struct(klass, &ossl_evp_pkey_type, NULL);
 }
 
 /*
@@ -543,6 +530,26 @@ ossl_pkey_initialize(VALUE self)
     }
     return self;
 }
+
+#ifdef HAVE_EVP_PKEY_DUP
+static VALUE
+ossl_pkey_initialize_copy(VALUE self, VALUE other)
+{
+    EVP_PKEY *pkey, *pkey_other;
+
+    TypedData_Get_Struct(self, EVP_PKEY, &ossl_evp_pkey_type, pkey);
+    TypedData_Get_Struct(other, EVP_PKEY, &ossl_evp_pkey_type, pkey_other);
+    if (pkey)
+        rb_raise(rb_eTypeError, "pkey already initialized");
+    if (pkey_other) {
+        pkey = EVP_PKEY_dup(pkey_other);
+        if (!pkey)
+            ossl_raise(ePKeyError, "EVP_PKEY_dup");
+        RTYPEDDATA_DATA(self) = pkey;
+    }
+    return self;
+}
+#endif
 
 /*
  * call-seq:
@@ -1521,6 +1528,11 @@ Init_ossl_pkey(void)
 
     rb_define_alloc_func(cPKey, ossl_pkey_alloc);
     rb_define_method(cPKey, "initialize", ossl_pkey_initialize, 0);
+#ifdef HAVE_EVP_PKEY_DUP
+    rb_define_method(cPKey, "initialize_copy", ossl_pkey_initialize_copy, 1);
+#else
+    rb_undef_method(cPKey, "initialize_copy");
+#endif
     rb_define_method(cPKey, "oid", ossl_pkey_oid, 0);
     rb_define_method(cPKey, "inspect", ossl_pkey_inspect, 0);
     rb_define_method(cPKey, "to_text", ossl_pkey_to_text, 0);
