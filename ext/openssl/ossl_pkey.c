@@ -9,6 +9,10 @@
  */
 #include "ossl.h"
 
+#ifdef OSSL_USE_ENGINE
+# include <openssl/engine.h>
+#endif
+
 /*
  * Classes
  */
@@ -312,6 +316,11 @@ pkey_generate(int argc, VALUE *argv, VALUE self, int genparam)
             ossl_raise(ePKeyError, "EVP_PKEY_CTX_new");
     }
     else {
+#if OSSL_OPENSSL_PREREQ(3, 0, 0)
+        ctx = EVP_PKEY_CTX_new_from_name(NULL, StringValueCStr(alg), NULL);
+        if (!ctx)
+            ossl_raise(ePKeyError, "EVP_PKEY_CTX_new_from_name");
+#else
         const EVP_PKEY_ASN1_METHOD *ameth;
         ENGINE *tmpeng;
         int pkey_id;
@@ -330,6 +339,7 @@ pkey_generate(int argc, VALUE *argv, VALUE self, int genparam)
         ctx = EVP_PKEY_CTX_new_id(pkey_id, NULL/* engine */);
         if (!ctx)
             ossl_raise(ePKeyError, "EVP_PKEY_CTX_new_id");
+#endif
     }
 
     if (genparam && EVP_PKEY_paramgen_init(ctx) <= 0) {
@@ -425,9 +435,19 @@ ossl_pkey_s_generate_key(int argc, VALUE *argv, VALUE self)
     return pkey_generate(argc, argv, self, 0);
 }
 
+/*
+ * TODO: There is no convenient way to check the presence of public key
+ * components on OpenSSL 3.0. But since keys are immutable on 3.0, pkeys without
+ * these should only be created by OpenSSL::PKey.generate_parameters or by
+ * parsing DER-/PEM-encoded string. We would need another flag for that.
+ */
 void
 ossl_pkey_check_public_key(const EVP_PKEY *pkey)
 {
+#if OSSL_OPENSSL_PREREQ(3, 0, 0)
+    if (EVP_PKEY_missing_parameters(pkey))
+        ossl_raise(ePKeyError, "parameters missing");
+#else
     void *ptr;
     const BIGNUM *n, *e, *pubkey;
 
@@ -463,6 +483,7 @@ ossl_pkey_check_public_key(const EVP_PKEY *pkey)
 	return;
     }
     ossl_raise(ePKeyError, "public key missing");
+#endif
 }
 
 EVP_PKEY *

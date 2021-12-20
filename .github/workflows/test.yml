@@ -74,6 +74,7 @@ jobs:
           - openssl-1.0.2u # EOL
           - openssl-1.1.0l # EOL
           - openssl-1.1.1l
+          - openssl-3.0.1
           - libressl-3.1.5 # EOL
           - libressl-3.2.6
           - libressl-3.3.4
@@ -89,7 +90,7 @@ jobs:
             curl -OL https://ftp.openssl.org/source/${{ matrix.openssl }}.tar.gz
             tar xf ${{ matrix.openssl }}.tar.gz && cd ${{ matrix.openssl }}
             # shared is required for 1.0.x.
-            ./Configure --prefix=$HOME/.openssl/${{ matrix.openssl }} \
+            ./Configure --prefix=$HOME/.openssl/${{ matrix.openssl }} --libdir=lib \
                 shared linux-x86_64
             make depend
             ;;
