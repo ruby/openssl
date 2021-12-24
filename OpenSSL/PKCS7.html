@@ -247,7 +247,7 @@ ossl_pkcs7_s_encrypt(int argc, VALUE *argv, VALUE klass)
             <pre>static VALUE
 ossl_pkcs7_initialize(int argc, VALUE *argv, VALUE self)
 {
-    PKCS7 *p7, *pkcs = DATA_PTR(self);
+    PKCS7 *p7, *p7_orig = RTYPEDDATA_DATA(self);
     BIO *in;
     VALUE arg;
 
@@ -255,19 +255,17 @@ ossl_pkcs7_initialize(int argc, VALUE *argv, VALUE self)
         return self;
     arg = ossl_to_der_if_possible(arg);
     in = ossl_obj2bio(&amp;arg);
-    p7 = PEM_read_bio_PKCS7(in, &amp;pkcs, NULL, NULL);
+    p7 = d2i_PKCS7_bio(in, NULL);
     if (!p7) {
         OSSL_BIO_reset(in);
-        p7 = d2i_PKCS7_bio(in, &amp;pkcs);
-        if (!p7) {
-            BIO_free(in);
-            PKCS7_free(pkcs);
-            DATA_PTR(self) = NULL;
-            ossl_raise(rb_eArgError, &quot;Could not parse the PKCS7&quot;);
-        }
+        p7 = PEM_read_bio_PKCS7(in, NULL, NULL, NULL);
     }
-    DATA_PTR(self) = pkcs;
     BIO_free(in);
+    if (!p7)
+        ossl_raise(rb_eArgError, &quot;Could not parse the PKCS7&quot;);
+
+    RTYPEDDATA_DATA(self) = p7;
+    PKCS7_free(p7_orig);
     ossl_pkcs7_set_data(self, Qnil);
     ossl_pkcs7_set_err_string(self, Qnil);
 
@@ -559,13 +557,18 @@ ossl_pkcs7_add_data(VALUE self, VALUE data)
 ossl_pkcs7_add_recipient(VALUE self, VALUE recip)
 {
     PKCS7 *pkcs7;
-    PKCS7_RECIP_INFO *ri;
+    PKCS7_RECIP_INFO *ri, *ri_new;
 
-    ri = DupPKCS7RecipientPtr(recip); /* NEED TO DUP */
     GetPKCS7(self, pkcs7);
-    if (!PKCS7_add_recipient_info(pkcs7, ri)) {
-        PKCS7_RECIP_INFO_free(ri);
-        ossl_raise(ePKCS7Error, &quot;Could not add recipient.&quot;);
+    GetPKCS7ri(recip, ri);
+
+    ri_new = ossl_PKCS7_RECIP_INFO_dup(ri);
+    if (!ri_new)
+        ossl_raise(ePKCS7Error, &quot;PKCS7_RECIP_INFO_dup&quot;);
+
+    if (PKCS7_add_recipient_info(pkcs7, ri_new) != 1) {
+        PKCS7_RECIP_INFO_free(ri_new);
+        ossl_raise(ePKCS7Error, &quot;PKCS7_add_recipient_info&quot;);
     }
 
     return self;
@@ -591,17 +594,18 @@ ossl_pkcs7_add_recipient(VALUE self, VALUE recip)
 ossl_pkcs7_add_signer(VALUE self, VALUE signer)
 {
     PKCS7 *pkcs7;
-    PKCS7_SIGNER_INFO *p7si;
+    PKCS7_SIGNER_INFO *si, *si_new;
 
-    p7si = DupPKCS7SignerPtr(signer); /* NEED TO DUP */
     GetPKCS7(self, pkcs7);
-    if (!PKCS7_add_signer(pkcs7, p7si)) {
-        PKCS7_SIGNER_INFO_free(p7si);
-        ossl_raise(ePKCS7Error, &quot;Could not add signer.&quot;);
-    }
-    if (PKCS7_type_is_signed(pkcs7)){
-        PKCS7_add_signed_attribute(p7si, NID_pkcs9_contentType,
-                                   V_ASN1_OBJECT, OBJ_nid2obj(NID_pkcs7_data));
+    GetPKCS7si(signer, si);
+
+    si_new = ossl_PKCS7_SIGNER_INFO_dup(si);
+    if (!si_new)
+        ossl_raise(ePKCS7Error, &quot;PKCS7_SIGNER_INFO_dup&quot;);
+
+    if (PKCS7_add_signer(pkcs7, si_new) != 1) {
+        PKCS7_SIGNER_INFO_free(si_new);
+        ossl_raise(ePKCS7Error, &quot;PKCS7_add_signer&quot;);
     }
 
     return self;

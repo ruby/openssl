@@ -153,7 +153,7 @@
 
 <p>Keys saved to disk without encryption are not secure as anyone who gets ahold of the key may use it unless it is encrypted.  In order to securely export a key you may export it with a pass phrase.</p>
 
-<pre class="ruby"><span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">new</span> <span class="ruby-string">&#39;AES-256-CBC&#39;</span>
+<pre class="ruby"><span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">new</span> <span class="ruby-string">&#39;aes-256-cbc&#39;</span>
 <span class="ruby-identifier">pass_phrase</span> = <span class="ruby-string">&#39;my secure pass phrase goes here&#39;</span>
 
 <span class="ruby-identifier">key_secure</span> = <span class="ruby-identifier">key</span>.<span class="ruby-identifier">export</span> <span class="ruby-identifier">cipher</span>, <span class="ruby-identifier">pass_phrase</span>
@@ -169,14 +169,14 @@
 
 <p>A key can also be loaded from a file.</p>
 
-<pre class="ruby"><span class="ruby-identifier">key2</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">RSA</span>.<span class="ruby-identifier">new</span> <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span> <span class="ruby-string">&#39;private_key.pem&#39;</span>
+<pre class="ruby"><span class="ruby-identifier">key2</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span>.<span class="ruby-identifier">read</span> <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span> <span class="ruby-string">&#39;private_key.pem&#39;</span>
 <span class="ruby-identifier">key2</span>.<span class="ruby-identifier">public?</span> <span class="ruby-comment"># =&gt; true</span>
 <span class="ruby-identifier">key2</span>.<span class="ruby-identifier">private?</span> <span class="ruby-comment"># =&gt; true</span>
 </pre>
 
 <p>or</p>
 
-<pre class="ruby"><span class="ruby-identifier">key3</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">RSA</span>.<span class="ruby-identifier">new</span> <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span> <span class="ruby-string">&#39;public_key.pem&#39;</span>
+<pre class="ruby"><span class="ruby-identifier">key3</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span>.<span class="ruby-identifier">read</span> <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span> <span class="ruby-string">&#39;public_key.pem&#39;</span>
 <span class="ruby-identifier">key3</span>.<span class="ruby-identifier">public?</span> <span class="ruby-comment"># =&gt; true</span>
 <span class="ruby-identifier">key3</span>.<span class="ruby-identifier">private?</span> <span class="ruby-comment"># =&gt; false</span>
 </pre>
@@ -187,7 +187,7 @@
 
 <pre class="ruby"><span class="ruby-identifier">key4_pem</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span> <span class="ruby-string">&#39;private.secure.pem&#39;</span>
 <span class="ruby-identifier">pass_phrase</span> = <span class="ruby-string">&#39;my secure pass phrase goes here&#39;</span>
-<span class="ruby-identifier">key4</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">RSA</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">key4_pem</span>, <span class="ruby-identifier">pass_phrase</span>
+<span class="ruby-identifier">key4</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span>.<span class="ruby-identifier">read</span> <span class="ruby-identifier">key4_pem</span>, <span class="ruby-identifier">pass_phrase</span>
 </pre>
 
 <h2 id="module-OpenSSL-label-RSA+Encryption">RSA Encryption<span><a href="#module-OpenSSL-label-RSA+Encryption">&para;</a> <a href="#top">&uarr;</a></span></h2>
@@ -236,7 +236,7 @@
 
 <p>The strategy is to first instantiate a <a href="OpenSSL/Cipher.html"><code>Cipher</code></a> for encryption, and then to generate a random IV plus a key derived from the password using PBKDF2. PKCS #5 v2.0 recommends at least 8 bytes for the salt, the number of iterations largely depends on the hardware being used.</p>
 
-<pre>cipher = OpenSSL::Cipher.new &#39;AES-256-CBC&#39;
+<pre>cipher = OpenSSL::Cipher.new &#39;aes-256-cbc&#39;
 cipher.encrypt
 iv = cipher.random_iv
 
@@ -258,7 +258,7 @@ encrypted &lt;&lt; cipher.final</pre>
 
 <p>Use the same steps as before to derive the symmetric AES key, this time setting the <a href="OpenSSL/Cipher.html"><code>Cipher</code></a> up for decryption.</p>
 
-<pre>cipher = OpenSSL::Cipher.new &#39;AES-256-CBC&#39;
+<pre>cipher = OpenSSL::Cipher.new &#39;aes-256-cbc&#39;
 cipher.decrypt
 cipher.iv = iv # the one generated with #random_iv
 
@@ -290,7 +290,7 @@ decrypted &lt;&lt; cipher.final</pre>
 
 <p>First set up the cipher for encryption</p>
 
-<pre class="ruby"><span class="ruby-identifier">encryptor</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">new</span> <span class="ruby-string">&#39;AES-256-CBC&#39;</span>
+<pre class="ruby"><span class="ruby-identifier">encryptor</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">new</span> <span class="ruby-string">&#39;aes-256-cbc&#39;</span>
 <span class="ruby-identifier">encryptor</span>.<span class="ruby-identifier">encrypt</span>
 <span class="ruby-identifier">encryptor</span>.<span class="ruby-identifier">pkcs5_keyivgen</span> <span class="ruby-identifier">pass_phrase</span>, <span class="ruby-identifier">salt</span>
 </pre>
@@ -305,7 +305,7 @@ decrypted &lt;&lt; cipher.final</pre>
 
 <p>Use a new <a href="OpenSSL/Cipher.html"><code>Cipher</code></a> instance set up for decryption</p>
 
-<pre class="ruby"><span class="ruby-identifier">decryptor</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">new</span> <span class="ruby-string">&#39;AES-256-CBC&#39;</span>
+<pre class="ruby"><span class="ruby-identifier">decryptor</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">new</span> <span class="ruby-string">&#39;aes-256-cbc&#39;</span>
 <span class="ruby-identifier">decryptor</span>.<span class="ruby-identifier">decrypt</span>
 <span class="ruby-identifier">decryptor</span>.<span class="ruby-identifier">pkcs5_keyivgen</span> <span class="ruby-identifier">pass_phrase</span>, <span class="ruby-identifier">salt</span>
 </pre>
@@ -389,7 +389,7 @@ decrypted &lt;&lt; cipher.final</pre>
 <pre class="ruby"><span class="ruby-identifier">ca_key</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">RSA</span>.<span class="ruby-identifier">new</span> <span class="ruby-value">2048</span>
 <span class="ruby-identifier">pass_phrase</span> = <span class="ruby-string">&#39;my secure pass phrase goes here&#39;</span>
 
-<span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">new</span> <span class="ruby-string">&#39;AES-256-CBC&#39;</span>
+<span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">new</span> <span class="ruby-string">&#39;aes-256-cbc&#39;</span>
 
 <span class="ruby-identifier">open</span> <span class="ruby-string">&#39;ca_key.pem&#39;</span>, <span class="ruby-string">&#39;w&#39;</span>, <span class="ruby-value">0400</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">io</span><span class="ruby-operator">|</span>
   <span class="ruby-identifier">io</span>.<span class="ruby-identifier">write</span> <span class="ruby-identifier">ca_key</span>.<span class="ruby-identifier">export</span>(<span class="ruby-identifier">cipher</span>, <span class="ruby-identifier">pass_phrase</span>)
@@ -530,13 +530,13 @@ decrypted &lt;&lt; cipher.final</pre>
 <span class="ruby-identifier">loop</span> <span class="ruby-keyword">do</span>
   <span class="ruby-identifier">ssl_connection</span> = <span class="ruby-identifier">ssl_server</span>.<span class="ruby-identifier">accept</span>
 
-  <span class="ruby-identifier">data</span> = <span class="ruby-identifier">connection</span>.<span class="ruby-identifier">gets</span>
+  <span class="ruby-identifier">data</span> = <span class="ruby-identifier">ssl_connection</span>.<span class="ruby-identifier">gets</span>
 
   <span class="ruby-identifier">response</span> = <span class="ruby-node">&quot;I got #{data.dump}&quot;</span>
   <span class="ruby-identifier">puts</span> <span class="ruby-identifier">response</span>
 
-  <span class="ruby-identifier">connection</span>.<span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;I got #{data.dump}&quot;</span>
-  <span class="ruby-identifier">connection</span>.<span class="ruby-identifier">close</span>
+  <span class="ruby-identifier">ssl_connection</span>.<span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;I got #{data.dump}&quot;</span>
+  <span class="ruby-identifier">ssl_connection</span>.<span class="ruby-identifier">close</span>
 <span class="ruby-keyword">end</span>
 </pre>
 
@@ -672,7 +672,7 @@ ossl_debug_get(VALUE self)
         </div>
 
         <div class="method-description">
-          <p>Turns on or off debug mode. With debug mode, all erros added to the <a href="OpenSSL.html"><code>OpenSSL</code></a> error queue will be printed to stderr.</p>
+          <p>Turns on or off debug mode. With debug mode, all errors added to the <a href="OpenSSL.html"><code>OpenSSL</code></a> error queue will be printed to stderr.</p>
 
           <div class="method-source-code" id="debug-3D-source">
             <pre>static VALUE
@@ -926,7 +926,7 @@ print_mem_leaks(VALUE self)
           <p>Constant time memory comparison. Inputs are hashed using SHA-256 to mask the length of the secret. Returns <code>true</code> if the strings are identical, <code>false</code> otherwise.</p>
 
           <div class="method-source-code" id="secure_compare-source">
-            <pre><span class="ruby-comment"># File lib/openssl.rb, line 33</span>
+            <pre><span class="ruby-comment"># File lib/openssl.rb, line 32</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier ruby-title">secure_compare</span>(<span class="ruby-identifier">a</span>, <span class="ruby-identifier">b</span>)
   <span class="ruby-identifier">hashed_a</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">digest</span>(<span class="ruby-string">&#39;SHA256&#39;</span>, <span class="ruby-identifier">a</span>)
   <span class="ruby-identifier">hashed_b</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">digest</span>(<span class="ruby-string">&#39;SHA256&#39;</span>, <span class="ruby-identifier">b</span>)

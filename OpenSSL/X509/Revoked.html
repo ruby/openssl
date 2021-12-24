@@ -150,7 +150,7 @@ ossl_x509revoked_initialize(int argc, VALUE *argv, VALUE self)
           
 
           <div class="method-source-code" id="3D-3D-source">
-            <pre><span class="ruby-comment"># File lib/openssl/x509.rb, line 354</span>
+            <pre><span class="ruby-comment"># File lib/openssl/x509.rb, line 376</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">==</span>(<span class="ruby-identifier">other</span>)
   <span class="ruby-keyword">return</span> <span class="ruby-keyword">false</span> <span class="ruby-keyword">unless</span> <span class="ruby-constant">Revoked</span> <span class="ruby-operator">===</span> <span class="ruby-identifier">other</span>
   <span class="ruby-identifier">to_der</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">other</span>.<span class="ruby-identifier">to_der</span>

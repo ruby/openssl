@@ -105,7 +105,6 @@
     <li ><a href="#method-i-to_der">#to_der</a>
     <li ><a href="#method-i-to_pem">#to_pem</a>
     <li ><a href="#method-i-to_s">#to_s</a>
-    <li ><a href="#method-i-to_text">#to_text</a>
   </ul>
 </div>
 
@@ -138,13 +137,19 @@
 
 <h3 id="class-OpenSSL::PKey::DH-label-Example+of+a+key+exchange">Example of a key exchange<span><a href="#class-OpenSSL::PKey::DH-label-Example+of+a+key+exchange">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
-<pre class="ruby"><span class="ruby-identifier">dh1</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">DH</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">2048</span>)
-<span class="ruby-identifier">der</span> = <span class="ruby-identifier">dh1</span>.<span class="ruby-identifier">public_key</span>.<span class="ruby-identifier">to_der</span> <span class="ruby-comment">#you may send this publicly to the participating party</span>
-<span class="ruby-identifier">dh2</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">DH</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">der</span>)
-<span class="ruby-identifier">dh2</span>.<span class="ruby-identifier">generate_key!</span> <span class="ruby-comment">#generate the per-session key pair</span>
-<span class="ruby-identifier">symm_key1</span> = <span class="ruby-identifier">dh1</span>.<span class="ruby-identifier">compute_key</span>(<span class="ruby-identifier">dh2</span>.<span class="ruby-identifier">pub_key</span>)
-<span class="ruby-identifier">symm_key2</span> = <span class="ruby-identifier">dh2</span>.<span class="ruby-identifier">compute_key</span>(<span class="ruby-identifier">dh1</span>.<span class="ruby-identifier">pub_key</span>)
+<pre class="ruby"><span class="ruby-comment"># you may send the parameters (der) and own public key (pub1) publicly</span>
+<span class="ruby-comment"># to the participating party</span>
+<span class="ruby-identifier">dh1</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">DH</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">2048</span>)
+<span class="ruby-identifier">der</span> = <span class="ruby-identifier">dh1</span>.<span class="ruby-identifier">to_der</span>
+<span class="ruby-identifier">pub1</span> = <span class="ruby-identifier">dh1</span>.<span class="ruby-identifier">pub_key</span>
 
+<span class="ruby-comment"># the other party generates its per-session key pair</span>
+<span class="ruby-identifier">dhparams</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">DH</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">der</span>)
+<span class="ruby-identifier">dh2</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span>.<span class="ruby-identifier">generate_key</span>(<span class="ruby-identifier">dhparams</span>)
+<span class="ruby-identifier">pub2</span> = <span class="ruby-identifier">dh2</span>.<span class="ruby-identifier">pub_key</span>
+
+<span class="ruby-identifier">symm_key1</span> = <span class="ruby-identifier">dh1</span>.<span class="ruby-identifier">compute_key</span>(<span class="ruby-identifier">pub2</span>)
+<span class="ruby-identifier">symm_key2</span> = <span class="ruby-identifier">dh2</span>.<span class="ruby-identifier">compute_key</span>(<span class="ruby-identifier">pub1</span>)
 <span class="ruby-identifier">puts</span> <span class="ruby-identifier">symm_key1</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">symm_key2</span> <span class="ruby-comment"># =&gt; true</span>
 </pre>
 
@@ -164,41 +169,32 @@
       <div id="method-c-generate" class="method-detail ">
         <div class="method-heading">
           <span class="method-callseq">
-            generate(size [, generator]) &rarr; dh
+            generate(size, generator = 2) &rarr; dh
           </span>
           <span class="method-click-advice">click to toggle source</span>
         </div>
 
         <div class="method-description">
-          <p>Creates a new <a href="DH.html"><code>DH</code></a> instance from scratch by generating the private and public components alike.</p>
+          <p>Creates a new <a href="DH.html"><code>DH</code></a> instance from scratch by generating random parameters and a key pair.</p>
 
-<h3 id="method-c-generate-label-Parameters">Parameters<span><a href="#method-c-generate-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
-<ul><li>
-<p><em>size</em> is an integer representing the desired key size. Keys smaller than 1024 bits should be considered insecure.</p>
-</li><li>
-<p><em>generator</em> is a small number &gt; 1, typically 2 or 5.</p>
-</li></ul>
+<p>See also <a href="../PKey.html#method-c-generate_parameters"><code>OpenSSL::PKey.generate_parameters</code></a> and <a href="../PKey.html#method-c-generate_key"><code>OpenSSL::PKey.generate_key</code></a>.</p>
+<dl class="rdoc-list note-list"><dt><code>size</code>
+<dd>
+<p>The desired key size in bits.</p>
+</dd><dt><code>generator</code>
+<dd>
+<p>The generator.</p>
+</dd></dl>
 
           <div class="method-source-code" id="generate-source">
-            <pre>static VALUE
-ossl_dh_s_generate(int argc, VALUE *argv, VALUE klass)
-{
-    DH *dh ;
-    int g = 2;
-    VALUE size, gen, obj;
-
-    if (rb_scan_args(argc, argv, &quot;11&quot;, &amp;size, &amp;gen) == 2) {
-        g = NUM2INT(gen);
-    }
-    dh = dh_generate(NUM2INT(size), g);
-    obj = dh_instance(klass, dh);
-    if (obj == Qfalse) {
-        DH_free(dh);
-        ossl_raise(eDHError, NULL);
-    }
-
-    return obj;
-}</pre>
+            <pre><span class="ruby-comment"># File lib/openssl/pkey.rb, line 118</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">generate</span>(<span class="ruby-identifier">size</span>, <span class="ruby-identifier">generator</span> = <span class="ruby-value">2</span>, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">blk</span>)
+  <span class="ruby-identifier">dhparams</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span>.<span class="ruby-identifier">generate_parameters</span>(<span class="ruby-string">&quot;DH&quot;</span>, {
+    <span class="ruby-string">&quot;dh_paramgen_prime_len&quot;</span> <span class="ruby-operator">=&gt;</span> <span class="ruby-identifier">size</span>,
+    <span class="ruby-string">&quot;dh_paramgen_generator&quot;</span> <span class="ruby-operator">=&gt;</span> <span class="ruby-identifier">generator</span>,
+  }, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">blk</span>)
+  <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span>.<span class="ruby-identifier">generate_key</span>(<span class="ruby-identifier">dhparams</span>)
+<span class="ruby-keyword">end</span></pre>
           </div>
         </div>
 
@@ -224,25 +220,37 @@ ossl_dh_s_generate(int argc, VALUE *argv, VALUE klass)
         </div>
 
         <div class="method-description">
-          <p>Either generates a <a href="DH.html"><code>DH</code></a> instance from scratch or by reading already existing <a href="DH.html"><code>DH</code></a> parameters from <em>string</em>. Note that when reading a <a href="DH.html"><code>DH</code></a> instance from data that was encoded from a <a href="DH.html"><code>DH</code></a> instance by using <a href="DH.html#method-i-to_pem"><code>DH#to_pem</code></a> or <a href="DH.html#method-i-to_der"><code>DH#to_der</code></a> the result will <strong>not</strong> contain a public/private key pair yet. This needs to be generated using <a href="DH.html#method-i-generate_key-21"><code>DH#generate_key!</code></a> first.</p>
+          <p>Creates a new instance of <a href="DH.html"><code>OpenSSL::PKey::DH</code></a>.</p>
 
-<h3 id="method-c-new-label-Parameters">Parameters<span><a href="#method-c-new-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
-<ul><li>
-<p><em>size</em> is an integer representing the desired key size. Keys smaller than 1024 bits should be considered insecure.</p>
-</li><li>
-<p><em>generator</em> is a small number &gt; 1, typically 2 or 5.</p>
-</li><li>
-<p><em>string</em> contains the DER or PEM encoded key.</p>
-</li></ul>
+<p>If called without arguments, an empty instance without any parameter or key components is created. Use <a href="DH.html#method-i-set_pqg"><code>set_pqg</code></a> to manually set the parameters afterwards (and optionally <a href="DH.html#method-i-set_key"><code>set_key</code></a> to set private and public key components).</p>
 
-<h3 id="method-c-new-label-Examples">Examples<span><a href="#method-c-new-label-Examples">&para;</a> <a href="#top">&uarr;</a></span></h3>
+<p>If a String is given, tries to parse it as a DER- or PEM- encoded parameters. See also <a href="../PKey.html#method-c-read"><code>OpenSSL::PKey.read</code></a> which can parse keys of any kinds.</p>
 
-<pre class="ruby"><span class="ruby-constant">DH</span>.<span class="ruby-identifier">new</span> <span class="ruby-comment"># -&gt; dh</span>
-<span class="ruby-constant">DH</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">1024</span>) <span class="ruby-comment"># -&gt; dh</span>
-<span class="ruby-constant">DH</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">1024</span>, <span class="ruby-value">5</span>) <span class="ruby-comment"># -&gt; dh</span>
-<span class="ruby-comment">#Reading DH parameters</span>
-<span class="ruby-identifier">dh</span> = <span class="ruby-constant">DH</span>.<span class="ruby-identifier">new</span>(<span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span>(<span class="ruby-string">&#39;parameters.pem&#39;</span>)) <span class="ruby-comment"># -&gt; dh, but no public/private key yet</span>
-<span class="ruby-identifier">dh</span>.<span class="ruby-identifier">generate_key!</span> <span class="ruby-comment"># -&gt; dh with public and private key</span>
+<p>The <a href="DH.html#method-c-new"><code>DH.new</code></a>(size [, generator]) form is an alias of <a href="DH.html#method-c-generate"><code>DH.generate</code></a>.</p>
+<dl class="rdoc-list note-list"><dt><code>string</code>
+<dd>
+<p>A String that contains the DER or PEM encoded key.</p>
+</dd><dt><code>size</code>
+<dd>
+<p>See <a href="DH.html#method-c-generate"><code>DH.generate</code></a>.</p>
+</dd><dt><code>generator</code>
+<dd>
+<p>See <a href="DH.html#method-c-generate"><code>DH.generate</code></a>.</p>
+</dd></dl>
+
+<p>Examples:</p>
+
+<pre class="ruby"><span class="ruby-comment"># Creating an instance from scratch</span>
+<span class="ruby-comment"># Note that this is deprecated and will not work on OpenSSL 3.0 or later.</span>
+<span class="ruby-identifier">dh</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">DH</span>.<span class="ruby-identifier">new</span>
+<span class="ruby-identifier">dh</span>.<span class="ruby-identifier">set_pqg</span>(<span class="ruby-identifier">bn_p</span>, <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">bn_g</span>)
+
+<span class="ruby-comment"># Generating a parameters and a key pair</span>
+<span class="ruby-identifier">dh</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">DH</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">2048</span>) <span class="ruby-comment"># An alias of OpenSSL::PKey::DH.generate(2048)</span>
+
+<span class="ruby-comment"># Reading DH parameters</span>
+<span class="ruby-identifier">dh_params</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">DH</span>.<span class="ruby-identifier">new</span>(<span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span>(<span class="ruby-string">&#39;parameters.pem&#39;</span>)) <span class="ruby-comment"># loads parameters only</span>
+<span class="ruby-identifier">dh</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span>.<span class="ruby-identifier">generate_key</span>(<span class="ruby-identifier">dh_params</span>) <span class="ruby-comment"># generates a key pair</span>
 </pre>
 
           <div class="method-source-code" id="new-source">
@@ -250,40 +258,57 @@ ossl_dh_s_generate(int argc, VALUE *argv, VALUE klass)
 ossl_dh_initialize(int argc, VALUE *argv, VALUE self)
 {
     EVP_PKEY *pkey;
+    int type;
     DH *dh;
-    int g = 2;
-    BIO *in;
-    VALUE arg, gen;
+    BIO *in = NULL;
+    VALUE arg;
 
-    GetPKey(self, pkey);
-    if(rb_scan_args(argc, argv, &quot;02&quot;, &amp;arg, &amp;gen) == 0) {
-      dh = DH_new();
+    TypedData_Get_Struct(self, EVP_PKEY, &amp;ossl_evp_pkey_type, pkey);
+    if (pkey)
+        rb_raise(rb_eTypeError, &quot;pkey already initialized&quot;);
+
+    /* The DH.new(size, generator) form is handled by lib/openssl/pkey.rb */
+    if (rb_scan_args(argc, argv, &quot;01&quot;, &amp;arg) == 0) {
+        dh = DH_new();
+        if (!dh)
+            ossl_raise(eDHError, &quot;DH_new&quot;);
+        goto legacy;
     }
-    else if (RB_INTEGER_TYPE_P(arg)) {
-        if (!NIL_P(gen)) {
-            g = NUM2INT(gen);
-        }
-        if (!(dh = dh_generate(NUM2INT(arg), g))) {
-            ossl_raise(eDHError, NULL);
-        }
+
+    arg = ossl_to_der_if_possible(arg);
+    in = ossl_obj2bio(&amp;arg);
+
+    /*
+     * On OpenSSL &lt;= 1.1.1 and current versions of LibreSSL, the generic
+     * routine does not support DER-encoded parameters
+     */
+    dh = d2i_DHparams_bio(in, NULL);
+    if (dh)
+        goto legacy;
+    OSSL_BIO_reset(in);
+
+    pkey = ossl_pkey_read_generic(in, Qnil);
+    BIO_free(in);
+    if (!pkey)
+        ossl_raise(eDHError, &quot;could not parse pkey&quot;);
+
+    type = EVP_PKEY_base_id(pkey);
+    if (type != EVP_PKEY_DH) {
+        EVP_PKEY_free(pkey);
+        rb_raise(eDHError, &quot;incorrect pkey type: %s&quot;, OBJ_nid2sn(type));
     }
-    else {
-        arg = ossl_to_der_if_possible(arg);
-        in = ossl_obj2bio(&amp;arg);
-        dh = PEM_read_bio_DHparams(in, NULL, NULL, NULL);
-        if (!dh){
-            OSSL_BIO_reset(in);
-            dh = d2i_DHparams_bio(in, NULL);
-        }
-        BIO_free(in);
-        if (!dh) {
-            ossl_raise(eDHError, NULL);
-        }
-    }
-    if (!EVP_PKEY_assign_DH(pkey, dh)) {
+    RTYPEDDATA_DATA(self) = pkey;
+    return self;
+
+  legacy:
+    BIO_free(in);
+    pkey = EVP_PKEY_new();
+    if (!pkey || EVP_PKEY_assign_DH(pkey, dh) != 1) {
+        EVP_PKEY_free(pkey);
         DH_free(dh);
-        ossl_raise(eDHError, NULL);
+        ossl_raise(eDHError, &quot;EVP_PKEY_assign_DH&quot;);
     }
+    RTYPEDDATA_DATA(self) = pkey;
     return self;
 }</pre>
           </div>
@@ -302,13 +327,15 @@ ossl_dh_initialize(int argc, VALUE *argv, VALUE self)
       <div id="method-i-compute_key" class="method-detail ">
         <div class="method-heading">
           <span class="method-callseq">
-            compute_key(pub_bn) &rarr; aString
+            compute_key(pub_bn) &rarr; string
           </span>
           <span class="method-click-advice">click to toggle source</span>
         </div>
 
         <div class="method-description">
-          <p>Returns a String containing a shared secret computed from the other party’s public value. See DH_compute_key() for further information.</p>
+          <p>Returns a String containing a shared secret computed from the other party’s public value.</p>
+
+<p>This method is provided for backwards compatibility, and calls <a href="PKey.html#method-i-derive"><code>derive</code></a> internally.</p>
 
 <h3 id="method-i-compute_key-label-Parameters">Parameters<span><a href="#method-i-compute_key-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
 <ul><li>
@@ -316,28 +343,22 @@ ossl_dh_initialize(int argc, VALUE *argv, VALUE self)
 </li></ul>
 
           <div class="method-source-code" id="compute_key-source">
-            <pre>static VALUE
-ossl_dh_compute_key(VALUE self, VALUE pub)
-{
-    DH *dh;
-    const BIGNUM *pub_key, *dh_p;
-    VALUE str;
-    int len;
-
-    GetDH(self, dh);
-    DH_get0_pqg(dh, &amp;dh_p, NULL, NULL);
-    if (!dh_p)
-        ossl_raise(eDHError, &quot;incomplete DH&quot;);
-    pub_key = GetBNPtr(pub);
-    len = DH_size(dh);
-    str = rb_str_new(0, len);
-    if ((len = DH_compute_key((unsigned char *)RSTRING_PTR(str), pub_key, dh)) &lt; 0) {
-        ossl_raise(eDHError, NULL);
-    }
-    rb_str_set_len(str, len);
-
-    return str;
-}</pre>
+            <pre><span class="ruby-comment"># File lib/openssl/pkey.rb, line 49</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">compute_key</span>(<span class="ruby-identifier">pub_bn</span>)
+  <span class="ruby-comment"># FIXME: This is constructing an X.509 SubjectPublicKeyInfo and is very</span>
+  <span class="ruby-comment"># inefficient</span>
+  <span class="ruby-identifier">obj</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span>.<span class="ruby-constant">Sequence</span>([
+    <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span>.<span class="ruby-constant">Sequence</span>([
+      <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span>.<span class="ruby-constant">ObjectId</span>(<span class="ruby-string">&quot;dhKeyAgreement&quot;</span>),
+      <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span>.<span class="ruby-constant">Sequence</span>([
+        <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span>.<span class="ruby-constant">Integer</span>(<span class="ruby-identifier">p</span>),
+        <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span>.<span class="ruby-constant">Integer</span>(<span class="ruby-identifier">g</span>),
+      ]),
+    ]),
+    <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span>.<span class="ruby-constant">BitString</span>(<span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span>.<span class="ruby-constant">Integer</span>(<span class="ruby-identifier">pub_bn</span>).<span class="ruby-identifier">to_der</span>),
+  ])
+  <span class="ruby-identifier">derive</span>(<span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span>.<span class="ruby-identifier">read</span>(<span class="ruby-identifier">obj</span>.<span class="ruby-identifier">to_der</span>))
+<span class="ruby-keyword">end</span></pre>
           </div>
         </div>
 
@@ -393,27 +414,41 @@ ossl_dh_export(VALUE self)
         </div>
 
         <div class="method-description">
-          <p>Generates a private and public key unless a private key already exists. If this <a href="DH.html"><code>DH</code></a> instance was generated from public <a href="DH.html"><code>DH</code></a> parameters (e.g. by encoding the result of <a href="DH.html#method-i-public_key"><code>DH#public_key</code></a>), then this method needs to be called first in order to generate the per-session keys before performing the actual key exchange.</p>
+          <p>Generates a private and public key unless a private key already exists. If this <a href="DH.html"><code>DH</code></a> instance was generated from public DH parameters (e.g. by encoding the result of <a href="DH.html#method-i-public_key"><code>DH#public_key</code></a>), then this method needs to be called first in order to generate the per-session keys before performing the actual key exchange.</p>
 
-<h3 id="method-i-generate_key-21-label-Example">Example<span><a href="#method-i-generate_key-21-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
+<p><strong>Deprecated in version 3.0</strong>. This method is incompatible with <a href="../../OpenSSL.html"><code>OpenSSL</code></a> 3.0.0 or later.</p>
 
-<pre class="ruby"><span class="ruby-identifier">dh</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">DH</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">2048</span>)
-<span class="ruby-identifier">public_key</span> = <span class="ruby-identifier">dh</span>.<span class="ruby-identifier">public_key</span> <span class="ruby-comment">#contains no private/public key yet</span>
-<span class="ruby-identifier">public_key</span>.<span class="ruby-identifier">generate_key!</span>
-<span class="ruby-identifier">puts</span> <span class="ruby-identifier">public_key</span>.<span class="ruby-identifier">private?</span> <span class="ruby-comment"># =&gt; true</span>
+<p>See also <a href="../PKey.html#method-c-generate_key"><code>OpenSSL::PKey.generate_key</code></a>.</p>
+
+<p>Example:</p>
+
+<pre class="ruby"><span class="ruby-comment"># DEPRECATED USAGE: This will not work on OpenSSL 3.0 or later</span>
+<span class="ruby-identifier">dh0</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">DH</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">2048</span>)
+<span class="ruby-identifier">dh</span> = <span class="ruby-identifier">dh0</span>.<span class="ruby-identifier">public_key</span> <span class="ruby-comment"># #public_key only copies the DH parameters (contrary to the name)</span>
+<span class="ruby-identifier">dh</span>.<span class="ruby-identifier">generate_key!</span>
+<span class="ruby-identifier">puts</span> <span class="ruby-identifier">dh</span>.<span class="ruby-identifier">private?</span> <span class="ruby-comment"># =&gt; true</span>
+<span class="ruby-identifier">puts</span> <span class="ruby-identifier">dh0</span>.<span class="ruby-identifier">pub_key</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">dh</span>.<span class="ruby-identifier">pub_key</span> <span class="ruby-comment">#=&gt; false</span>
+
+<span class="ruby-comment"># With OpenSSL::PKey.generate_key</span>
+<span class="ruby-identifier">dh0</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">DH</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">2048</span>)
+<span class="ruby-identifier">dh</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span>.<span class="ruby-identifier">generate_key</span>(<span class="ruby-identifier">dh0</span>)
+<span class="ruby-identifier">puts</span> <span class="ruby-identifier">dh0</span>.<span class="ruby-identifier">pub_key</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">dh</span>.<span class="ruby-identifier">pub_key</span> <span class="ruby-comment">#=&gt; false</span>
 </pre>
 
           <div class="method-source-code" id="generate_key-21-source">
-            <pre>static VALUE
-ossl_dh_generate_key(VALUE self)
-{
-    DH *dh;
+            <pre><span class="ruby-comment"># File lib/openssl/pkey.rb, line 91</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">generate_key!</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">OPENSSL_VERSION_NUMBER</span> <span class="ruby-operator">&gt;=</span> <span class="ruby-value">0x30000000</span>
+    <span class="ruby-identifier">raise</span> <span class="ruby-constant">DHError</span>, <span class="ruby-string">&quot;OpenSSL::PKey::DH is immutable on OpenSSL 3.0; &quot;</span> \
+    <span class="ruby-string">&quot;use OpenSSL::PKey.generate_key instead&quot;</span>
+  <span class="ruby-keyword">end</span>
 
-    GetDH(self, dh);
-    if (!DH_generate_key(dh))
-        ossl_raise(eDHError, &quot;Failed to generate key&quot;);
-    return self;
-}</pre>
+  <span class="ruby-keyword">unless</span> <span class="ruby-identifier">priv_key</span>
+    <span class="ruby-identifier">tmp</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span>.<span class="ruby-identifier">generate_key</span>(<span class="ruby-keyword">self</span>)
+    <span class="ruby-identifier">set_key</span>(<span class="ruby-identifier">tmp</span>.<span class="ruby-identifier">pub_key</span>, <span class="ruby-identifier">tmp</span>.<span class="ruby-identifier">priv_key</span>)
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">self</span>
+<span class="ruby-keyword">end</span></pre>
           </div>
         </div>
 
@@ -438,15 +473,14 @@ ossl_dh_initialize_copy(VALUE self, VALUE other)
     DH *dh, *dh_other;
     const BIGNUM *pub, *priv;
 
-    GetPKey(self, pkey);
-    if (EVP_PKEY_base_id(pkey) != EVP_PKEY_NONE)
-        ossl_raise(eDHError, &quot;DH already initialized&quot;);
+    TypedData_Get_Struct(self, EVP_PKEY, &amp;ossl_evp_pkey_type, pkey);
+    if (pkey)
+        rb_raise(rb_eTypeError, &quot;pkey already initialized&quot;);
     GetDH(other, dh_other);
 
     dh = DHparams_dup(dh_other);
     if (!dh)
         ossl_raise(eDHError, &quot;DHparams_dup&quot;);
-    EVP_PKEY_assign_DH(pkey, dh);
 
     DH_get0_key(dh_other, &amp;pub, &amp;priv);
     if (pub) {
@@ -461,6 +495,13 @@ ossl_dh_initialize_copy(VALUE self, VALUE other)
         DH_set0_key(dh, pub2, priv2);
     }
 
+    pkey = EVP_PKEY_new();
+    if (!pkey || EVP_PKEY_assign_DH(pkey, dh) != 1) {
+        EVP_PKEY_free(pkey);
+        DH_free(dh);
+        ossl_raise(eDHError, &quot;EVP_PKEY_assign_DH&quot;);
+    }
+    RTYPEDDATA_DATA(self) = pkey;
     return self;
 }</pre>
           </div>
@@ -518,19 +559,38 @@ ossl_dh_get_params(VALUE self)
         <div class="method-description">
           <p>Validates the Diffie-Hellman parameters associated with this instance. It checks whether a safe prime and a suitable generator are used. If this is not the case, <code>false</code> is returned.</p>
 
+<p>See also the man page EVP_PKEY_param_check(3).</p>
+
           <div class="method-source-code" id="params_ok-3F-source">
             <pre>static VALUE
 ossl_dh_check_params(VALUE self)
 {
+    int ret;
+#ifdef HAVE_EVP_PKEY_CHECK
+    EVP_PKEY *pkey;
+    EVP_PKEY_CTX *pctx;
+
+    GetPKey(self, pkey);
+    pctx = EVP_PKEY_CTX_new(pkey, /* engine */NULL);
+    if (!pctx)
+        ossl_raise(eDHError, &quot;EVP_PKEY_CTX_new&quot;);
+    ret = EVP_PKEY_param_check(pctx);
+    EVP_PKEY_CTX_free(pctx);
+#else
     DH *dh;
     int codes;
 
     GetDH(self, dh);
-    if (!DH_check(dh, &amp;codes)) {
+    ret = DH_check(dh, &amp;codes) == 1 &amp;&amp; codes == 0;
+#endif
+
+    if (ret == 1)
+        return Qtrue;
+    else {
+        /* DH_check_ex() will put error entry on failure */
+        ossl_clear_error();
         return Qfalse;
     }
-
-    return codes == 0 ? Qtrue : Qfalse;
 }</pre>
           </div>
         </div>
@@ -603,38 +663,34 @@ ossl_dh_is_public(VALUE self)
       <div id="method-i-public_key" class="method-detail ">
         <div class="method-heading">
           <span class="method-callseq">
-            public_key &rarr; aDH
+            public_key &rarr; dhnew
           </span>
           <span class="method-click-advice">click to toggle source</span>
         </div>
 
         <div class="method-description">
-          <p>Returns a new <a href="DH.html"><code>DH</code></a> instance that carries just the public information, i.e. the prime <em>p</em> and the generator <em>g</em>, but no public/private key yet. Such a pair may be generated using <a href="DH.html#method-i-generate_key-21"><code>DH#generate_key!</code></a>. The “public key” needed for a key exchange with <a href="DH.html#method-i-compute_key"><code>DH#compute_key</code></a> is considered as per-session information and may be retrieved with DH#pub_key once a key pair has been generated. If the current instance already contains private information (and thus a valid public/private key pair), this information will no longer be present in the new instance generated by <a href="DH.html#method-i-public_key"><code>DH#public_key</code></a>. This feature is helpful for publishing the Diffie-Hellman parameters without leaking any of the private per-session information.</p>
+          <p>Returns a new <a href="DH.html"><code>DH</code></a> instance that carries just the DH parameters.</p>
 
-<h3 id="method-i-public_key-label-Example">Example<span><a href="#method-i-public_key-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
+<p>Contrary to the method name, the returned <a href="DH.html"><code>DH</code></a> object contains only parameters and not the public key.</p>
 
-<pre class="ruby"><span class="ruby-identifier">dh</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">DH</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">2048</span>) <span class="ruby-comment"># has public and private key set</span>
-<span class="ruby-identifier">public_key</span> = <span class="ruby-identifier">dh</span>.<span class="ruby-identifier">public_key</span> <span class="ruby-comment"># contains only prime and generator</span>
-<span class="ruby-identifier">parameters</span> = <span class="ruby-identifier">public_key</span>.<span class="ruby-identifier">to_der</span> <span class="ruby-comment"># it&#39;s safe to publish this</span>
+<p>This method is provided for backwards compatibility. In most cases, there is no need to call this method.</p>
+
+<p>For the purpose of re-generating the key pair while keeping the parameters, check <a href="../PKey.html#method-c-generate_key"><code>OpenSSL::PKey.generate_key</code></a>.</p>
+
+<p>Example:</p>
+
+<pre class="ruby"><span class="ruby-comment"># OpenSSL::PKey::DH.generate by default generates a random key pair</span>
+<span class="ruby-identifier">dh1</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">DH</span>.<span class="ruby-identifier">generate</span>(<span class="ruby-value">2048</span>)
+<span class="ruby-identifier">p</span> <span class="ruby-identifier">dh1</span>.<span class="ruby-identifier">priv_key</span> <span class="ruby-comment">#=&gt; #&lt;OpenSSL::BN 1288347...&gt;</span>
+<span class="ruby-identifier">dhcopy</span> = <span class="ruby-identifier">dh1</span>.<span class="ruby-identifier">public_key</span>
+<span class="ruby-identifier">p</span> <span class="ruby-identifier">dhcopy</span>.<span class="ruby-identifier">priv_key</span> <span class="ruby-comment">#=&gt; nil</span>
 </pre>
 
           <div class="method-source-code" id="public_key-source">
-            <pre>static VALUE
-ossl_dh_to_public_key(VALUE self)
-{
-    DH *orig_dh, *dh;
-    VALUE obj;
-
-    GetDH(self, orig_dh);
-    dh = DHparams_dup(orig_dh); /* err check perfomed by dh_instance */
-    obj = dh_instance(rb_obj_class(self), dh);
-    if (obj == Qfalse) {
-        DH_free(dh);
-        ossl_raise(eDHError, NULL);
-    }
-
-    return obj;
-}</pre>
+            <pre><span class="ruby-comment"># File lib/openssl/pkey.rb, line 33</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">public_key</span>
+  <span class="ruby-constant">DH</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">to_der</span>)
+<span class="ruby-keyword">end</span></pre>
           </div>
         </div>
 
@@ -742,43 +798,6 @@ ossl_dh_to_der(VALUE self)
         <div class="aliases">
           Alias for: <a href="DH.html#method-i-export">export</a>
         </div>
-      </div>
-
-      <div id="method-i-to_text" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            to_text &rarr; aString
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-
-        <div class="method-description">
-          <p>Prints all parameters of key to buffer INSECURE: PRIVATE INFORMATIONS CAN LEAK OUT!!! Don’t use :-)) (I’s up to you)</p>
-
-          <div class="method-source-code" id="to_text-source">
-            <pre>static VALUE
-ossl_dh_to_text(VALUE self)
-{
-    DH *dh;
-    BIO *out;
-    VALUE str;
-
-    GetDH(self, dh);
-    if (!(out = BIO_new(BIO_s_mem()))) {
-        ossl_raise(eDHError, NULL);
-    }
-    if (!DHparams_print(out, dh)) {
-        BIO_free(out);
-        ossl_raise(eDHError, NULL);
-    }
-    str = ossl_membio2str(out);
-
-    return str;
-}</pre>
-          </div>
-        </div>
-
-
       </div>
 
     </section>

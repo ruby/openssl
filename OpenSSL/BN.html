@@ -82,6 +82,8 @@
   <ul class="link-list" role="directory">
     <li ><a href="#method-c-generate_prime">::generate_prime</a>
     <li ><a href="#method-c-new">::new</a>
+    <li ><a href="#method-c-rand">::rand</a>
+    <li ><a href="#method-c-rand_range">::rand_range</a>
     <li ><a href="#method-i-25">#%</a>
     <li ><a href="#method-i-2A">#*</a>
     <li ><a href="#method-i-2A-2A">#**</a>
@@ -95,6 +97,7 @@
     <li ><a href="#method-i-3D-3D">#==</a>
     <li ><a href="#method-i-3D-3D-3D">#===</a>
     <li ><a href="#method-i-3E-3E">#&gt;&gt;</a>
+    <li ><a href="#method-i-abs">#abs</a>
     <li ><a href="#method-i-bit_set-3F">#bit_set?</a>
     <li ><a href="#method-i-clear_bit-21">#clear_bit!</a>
     <li ><a href="#method-i-cmp">#cmp</a>
@@ -102,6 +105,7 @@
     <li ><a href="#method-i-copy">#copy</a>
     <li ><a href="#method-i-eql-3F">#eql?</a>
     <li ><a href="#method-i-gcd">#gcd</a>
+    <li ><a href="#method-i-get_flags">#get_flags</a>
     <li ><a href="#method-i-hash">#hash</a>
     <li ><a href="#method-i-initialize_copy">#initialize_copy</a>
     <li ><a href="#method-i-lshift-21">#lshift!</a>
@@ -121,6 +125,7 @@
     <li ><a href="#method-i-prime_fasttest-3F">#prime_fasttest?</a>
     <li ><a href="#method-i-rshift-21">#rshift!</a>
     <li ><a href="#method-i-set_bit-21">#set_bit!</a>
+    <li ><a href="#method-i-set_flags">#set_flags</a>
     <li ><a href="#method-i-sqr">#sqr</a>
     <li ><a href="#method-i-to_bn">#to_bn</a>
     <li ><a href="#method-i-to_i">#to_i</a>
@@ -146,6 +151,19 @@
   <section id="5Buntitled-5D" class="documentation-section">
 
 
+    <section class="constants-list">
+      <header>
+        <h3>Constants</h3>
+      </header>
+      <dl>
+        <dt id="CONSTTIME">CONSTTIME
+        <dd>
+        <dt id="MALLOCED">MALLOCED
+        <dd>
+        <dt id="STATIC_DATA">STATIC_DATA
+        <dd>
+      </dl>
+    </section>
 
 
 
@@ -227,17 +245,32 @@ ossl_bn_s_generate_prime(int argc, VALUE *argv, VALUE klass)
         </div>
         <div class="method-heading">
           <span class="method-callseq">
-            OpenSSL::BN.new(string) &rarr; aBN
-          </span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            OpenSSL::BN.new(string, 0 | 2 | 10 | 16) &rarr; aBN
+            OpenSSL::BN.new(string, base = 10) &rarr; aBN
           </span>
         </div>
 
         <div class="method-description">
-          <p>Construct a new <a href="../OpenSSL.html"><code>OpenSSL</code></a> BIGNUM object.</p>
+          <p>Construct a new OpenSSL BIGNUM object.</p>
+
+<p>If <code>bn</code> is an <a href="../Integer.html"><code>Integer</code></a> or <a href="BN.html"><code>OpenSSL::BN</code></a>, a new instance of <a href="BN.html"><code>OpenSSL::BN</code></a> representing the same value is returned. See also <a href="../Integer.html#method-i-to_bn"><code>Integer#to_bn</code></a> for the short-hand.</p>
+
+<p>If a String is given, the content will be parsed according to <code>base</code>.</p>
+<dl class="rdoc-list note-list"><dt><code>string</code>
+<dd>
+<p>The string to be parsed.</p>
+</dd><dt><code>base</code>
+<dd>
+<p>The format. Must be one of the following:</p>
+<ul><li>
+<p><code>0</code>  - MPI format. See the man page BN_mpi2bn(3) for details.</p>
+</li><li>
+<p><code>2</code>  - Variable-length and big-endian binary encoding of a positive number.</p>
+</li><li>
+<p><code>10</code> - Decimal number representation, with a leading ‘-’ for a negative number.</p>
+</li><li>
+<p><code>16</code> - Hexadeciaml number representation, with a leading ‘-’ for a negative number.</p>
+</li></ul>
+</dd></dl>
 
           <div class="method-source-code" id="new-source">
             <pre>static VALUE
@@ -302,6 +335,86 @@ ossl_bn_initialize(int argc, VALUE *argv, VALUE self)
         ossl_raise(rb_eArgError, &quot;invalid radix %d&quot;, base);
     }
     return self;
+}</pre>
+          </div>
+        </div>
+
+
+      </div>
+
+      <div id="method-c-rand" class="method-detail ">
+        <div class="method-heading">
+          <span class="method-callseq">
+            rand(bits [, fill [, odd]]) &rarr; aBN
+          </span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+
+        <div class="method-description">
+          <p>Generates a cryptographically strong pseudo-random number of <code>bits</code>.</p>
+
+<p>See also the man page BN_rand(3).</p>
+
+          <div class="method-source-code" id="rand-source">
+            <pre>static VALUE
+ossl_bn_s_rand(int argc, VALUE *argv, VALUE klass)
+{
+    BIGNUM *result;
+    int bottom = 0, top = 0, b;
+    VALUE bits, fill, odd, obj;
+
+    switch (rb_scan_args(argc, argv, &quot;12&quot;, &amp;bits, &amp;fill, &amp;odd)) {
+      case 3:
+        bottom = (odd == Qtrue) ? 1 : 0;
+        /* FALLTHROUGH */
+      case 2:
+        top = NUM2INT(fill);
+    }
+    b = NUM2INT(bits);
+    obj = NewBN(klass);
+    if (!(result = BN_new())) {
+        ossl_raise(eBNError, &quot;BN_new&quot;);
+    }
+    if (BN_rand(result, b, top, bottom) &lt;= 0) {
+        BN_free(result);
+        ossl_raise(eBNError, &quot;BN_rand&quot;);
+    }
+    SetBN(obj, result);
+    return obj;
+}</pre>
+          </div>
+        </div>
+
+
+      </div>
+
+      <div id="method-c-rand_range" class="method-detail ">
+        <div class="method-heading">
+          <span class="method-callseq">
+            rand_range(range) &rarr; aBN
+          </span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+
+        <div class="method-description">
+          <p>Generates a cryptographically strong pseudo-random number in the range 0…<code>range</code>.</p>
+
+<p>See also the man page BN_rand_range(3).</p>
+
+          <div class="method-source-code" id="rand_range-source">
+            <pre>static VALUE
+ossl_bn_s_rand_range(VALUE klass, VALUE range)
+{
+    BIGNUM *bn = GetBNPtr(range), *result;
+    VALUE obj = NewBN(klass);
+    if (!(result = BN_new()))
+        ossl_raise(eBNError, &quot;BN_new&quot;);
+    if (BN_rand_range(result, bn) &lt;= 0) {
+        BN_free(result);
+        ossl_raise(eBNError, &quot;BN_rand_range&quot;);
+    }
+    SetBN(obj, result);
+    return obj;
 }</pre>
           </div>
         </div>
@@ -391,7 +504,17 @@ ossl_bn_initialize(int argc, VALUE *argv, VALUE self)
             <pre>static VALUE
 ossl_bn_uplus(VALUE self)
 {
-    return self;
+    VALUE obj;
+    BIGNUM *bn1, *bn2;
+
+    GetBN(self, bn1);
+    obj = NewBN(cBN);
+    bn2 = BN_dup(bn1);
+    if (!bn2)
+        ossl_raise(eBNError, &quot;BN_dup&quot;);
+    SetBN(obj, bn2);
+
+    return obj;
 }</pre>
           </div>
         </div>
@@ -595,6 +718,37 @@ ossl_bn_eq(VALUE self, VALUE other)
 
       </div>
 
+      <div id="method-i-abs" class="method-detail ">
+        <div class="method-heading">
+          <span class="method-callseq">
+            abs &rarr; aBN
+          </span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+
+        <div class="method-description">
+          
+
+          <div class="method-source-code" id="abs-source">
+            <pre>static VALUE
+ossl_bn_abs(VALUE self)
+{
+    BIGNUM *bn1;
+
+    GetBN(self, bn1);
+    if (BN_is_negative(bn1)) {
+        return ossl_bn_uminus(self);
+    }
+    else {
+        return ossl_bn_uplus(self);
+    }
+}</pre>
+          </div>
+        </div>
+
+
+      </div>
+
       <div id="method-i-bit_set-3F" class="method-detail ">
         <div class="method-heading">
           <span class="method-callseq">
@@ -751,6 +905,37 @@ ossl_bn_eql(VALUE self, VALUE other)
         <div class="method-description">
           
 
+        </div>
+
+
+      </div>
+
+      <div id="method-i-get_flags" class="method-detail ">
+        <div class="method-heading">
+          <span class="method-callseq">
+            get_flags(flags) &rarr; flags
+          </span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+
+        <div class="method-description">
+          <p>Returns the flags on the <a href="BN.html"><code>BN</code></a> object. The argument is used as a bit mask.</p>
+
+<h3 id="method-i-get_flags-label-Parameters">Parameters<span><a href="#method-i-get_flags-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
+<ul><li>
+<p><em>flags</em> - integer</p>
+</li></ul>
+
+          <div class="method-source-code" id="get_flags-source">
+            <pre>static VALUE
+ossl_bn_get_flags(VALUE self, VALUE arg)
+{
+    BIGNUM *bn;
+    GetBN(self, bn);
+
+    return INT2NUM(BN_get_flags(bn, NUM2INT(arg)));
+}</pre>
+          </div>
         </div>
 
 
@@ -1080,35 +1265,30 @@ ossl_bn_is_negative(VALUE self)
         </div>
 
         <div class="method-description">
-          <p>Performs a Miller-Rabin probabilistic primality test with <em>checks</em> iterations. If <em>checks</em> is not specified, a number of iterations is used that yields a false positive rate of at most 2^-80 for random input.</p>
+          <p>Performs a Miller-Rabin probabilistic primality test for <code>bn</code>.</p>
 
-<h3 id="method-i-prime-3F-label-Parameters">Parameters<span><a href="#method-i-prime-3F-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
-<ul><li>
-<p><em>checks</em> - integer</p>
-</li></ul>
+<p><strong><code>checks</code> parameter is deprecated in version 3.0.</strong> It has no effect.</p>
 
           <div class="method-source-code" id="prime-3F-source">
             <pre>static VALUE
 ossl_bn_is_prime(int argc, VALUE *argv, VALUE self)
 {
     BIGNUM *bn;
-    VALUE vchecks;
-    int checks = BN_prime_checks;
+    int ret;
 
-    if (rb_scan_args(argc, argv, &quot;01&quot;, &amp;vchecks) == 1) {
-        checks = NUM2INT(vchecks);
-    }
+    rb_check_arity(argc, 0, 1);
     GetBN(self, bn);
-    switch (BN_is_prime_ex(bn, checks, ossl_bn_ctx, NULL)) {
-    case 1:
-        return Qtrue;
-    case 0:
-        return Qfalse;
-    default:
-        ossl_raise(eBNError, NULL);
-    }
-    /* not reachable */
-    return Qnil;
+
+#ifdef HAVE_BN_CHECK_PRIME
+    ret = BN_check_prime(bn, ossl_bn_ctx, NULL);
+    if (ret &lt; 0)
+        ossl_raise(eBNError, &quot;BN_check_prime&quot;);
+#else
+    ret = BN_is_prime_fasttest_ex(bn, BN_prime_checks, ossl_bn_ctx, 1, NULL);
+    if (ret &lt; 0)
+        ossl_raise(eBNError, &quot;BN_is_prime_fasttest_ex&quot;);
+#endif
+    return ret ? Qtrue : Qfalse;
 }</pre>
           </div>
         </div>
@@ -1135,43 +1315,18 @@ ossl_bn_is_prime(int argc, VALUE *argv, VALUE self)
         </div>
 
         <div class="method-description">
-          <p>Performs a Miller-Rabin primality test. This is same as <a href="BN.html#method-i-prime-3F"><code>prime?</code></a> except this first attempts trial divisions with some small primes.</p>
+          <p>Performs a Miller-Rabin probabilistic primality test for <code>bn</code>.</p>
 
-<h3 id="method-i-prime_fasttest-3F-label-Parameters">Parameters<span><a href="#method-i-prime_fasttest-3F-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
-<ul><li>
-<p><em>checks</em> - integer</p>
-</li><li>
-<p><em>trial_div</em> - boolean</p>
-</li></ul>
+<p><strong>Deprecated in version 3.0.</strong> Use <a href="BN.html#method-i-prime-3F"><code>prime?</code></a> instead.</p>
+
+<p><code>checks</code> and <code>trial_div</code> parameters no longer have any effect.</p>
 
           <div class="method-source-code" id="prime_fasttest-3F-source">
             <pre>static VALUE
 ossl_bn_is_prime_fasttest(int argc, VALUE *argv, VALUE self)
 {
-    BIGNUM *bn;
-    VALUE vchecks, vtrivdiv;
-    int checks = BN_prime_checks, do_trial_division = 1;
-
-    rb_scan_args(argc, argv, &quot;02&quot;, &amp;vchecks, &amp;vtrivdiv);
-
-    if (!NIL_P(vchecks)) {
-        checks = NUM2INT(vchecks);
-    }
-    GetBN(self, bn);
-    /* handle true/false */
-    if (vtrivdiv == Qfalse) {
-        do_trial_division = 0;
-    }
-    switch (BN_is_prime_fasttest_ex(bn, checks, ossl_bn_ctx, do_trial_division, NULL)) {
-    case 1:
-        return Qtrue;
-    case 0:
-        return Qfalse;
-    default:
-        ossl_raise(eBNError, NULL);
-    }
-    /* not reachable */
-    return Qnil;
+    rb_check_arity(argc, 0, 2);
+    return ossl_bn_is_prime(0, argv, self);
 }</pre>
           </div>
         </div>
@@ -1204,6 +1359,33 @@ ossl_bn_is_prime_fasttest(int argc, VALUE *argv, VALUE self)
         <div class="method-description">
           
 
+        </div>
+
+
+      </div>
+
+      <div id="method-i-set_flags" class="method-detail ">
+        <div class="method-heading">
+          <span class="method-callseq">
+            set_flags(flags) &rarr; nil
+          </span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+
+        <div class="method-description">
+          <p>Enables the flags on the <a href="BN.html"><code>BN</code></a> object. Currently, the flags argument can contain zero of <a href="BN.html#CONSTTIME"><code>OpenSSL::BN::CONSTTIME</code></a>.</p>
+
+          <div class="method-source-code" id="set_flags-source">
+            <pre>static VALUE
+ossl_bn_set_flags(VALUE self, VALUE arg)
+{
+    BIGNUM *bn;
+    GetBN(self, bn);
+
+    BN_set_flags(bn, NUM2INT(arg));
+    return Qnil;
+}</pre>
+          </div>
         </div>
 
 
@@ -1304,30 +1486,28 @@ ossl_bn_to_i(VALUE self)
       <div id="method-i-to_s" class="method-detail ">
         <div class="method-heading">
           <span class="method-callseq">
-            to_s &rarr; string
+            to_s(base = 10) &rarr; string
           </span>
           <span class="method-click-advice">click to toggle source</span>
         </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            to_s(base) &rarr; string
-          </span>
-        </div>
 
         <div class="method-description">
-          <h3 id="method-i-to_s-label-Parameters">Parameters<span><a href="#method-i-to_s-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
+          <p>Returns the string representation of the bignum.</p>
+
+<p><a href="BN.html#method-c-new"><code>BN.new</code></a> can parse the encoded string to convert back into an <a href="BN.html"><code>OpenSSL::BN</code></a>.</p>
+<dl class="rdoc-list note-list"><dt><code>base</code>
+<dd>
+<p>The format. Must be one of the following:</p>
 <ul><li>
-<p><em>base</em> - <a href="../Integer.html"><code>Integer</code></a> Valid values:</p>
-<ul><li>
-<p>0 - MPI</p>
+<p><code>0</code>  - MPI format. See the man page BN_bn2mpi(3) for details.</p>
 </li><li>
-<p>2 - binary</p>
+<p><code>2</code>  - Variable-length and big-endian binary encoding. The sign of the bignum is ignored.</p>
 </li><li>
-<p>10 - the default</p>
+<p><code>10</code> - Decimal number representation, with a leading ‘-’ for a negative bignum.</p>
 </li><li>
-<p>16 - hex</p>
+<p><code>16</code> - Hexadeciaml number representation, with a leading ‘-’ for a negative bignum.</p>
 </li></ul>
-</li></ul>
+</dd></dl>
 
           <div class="method-source-code" id="to_s-source">
             <pre>static VALUE

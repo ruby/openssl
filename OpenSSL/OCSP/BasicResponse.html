@@ -217,7 +217,7 @@ ossl_ocspbres_add_nonce(int argc, VALUE *argv, VALUE self)
 
 <p><em>reason</em> and <em>revocation_time</em> can be given only when <em>status</em> is OpenSSL::OCSP::V_CERTSTATUS_REVOKED. <em>reason</em> describes the reason for the revocation, and must be one of OpenSSL::OCSP::REVOKED_STATUS_* constants. <em>revocation_time</em> is the time when the certificate is revoked.</p>
 
-<p><em>this_update</em> and <em>next_update</em> indicate the time at which ths status is verified to be correct and the time at or before which newer information will be available, respectively. <em>next_update</em> is optional.</p>
+<p><em>this_update</em> and <em>next_update</em> indicate the time at which the status is verified to be correct and the time at or before which newer information will be available, respectively. <em>next_update</em> is optional.</p>
 
 <p><em>extensions</em> is an Array of <a href="../X509/Extension.html"><code>OpenSSL::X509::Extension</code></a> to be included in the <a href="SingleResponse.html"><code>SingleResponse</code></a>. This is also optional.</p>
 
@@ -632,55 +632,7 @@ ossl_ocspbres_verify(int argc, VALUE *argv, VALUE self)
     x509st = GetX509StorePtr(store);
     flg = NIL_P(flags) ? 0 : NUM2INT(flags);
     x509s = ossl_x509_ary2sk(certs);
-#if (OPENSSL_VERSION_NUMBER &lt; 0x1000202fL) || defined(LIBRESSL_VERSION_NUMBER)
-    /*
-     * OpenSSL had a bug that it doesn&#39;t use the certificates in x509s for
-     * verifying the chain. This can be a problem when the response is signed by
-     * a certificate issued by an intermediate CA.
-     *
-     *       root_ca
-     *         |
-     *   intermediate_ca
-     *         |-------------|
-     *     end_entity    ocsp_signer
-     *
-     * When the certificate hierarchy is like this, and the response contains
-     * only ocsp_signer certificate, the following code wrongly fails.
-     *
-     *   store = OpenSSL::X509::Store.new; store.add_cert(root_ca)
-     *   basic_response.verify([intermediate_ca], store)
-     *
-     * So add the certificates in x509s to the embedded certificates list first.
-     *
-     * This is fixed in OpenSSL 0.9.8zg, 1.0.0s, 1.0.1n, 1.0.2b. But it still
-     * exists in LibreSSL 2.1.10, 2.2.9, 2.3.6, 2.4.1.
-     */
-    if (!(flg &amp; (OCSP_NOCHAIN | OCSP_NOVERIFY)) &amp;&amp;
-        sk_X509_num(x509s) &amp;&amp; sk_X509_num(bs-&gt;certs)) {
-        int i;
-
-        bs = ASN1_item_dup(ASN1_ITEM_rptr(OCSP_BASICRESP), bs);
-        if (!bs) {
-            sk_X509_pop_free(x509s, X509_free);
-            ossl_raise(eOCSPError, &quot;ASN1_item_dup&quot;);
-        }
-
-        for (i = 0; i &lt; sk_X509_num(x509s); i++) {
-            if (!OCSP_basic_add1_cert(bs, sk_X509_value(x509s, i))) {
-                sk_X509_pop_free(x509s, X509_free);
-                OCSP_BASICRESP_free(bs);
-                ossl_raise(eOCSPError, &quot;OCSP_basic_add1_cert&quot;);
-            }
-        }
-        result = OCSP_basic_verify(bs, x509s, x509st, flg);
-        OCSP_BASICRESP_free(bs);
-    }
-    else {
-        result = OCSP_basic_verify(bs, x509s, x509st, flg);
-    }
-#else
     result = OCSP_basic_verify(bs, x509s, x509st, flg);
-#endif
     sk_X509_pop_free(x509s, X509_free);
     if (result &lt;= 0)
         ossl_clear_error();

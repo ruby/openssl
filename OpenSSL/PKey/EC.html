@@ -103,7 +103,6 @@
     <li ><a href="#method-i-public_key-3F">#public_key?</a>
     <li ><a href="#method-i-to_der">#to_der</a>
     <li ><a href="#method-i-to_pem">#to_pem</a>
-    <li ><a href="#method-i-to_text">#to_text</a>
   </ul>
 </div>
 
@@ -221,16 +220,20 @@
             <pre>static VALUE
 ossl_ec_key_s_generate(VALUE klass, VALUE arg)
 {
+    EVP_PKEY *pkey;
     EC_KEY *ec;
     VALUE obj;
 
-    ec = ec_key_new_from_group(arg);
+    obj = rb_obj_alloc(klass);
 
-    obj = ec_instance(klass, ec);
-    if (obj == Qfalse) {
+    ec = ec_key_new_from_group(arg);
+    pkey = EVP_PKEY_new();
+    if (!pkey || EVP_PKEY_assign_EC_KEY(pkey, ec) != 1) {
+        EVP_PKEY_free(pkey);
         EC_KEY_free(ec);
-        ossl_raise(eECError, NULL);
+        ossl_raise(eECError, &quot;EVP_PKEY_assign_EC_KEY&quot;);
     }
+    RTYPEDDATA_DATA(obj) = pkey;
 
     if (!EC_KEY_generate_key(ec))
         ossl_raise(eECError, &quot;EC_KEY_generate_key&quot;);
@@ -284,57 +287,53 @@ ossl_ec_key_s_generate(VALUE klass, VALUE arg)
 {
     EVP_PKEY *pkey;
     EC_KEY *ec;
+    BIO *in;
     VALUE arg, pass;
+    int type;
 
-    GetPKey(self, pkey);
-    if (EVP_PKEY_base_id(pkey) != EVP_PKEY_NONE)
-        ossl_raise(eECError, &quot;EC_KEY already initialized&quot;);
+    TypedData_Get_Struct(self, EVP_PKEY, &amp;ossl_evp_pkey_type, pkey);
+    if (pkey)
+        rb_raise(rb_eTypeError, &quot;pkey already initialized&quot;);
 
     rb_scan_args(argc, argv, &quot;02&quot;, &amp;arg, &amp;pass);
-
     if (NIL_P(arg)) {
         if (!(ec = EC_KEY_new()))
-            ossl_raise(eECError, NULL);
-    } else if (rb_obj_is_kind_of(arg, cEC)) {
-        EC_KEY *other_ec = NULL;
-
-        GetEC(arg, other_ec);
-        if (!(ec = EC_KEY_dup(other_ec)))
-            ossl_raise(eECError, NULL);
-    } else if (rb_obj_is_kind_of(arg, cEC_GROUP)) {
+            ossl_raise(eECError, &quot;EC_KEY_new&quot;);
+        goto legacy;
+    }
+    else if (rb_obj_is_kind_of(arg, cEC_GROUP)) {
         ec = ec_key_new_from_group(arg);
-    } else {
-        BIO *in;
-
-        pass = ossl_pem_passwd_value(pass);
-        in = ossl_obj2bio(&amp;arg);
-
-        ec = PEM_read_bio_ECPrivateKey(in, NULL, ossl_pem_passwd_cb, (void *)pass);
-        if (!ec) {
-            OSSL_BIO_reset(in);
-            ec = PEM_read_bio_EC_PUBKEY(in, NULL, ossl_pem_passwd_cb, (void *)pass);
-        }
-        if (!ec) {
-            OSSL_BIO_reset(in);
-            ec = d2i_ECPrivateKey_bio(in, NULL);
-        }
-        if (!ec) {
-            OSSL_BIO_reset(in);
-            ec = d2i_EC_PUBKEY_bio(in, NULL);
-        }
-        BIO_free(in);
-
-        if (!ec) {
-            ossl_clear_error();
-            ec = ec_key_new_from_group(arg);
-        }
+        goto legacy;
     }
 
-    if (!EVP_PKEY_assign_EC_KEY(pkey, ec)) {
+    pass = ossl_pem_passwd_value(pass);
+    arg = ossl_to_der_if_possible(arg);
+    in = ossl_obj2bio(&amp;arg);
+
+    pkey = ossl_pkey_read_generic(in, pass);
+    BIO_free(in);
+    if (!pkey) {
+        ossl_clear_error();
+        ec = ec_key_new_from_group(arg);
+        goto legacy;
+    }
+
+    type = EVP_PKEY_base_id(pkey);
+    if (type != EVP_PKEY_EC) {
+        EVP_PKEY_free(pkey);
+        rb_raise(eDSAError, &quot;incorrect pkey type: %s&quot;, OBJ_nid2sn(type));
+    }
+    RTYPEDDATA_DATA(self) = pkey;
+    return self;
+
+  legacy:
+    pkey = EVP_PKEY_new();
+    if (!pkey || EVP_PKEY_assign_EC_KEY(pkey, ec) != 1) {
+        EVP_PKEY_free(pkey);
         EC_KEY_free(ec);
         ossl_raise(eECError, &quot;EVP_PKEY_assign_EC_KEY&quot;);
     }
-
+    RTYPEDDATA_DATA(self) = pkey;
     return self;
 }</pre>
           </div>
@@ -361,16 +360,31 @@ ossl_ec_key_s_generate(VALUE klass, VALUE arg)
         <div class="method-description">
           <p>Raises an exception if the key is invalid.</p>
 
-<p>See the <a href="../../OpenSSL.html"><code>OpenSSL</code></a> documentation for EC_KEY_check_key()</p>
+<p>See also the man page EVP_PKEY_public_check(3).</p>
 
           <div class="method-source-code" id="check_key-source">
             <pre>static VALUE ossl_ec_key_check_key(VALUE self)
 {
+#ifdef HAVE_EVP_PKEY_CHECK
+    EVP_PKEY *pkey;
+    EVP_PKEY_CTX *pctx;
+    int ret;
+
+    GetPKey(self, pkey);
+    pctx = EVP_PKEY_CTX_new(pkey, /* engine */NULL);
+    if (!pctx)
+        ossl_raise(eDHError, &quot;EVP_PKEY_CTX_new&quot;);
+    ret = EVP_PKEY_public_check(pctx);
+    EVP_PKEY_CTX_free(pctx);
+    if (ret != 1)
+        ossl_raise(eECError, &quot;EVP_PKEY_public_check&quot;);
+#else
     EC_KEY *ec;
 
     GetEC(self, ec);
     if (EC_KEY_check_key(ec) != 1)
         ossl_raise(eECError, &quot;EC_KEY_check_key&quot;);
+#endif
 
     return Qtrue;
 }</pre>
@@ -383,37 +397,28 @@ ossl_ec_key_s_generate(VALUE klass, VALUE arg)
       <div id="method-i-dh_compute_key" class="method-detail ">
         <div class="method-heading">
           <span class="method-callseq">
-            dh_compute_key(pubkey)   &rarr; String
+            dh_compute_key(pubkey) &rarr; string
           </span>
           <span class="method-click-advice">click to toggle source</span>
         </div>
 
         <div class="method-description">
-          <p>See the <a href="../../OpenSSL.html"><code>OpenSSL</code></a> documentation for ECDH_compute_key()</p>
+          <p>Derives a shared secret by ECDH. <em>pubkey</em> must be an instance of <a href="EC/Point.html"><code>OpenSSL::PKey::EC::Point</code></a> and must belong to the same group.</p>
+
+<p>This method is provided for backwards compatibility, and calls <a href="PKey.html#method-i-derive"><code>derive</code></a> internally.</p>
 
           <div class="method-source-code" id="dh_compute_key-source">
-            <pre>static VALUE ossl_ec_key_dh_compute_key(VALUE self, VALUE pubkey)
-{
-    EC_KEY *ec;
-    EC_POINT *point;
-    int buf_len;
-    VALUE str;
-
-    GetEC(self, ec);
-    GetECPoint(pubkey, point);
-
-/* BUG: need a way to figure out the maximum string size */
-    buf_len = 1024;
-    str = rb_str_new(0, buf_len);
-/* BUG: take KDF as a block */
-    buf_len = ECDH_compute_key(RSTRING_PTR(str), buf_len, point, ec, NULL);
-    if (buf_len &lt; 0)
-         ossl_raise(eECError, &quot;ECDH_compute_key&quot;);
-
-    rb_str_resize(str, buf_len);
-
-    return str;
-}</pre>
+            <pre><span class="ruby-comment"># File lib/openssl/pkey.rb, line 276</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">dh_compute_key</span>(<span class="ruby-identifier">pubkey</span>)
+  <span class="ruby-identifier">obj</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span>.<span class="ruby-constant">Sequence</span>([
+    <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span>.<span class="ruby-constant">Sequence</span>([
+      <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span>.<span class="ruby-constant">ObjectId</span>(<span class="ruby-string">&quot;id-ecPublicKey&quot;</span>),
+      <span class="ruby-identifier">group</span>.<span class="ruby-identifier">to_der</span>,
+    ]),
+    <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">ASN1</span>.<span class="ruby-constant">BitString</span>(<span class="ruby-identifier">pubkey</span>.<span class="ruby-identifier">to_octet_string</span>(<span class="ruby-value">:uncompressed</span>)),
+  ])
+  <span class="ruby-identifier">derive</span>(<span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span>.<span class="ruby-identifier">read</span>(<span class="ruby-identifier">obj</span>.<span class="ruby-identifier">to_der</span>))
+<span class="ruby-keyword">end</span></pre>
           </div>
         </div>
 
@@ -423,34 +428,21 @@ ossl_ec_key_s_generate(VALUE klass, VALUE arg)
       <div id="method-i-dsa_sign_asn1" class="method-detail ">
         <div class="method-heading">
           <span class="method-callseq">
-            dsa_sign_asn1(data)   &rarr; String
+            dsa_sign_asn1(data) &rarr; String
           </span>
           <span class="method-click-advice">click to toggle source</span>
         </div>
 
         <div class="method-description">
-          <p>See the <a href="../../OpenSSL.html"><code>OpenSSL</code></a> documentation for ECDSA_sign()</p>
+          <p><strong>Deprecated in version 3.0</strong>. Consider using <a href="PKey.html#method-i-sign_raw"><code>PKey::PKey#sign_raw</code></a> and <a href="PKey.html#method-i-verify_raw"><code>PKey::PKey#verify_raw</code></a> instead.</p>
 
           <div class="method-source-code" id="dsa_sign_asn1-source">
-            <pre>static VALUE ossl_ec_key_dsa_sign_asn1(VALUE self, VALUE data)
-{
-    EC_KEY *ec;
-    unsigned int buf_len;
-    VALUE str;
-
-    GetEC(self, ec);
-    StringValue(data);
-
-    if (EC_KEY_get0_private_key(ec) == NULL)
-        ossl_raise(eECError, &quot;Private EC key needed!&quot;);
-
-    str = rb_str_new(0, ECDSA_size(ec));
-    if (ECDSA_sign(0, (unsigned char *) RSTRING_PTR(data), RSTRING_LENINT(data), (unsigned char *) RSTRING_PTR(str), &amp;buf_len, ec) != 1)
-        ossl_raise(eECError, &quot;ECDSA_sign&quot;);
-    rb_str_set_len(str, buf_len);
-
-    return str;
-}</pre>
+            <pre><span class="ruby-comment"># File lib/openssl/pkey.rb, line 251</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">dsa_sign_asn1</span>(<span class="ruby-identifier">data</span>)
+  <span class="ruby-identifier">sign_raw</span>(<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">data</span>)
+<span class="ruby-keyword">rescue</span> <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">PKeyError</span>
+  <span class="ruby-identifier">raise</span> <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">ECError</span>, <span class="ruby-identifier">$!</span>.<span class="ruby-identifier">message</span>
+<span class="ruby-keyword">end</span></pre>
           </div>
         </div>
 
@@ -460,33 +452,21 @@ ossl_ec_key_s_generate(VALUE klass, VALUE arg)
       <div id="method-i-dsa_verify_asn1" class="method-detail ">
         <div class="method-heading">
           <span class="method-callseq">
-            dsa_verify_asn1(data, sig)   &rarr; true or false
+            dsa_verify_asn1(data, sig) &rarr; true | false
           </span>
           <span class="method-click-advice">click to toggle source</span>
         </div>
 
         <div class="method-description">
-          <p>See the <a href="../../OpenSSL.html"><code>OpenSSL</code></a> documentation for ECDSA_verify()</p>
+          <p><strong>Deprecated in version 3.0</strong>. Consider using <a href="PKey.html#method-i-sign_raw"><code>PKey::PKey#sign_raw</code></a> and <a href="PKey.html#method-i-verify_raw"><code>PKey::PKey#verify_raw</code></a> instead.</p>
 
           <div class="method-source-code" id="dsa_verify_asn1-source">
-            <pre>static VALUE ossl_ec_key_dsa_verify_asn1(VALUE self, VALUE data, VALUE sig)
-{
-    EC_KEY *ec;
-
-    GetEC(self, ec);
-    StringValue(data);
-    StringValue(sig);
-
-    switch (ECDSA_verify(0, (unsigned char *)RSTRING_PTR(data), RSTRING_LENINT(data),
-                         (unsigned char *)RSTRING_PTR(sig), RSTRING_LENINT(sig), ec)) {
-      case 1:
-        return Qtrue;
-      case 0:
-        return Qfalse;
-      default:
-        ossl_raise(eECError, &quot;ECDSA_verify&quot;);
-    }
-}</pre>
+            <pre><span class="ruby-comment"># File lib/openssl/pkey.rb, line 262</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">dsa_verify_asn1</span>(<span class="ruby-identifier">data</span>, <span class="ruby-identifier">sig</span>)
+  <span class="ruby-identifier">verify_raw</span>(<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">sig</span>, <span class="ruby-identifier">data</span>)
+<span class="ruby-keyword">rescue</span> <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">PKeyError</span>
+  <span class="ruby-identifier">raise</span> <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">ECError</span>, <span class="ruby-identifier">$!</span>.<span class="ruby-identifier">message</span>
+<span class="ruby-keyword">end</span></pre>
           </div>
         </div>
 
@@ -505,11 +485,16 @@ ossl_ec_key_s_generate(VALUE klass, VALUE arg)
           <p>Outputs the <a href="EC.html"><code>EC</code></a> key in PEM encoding.  If <em>cipher</em> and <em>pass_phrase</em> are given they will be used to encrypt the key.  <em>cipher</em> must be an <a href="../Cipher.html"><code>OpenSSL::Cipher</code></a> instance. Note that encryption will only be effective for a private key, public keys will always be encoded in plain text.</p>
 
           <div class="method-source-code" id="export-source">
-            <pre>static VALUE ossl_ec_key_export(int argc, VALUE *argv, VALUE self)
+            <pre>static VALUE
+ossl_ec_key_export(int argc, VALUE *argv, VALUE self)
 {
-    VALUE cipher, passwd;
-    rb_scan_args(argc, argv, &quot;02&quot;, &amp;cipher, &amp;passwd);
-    return ossl_ec_key_to_string(self, cipher, passwd, EXPORT_PEM);
+    EC_KEY *ec;
+
+    GetEC(self, ec);
+    if (EC_KEY_get0_private_key(ec))
+        return ossl_pkey_export_traditional(argc, argv, self, 0);
+    else
+        return ossl_pkey_export_spki(self, 0);
 }</pre>
           </div>
         </div>
@@ -570,6 +555,9 @@ ossl_ec_key_s_generate(VALUE klass, VALUE arg)
           <div class="method-source-code" id="generate_key-21-source">
             <pre>static VALUE ossl_ec_key_generate_key(VALUE self)
 {
+#if OSSL_OPENSSL_PREREQ(3, 0, 0)
+    rb_raise(ePKeyError, &quot;pkeys are immutable on OpenSSL 3.0&quot;);
+#else
     EC_KEY *ec;
 
     GetEC(self, ec);
@@ -577,6 +565,7 @@ ossl_ec_key_s_generate(VALUE klass, VALUE arg)
         ossl_raise(eECError, &quot;EC_KEY_generate_key&quot;);
 
     return self;
+#endif
 }</pre>
           </div>
         </div>
@@ -633,6 +622,9 @@ ossl_ec_key_get_group(VALUE self)
             <pre>static VALUE
 ossl_ec_key_set_group(VALUE self, VALUE group_v)
 {
+#if OSSL_OPENSSL_PREREQ(3, 0, 0)
+    rb_raise(ePKeyError, &quot;pkeys are immutable on OpenSSL 3.0&quot;);
+#else
     EC_KEY *ec;
     EC_GROUP *group;
 
@@ -643,6 +635,7 @@ ossl_ec_key_set_group(VALUE self, VALUE group_v)
         ossl_raise(eECError, &quot;EC_KEY_set_group&quot;);
 
     return group_v;
+#endif
 }</pre>
           </div>
         </div>
@@ -667,18 +660,21 @@ ossl_ec_key_initialize_copy(VALUE self, VALUE other)
     EVP_PKEY *pkey;
     EC_KEY *ec, *ec_new;
 
-    GetPKey(self, pkey);
-    if (EVP_PKEY_base_id(pkey) != EVP_PKEY_NONE)
-        ossl_raise(eECError, &quot;EC already initialized&quot;);
+    TypedData_Get_Struct(self, EVP_PKEY, &amp;ossl_evp_pkey_type, pkey);
+    if (pkey)
+        rb_raise(rb_eTypeError, &quot;pkey already initialized&quot;);
     GetEC(other, ec);
 
     ec_new = EC_KEY_dup(ec);
     if (!ec_new)
         ossl_raise(eECError, &quot;EC_KEY_dup&quot;);
-    if (!EVP_PKEY_assign_EC_KEY(pkey, ec_new)) {
+
+    pkey = EVP_PKEY_new();
+    if (!pkey || EVP_PKEY_assign_EC_KEY(pkey, ec_new) != 1) {
         EC_KEY_free(ec_new);
         ossl_raise(eECError, &quot;EVP_PKEY_assign_EC_KEY&quot;);
     }
+    RTYPEDDATA_DATA(self) = pkey;
 
     return self;
 }</pre>
@@ -760,6 +756,9 @@ ossl_ec_key_initialize_copy(VALUE self, VALUE other)
           <div class="method-source-code" id="private_key-3D-source">
             <pre>static VALUE ossl_ec_key_set_private_key(VALUE self, VALUE private_key)
 {
+#if OSSL_OPENSSL_PREREQ(3, 0, 0)
+    rb_raise(ePKeyError, &quot;pkeys are immutable on OpenSSL 3.0&quot;);
+#else
     EC_KEY *ec;
     BIGNUM *bn = NULL;
 
@@ -773,11 +772,13 @@ ossl_ec_key_initialize_copy(VALUE self, VALUE other)
     case 0:
         if (bn == NULL)
             break;
+        /* fallthrough */
     default:
         ossl_raise(eECError, &quot;EC_KEY_set_private_key&quot;);
     }
 
     return private_key;
+#endif
 }</pre>
           </div>
         </div>
@@ -874,6 +875,9 @@ ossl_ec_key_initialize_copy(VALUE self, VALUE other)
           <div class="method-source-code" id="public_key-3D-source">
             <pre>static VALUE ossl_ec_key_set_public_key(VALUE self, VALUE public_key)
 {
+#if OSSL_OPENSSL_PREREQ(3, 0, 0)
+    rb_raise(ePKeyError, &quot;pkeys are immutable on OpenSSL 3.0&quot;);
+#else
     EC_KEY *ec;
     EC_POINT *point = NULL;
 
@@ -887,11 +891,13 @@ ossl_ec_key_initialize_copy(VALUE self, VALUE other)
     case 0:
         if (point == NULL)
             break;
+        /* fallthrough */
     default:
         ossl_raise(eECError, &quot;EC_KEY_set_public_key&quot;);
     }
 
     return public_key;
+#endif
 }</pre>
           </div>
         </div>
@@ -928,9 +934,16 @@ ossl_ec_key_initialize_copy(VALUE self, VALUE other)
           <p>See the <a href="../../OpenSSL.html"><code>OpenSSL</code></a> documentation for i2d_ECPrivateKey_bio()</p>
 
           <div class="method-source-code" id="to_der-source">
-            <pre>static VALUE ossl_ec_key_to_der(VALUE self)
+            <pre>static VALUE
+ossl_ec_key_to_der(VALUE self)
 {
-    return ossl_ec_key_to_string(self, Qnil, Qnil, EXPORT_DER);
+    EC_KEY *ec;
+
+    GetEC(self, ec);
+    if (EC_KEY_get0_private_key(ec))
+        return ossl_pkey_export_traditional(0, NULL, self, 1);
+    else
+        return ossl_pkey_export_spki(self, 1);
 }</pre>
           </div>
         </div>
@@ -954,42 +967,6 @@ ossl_ec_key_initialize_copy(VALUE self, VALUE other)
         <div class="aliases">
           Alias for: <a href="EC.html#method-i-export">export</a>
         </div>
-      </div>
-
-      <div id="method-i-to_text" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            to_text   &rarr; String
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-
-        <div class="method-description">
-          <p>See the <a href="../../OpenSSL.html"><code>OpenSSL</code></a> documentation for EC_KEY_print()</p>
-
-          <div class="method-source-code" id="to_text-source">
-            <pre>static VALUE ossl_ec_key_to_text(VALUE self)
-{
-    EC_KEY *ec;
-    BIO *out;
-    VALUE str;
-
-    GetEC(self, ec);
-    if (!(out = BIO_new(BIO_s_mem()))) {
-        ossl_raise(eECError, &quot;BIO_new(BIO_s_mem())&quot;);
-    }
-    if (!EC_KEY_print(out, ec, 0)) {
-        BIO_free(out);
-        ossl_raise(eECError, &quot;EC_KEY_print&quot;);
-    }
-    str = ossl_membio2str(out);
-
-    return str;
-}</pre>
-          </div>
-        </div>
-
-
       </div>
 
     </section>

@@ -94,6 +94,8 @@
   <h3>Methods</h3>
 
   <ul class="link-list" role="directory">
+    <li ><a href="#method-c-load">::load</a>
+    <li ><a href="#method-c-load_file">::load_file</a>
     <li ><a href="#method-c-new">::new</a>
     <li ><a href="#method-i-3D-3D">#==</a>
     <li ><a href="#method-i-add_extension">#add_extension</a>
@@ -143,7 +145,7 @@
 
 <p><a href="Certificate.html"><code>Certificate</code></a> is capable of handling DER-encoded certificates and certificates encoded in OpenSSL’s PEM format.</p>
 
-<pre class="ruby"><span class="ruby-identifier">raw</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span> <span class="ruby-string">&quot;cert.cer&quot;</span> <span class="ruby-comment"># DER- or PEM-encoded</span>
+<pre class="ruby"><span class="ruby-identifier">raw</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">binread</span> <span class="ruby-string">&quot;cert.cer&quot;</span> <span class="ruby-comment"># DER- or PEM-encoded</span>
 <span class="ruby-identifier">certificate</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">Certificate</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">raw</span>
 </pre>
 
@@ -222,6 +224,63 @@
          <h3>Public Class Methods</h3>
        </header>
 
+      <div id="method-c-load" class="method-detail ">
+        <div class="method-heading">
+          <span class="method-callseq">
+            OpenSSL::X509::Certificate.load(string) &rarr; [certs...]
+          </span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        <div class="method-heading">
+          <span class="method-callseq">
+            OpenSSL::X509::Certificate.load(file) &rarr; [certs...]
+          </span>
+        </div>
+
+        <div class="method-description">
+          <p>Read the chained certificates from the given input. Supports both PEM and DER encoded certificates.</p>
+
+<p>PEM is a text format and supports more than one certificate.</p>
+
+<p>DER is a binary format and only supports one certificate.</p>
+
+<p>If the file is empty, or contains only unrelated data, an <code>OpenSSL::X509::CertificateError</code> exception will be raised.</p>
+
+          <div class="method-source-code" id="load-source">
+            <pre>static VALUE
+ossl_x509_load(VALUE klass, VALUE buffer)
+{
+    BIO *in = ossl_obj2bio(&amp;buffer);
+
+    return rb_ensure(load_chained_certificates, (VALUE)in, load_chained_certificates_ensure, (VALUE)in);
+}</pre>
+          </div>
+        </div>
+
+
+      </div>
+
+      <div id="method-c-load_file" class="method-detail ">
+        <div class="method-heading">
+          <span class="method-name">load_file</span><span
+            class="method-args">(path)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+
+        <div class="method-description">
+          
+
+          <div class="method-source-code" id="load_file-source">
+            <pre><span class="ruby-comment"># File lib/openssl/x509.rb, line 360</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier ruby-title">load_file</span>(<span class="ruby-identifier">path</span>)
+  <span class="ruby-identifier">load</span>(<span class="ruby-constant">File</span>.<span class="ruby-identifier">binread</span>(<span class="ruby-identifier">path</span>))
+<span class="ruby-keyword">end</span></pre>
+          </div>
+        </div>
+
+
+      </div>
+
       <div id="method-c-new" class="method-detail ">
         <div class="method-heading">
           <span class="method-callseq">
@@ -243,24 +302,27 @@
 ossl_x509_initialize(int argc, VALUE *argv, VALUE self)
 {
     BIO *in;
-    X509 *x509, *x = DATA_PTR(self);
+    X509 *x509, *x509_orig = RTYPEDDATA_DATA(self);
     VALUE arg;
 
+    rb_check_frozen(self);
     if (rb_scan_args(argc, argv, &quot;01&quot;, &amp;arg) == 0) {
         /* create just empty X509Cert */
         return self;
     }
     arg = ossl_to_der_if_possible(arg);
     in = ossl_obj2bio(&amp;arg);
-    x509 = PEM_read_bio_X509(in, &amp;x, NULL, NULL);
-    DATA_PTR(self) = x;
+    x509 = d2i_X509_bio(in, NULL);
     if (!x509) {
         OSSL_BIO_reset(in);
-        x509 = d2i_X509_bio(in, &amp;x);
-        DATA_PTR(self) = x;
+        x509 = PEM_read_bio_X509(in, NULL, NULL, NULL);
     }
     BIO_free(in);
-    if (!x509) ossl_raise(eX509CertError, NULL);
+    if (!x509)
+        ossl_raise(eX509CertError, &quot;PEM_read_bio_X509&quot;);
+
+    RTYPEDDATA_DATA(self) = x509;
+    X509_free(x509_orig);
 
     return self;
 }</pre>
@@ -722,7 +784,7 @@ ossl_x509_set_not_before(VALUE self, VALUE time)
           
 
           <div class="method-source-code" id="pretty_print-source">
-            <pre><span class="ruby-comment"># File lib/openssl/x509.rb, line 331</span>
+            <pre><span class="ruby-comment"># File lib/openssl/x509.rb, line 349</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">pretty_print</span>(<span class="ruby-identifier">q</span>)
   <span class="ruby-identifier">q</span>.<span class="ruby-identifier">object_group</span>(<span class="ruby-keyword">self</span>) {
     <span class="ruby-identifier">q</span>.<span class="ruby-identifier">breakable</span>

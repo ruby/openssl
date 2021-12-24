@@ -114,7 +114,7 @@
 
 <p>You can create a <a href="Name.html"><code>Name</code></a> by parsing a distinguished name String or by supplying the distinguished name as an Array.</p>
 
-<pre class="ruby"><span class="ruby-identifier">name</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">Name</span>.<span class="ruby-identifier">parse</span> <span class="ruby-string">&#39;/CN=nobody/DC=example&#39;</span>
+<pre class="ruby"><span class="ruby-identifier">name</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">Name</span>.<span class="ruby-identifier">parse_rfc2253</span> <span class="ruby-string">&#39;DC=example,CN=nobody&#39;</span>
 
 <span class="ruby-identifier">name</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">Name</span>.<span class="ruby-identifier">new</span> [[<span class="ruby-string">&#39;CN&#39;</span>, <span class="ruby-string">&#39;nobody&#39;</span>], [<span class="ruby-string">&#39;DC&#39;</span>, <span class="ruby-string">&#39;example&#39;</span>]]
 </pre>
@@ -260,10 +260,19 @@ ossl_x509name_initialize(int argc, VALUE *argv, VALUE self)
         </div>
 
         <div class="method-description">
-          
+          <p>Parses the string representation of a distinguished name. Two different forms are supported:</p>
+<ul><li>
+<p>OpenSSL format (<code>X509_NAME_oneline()</code>) used by <code>#to_s</code>. For example: <code>/DC=com/DC=example/CN=nobody</code></p>
+</li><li>
+<p>OpenSSL format (<code>X509_NAME_print()</code>) used by <code>#to_s(OpenSSL::X509::Name::COMPAT)</code>. For example: <code>DC=com, DC=example, CN=nobody</code></p>
+</li></ul>
+
+<p>Neither of them is standardized and has quirks and inconsistencies in handling of escaped characters or multi-valued RDNs.</p>
+
+<p>Use of this method is discouraged in new applications. See <a href="Name.html#method-c-parse_rfc2253"><code>Name.parse_rfc2253</code></a> and <a href="Name.html#method-i-to_utf8"><code>to_utf8</code></a> for the alternative.</p>
 
           <div class="method-source-code" id="parse_openssl-source">
-            <pre><span class="ruby-comment"># File lib/openssl/x509.rb, line 287</span>
+            <pre><span class="ruby-comment"># File lib/openssl/x509.rb, line 305</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">parse_openssl</span>(<span class="ruby-identifier">str</span>, <span class="ruby-identifier">template</span>=<span class="ruby-constant">OBJECT_TYPE_TEMPLATE</span>)
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">str</span>.<span class="ruby-identifier">start_with?</span>(<span class="ruby-string">&quot;/&quot;</span>)
     <span class="ruby-comment"># /A=B/C=D format</span>
@@ -291,10 +300,12 @@ ossl_x509name_initialize(int argc, VALUE *argv, VALUE self)
         </div>
 
         <div class="method-description">
-          
+          <p>Parses the UTF-8 string representation of a distinguished name, according to RFC 2253.</p>
+
+<p>See also <a href="Name.html#method-i-to_utf8"><code>to_utf8</code></a> for the opposite operation.</p>
 
           <div class="method-source-code" id="parse_rfc2253-source">
-            <pre><span class="ruby-comment"># File lib/openssl/x509.rb, line 282</span>
+            <pre><span class="ruby-comment"># File lib/openssl/x509.rb, line 286</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">parse_rfc2253</span>(<span class="ruby-identifier">str</span>, <span class="ruby-identifier">template</span>=<span class="ruby-constant">OBJECT_TYPE_TEMPLATE</span>)
   <span class="ruby-identifier">ary</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">Name</span><span class="ruby-operator">::</span><span class="ruby-constant">RFC2253DN</span>.<span class="ruby-identifier">scan</span>(<span class="ruby-identifier">str</span>)
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">ary</span>, <span class="ruby-identifier">template</span>)
@@ -565,7 +576,7 @@ ossl_x509name_initialize_copy(VALUE self, VALUE other)
           
 
           <div class="method-source-code" id="pretty_print-source">
-            <pre><span class="ruby-comment"># File lib/openssl/x509.rb, line 301</span>
+            <pre><span class="ruby-comment"># File lib/openssl/x509.rb, line 319</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">pretty_print</span>(<span class="ruby-identifier">q</span>)
   <span class="ruby-identifier">q</span>.<span class="ruby-identifier">object_group</span>(<span class="ruby-keyword">self</span>) {
     <span class="ruby-identifier">q</span>.<span class="ruby-identifier">text</span> <span class="ruby-string">&#39; &#39;</span>
@@ -697,7 +708,11 @@ ossl_x509name_to_der(VALUE self)
 <p><a href="Name.html#MULTILINE"><code>OpenSSL::X509::Name::MULTILINE</code></a></p>
 </li></ul>
 
-<p>If <em>format</em> is omitted, the largely broken and traditional <a href="../../OpenSSL.html"><code>OpenSSL</code></a> format is used.</p>
+<p>If <em>format</em> is omitted, the largely broken and traditional <a href="../../OpenSSL.html"><code>OpenSSL</code></a> format (<code>X509_NAME_oneline()</code> format) is chosen.</p>
+
+<p><strong>Use of this method is discouraged.</strong> None of the formats other than <a href="Name.html#RFC2253"><code>OpenSSL::X509::Name::RFC2253</code></a> is standardized and may show an inconsistent behavior through OpenSSL versions.</p>
+
+<p>It is recommended to use <a href="Name.html#method-i-to_utf8"><code>to_utf8</code></a> instead, which is equivalent to calling <code>name.to_s(OpenSSL::X509::Name::RFC2253).force_encoding(&quot;UTF-8&quot;)</code>.</p>
 
           <div class="method-source-code" id="to_s-source">
             <pre>static VALUE

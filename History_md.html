@@ -58,6 +58,9 @@
   <h3>Table of Contents</h3>
 
   <ul class="link-list" role="directory">
+    <li><a href="#label-Version+3.0.0">Version 3.0.0</a>
+    <li><a href="#label-Compatibility+notes">Compatibility notes</a>
+    <li><a href="#label-Notable+changes">Notable changes</a>
     <li><a href="#label-Version+2.2.1">Version 2.2.1</a>
     <li><a href="#label-Bug+fixes">Bug fixes</a>
     <li><a href="#label-Version+2.2.0">Version 2.2.0</a>
@@ -114,6 +117,69 @@
 </nav>
 
 <main role="main" aria-label="Page History.md">
+
+<h1 id="label-Version+3.0.0">Version 3.0.0<span><a href="#label-Version+3.0.0">&para;</a> <a href="#top">&uarr;</a></span></h1>
+
+<h2 id="label-Compatibility+notes">Compatibility notes<span><a href="#label-Compatibility+notes">&para;</a> <a href="#top">&uarr;</a></span></h2>
+<ul><li>
+<p><a href="OpenSSL.html"><code>OpenSSL</code></a> 1.0.1 and Ruby 2.3-2.5 are no longer supported.  <a href="https://github.com/ruby/openssl/pull/396">[GitHub #396]</a>  <a href="https://github.com/ruby/openssl/pull/466">[GitHub #466]</a></p>
+</li><li>
+<p><a href="OpenSSL.html"><code>OpenSSL</code></a> 3.0 support is added. It is the first major version bump from <a href="OpenSSL.html"><code>OpenSSL</code></a>  1.1 and contains incompatible changes that affect Ruby/OpenSSL.  Note that <a href="OpenSSL.html"><code>OpenSSL</code></a> 3.0 support is preliminary and not all features are  currently available:  <a href="https://github.com/ruby/openssl/issues/369">[GitHub #369]</a></p>
+</li><li>
+<p>Deprecate the ability to modify <code>OpenSSL::PKey::PKey</code> instances. <a href="OpenSSL.html"><code>OpenSSL</code></a> 3.0 made EVP_PKEY structure immutable, and hence the following methods are not available when Ruby/OpenSSL is linked against <a href="OpenSSL.html"><code>OpenSSL</code></a> 3.0. <a href="https://github.com/ruby/openssl/pull/480">[GitHub #480]</a></p>
+<ul><li>
+<p><code>OpenSSL::PKey::RSA#set_key</code>, <code>#set_factors</code>, <code>#set_crt_params</code></p>
+</li><li>
+<p><code>OpenSSL::PKey::DSA#set_pqg</code>, <code>#set_key</code></p>
+</li><li>
+<p><code>OpenSSL::PKey::DH#set_pqg</code>, <code>#set_key</code>, <code>#generate_key!</code></p>
+</li><li>
+<p><code>OpenSSL::PKey::EC#private_key=</code>, <code>#public_key=</code>, <code>#group=</code>, <code>#generate_key!</code></p>
+</li></ul>
+</li><li>
+<p>Deprecate <code>OpenSSL::Engine</code>. The ENGINE API has been deprecated in <a href="OpenSSL.html"><code>OpenSSL</code></a> 3.0 in favor of the new "provider" concept and will be removed in a future version. <a href="https://github.com/ruby/openssl/pull/481">[GitHub #481]</a></p>
+</li><li>
+<p><code>OpenSSL::SSL::SSLContext#tmp_ecdh_callback</code> has been removed. It has been  deprecated since v2.0.0 because it is incompatible with modern <a href="OpenSSL.html"><code>OpenSSL</code></a>  versions.  <a href="https://github.com/ruby/openssl/pull/394">[GitHub #394]</a></p>
+</li><li>
+<p><code>OpenSSL::SSL::SSLSocket#read</code> and <code>#write</code> now raise <code>OpenSSL::SSL::SSLError</code>  if called before a TLS connection is established. Historically, they  read/wrote unencrypted data to the underlying socket directly in that case.  <a href="https://github.com/ruby/openssl/issues/9">[GitHub #9]</a>  <a href="https://github.com/ruby/openssl/pull/469">[GitHub #469]</a></p>
+</li></ul>
+
+<h2 id="label-Notable+changes">Notable changes<span><a href="#label-Notable+changes">&para;</a> <a href="#top">&uarr;</a></span></h2>
+<ul><li>
+<p>Enhance <a href="OpenSSL/PKey.html"><code>OpenSSL::PKey</code></a>'s common interface.  <a href="https://github.com/ruby/openssl/issues/370">[GitHub #370]</a></p>
+</li><li>
+<p>Key deserialization: Enhance <code>OpenSSL::PKey.read</code> to handle PEM encoding of DH parameters, which used to be only deserialized by <code>OpenSSL::PKey::DH.new</code>. <a href="https://github.com/ruby/openssl/issues/328">[GitHub #328]</a></p>
+</li><li>
+<p>Key generation: Add <code>OpenSSL::PKey.generate_parameters</code> and <code>OpenSSL::PKey.generate_key</code>. <a href="https://github.com/ruby/openssl/issues/329">[GitHub #329]</a></p>
+</li><li>
+<p>Public key signing: Enhance <code>OpenSSL::PKey::PKey#sign</code> and <code>#verify</code> to use the new EVP_DigestSign() family to enable PureEdDSA support on <a href="OpenSSL.html"><code>OpenSSL</code></a> 1.1.1 or later. They also now take optional algorithm-specific parameters for more control. <a href="https://github.com/ruby/openssl/issues/329">[GitHub #329]</a></p>
+</li><li>
+<p>Low-level public key signing and verification: Add <code>OpenSSL::PKey::PKey#sign_raw</code>, <code>#verify_raw</code>, and <code>#verify_recover</code>. <a href="https://github.com/ruby/openssl/issues/382">[GitHub #382]</a></p>
+</li><li>
+<p>Public key encryption: Add <code>OpenSSL::PKey::PKey#encrypt</code> and <code>#decrypt</code>. <a href="https://github.com/ruby/openssl/issues/382">[GitHub #382]</a></p>
+</li><li>
+<p>Key agreement: Add <code>OpenSSL::PKey::PKey#derive</code>. <a href="https://github.com/ruby/openssl/issues/329">[GitHub #329]</a></p>
+</li><li>
+<p>Key comparison: Add <code>OpenSSL::PKey::PKey#compare?</code> to conveniently check that two keys have common parameters and a public key. <a href="https://github.com/ruby/openssl/issues/383">[GitHub #383]</a></p>
+</li><li>
+<p>Add <code>OpenSSL::BN#set_flags</code> and <code>#get_flags</code>. This can be used in combination  with <code>OpenSSL::BN::CONSTTIME</code> to force constant-time computation.  <a href="https://github.com/ruby/openssl/issues/417">[GitHub #417]</a></p>
+</li><li>
+<p>Add <code>OpenSSL::BN#abs</code> to get the absolute value of the BIGNUM.  <a href="https://github.com/ruby/openssl/issues/430">[GitHub #430]</a></p>
+</li><li>
+<p>Add <code>OpenSSL::SSL::SSLSocket#getbyte</code>.  <a href="https://github.com/ruby/openssl/issues/438">[GitHub #438]</a></p>
+</li><li>
+<p>Add <code>OpenSSL::SSL::SSLContext#tmp_dh=</code>.  <a href="https://github.com/ruby/openssl/pull/459">[GitHub #459]</a></p>
+</li><li>
+<p>Add <code>OpenSSL::X509::Certificate.load</code> to load a PEM-encoded and concatenated  list of X.509 certificates at once.  <a href="https://github.com/ruby/openssl/pull/441">[GitHub #441]</a></p>
+</li><li>
+<p>Change <code>OpenSSL::X509::Certificate.new</code> to attempt to deserialize the given  string first as DER encoding first and then as PEM encoding to ensure the  round-trip consistency.  <a href="https://github.com/ruby/openssl/pull/442">[GitHub #442]</a></p>
+</li><li>
+<p>Update various part of the code base to use the modern API. No breaking  changes are intended with this. This includes:</p>
+</li><li>
+<p><code>OpenSSL::HMAC</code> uses the EVP API. <a href="https://github.com/ruby/openssl/issues/371">[GitHub #371]</a></p>
+</li><li>
+<p><code>OpenSSL::Config</code> uses native <a href="OpenSSL.html"><code>OpenSSL</code></a> API to parse config files. <a href="https://github.com/ruby/openssl/issues/342">[GitHub #342]</a></p>
+</li></ul>
 
 <h1 id="label-Version+2.2.1">Version 2.2.1<span><a href="#label-Version+2.2.1">&para;</a> <a href="#top">&uarr;</a></span></h1>
 
@@ -186,7 +252,7 @@
 <ul><li>
 <p>Fix deprecation warnings on Ruby 3.0.</p>
 </li><li>
-<p>Add “.include” directive support in <code>OpenSSL::Config</code>.  <a href="https://github.com/ruby/openssl/pull/216">[GitHub #216]</a></p>
+<p>Add ".include" directive support in <code>OpenSSL::Config</code>.  <a href="https://github.com/ruby/openssl/pull/216">[GitHub #216]</a></p>
 </li><li>
 <p>Fix handling of IPv6 address SANs.  <a href="https://github.com/ruby/openssl/pull/185">[GitHub #185]</a></p>
 </li><li>
@@ -198,7 +264,7 @@
 </li><li>
 <p>Fix misuse of input record separator in <code>OpenSSL::Buffering</code> where it was  for output.</p>
 </li><li>
-<p>Fix wrong interger casting in <code>OpenSSL::PKey::EC#dsa_verify_asn1</code>.  <a href="https://github.com/ruby/openssl/pull/460">[GitHub #460]</a></p>
+<p>Fix wrong integer casting in <code>OpenSSL::PKey::EC#dsa_verify_asn1</code>.  <a href="https://github.com/ruby/openssl/pull/460">[GitHub #460]</a></p>
 </li><li>
 <p><code>extconf.rb</code> explicitly checks that OpenSSL’s version number is 1.0.1 or  newer but also less than 3.0. Ruby/OpenSSL v2.1.x and v2.2.x will not support  <a href="OpenSSL.html"><code>OpenSSL</code></a> 3.0 API.  <a href="https://github.com/ruby/openssl/pull/458">[GitHub #458]</a></p>
 </li><li>
@@ -239,7 +305,7 @@
 </li><li>
 <p><a href="OpenSSL/X509/Name.html#method-i-to_utf8"><code>OpenSSL::X509::Name#to_utf8</code></a> is added.  <a href="https://github.com/ruby/openssl/issues/26">[GitHub #26]</a>  <a href="https://github.com/ruby/openssl/pull/143">[GitHub #143]</a></p>
 </li><li>
-<p>OpenSSL::X509::<a href="https://github.com/ruby/openssl/pull/161">Extension,Attribute,Certificate,CRL,Revoked,Request} can be  compared with == operator.  {[GitHub #161]</a></p>
+<p><a href="OpenSSL/X509.html"><code>OpenSSL::X509</code></a>::<a href="https://github.com/ruby/openssl/pull/161">Extension,Attribute,Certificate,CRL,Revoked,Request} can be  compared with == operator.  {[GitHub #161]</a></p>
 </li><li>
 <p>TLS Fallback Signaling Cipher Suite Value (SCSV) support is added.  <a href="https://github.com/ruby/openssl/pull/165">[GitHub #165]</a></p>
 </li><li>
@@ -258,7 +324,7 @@
 
 <h2 id="label-Security+fixes">Security fixes<span><a href="#label-Security+fixes">&para;</a> <a href="#top">&uarr;</a></span></h2>
 <ul><li>
-<p>OpenSSL::X509::Name#&lt;=&gt; could incorrectly return 0 (= equal) for non-equal  objects. CVE-2018-16395 is assigned for this issue.  <a href="https://hackerone.com/reports/387250">hackerone.com/reports/387250</a></p>
+<p><a href="OpenSSL/X509/Name.html"><code>OpenSSL::X509::Name</code></a>#&lt;=&gt; could incorrectly return 0 (= equal) for non-equal  objects. CVE-2018-16395 is assigned for this issue.  <a href="https://hackerone.com/reports/387250">hackerone.com/reports/387250</a></p>
 </li></ul>
 
 <h2 id="label-Bug+fixes">Bug fixes<span><a href="#label-Bug+fixes">&para;</a> <a href="#top">&uarr;</a></span></h2>
@@ -398,7 +464,7 @@
 </li><li>
 <p><a href="OpenSSL/PKey/EC.html"><code>OpenSSL::PKey::EC</code></a> follows the general PKey interface. <a href="https://bugs.ruby-lang.org/issues/6567">[Bug #6567]</a></p>
 </li><li>
-<p><a href="OpenSSL/PKey.html#method-c-read"><code>OpenSSL::PKey.read</code></a> raises <a href="OpenSSL/PKey/PKeyError.html"><code>OpenSSL::PKey::PKeyError</code></a> instead of ArgumentError for consistency with OpenSSL::PKey::<a href="https://bugs.ruby-lang.org/issues/11774">DH,DSA,RSA,EC}#new. {[Bug #11774]</a>, <a href="https://github.com/ruby/openssl/pull/55">[GH ruby/openssl#55]</a></p>
+<p><a href="OpenSSL/PKey.html#method-c-read"><code>OpenSSL::PKey.read</code></a> raises <a href="OpenSSL/PKey/PKeyError.html"><code>OpenSSL::PKey::PKeyError</code></a> instead of ArgumentError for consistency with <a href="OpenSSL/PKey.html"><code>OpenSSL::PKey</code></a>::<a href="https://bugs.ruby-lang.org/issues/11774">DH,DSA,RSA,EC}#new. {[Bug #11774]</a>, <a href="https://github.com/ruby/openssl/pull/55">[GH ruby/openssl#55]</a></p>
 </li><li>
 <p><a href="OpenSSL/PKey/EC/Group.html"><code>OpenSSL::PKey::EC::Group</code></a> retrieved by <a href="OpenSSL/PKey/EC.html#method-i-group"><code>OpenSSL::PKey::EC#group</code></a> is no longer linked with the EC key. Modifications to the EC::Group have no effect on the key. <a href="https://github.com/ruby/openssl/pull/71">[GH ruby/openssl#71]</a></p>
 </li><li>
@@ -440,7 +506,7 @@
 </li><li>
 <p><a href="OpenSSL/SSL.html"><code>OpenSSL::SSL</code></a></p>
 </li><li>
-<p><a href="OpenSSL/SSL/SSLContext.html#attribute-i-tmp_ecdh_callback"><code>OpenSSL::SSL::SSLContext#tmp_ecdh_callback</code></a> is deprecated, as the underlying API SSL_CTX_set_tmp_ecdh_callback() is removed in <a href="OpenSSL.html"><code>OpenSSL</code></a> 1.1.0. It was first added in Ruby 2.3.0. To specify the curve to be used in ephemeral ECDH, use <a href="OpenSSL/SSL/SSLContext.html#method-i-ecdh_curves-3D"><code>OpenSSL::SSL::SSLContext#ecdh_curves=</code></a>. The automatic curve selection is also now enabled by default when built with a capable <a href="OpenSSL.html"><code>OpenSSL</code></a>.</p>
+<p>OpenSSL::SSL::SSLContext#tmp_ecdh_callback is deprecated, as the underlying API SSL_CTX_set_tmp_ecdh_callback() is removed in <a href="OpenSSL.html"><code>OpenSSL</code></a> 1.1.0. It was first added in Ruby 2.3.0. To specify the curve to be used in ephemeral ECDH, use <a href="OpenSSL/SSL/SSLContext.html#method-i-ecdh_curves-3D"><code>OpenSSL::SSL::SSLContext#ecdh_curves=</code></a>. The automatic curve selection is also now enabled by default when built with a capable <a href="OpenSSL.html"><code>OpenSSL</code></a>.</p>
 </li></ul>
 
 </main>

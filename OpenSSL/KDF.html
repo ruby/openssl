@@ -179,6 +179,16 @@
 <p>The hash function.</p>
 </dd></dl>
 
+<h3 id="method-c-hkdf-label-Example">Example<span><a href="#method-c-hkdf-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby"><span class="ruby-comment"># The values from https://datatracker.ietf.org/doc/html/rfc5869#appendix-A.1</span>
+<span class="ruby-identifier">ikm</span> = [<span class="ruby-string">&quot;0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b&quot;</span>].<span class="ruby-identifier">pack</span>(<span class="ruby-string">&quot;H*&quot;</span>)
+<span class="ruby-identifier">salt</span> = [<span class="ruby-string">&quot;000102030405060708090a0b0c&quot;</span>].<span class="ruby-identifier">pack</span>(<span class="ruby-string">&quot;H*&quot;</span>)
+<span class="ruby-identifier">info</span> = [<span class="ruby-string">&quot;f0f1f2f3f4f5f6f7f8f9&quot;</span>].<span class="ruby-identifier">pack</span>(<span class="ruby-string">&quot;H*&quot;</span>)
+<span class="ruby-identifier">p</span> <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">KDF</span>.<span class="ruby-identifier">hkdf</span>(<span class="ruby-identifier">ikm</span>, <span class="ruby-value">salt:</span> <span class="ruby-identifier">salt</span>, <span class="ruby-value">info:</span> <span class="ruby-identifier">info</span>, <span class="ruby-value">length:</span> <span class="ruby-value">42</span>, <span class="ruby-value">hash:</span> <span class="ruby-string">&quot;SHA256&quot;</span>).<span class="ruby-identifier">unpack1</span>(<span class="ruby-string">&quot;H*&quot;</span>)
+<span class="ruby-comment"># =&gt; &quot;3cb25f25faacd57a90434f64d0362f2a2d2d0a90cf1a5a4c5db02d56ecc4c5bf34007208d5b887185865&quot;</span>
+</pre>
+
           <div class="method-source-code" id="hkdf-source">
             <pre>static VALUE
 kdf_hkdf(int argc, VALUE *argv, VALUE self)

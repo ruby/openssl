@@ -140,23 +140,26 @@
 ossl_x509req_initialize(int argc, VALUE *argv, VALUE self)
 {
     BIO *in;
-    X509_REQ *req, *x = DATA_PTR(self);
+    X509_REQ *req, *req_orig = RTYPEDDATA_DATA(self);
     VALUE arg;
 
+    rb_check_frozen(self);
     if (rb_scan_args(argc, argv, &quot;01&quot;, &amp;arg) == 0) {
         return self;
     }
     arg = ossl_to_der_if_possible(arg);
     in = ossl_obj2bio(&amp;arg);
-    req = PEM_read_bio_X509_REQ(in, &amp;x, NULL, NULL);
-    DATA_PTR(self) = x;
+    req = d2i_X509_REQ_bio(in, NULL);
     if (!req) {
         OSSL_BIO_reset(in);
-        req = d2i_X509_REQ_bio(in, &amp;x);
-        DATA_PTR(self) = x;
+        req = PEM_read_bio_X509_REQ(in, NULL, NULL, NULL);
     }
     BIO_free(in);
-    if (!req) ossl_raise(eX509ReqError, NULL);
+    if (!req)
+        ossl_raise(eX509ReqError, &quot;PEM_read_bio_X509_REQ&quot;);
+
+    RTYPEDDATA_DATA(self) = req;
+    X509_REQ_free(req_orig);
 
     return self;
 }</pre>
@@ -184,7 +187,7 @@ ossl_x509req_initialize(int argc, VALUE *argv, VALUE self)
           
 
           <div class="method-source-code" id="3D-3D-source">
-            <pre><span class="ruby-comment"># File lib/openssl/x509.rb, line 363</span>
+            <pre><span class="ruby-comment"># File lib/openssl/x509.rb, line 385</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">==</span>(<span class="ruby-identifier">other</span>)
   <span class="ruby-keyword">return</span> <span class="ruby-keyword">false</span> <span class="ruby-keyword">unless</span> <span class="ruby-constant">Request</span> <span class="ruby-operator">===</span> <span class="ruby-identifier">other</span>
   <span class="ruby-identifier">to_der</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">other</span>.<span class="ruby-identifier">to_der</span>

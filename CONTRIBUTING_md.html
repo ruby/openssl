@@ -62,7 +62,7 @@
     <li><a href="#label-Bugs+and+feature+requests">Bugs and feature requests</a>
     <li><a href="#label-Submitting+patches">Submitting patches</a>
     <li><a href="#label-Testing">Testing</a>
-    <li><a href="#label-Docker">Docker</a>
+    <li><a href="#label-With+different+versions+of+OpenSSL">With different versions of OpenSSL</a>
     <li><a href="#label-Relation+with+Ruby+source+tree">Relation with Ruby source tree</a>
     <li><a href="#label-Release+policy">Release policy</a>
     <li><a href="#label-Security">Security</a>
@@ -99,9 +99,18 @@
 
 <p>If you think you found a bug, file a ticket on GitHub. Please DO NOT report security issues here, there is a separate procedure which is described on <a href="https://www.ruby-lang.org/en/security/">“Security at ruby-lang.org”</a>.</p>
 
-<p>When reporting a bug, please make sure you include: * Ruby version * <a href="OpenSSL.html"><code>OpenSSL</code></a> gem version * <a href="OpenSSL.html"><code>OpenSSL</code></a> library version * A sample file that illustrates the problem or link to the repository or  gem that is associated with the bug.</p>
+<p>When reporting a bug, please make sure you include:</p>
+<ul><li>
+<p>Ruby version (<code>ruby -v</code>)</p>
+</li><li>
+<p><code>openssl</code> gem version (<code>gem list openssl</code> and <code>OpenSSL::VERSION</code>)</p>
+</li><li>
+<p><a href="OpenSSL.html"><code>OpenSSL</code></a> library version (<code>OpenSSL::OPENSSL_VERSION</code>)</p>
+</li><li>
+<p>A sample file that illustrates the problem or link to the repository or  gem that is associated with the bug.</p>
+</li></ul>
 
-<p>There are a number of unresolved issues and feature requests for openssl that need review. Before submitting a new ticket, it is recommended to check <a href="https://github.com/ruby/openssl/issues">known issues</a> and <a href="https://bugs.ruby-lang.org/issues?utf8=%E2%9C%93&set_filter=1&f%5B%5D=status_id&op%5Bstatus_id%5D=o&f%5B%5D=assigned_to_id&op%5Bassigned_to_id%5D=%3D&v%5Bassigned_to_id%5D%5B%5D=7150&f%5B%5D=&c%5B%5D=project&c%5B%5D=tracker&c%5B%5D=status&c%5B%5D=subject&c%5B%5D=assigned_to&c%5B%5D=updated_on&group_by=&t%5B%5D=">bugs.ruby-lang.org</a>, the previous issue tracker.</p>
+<p>There are a number of unresolved issues and feature requests for openssl that need review. Before submitting a new ticket, it is recommended to check <a href="https://github.com/ruby/openssl/issues">known issues</a>.</p>
 
 <h2 id="label-Submitting+patches">Submitting patches<span><a href="#label-Submitting+patches">&para;</a> <a href="#top">&uarr;</a></span></h2>
 
@@ -116,45 +125,39 @@
 <p>Follow Ruby’s coding style (<a href="https://bugs.ruby-lang.org/projects/ruby/wiki/DeveloperHowto">DeveloperHowTo</a>)</p>
 </li><li>
 <p>Pass the test suite successfully (see “Testing”)</p>
-</li><li>
-<p>Add an entry to <a href="https://github.com/ruby/openssl/tree/master/History.md">History.md</a> if necessary</p>
 </li></ul>
 
 <h2 id="label-Testing">Testing<span><a href="#label-Testing">&para;</a> <a href="#top">&uarr;</a></span></h2>
 
 <p>We have a test suite!</p>
 
-<p>Test cases are located under the {<code>test/</code><a href="https://github.com/ruby/openssl/tree/master/test">}</a> directory.</p>
+<p>Test cases are located under the {<code>test/openssl</code><a href="https://github.com/ruby/openssl/tree/master/test/openssl">}</a> directory.</p>
 
 <p>You can run it with the following three commands:</p>
 
-<pre>$ rake install_dependencies # installs rake-compiler, test-unit, ...
-$ rake compile
-$ rake test</pre>
+<pre>$ bundle install # installs rake-compiler, test-unit, ...
+$ bundle exec rake compile
+$ bundle exec rake test</pre>
 
-<h3 id="label-Docker">Docker<span><a href="#label-Docker">&para;</a> <a href="#top">&uarr;</a></span></h3>
+<h3 id="label-With+different+versions+of+OpenSSL">With different versions of <a href="OpenSSL.html"><code>OpenSSL</code></a><span><a href="#label-With+different+versions+of+OpenSSL">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
-<p>You can also use Docker Compose to run tests. It can be used to check that your changes work correctly with various supported versions of Ruby and <a href="OpenSSL.html"><code>OpenSSL</code></a>.</p>
+<p>Ruby <a href="OpenSSL.html"><code>OpenSSL</code></a> supports various versions of <a href="OpenSSL.html"><code>OpenSSL</code></a> library. The test suite needs to pass on all supported combinations.</p>
 
-<p>First, you need to install <a href="https://www.docker.com/products/docker">Docker</a> and <a href="https://www.docker.com/products/docker-compose">Docker Compose</a> on your computer.</p>
+<p>Similarly to when installing <code>openssl</code> gem via the <code>gem</code> command, you can pass a <code>--with-openssl-dir</code> argument to <code>rake compile</code> to specify the <a href="OpenSSL.html"><code>OpenSSL</code></a> library to build against.</p>
 
-<p>If you’re on MacOS or Windows, we recommended to use the official <a href="https://www.docker.com/products/docker-toolbox">Docker Toolbox</a>. On Linux, follow the instructions for your package manager. For further information, please check the <a href="https://docs.docker.com/">official documentation</a>.</p>
+<pre>$ ( curl -OL https://ftp.openssl.org/source/openssl-3.0.1.tar.gz &amp;&amp;
+    tar xf openssl-3.0.1.tar.gz &amp;&amp;
+    cd openssl-3.0.1 &amp;&amp;
+    ./config --prefix=$HOME/.openssl/openssl-3.0.1 --libdir=lib &amp;&amp;
+    make -j4 &amp;&amp;
+    make install )
 
-<p>Once you have Docker and Docker Compose, running the following commands will build the container and execute the openssl tests. In this example, we will use Ruby version 2.3 with <a href="OpenSSL.html"><code>OpenSSL</code></a> version 1.0.2.</p>
+$ # in Ruby/OpenSSL&#39;s source directory
+$ bundle exec rake clean
+$ bundle exec rake compile -- --with-openssl-dir=$HOME/.openssl/openssl-3.0.1
+$ bundle exec rake test</pre>
 
-<pre>$ docker-compose build
-$ export RUBY_VERSION=ruby-2.3
-$ export OPENSSL_VERSION=openssl-1.0.2
-$ docker-compose run test
-
-# You may want an interactive shell for dubugging
-$ docker-compose run debug</pre>
-
-<p>All possible values for <code>RUBY_VERSION</code> and <code>OPENSSL_VERSION</code> can be found in {<code>test.yml</code><a href="https://github.com/ruby/openssl/tree/master/.github/workflows/test.yml">}</a>.</p>
-
-<p><strong>NOTE</strong>: these commands must be run from the openssl repository root, in order to use the {<code>docker-compose.yml</code><a href="https://github.com/ruby/openssl/blob/master/docker-compose.yml">}</a> file we have provided.</p>
-
-<p>This Docker image is built using the <a href="https://github.com/ruby/openssl/tree/master/tool/ruby-openssl-docker">Dockerfile</a> provided in the repository.</p>
+<p>The GitHub Actions workflow file {<code>test.yml</code><a href="https://github.com/ruby/openssl/tree/master/.github/workflows/test.yml">}</a> contains useful information for building OpenSSL/LibreSSL and testing against them.</p>
 
 <h2 id="label-Relation+with+Ruby+source+tree">Relation with Ruby source tree<span><a href="#label-Relation+with+Ruby+source+tree">&para;</a> <a href="#top">&uarr;</a></span></h2>
 

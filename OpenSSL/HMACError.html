@@ -102,11 +102,10 @@
 
 <h3 id="class-OpenSSL::HMACError-label-HMAC-SHA256+using+incremental+interface">HMAC-SHA256 using incremental interface<span><a href="#class-OpenSSL::HMACError-label-HMAC-SHA256+using+incremental+interface">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
-<pre class="ruby"><span class="ruby-identifier">data1</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span>(<span class="ruby-string">&quot;file1&quot;</span>)
-<span class="ruby-identifier">data2</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span>(<span class="ruby-string">&quot;file2&quot;</span>)
+<pre class="ruby"><span class="ruby-identifier">data1</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">binread</span>(<span class="ruby-string">&quot;file1&quot;</span>)
+<span class="ruby-identifier">data2</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">binread</span>(<span class="ruby-string">&quot;file2&quot;</span>)
 <span class="ruby-identifier">key</span> = <span class="ruby-string">&quot;key&quot;</span>
-<span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;SHA256&#39;</span>)
-<span class="ruby-identifier">hmac</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">HMAC</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">key</span>, <span class="ruby-identifier">digest</span>)
+<span class="ruby-identifier">hmac</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">HMAC</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">key</span>, <span class="ruby-string">&#39;SHA256&#39;</span>)
 <span class="ruby-identifier">hmac</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">data1</span>
 <span class="ruby-identifier">hmac</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">data2</span>
 <span class="ruby-identifier">mac</span> = <span class="ruby-identifier">hmac</span>.<span class="ruby-identifier">digest</span>

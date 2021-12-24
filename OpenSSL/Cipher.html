@@ -144,7 +144,7 @@
 
 <p>That is, a string consisting of the hyphenated concatenation of the individual components name, key length and mode. Either all uppercase or all lowercase strings may be used, for example:</p>
 
-<pre class="ruby"><span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;AES-128-CBC&#39;</span>)
+<pre class="ruby"><span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;aes-128-cbc&#39;</span>)
 </pre>
 
 <h3 id="class-OpenSSL::Cipher-label-Choosing+either+encryption+or+decryption+mode">Choosing either encryption or decryption mode<span><a href="#class-OpenSSL::Cipher-label-Choosing+either+encryption+or+decryption+mode">&para;</a> <a href="#top">&uarr;</a></span></h3>
@@ -165,7 +165,7 @@
 
 <p>Symmetric encryption requires a key that is the same for the encrypting and for the decrypting party and after initial key establishment should be kept as private information. There are a lot of ways to create insecure keys, the most notable is to simply take a password as the key without processing the password further. A simple and secure way to create a key for a particular <a href="Cipher/Cipher.html"><code>Cipher</code></a> is</p>
 
-<pre class="ruby"><span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;AES-256-CFB&#39;</span>)
+<pre class="ruby"><span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;aes-256-cfb&#39;</span>)
 <span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">encrypt</span>
 <span class="ruby-identifier">key</span> = <span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">random_key</span> <span class="ruby-comment"># also sets the generated key on the Cipher</span>
 </pre>
@@ -204,14 +204,14 @@
 
 <pre class="ruby"><span class="ruby-identifier">data</span> = <span class="ruby-string">&quot;Very, very confidential data&quot;</span>
 
-<span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;AES-128-CBC&#39;</span>)
+<span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;aes-128-cbc&#39;</span>)
 <span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">encrypt</span>
 <span class="ruby-identifier">key</span> = <span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">random_key</span>
 <span class="ruby-identifier">iv</span> = <span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">random_iv</span>
 
 <span class="ruby-identifier">encrypted</span> = <span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">update</span>(<span class="ruby-identifier">data</span>) <span class="ruby-operator">+</span> <span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">final</span>
 <span class="ruby-operator">...</span>
-<span class="ruby-identifier">decipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;AES-128-CBC&#39;</span>)
+<span class="ruby-identifier">decipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;aes-128-cbc&#39;</span>)
 <span class="ruby-identifier">decipher</span>.<span class="ruby-identifier">decrypt</span>
 <span class="ruby-identifier">decipher</span>.<span class="ruby-identifier">key</span> = <span class="ruby-identifier">key</span>
 <span class="ruby-identifier">decipher</span>.<span class="ruby-identifier">iv</span> = <span class="ruby-identifier">iv</span>
@@ -231,7 +231,7 @@
 
 <p>An example using the GCM (Galois/Counter Mode). You have 16 bytes <em>key</em>, 12 bytes (96 bits) <em>nonce</em> and the associated data <em>auth_data</em>. Be sure not to reuse the <em>key</em> and <em>nonce</em> pair. Reusing an nonce ruins the security guarantees of GCM mode.</p>
 
-<pre class="ruby"><span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;AES-128-GCM&#39;</span>).<span class="ruby-identifier">encrypt</span>
+<pre class="ruby"><span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;aes-128-gcm&#39;</span>).<span class="ruby-identifier">encrypt</span>
 <span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">key</span> = <span class="ruby-identifier">key</span>
 <span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">iv</span> = <span class="ruby-identifier">nonce</span>
 <span class="ruby-identifier">cipher</span>.<span class="ruby-identifier">auth_data</span> = <span class="ruby-identifier">auth_data</span>
@@ -243,7 +243,7 @@
 <p>Now you are the receiver. You know the <em>key</em> and have received <em>nonce</em>, <em>auth_data</em>, <em>encrypted</em> and <em>tag</em> through an untrusted network. Note that GCM accepts an arbitrary length tag between 1 and 16 bytes. You may additionally need to check that the received tag has the correct length, or you allow attackers to forge a valid single byte tag for the tampered ciphertext with a probability of 1/256.</p>
 
 <pre class="ruby"><span class="ruby-identifier">raise</span> <span class="ruby-string">&quot;tag is truncated!&quot;</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">bytesize</span> <span class="ruby-operator">==</span> <span class="ruby-value">16</span>
-<span class="ruby-identifier">decipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;AES-128-GCM&#39;</span>).<span class="ruby-identifier">decrypt</span>
+<span class="ruby-identifier">decipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;aes-128-gcm&#39;</span>).<span class="ruby-identifier">decrypt</span>
 <span class="ruby-identifier">decipher</span>.<span class="ruby-identifier">key</span> = <span class="ruby-identifier">key</span>
 <span class="ruby-identifier">decipher</span>.<span class="ruby-identifier">iv</span> = <span class="ruby-identifier">nonce</span>
 <span class="ruby-identifier">decipher</span>.<span class="ruby-identifier">auth_tag</span> = <span class="ruby-identifier">tag</span>
@@ -286,7 +286,7 @@ ossl_s_ciphers(VALUE self)
 
     ary = rb_ary_new();
     OBJ_NAME_do_all_sorted(OBJ_NAME_TYPE_CIPHER_METH,
-                    (void(*)(const OBJ_NAME*,void*))add_cipher_name_to_ary,
+                    add_cipher_name_to_ary,
                     (void*)ary);
 
     return ary;
@@ -306,7 +306,7 @@ ossl_s_ciphers(VALUE self)
         </div>
 
         <div class="method-description">
-          <p>The string must contain a valid cipher name like “AES-256-CBC”.</p>
+          <p>The string must contain a valid cipher name like “aes-256-cbc”.</p>
 
 <p>A list of cipher names is available by calling <a href="Cipher.html#method-c-ciphers"><code>OpenSSL::Cipher.ciphers</code></a>.</p>
 

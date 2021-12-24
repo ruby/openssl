@@ -126,43 +126,38 @@
           <p>Creates a new <a href="Session.html"><code>Session</code></a> object from an instance of <a href="SSLSocket.html"><code>SSLSocket</code></a> or DER/PEM encoded String.</p>
 
           <div class="method-source-code" id="new-source">
-            <pre>static VALUE ossl_ssl_session_initialize(VALUE self, VALUE arg1)
+            <pre>static VALUE
+ossl_ssl_session_initialize(VALUE self, VALUE arg1)
 {
-        SSL_SESSION *ctx = NULL;
+    SSL_SESSION *ctx;
 
-        if (RDATA(self)-&gt;data)
-                ossl_raise(eSSLSession, &quot;SSL Session already initialized&quot;);
+    if (RTYPEDDATA_DATA(self))
+        ossl_raise(eSSLSession, &quot;SSL Session already initialized&quot;);
 
-        if (rb_obj_is_instance_of(arg1, cSSLSocket)) {
-                SSL *ssl;
+    if (rb_obj_is_instance_of(arg1, cSSLSocket)) {
+        SSL *ssl;
 
-                GetSSL(arg1, ssl);
+        GetSSL(arg1, ssl);
 
-                if ((ctx = SSL_get1_session(ssl)) == NULL)
-                        ossl_raise(eSSLSession, &quot;no session available&quot;);
-        } else {
-                BIO *in = ossl_obj2bio(&amp;arg1);
+        if ((ctx = SSL_get1_session(ssl)) == NULL)
+            ossl_raise(eSSLSession, &quot;no session available&quot;);
+    }
+    else {
+        BIO *in = ossl_obj2bio(&amp;arg1);
 
-                ctx = PEM_read_bio_SSL_SESSION(in, NULL, NULL, NULL);
-
-                if (!ctx) {
-                        OSSL_BIO_reset(in);
-                        ctx = d2i_SSL_SESSION_bio(in, NULL);
-                }
-
-                BIO_free(in);
-
-                if (!ctx)
-                        ossl_raise(rb_eArgError, &quot;unknown type&quot;);
+        ctx = d2i_SSL_SESSION_bio(in, NULL);
+        if (!ctx) {
+            OSSL_BIO_reset(in);
+            ctx = PEM_read_bio_SSL_SESSION(in, NULL, NULL, NULL);
         }
+        BIO_free(in);
+        if (!ctx)
+            ossl_raise(rb_eArgError, &quot;unknown type&quot;);
+    }
 
-        /* should not happen */
-        if (ctx == NULL)
-                ossl_raise(eSSLSession, &quot;ctx not set - internal error&quot;);
+    RTYPEDDATA_DATA(self) = ctx;
 
-        RDATA(self)-&gt;data = ctx;
-
-        return self;
+    return self;
 }</pre>
           </div>
         </div>

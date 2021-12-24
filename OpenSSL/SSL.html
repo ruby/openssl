@@ -94,6 +94,8 @@
       <dl>
         <dt id="OP_ALL">OP_ALL
         <dd>
+        <dt id="OP_ALLOW_CLIENT_RENEGOTIATION">OP_ALLOW_CLIENT_RENEGOTIATION
+        <dd>
         <dt id="OP_ALLOW_NO_DHE_KEX">OP_ALLOW_NO_DHE_KEX
         <dd>
         <dt id="OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION">OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION
@@ -102,14 +104,24 @@
         <dd>
         <dt id="OP_CISCO_ANYCONNECT">OP_CISCO_ANYCONNECT
         <dd>
+        <dt id="OP_CLEANSE_PLAINTEXT">OP_CLEANSE_PLAINTEXT
+        <dd>
         <dt id="OP_COOKIE_EXCHANGE">OP_COOKIE_EXCHANGE
         <dd>
         <dt id="OP_CRYPTOPRO_TLSEXT_BUG">OP_CRYPTOPRO_TLSEXT_BUG
         <dd>
+        <dt id="OP_DISABLE_TLSEXT_CA_NAMES">OP_DISABLE_TLSEXT_CA_NAMES
+        <dd>
         <dt id="OP_DONT_INSERT_EMPTY_FRAGMENTS">OP_DONT_INSERT_EMPTY_FRAGMENTS
+        <dd>
+        <dt id="OP_ENABLE_KTLS">OP_ENABLE_KTLS
+        <dd>
+        <dt id="OP_ENABLE_MIDDLEBOX_COMPAT">OP_ENABLE_MIDDLEBOX_COMPAT
         <dd>
         <dt id="OP_EPHEMERAL_RSA">OP_EPHEMERAL_RSA
         <dd><p>Deprecated in <a href="../OpenSSL.html"><code>OpenSSL</code></a> 1.0.1k and 1.0.2.</p>
+        <dt id="OP_IGNORE_UNEXPECTED_EOF">OP_IGNORE_UNEXPECTED_EOF
+        <dd>
         <dt id="OP_LEGACY_SERVER_CONNECT">OP_LEGACY_SERVER_CONNECT
         <dd>
         <dt id="OP_MICROSOFT_BIG_SSLV3_BUFFER">OP_MICROSOFT_BIG_SSLV3_BUFFER
@@ -126,6 +138,8 @@
         <dd><p>Deprecated in <a href="../OpenSSL.html"><code>OpenSSL</code></a> 1.1.0.</p>
         <dt id="OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG">OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG
         <dd><p>Deprecated in <a href="../OpenSSL.html"><code>OpenSSL</code></a> 0.9.8q and 1.0.0c.</p>
+        <dt id="OP_NO_ANTI_REPLAY">OP_NO_ANTI_REPLAY
+        <dd>
         <dt id="OP_NO_COMPRESSION">OP_NO_COMPRESSION
         <dd>
         <dt id="OP_NO_ENCRYPT_THEN_MAC">OP_NO_ENCRYPT_THEN_MAC
@@ -154,6 +168,8 @@
         <dd><p>Deprecated in <a href="../OpenSSL.html"><code>OpenSSL</code></a> 1.0.1.</p>
         <dt id="OP_PKCS1_CHECK_2">OP_PKCS1_CHECK_2
         <dd><p>Deprecated in <a href="../OpenSSL.html"><code>OpenSSL</code></a> 1.0.1.</p>
+        <dt id="OP_PRIORITIZE_CHACHA">OP_PRIORITIZE_CHACHA
+        <dd>
         <dt id="OP_SAFARI_ECDHE_ECDSA_BUG">OP_SAFARI_ECDHE_ECDSA_BUG
         <dd>
         <dt id="OP_SINGLE_DH_USE">OP_SINGLE_DH_USE
@@ -213,7 +229,7 @@
           
 
           <div class="method-source-code" id="verify_certificate_identity-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 269</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 273</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">verify_certificate_identity</span>(<span class="ruby-identifier">cert</span>, <span class="ruby-identifier">hostname</span>)
   <span class="ruby-identifier">should_verify_common_name</span> = <span class="ruby-keyword">true</span>
   <span class="ruby-identifier">cert</span>.<span class="ruby-identifier">extensions</span>.<span class="ruby-identifier">each</span>{<span class="ruby-operator">|</span><span class="ruby-identifier">ext</span><span class="ruby-operator">|</span>

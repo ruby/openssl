@@ -110,18 +110,19 @@
 
 <p>Assume we received a timestamp request that has set <a href="Request.html#method-i-policy_id"><code>Request#policy_id</code></a> to <code>nil</code> and <a href="Request.html#method-i-cert_requested-3F"><code>Request#cert_requested?</code></a> to true. The raw request bytes are stored in a variable called <code>req_raw</code>. We’d still like to integrate the necessary intermediate certificates (in <code>inter1.cer</code> and <code>inter2.cer</code>) to simplify validation of the resulting <a href="Response.html"><code>Response</code></a>. <code>ts.p12</code> is a PKCS#12-compatible file including the private key and the timestamping certificate.</p>
 
-<pre>req = OpenSSL::Timestamp::Request.new(raw_bytes)
-p12 = OpenSSL::PKCS12.new(File.open(&#39;ts.p12&#39;, &#39;rb&#39;), &#39;pwd&#39;)
-inter1 = OpenSSL::X509::Certificate.new(File.open(&#39;inter1.cer&#39;, &#39;rb&#39;)
-inter2 = OpenSSL::X509::Certificate.new(File.open(&#39;inter2.cer&#39;, &#39;rb&#39;)
-fac = OpenSSL::Timestamp::Factory.new
-fac.gen_time = Time.now
-fac.serial_number = 1
-fac.allowed_digests = [&quot;sha256&quot;, &quot;sha384&quot;, &quot;sha512&quot;]
-#needed because the Request contained no policy identifier
-fac.default_policy_id = &#39;1.2.3.4.5&#39;
-fac.additional_certificates = [ inter1, inter2 ]
-timestamp = fac.create_timestamp(p12.key, p12.certificate, req)</pre>
+<pre class="ruby"><span class="ruby-identifier">req</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Timestamp</span><span class="ruby-operator">::</span><span class="ruby-constant">Request</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">raw_bytes</span>)
+<span class="ruby-identifier">p12</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKCS12</span>.<span class="ruby-identifier">new</span>(<span class="ruby-constant">File</span>.<span class="ruby-identifier">binread</span>(<span class="ruby-string">&#39;ts.p12&#39;</span>), <span class="ruby-string">&#39;pwd&#39;</span>)
+<span class="ruby-identifier">inter1</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">Certificate</span>.<span class="ruby-identifier">new</span>(<span class="ruby-constant">File</span>.<span class="ruby-identifier">binread</span>(<span class="ruby-string">&#39;inter1.cer&#39;</span>))
+<span class="ruby-identifier">inter2</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">X509</span><span class="ruby-operator">::</span><span class="ruby-constant">Certificate</span>.<span class="ruby-identifier">new</span>(<span class="ruby-constant">File</span>.<span class="ruby-identifier">binread</span>(<span class="ruby-string">&#39;inter2.cer&#39;</span>))
+<span class="ruby-identifier">fac</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Timestamp</span><span class="ruby-operator">::</span><span class="ruby-constant">Factory</span>.<span class="ruby-identifier">new</span>
+<span class="ruby-identifier">fac</span>.<span class="ruby-identifier">gen_time</span> = <span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span>
+<span class="ruby-identifier">fac</span>.<span class="ruby-identifier">serial_number</span> = <span class="ruby-value">1</span>
+<span class="ruby-identifier">fac</span>.<span class="ruby-identifier">allowed_digests</span> = [<span class="ruby-string">&quot;sha256&quot;</span>, <span class="ruby-string">&quot;sha384&quot;</span>, <span class="ruby-string">&quot;sha512&quot;</span>]
+<span class="ruby-comment">#needed because the Request contained no policy identifier</span>
+<span class="ruby-identifier">fac</span>.<span class="ruby-identifier">default_policy_id</span> = <span class="ruby-string">&#39;1.2.3.4.5&#39;</span>
+<span class="ruby-identifier">fac</span>.<span class="ruby-identifier">additional_certificates</span> = [ <span class="ruby-identifier">inter1</span>, <span class="ruby-identifier">inter2</span> ]
+<span class="ruby-identifier">timestamp</span> = <span class="ruby-identifier">fac</span>.<span class="ruby-identifier">create_timestamp</span>(<span class="ruby-identifier">p12</span>.<span class="ruby-identifier">key</span>, <span class="ruby-identifier">p12</span>.<span class="ruby-identifier">certificate</span>, <span class="ruby-identifier">req</span>)
+</pre>
 
 <h2 id="class-OpenSSL::Timestamp::Factory-label-Attributes">Attributes<span><a href="#class-OpenSSL::Timestamp::Factory-label-Attributes">&para;</a> <a href="#top">&uarr;</a></span></h2>
 
@@ -315,7 +316,7 @@ ossl_tsfac_create_ts(VALUE self, VALUE key, VALUE certificate, VALUE request)
         goto end;
     }
     if (!NIL_P(def_policy_id) &amp;&amp; !TS_REQ_get_policy_id(req)) {
-        def_policy_id_obj = (ASN1_OBJECT*)rb_protect((VALUE (*)(VALUE))obj_to_asn1obj, (VALUE)def_policy_id, &amp;status);
+        def_policy_id_obj = (ASN1_OBJECT*)rb_protect(obj_to_asn1obj_i, (VALUE)def_policy_id, &amp;status);
         if (status)
             goto end;
     }
@@ -357,7 +358,7 @@ ossl_tsfac_create_ts(VALUE self, VALUE key, VALUE certificate, VALUE request)
 
         for (i = 0; i &lt; RARRAY_LEN(allowed_digests); i++) {
             rbmd = rb_ary_entry(allowed_digests, i);
-            md = (const EVP_MD *)rb_protect((VALUE (*)(VALUE))ossl_evp_get_digestbyname, rbmd, &amp;status);
+            md = (const EVP_MD *)rb_protect(ossl_evp_get_digestbyname_i, rbmd, &amp;status);
             if (status)
                 goto end;
             TS_RESP_CTX_add_md(ctx, md);
@@ -368,7 +369,7 @@ ossl_tsfac_create_ts(VALUE self, VALUE key, VALUE certificate, VALUE request)
     if (status)
         goto end;
 
-    req_bio = (BIO*)rb_protect((VALUE (*)(VALUE))ossl_obj2bio, (VALUE)&amp;str, &amp;status);
+    req_bio = (BIO*)rb_protect(ossl_obj2bio_i, (VALUE)&amp;str, &amp;status);
     if (status)
         goto end;
 
@@ -392,7 +393,7 @@ end:
     ASN1_OBJECT_free(def_policy_id_obj);
     TS_RESP_CTX_free(ctx);
     if (err_msg)
-        ossl_raise(eTimestampError, err_msg);
+        rb_exc_raise(ossl_make_error(eTimestampError, rb_str_new_cstr(err_msg)));
     if (status)
         rb_jump_tag(status);
     return ret;

@@ -418,7 +418,7 @@ ossl_ec_point_initialize_copy(VALUE self, VALUE other)
         </div>
 
         <div class="method-description">
-          
+          <p>This method is deprecated and should not be used. This is a no-op.</p>
 
           <div class="method-source-code" id="make_affine-21-source">
             <pre>static VALUE ossl_ec_point_make_affine(VALUE self)
@@ -429,8 +429,11 @@ ossl_ec_point_initialize_copy(VALUE self, VALUE other)
     GetECPoint(self, point);
     GetECPointGroup(self, group);
 
+    rb_warn(&quot;OpenSSL::PKey::EC::Point#make_affine! is deprecated&quot;);
+#if !OSSL_OPENSSL_PREREQ(3, 0, 0)
     if (EC_POINT_make_affine(group, point, ossl_bn_ctx) != 1)
         ossl_raise(cEC_POINT, &quot;EC_POINT_make_affine&quot;);
+#endif
 
     return self;
 }</pre>
@@ -485,6 +488,10 @@ ossl_ec_point_initialize_copy(VALUE self, VALUE other)
         if (EC_POINT_mul(group, point_result, bn_g, point_self, bn, ossl_bn_ctx) != 1)
             ossl_raise(eEC_POINT, NULL);
     } else {
+#if (defined(OPENSSL_VERSION_MAJOR) &amp;&amp; OPENSSL_VERSION_MAJOR &gt;= 3) || defined(LIBRESSL_VERSION_NUMBER)
+        rb_raise(rb_eNotImpError, &quot;calling #mul with arrays is not&quot; \
+                 &quot;supported by this OpenSSL version&quot;);
+#else
         /*
          * bignums | arg1[0] | arg1[1] | arg1[2] | ...
          * points  | self    | arg2[0] | arg2[1] | ...
@@ -498,6 +505,9 @@ ossl_ec_point_initialize_copy(VALUE self, VALUE other)
         Check_Type(arg2, T_ARRAY);
         if (RARRAY_LEN(arg1) != RARRAY_LEN(arg2) + 1) /* arg2 must be 1 larger */
             ossl_raise(rb_eArgError, &quot;bns must be 1 longer than points; see the documentation&quot;);
+
+        rb_warning(&quot;OpenSSL::PKey::EC::Point#mul(ary, ary) is deprecated; &quot; \
+                   &quot;use #mul(bn) form instead&quot;);
 
         num = RARRAY_LEN(arg1);
         bns_tmp = rb_ary_tmp_new(num);
@@ -524,6 +534,7 @@ ossl_ec_point_initialize_copy(VALUE self, VALUE other)
 
         ALLOCV_END(tmp_b);
         ALLOCV_END(tmp_p);
+#endif
     }
 
     return result;
@@ -615,7 +626,7 @@ ossl_ec_point_initialize_copy(VALUE self, VALUE other)
 <p>See <a href="Point.html#method-i-to_octet_string"><code>to_octet_string</code></a> for more information.</p>
 
           <div class="method-source-code" id="to_bn-source">
-            <pre><span class="ruby-comment"># File lib/openssl/pkey.rb, line 33</span>
+            <pre><span class="ruby-comment"># File lib/openssl/pkey.rb, line 299</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">to_bn</span>(<span class="ruby-identifier">conversion_form</span> = <span class="ruby-identifier">group</span>.<span class="ruby-identifier">point_conversion_form</span>)
   <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">BN</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">to_octet_string</span>(<span class="ruby-identifier">conversion_form</span>), <span class="ruby-value">2</span>)
 <span class="ruby-keyword">end</span></pre>

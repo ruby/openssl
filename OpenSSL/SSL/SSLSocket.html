@@ -233,6 +233,7 @@ ossl_ssl_initialize(int argc, VALUE *argv, VALUE self)
 
     if (rb_respond_to(io, rb_intern(&quot;nonblock=&quot;)))
         rb_funcall(io, rb_intern(&quot;nonblock=&quot;), 1, Qtrue);
+    Check_Type(io, T_FILE);
     rb_ivar_set(self, id_i_io, io);
 
     ssl = SSL_new(ctx);
@@ -271,7 +272,7 @@ ossl_ssl_initialize(int argc, VALUE *argv, VALUE self)
         </div>
 
         <div class="method-description">
-          <p>Waits for a SSL/TLS client to initiate a handshake.  The handshake may be started after unencrypted data has been sent over the socket.</p>
+          <p>Waits for a SSL/TLS client to initiate a handshake.</p>
 
           <div class="method-source-code" id="accept-source">
             <pre>static VALUE
@@ -467,7 +468,7 @@ ossl_ssl_get_client_ca_list(VALUE self)
         </div>
 
         <div class="method-description">
-          <p>Initiates an SSL/TLS handshake with a server.  The handshake may be started after unencrypted data has been sent over the socket.</p>
+          <p>Initiates an SSL/TLS handshake with a server.</p>
 
           <div class="method-source-code" id="connect-source">
             <pre>static VALUE
@@ -783,7 +784,7 @@ ossl_ssl_pending(VALUE self)
 <p>This method MUST be called after calling <a href="SSLSocket.html#method-i-connect"><code>connect</code></a> to ensure that the hostname of a remote peer has been verified.</p>
 
           <div class="method-source-code" id="post_connection_check-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 390</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 394</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">post_connection_check</span>(<span class="ruby-identifier">hostname</span>)
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">peer_cert</span>.<span class="ruby-identifier">nil?</span>
     <span class="ruby-identifier">msg</span> = <span class="ruby-string">&quot;Peer verification enabled, but no certificate received.&quot;</span>
@@ -817,7 +818,7 @@ ossl_ssl_pending(VALUE self)
           <p>Returns the SSLSession object currently used, or nil if the session is not established.</p>
 
           <div class="method-source-code" id="session-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 411</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 415</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">session</span>
   <span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Session</span>.<span class="ruby-identifier">new</span>(<span class="ruby-keyword">self</span>)
 <span class="ruby-keyword">rescue</span> <span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Session</span><span class="ruby-operator">::</span><span class="ruby-constant">SessionError</span>
@@ -962,7 +963,7 @@ ossl_ssl_get_state(VALUE self)
 <p>If <a href="SSLSocket.html#attribute-i-sync_close"><code>sync_close</code></a> is set to <code>true</code>, the underlying <a href="../../IO.html"><code>IO</code></a> is also closed.</p>
 
           <div class="method-source-code" id="sysclose-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 377</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 381</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">sysclose</span>
   <span class="ruby-keyword">return</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">closed?</span>
   <span class="ruby-identifier">stop</span>

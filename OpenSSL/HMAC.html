@@ -81,11 +81,13 @@
   <h3>Methods</h3>
 
   <ul class="link-list" role="directory">
+    <li ><a href="#method-c-base64digest">::base64digest</a>
     <li ><a href="#method-c-digest">::digest</a>
     <li ><a href="#method-c-hexdigest">::hexdigest</a>
     <li ><a href="#method-c-new">::new</a>
     <li ><a href="#method-i-3C-3C">#&lt;&lt;</a>
     <li ><a href="#method-i-3D-3D">#==</a>
+    <li ><a href="#method-i-base64digest">#base64digest</a>
     <li ><a href="#method-i-digest">#digest</a>
     <li ><a href="#method-i-hexdigest">#hexdigest</a>
     <li ><a href="#method-i-initialize_copy">#initialize_copy</a>
@@ -120,11 +122,10 @@
 
 <h3 id="class-OpenSSL::HMAC-label-HMAC-SHA256+using+incremental+interface">HMAC-SHA256 using incremental interface<span><a href="#class-OpenSSL::HMAC-label-HMAC-SHA256+using+incremental+interface">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
-<pre class="ruby"><span class="ruby-identifier">data1</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span>(<span class="ruby-string">&quot;file1&quot;</span>)
-<span class="ruby-identifier">data2</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span>(<span class="ruby-string">&quot;file2&quot;</span>)
+<pre class="ruby"><span class="ruby-identifier">data1</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">binread</span>(<span class="ruby-string">&quot;file1&quot;</span>)
+<span class="ruby-identifier">data2</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">binread</span>(<span class="ruby-string">&quot;file2&quot;</span>)
 <span class="ruby-identifier">key</span> = <span class="ruby-string">&quot;key&quot;</span>
-<span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;SHA256&#39;</span>)
-<span class="ruby-identifier">hmac</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">HMAC</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">key</span>, <span class="ruby-identifier">digest</span>)
+<span class="ruby-identifier">hmac</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">HMAC</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">key</span>, <span class="ruby-string">&#39;SHA256&#39;</span>)
 <span class="ruby-identifier">hmac</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">data1</span>
 <span class="ruby-identifier">hmac</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">data2</span>
 <span class="ruby-identifier">mac</span> = <span class="ruby-identifier">hmac</span>.<span class="ruby-identifier">digest</span>
@@ -143,6 +144,37 @@
          <h3>Public Class Methods</h3>
        </header>
 
+      <div id="method-c-base64digest" class="method-detail ">
+        <div class="method-heading">
+          <span class="method-callseq">
+            base64digest(digest, key, data) &rarr; aString
+          </span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+
+        <div class="method-description">
+          <p>Returns the authentication code as a Base64-encoded string. The <em>digest</em> parameter specifies the digest algorithm to use. This may be a String representing the algorithm name or an instance of <a href="Digest.html"><code>OpenSSL::Digest</code></a>.</p>
+
+<h3 id="method-c-base64digest-label-Example">Example<span><a href="#method-c-base64digest-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby"><span class="ruby-identifier">key</span> = <span class="ruby-string">&#39;key&#39;</span>
+<span class="ruby-identifier">data</span> = <span class="ruby-string">&#39;The quick brown fox jumps over the lazy dog&#39;</span>
+
+<span class="ruby-identifier">hmac</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">HMAC</span>.<span class="ruby-identifier">base64digest</span>(<span class="ruby-string">&#39;SHA1&#39;</span>, <span class="ruby-identifier">key</span>, <span class="ruby-identifier">data</span>)
+<span class="ruby-comment">#=&gt; &quot;3nybhbi3iqa8ino29wqQcBydtNk=&quot;</span>
+</pre>
+
+          <div class="method-source-code" id="base64digest-source">
+            <pre><span class="ruby-comment"># File lib/openssl/hmac.rb, line 73</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">base64digest</span>(<span class="ruby-identifier">digest</span>, <span class="ruby-identifier">key</span>, <span class="ruby-identifier">data</span>)
+  [<span class="ruby-identifier">digest</span>(<span class="ruby-identifier">digest</span>, <span class="ruby-identifier">key</span>, <span class="ruby-identifier">data</span>)].<span class="ruby-identifier">pack</span>(<span class="ruby-string">&quot;m0&quot;</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+        </div>
+
+
+      </div>
+
       <div id="method-c-digest" class="method-detail ">
         <div class="method-heading">
           <span class="method-callseq">
@@ -159,25 +191,17 @@
 <pre class="ruby"><span class="ruby-identifier">key</span> = <span class="ruby-string">&#39;key&#39;</span>
 <span class="ruby-identifier">data</span> = <span class="ruby-string">&#39;The quick brown fox jumps over the lazy dog&#39;</span>
 
-<span class="ruby-identifier">hmac</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">HMAC</span>.<span class="ruby-identifier">digest</span>(<span class="ruby-string">&#39;sha1&#39;</span>, <span class="ruby-identifier">key</span>, <span class="ruby-identifier">data</span>)
+<span class="ruby-identifier">hmac</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">HMAC</span>.<span class="ruby-identifier">digest</span>(<span class="ruby-string">&#39;SHA1&#39;</span>, <span class="ruby-identifier">key</span>, <span class="ruby-identifier">data</span>)
 <span class="ruby-comment">#=&gt; &quot;\xDE|\x9B\x85\xB8\xB7\x8A\xA6\xBC\x8Az6\xF7\n\x90p\x1C\x9D\xB4\xD9&quot;</span>
 </pre>
 
           <div class="method-source-code" id="digest-source">
-            <pre>static VALUE
-ossl_hmac_s_digest(VALUE klass, VALUE digest, VALUE key, VALUE data)
-{
-    unsigned char *buf;
-    unsigned int buf_len;
-
-    StringValue(key);
-    StringValue(data);
-    buf = HMAC(ossl_evp_get_digestbyname(digest), RSTRING_PTR(key),
-               RSTRING_LENINT(key), (unsigned char *)RSTRING_PTR(data),
-               RSTRING_LEN(data), NULL, &amp;buf_len);
-
-    return rb_str_new((const char *)buf, buf_len);
-}</pre>
+            <pre><span class="ruby-comment"># File lib/openssl/hmac.rb, line 35</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">digest</span>(<span class="ruby-identifier">digest</span>, <span class="ruby-identifier">key</span>, <span class="ruby-identifier">data</span>)
+  <span class="ruby-identifier">hmac</span> = <span class="ruby-identifier">new</span>(<span class="ruby-identifier">key</span>, <span class="ruby-identifier">digest</span>)
+  <span class="ruby-identifier">hmac</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">data</span>
+  <span class="ruby-identifier">hmac</span>.<span class="ruby-identifier">digest</span>
+<span class="ruby-keyword">end</span></pre>
           </div>
         </div>
 
@@ -200,31 +224,17 @@ ossl_hmac_s_digest(VALUE klass, VALUE digest, VALUE key, VALUE data)
 <pre class="ruby"><span class="ruby-identifier">key</span> = <span class="ruby-string">&#39;key&#39;</span>
 <span class="ruby-identifier">data</span> = <span class="ruby-string">&#39;The quick brown fox jumps over the lazy dog&#39;</span>
 
-<span class="ruby-identifier">hmac</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">HMAC</span>.<span class="ruby-identifier">hexdigest</span>(<span class="ruby-string">&#39;sha1&#39;</span>, <span class="ruby-identifier">key</span>, <span class="ruby-identifier">data</span>)
+<span class="ruby-identifier">hmac</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">HMAC</span>.<span class="ruby-identifier">hexdigest</span>(<span class="ruby-string">&#39;SHA1&#39;</span>, <span class="ruby-identifier">key</span>, <span class="ruby-identifier">data</span>)
 <span class="ruby-comment">#=&gt; &quot;de7c9b85b8b78aa6bc8a7a36f70a90701c9db4d9&quot;</span>
 </pre>
 
           <div class="method-source-code" id="hexdigest-source">
-            <pre>static VALUE
-ossl_hmac_s_hexdigest(VALUE klass, VALUE digest, VALUE key, VALUE data)
-{
-    unsigned char buf[EVP_MAX_MD_SIZE];
-    unsigned int buf_len;
-    VALUE ret;
-
-    StringValue(key);
-    StringValue(data);
-
-    if (!HMAC(ossl_evp_get_digestbyname(digest), RSTRING_PTR(key),
-              RSTRING_LENINT(key), (unsigned char *)RSTRING_PTR(data),
-              RSTRING_LEN(data), buf, &amp;buf_len))
-        ossl_raise(eHMACError, &quot;HMAC&quot;);
-
-    ret = rb_str_new(NULL, buf_len * 2);
-    ossl_bin2hex(buf, RSTRING_PTR(ret), buf_len);
-
-    return ret;
-}</pre>
+            <pre><span class="ruby-comment"># File lib/openssl/hmac.rb, line 54</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">hexdigest</span>(<span class="ruby-identifier">digest</span>, <span class="ruby-identifier">key</span>, <span class="ruby-identifier">data</span>)
+  <span class="ruby-identifier">hmac</span> = <span class="ruby-identifier">new</span>(<span class="ruby-identifier">key</span>, <span class="ruby-identifier">digest</span>)
+  <span class="ruby-identifier">hmac</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">data</span>
+  <span class="ruby-identifier">hmac</span>.<span class="ruby-identifier">hexdigest</span>
+<span class="ruby-keyword">end</span></pre>
           </div>
         </div>
 
@@ -245,8 +255,7 @@ ossl_hmac_s_hexdigest(VALUE klass, VALUE digest, VALUE key, VALUE data)
 <h3 id="method-c-new-label-Example">Example<span><a href="#method-c-new-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
 <pre class="ruby"><span class="ruby-identifier">key</span> = <span class="ruby-string">&#39;key&#39;</span>
-<span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;sha1&#39;</span>)
-<span class="ruby-identifier">instance</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">HMAC</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">key</span>, <span class="ruby-identifier">digest</span>)
+<span class="ruby-identifier">instance</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">HMAC</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">key</span>, <span class="ruby-string">&#39;SHA1&#39;</span>)
 <span class="ruby-comment">#=&gt; f42bb0eeb018ebbd4597ae7213711ec60760843f</span>
 <span class="ruby-identifier">instance</span>.<span class="ruby-identifier">class</span>
 <span class="ruby-comment">#=&gt; OpenSSL::HMAC</span>
@@ -256,7 +265,7 @@ ossl_hmac_s_hexdigest(VALUE klass, VALUE digest, VALUE key, VALUE data)
 
 <p>Two instances can be securely compared with <a href="HMAC.html#method-i-3D-3D"><code>==</code></a> in constant time:</p>
 
-<pre class="ruby">    <span class="ruby-identifier">other_instance</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">HMAC</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;key&#39;</span>, <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;sha1&#39;</span>))
+<pre class="ruby">    <span class="ruby-identifier">other_instance</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">HMAC</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;key&#39;</span>, <span class="ruby-string">&#39;SHA1&#39;</span>)
 <span class="ruby-comment">#=&gt; f42bb0eeb018ebbd4597ae7213711ec60760843f</span>
 <span class="ruby-identifier">instance</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">other_instance</span>
 <span class="ruby-comment">#=&gt; true</span>
@@ -266,12 +275,23 @@ ossl_hmac_s_hexdigest(VALUE klass, VALUE digest, VALUE key, VALUE data)
             <pre>static VALUE
 ossl_hmac_initialize(VALUE self, VALUE key, VALUE digest)
 {
-    HMAC_CTX *ctx;
+    EVP_MD_CTX *ctx;
+    EVP_PKEY *pkey;
 
-    StringValue(key);
     GetHMAC(self, ctx);
-    HMAC_Init_ex(ctx, RSTRING_PTR(key), RSTRING_LENINT(key),
-                 ossl_evp_get_digestbyname(digest), NULL);
+    StringValue(key);
+    pkey = EVP_PKEY_new_mac_key(EVP_PKEY_HMAC, NULL,
+                                (unsigned char *)RSTRING_PTR(key),
+                                RSTRING_LENINT(key));
+    if (!pkey)
+        ossl_raise(eHMACError, &quot;EVP_PKEY_new_mac_key&quot;);
+    if (EVP_DigestSignInit(ctx, NULL, ossl_evp_get_digestbyname(digest),
+                           NULL, pkey) != 1) {
+        EVP_PKEY_free(pkey);
+        ossl_raise(eHMACError, &quot;EVP_DigestSignInit&quot;);
+    }
+    /* Decrement reference counter; EVP_MD_CTX still keeps it */
+    EVP_PKEY_free(pkey);
 
     return self;
 }</pre>
@@ -340,6 +360,28 @@ ossl_hmac_initialize(VALUE self, VALUE key, VALUE digest)
 
       </div>
 
+      <div id="method-i-base64digest" class="method-detail ">
+        <div class="method-heading">
+          <span class="method-callseq">
+            base64digest &rarr; string
+          </span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+
+        <div class="method-description">
+          <p>Returns the authentication code an a Base64-encoded string.</p>
+
+          <div class="method-source-code" id="base64digest-source">
+            <pre><span class="ruby-comment"># File lib/openssl/hmac.rb, line 17</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">base64digest</span>
+  [<span class="ruby-identifier">digest</span>].<span class="ruby-identifier">pack</span>(<span class="ruby-string">&quot;m0&quot;</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+        </div>
+
+
+      </div>
+
       <div id="method-i-digest" class="method-detail ">
         <div class="method-heading">
           <span class="method-callseq">
@@ -353,7 +395,7 @@ ossl_hmac_initialize(VALUE self, VALUE key, VALUE digest)
 
 <h3 id="method-i-digest-label-Example">Example<span><a href="#method-i-digest-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
-<pre class="ruby"><span class="ruby-identifier">instance</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">HMAC</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;key&#39;</span>, <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;sha1&#39;</span>))
+<pre class="ruby"><span class="ruby-identifier">instance</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">HMAC</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;key&#39;</span>, <span class="ruby-string">&#39;SHA1&#39;</span>)
 <span class="ruby-comment">#=&gt; f42bb0eeb018ebbd4597ae7213711ec60760843f</span>
 <span class="ruby-identifier">instance</span>.<span class="ruby-identifier">digest</span>
 <span class="ruby-comment">#=&gt; &quot;\xF4+\xB0\xEE\xB0\x18\xEB\xBDE\x97\xAEr\x13q\x1E\xC6\a`\x84?&quot;</span>
@@ -363,15 +405,16 @@ ossl_hmac_initialize(VALUE self, VALUE key, VALUE digest)
             <pre>static VALUE
 ossl_hmac_digest(VALUE self)
 {
-    HMAC_CTX *ctx;
-    unsigned int buf_len;
+    EVP_MD_CTX *ctx;
+    size_t buf_len = EVP_MAX_MD_SIZE;
     VALUE ret;
 
     GetHMAC(self, ctx);
     ret = rb_str_new(NULL, EVP_MAX_MD_SIZE);
-    hmac_final(ctx, (unsigned char *)RSTRING_PTR(ret), &amp;buf_len);
-    assert(buf_len &lt;= EVP_MAX_MD_SIZE);
-    rb_str_set_len(ret, buf_len);
+    if (EVP_DigestSignFinal(ctx, (unsigned char *)RSTRING_PTR(ret),
+                            &amp;buf_len) != 1)
+        ossl_raise(eHMACError, &quot;EVP_DigestSignFinal&quot;);
+    rb_str_set_len(ret, (long)buf_len);
 
     return ret;
 }</pre>
@@ -396,13 +439,14 @@ ossl_hmac_digest(VALUE self)
             <pre>static VALUE
 ossl_hmac_hexdigest(VALUE self)
 {
-    HMAC_CTX *ctx;
+    EVP_MD_CTX *ctx;
     unsigned char buf[EVP_MAX_MD_SIZE];
-    unsigned int buf_len;
+    size_t buf_len = EVP_MAX_MD_SIZE;
     VALUE ret;
 
     GetHMAC(self, ctx);
-    hmac_final(ctx, buf, &amp;buf_len);
+    if (EVP_DigestSignFinal(ctx, buf, &amp;buf_len) != 1)
+        ossl_raise(eHMACError, &quot;EVP_DigestSignFinal&quot;);
     ret = rb_str_new(NULL, buf_len * 2);
     ossl_bin2hex(buf, RSTRING_PTR(ret), buf_len);
 
@@ -431,16 +475,15 @@ ossl_hmac_hexdigest(VALUE self)
             <pre>static VALUE
 ossl_hmac_copy(VALUE self, VALUE other)
 {
-    HMAC_CTX *ctx1, *ctx2;
+    EVP_MD_CTX *ctx1, *ctx2;
 
     rb_check_frozen(self);
     if (self == other) return self;
 
     GetHMAC(self, ctx1);
     GetHMAC(other, ctx2);
-
-    if (!HMAC_CTX_copy(ctx1, ctx2))
-        ossl_raise(eHMACError, &quot;HMAC_CTX_copy&quot;);
+    if (EVP_MD_CTX_copy(ctx1, ctx2) != 1)
+        ossl_raise(eHMACError, &quot;EVP_MD_CTX_copy&quot;);
     return self;
 }</pre>
           </div>
@@ -456,16 +499,7 @@ ossl_hmac_copy(VALUE self, VALUE other)
         </div>
 
         <div class="method-description">
-          <p>Returns the authentication code as a hex-encoded string. The <em>digest</em> parameter specifies the digest algorithm to use. This may be a String representing the algorithm name or an instance of <a href="Digest.html"><code>OpenSSL::Digest</code></a>.</p>
-
-<h3 id="method-i-inspect-label-Example">Example<span><a href="#method-i-inspect-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
-
-<pre class="ruby"><span class="ruby-identifier">key</span> = <span class="ruby-string">&#39;key&#39;</span>
-<span class="ruby-identifier">data</span> = <span class="ruby-string">&#39;The quick brown fox jumps over the lazy dog&#39;</span>
-
-<span class="ruby-identifier">hmac</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">HMAC</span>.<span class="ruby-identifier">hexdigest</span>(<span class="ruby-string">&#39;sha1&#39;</span>, <span class="ruby-identifier">key</span>, <span class="ruby-identifier">data</span>)
-<span class="ruby-comment">#=&gt; &quot;de7c9b85b8b78aa6bc8a7a36f70a90701c9db4d9&quot;</span>
-</pre>
+          <p>Returns the authentication code an instance represents as a hex-encoded string.</p>
 
         </div>
 
@@ -489,7 +523,7 @@ ossl_hmac_copy(VALUE self, VALUE other)
 <h3 id="method-i-reset-label-Example">Example<span><a href="#method-i-reset-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
 <pre class="ruby"><span class="ruby-identifier">data</span> = <span class="ruby-string">&quot;The quick brown fox jumps over the lazy dog&quot;</span>
-<span class="ruby-identifier">instance</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">HMAC</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;key&#39;</span>, <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;sha1&#39;</span>))
+<span class="ruby-identifier">instance</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">HMAC</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;key&#39;</span>, <span class="ruby-string">&#39;SHA1&#39;</span>)
 <span class="ruby-comment">#=&gt; f42bb0eeb018ebbd4597ae7213711ec60760843f</span>
 
 <span class="ruby-identifier">instance</span>.<span class="ruby-identifier">update</span>(<span class="ruby-identifier">data</span>)
@@ -502,10 +536,13 @@ ossl_hmac_copy(VALUE self, VALUE other)
             <pre>static VALUE
 ossl_hmac_reset(VALUE self)
 {
-    HMAC_CTX *ctx;
+    EVP_MD_CTX *ctx;
+    EVP_PKEY *pkey;
 
     GetHMAC(self, ctx);
-    HMAC_Init_ex(ctx, NULL, 0, NULL, NULL);
+    pkey = EVP_PKEY_CTX_get0_pkey(EVP_MD_CTX_get_pkey_ctx(ctx));
+    if (EVP_DigestSignInit(ctx, NULL, EVP_MD_CTX_get0_md(ctx), NULL, pkey) != 1)
+        ossl_raise(eHMACError, &quot;EVP_DigestSignInit&quot;);
 
     return self;
 }</pre>
@@ -522,16 +559,7 @@ ossl_hmac_reset(VALUE self)
         </div>
 
         <div class="method-description">
-          <p>Returns the authentication code as a hex-encoded string. The <em>digest</em> parameter specifies the digest algorithm to use. This may be a String representing the algorithm name or an instance of <a href="Digest.html"><code>OpenSSL::Digest</code></a>.</p>
-
-<h3 id="method-i-to_s-label-Example">Example<span><a href="#method-i-to_s-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
-
-<pre class="ruby"><span class="ruby-identifier">key</span> = <span class="ruby-string">&#39;key&#39;</span>
-<span class="ruby-identifier">data</span> = <span class="ruby-string">&#39;The quick brown fox jumps over the lazy dog&#39;</span>
-
-<span class="ruby-identifier">hmac</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">HMAC</span>.<span class="ruby-identifier">hexdigest</span>(<span class="ruby-string">&#39;sha1&#39;</span>, <span class="ruby-identifier">key</span>, <span class="ruby-identifier">data</span>)
-<span class="ruby-comment">#=&gt; &quot;de7c9b85b8b78aa6bc8a7a36f70a90701c9db4d9&quot;</span>
-</pre>
+          <p>Returns the authentication code an instance represents as a hex-encoded string.</p>
 
         </div>
 
@@ -567,11 +595,12 @@ ossl_hmac_reset(VALUE self)
             <pre>static VALUE
 ossl_hmac_update(VALUE self, VALUE data)
 {
-    HMAC_CTX *ctx;
+    EVP_MD_CTX *ctx;
 
     StringValue(data);
     GetHMAC(self, ctx);
-    HMAC_Update(ctx, (unsigned char *)RSTRING_PTR(data), RSTRING_LEN(data));
+    if (EVP_DigestSignUpdate(ctx, RSTRING_PTR(data), RSTRING_LEN(data)) != 1)
+        ossl_raise(eHMACError, &quot;EVP_DigestSignUpdate&quot;);
 
     return self;
 }</pre>

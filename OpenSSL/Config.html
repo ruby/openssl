@@ -84,10 +84,9 @@
     <li ><a href="#method-c-parse">::parse</a>
     <li ><a href="#method-c-parse_config">::parse_config</a>
     <li ><a href="#method-i-5B-5D">#[]</a>
-    <li ><a href="#method-i-5B-5D-3D">#[]=</a>
-    <li ><a href="#method-i-add_value">#add_value</a>
     <li ><a href="#method-i-each">#each</a>
     <li ><a href="#method-i-get_value">#get_value</a>
+    <li ><a href="#method-i-initialize_copy">#initialize_copy</a>
     <li ><a href="#method-i-inspect">#inspect</a>
     <li ><a href="#method-i-sections">#sections</a>
     <li ><a href="#method-i-to_s">#to_s</a>
@@ -104,8 +103,6 @@
 
   <section class="description">
     
-<h1 id="class-OpenSSL::Config-label-OpenSSL-3A-3AConfig"><a href="Config.html"><code>OpenSSL::Config</code></a><span><a href="#class-OpenSSL::Config-label-OpenSSL-3A-3AConfig">&para;</a> <a href="#top">&uarr;</a></span></h1>
-
 <p>Configuration for the openssl library.</p>
 
 <p>Many system’s installation of openssl library will depend on your system configuration. See the value of <a href="Config.html#DEFAULT_CONFIG_FILE"><code>OpenSSL::Config::DEFAULT_CONFIG_FILE</code></a> for the location of the file for your host.</p>
@@ -123,13 +120,7 @@
       </header>
       <dl>
         <dt id="DEFAULT_CONFIG_FILE">DEFAULT_CONFIG_FILE
-        <dd><p>The default system configuration file for openssl</p>
-        <dt id="ESCAPE_MAP">ESCAPE_MAP
-        <dd><p>escaped char map</p>
-        <dt id="QUOTE_REGEXP_DQ">QUOTE_REGEXP_DQ
-        <dd><p>escape with backslash and doubled dq</p>
-        <dt id="QUOTE_REGEXP_SQ">QUOTE_REGEXP_SQ
-        <dd><p>escape with backslash</p>
+        <dd><p>The default system configuration file for <a href="../OpenSSL.html"><code>OpenSSL</code></a>.</p>
       </dl>
     </section>
 
@@ -142,32 +133,37 @@
 
       <div id="method-c-new" class="method-detail ">
         <div class="method-heading">
-          <span class="method-name">new</span><span
-            class="method-args">(filename = nil)</span>
+          <span class="method-callseq">
+            new(filename) &rarr; OpenSSL::Config
+          </span>
           <span class="method-click-advice">click to toggle source</span>
         </div>
 
         <div class="method-description">
-          <p>Creates an instance of OpenSSL’s configuration class.</p>
+          <p>Creates an instance of <a href="Config.html"><code>OpenSSL::Config</code></a> from the content of the file specified by <em>filename</em>.</p>
 
 <p>This can be used in contexts like <a href="X509/ExtensionFactory.html#attribute-i-config"><code>OpenSSL::X509::ExtensionFactory.config=</code></a></p>
-
-<p>If the optional <em>filename</em> parameter is provided, then it is read in and parsed via parse_config.</p>
 
 <p>This can raise <a href="../IO.html"><code>IO</code></a> exceptions based on the access, or availability of the file. A <a href="ConfigError.html"><code>ConfigError</code></a> exception may be raised depending on the validity of the data being configured.</p>
 
           <div class="method-source-code" id="new-source">
-            <pre><span class="ruby-comment"># File lib/openssl/config.rb, line 264</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">initialize</span>(<span class="ruby-identifier">filename</span> = <span class="ruby-keyword">nil</span>)
-  <span class="ruby-ivar">@data</span> = {}
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">filename</span>
-    <span class="ruby-constant">File</span>.<span class="ruby-identifier">open</span>(<span class="ruby-identifier">filename</span>.<span class="ruby-identifier">to_s</span>) <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">file</span><span class="ruby-operator">|</span>
-      <span class="ruby-constant">Config</span>.<span class="ruby-identifier">parse_config</span>(<span class="ruby-identifier">file</span>).<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">section</span>, <span class="ruby-identifier">hash</span><span class="ruby-operator">|</span>
-        <span class="ruby-identifier">set_section</span>(<span class="ruby-identifier">section</span>, <span class="ruby-identifier">hash</span>)
-      <span class="ruby-keyword">end</span>
-    <span class="ruby-keyword">end</span>
-  <span class="ruby-keyword">end</span>
-<span class="ruby-keyword">end</span></pre>
+            <pre>static VALUE
+config_initialize(int argc, VALUE *argv, VALUE self)
+{
+    CONF *conf = GetConfig(self);
+    VALUE filename;
+
+    /* 0-arguments call has no use-case, but is kept for compatibility */
+    rb_scan_args(argc, argv, &quot;01&quot;, &amp;filename);
+    rb_check_frozen(self);
+    if (!NIL_P(filename)) {
+        BIO *bio = BIO_new_file(StringValueCStr(filename), &quot;rb&quot;);
+        if (!bio)
+            ossl_raise(eConfigError, &quot;BIO_new_file&quot;);
+        config_load_bio(conf, bio); /* Consumes BIO */
+    }
+    return self;
+}</pre>
           </div>
         </div>
 
@@ -176,25 +172,27 @@
 
       <div id="method-c-parse" class="method-detail ">
         <div class="method-heading">
-          <span class="method-name">parse</span><span
-            class="method-args">(string)</span>
+          <span class="method-callseq">
+            parse(string) &rarr; OpenSSL::Config
+          </span>
           <span class="method-click-advice">click to toggle source</span>
         </div>
 
         <div class="method-description">
           <p>Parses a given <em>string</em> as a blob that contains configuration for <a href="../OpenSSL.html"><code>OpenSSL</code></a>.</p>
 
-<p>If the source of the <a href="../IO.html"><code>IO</code></a> is a file, then consider using parse_config.</p>
-
           <div class="method-source-code" id="parse-source">
-            <pre><span class="ruby-comment"># File lib/openssl/config.rb, line 37</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">parse</span>(<span class="ruby-identifier">string</span>)
-  <span class="ruby-identifier">c</span> = <span class="ruby-identifier">new</span>()
-  <span class="ruby-identifier">parse_config</span>(<span class="ruby-constant">StringIO</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">string</span>)).<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">section</span>, <span class="ruby-identifier">hash</span><span class="ruby-operator">|</span>
-    <span class="ruby-identifier">c</span>.<span class="ruby-identifier">set_section</span>(<span class="ruby-identifier">section</span>, <span class="ruby-identifier">hash</span>)
-  <span class="ruby-keyword">end</span>
-  <span class="ruby-identifier">c</span>
-<span class="ruby-keyword">end</span></pre>
+            <pre>static VALUE
+config_s_parse(VALUE klass, VALUE str)
+{
+    VALUE obj = config_s_alloc(klass);
+    CONF *conf = GetConfig(obj);
+    BIO *bio;
+
+    bio = ossl_obj2bio(&amp;str);
+    config_load_bio(conf, bio); /* Consumes BIO */
+    return obj;
+}</pre>
           </div>
         </div>
 
@@ -203,25 +201,31 @@
 
       <div id="method-c-parse_config" class="method-detail ">
         <div class="method-heading">
-          <span class="method-name">parse_config</span><span
-            class="method-args">(io)</span>
+          <span class="method-callseq">
+            parse_config(io) &rarr; hash
+          </span>
           <span class="method-click-advice">click to toggle source</span>
         </div>
 
         <div class="method-description">
-          <p>Parses the configuration data read from <em>io</em>, see also parse.</p>
-
-<p>Raises a <a href="ConfigError.html"><code>ConfigError</code></a> on invalid configuration data.</p>
+          <p>Parses the configuration data read from <em>io</em> and returns the whole content as a Hash.</p>
 
           <div class="method-source-code" id="parse_config-source">
-            <pre><span class="ruby-comment"># File lib/openssl/config.rb, line 53</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">parse_config</span>(<span class="ruby-identifier">io</span>)
-  <span class="ruby-keyword">begin</span>
-    <span class="ruby-identifier">parse_config_lines</span>(<span class="ruby-identifier">io</span>)
-  <span class="ruby-keyword">rescue</span> <span class="ruby-operator">=&gt;</span> <span class="ruby-identifier">error</span>
-    <span class="ruby-identifier">raise</span> <span class="ruby-constant">ConfigError</span>, <span class="ruby-node">&quot;error in line #{io.lineno}: &quot;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">error</span>.<span class="ruby-identifier">message</span>
-  <span class="ruby-keyword">end</span>
-<span class="ruby-keyword">end</span></pre>
+            <pre>static VALUE
+config_s_parse_config(VALUE klass, VALUE io)
+{
+    VALUE obj, sections, ret;
+    long i;
+
+    obj = config_s_parse(klass, io);
+    sections = config_get_sections(obj);
+    ret = rb_hash_new();
+    for (i = 0; i &lt; RARRAY_LEN(sections); i++) {
+        VALUE section = rb_ary_entry(sections, i);
+        rb_hash_aset(ret, section, config_get_section(obj, section));
+    }
+    return ret;
+}</pre>
           </div>
         </div>
 
@@ -237,13 +241,14 @@
 
       <div id="method-i-5B-5D" class="method-detail ">
         <div class="method-heading">
-          <span class="method-name">[]</span><span
-            class="method-args">(section)</span>
+          <span class="method-callseq">
+            config[section] &rarr; hash
+          </span>
           <span class="method-click-advice">click to toggle source</span>
         </div>
 
         <div class="method-description">
-          <p>Get a specific <em>section</em> from the current configuration</p>
+          <p>Gets all key-value pairs in a specific <em>section</em> from the current configuration.</p>
 
 <p>Given the following configurating file being loaded:</p>
 
@@ -261,98 +266,28 @@
 </pre>
 
           <div class="method-source-code" id="5B-5D-source">
-            <pre><span class="ruby-comment"># File lib/openssl/config.rb, line 360</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">[]</span>(<span class="ruby-identifier">section</span>)
-  <span class="ruby-ivar">@data</span>[<span class="ruby-identifier">section</span>] <span class="ruby-operator">||</span> {}
-<span class="ruby-keyword">end</span></pre>
-          </div>
-        </div>
+            <pre>static VALUE
+config_get_section(VALUE self, VALUE section)
+{
+    CONF *conf = GetConfig(self);
+    STACK_OF(CONF_VALUE) *sk;
+    int i, entries;
+    VALUE hash;
 
-
-      </div>
-
-      <div id="method-i-5B-5D-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">[]=</span><span
-            class="method-args">(section, pairs)</span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-
-        <div class="method-description">
-          <p>*Deprecated in v2.2.0*. This method will be removed in a future release.</p>
-
-<p>Sets a specific <em>section</em> name with a Hash <em>pairs</em>.</p>
-
-<p>Given the following configuration being created:</p>
-
-<pre class="ruby"><span class="ruby-identifier">config</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Config</span>.<span class="ruby-identifier">new</span>
-  <span class="ruby-comment">#=&gt; #&lt;OpenSSL::Config sections=[]&gt;</span>
-<span class="ruby-identifier">config</span>[<span class="ruby-string">&#39;default&#39;</span>] = {<span class="ruby-string">&quot;foo&quot;</span><span class="ruby-operator">=&gt;</span><span class="ruby-string">&quot;bar&quot;</span>,<span class="ruby-string">&quot;baz&quot;</span><span class="ruby-operator">=&gt;</span><span class="ruby-string">&quot;buz&quot;</span>}
-  <span class="ruby-comment">#=&gt; {&quot;foo&quot;=&gt;&quot;bar&quot;, &quot;baz&quot;=&gt;&quot;buz&quot;}</span>
-<span class="ruby-identifier">puts</span> <span class="ruby-identifier">config</span>.<span class="ruby-identifier">to_s</span>
-  <span class="ruby-comment">#=&gt; [ default ]</span>
-  <span class="ruby-comment">#   foo=bar</span>
-  <span class="ruby-comment">#   baz=buz</span>
-</pre>
-
-<p>It’s important to note that this will essentially merge any of the keys in <em>pairs</em> with the existing <em>section</em>. For example:</p>
-
-<pre class="ruby"><span class="ruby-identifier">config</span>[<span class="ruby-string">&#39;default&#39;</span>]
-  <span class="ruby-comment">#=&gt; {&quot;foo&quot;=&gt;&quot;bar&quot;, &quot;baz&quot;=&gt;&quot;buz&quot;}</span>
-<span class="ruby-identifier">config</span>[<span class="ruby-string">&#39;default&#39;</span>] = {<span class="ruby-string">&quot;foo&quot;</span> <span class="ruby-operator">=&gt;</span> <span class="ruby-string">&quot;changed&quot;</span>}
-  <span class="ruby-comment">#=&gt; {&quot;foo&quot;=&gt;&quot;changed&quot;}</span>
-<span class="ruby-identifier">config</span>[<span class="ruby-string">&#39;default&#39;</span>]
-  <span class="ruby-comment">#=&gt; {&quot;foo&quot;=&gt;&quot;changed&quot;, &quot;baz&quot;=&gt;&quot;buz&quot;}</span>
-</pre>
-
-          <div class="method-source-code" id="5B-5D-3D-source">
-            <pre><span class="ruby-comment"># File lib/openssl/config.rb, line 399</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">[]=</span>(<span class="ruby-identifier">section</span>, <span class="ruby-identifier">pairs</span>)
-  <span class="ruby-identifier">check_modify</span>
-  <span class="ruby-identifier">set_section</span>(<span class="ruby-identifier">section</span>, <span class="ruby-identifier">pairs</span>)
-<span class="ruby-keyword">end</span></pre>
-          </div>
-        </div>
-
-
-      </div>
-
-      <div id="method-i-add_value" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">add_value</span><span
-            class="method-args">(section, key, value)</span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-
-        <div class="method-description">
-          <p>*Deprecated in v2.2.0*. This method will be removed in a future release.</p>
-
-<p>Set the target <em>key</em> with a given <em>value</em> under a specific <em>section</em>.</p>
-
-<p>Given the following configurating file being loaded:</p>
-
-<pre class="ruby"><span class="ruby-identifier">config</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Config</span>.<span class="ruby-identifier">load</span>(<span class="ruby-string">&#39;foo.cnf&#39;</span>)
-  <span class="ruby-comment">#=&gt; #&lt;OpenSSL::Config sections=[&quot;default&quot;]&gt;</span>
-<span class="ruby-identifier">puts</span> <span class="ruby-identifier">config</span>.<span class="ruby-identifier">to_s</span>
-  <span class="ruby-comment">#=&gt; [ default ]</span>
-  <span class="ruby-comment">#   foo=bar</span>
-</pre>
-
-<p>You can set the value of <em>foo</em> under the <em>default</em> section to a new value:</p>
-
-<pre class="ruby"><span class="ruby-identifier">config</span>.<span class="ruby-identifier">add_value</span>(<span class="ruby-string">&#39;default&#39;</span>, <span class="ruby-string">&#39;foo&#39;</span>, <span class="ruby-string">&#39;buzz&#39;</span>)
-  <span class="ruby-comment">#=&gt; &quot;buzz&quot;</span>
-<span class="ruby-identifier">puts</span> <span class="ruby-identifier">config</span>.<span class="ruby-identifier">to_s</span>
-  <span class="ruby-comment">#=&gt; [ default ]</span>
-  <span class="ruby-comment">#   foo=buzz</span>
-</pre>
-
-          <div class="method-source-code" id="add_value-source">
-            <pre><span class="ruby-comment"># File lib/openssl/config.rb, line 339</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">add_value</span>(<span class="ruby-identifier">section</span>, <span class="ruby-identifier">key</span>, <span class="ruby-identifier">value</span>)
-  <span class="ruby-identifier">check_modify</span>
-  (<span class="ruby-ivar">@data</span>[<span class="ruby-identifier">section</span>] <span class="ruby-operator">||=</span> {})[<span class="ruby-identifier">key</span>] = <span class="ruby-identifier">value</span>
-<span class="ruby-keyword">end</span></pre>
+    hash = rb_hash_new();
+    StringValueCStr(section);
+    if (!(sk = NCONF_get_section(conf, RSTRING_PTR(section)))) {
+        ossl_clear_error();
+        return hash;
+    }
+    entries = sk_CONF_VALUE_num(sk);
+    for (i = 0; i &lt; entries; i++) {
+        CONF_VALUE *entry = sk_CONF_VALUE_value(sk, i);
+        rb_hash_aset(hash, rb_str_new_cstr(entry-&gt;name),
+                     rb_str_new_cstr(entry-&gt;value));
+    }
+    return hash;
+}</pre>
           </div>
         </div>
 
@@ -361,15 +296,14 @@
 
       <div id="method-i-each" class="method-detail ">
         <div class="method-heading">
-          <span class="method-name">each</span><span
-            class="method-args">() { |section, key, value| ... }</span>
+          <span class="method-callseq">
+            each { |section, key, value| }
+          </span>
           <span class="method-click-advice">click to toggle source</span>
         </div>
 
         <div class="method-description">
-          <p>For a block.</p>
-
-<p>Receive the section and its pairs for the current configuration.</p>
+          <p>Retrieves the section and its pairs for the current configuration.</p>
 
 <pre class="ruby"><span class="ruby-identifier">config</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">section</span>, <span class="ruby-identifier">key</span>, <span class="ruby-identifier">value</span><span class="ruby-operator">|</span>
   <span class="ruby-comment"># ...</span>
@@ -377,14 +311,17 @@
 </pre>
 
           <div class="method-source-code" id="each-source">
-            <pre><span class="ruby-comment"># File lib/openssl/config.rb, line 464</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">each</span>
-  <span class="ruby-ivar">@data</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">section</span>, <span class="ruby-identifier">hash</span><span class="ruby-operator">|</span>
-    <span class="ruby-identifier">hash</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">key</span>, <span class="ruby-identifier">value</span><span class="ruby-operator">|</span>
-      <span class="ruby-keyword">yield</span> [<span class="ruby-identifier">section</span>, <span class="ruby-identifier">key</span>, <span class="ruby-identifier">value</span>]
-    <span class="ruby-keyword">end</span>
-  <span class="ruby-keyword">end</span>
-<span class="ruby-keyword">end</span></pre>
+            <pre>static VALUE
+config_each(VALUE self)
+{
+    CONF *conf = GetConfig(self);
+
+    RETURN_ENUMERATOR(self, 0, 0);
+
+    lh_doall_arg((_LHASH *)conf-&gt;data, LHASH_DOALL_ARG_FN(each_conf_value),
+                 NULL);
+    return self;
+}</pre>
           </div>
         </div>
 
@@ -393,13 +330,14 @@
 
       <div id="method-i-get_value" class="method-detail ">
         <div class="method-heading">
-          <span class="method-name">get_value</span><span
-            class="method-args">(section, key)</span>
+          <span class="method-callseq">
+            get_value(section, key) &rarr; string
+          </span>
           <span class="method-click-advice">click to toggle source</span>
         </div>
 
         <div class="method-description">
-          <p>Gets the value of <em>key</em> from the given <em>section</em></p>
+          <p>Gets the value of <em>key</em> from the given <em>section</em>.</p>
 
 <p>Given the following configurating file being loaded:</p>
 
@@ -417,14 +355,53 @@
 </pre>
 
           <div class="method-source-code" id="get_value-source">
-            <pre><span class="ruby-comment"># File lib/openssl/config.rb, line 292</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">get_value</span>(<span class="ruby-identifier">section</span>, <span class="ruby-identifier">key</span>)
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">section</span>.<span class="ruby-identifier">nil?</span>
-    <span class="ruby-identifier">raise</span> <span class="ruby-constant">TypeError</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;nil not allowed&#39;</span>)
-  <span class="ruby-keyword">end</span>
-  <span class="ruby-identifier">section</span> = <span class="ruby-string">&#39;default&#39;</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">section</span>.<span class="ruby-identifier">empty?</span>
-  <span class="ruby-identifier">get_key_string</span>(<span class="ruby-identifier">section</span>, <span class="ruby-identifier">key</span>)
-<span class="ruby-keyword">end</span></pre>
+            <pre>static VALUE
+config_get_value(VALUE self, VALUE section, VALUE key)
+{
+    CONF *conf = GetConfig(self);
+    const char *str, *sectionp;
+
+    StringValueCStr(section);
+    StringValueCStr(key);
+    /* For compatibility; NULL means &quot;default&quot;. */
+    sectionp = RSTRING_LEN(section) ? RSTRING_PTR(section) : NULL;
+    str = NCONF_get_string(conf, sectionp, RSTRING_PTR(key));
+    if (!str) {
+        ossl_clear_error();
+        return Qnil;
+    }
+    return rb_str_new_cstr(str);
+}</pre>
+          </div>
+        </div>
+
+
+      </div>
+
+      <div id="method-i-initialize_copy" class="method-detail ">
+        <div class="method-heading">
+          <span class="method-name">initialize_copy</span><span
+            class="method-args">(p1)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+
+        <div class="method-description">
+          
+
+          <div class="method-source-code" id="initialize_copy-source">
+            <pre>static VALUE
+config_initialize_copy(VALUE self, VALUE other)
+{
+    CONF *conf = GetConfig(self);
+    VALUE str;
+    BIO *bio;
+
+    str = rb_funcall(other, rb_intern(&quot;to_s&quot;), 0);
+    rb_check_frozen(self);
+    bio = ossl_obj2bio(&amp;str);
+    config_load_bio(conf, bio); /* Consumes BIO */
+    return self;
+}</pre>
           </div>
         </div>
 
@@ -433,8 +410,9 @@
 
       <div id="method-i-inspect" class="method-detail ">
         <div class="method-heading">
-          <span class="method-name">inspect</span><span
-            class="method-args">()</span>
+          <span class="method-callseq">
+            inspect &rarr; string
+          </span>
           <span class="method-click-advice">click to toggle source</span>
         </div>
 
@@ -442,10 +420,20 @@
           <p>String representation of this configuration object, including the class name and its sections.</p>
 
           <div class="method-source-code" id="inspect-source">
-            <pre><span class="ruby-comment"># File lib/openssl/config.rb, line 475</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">inspect</span>
-  <span class="ruby-node">&quot;#&lt;#{self.class.name} sections=#{sections.inspect}&gt;&quot;</span>
-<span class="ruby-keyword">end</span></pre>
+            <pre>static VALUE
+config_inspect(VALUE self)
+{
+    VALUE str, ary = config_get_sections(self);
+    const char *cname = rb_class2name(rb_obj_class(self));
+
+    str = rb_str_new_cstr(&quot;#&lt;&quot;);
+    rb_str_cat_cstr(str, cname);
+    rb_str_cat_cstr(str, &quot; sections=&quot;);
+    rb_str_append(str, rb_inspect(ary));
+    rb_str_cat_cstr(str, &quot;&gt;&quot;);
+
+    return str;
+}</pre>
           </div>
         </div>
 
@@ -454,19 +442,27 @@
 
       <div id="method-i-sections" class="method-detail ">
         <div class="method-heading">
-          <span class="method-name">sections</span><span
-            class="method-args">()</span>
+          <span class="method-callseq">
+            sections &rarr; array of string
+          </span>
           <span class="method-click-advice">click to toggle source</span>
         </div>
 
         <div class="method-description">
-          <p>Get the names of all sections in the current configuration</p>
+          <p>Get the names of all sections in the current configuration.</p>
 
           <div class="method-source-code" id="sections-source">
-            <pre><span class="ruby-comment"># File lib/openssl/config.rb, line 413</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">sections</span>
-  <span class="ruby-ivar">@data</span>.<span class="ruby-identifier">keys</span>
-<span class="ruby-keyword">end</span></pre>
+            <pre>static VALUE
+config_get_sections(VALUE self)
+{
+    CONF *conf = GetConfig(self);
+    VALUE ary;
+
+    ary = rb_ary_new();
+    lh_doall_arg((_LHASH *)conf-&gt;data, LHASH_DOALL_ARG_FN(get_conf_section),
+                 &amp;ary);
+    return ary;
+}</pre>
           </div>
         </div>
 
@@ -475,13 +471,14 @@
 
       <div id="method-i-to_s" class="method-detail ">
         <div class="method-heading">
-          <span class="method-name">to_s</span><span
-            class="method-args">()</span>
+          <span class="method-callseq">
+            to_s &rarr; string
+          </span>
           <span class="method-click-advice">click to toggle source</span>
         </div>
 
         <div class="method-description">
-          <p>Get the parsable form of the current configuration</p>
+          <p>Gets the parsable form of the current configuration.</p>
 
 <p>Given the following configuration being created:</p>
 
@@ -508,18 +505,17 @@
 </pre>
 
           <div class="method-source-code" id="to_s-source">
-            <pre><span class="ruby-comment"># File lib/openssl/config.rb, line 443</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">to_s</span>
-  <span class="ruby-identifier">ary</span> = []
-  <span class="ruby-ivar">@data</span>.<span class="ruby-identifier">keys</span>.<span class="ruby-identifier">sort</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">section</span><span class="ruby-operator">|</span>
-    <span class="ruby-identifier">ary</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-node">&quot;[ #{section} ]\n&quot;</span>
-    <span class="ruby-ivar">@data</span>[<span class="ruby-identifier">section</span>].<span class="ruby-identifier">keys</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">key</span><span class="ruby-operator">|</span>
-      <span class="ruby-identifier">ary</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-node">&quot;#{key}=#{@data[section][key]}\n&quot;</span>
-    <span class="ruby-keyword">end</span>
-    <span class="ruby-identifier">ary</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-string">&quot;\n&quot;</span>
-  <span class="ruby-keyword">end</span>
-  <span class="ruby-identifier">ary</span>.<span class="ruby-identifier">join</span>
-<span class="ruby-keyword">end</span></pre>
+            <pre>static VALUE
+config_to_s(VALUE self)
+{
+    CONF *conf = GetConfig(self);
+    VALUE str;
+
+    str = rb_str_new(NULL, 0);
+    lh_doall_arg((_LHASH *)conf-&gt;data, LHASH_DOALL_ARG_FN(dump_conf_value),
+                 &amp;str);
+    return str;
+}</pre>
           </div>
         </div>
 

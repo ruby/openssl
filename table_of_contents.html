@@ -35,7 +35,7 @@
       <li><a href="CONTRIBUTING_md.html#label-Bugs+and+feature+requests">Bugs and feature requests</a>
       <li><a href="CONTRIBUTING_md.html#label-Submitting+patches">Submitting patches</a>
       <li><a href="CONTRIBUTING_md.html#label-Testing">Testing</a>
-      <li><a href="CONTRIBUTING_md.html#label-Docker">Docker</a>
+      <li><a href="CONTRIBUTING_md.html#label-With+different+versions+of+OpenSSL">With different versions of OpenSSL</a>
       <li><a href="CONTRIBUTING_md.html#label-Relation+with+Ruby+source+tree">Relation with Ruby source tree</a>
       <li><a href="CONTRIBUTING_md.html#label-Release+policy">Release policy</a>
       <li><a href="CONTRIBUTING_md.html#label-Security">Security</a>
@@ -45,6 +45,9 @@
     <a href="History_md.html">History</a>
 
     <ul>
+      <li><a href="History_md.html#label-Version+3.0.0">Version 3.0.0</a>
+      <li><a href="History_md.html#label-Compatibility+notes">Compatibility notes</a>
+      <li><a href="History_md.html#label-Notable+changes">Notable changes</a>
       <li><a href="History_md.html#label-Version+2.2.1">Version 2.2.1</a>
       <li><a href="History_md.html#label-Bug+fixes">Bug fixes</a>
       <li><a href="History_md.html#label-Version+2.2.0">Version 2.2.0</a>
@@ -238,10 +241,6 @@
   </li>
   <li class="class">
     <a href="OpenSSL/Config.html">OpenSSL::Config</a>
-
-    <ul>
-      <li><a href="OpenSSL/Config.html#label-OpenSSL-3A-3AConfig">OpenSSL::Config</a>
-    </ul>
   </li>
   <li class="class">
     <a href="OpenSSL/ConfigError.html">OpenSSL::ConfigError</a>
@@ -582,6 +581,11 @@
     <span class="container">OpenSSL</span>
 
   <li class="method">
+    <a href="OpenSSL/HMAC.html#method-c-base64digest">::base64digest</a>
+    &mdash;
+    <span class="container">OpenSSL::HMAC</span>
+
+  <li class="method">
     <a href="OpenSSL/PKey/EC.html#method-c-builtin_curves">::builtin_curves</a>
     &mdash;
     <span class="container">OpenSSL::PKey::EC</span>
@@ -702,6 +706,16 @@
     <span class="container">OpenSSL::PKey::RSA</span>
 
   <li class="method">
+    <a href="OpenSSL/PKey.html#method-c-generate_key">::generate_key</a>
+    &mdash;
+    <span class="container">OpenSSL::PKey</span>
+
+  <li class="method">
+    <a href="OpenSSL/PKey.html#method-c-generate_parameters">::generate_parameters</a>
+    &mdash;
+    <span class="container">OpenSSL::PKey</span>
+
+  <li class="method">
     <a href="OpenSSL/BN.html#method-c-generate_prime">::generate_prime</a>
     &mdash;
     <span class="container">OpenSSL::BN</span>
@@ -725,6 +739,16 @@
     <a href="OpenSSL/Engine.html#method-c-load">::load</a>
     &mdash;
     <span class="container">OpenSSL::Engine</span>
+
+  <li class="method">
+    <a href="OpenSSL/X509/Certificate.html#method-c-load">::load</a>
+    &mdash;
+    <span class="container">OpenSSL::X509::Certificate</span>
+
+  <li class="method">
+    <a href="OpenSSL/X509/Certificate.html#method-c-load_file">::load_file</a>
+    &mdash;
+    <span class="container">OpenSSL::X509::Certificate</span>
 
   <li class="method">
     <a href="OpenSSL/Random.html#method-c-load_random_file">::load_random_file</a>
@@ -992,6 +1016,16 @@
     <span class="container">OpenSSL</span>
 
   <li class="method">
+    <a href="OpenSSL/BN.html#method-c-rand">::rand</a>
+    &mdash;
+    <span class="container">OpenSSL::BN</span>
+
+  <li class="method">
+    <a href="OpenSSL/BN.html#method-c-rand_range">::rand_range</a>
+    &mdash;
+    <span class="container">OpenSSL::BN</span>
+
+  <li class="method">
     <a href="OpenSSL/Random.html#method-c-random_add">::random_add</a>
     &mdash;
     <span class="container">OpenSSL::Random</span>
@@ -1212,11 +1246,6 @@
     <span class="container">OpenSSL::Config</span>
 
   <li class="method">
-    <a href="OpenSSL/Config.html#method-i-5B-5D-3D">#[]=</a>
-    &mdash;
-    <span class="container">OpenSSL::Config</span>
-
-  <li class="method">
     <a href="OpenSSL/Marshal.html#method-i-_dump">#_dump</a>
     &mdash;
     <span class="container">OpenSSL::Marshal</span>
@@ -1225,6 +1254,11 @@
     <a href="OpenSSL/Marshal/ClassMethods.html#method-i-_load">#_load</a>
     &mdash;
     <span class="container">OpenSSL::Marshal::ClassMethods</span>
+
+  <li class="method">
+    <a href="OpenSSL/BN.html#method-i-abs">#abs</a>
+    &mdash;
+    <span class="container">OpenSSL::BN</span>
 
   <li class="method">
     <a href="OpenSSL/SSL/SSLSocket.html#method-i-accept">#accept</a>
@@ -1347,11 +1381,6 @@
     <span class="container">OpenSSL::OCSP::BasicResponse</span>
 
   <li class="method">
-    <a href="OpenSSL/Config.html#method-i-add_value">#add_value</a>
-    &mdash;
-    <span class="container">OpenSSL::Config</span>
-
-  <li class="method">
     <a href="OpenSSL/SSL/SocketForwarder.html#method-i-addr">#addr</a>
     &mdash;
     <span class="container">OpenSSL::SSL::SocketForwarder</span>
@@ -1427,6 +1456,11 @@
     <span class="container">OpenSSL::X509::Extension::AuthorityKeyIdentifier</span>
 
   <li class="method">
+    <a href="OpenSSL/HMAC.html#method-i-base64digest">#base64digest</a>
+    &mdash;
+    <span class="container">OpenSSL::HMAC</span>
+
+  <li class="method">
     <a href="OpenSSL/OCSP/Response.html#method-i-basic">#basic</a>
     &mdash;
     <span class="container">OpenSSL::OCSP::Response</span>
@@ -1435,16 +1469,6 @@
     <a href="OpenSSL/BN.html#method-i-bit_set-3F">#bit_set?</a>
     &mdash;
     <span class="container">OpenSSL::BN</span>
-
-  <li class="method">
-    <a href="OpenSSL/PKey/RSA.html#method-i-blinding_off-21">#blinding_off!</a>
-    &mdash;
-    <span class="container">OpenSSL::PKey::RSA</span>
-
-  <li class="method">
-    <a href="OpenSSL/PKey/RSA.html#method-i-blinding_on-21">#blinding_on!</a>
-    &mdash;
-    <span class="container">OpenSSL::PKey::RSA</span>
 
   <li class="method">
     <a href="OpenSSL/Digest.html#method-i-block_length">#block_length</a>
@@ -1632,6 +1656,11 @@
     <span class="container">OpenSSL::PKey::EC::Group</span>
 
   <li class="method">
+    <a href="OpenSSL/PKey/PKey.html#method-i-compare-3F">#compare?</a>
+    &mdash;
+    <span class="container">OpenSSL::PKey::PKey</span>
+
+  <li class="method">
     <a href="OpenSSL/PKey/DH.html#method-i-compute_key">#compute_key</a>
     &mdash;
     <span class="container">OpenSSL::PKey::DH</span>
@@ -1757,9 +1786,19 @@
     <span class="container">OpenSSL::PKCS7</span>
 
   <li class="method">
+    <a href="OpenSSL/PKey/PKey.html#method-i-decrypt">#decrypt</a>
+    &mdash;
+    <span class="container">OpenSSL::PKey::PKey</span>
+
+  <li class="method">
     <a href="OpenSSL/PKey/EC/Group.html#method-i-degree">#degree</a>
     &mdash;
     <span class="container">OpenSSL::PKey::EC::Group</span>
+
+  <li class="method">
+    <a href="OpenSSL/PKey/PKey.html#method-i-derive">#derive</a>
+    &mdash;
+    <span class="container">OpenSSL::PKey::PKey</span>
 
   <li class="method">
     <a href="OpenSSL/PKCS7.html#method-i-detached">#detached</a>
@@ -1855,6 +1894,11 @@
     <a href="OpenSSL/Cipher.html#method-i-encrypt">#encrypt</a>
     &mdash;
     <span class="container">OpenSSL::Cipher</span>
+
+  <li class="method">
+    <a href="OpenSSL/PKey/PKey.html#method-i-encrypt">#encrypt</a>
+    &mdash;
+    <span class="container">OpenSSL::PKey::PKey</span>
 
   <li class="method">
     <a href="OpenSSL/Buffering.html#method-i-eof">#eof</a>
@@ -2072,9 +2116,19 @@
     <span class="container">OpenSSL::PKey::EC::Group</span>
 
   <li class="method">
+    <a href="OpenSSL/BN.html#method-i-get_flags">#get_flags</a>
+    &mdash;
+    <span class="container">OpenSSL::BN</span>
+
+  <li class="method">
     <a href="OpenSSL/Config.html#method-i-get_value">#get_value</a>
     &mdash;
     <span class="container">OpenSSL::Config</span>
+
+  <li class="method">
+    <a href="OpenSSL/Buffering.html#method-i-getbyte">#getbyte</a>
+    &mdash;
+    <span class="container">OpenSSL::Buffering</span>
 
   <li class="method">
     <a href="OpenSSL/Buffering.html#method-i-getc">#getc</a>
@@ -2157,6 +2211,11 @@
     <span class="container">OpenSSL::Cipher</span>
 
   <li class="method">
+    <a href="OpenSSL/Config.html#method-i-initialize_copy">#initialize_copy</a>
+    &mdash;
+    <span class="container">OpenSSL::Config</span>
+
+  <li class="method">
     <a href="OpenSSL/Digest.html#method-i-initialize_copy">#initialize_copy</a>
     &mdash;
     <span class="container">OpenSSL::Digest</span>
@@ -2200,6 +2259,11 @@
     <a href="OpenSSL/PKCS7.html#method-i-initialize_copy">#initialize_copy</a>
     &mdash;
     <span class="container">OpenSSL::PKCS7</span>
+
+  <li class="method">
+    <a href="OpenSSL/PKey/PKey.html#method-i-initialize_copy">#initialize_copy</a>
+    &mdash;
+    <span class="container">OpenSSL::PKey::PKey</span>
 
   <li class="method">
     <a href="OpenSSL/PKey/DH.html#method-i-initialize_copy">#initialize_copy</a>
@@ -3172,6 +3236,11 @@
     <span class="container">OpenSSL::PKey::RSA</span>
 
   <li class="method">
+    <a href="OpenSSL/BN.html#method-i-set_flags">#set_flags</a>
+    &mdash;
+    <span class="container">OpenSSL::BN</span>
+
+  <li class="method">
     <a href="OpenSSL/PKey/EC/Group.html#method-i-set_generator">#set_generator</a>
     &mdash;
     <span class="container">OpenSSL::PKey::EC::Group</span>
@@ -3270,6 +3339,11 @@
     <a href="OpenSSL/PKey/RSA.html#method-i-sign_pss">#sign_pss</a>
     &mdash;
     <span class="container">OpenSSL::PKey::RSA</span>
+
+  <li class="method">
+    <a href="OpenSSL/PKey/PKey.html#method-i-sign_raw">#sign_raw</a>
+    &mdash;
+    <span class="container">OpenSSL::PKey::PKey</span>
 
   <li class="method">
     <a href="OpenSSL/X509/Certificate.html#method-i-signature_algorithm">#signature_algorithm</a>
@@ -3455,6 +3529,11 @@
     <a href="OpenSSL/SSL/Session.html#method-i-timeout-3D">#timeout=</a>
     &mdash;
     <span class="container">OpenSSL::SSL::Session</span>
+
+  <li class="method">
+    <a href="OpenSSL/SSL/SSLContext.html#method-i-tmp_dh-3D">#tmp_dh=</a>
+    &mdash;
+    <span class="container">OpenSSL::SSL::SSLContext</span>
 
   <li class="method">
     <a href="OpenSSL/SSL/SSLSocket.html#method-i-tmp_key">#tmp_key</a>
@@ -3772,29 +3851,14 @@
     <span class="container">OpenSSL::Netscape::SPKI</span>
 
   <li class="method">
-    <a href="OpenSSL/PKey/DH.html#method-i-to_text">#to_text</a>
+    <a href="OpenSSL/PKey/PKey.html#method-i-to_text">#to_text</a>
     &mdash;
-    <span class="container">OpenSSL::PKey::DH</span>
-
-  <li class="method">
-    <a href="OpenSSL/PKey/DSA.html#method-i-to_text">#to_text</a>
-    &mdash;
-    <span class="container">OpenSSL::PKey::DSA</span>
-
-  <li class="method">
-    <a href="OpenSSL/PKey/EC.html#method-i-to_text">#to_text</a>
-    &mdash;
-    <span class="container">OpenSSL::PKey::EC</span>
+    <span class="container">OpenSSL::PKey::PKey</span>
 
   <li class="method">
     <a href="OpenSSL/PKey/EC/Group.html#method-i-to_text">#to_text</a>
     &mdash;
     <span class="container">OpenSSL::PKey::EC::Group</span>
-
-  <li class="method">
-    <a href="OpenSSL/PKey/RSA.html#method-i-to_text">#to_text</a>
-    &mdash;
-    <span class="container">OpenSSL::PKey::RSA</span>
 
   <li class="method">
     <a href="OpenSSL/SSL/Session.html#method-i-to_text">#to_text</a>
@@ -3970,6 +4034,16 @@
     <a href="OpenSSL/PKey/RSA.html#method-i-verify_pss">#verify_pss</a>
     &mdash;
     <span class="container">OpenSSL::PKey::RSA</span>
+
+  <li class="method">
+    <a href="OpenSSL/PKey/PKey.html#method-i-verify_raw">#verify_raw</a>
+    &mdash;
+    <span class="container">OpenSSL::PKey::PKey</span>
+
+  <li class="method">
+    <a href="OpenSSL/PKey/PKey.html#method-i-verify_recover">#verify_recover</a>
+    &mdash;
+    <span class="container">OpenSSL::PKey::PKey</span>
 
   <li class="method">
     <a href="OpenSSL/SSL/SSLSocket.html#method-i-verify_result">#verify_result</a>

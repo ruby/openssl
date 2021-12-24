@@ -176,39 +176,28 @@ ossl_x509stctx_initialize(int argc, VALUE *argv, VALUE self)
       <div id="method-i-chain" class="method-detail ">
         <div class="method-heading">
           <span class="method-callseq">
-            chain &rarr; Array of X509::Certificate
+            chain &rarr; nil | Array of X509::Certificate
           </span>
           <span class="method-click-advice">click to toggle source</span>
         </div>
 
         <div class="method-description">
-          
+          <p>Returns the verified chain.</p>
+
+<p>See also the man page X509_STORE_CTX_set0_verified_chain(3).</p>
 
           <div class="method-source-code" id="chain-source">
             <pre>static VALUE
 ossl_x509stctx_get_chain(VALUE self)
 {
     X509_STORE_CTX *ctx;
-    STACK_OF(X509) *chain;
-    X509 *x509;
-    int i, num;
-    VALUE ary;
+    const STACK_OF(X509) *chain;
 
     GetX509StCtx(self, ctx);
-    if((chain = X509_STORE_CTX_get0_chain(ctx)) == NULL){
-        return Qnil;
-    }
-    if((num = sk_X509_num(chain)) &lt; 0){
-        OSSL_Debug(&quot;certs in chain &lt; 0???&quot;);
-        return rb_ary_new();
-    }
-    ary = rb_ary_new2(num);
-    for(i = 0; i &lt; num; i++) {
-        x509 = sk_X509_value(chain, i);
-        rb_ary_push(ary, ossl_x509_new(x509));
-    }
-
-    return ary;
+    chain = X509_STORE_CTX_get0_chain(ctx);
+    if (!chain)
+        return Qnil; /* Could be an empty array instead? */
+    return ossl_x509_sk2ary(chain);
 }</pre>
           </div>
         </div>
@@ -227,7 +216,7 @@ ossl_x509stctx_get_chain(VALUE self)
           
 
           <div class="method-source-code" id="cleanup-source">
-            <pre><span class="ruby-comment"># File lib/openssl/x509.rb, line 319</span>
+            <pre><span class="ruby-comment"># File lib/openssl/x509.rb, line 337</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">cleanup</span>
   <span class="ruby-identifier">warn</span> <span class="ruby-node">&quot;(#{caller.first}) OpenSSL::X509::StoreContext#cleanup is deprecated with no replacement&quot;</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">$VERBOSE</span>
 <span class="ruby-keyword">end</span></pre>
@@ -246,7 +235,9 @@ ossl_x509stctx_get_chain(VALUE self)
         </div>
 
         <div class="method-description">
-          
+          <p>Returns the certificate which caused the error.</p>
+
+<p>See also the man page X509_STORE_CTX_get_current_cert(3).</p>
 
           <div class="method-source-code" id="current_cert-source">
             <pre>static VALUE
@@ -273,7 +264,9 @@ ossl_x509stctx_get_curr_cert(VALUE self)
         </div>
 
         <div class="method-description">
-          
+          <p>Returns the <a href="CRL.html"><code>CRL</code></a> which caused the error.</p>
+
+<p>See also the man page X509_STORE_CTX_get_current_crl(3).</p>
 
           <div class="method-source-code" id="current_crl-source">
             <pre>static VALUE
@@ -304,7 +297,9 @@ ossl_x509stctx_get_curr_crl(VALUE self)
         </div>
 
         <div class="method-description">
-          
+          <p>Returns the error code of <em>stctx</em>. This is typically called after <a href="StoreContext.html#method-i-verify"><code>verify</code></a> is done, or from the verification callback set to <a href="Store.html#method-i-verify_callback-3D"><code>OpenSSL::X509::Store#verify_callback=</code></a>.</p>
+
+<p>See also the man page X509_STORE_CTX_get_error(3).</p>
 
           <div class="method-source-code" id="error-source">
             <pre>static VALUE
@@ -331,7 +326,9 @@ ossl_x509stctx_get_err(VALUE self)
         </div>
 
         <div class="method-description">
-          
+          <p>Sets the error code of <em>stctx</em>. This is used by the verification callback set to <a href="Store.html#method-i-verify_callback-3D"><code>OpenSSL::X509::Store#verify_callback=</code></a>.</p>
+
+<p>See also the man page X509_STORE_CTX_set_error(3).</p>
 
           <div class="method-source-code" id="error-3D-source">
             <pre>static VALUE
@@ -359,7 +356,9 @@ ossl_x509stctx_set_error(VALUE self, VALUE err)
         </div>
 
         <div class="method-description">
-          
+          <p>Returns the depth of the chain. This is used in combination with <a href="StoreContext.html#method-i-error"><code>error</code></a>.</p>
+
+<p>See also the man page X509_STORE_CTX_get_error_depth(3).</p>
 
           <div class="method-source-code" id="error_depth-source">
             <pre>static VALUE
@@ -386,7 +385,9 @@ ossl_x509stctx_get_err_depth(VALUE self)
         </div>
 
         <div class="method-description">
-          <p>Returns the error string corresponding to the error code retrieved by <a href="StoreContext.html#method-i-error"><code>error</code></a>.</p>
+          <p>Returns the human readable error string corresponding to the error code retrieved by <a href="StoreContext.html#method-i-error"><code>error</code></a>.</p>
+
+<p>See also the man page X509_verify_cert_error_string(3).</p>
 
           <div class="method-source-code" id="error_string-source">
             <pre>static VALUE
@@ -415,7 +416,9 @@ ossl_x509stctx_get_err_string(VALUE self)
         </div>
 
         <div class="method-description">
-          <p>Sets the verification flags to the context. See <a href="Store.html#method-i-flags-3D"><code>Store#flags=</code></a>.</p>
+          <p>Sets the verification flags to the context. This overrides the default value set by <a href="Store.html#method-i-flags-3D"><code>Store#flags=</code></a>.</p>
+
+<p>See also the man page X509_VERIFY_PARAM_set_flags(3).</p>
 
           <div class="method-source-code" id="flags-3D-source">
             <pre>static VALUE
@@ -444,7 +447,9 @@ ossl_x509stctx_set_flags(VALUE self, VALUE flags)
         </div>
 
         <div class="method-description">
-          <p>Sets the purpose of the context. See <a href="Store.html#method-i-purpose-3D"><code>Store#purpose=</code></a>.</p>
+          <p>Sets the purpose of the context. This overrides the default value set by <a href="Store.html#method-i-purpose-3D"><code>Store#purpose=</code></a>.</p>
+
+<p>See also the man page X509_VERIFY_PARAM_set_purpose(3).</p>
 
           <div class="method-source-code" id="purpose-3D-source">
             <pre>static VALUE
@@ -475,6 +480,8 @@ ossl_x509stctx_set_purpose(VALUE self, VALUE purpose)
         <div class="method-description">
           <p>Sets the time used in the verification. If not set, the current time is used.</p>
 
+<p>See also the man page X509_VERIFY_PARAM_set_time(3).</p>
+
           <div class="method-source-code" id="time-3D-source">
             <pre>static VALUE
 ossl_x509stctx_set_time(VALUE self, VALUE time)
@@ -503,7 +510,9 @@ ossl_x509stctx_set_time(VALUE self, VALUE time)
         </div>
 
         <div class="method-description">
-          
+          <p>Sets the trust settings of the context. This overrides the default value set by <a href="Store.html#method-i-trust-3D"><code>Store#trust=</code></a>.</p>
+
+<p>See also the man page X509_VERIFY_PARAM_set_trust(3).</p>
 
           <div class="method-source-code" id="trust-3D-source">
             <pre>static VALUE
@@ -532,7 +541,9 @@ ossl_x509stctx_set_trust(VALUE self, VALUE trust)
         </div>
 
         <div class="method-description">
-          
+          <p>Performs the certificate verification using the parameters set to <em>stctx</em>.</p>
+
+<p>See also the man page X509_verify_cert(3).</p>
 
           <div class="method-source-code" id="verify-source">
             <pre>static VALUE
@@ -551,7 +562,7 @@ ossl_x509stctx_verify(VALUE self)
         ossl_clear_error();
         return Qfalse;
       default:
-        ossl_raise(eX509CertError, NULL);
+        ossl_raise(eX509CertError, &quot;X509_verify_cert&quot;);
     }
 }</pre>
           </div>

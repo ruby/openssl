@@ -135,16 +135,16 @@
 
 <h3 id="class-OpenSSL::Digest-label-Hashing+a+file">Hashing a file<span><a href="#class-OpenSSL::Digest-label-Hashing+a+file">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
-<pre class="ruby"><span class="ruby-identifier">data</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span>(<span class="ruby-string">&#39;document&#39;</span>)
+<pre class="ruby"><span class="ruby-identifier">data</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">binread</span>(<span class="ruby-string">&#39;document&#39;</span>)
 <span class="ruby-identifier">sha256</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;SHA256&#39;</span>)
 <span class="ruby-identifier">digest</span> = <span class="ruby-identifier">sha256</span>.<span class="ruby-identifier">digest</span>(<span class="ruby-identifier">data</span>)
 </pre>
 
 <h3 id="class-OpenSSL::Digest-label-Hashing+several+pieces+of+data+at+once">Hashing several pieces of data at once<span><a href="#class-OpenSSL::Digest-label-Hashing+several+pieces+of+data+at+once">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
-<pre class="ruby"><span class="ruby-identifier">data1</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span>(<span class="ruby-string">&#39;file1&#39;</span>)
-<span class="ruby-identifier">data2</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span>(<span class="ruby-string">&#39;file2&#39;</span>)
-<span class="ruby-identifier">data3</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span>(<span class="ruby-string">&#39;file3&#39;</span>)
+<pre class="ruby"><span class="ruby-identifier">data1</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">binread</span>(<span class="ruby-string">&#39;file1&#39;</span>)
+<span class="ruby-identifier">data2</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">binread</span>(<span class="ruby-string">&#39;file2&#39;</span>)
+<span class="ruby-identifier">data3</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">binread</span>(<span class="ruby-string">&#39;file3&#39;</span>)
 <span class="ruby-identifier">sha256</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;SHA256&#39;</span>)
 <span class="ruby-identifier">sha256</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">data1</span>
 <span class="ruby-identifier">sha256</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">data2</span>
@@ -154,11 +154,11 @@
 
 <h3 id="class-OpenSSL::Digest-label-Reuse+a+Digest+instance">Reuse a <a href="Digest.html"><code>Digest</code></a> instance<span><a href="#class-OpenSSL::Digest-label-Reuse+a+Digest+instance">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
-<pre class="ruby"><span class="ruby-identifier">data1</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span>(<span class="ruby-string">&#39;file1&#39;</span>)
+<pre class="ruby"><span class="ruby-identifier">data1</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">binread</span>(<span class="ruby-string">&#39;file1&#39;</span>)
 <span class="ruby-identifier">sha256</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;SHA256&#39;</span>)
 <span class="ruby-identifier">digest1</span> = <span class="ruby-identifier">sha256</span>.<span class="ruby-identifier">digest</span>(<span class="ruby-identifier">data1</span>)
 
-<span class="ruby-identifier">data2</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span>(<span class="ruby-string">&#39;file2&#39;</span>)
+<span class="ruby-identifier">data2</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">binread</span>(<span class="ruby-string">&#39;file2&#39;</span>)
 <span class="ruby-identifier">sha256</span>.<span class="ruby-identifier">reset</span>
 <span class="ruby-identifier">digest2</span> = <span class="ruby-identifier">sha256</span>.<span class="ruby-identifier">digest</span>(<span class="ruby-identifier">data2</span>)
 </pre>
@@ -425,7 +425,7 @@ ossl_digest_name(VALUE self)
 
     GetDigest(self, ctx);
 
-    return rb_str_new2(EVP_MD_name(EVP_MD_CTX_md(ctx)));
+    return rb_str_new_cstr(EVP_MD_name(EVP_MD_CTX_get0_md(ctx)));
 }</pre>
           </div>
         </div>
@@ -451,7 +451,7 @@ ossl_digest_reset(VALUE self)
     EVP_MD_CTX *ctx;
 
     GetDigest(self, ctx);
-    if (EVP_DigestInit_ex(ctx, EVP_MD_CTX_md(ctx), NULL) != 1) {
+    if (EVP_DigestInit_ex(ctx, EVP_MD_CTX_get0_md(ctx), NULL) != 1) {
         ossl_raise(eDigestError, &quot;Digest initialization failed.&quot;);
     }
 

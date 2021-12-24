@@ -145,6 +145,8 @@
 
         <div class="method-description">
         <p>The certificate chain constructed by the last call of <a href="Store.html#method-i-verify"><code>verify</code></a>.</p>
+
+<p>See also <a href="StoreContext.html#method-i-chain"><code>StoreContext#chain</code></a>.</p>
         </div>
       </div>
       <div id="attribute-i-error" class="method-detail">
@@ -155,6 +157,8 @@
 
         <div class="method-description">
         <p>The error code set by the last call of <a href="Store.html#method-i-verify"><code>verify</code></a>.</p>
+
+<p>See also <a href="StoreContext.html#method-i-error"><code>StoreContext#error</code></a>.</p>
         </div>
       </div>
       <div id="attribute-i-error_string" class="method-detail">
@@ -165,6 +169,8 @@
 
         <div class="method-description">
         <p>The description for the error code set by the last call of <a href="Store.html#method-i-verify"><code>verify</code></a>.</p>
+
+<p>See also <a href="StoreContext.html#method-i-error_string"><code>StoreContext#error_string</code></a>.</p>
         </div>
       </div>
       <div id="attribute-i-verify_callback" class="method-detail">
@@ -174,9 +180,15 @@
         </div>
 
         <div class="method-description">
-        <p>The callback for additional certificate verification. It is invoked for each untrusted certificate in the chain.</p>
+        <p>The callback for additional certificate verification. It is invoked for each certificate in the chain and can be used to implement custom certificate verification conditions.</p>
 
-<p>The callback is invoked with two values, a boolean that indicates if the pre-verification by <a href="../../OpenSSL.html"><code>OpenSSL</code></a> has succeeded or not, and the <a href="StoreContext.html"><code>StoreContext</code></a> in use. The callback must return either true or false.</p>
+<p>The callback is invoked with two values, a boolean that indicates if the pre-verification by <a href="../../OpenSSL.html"><code>OpenSSL</code></a> has succeeded or not, and the <a href="StoreContext.html"><code>StoreContext</code></a> in use.</p>
+
+<p>The callback can use <a href="StoreContext.html#method-i-error-3D"><code>StoreContext#error=</code></a> to change the error code as needed. The callback must return either true or false.</p>
+
+<p>NOTE: any exception raised within the callback will be ignored.</p>
+
+<p>See also the man page X509_STORE_CTX_set_verify_cb(3).</p>
         </div>
       </div>
     </section>
@@ -204,8 +216,9 @@ ossl_x509store_initialize(int argc, VALUE *argv, VALUE self)
 {
     X509_STORE *store;
 
-/* BUG: This method takes any number of arguments but appears to ignore them. */
     GetX509Store(self, store);
+    if (argc != 0)
+        rb_warn(&quot;OpenSSL::X509::Store.new does not take any arguments&quot;);
 #if !defined(HAVE_OPAQUE_OPENSSL)
     /* [Bug #405] [Bug #1678] [Bug #3000]; already fixed? */
     store-&gt;ex_data.sk = NULL;
@@ -237,13 +250,15 @@ ossl_x509store_initialize(int argc, VALUE *argv, VALUE self)
       <div id="method-i-add_cert" class="method-detail ">
         <div class="method-heading">
           <span class="method-callseq">
-            add_cert(cert)
+            add_cert(cert) &rarr; self
           </span>
           <span class="method-click-advice">click to toggle source</span>
         </div>
 
         <div class="method-description">
           <p>Adds the <a href="Certificate.html"><code>OpenSSL::X509::Certificate</code></a> <em>cert</em> to the certificate store.</p>
+
+<p>See also the man page X509_STORE_add_cert(3).</p>
 
           <div class="method-source-code" id="add_cert-source">
             <pre>static VALUE
@@ -254,9 +269,8 @@ ossl_x509store_add_cert(VALUE self, VALUE arg)
 
     cert = GetX509CertPtr(arg); /* NO NEED TO DUP */
     GetX509Store(self, store);
-    if (X509_STORE_add_cert(store, cert) != 1){
-        ossl_raise(eX509StoreError, NULL);
-    }
+    if (X509_STORE_add_cert(store, cert) != 1)
+        ossl_raise(eX509StoreError, &quot;X509_STORE_add_cert&quot;);
 
     return self;
 }</pre>
@@ -277,6 +291,8 @@ ossl_x509store_add_cert(VALUE self, VALUE arg)
         <div class="method-description">
           <p>Adds the <a href="CRL.html"><code>OpenSSL::X509::CRL</code></a> <em>crl</em> to the store.</p>
 
+<p>See also the man page X509_STORE_add_crl(3).</p>
+
           <div class="method-source-code" id="add_crl-source">
             <pre>static VALUE
 ossl_x509store_add_crl(VALUE self, VALUE arg)
@@ -286,9 +302,8 @@ ossl_x509store_add_crl(VALUE self, VALUE arg)
 
     crl = GetX509CRLPtr(arg); /* NO NEED TO DUP */
     GetX509Store(self, store);
-    if (X509_STORE_add_crl(store, crl) != 1){
-        ossl_raise(eX509StoreError, NULL);
-    }
+    if (X509_STORE_add_crl(store, crl) != 1)
+        ossl_raise(eX509StoreError, &quot;X509_STORE_add_crl&quot;);
 
     return self;
 }</pre>
@@ -309,23 +324,23 @@ ossl_x509store_add_crl(VALUE self, VALUE arg)
         <div class="method-description">
           <p>Adds the certificates in <em>file</em> to the certificate store. <em>file</em> is the path to the file, and the file contains one or more certificates in PEM format concatenated together.</p>
 
+<p>See also the man page X509_LOOKUP_file(3).</p>
+
           <div class="method-source-code" id="add_file-source">
             <pre>static VALUE
 ossl_x509store_add_file(VALUE self, VALUE file)
 {
     X509_STORE *store;
     X509_LOOKUP *lookup;
-    char *path = NULL;
+    const char *path;
 
-    if(file != Qnil){
-        path = StringValueCStr(file);
-    }
     GetX509Store(self, store);
+    path = StringValueCStr(file);
     lookup = X509_STORE_add_lookup(store, X509_LOOKUP_file());
-    if(lookup == NULL) ossl_raise(eX509StoreError, NULL);
-    if(X509_LOOKUP_load_file(lookup, path, X509_FILETYPE_PEM) != 1){
-        ossl_raise(eX509StoreError, NULL);
-    }
+    if (!lookup)
+        ossl_raise(eX509StoreError, &quot;X509_STORE_add_lookup&quot;);
+    if (X509_LOOKUP_load_file(lookup, path, X509_FILETYPE_PEM) != 1)
+        ossl_raise(eX509StoreError, &quot;X509_LOOKUP_load_file&quot;);
 #if OPENSSL_VERSION_NUMBER &lt; 0x10101000 || defined(LIBRESSL_VERSION_NUMBER)
     /*
      * X509_load_cert_crl_file() which is called from X509_LOOKUP_load_file()
@@ -355,23 +370,23 @@ ossl_x509store_add_file(VALUE self, VALUE file)
         <div class="method-description">
           <p>Adds <em>path</em> as the hash dir to be looked up by the store.</p>
 
+<p>See also the man page X509_LOOKUP_hash_dir(3).</p>
+
           <div class="method-source-code" id="add_path-source">
             <pre>static VALUE
 ossl_x509store_add_path(VALUE self, VALUE dir)
 {
     X509_STORE *store;
     X509_LOOKUP *lookup;
-    char *path = NULL;
+    const char *path;
 
-    if(dir != Qnil){
-        path = StringValueCStr(dir);
-    }
     GetX509Store(self, store);
+    path = StringValueCStr(dir);
     lookup = X509_STORE_add_lookup(store, X509_LOOKUP_hash_dir());
-    if(lookup == NULL) ossl_raise(eX509StoreError, NULL);
-    if(X509_LOOKUP_add_dir(lookup, path, X509_FILETYPE_PEM) != 1){
-        ossl_raise(eX509StoreError, NULL);
-    }
+    if (!lookup)
+        ossl_raise(eX509StoreError, &quot;X509_STORE_add_lookup&quot;);
+    if (X509_LOOKUP_add_dir(lookup, path, X509_FILETYPE_PEM) != 1)
+        ossl_raise(eX509StoreError, &quot;X509_LOOKUP_add_dir&quot;);
 
     return self;
 }</pre>
@@ -390,7 +405,13 @@ ossl_x509store_add_path(VALUE self, VALUE dir)
         </div>
 
         <div class="method-description">
-          <p>Sets <em>flags</em> to the <a href="Store.html"><code>Store</code></a>. <em>flags</em> consists of zero or more of the constants defined in with name V_FLAG_* or’ed together.</p>
+          <p>Sets the default flags used by certificate chain verification performed with the <a href="Store.html"><code>Store</code></a>.</p>
+
+<p><em>flags</em> consists of zero or more of the constants defined in <a href="../X509.html"><code>OpenSSL::X509</code></a> with name V_FLAG_* or’ed together.</p>
+
+<p><a href="StoreContext.html#method-i-flags-3D"><code>OpenSSL::X509::StoreContext#flags=</code></a> can be used to change the flags for a single verification operation.</p>
+
+<p>See also the man page X509_VERIFY_PARAM_set_flags(3).</p>
 
           <div class="method-source-code" id="flags-3D-source">
             <pre>static VALUE
@@ -419,7 +440,7 @@ ossl_x509store_set_flags(VALUE self, VALUE flags)
         </div>
 
         <div class="method-description">
-          <p>Sets the store’s purpose to <em>purpose</em>. If specified, the verifications on the store will check every untrusted certificate’s extensions are consistent with the purpose. The purpose is specified by constants:</p>
+          <p>Sets the store’s default verification purpose. If specified, the verifications on the store will check every certificate’s extensions are consistent with the purpose. The purpose is specified by constants:</p>
 <ul><li>
 <p>X509::PURPOSE_SSL_CLIENT</p>
 </li><li>
@@ -439,6 +460,10 @@ ossl_x509store_set_flags(VALUE self, VALUE flags)
 </li><li>
 <p>X509::PURPOSE_TIMESTAMP_SIGN</p>
 </li></ul>
+
+<p><a href="StoreContext.html#method-i-purpose-3D"><code>OpenSSL::X509::StoreContext#purpose=</code></a> can be used to change the value for a single verification operation.</p>
+
+<p>See also the man page X509_VERIFY_PARAM_set_purpose(3).</p>
 
           <div class="method-source-code" id="purpose-3D-source">
             <pre>static VALUE
@@ -474,6 +499,8 @@ ossl_x509store_set_purpose(VALUE self, VALUE purpose)
 <p>OpenSSL::X509::DEFAULT_CERT_DIR</p>
 </li></ul>
 
+<p>See also the man page X509_STORE_set_default_paths(3).</p>
+
           <div class="method-source-code" id="set_default_paths-source">
             <pre>static VALUE
 ossl_x509store_set_default_paths(VALUE self)
@@ -481,9 +508,8 @@ ossl_x509store_set_default_paths(VALUE self)
     X509_STORE *store;
 
     GetX509Store(self, store);
-    if (X509_STORE_set_default_paths(store) != 1){
-        ossl_raise(eX509StoreError, NULL);
-    }
+    if (X509_STORE_set_default_paths(store) != 1)
+        ossl_raise(eX509StoreError, &quot;X509_STORE_set_default_paths&quot;);
 
     return Qnil;
 }</pre>
@@ -502,7 +528,11 @@ ossl_x509store_set_default_paths(VALUE self)
         </div>
 
         <div class="method-description">
-          <p>Sets the time to be used in verifications.</p>
+          <p>Sets the time to be used in the certificate verifications with the store. By default, if not specified, the current system time is used.</p>
+
+<p><a href="StoreContext.html#method-i-time-3D"><code>OpenSSL::X509::StoreContext#time=</code></a> can be used to change the value for a single verification operation.</p>
+
+<p>See also the man page X509_VERIFY_PARAM_set_time(3).</p>
 
           <div class="method-source-code" id="time-3D-source">
             <pre>static VALUE
@@ -526,7 +556,11 @@ ossl_x509store_set_time(VALUE self, VALUE time)
         </div>
 
         <div class="method-description">
-          
+          <p>Sets the default trust settings used by the certificate verification with the store.</p>
+
+<p><a href="StoreContext.html#method-i-trust-3D"><code>OpenSSL::X509::StoreContext#trust=</code></a> can be used to change the value for a single verification operation.</p>
+
+<p>See also the man page X509_VERIFY_PARAM_set_trust(3).</p>
 
           <div class="method-source-code" id="trust-3D-source">
             <pre>static VALUE

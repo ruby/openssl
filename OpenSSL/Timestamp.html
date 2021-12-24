@@ -88,7 +88,7 @@
 
 <pre class="ruby"><span class="ruby-comment">#Assumes ts.p12 is a PKCS#12-compatible file with a private key</span>
 <span class="ruby-comment">#and a certificate that has an extended key usage of &#39;timeStamping&#39;</span>
-<span class="ruby-identifier">p12</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKCS12</span>.<span class="ruby-identifier">new</span>(<span class="ruby-constant">File</span>.<span class="ruby-identifier">open</span>(<span class="ruby-string">&#39;ts.p12&#39;</span>, <span class="ruby-string">&#39;rb&#39;</span>), <span class="ruby-string">&#39;pwd&#39;</span>)
+<span class="ruby-identifier">p12</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKCS12</span>.<span class="ruby-identifier">new</span>(<span class="ruby-constant">File</span>.<span class="ruby-identifier">binread</span>(<span class="ruby-string">&#39;ts.p12&#39;</span>), <span class="ruby-string">&#39;pwd&#39;</span>)
 <span class="ruby-identifier">md</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;SHA1&#39;</span>)
 <span class="ruby-identifier">hash</span> = <span class="ruby-identifier">md</span>.<span class="ruby-identifier">digest</span>(<span class="ruby-identifier">data</span>) <span class="ruby-comment">#some binary data to be timestamped</span>
 <span class="ruby-identifier">req</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Timestamp</span><span class="ruby-operator">::</span><span class="ruby-constant">Request</span>.<span class="ruby-identifier">new</span>
@@ -105,16 +105,16 @@
 <h3 id="module-OpenSSL::Timestamp-label-Verify+a+timestamp+response-3A">Verify a timestamp response:<span><a href="#module-OpenSSL::Timestamp-label-Verify+a+timestamp+response-3A">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
 <pre>#Assume we have a timestamp token in a file called ts.der
-ts = OpenSSL::Timestamp::Response.new(File.open(&#39;ts.der&#39;, &#39;rb&#39;)
+ts = OpenSSL::Timestamp::Response.new(File.binread(&#39;ts.der&#39;))
 #Assume we have the Request for this token in a file called req.der
-req = OpenSSL::Timestamp::Request.new(File.open(&#39;req.der&#39;, &#39;rb&#39;)
+req = OpenSSL::Timestamp::Request.new(File.binread(&#39;req.der&#39;))
 # Assume the associated root CA certificate is contained in a
 # DER-encoded file named root.cer
-root = OpenSSL::X509::Certificate.new(File.open(&#39;root.cer&#39;, &#39;rb&#39;)
+root = OpenSSL::X509::Certificate.new(File.binread(&#39;root.cer&#39;))
 # get the necessary intermediate certificates, available in
 # DER-encoded form in inter1.cer and inter2.cer
-inter1 = OpenSSL::X509::Certificate.new(File.open(&#39;inter1.cer&#39;, &#39;rb&#39;)
-inter2 = OpenSSL::X509::Certificate.new(File.open(&#39;inter2.cer&#39;, &#39;rb&#39;)
+inter1 = OpenSSL::X509::Certificate.new(File.binread(&#39;inter1.cer&#39;))
+inter2 = OpenSSL::X509::Certificate.new(File.binread(&#39;inter2.cer&#39;))
 ts.verify(req, root, inter1, inter2) -&gt; ts or raises an exception if validation fails</pre>
 
   </section>

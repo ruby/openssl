@@ -75,6 +75,8 @@
   <h3>Methods</h3>
 
   <ul class="link-list" role="directory">
+    <li ><a href="#method-c-generate_key">::generate_key</a>
+    <li ><a href="#method-c-generate_parameters">::generate_parameters</a>
     <li ><a href="#method-c-read">::read</a>
   </ul>
 </div>
@@ -125,6 +127,79 @@
          <h3>Public Class Methods</h3>
        </header>
 
+      <div id="method-c-generate_key" class="method-detail ">
+        <div class="method-heading">
+          <span class="method-callseq">
+            OpenSSL::PKey.generate_key(algo_name [, options]) &rarr; pkey
+          </span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        <div class="method-heading">
+          <span class="method-callseq">
+            OpenSSL::PKey.generate_key(pkey [, options]) &rarr; pkey
+          </span>
+        </div>
+
+        <div class="method-description">
+          <p>Generates a new key (pair).</p>
+
+<p>If a String is given as the first argument, it generates a new random key for the algorithm specified by the name just as <a href="PKey.html#method-c-generate_parameters"><code>::generate_parameters</code></a> does. If an <a href="PKey/PKey.html"><code>OpenSSL::PKey::PKey</code></a> is given instead, it generates a new random key for the same algorithm as the key, using the parameters the key contains.</p>
+
+<p>See <a href="PKey.html#method-c-generate_parameters"><code>::generate_parameters</code></a> for the details of <em>options</em> and the given block.</p>
+
+<h2 id="method-c-generate_key-label-Example">Example<span><a href="#method-c-generate_key-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h2>
+
+<pre class="ruby"><span class="ruby-identifier">pkey_params</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span>.<span class="ruby-identifier">generate_parameters</span>(<span class="ruby-string">&quot;DSA&quot;</span>, <span class="ruby-string">&quot;dsa_paramgen_bits&quot;</span> <span class="ruby-operator">=&gt;</span> <span class="ruby-value">2048</span>)
+<span class="ruby-identifier">pkey_params</span>.<span class="ruby-identifier">priv_key</span> <span class="ruby-comment">#=&gt; nil</span>
+<span class="ruby-identifier">pkey</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span>.<span class="ruby-identifier">generate_key</span>(<span class="ruby-identifier">pkey_params</span>)
+<span class="ruby-identifier">pkey</span>.<span class="ruby-identifier">priv_key</span> <span class="ruby-comment">#=&gt; #&lt;OpenSSL::BN 6277...</span>
+</pre>
+
+          <div class="method-source-code" id="generate_key-source">
+            <pre>static VALUE
+ossl_pkey_s_generate_key(int argc, VALUE *argv, VALUE self)
+{
+    return pkey_generate(argc, argv, self, 0);
+}</pre>
+          </div>
+        </div>
+
+
+      </div>
+
+      <div id="method-c-generate_parameters" class="method-detail ">
+        <div class="method-heading">
+          <span class="method-callseq">
+            OpenSSL::PKey.generate_parameters(algo_name [, options]) &rarr; pkey
+          </span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+
+        <div class="method-description">
+          <p>Generates new parameters for the algorithm. <em>algo_name</em> is a String that represents the algorithm. The optional argument <em>options</em> is a Hash that specifies the options specific to the algorithm. The order of the options can be important.</p>
+
+<p>A block can be passed optionally. The meaning of the arguments passed to the block varies depending on the implementation of the algorithm. The block may be called once or multiple times, or may not even be called.</p>
+
+<p>For the supported options, see the documentation for the ‘openssl genpkey’ utility command.</p>
+
+<h2 id="method-c-generate_parameters-label-Example">Example<span><a href="#method-c-generate_parameters-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h2>
+
+<pre class="ruby"><span class="ruby-identifier">pkey</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span>.<span class="ruby-identifier">generate_parameters</span>(<span class="ruby-string">&quot;DSA&quot;</span>, <span class="ruby-string">&quot;dsa_paramgen_bits&quot;</span> <span class="ruby-operator">=&gt;</span> <span class="ruby-value">2048</span>)
+<span class="ruby-identifier">p</span> <span class="ruby-identifier">pkey</span>.<span class="ruby-identifier">p</span>.<span class="ruby-identifier">num_bits</span> <span class="ruby-comment">#=&gt; 2048</span>
+</pre>
+
+          <div class="method-source-code" id="generate_parameters-source">
+            <pre>static VALUE
+ossl_pkey_s_generate_parameters(int argc, VALUE *argv, VALUE self)
+{
+    return pkey_generate(argc, argv, self, 1);
+}</pre>
+          </div>
+        </div>
+
+
+      </div>
+
       <div id="method-c-read" class="method-detail ">
         <div class="method-heading">
           <span class="method-callseq">
@@ -143,7 +218,7 @@
 
 <h3 id="method-c-read-label-Parameters">Parameters<span><a href="#method-c-read-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
 <ul><li>
-<p>_string+ is a DER- or PEM-encoded string containing an arbitrary private or public key.</p>
+<p><em>string</em> is a DER- or PEM-encoded string containing an arbitrary private or public key.</p>
 </li><li>
 <p><em>io</em> is an instance of <a href="../IO.html"><code>IO</code></a> containing a DER- or PEM-encoded arbitrary private or public key.</p>
 </li><li>
@@ -159,30 +234,11 @@ ossl_pkey_new_from_data(int argc, VALUE *argv, VALUE self)
     VALUE data, pass;
 
     rb_scan_args(argc, argv, &quot;11&quot;, &amp;data, &amp;pass);
-    pass = ossl_pem_passwd_value(pass);
-
     bio = ossl_obj2bio(&amp;data);
-    if ((pkey = d2i_PrivateKey_bio(bio, NULL)))
-        goto ok;
-    OSSL_BIO_reset(bio);
-    if ((pkey = d2i_PKCS8PrivateKey_bio(bio, NULL, ossl_pem_passwd_cb, (void *)pass)))
-        goto ok;
-    OSSL_BIO_reset(bio);
-    if ((pkey = d2i_PUBKEY_bio(bio, NULL)))
-        goto ok;
-    OSSL_BIO_reset(bio);
-    /* PEM_read_bio_PrivateKey() also parses PKCS #8 formats */
-    if ((pkey = PEM_read_bio_PrivateKey(bio, NULL, ossl_pem_passwd_cb, (void *)pass)))
-        goto ok;
-    OSSL_BIO_reset(bio);
-    if ((pkey = PEM_read_bio_PUBKEY(bio, NULL, NULL, NULL)))
-        goto ok;
-
+    pkey = ossl_pkey_read_generic(bio, ossl_pem_passwd_value(pass));
     BIO_free(bio);
-    ossl_raise(ePKeyError, &quot;Could not parse PKey&quot;);
-
-ok:
-    BIO_free(bio);
+    if (!pkey)
+        ossl_raise(ePKeyError, &quot;Could not parse PKey&quot;);
     return ossl_pkey_new(pkey);
 }</pre>
           </div>

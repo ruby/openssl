@@ -96,6 +96,7 @@
     <li ><a href="#method-i-set_params">#set_params</a>
     <li ><a href="#method-i-setup">#setup</a>
     <li ><a href="#method-i-ssl_version-3D">#ssl_version=</a>
+    <li ><a href="#method-i-tmp_dh-3D">#tmp_dh=</a>
   </ul>
 </div>
 
@@ -417,25 +418,13 @@
         </div>
 
         <div class="method-description">
-        <p>A callback invoked when DH parameters are required.</p>
+        <p>A callback invoked when DH parameters are required for ephemeral DH key exchange.</p>
 
-<p>The callback is invoked with the <a href="Session.html"><code>Session</code></a> for the key exchange, an flag indicating the use of an export cipher and the keylength required.</p>
+<p>The callback is invoked with the <a href="SSLSocket.html"><code>SSLSocket</code></a>, a flag indicating the use of an export cipher and the keylength required.</p>
 
 <p>The callback must return an <a href="../PKey/DH.html"><code>OpenSSL::PKey::DH</code></a> instance of the correct key length.</p>
-        </div>
-      </div>
-      <div id="attribute-i-tmp_ecdh_callback" class="method-detail">
-        <div class="method-heading attribute-method-heading">
-          <span class="method-name">tmp_ecdh_callback</span><span
-            class="attribute-access-type">[RW]</span>
-        </div>
 
-        <div class="method-description">
-        <p>A callback invoked when ECDH parameters are required.</p>
-
-<p>The callback is invoked with the <a href="Session.html"><code>Session</code></a> for the key exchange, an flag indicating the use of an export cipher and the keylength required.</p>
-
-<p>The callback is deprecated. This does not work with recent versions of <a href="../../OpenSSL.html"><code>OpenSSL</code></a>. Use <a href="SSLContext.html#method-i-ecdh_curves-3D"><code>OpenSSL::SSL::SSLContext#ecdh_curves=</code></a> instead.</p>
+<p><strong>Deprecated in version 3.0.</strong> Use <a href="SSLContext.html#method-i-tmp_dh-3D"><code>tmp_dh=</code></a> instead.</p>
         </div>
       </div>
       <div id="attribute-i-verify_callback" class="method-detail">
@@ -522,10 +511,12 @@
 <p>If an argument is given, <a href="SSLContext.html#method-i-ssl_version-3D"><code>ssl_version=</code></a> is called with the value. Note that this form is deprecated. New applications should use <a href="SSLContext.html#method-i-min_version-3D"><code>min_version=</code></a> and <a href="SSLContext.html#method-i-max_version-3D"><code>max_version=</code></a> as necessary.</p>
 
           <div class="method-source-code" id="new-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 122</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 124</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">initialize</span>(<span class="ruby-identifier">version</span> = <span class="ruby-keyword">nil</span>)
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">options</span> <span class="ruby-operator">|=</span> <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">OP_ALL</span>
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">ssl_version</span> = <span class="ruby-identifier">version</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">version</span>
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">verify_mode</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">VERIFY_NONE</span>
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">verify_hostname</span> = <span class="ruby-keyword">false</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
         </div>
@@ -543,7 +534,7 @@
       <div id="method-i-add_certificate" class="method-detail ">
         <div class="method-heading">
           <span class="method-callseq">
-            add_certificate(certiticate, pkey [, extra_certs]) &rarr; self
+            add_certificate(certificate, pkey [, extra_certs]) &rarr; self
           </span>
           <span class="method-click-advice">click to toggle source</span>
         </div>
@@ -579,10 +570,6 @@ ecdsa_pkey = ...
 another_ca_cert = ...
 ctx.add_certificate(ecdsa_cert, ecdsa_pkey, [another_ca_cert])</pre>
 
-<h3 id="method-i-add_certificate-label-Note">Note<span><a href="#method-i-add_certificate-label-Note">&para;</a> <a href="#top">&uarr;</a></span></h3>
-
-<p><a href="../../OpenSSL.html"><code>OpenSSL</code></a> before the version 1.0.2 could handle only one extra chain across all key types. Calling this method discards the chain set previously.</p>
-
           <div class="method-source-code" id="add_certificate-source">
             <pre>static VALUE
 ossl_sslctx_add_certificate(int argc, VALUE *argv, VALUE self)
@@ -607,7 +594,7 @@ ossl_sslctx_add_certificate(int argc, VALUE *argv, VALUE self)
     EVP_PKEY_free(pub_pkey);
     if (!pub_pkey)
         rb_raise(rb_eArgError, &quot;certificate does not contain public key&quot;);
-    if (EVP_PKEY_cmp(pub_pkey, pkey) != 1)
+    if (EVP_PKEY_eq(pub_pkey, pkey) != 1)
         rb_raise(rb_eArgError, &quot;public key mismatch&quot;);
 
     if (argc &gt;= 3)
@@ -621,34 +608,9 @@ ossl_sslctx_add_certificate(int argc, VALUE *argv, VALUE self)
         sk_X509_pop_free(extra_chain, X509_free);
         ossl_raise(eSSLError, &quot;SSL_CTX_use_PrivateKey&quot;);
     }
-
-    if (extra_chain) {
-#if OPENSSL_VERSION_NUMBER &gt;= 0x10002000 &amp;&amp; !defined(LIBRESSL_VERSION_NUMBER)
-        if (!SSL_CTX_set0_chain(ctx, extra_chain)) {
-            sk_X509_pop_free(extra_chain, X509_free);
-            ossl_raise(eSSLError, &quot;SSL_CTX_set0_chain&quot;);
-        }
-#else
-        STACK_OF(X509) *orig_extra_chain;
-        X509 *x509_tmp;
-
-        /* First, clear the existing chain */
-        SSL_CTX_get_extra_chain_certs(ctx, &amp;orig_extra_chain);
-        if (orig_extra_chain &amp;&amp; sk_X509_num(orig_extra_chain)) {
-            rb_warning(&quot;SSL_CTX_set0_chain() is not available; &quot; \
-                       &quot;clearing previously set certificate chain&quot;);
-            SSL_CTX_clear_extra_chain_certs(ctx);
-        }
-        while ((x509_tmp = sk_X509_shift(extra_chain))) {
-            /* Transfers ownership */
-            if (!SSL_CTX_add_extra_chain_cert(ctx, x509_tmp)) {
-                X509_free(x509_tmp);
-                sk_X509_pop_free(extra_chain, X509_free);
-                ossl_raise(eSSLError, &quot;SSL_CTX_add_extra_chain_cert&quot;);
-            }
-        }
-        sk_X509_free(extra_chain);
-#endif
+    if (extra_chain &amp;&amp; !SSL_CTX_set0_chain(ctx, extra_chain)) {
+        sk_X509_pop_free(extra_chain, X509_free);
+        ossl_raise(eSSLError, &quot;SSL_CTX_set0_chain&quot;);
     }
     return self;
 }</pre>
@@ -770,8 +732,6 @@ ossl_sslctx_set_ciphers(VALUE self, VALUE v)
 
 <p>For a TLS client, the list is directly used in the Supported Elliptic Curves Extension. For a server, the list is used by <a href="../../OpenSSL.html"><code>OpenSSL</code></a> to determine the set of shared curves. <a href="../../OpenSSL.html"><code>OpenSSL</code></a> will pick the most appropriate one from it.</p>
 
-<p>Note that this works differently with old <a href="../../OpenSSL.html"><code>OpenSSL</code></a> (&lt;= 1.0.1). Only one curve can be set, and this has no effect for TLS clients.</p>
-
 <h3 id="method-i-ecdh_curves-3D-label-Example">Example<span><a href="#method-i-ecdh_curves-3D-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
 <pre class="ruby"><span class="ruby-identifier">ctx1</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSLContext</span>.<span class="ruby-identifier">new</span>
@@ -798,48 +758,8 @@ ossl_sslctx_set_ecdh_curves(VALUE self, VALUE arg)
     GetSSLCTX(self, ctx);
     StringValueCStr(arg);
 
-#if defined(HAVE_SSL_CTX_SET1_CURVES_LIST)
     if (!SSL_CTX_set1_curves_list(ctx, RSTRING_PTR(arg)))
         ossl_raise(eSSLError, NULL);
-#else
-    /* OpenSSL does not have SSL_CTX_set1_curves_list()... Fallback to
-     * SSL_CTX_set_tmp_ecdh(). So only the first curve is used. */
-    {
-        VALUE curve, splitted;
-        EC_KEY *ec;
-        int nid;
-
-        splitted = rb_str_split(arg, &quot;:&quot;);
-        if (!RARRAY_LEN(splitted))
-            ossl_raise(eSSLError, &quot;invalid input format&quot;);
-        curve = RARRAY_AREF(splitted, 0);
-        StringValueCStr(curve);
-
-        /* SSL_CTX_set1_curves_list() accepts NIST names */
-        nid = EC_curve_nist2nid(RSTRING_PTR(curve));
-        if (nid == NID_undef)
-            nid = OBJ_txt2nid(RSTRING_PTR(curve));
-        if (nid == NID_undef)
-            ossl_raise(eSSLError, &quot;unknown curve name&quot;);
-
-        ec = EC_KEY_new_by_curve_name(nid);
-        if (!ec)
-            ossl_raise(eSSLError, NULL);
-        EC_KEY_set_asn1_flag(ec, OPENSSL_EC_NAMED_CURVE);
-        if (!SSL_CTX_set_tmp_ecdh(ctx, ec)) {
-            EC_KEY_free(ec);
-            ossl_raise(eSSLError, &quot;SSL_CTX_set_tmp_ecdh&quot;);
-        }
-        EC_KEY_free(ec);
-# if defined(HAVE_SSL_CTX_SET_ECDH_AUTO)
-        /* tmp_ecdh and ecdh_auto conflict. tmp_ecdh is ignored when ecdh_auto
-         * is enabled. So disable ecdh_auto. */
-        if (!SSL_CTX_set_ecdh_auto(ctx, 0))
-            ossl_raise(eSSLError, &quot;SSL_CTX_set_ecdh_auto&quot;);
-# endif
-    }
-#endif
-
     return arg;
 }</pre>
           </div>
@@ -956,7 +876,7 @@ ossl_sslctx_flush_sessions(int argc, VALUE *argv, VALUE self)
           <p>Sets the upper bound of the supported SSL/TLS protocol version. See <a href="SSLContext.html#method-i-min_version-3D"><code>min_version=</code></a> for the possible values.</p>
 
           <div class="method-source-code" id="max_version-3D-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 183</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 187</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">max_version=</span>(<span class="ruby-identifier">version</span>)
   <span class="ruby-identifier">set_minmax_proto_version</span>(<span class="ruby-ivar">@min_proto_version</span> <span class="ruby-operator">||=</span> <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">version</span>)
   <span class="ruby-ivar">@max_proto_version</span> = <span class="ruby-identifier">version</span>
@@ -1001,7 +921,7 @@ ossl_sslctx_flush_sessions(int argc, VALUE *argv, VALUE self)
 </pre>
 
           <div class="method-source-code" id="min_version-3D-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 171</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 175</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">min_version=</span>(<span class="ruby-identifier">version</span>)
   <span class="ruby-identifier">set_minmax_proto_version</span>(<span class="ruby-identifier">version</span>, <span class="ruby-ivar">@max_proto_version</span> <span class="ruby-operator">||=</span> <span class="ruby-keyword">nil</span>)
   <span class="ruby-ivar">@min_proto_version</span> = <span class="ruby-identifier">version</span>
@@ -1417,7 +1337,7 @@ ossl_sslctx_session_remove(VALUE self, VALUE arg)
 <p>If the <a href="SSLContext.html#attribute-i-verify_mode"><code>verify_mode</code></a> is not VERIFY_NONE and <a href="SSLContext.html#attribute-i-ca_file"><code>ca_file</code></a>, <a href="SSLContext.html#attribute-i-ca_path"><code>ca_path</code></a> and <a href="SSLContext.html#attribute-i-cert_store"><code>cert_store</code></a> are not set then the system default certificate store is used.</p>
 
           <div class="method-source-code" id="set_params-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 139</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 143</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">set_params</span>(<span class="ruby-identifier">params</span>={})
   <span class="ruby-identifier">params</span> = <span class="ruby-constant">DEFAULT_PARAMS</span>.<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">params</span>)
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">options</span> = <span class="ruby-identifier">params</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-value">:options</span>) <span class="ruby-comment"># set before min_version/max_version</span>
@@ -1470,26 +1390,6 @@ ossl_sslctx_setup(VALUE self)
     SSL_CTX_set_tmp_dh_callback(ctx, ossl_tmp_dh_callback);
 #endif
 
-#if !defined(OPENSSL_NO_EC)
-    /* We added SSLContext#tmp_ecdh_callback= in Ruby 2.3.0,
-     * but SSL_CTX_set_tmp_ecdh_callback() was removed in OpenSSL 1.1.0. */
-    if (RTEST(rb_attr_get(self, id_i_tmp_ecdh_callback))) {
-# if defined(HAVE_SSL_CTX_SET_TMP_ECDH_CALLBACK)
-        rb_warn(&quot;#tmp_ecdh_callback= is deprecated; use #ecdh_curves= instead&quot;);
-        SSL_CTX_set_tmp_ecdh_callback(ctx, ossl_tmp_ecdh_callback);
-#  if defined(HAVE_SSL_CTX_SET_ECDH_AUTO)
-        /* tmp_ecdh_callback and ecdh_auto conflict; OpenSSL ignores
-         * tmp_ecdh_callback. So disable ecdh_auto. */
-        if (!SSL_CTX_set_ecdh_auto(ctx, 0))
-            ossl_raise(eSSLError, &quot;SSL_CTX_set_ecdh_auto&quot;);
-#  endif
-# else
-        ossl_raise(eSSLError, &quot;OpenSSL does not support tmp_ecdh_callback; &quot;
-                   &quot;use #ecdh_curves= instead&quot;);
-# endif
-    }
-#endif /* OPENSSL_NO_EC */
-
 #ifdef HAVE_SSL_CTX_SET_POST_HANDSHAKE_AUTH
     SSL_CTX_set_post_handshake_auth(ctx, 1);
 #endif
@@ -1498,17 +1398,7 @@ ossl_sslctx_setup(VALUE self)
     if (!NIL_P(val)) {
         X509_STORE *store = GetX509StorePtr(val); /* NO NEED TO DUP */
         SSL_CTX_set_cert_store(ctx, store);
-#if !defined(HAVE_X509_STORE_UP_REF)
-        /*
-         * WORKAROUND:
-         *   X509_STORE can count references, but
-         *   X509_STORE_free() doesn&#39;t care it.
-         *   So we won&#39;t increment it but mark it by ex_data.
-         */
-        SSL_CTX_set_ex_data(ctx, ossl_sslctx_ex_store_p, ctx);
-#else /* Fixed in OpenSSL 1.0.2; bff9ce4db38b (master), 5b4b9ce976fc (1.0.2) */
         X509_STORE_up_ref(store);
-#endif
     }
 
     val = rb_attr_get(self, id_i_extra_chain_cert);
@@ -1559,10 +1449,17 @@ ossl_sslctx_setup(VALUE self)
     ca_file = NIL_P(val) ? NULL : StringValueCStr(val);
     val = rb_attr_get(self, id_i_ca_path);
     ca_path = NIL_P(val) ? NULL : StringValueCStr(val);
+#ifdef HAVE_SSL_CTX_LOAD_VERIFY_FILE
+    if (ca_file &amp;&amp; !SSL_CTX_load_verify_file(ctx, ca_file))
+        ossl_raise(eSSLError, &quot;SSL_CTX_load_verify_file&quot;);
+    if (ca_path &amp;&amp; !SSL_CTX_load_verify_dir(ctx, ca_path))
+        ossl_raise(eSSLError, &quot;SSL_CTX_load_verify_dir&quot;);
+#else
     if(ca_file || ca_path){
         if (!SSL_CTX_load_verify_locations(ctx, ca_file, ca_path))
             rb_warning(&quot;can&#39;t set verify locations&quot;);
     }
+#endif
 
     val = rb_attr_get(self, id_i_verify_mode);
     verify_mode = NIL_P(val) ? SSL_VERIFY_NONE : NUM2INT(val);
@@ -1590,7 +1487,6 @@ ossl_sslctx_setup(VALUE self)
     }
 #endif
 
-#ifdef HAVE_SSL_CTX_SET_ALPN_SELECT_CB
     val = rb_attr_get(self, id_i_alpn_protocols);
     if (!NIL_P(val)) {
         VALUE rprotos = ssl_encode_npn_protocols(val);
@@ -1605,7 +1501,6 @@ ossl_sslctx_setup(VALUE self)
         SSL_CTX_set_alpn_select_cb(ctx, ssl_alpn_select_cb, (void *) self);
         OSSL_Debug(&quot;SSL ALPN select callback added&quot;);
     }
-#endif
 
     rb_obj_freeze(self);
 
@@ -1669,7 +1564,7 @@ ossl_sslctx_setup(VALUE self)
 <p>As the name hints, this used to call the SSL_CTX_set_ssl_version() function which sets the <a href="../SSL.html"><code>SSL</code></a> method used for connections created from the context. As of Ruby/OpenSSL 2.1, this accessor method is implemented to call <a href="SSLContext.html#method-i-min_version-3D"><code>min_version=</code></a> and <a href="SSLContext.html#method-i-max_version-3D"><code>max_version=</code></a> instead.</p>
 
           <div class="method-source-code" id="ssl_version-3D-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 202</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 206</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">ssl_version=</span>(<span class="ruby-identifier">meth</span>)
   <span class="ruby-identifier">meth</span> = <span class="ruby-identifier">meth</span>.<span class="ruby-identifier">to_s</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">meth</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Symbol</span>)
   <span class="ruby-keyword">if</span> <span class="ruby-regexp">/(?&lt;type&gt;_client|_server)\z/</span> <span class="ruby-operator">=~</span> <span class="ruby-identifier">meth</span>
@@ -1683,6 +1578,60 @@ ossl_sslctx_setup(VALUE self)
   <span class="ruby-identifier">set_minmax_proto_version</span>(<span class="ruby-identifier">version</span>, <span class="ruby-identifier">version</span>)
   <span class="ruby-ivar">@min_proto_version</span> = <span class="ruby-ivar">@max_proto_version</span> = <span class="ruby-identifier">version</span>
 <span class="ruby-keyword">end</span></pre>
+          </div>
+        </div>
+
+
+      </div>
+
+      <div id="method-i-tmp_dh-3D" class="method-detail ">
+        <div class="method-heading">
+          <span class="method-callseq">
+            tmp_dh = pkey
+          </span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+
+        <div class="method-description">
+          <p>Sets DH parameters used for ephemeral DH key exchange. This is relevant for servers only.</p>
+
+<p><code>pkey</code> is an instance of <a href="../PKey/DH.html"><code>OpenSSL::PKey::DH</code></a>. Note that key components contained in the key object, if any, are ignored. The server will always generate a new key pair for each handshake.</p>
+
+<p>Added in version 3.0. See also the man page SSL_set0_tmp_dh_pkey(3).</p>
+
+<p>Example:</p>
+
+<pre class="ruby"><span class="ruby-identifier">ctx</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSLContext</span>.<span class="ruby-identifier">new</span>
+<span class="ruby-identifier">ctx</span>.<span class="ruby-identifier">tmp_dh</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">DH</span>.<span class="ruby-identifier">generate</span>(<span class="ruby-value">2048</span>)
+<span class="ruby-identifier">svr</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSLServer</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">tcp_svr</span>, <span class="ruby-identifier">ctx</span>)
+<span class="ruby-constant">Thread</span>.<span class="ruby-identifier">new</span> { <span class="ruby-identifier">svr</span>.<span class="ruby-identifier">accept</span> }
+</pre>
+
+          <div class="method-source-code" id="tmp_dh-3D-source">
+            <pre>static VALUE
+ossl_sslctx_set_tmp_dh(VALUE self, VALUE arg)
+{
+    SSL_CTX *ctx;
+    EVP_PKEY *pkey;
+
+    rb_check_frozen(self);
+    GetSSLCTX(self, ctx);
+    pkey = GetPKeyPtr(arg);
+
+    if (EVP_PKEY_base_id(pkey) != EVP_PKEY_DH)
+        rb_raise(eSSLError, &quot;invalid pkey type %s (expected DH)&quot;,
+                 OBJ_nid2sn(EVP_PKEY_base_id(pkey)));
+#ifdef HAVE_SSL_SET0_TMP_DH_PKEY
+    if (!SSL_CTX_set0_tmp_dh_pkey(ctx, pkey))
+        ossl_raise(eSSLError, &quot;SSL_CTX_set0_tmp_dh_pkey&quot;);
+    EVP_PKEY_up_ref(pkey);
+#else
+    if (!SSL_CTX_set_tmp_dh(ctx, EVP_PKEY_get0_DH(pkey)))
+        ossl_raise(eSSLError, &quot;SSL_CTX_set_tmp_dh&quot;);
+#endif
+
+    return arg;
+}</pre>
           </div>
         </div>
 

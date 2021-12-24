@@ -131,11 +131,6 @@
         </div>
         <div class="method-heading">
           <span class="method-callseq">
-            OpenSSL::PKey::EC::Group.new(ec_method)
-          </span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
             OpenSSL::PKey::EC::Group.new(:GFp, bignum_p, bignum_a, bignum_b)
           </span>
         </div>
@@ -147,17 +142,6 @@
 
         <div class="method-description">
           <p>Creates a new <a href="Group.html"><code>EC::Group</code></a> object.</p>
-
-<p><em>ec_method</em> is a symbol that represents an EC_METHOD. Currently the following are supported:</p>
-<ul><li>
-<p>:GFp_simple</p>
-</li><li>
-<p>:GFp_mont</p>
-</li><li>
-<p>:GFp_nist</p>
-</li><li>
-<p>:GF2m_simple</p>
-</li></ul>
 
 <p>If the first argument is :GFp or :GF2m, creates a new curve with given parameters.</p>
 
@@ -173,29 +157,7 @@
 
     switch (rb_scan_args(argc, argv, &quot;13&quot;, &amp;arg1, &amp;arg2, &amp;arg3, &amp;arg4)) {
     case 1:
-        if (SYMBOL_P(arg1)) {
-            const EC_METHOD *method = NULL;
-            ID id = SYM2ID(arg1);
-
-            if (id == s_GFp_simple) {
-                method = EC_GFp_simple_method();
-            } else if (id == s_GFp_mont) {
-                method = EC_GFp_mont_method();
-            } else if (id == s_GFp_nist) {
-                method = EC_GFp_nist_method();
-#if !defined(OPENSSL_NO_EC2M)
-            } else if (id == s_GF2m_simple) {
-                method = EC_GF2m_simple_method();
-#endif
-            }
-
-            if (method) {
-                if ((group = EC_GROUP_new(method)) == NULL)
-                    ossl_raise(eEC_GROUP, &quot;EC_GROUP_new&quot;);
-            } else {
-                ossl_raise(rb_eArgError, &quot;unknown symbol, must be :GFp_simple, :GFp_mont, :GFp_nist or :GF2m_simple&quot;);
-            }
-        } else if (rb_obj_is_kind_of(arg1, cEC_GROUP)) {
+        if (rb_obj_is_kind_of(arg1, cEC_GROUP)) {
             const EC_GROUP *arg1_group;
 
             GetECGroup(arg1, arg1_group);
@@ -259,8 +221,7 @@
         ossl_raise(rb_eArgError, &quot;wrong number of arguments&quot;);
     }
 
-    if (group == NULL)
-        ossl_raise(eEC_GROUP, &quot;&quot;);
+    ASSUME(group);
     RTYPEDDATA_DATA(self) = group;
 
     return self;
