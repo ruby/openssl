@@ -10,8 +10,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest, macos-latest ]
-        ruby: [ head, "3.0", "2.7", "2.6" ]
+        os: [ ubuntu-20.04, macos-11 ]
+        ruby: [ head, "3.1", "3.0", "2.7", "2.6" ]
     steps:
       - name: repo checkout
         uses: actions/checkout@v2
@@ -37,17 +37,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ windows-latest ]
-        ruby: [ mswin, mingw, "3.0", "2.7", "2.6" ]
+        os: [ windows-2022 ]
+        ruby: [ ucrt, mingw, "3.1", "3.0", "2.7", "2.6" ]
+        include:
+          # as of 2022-Jan, mswin will not build on windows-2022
+          - { os: windows-2019, ruby: mswin }
     steps:
       - name: repo checkout
         uses: actions/checkout@v2
 
-      - name: load ruby, install/update gcc, install openssl
-        uses: MSP-Greg/setup-ruby-pkgs@v1
+      - name: load ruby
+        uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
-          mingw: _upgrade_ openssl
 
       - name: depends
         run:  bundle install
@@ -56,7 +58,14 @@ jobs:
       # SSL_DIR is set as needed by MSP-Greg/setup-ruby-pkgs
       # only used with mswin
       - name: compile
-        run:  rake compile -- --enable-debug --without-pkg-config $env:SSL_DIR
+        run:  |
+          if ('${{ matrix.ruby }}' -eq 'mswin') {
+            choco install --no-progress openssl
+            New-Item  -Path C:/OpenSSL-Win64 -ItemType Junction -Value "C:/Program Files/OpenSSL-Win64" 1> $null
+            rake compile -- --enable-debug --without-pkg-config --with-openssl-dir=C:/OpenSSL-Win64
+          } else {
+            rake compile -- --enable-debug
+          }
 
       - name: test
         run:  rake test TESTOPTS="-v --no-show-detail-immediately" OSSL_MDEBUG=1
