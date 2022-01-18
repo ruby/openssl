@@ -1569,6 +1569,104 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     end
   end
 
+  def test_ciphersuites_method_tls_connection
+    pend 'TLS 1.3 not supported' unless tls13_supported?
+    ssl_ctx = OpenSSL::SSL::SSLContext.new
+    tls13_ciphersuites = ssl_ctx.ciphers.select { |x| x[1] == 'TLSv1.3' }
+    if tls13_ciphersuites.empty? || !ssl_ctx.respond_to?(:ciphersuites=)
+      pend 'no support for TLSv1.3 cipher suites?'
+    end
+
+    tls13_csuite = tls13_ciphersuites[-1]
+    inputs = [tls13_csuite[0], [tls13_csuite[0]], [tls13_csuite]]
+
+    ctx_proc = -> ctx {
+      ctx.min_version = ctx.max_version = OpenSSL::SSL::TLS1_3_VERSION
+      ctx.ciphersuites = tls13_csuite[0]
+    }
+    start_server(ctx_proc: ctx_proc) do |port|
+      inputs.each do |input|
+        cli_ctx = OpenSSL::SSL::SSLContext.new
+        cli_ctx.min_version = cli_ctx.max_version = OpenSSL::SSL::TLS1_3_VERSION
+        cli_ctx.ciphersuites = input
+
+        server_connect(port, cli_ctx) do |ssl|
+          assert_equal(ssl.ssl_version, 'TLSv1.3')
+          assert_equal(ssl.cipher, tls13_csuite)
+        end
+      end
+    end
+  end
+
+  def test_ciphersuites_method_nil_argument
+    ssl_ctx = OpenSSL::SSL::SSLContext.new
+    pend 'ciphersuites= method is missing' unless ssl_ctx.respond_to?(:ciphersuites=)
+
+    assert_equal(ssl_ctx.ciphersuites = nil, nil)
+  end
+
+  def test_ciphersuites_method_frozen_object
+    ssl_ctx = OpenSSL::SSL::SSLContext.new
+    pend 'ciphersuites= method is missing' unless ssl_ctx.respond_to?(:ciphersuites=)
+
+    ssl_ctx.freeze
+    assert_raise(FrozenError) { ssl_ctx.ciphersuites = 'TLS_AES_256_GCM_SHA384' }
+  end
+
+  def test_ciphersuites_method_bogus_csuite
+    ssl_ctx = OpenSSL::SSL::SSLContext.new
+    pend 'ciphersuites= method is missing' unless ssl_ctx.respond_to?(:ciphersuites=)
+
+    assert_raise_with_message(
+      OpenSSL::SSL::SSLError,
+      /SSL_CTX_set_ciphersuites: no cipher match/i
+    ) { ssl_ctx.ciphersuites = 'BOGUS' }
+  end
+
+  def test_ciphers_method_tls_connection
+    ssl_ctx = OpenSSL::SSL::SSLContext.new
+    csuite = ssl_ctx.ciphers.select { |x| x[0] !~ /PSK|SRP/ && \
+      x[1] == 'TLSv1.0' }[-1]
+
+    pend "couldn't find a TLSv1.0 cipher suite for testing" if csuite.nil?
+
+    inputs = [csuite[0], [csuite[0]], [csuite]]
+
+    start_server do |port|
+      inputs.each do |input|
+        cli_ctx = OpenSSL::SSL::SSLContext.new
+        cli_ctx.min_version = cli_ctx.max_version = OpenSSL::SSL::TLS1_VERSION
+        cli_ctx.ciphers = input
+
+        server_connect(port, cli_ctx) do |ssl|
+          assert_equal(ssl.ssl_version, 'TLSv1')
+          assert_equal(ssl.cipher, csuite)
+        end
+      end
+    end
+  end
+
+  def test_ciphers_method_nil_argument
+    ssl_ctx = OpenSSL::SSL::SSLContext.new
+    assert_equal(ssl_ctx.ciphers = nil, nil)
+  end
+
+  def test_ciphers_method_frozen_object
+    ssl_ctx = OpenSSL::SSL::SSLContext.new
+
+    ssl_ctx.freeze
+    assert_raise(FrozenError) { ssl_ctx.ciphers = 'ECDHE-RSA-AES128-SHA' }
+  end
+
+  def test_ciphers_method_bogus_csuite
+    ssl_ctx = OpenSSL::SSL::SSLContext.new
+
+    assert_raise_with_message(
+      OpenSSL::SSL::SSLError,
+      /SSL_CTX_set_cipher_list: no cipher match/i
+    ) { ssl_ctx.ciphers = 'BOGUS' }
+  end
+
   def test_connect_works_when_setting_dh_callback_to_nil
     ctx_proc = -> ctx {
       ctx.max_version = :TLS1_2
