@@ -1625,7 +1625,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
 
   def test_ciphers_method_tls_connection
     ssl_ctx = OpenSSL::SSL::SSLContext.new
-    csuite = ssl_ctx.ciphers.select { |x| x[0] !~ /PSK|SRP/ && \
+    csuite = ssl_ctx.ciphers.select { |x| x[0] =~ /^(EC)?DHE?-RSA/ && \
       x[1] == 'TLSv1.0' }[-1]
 
     pend "couldn't find a TLSv1.0 cipher suite for testing" if csuite.nil?
