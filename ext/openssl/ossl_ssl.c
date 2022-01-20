@@ -1014,9 +1014,9 @@ ossl_sslctx_set_ciphers(VALUE self, VALUE v)
 #ifdef HAVE_SSL_CTX_SET_CIPHERSUITES
 /*
  * call-seq:
- *    ctx.tls13_ciphers = "cipher1:cipher2:..."
- *    ctx.tls13_ciphers = [name, ...]
- *    ctx.tls13_ciphers = [[name, version, bits, alg_bits], ...]
+ *    ctx.ciphersuites = "cipher1:cipher2:..."
+ *    ctx.ciphersuites = [name, ...]
+ *    ctx.ciphersuites = [[name, version, bits, alg_bits], ...]
  *
  * Sets the list of available TLSv1.3 cipher suites for this context.
  */
@@ -2740,8 +2740,8 @@ Init_ossl_ssl(void)
     rb_define_alias(cSSLContext, "ssl_timeout=", "timeout=");
     rb_define_private_method(cSSLContext, "set_minmax_proto_version",
 			     ossl_sslctx_set_minmax_proto_version, 2);
-    rb_define_method(cSSLContext, "ciphers",        ossl_sslctx_get_ciphers, 0);
-    rb_define_method(cSSLContext, "ciphers=",       ossl_sslctx_set_ciphers, 1);
+    rb_define_method(cSSLContext, "ciphers",     ossl_sslctx_get_ciphers, 0);
+    rb_define_method(cSSLContext, "ciphers=",    ossl_sslctx_set_ciphers, 1);
 #ifdef HAVE_SSL_CTX_SET_CIPHERSUITES
     rb_define_method(cSSLContext, "ciphersuites=", ossl_sslctx_set_ciphersuites, 1);
 #endif

@@ -1572,27 +1572,19 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   def test_ciphersuites_method_tls_connection
     pend 'TLS 1.3 not supported' unless tls13_supported?
     ssl_ctx = OpenSSL::SSL::SSLContext.new
-    tls13_ciphersuites = ssl_ctx.ciphers.select { |x| x[1] == 'TLSv1.3' }
-    if tls13_ciphersuites.empty? || !ssl_ctx.respond_to?(:ciphersuites=)
-      pend 'no support for TLSv1.3 cipher suites?'
-    end
 
-    tls13_csuite = tls13_ciphersuites[-1]
-    inputs = [tls13_csuite[0], [tls13_csuite[0]], [tls13_csuite]]
+    csuite = ['TLS_AES_128_GCM_SHA256', 'TLSv1.3', 128, 128]
+    inputs = [csuite[0], [csuite[0]], [csuite]]
 
-    ctx_proc = -> ctx {
-      ctx.min_version = ctx.max_version = OpenSSL::SSL::TLS1_3_VERSION
-      ctx.ciphersuites = tls13_csuite[0]
-    }
-    start_server(ctx_proc: ctx_proc) do |port|
+    start_server do |port|
       inputs.each do |input|
         cli_ctx = OpenSSL::SSL::SSLContext.new
         cli_ctx.min_version = cli_ctx.max_version = OpenSSL::SSL::TLS1_3_VERSION
         cli_ctx.ciphersuites = input
 
         server_connect(port, cli_ctx) do |ssl|
-          assert_equal(ssl.ssl_version, 'TLSv1.3')
-          assert_equal(ssl.cipher, tls13_csuite)
+          assert_equal('TLSv1.3', ssl.ssl_version)
+          assert_equal(csuite, ssl.cipher)
         end
       end
     end
@@ -1602,7 +1594,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     ssl_ctx = OpenSSL::SSL::SSLContext.new
     pend 'ciphersuites= method is missing' unless ssl_ctx.respond_to?(:ciphersuites=)
 
-    assert_equal(ssl_ctx.ciphersuites = nil, nil)
+    assert_nothing_raised { ssl_ctx.ciphersuites = nil }
   end
 
   def test_ciphersuites_method_frozen_object
@@ -1625,22 +1617,19 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
 
   def test_ciphers_method_tls_connection
     ssl_ctx = OpenSSL::SSL::SSLContext.new
-    csuite = ssl_ctx.ciphers.select { |x| x[0] =~ /^(EC)?DHE?-RSA/ && \
-      x[1] == 'TLSv1.0' }[-1]
 
-    pend "couldn't find a TLSv1.0 cipher suite for testing" if csuite.nil?
-
+    csuite = ['ECDHE-RSA-AES256-SHA384', 'TLSv1.2', 256, 256]
     inputs = [csuite[0], [csuite[0]], [csuite]]
 
     start_server do |port|
       inputs.each do |input|
         cli_ctx = OpenSSL::SSL::SSLContext.new
-        cli_ctx.min_version = cli_ctx.max_version = OpenSSL::SSL::TLS1_VERSION
+        cli_ctx.min_version = cli_ctx.max_version = OpenSSL::SSL::TLS1_2_VERSION
         cli_ctx.ciphers = input
 
         server_connect(port, cli_ctx) do |ssl|
-          assert_equal(ssl.ssl_version, 'TLSv1')
-          assert_equal(ssl.cipher, csuite)
+          assert_equal('TLSv1.2', ssl.ssl_version)
+          assert_equal(csuite, ssl.cipher)
         end
       end
     end
@@ -1648,7 +1637,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
 
   def test_ciphers_method_nil_argument
     ssl_ctx = OpenSSL::SSL::SSLContext.new
-    assert_equal(ssl_ctx.ciphers = nil, nil)
+    assert_nothing_raised { ssl_ctx.ciphers = nil }
   end
 
   def test_ciphers_method_frozen_object
