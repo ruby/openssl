@@ -1586,7 +1586,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
 
         server_connect(port, cli_ctx) do |ssl|
           assert_equal('TLSv1.3', ssl.ssl_version)
-          assert_equal(csuite, ssl.cipher)
+          assert_equal(csuite[0], ssl.cipher[0])
         end
       end
     end
@@ -1629,7 +1629,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
 
         server_connect(port, cli_ctx) do |ssl|
           assert_equal('TLSv1.2', ssl.ssl_version)
-          assert_equal(csuite, ssl.cipher)
+          assert_equal(csuite[0], ssl.cipher[0])
         end
       end
     end
