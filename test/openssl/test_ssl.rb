@@ -1618,8 +1618,6 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   end
 
   def test_ciphers_method_tls_connection
-    ssl_ctx = OpenSSL::SSL::SSLContext.new
-
     csuite = ['ECDHE-RSA-AES256-SHA384', 'TLSv1.2', 256, 256]
     inputs = [csuite[0], [csuite[0]], [csuite]]
 
