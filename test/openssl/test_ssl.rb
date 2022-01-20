@@ -1570,8 +1570,10 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   end
 
   def test_ciphersuites_method_tls_connection
-    pend 'TLS 1.3 not supported' unless tls13_supported?
     ssl_ctx = OpenSSL::SSL::SSLContext.new
+    if !tls13_supported? || !ssl_ctx.respond_to?(:ciphersuites=)
+      pend 'TLS 1.3 not supported'
+    end
 
     csuite = ['TLS_AES_128_GCM_SHA256', 'TLSv1.3', 128, 128]
     inputs = [csuite[0], [csuite[0]], [csuite]]
