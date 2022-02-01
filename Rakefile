@@ -42,10 +42,10 @@ namespace :sync do
       ["ext/openssl/", "ext/openssl/"],
       ["lib/", "ext/openssl/lib/"],
       ["sample/", "sample/openssl/"],
-      ["test/fixtures/", "test/openssl/fixtures/"],
-      ["test/utils.rb", "test/openssl/"],
-      ["test/ut_eof.rb", "test/openssl/"],
-      ["test/test_*", "test/openssl/"],
+      ["test/openssl/fixtures/", "test/openssl/fixtures/"],
+      ["test/openssl/utils.rb", "test/openssl/"],
+      ["test/openssl/ut_eof.rb", "test/openssl/"],
+      ["test/openssl/test_*", "test/openssl/"],
       ["History.md", "ext/openssl/"],
     ]
     paths.each do |src, dst|
