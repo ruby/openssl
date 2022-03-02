@@ -670,11 +670,8 @@ ossl_pkey_export_traditional(int argc, VALUE *argv, VALUE self, int to_der)
 	}
     }
     else {
-#if OPENSSL_VERSION_NUMBER >= 0x10100000 && !defined(LIBRESSL_VERSION_NUMBER)
-	if (!PEM_write_bio_PrivateKey_traditional(bio, pkey, enc, NULL, 0,
-						  ossl_pem_passwd_cb,
-						  (void *)pass)) {
-#else
+#if OPENSSL_VERSION_NUMBER < 0x10100000 || \
+	(defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER < 0x30500000)
 	char pem_str[80];
 	const char *aname;
 
@@ -683,6 +680,10 @@ ossl_pkey_export_traditional(int argc, VALUE *argv, VALUE self, int to_der)
 	if (!PEM_ASN1_write_bio((i2d_of_void *)i2d_PrivateKey, pem_str, bio,
 				pkey, enc, NULL, 0, ossl_pem_passwd_cb,
 				(void *)pass)) {
+#else
+	if (!PEM_write_bio_PrivateKey_traditional(bio, pkey, enc, NULL, 0,
+						  ossl_pem_passwd_cb,
+						  (void *)pass)) {
 #endif
 	    BIO_free(bio);
 	    ossl_raise(ePKeyError, "PEM_write_bio_PrivateKey_traditional");
