@@ -232,7 +232,7 @@ module OpenSSL::Buffering
   #
   # Unlike IO#gets the separator must be provided if a limit is provided.
 
-  def gets(eol=$/, limit=nil)
+  def gets(eol=$/, limit=nil, chomp: false)
     idx = @rbuffer.index(eol)
     until @eof
       break if idx
@@ -247,7 +247,9 @@ module OpenSSL::Buffering
     if size && limit && limit >= 0
       size = [size, limit].min
     end
-    consume_rbuff(size)
+    str = consume_rbuff(size)
+    str.chomp!(eol) if chomp && str
+    str
   end
 
   ##
@@ -256,8 +258,8 @@ module OpenSSL::Buffering
   #
   # See also #gets
 
-  def each(eol=$/)
-    while line = self.gets(eol)
+  def each(eol=$/, chomp: false)
+    while line = self.gets(eol, chomp: chomp)
       yield line
     end
   end
@@ -268,9 +270,9 @@ module OpenSSL::Buffering
   #
   # See also #gets
 
-  def readlines(eol=$/)
+  def readlines(eol=$/, chomp: false)
     ary = []
-    while line = self.gets(eol)
+    while line = self.gets(eol, chomp: chomp)
       ary << line
     end
     ary
@@ -281,9 +283,9 @@ module OpenSSL::Buffering
   #
   # Raises EOFError if at end of file.
 
-  def readline(eol=$/)
+  def readline(eol=$/, chomp: false)
     raise EOFError if eof?
-    gets(eol)
+    gets(eol, chomp: chomp)
   end
 
   ##
