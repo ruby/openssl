@@ -47,7 +47,8 @@ jobs:
         uses: MSP-Greg/setup-ruby-pkgs@v1
         with:
           ruby-version: ${{ matrix.ruby }}
-          mingw: _upgrade_ openssl
+          mingw: ${{ matrix.ruby != 'mswin' && '_upgrade_ openssl' || '' }}
+          vcpkg: ${{ matrix.ruby == 'mswin' && 'openssl' || '' }}
 
       - name: depends
         run:  bundle install
