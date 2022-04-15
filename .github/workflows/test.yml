@@ -11,10 +11,10 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest, macos-latest ]
-        ruby: [ head, "3.0", "2.7", "2.6" ]
+        ruby: [ head, "3.1", "3.0", "2.7", "2.6" ]
     steps:
       - name: repo checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: load ruby
         uses: ruby/setup-ruby@v1
@@ -38,10 +38,10 @@ jobs:
       fail-fast: false
       matrix:
         os: [ windows-latest ]
-        ruby: [ mswin, mingw, "3.0", "2.7", "2.6" ]
+        ruby: [ mswin, mingw, "3.1", "3.0", "2.7", "2.6" ]
     steps:
       - name: repo checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: load ruby, install/update gcc, install openssl
         uses: MSP-Greg/setup-ruby-pkgs@v1
