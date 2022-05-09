@@ -44,7 +44,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: load ruby, install/update gcc, install openssl
-        uses: MSP-Greg/setup-ruby-pkgs@v1
+        uses: ruby/setup-ruby-pkgs@v1
         with:
           ruby-version: ${{ matrix.ruby }}
           mingw: ${{ matrix.ruby != 'mswin' && '_upgrade_ openssl' || '' }}
@@ -54,7 +54,7 @@ jobs:
         run:  bundle install
 
       # pkg-config is disabled because it can pick up the different OpenSSL installation
-      # SSL_DIR is set as needed by MSP-Greg/setup-ruby-pkgs
+      # SSL_DIR is set as needed by ruby/setup-ruby-pkgs
       # only used with mswin
       - name: compile
         run:  rake compile -- --enable-debug --without-pkg-config $env:SSL_DIR
