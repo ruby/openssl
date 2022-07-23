@@ -3,7 +3,7 @@
 # = Ruby-space definitions that completes C-space funcs for X509 and subclasses
 #
 # = Info
-# 'OpenSSL for Ruby 2' project
+# 'OpenSSL for Ruby' project
 # Copyright (C) 2002  Michal Rokos <m.rokos@sh.cvut.cz>
 # All rights reserved.
 #

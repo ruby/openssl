@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 =begin
 = Info
-  'OpenSSL for Ruby 2' project
+  'OpenSSL for Ruby' project
   Copyright (C) 2002  Michal Rokos <m.rokos@sh.cvut.cz>
   All rights reserved.
 
