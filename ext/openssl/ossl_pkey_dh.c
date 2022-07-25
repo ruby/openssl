@@ -74,7 +74,9 @@ ossl_dh_initialize(int argc, VALUE *argv, VALUE self)
 {
     EVP_PKEY *pkey;
     int type;
+#ifndef OSSL_HAVE_PROVIDER
     DH *dh;
+#endif
     BIO *in = NULL;
     VALUE arg;
 
@@ -84,15 +86,20 @@ ossl_dh_initialize(int argc, VALUE *argv, VALUE self)
 
     /* The DH.new(size, generator) form is handled by lib/openssl/pkey.rb */
     if (rb_scan_args(argc, argv, "01", &arg) == 0) {
+#ifdef OSSL_HAVE_PROVIDER
+        rb_raise(eDHError, "empty DH cannot be created");
+#else
         dh = DH_new();
         if (!dh)
             ossl_raise(eDHError, "DH_new");
         goto legacy;
+#endif
     }
 
     arg = ossl_to_der_if_possible(arg);
     in = ossl_obj2bio(&arg);
 
+#ifndef OSSL_HAVE_PROVIDER
     /*
      * On OpenSSL <= 1.1.1 and current versions of LibreSSL, the generic
      * routine does not support DER-encoded parameters
@@ -101,6 +108,7 @@ ossl_dh_initialize(int argc, VALUE *argv, VALUE self)
     if (dh)
         goto legacy;
     OSSL_BIO_reset(in);
+#endif
 
     pkey = ossl_pkey_read_generic(in, Qnil);
     BIO_free(in);
@@ -115,6 +123,7 @@ ossl_dh_initialize(int argc, VALUE *argv, VALUE self)
     RTYPEDDATA_DATA(self) = pkey;
     return self;
 
+#ifndef OSSL_HAVE_PROVIDER
   legacy:
     BIO_free(in);
     pkey = EVP_PKEY_new();
@@ -125,6 +134,7 @@ ossl_dh_initialize(int argc, VALUE *argv, VALUE self)
     }
     RTYPEDDATA_DATA(self) = pkey;
     return self;
+#endif
 }
 
 #ifndef HAVE_EVP_PKEY_DUP
