@@ -79,7 +79,7 @@ ossl_pkey_new(EVP_PKEY *pkey)
     return obj;
 }
 
-#if OSSL_OPENSSL_PREREQ(3, 0, 0)
+#ifdef OSSL_HAVE_PROVIDER
 # include <openssl/decoder.h>
 
 EVP_PKEY *
@@ -484,7 +484,7 @@ ossl_pkey_s_generate_key(int argc, VALUE *argv, VALUE self)
 void
 ossl_pkey_check_public_key(const EVP_PKEY *pkey)
 {
-#if OSSL_OPENSSL_PREREQ(3, 0, 0)
+#ifdef OSSL_HAVE_PROVIDER
     if (EVP_PKEY_missing_parameters(pkey))
         ossl_raise(ePKeyError, "parameters missing");
 #else

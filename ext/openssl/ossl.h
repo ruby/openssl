@@ -56,6 +56,10 @@
 # define OSSL_USE_ENGINE
 #endif
 
+#if OSSL_OPENSSL_PREREQ(3, 0, 0)
+# define OSSL_HAVE_PROVIDER
+#endif
+
 /*
  * Common Module
  */
