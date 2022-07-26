@@ -73,7 +73,6 @@ static VALUE
 ossl_dh_initialize(int argc, VALUE *argv, VALUE self)
 {
     EVP_PKEY *pkey;
-    int type;
 #ifndef OSSL_HAVE_PROVIDER
     DH *dh;
 #endif
@@ -110,16 +109,10 @@ ossl_dh_initialize(int argc, VALUE *argv, VALUE self)
     OSSL_BIO_reset(in);
 #endif
 
-    pkey = ossl_pkey_read_generic(in, Qnil);
+    pkey = ossl_pkey_read_generic(in, Qnil, "DH");
     BIO_free(in);
     if (!pkey)
         ossl_raise(eDHError, "could not parse pkey");
-
-    type = EVP_PKEY_base_id(pkey);
-    if (type != EVP_PKEY_DH) {
-        EVP_PKEY_free(pkey);
-        rb_raise(eDHError, "incorrect pkey type: %s", OBJ_nid2sn(type));
-    }
     RTYPEDDATA_DATA(self) = pkey;
     return self;
 

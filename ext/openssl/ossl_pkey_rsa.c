@@ -82,7 +82,6 @@ ossl_rsa_initialize(int argc, VALUE *argv, VALUE self)
 #endif
     BIO *in = NULL;
     VALUE arg, pass;
-    int type;
 
     TypedData_Get_Struct(self, EVP_PKEY, &ossl_evp_pkey_type, pkey);
     if (pkey)
@@ -118,16 +117,10 @@ ossl_rsa_initialize(int argc, VALUE *argv, VALUE self)
 #endif
 
     /* Use the generic routine */
-    pkey = ossl_pkey_read_generic(in, pass);
+    pkey = ossl_pkey_read_generic(in, pass, "RSA");
     BIO_free(in);
     if (!pkey)
         ossl_raise(eRSAError, "Neither PUB key nor PRIV key");
-
-    type = EVP_PKEY_base_id(pkey);
-    if (type != EVP_PKEY_RSA) {
-        EVP_PKEY_free(pkey);
-        rb_raise(eRSAError, "incorrect pkey type: %s", OBJ_nid2sn(type));
-    }
     RTYPEDDATA_DATA(self) = pkey;
     return self;
 

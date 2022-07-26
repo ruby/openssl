@@ -89,7 +89,6 @@ ossl_dsa_initialize(int argc, VALUE *argv, VALUE self)
 #endif
     BIO *in = NULL;
     VALUE arg, pass;
-    int type;
 
     TypedData_Get_Struct(self, EVP_PKEY, &ossl_evp_pkey_type, pkey);
     if (pkey)
@@ -122,16 +121,10 @@ ossl_dsa_initialize(int argc, VALUE *argv, VALUE self)
     OSSL_BIO_reset(in);
 #endif
 
-    pkey = ossl_pkey_read_generic(in, pass);
+    pkey = ossl_pkey_read_generic(in, pass, "DSA");
     BIO_free(in);
     if (!pkey)
         ossl_raise(eDSAError, "Neither PUB key nor PRIV key");
-
-    type = EVP_PKEY_base_id(pkey);
-    if (type != EVP_PKEY_DSA) {
-        EVP_PKEY_free(pkey);
-        rb_raise(eDSAError, "incorrect pkey type: %s", OBJ_nid2sn(type));
-    }
     RTYPEDDATA_DATA(self) = pkey;
     return self;
 

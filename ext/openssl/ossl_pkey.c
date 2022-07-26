@@ -83,14 +83,14 @@ ossl_pkey_new(EVP_PKEY *pkey)
 # include <openssl/decoder.h>
 
 EVP_PKEY *
-ossl_pkey_read_generic(BIO *bio, VALUE pass)
+ossl_pkey_read_generic(BIO *bio, VALUE pass, const char *input_type)
 {
     void *ppass = (void *)pass;
     OSSL_DECODER_CTX *dctx;
     EVP_PKEY *pkey = NULL;
     int pos = 0, pos2;
 
-    dctx = OSSL_DECODER_CTX_new_for_pkey(&pkey, "DER", NULL, NULL, 0, NULL, NULL);
+    dctx = OSSL_DECODER_CTX_new_for_pkey(&pkey, "DER", NULL, input_type, 0, NULL, NULL);
     if (!dctx)
         goto out;
     if (OSSL_DECODER_CTX_set_pem_password_cb(dctx, ossl_pem_passwd_cb, ppass) != 1)
@@ -158,7 +158,7 @@ ossl_pkey_read_generic(BIO *bio, VALUE pass)
 }
 #else
 EVP_PKEY *
-ossl_pkey_read_generic(BIO *bio, VALUE pass)
+ossl_pkey_read_generic(BIO *bio, VALUE pass, const char *input_type)
 {
     void *ppass = (void *)pass;
     EVP_PKEY *pkey;
@@ -183,6 +183,31 @@ ossl_pkey_read_generic(BIO *bio, VALUE pass)
 	goto out;
 
   out:
+    /* This is to mimic OSSL_DECODER_CTX's input_type parameter */
+    if (pkey && input_type) {
+        switch (EVP_PKEY_base_id(pkey)) {
+          case EVP_PKEY_RSA:
+            if (!strcmp(input_type, "RSA"))
+                return pkey;
+            break;
+          case EVP_PKEY_DSA:
+            if (!strcmp(input_type, "DSA"))
+                return pkey;
+            break;
+          case EVP_PKEY_DH:
+            if (!strcmp(input_type, "DH"))
+                return pkey;
+            break;
+#if !defined(OPENSSL_NO_EC)
+          case EVP_PKEY_EC:
+            if (!strcmp(input_type, "EC"))
+                return pkey;
+            break;
+#endif
+        }
+        EVP_PKEY_free(pkey);
+        return NULL;
+    }
     return pkey;
 }
 #endif
@@ -212,7 +237,7 @@ ossl_pkey_new_from_data(int argc, VALUE *argv, VALUE self)
 
     rb_scan_args(argc, argv, "11", &data, &pass);
     bio = ossl_obj2bio(&data);
-    pkey = ossl_pkey_read_generic(bio, ossl_pem_passwd_value(pass));
+    pkey = ossl_pkey_read_generic(bio, ossl_pem_passwd_value(pass), NULL);
     BIO_free(bio);
     if (!pkey)
 	ossl_raise(ePKeyError, "Could not parse PKey");

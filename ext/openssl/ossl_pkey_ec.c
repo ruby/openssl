@@ -142,7 +142,6 @@ static VALUE ossl_ec_key_initialize(int argc, VALUE *argv, VALUE self)
     EC_KEY *ec;
     BIO *in;
     VALUE arg, pass;
-    int type;
 
     TypedData_Get_Struct(self, EVP_PKEY, &ossl_evp_pkey_type, pkey);
     if (pkey)
@@ -163,18 +162,12 @@ static VALUE ossl_ec_key_initialize(int argc, VALUE *argv, VALUE self)
     arg = ossl_to_der_if_possible(arg);
     in = ossl_obj2bio(&arg);
 
-    pkey = ossl_pkey_read_generic(in, pass);
+    pkey = ossl_pkey_read_generic(in, pass, "EC");
     BIO_free(in);
     if (!pkey) {
         ossl_clear_error();
         ec = ec_key_new_from_group(arg);
         goto legacy;
-    }
-
-    type = EVP_PKEY_base_id(pkey);
-    if (type != EVP_PKEY_EC) {
-        EVP_PKEY_free(pkey);
-        rb_raise(eDSAError, "incorrect pkey type: %s", OBJ_nid2sn(type));
     }
     RTYPEDDATA_DATA(self) = pkey;
     return self;
