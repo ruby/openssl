@@ -33,6 +33,7 @@ jobs:
 
       - name: test
         run:  rake test TESTOPTS="-v --no-show-detail-immediately" OSSL_MDEBUG=1
+        timeout-minutes: 5
 
   test-openssls:
     name: >-
@@ -46,8 +47,8 @@ jobs:
         openssl:
           - openssl-1.0.2u # EOL
           - openssl-1.1.0l # EOL
-          - openssl-1.1.1l
-          - openssl-3.0.1
+          - openssl-1.1.1q
+          - openssl-3.0.5
           - libressl-3.1.5 # EOL
           - libressl-3.2.7
           - libressl-3.3.5
@@ -94,3 +95,4 @@ jobs:
 
       - name: test
         run:  rake test TESTOPTS="-v --no-show-detail-immediately" OSSL_MDEBUG=1
+        timeout-minutes: 5
