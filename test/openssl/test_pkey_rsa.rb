@@ -172,7 +172,7 @@ class OpenSSL::TestPKeyRSA < OpenSSL::PKeyTestCase
     assert_raise(OpenSSL::PKey::PKeyError, "[Bug #12783]") {
       rsa.verify("SHA1", "a", "b")
     }
-  end
+  end if !openssl?(3, 0, 0)
 
   def test_sign_verify_pss
     key = Fixtures.pkey("rsa1024")
@@ -395,7 +395,7 @@ class OpenSSL::TestPKeyRSA < OpenSSL::PKeyTestCase
     EOF
     key = OpenSSL::PKey::RSA.new(pem)
     assert_same_rsa rsa1024pub, key
-  end
+  end if !openssl?(3, 0, 0) # RSAPublicKey is not available on OpenSSL 3.0
 
   def test_PUBKEY
     rsa1024 = Fixtures.pkey("rsa1024")

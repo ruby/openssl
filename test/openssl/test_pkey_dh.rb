@@ -10,7 +10,7 @@ class OpenSSL::TestPKeyDH < OpenSSL::PKeyTestCase
     dh = OpenSSL::PKey::DH.new
     assert_equal nil, dh.p
     assert_equal nil, dh.priv_key
-  end
+  end if !openssl?(3, 0, 0)
 
   def test_new_generate
     # This test is slow
