@@ -2541,7 +2541,7 @@ ossl_ssl_export_keying_material(int argc, VALUE *argv, VALUE self)
  * call-seq:
  *    ssl.tmp_key => PKey or nil
  *
- * Returns the ephemeral key used in case of forward secrecy cipher.
+ * Returns the temporary key provided by the peer and used during key exchange.
  */
 static VALUE
 ossl_ssl_tmp_key(VALUE self)
@@ -2552,7 +2552,7 @@ ossl_ssl_tmp_key(VALUE self)
     GetSSL(self, ssl);
     if (!SSL_get_server_tmp_key(ssl, &key))
 	return Qnil;
-    return ossl_pkey_new(key);
+    return ossl_pkey_new(key, OSSL_PKEY_HAS_PUBLIC);
 }
 #endif /* !defined(OPENSSL_NO_SOCK) */
 

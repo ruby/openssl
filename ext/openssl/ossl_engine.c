@@ -373,8 +373,7 @@ ossl_engine_load_privkey(int argc, VALUE *argv, VALUE self)
     GetEngine(self, e);
     pkey = ENGINE_load_private_key(e, sid, NULL, sdata);
     if (!pkey) ossl_raise(eEngineError, NULL);
-    obj = ossl_pkey_new(pkey);
-    OSSL_PKEY_SET_PRIVATE(obj);
+    obj = ossl_pkey_new(pkey, OSSL_PKEY_HAS_PRIVATE);
 
     return obj;
 }
@@ -403,7 +402,7 @@ ossl_engine_load_pubkey(int argc, VALUE *argv, VALUE self)
     pkey = ENGINE_load_public_key(e, sid, NULL, sdata);
     if (!pkey) ossl_raise(eEngineError, NULL);
 
-    return ossl_pkey_new(pkey);
+    return ossl_pkey_new(pkey, OSSL_PKEY_HAS_PUBLIC);
 }
 
 /*

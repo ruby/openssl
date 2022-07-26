@@ -19,7 +19,7 @@
 VALUE mPKey;
 VALUE cPKey;
 VALUE ePKeyError;
-static ID id_private_q;
+ID ossl_pkey_feature_id;
 
 static void
 ossl_evp_pkey_free(void *ptr)
@@ -65,7 +65,7 @@ pkey_new0(VALUE arg)
 }
 
 VALUE
-ossl_pkey_new(EVP_PKEY *pkey)
+ossl_pkey_new(EVP_PKEY *pkey, enum ossl_pkey_feature ps)
 {
     VALUE obj;
     int status;
@@ -75,6 +75,7 @@ ossl_pkey_new(EVP_PKEY *pkey)
 	EVP_PKEY_free(pkey);
 	rb_jump_tag(status);
     }
+    ossl_pkey_set(obj, ps);
 
     return obj;
 }
@@ -83,12 +84,13 @@ ossl_pkey_new(EVP_PKEY *pkey)
 # include <openssl/decoder.h>
 
 EVP_PKEY *
-ossl_pkey_read_generic(BIO *bio, VALUE pass, const char *input_type)
+ossl_pkey_read_generic(BIO *bio, VALUE pass, const char *input_type, enum ossl_pkey_feature *ps)
 {
     void *ppass = (void *)pass;
     OSSL_DECODER_CTX *dctx;
     EVP_PKEY *pkey = NULL;
     int pos = 0, pos2;
+    size_t i;
 
     dctx = OSSL_DECODER_CTX_new_for_pkey(&pkey, "DER", NULL, input_type, 0, NULL, NULL);
     if (!dctx)
@@ -96,16 +98,14 @@ ossl_pkey_read_generic(BIO *bio, VALUE pass, const char *input_type)
     if (OSSL_DECODER_CTX_set_pem_password_cb(dctx, ossl_pem_passwd_cb, ppass) != 1)
         goto out;
 
-    /* First check DER */
-    if (OSSL_DECODER_from_bio(dctx, bio) == 1)
-        goto out;
-    OSSL_BIO_reset(bio);
-
-    /* Then check PEM; multiple OSSL_DECODER_from_bio() calls may be needed */
-    if (OSSL_DECODER_CTX_set_input_type(dctx, "PEM") != 1)
-        goto out;
     /*
-     * First check for private key formats. This is to keep compatibility with
+     * This is very inefficient as it will try to decode the same DER/PEM
+     * encoding repeatedly, but OpenSSL 3.0 doesn't provide an API to return
+     * what kind of information an EVP_PKEY is holding.
+     * OpenSSL issue: https://github.com/openssl/openssl/issues/9467
+     *
+     * The attempt order of selections is important: private key formats are
+     * checked first. This is to keep compatibility with
      * ruby/openssl < 3.0 which decoded the following as a private key.
      *
      *     $ openssl ecparam -name prime256v1 -genkey -outform PEM
@@ -125,59 +125,94 @@ ossl_pkey_read_generic(BIO *bio, VALUE pass, const char *input_type)
      * Note that normally, the input is supposed to contain a single decodable
      * PEM block only, so this special handling should not create a new problem.
      */
-    OSSL_DECODER_CTX_set_selection(dctx, EVP_PKEY_KEYPAIR);
-    while (1) {
+    struct { int selection; enum ossl_pkey_feature ps; } selections[] = {
+#if OSSL_OPENSSL_PREREQ(3, 0, 0) && !OSSL_OPENSSL_PREREQ(3, 0, 3)
+        /*
+         * Public key formats are checked last, with 0 (any) selection to avoid
+         * segfault in OpenSSL <= 3.0.3.
+         * Fixed by https://github.com/openssl/openssl/pull/18462
+         *
+         * This workaround is mainly for Ubuntu 22.04, which currently has yet
+         * to backport it (as of 2022-07-26).
+         */
+        { EVP_PKEY_KEYPAIR, OSSL_PKEY_HAS_PRIVATE },
+        { EVP_PKEY_KEY_PARAMETERS, OSSL_PKEY_HAS_NONE },
+        { 0, OSSL_PKEY_HAS_PUBLIC },
+#else
+        { EVP_PKEY_KEYPAIR, OSSL_PKEY_HAS_PRIVATE },
+        { EVP_PKEY_PUBLIC_KEY, OSSL_PKEY_HAS_PUBLIC },
+        { EVP_PKEY_KEY_PARAMETERS, OSSL_PKEY_HAS_NONE },
+#endif
+    };
+
+    /* First check DER */
+    for (i = 0; i < sizeof(selections)/sizeof(selections[0]); i++) {
+        OSSL_DECODER_CTX_set_selection(dctx, selections[i].selection);
+        *ps = selections[i].ps;
         if (OSSL_DECODER_from_bio(dctx, bio) == 1)
             goto out;
-        if (BIO_eof(bio))
-            break;
-        pos2 = BIO_tell(bio);
-        if (pos2 < 0 || pos2 <= pos)
-            break;
-        ossl_clear_error();
-        pos = pos2;
+        OSSL_BIO_reset(bio);
     }
 
-    OSSL_BIO_reset(bio);
-    OSSL_DECODER_CTX_set_selection(dctx, 0);
-    while (1) {
-        if (OSSL_DECODER_from_bio(dctx, bio) == 1)
-            goto out;
-        if (BIO_eof(bio))
-            break;
-        pos2 = BIO_tell(bio);
-        if (pos2 < 0 || pos2 <= pos)
-            break;
-        ossl_clear_error();
-        pos = pos2;
+    /* Then check PEM; multiple OSSL_DECODER_from_bio() calls may be needed */
+    if (OSSL_DECODER_CTX_set_input_type(dctx, "PEM") != 1)
+        goto out;
+    for (i = 0; i < sizeof(selections)/sizeof(selections[0]); i++) {
+        OSSL_DECODER_CTX_set_selection(dctx, selections[i].selection);
+        *ps = selections[i].ps;
+        while (1) {
+            if (OSSL_DECODER_from_bio(dctx, bio) == 1)
+                goto out;
+            if (BIO_eof(bio))
+                break;
+            pos2 = BIO_tell(bio);
+            if (pos2 < 0 || pos2 <= pos)
+                break;
+            ossl_clear_error();
+            pos = pos2;
+        }
+        OSSL_BIO_reset(bio);
     }
 
   out:
     OSSL_DECODER_CTX_free(dctx);
+#if OSSL_OPENSSL_PREREQ(3, 0, 0) && !OSSL_OPENSSL_PREREQ(3, 0, 3)
+    /* It also leaks an error queue entry in the success path */
+    if (pkey) ossl_clear_error();
+#endif
     return pkey;
 }
 #else
 EVP_PKEY *
-ossl_pkey_read_generic(BIO *bio, VALUE pass, const char *input_type)
+ossl_pkey_read_generic(BIO *bio, VALUE pass, const char *input_type, enum ossl_pkey_feature *ps)
 {
     void *ppass = (void *)pass;
     EVP_PKEY *pkey;
 
+    *ps = OSSL_PKEY_HAS_PRIVATE;
     if ((pkey = d2i_PrivateKey_bio(bio, NULL)))
 	goto out;
     OSSL_BIO_reset(bio);
     if ((pkey = d2i_PKCS8PrivateKey_bio(bio, NULL, ossl_pem_passwd_cb, ppass)))
 	goto out;
+
+    *ps = OSSL_PKEY_HAS_PUBLIC;
     OSSL_BIO_reset(bio);
     if ((pkey = d2i_PUBKEY_bio(bio, NULL)))
 	goto out;
-    OSSL_BIO_reset(bio);
+
     /* PEM_read_bio_PrivateKey() also parses PKCS #8 formats */
+    *ps = OSSL_PKEY_HAS_PRIVATE;
+    OSSL_BIO_reset(bio);
     if ((pkey = PEM_read_bio_PrivateKey(bio, NULL, ossl_pem_passwd_cb, ppass)))
 	goto out;
+
+    *ps = OSSL_PKEY_HAS_PUBLIC;
     OSSL_BIO_reset(bio);
     if ((pkey = PEM_read_bio_PUBKEY(bio, NULL, NULL, NULL)))
 	goto out;
+
+    *ps = OSSL_PKEY_HAS_NONE;
     OSSL_BIO_reset(bio);
     if ((pkey = PEM_read_bio_Parameters(bio, NULL)))
 	goto out;
@@ -234,14 +269,15 @@ ossl_pkey_new_from_data(int argc, VALUE *argv, VALUE self)
     EVP_PKEY *pkey;
     BIO *bio;
     VALUE data, pass;
+    enum ossl_pkey_feature ps;
 
     rb_scan_args(argc, argv, "11", &data, &pass);
     bio = ossl_obj2bio(&data);
-    pkey = ossl_pkey_read_generic(bio, ossl_pem_passwd_value(pass), NULL);
+    pkey = ossl_pkey_read_generic(bio, ossl_pem_passwd_value(pass), NULL, &ps);
     BIO_free(bio);
     if (!pkey)
 	ossl_raise(ePKeyError, "Could not parse PKey");
-    return ossl_pkey_new(pkey);
+    return ossl_pkey_new(pkey, ps);
 }
 
 static VALUE
@@ -445,7 +481,7 @@ pkey_generate(int argc, VALUE *argv, VALUE self, int genparam)
         }
     }
 
-    return ossl_pkey_new(gen_arg.pkey);
+    return ossl_pkey_new(gen_arg.pkey, OSSL_PKEY_HAS_PRIVATE);
 }
 
 /*
@@ -567,18 +603,9 @@ GetPrivPKeyPtr(VALUE obj)
     EVP_PKEY *pkey;
 
     GetPKey(obj, pkey);
-    if (OSSL_PKEY_IS_PRIVATE(obj))
-        return pkey;
-    /*
-     * The EVP API does not provide a way to check if the EVP_PKEY has private
-     * components. Assuming it does...
-     */
-    if (!rb_respond_to(obj, id_private_q))
-        return pkey;
-    if (RTEST(rb_funcallv(obj, id_private_q, 0, NULL)))
-        return pkey;
-
-    rb_raise(rb_eArgError, "private key is needed");
+    if (!ossl_pkey_has(obj, OSSL_PKEY_HAS_PRIVATE))
+        rb_raise(rb_eArgError, "private key is needed");
+    return pkey;
 }
 
 EVP_PKEY *
@@ -653,6 +680,33 @@ ossl_pkey_oid(VALUE self)
     nid = EVP_PKEY_id(pkey);
     return rb_str_new_cstr(OBJ_nid2sn(nid));
 }
+
+/*
+ * call-seq:
+ *    pkey.public? -> true | false
+ *
+ * Indicates whether this PKey instance has a public key associated with it or
+ * not.
+ */
+static VALUE
+ossl_pkey_is_public(VALUE self)
+{
+    return ossl_pkey_has(self, OSSL_PKEY_HAS_PUBLIC) ? Qtrue : Qfalse;
+}
+
+/*
+ * call-seq:
+ *    pkey.private? -> true | false
+ *
+ * Indicates whether this PKey instance has a private key associated with it or
+ * not.
+ */
+static VALUE
+ossl_pkey_is_private(VALUE self)
+{
+    return ossl_pkey_has(self, OSSL_PKEY_HAS_PRIVATE) ? Qtrue : Qfalse;
+}
+
 
 /*
  * call-seq:
@@ -1620,6 +1674,8 @@ Init_ossl_pkey(void)
     rb_undef_method(cPKey, "initialize_copy");
 #endif
     rb_define_method(cPKey, "oid", ossl_pkey_oid, 0);
+    rb_define_method(cPKey, "public?", ossl_pkey_is_public, 0);
+    rb_define_method(cPKey, "private?", ossl_pkey_is_private, 0);
     rb_define_method(cPKey, "inspect", ossl_pkey_inspect, 0);
     rb_define_method(cPKey, "to_text", ossl_pkey_to_text, 0);
     rb_define_method(cPKey, "private_to_der", ossl_pkey_private_to_der, -1);
@@ -1637,7 +1693,7 @@ Init_ossl_pkey(void)
     rb_define_method(cPKey, "encrypt", ossl_pkey_encrypt, -1);
     rb_define_method(cPKey, "decrypt", ossl_pkey_decrypt, -1);
 
-    id_private_q = rb_intern("private?");
+    ossl_pkey_feature_id = rb_intern_const("state");
 
     /*
      * INIT rsa, dsa, dh, ec

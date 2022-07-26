@@ -140,6 +140,7 @@ IMPL_KEY_ACCESSOR3(RSA, crt_params, dmp1, dmq1, iqmp, (dmp1 == obj->dmp1 || dmq1
 IMPL_PKEY_GETTER(DSA, dsa)
 IMPL_KEY_ACCESSOR2(DSA, key, pub_key, priv_key, (pub_key == obj->pub_key || (obj->priv_key && priv_key == obj->priv_key)))
 IMPL_KEY_ACCESSOR3(DSA, pqg, p, q, g, (p == obj->p || q == obj->q || g == obj->g))
+static inline ENGINE *DSA_get0_engine(DSA *dsa) { return dsa->engine; }
 #endif
 
 #if !defined(OPENSSL_NO_DH)

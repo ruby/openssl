@@ -152,7 +152,7 @@ ossl_pkcs12_s_create(int argc, VALUE *argv, VALUE self)
 static VALUE
 ossl_pkey_new_i(VALUE arg)
 {
-    return ossl_pkey_new((EVP_PKEY *)arg);
+    return ossl_pkey_new((EVP_PKEY *)arg, OSSL_PKEY_HAS_PRIVATE);
 }
 
 static VALUE

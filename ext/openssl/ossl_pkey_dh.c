@@ -78,6 +78,7 @@ ossl_dh_initialize(int argc, VALUE *argv, VALUE self)
 #endif
     BIO *in = NULL;
     VALUE arg;
+    enum ossl_pkey_feature ps;
 
     TypedData_Get_Struct(self, EVP_PKEY, &ossl_evp_pkey_type, pkey);
     if (pkey)
@@ -88,6 +89,7 @@ ossl_dh_initialize(int argc, VALUE *argv, VALUE self)
 #ifdef OSSL_HAVE_PROVIDER
         rb_raise(eDHError, "empty DH cannot be created");
 #else
+        ps = OSSL_PKEY_HAS_NONE;
         dh = DH_new();
         if (!dh)
             ossl_raise(eDHError, "DH_new");
@@ -103,17 +105,19 @@ ossl_dh_initialize(int argc, VALUE *argv, VALUE self)
      * On OpenSSL <= 1.1.1 and current versions of LibreSSL, the generic
      * routine does not support DER-encoded parameters
      */
+    ps = OSSL_PKEY_HAS_NONE;
     dh = d2i_DHparams_bio(in, NULL);
     if (dh)
         goto legacy;
     OSSL_BIO_reset(in);
 #endif
 
-    pkey = ossl_pkey_read_generic(in, Qnil, "DH");
+    pkey = ossl_pkey_read_generic(in, Qnil, "DH", &ps);
     BIO_free(in);
     if (!pkey)
         ossl_raise(eDHError, "could not parse pkey");
     RTYPEDDATA_DATA(self) = pkey;
+    ossl_pkey_set(self, ps);
     return self;
 
 #ifndef OSSL_HAVE_PROVIDER
@@ -126,6 +130,7 @@ ossl_dh_initialize(int argc, VALUE *argv, VALUE self)
         ossl_raise(eDHError, "EVP_PKEY_assign_DH");
     }
     RTYPEDDATA_DATA(self) = pkey;
+    ossl_pkey_set(self, ps);
     return self;
 #endif
 }
@@ -170,48 +175,6 @@ ossl_dh_initialize_copy(VALUE self, VALUE other)
     return self;
 }
 #endif
-
-/*
- *  call-seq:
- *     dh.public? -> true | false
- *
- * Indicates whether this DH instance has a public key associated with it or
- * not. The public key may be retrieved with DH#pub_key.
- */
-static VALUE
-ossl_dh_is_public(VALUE self)
-{
-    DH *dh;
-    const BIGNUM *bn;
-
-    GetDH(self, dh);
-    DH_get0_key(dh, &bn, NULL);
-
-    return bn ? Qtrue : Qfalse;
-}
-
-/*
- *  call-seq:
- *     dh.private? -> true | false
- *
- * Indicates whether this DH instance has a private key associated with it or
- * not. The private key may be retrieved with DH#priv_key.
- */
-static VALUE
-ossl_dh_is_private(VALUE self)
-{
-    DH *dh;
-    const BIGNUM *bn;
-
-    GetDH(self, dh);
-    DH_get0_key(dh, NULL, &bn);
-
-#if !defined(OPENSSL_NO_ENGINE)
-    return (bn || DH_get0_engine(dh)) ? Qtrue : Qfalse;
-#else
-    return bn ? Qtrue : Qfalse;
-#endif
-}
 
 /*
  *  call-seq:
@@ -342,6 +305,22 @@ ossl_dh_check_params(VALUE self)
     }
 }
 
+#ifndef OSSL_HAVE_PROVIDER /* Used by OSSL_PKEY_BN_DEF* */
+static void dh_fix_selection(VALUE self, DH *dh)
+{
+    const BIGNUM *pub_key, *priv_key;
+
+    DH_get0_key(dh, &pub_key, &priv_key);
+
+    if (priv_key)
+        ossl_pkey_set(self, OSSL_PKEY_HAS_PRIVATE);
+    else if (pub_key)
+        ossl_pkey_set(self, OSSL_PKEY_HAS_PUBLIC);
+    else
+        ossl_pkey_set(self, OSSL_PKEY_HAS_NONE);
+}
+#endif
+
 /*
  * Document-method: OpenSSL::PKey::DH#set_pqg
  * call-seq:
@@ -416,8 +395,6 @@ Init_ossl_dh(void)
 #ifndef HAVE_EVP_PKEY_DUP
     rb_define_method(cDH, "initialize_copy", ossl_dh_initialize_copy, 1);
 #endif
-    rb_define_method(cDH, "public?", ossl_dh_is_public, 0);
-    rb_define_method(cDH, "private?", ossl_dh_is_private, 0);
     rb_define_method(cDH, "export", ossl_dh_export, 0);
     rb_define_alias(cDH, "to_pem", "export");
     rb_define_alias(cDH, "to_s", "export");

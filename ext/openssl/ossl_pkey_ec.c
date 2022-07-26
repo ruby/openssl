@@ -118,6 +118,7 @@ ossl_ec_key_s_generate(VALUE klass, VALUE arg)
         ossl_raise(eECError, "EVP_PKEY_assign_EC_KEY");
     }
     RTYPEDDATA_DATA(obj) = pkey;
+    ossl_pkey_set(obj, OSSL_PKEY_HAS_PRIVATE);
 
     if (!EC_KEY_generate_key(ec))
 	ossl_raise(eECError, "EC_KEY_generate_key");
@@ -142,6 +143,7 @@ static VALUE ossl_ec_key_initialize(int argc, VALUE *argv, VALUE self)
     EC_KEY *ec;
     BIO *in;
     VALUE arg, pass;
+    enum ossl_pkey_feature ps;
 
     TypedData_Get_Struct(self, EVP_PKEY, &ossl_evp_pkey_type, pkey);
     if (pkey)
@@ -149,11 +151,13 @@ static VALUE ossl_ec_key_initialize(int argc, VALUE *argv, VALUE self)
 
     rb_scan_args(argc, argv, "02", &arg, &pass);
     if (NIL_P(arg)) {
+        ps = OSSL_PKEY_HAS_NONE;
         if (!(ec = EC_KEY_new()))
             ossl_raise(eECError, "EC_KEY_new");
         goto legacy;
     }
     else if (rb_obj_is_kind_of(arg, cEC_GROUP)) {
+        ps = OSSL_PKEY_HAS_NONE;
         ec = ec_key_new_from_group(arg);
         goto legacy;
     }
@@ -162,14 +166,16 @@ static VALUE ossl_ec_key_initialize(int argc, VALUE *argv, VALUE self)
     arg = ossl_to_der_if_possible(arg);
     in = ossl_obj2bio(&arg);
 
-    pkey = ossl_pkey_read_generic(in, pass, "EC");
+    pkey = ossl_pkey_read_generic(in, pass, "EC", &ps);
     BIO_free(in);
     if (!pkey) {
         ossl_clear_error();
+        ps = OSSL_PKEY_HAS_NONE;
         ec = ec_key_new_from_group(arg);
         goto legacy;
     }
     RTYPEDDATA_DATA(self) = pkey;
+    ossl_pkey_set(self, ps);
     return self;
 
   legacy:
@@ -180,6 +186,7 @@ static VALUE ossl_ec_key_initialize(int argc, VALUE *argv, VALUE self)
         ossl_raise(eECError, "EVP_PKEY_assign_EC_KEY");
     }
     RTYPEDDATA_DATA(self) = pkey;
+    ossl_pkey_set(self, ps);
     return self;
 }
 
@@ -257,6 +264,18 @@ ossl_ec_key_set_group(VALUE self, VALUE group_v)
 #endif
 }
 
+#ifndef OSSL_HAVE_PROVIDER
+static void ec_key_fix_selection(VALUE self, EC_KEY *ec)
+{
+    if (EC_KEY_get0_private_key(ec))
+        ossl_pkey_set(self, OSSL_PKEY_HAS_PRIVATE);
+    else if (EC_KEY_get0_public_key(ec))
+        ossl_pkey_set(self, OSSL_PKEY_HAS_PUBLIC);
+    else
+        ossl_pkey_set(self, OSSL_PKEY_HAS_NONE);
+}
+#endif
+
 /*
  *  call-seq:
  *     key.private_key   => OpenSSL::BN
@@ -294,15 +313,16 @@ static VALUE ossl_ec_key_set_private_key(VALUE self, VALUE private_key)
         bn = GetBNPtr(private_key);
 
     switch (EC_KEY_set_private_key(ec, bn)) {
-    case 1:
+      case 1:
         break;
-    case 0:
+      case 0:
         if (bn == NULL)
             break;
-	/* fallthrough */
-    default:
+        /* fallthrough */
+      default:
         ossl_raise(eECError, "EC_KEY_set_private_key");
     }
+    ec_key_fix_selection(self, ec);
 
     return private_key;
 #endif
@@ -354,6 +374,7 @@ static VALUE ossl_ec_key_set_public_key(VALUE self, VALUE public_key)
     default:
         ossl_raise(eECError, "EC_KEY_set_public_key");
     }
+    ec_key_fix_selection(self, ec);
 
     return public_key;
 #endif
@@ -404,15 +425,21 @@ static VALUE ossl_ec_key_is_private(VALUE self)
 static VALUE
 ossl_ec_key_export(int argc, VALUE *argv, VALUE self)
 {
+    EVP_PKEY *pkey;
+#ifndef OSSL_HAVE_PROVIDER
     EC_KEY *ec;
-
     GetEC(self, ec);
     if (EC_KEY_get0_public_key(ec) == NULL)
         ossl_raise(eECError, "can't export - no public key set");
+#endif
+
+    GetPKey(self, pkey);
+    if (ossl_pkey_has(self, OSSL_PKEY_HAS_PRIVATE))
+#ifndef OSSL_HAVE_PROVIDER
     if (EC_KEY_get0_private_key(ec))
+#endif
         return ossl_pkey_export_traditional(argc, argv, self, 0);
-    else
-        return ossl_pkey_export_spki(self, 0);
+    return ossl_pkey_export_spki(self, 0);
 }
 
 /*
@@ -424,16 +451,23 @@ ossl_ec_key_export(int argc, VALUE *argv, VALUE self)
 static VALUE
 ossl_ec_key_to_der(VALUE self)
 {
+    EVP_PKEY *pkey;
+#ifndef OSSL_HAVE_PROVIDER
     EC_KEY *ec;
-
     GetEC(self, ec);
     if (EC_KEY_get0_public_key(ec) == NULL)
         ossl_raise(eECError, "can't export - no public key set");
+#endif
+
+    GetPKey(self, pkey);
+    if (ossl_pkey_has(self, OSSL_PKEY_HAS_PRIVATE))
+#ifndef OSSL_HAVE_PROVIDER
     if (EC_KEY_get0_private_key(ec))
+#endif
         return ossl_pkey_export_traditional(0, NULL, self, 1);
-    else
-        return ossl_pkey_export_spki(self, 1);
+    return ossl_pkey_export_spki(self, 1);
 }
+
 /*
  *  call-seq:
  *     key.generate_key!   => self
@@ -458,6 +492,7 @@ static VALUE ossl_ec_key_generate_key(VALUE self)
     GetEC(self, ec);
     if (EC_KEY_generate_key(ec) != 1)
 	ossl_raise(eECError, "EC_KEY_generate_key");
+    ossl_pkey_set(self, OSSL_PKEY_HAS_PRIVATE);
 
     return self;
 #endif

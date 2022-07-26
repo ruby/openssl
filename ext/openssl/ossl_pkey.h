@@ -14,10 +14,7 @@ extern VALUE mPKey;
 extern VALUE cPKey;
 extern VALUE ePKeyError;
 extern const rb_data_type_t ossl_evp_pkey_type;
-
-/* For ENGINE */
-#define OSSL_PKEY_SET_PRIVATE(obj) rb_ivar_set((obj), rb_intern("private"), Qtrue)
-#define OSSL_PKEY_IS_PRIVATE(obj)  (rb_attr_get((obj), rb_intern("private")) == Qtrue)
+extern ID ossl_pkey_feature_id;
 
 #define GetPKey(obj, pkey) do {\
     TypedData_Get_Struct((obj), EVP_PKEY, &ossl_evp_pkey_type, (pkey)); \
@@ -26,10 +23,34 @@ extern const rb_data_type_t ossl_evp_pkey_type;
     } \
 } while (0)
 
+/*
+ * Store whether pkey contains public key, private key, or neither of them.
+ * This is ugly, but OpenSSL currently (3.0) doesn't provide a public API for
+ * this purpose.
+ */
+enum ossl_pkey_feature {
+    OSSL_PKEY_HAS_NONE, /* or parameters only */
+    OSSL_PKEY_HAS_PUBLIC,
+    OSSL_PKEY_HAS_PRIVATE,
+};
+
+static inline void
+ossl_pkey_set(VALUE self, enum ossl_pkey_feature feature)
+{
+    rb_ivar_set(self, ossl_pkey_feature_id, INT2FIX(feature));
+}
+
+static inline int
+ossl_pkey_has(VALUE self, enum ossl_pkey_feature feature)
+{
+    return FIX2INT(rb_attr_get(self, ossl_pkey_feature_id)) >= (int)feature;
+}
+
 /* Takes ownership of the EVP_PKEY */
-VALUE ossl_pkey_new(EVP_PKEY *);
+VALUE ossl_pkey_new(EVP_PKEY *pkey, enum ossl_pkey_feature ps);
 void ossl_pkey_check_public_key(const EVP_PKEY *);
-EVP_PKEY *ossl_pkey_read_generic(BIO *bio, VALUE pass, const char *input_type);
+EVP_PKEY *ossl_pkey_read_generic(BIO *bio, VALUE pass, const char *input_type,
+                                 enum ossl_pkey_feature *ps);
 EVP_PKEY *GetPKeyPtr(VALUE);
 EVP_PKEY *DupPKeyPtr(VALUE);
 EVP_PKEY *GetPrivPKeyPtr(VALUE);
@@ -145,6 +166,7 @@ static VALUE ossl_##_keytype##_set_##_group(VALUE self, VALUE v1, VALUE v2, VALU
 		BN_clear_free(bn3);					\
 		ossl_raise(ePKeyError, #_type"_set0_"#_group);		\
 	}								\
+	_keytype##_fix_selection(self, obj);				\
 	return self;							\
 }
 
@@ -172,6 +194,7 @@ static VALUE ossl_##_keytype##_set_##_group(VALUE self, VALUE v1, VALUE v2) \
 		BN_clear_free(bn2);					\
 		ossl_raise(ePKeyError, #_type"_set0_"#_group);		\
 	}								\
+	_keytype##_fix_selection(self, obj);				\
 	return self;							\
 }
 #else /* OSSL_HAVE_PROVIDER */

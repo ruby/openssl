@@ -23,21 +23,6 @@
     (rsa) = EVP_PKEY_get0_RSA(_pkey); \
 } while (0)
 
-static inline int
-RSA_HAS_PRIVATE(RSA *rsa)
-{
-    const BIGNUM *e, *d;
-
-    RSA_get0_key(rsa, NULL, &e, &d);
-    return e && d;
-}
-
-static inline int
-RSA_PRIVATE(VALUE obj, RSA *rsa)
-{
-    return RSA_HAS_PRIVATE(rsa) || OSSL_PKEY_IS_PRIVATE(obj);
-}
-
 /*
  * Classes
  */
@@ -82,6 +67,7 @@ ossl_rsa_initialize(int argc, VALUE *argv, VALUE self)
 #endif
     BIO *in = NULL;
     VALUE arg, pass;
+    enum ossl_pkey_feature ps;
 
     TypedData_Get_Struct(self, EVP_PKEY, &ossl_evp_pkey_type, pkey);
     if (pkey)
@@ -106,6 +92,7 @@ ossl_rsa_initialize(int argc, VALUE *argv, VALUE self)
 
 #ifndef OSSL_HAVE_PROVIDER
     /* First try RSAPublicKey format */
+    ps = OSSL_PKEY_HAS_PUBLIC;
     rsa = d2i_RSAPublicKey_bio(in, NULL);
     if (rsa)
         goto legacy;
@@ -117,11 +104,12 @@ ossl_rsa_initialize(int argc, VALUE *argv, VALUE self)
 #endif
 
     /* Use the generic routine */
-    pkey = ossl_pkey_read_generic(in, pass, "RSA");
+    pkey = ossl_pkey_read_generic(in, pass, "RSA", &ps);
     BIO_free(in);
     if (!pkey)
         ossl_raise(eRSAError, "Neither PUB key nor PRIV key");
     RTYPEDDATA_DATA(self) = pkey;
+    ossl_pkey_set(self, ps);
     return self;
 
 #ifndef OSSL_HAVE_PROVIDER
@@ -134,6 +122,7 @@ ossl_rsa_initialize(int argc, VALUE *argv, VALUE self)
         ossl_raise(eRSAError, "EVP_PKEY_assign_RSA");
     }
     RTYPEDDATA_DATA(self) = pkey;
+    ossl_pkey_set(self, ps);
     return self;
 #endif
 }
@@ -167,55 +156,25 @@ ossl_rsa_initialize_copy(VALUE self, VALUE other)
 }
 #endif
 
-/*
- * call-seq:
- *   rsa.public? => true
- *
- * The return value is always +true+ since every private key is also a public
- * key.
- */
-static VALUE
-ossl_rsa_is_public(VALUE self)
-{
-    RSA *rsa;
-
-    GetRSA(self, rsa);
-    /*
-     * This method should check for n and e.  BUG.
-     */
-    (void)rsa;
-    return Qtrue;
-}
-
-/*
- * call-seq:
- *   rsa.private? => true | false
- *
- * Does this keypair contain a private key?
- */
-static VALUE
-ossl_rsa_is_private(VALUE self)
-{
-    RSA *rsa;
-
-    GetRSA(self, rsa);
-
-    return RSA_PRIVATE(self, rsa) ? Qtrue : Qfalse;
-}
-
 static int
 can_export_rsaprivatekey(VALUE self)
 {
+#ifndef OSSL_HAVE_PROVIDER
     RSA *rsa;
-    const BIGNUM *n, *e, *d, *p, *q, *dmp1, *dmq1, *iqmp;
+    const BIGNUM *p, *q, *dmp1, *dmq1, *iqmp;
 
     GetRSA(self, rsa);
-
-    RSA_get0_key(rsa, &n, &e, &d);
     RSA_get0_factors(rsa, &p, &q);
     RSA_get0_crt_params(rsa, &dmp1, &dmq1, &iqmp);
+#endif
 
-    return n && e && d && p && q && dmp1 && dmq1 && iqmp;
+    if (ossl_pkey_has(self, OSSL_PKEY_HAS_PRIVATE))
+#ifndef OSSL_HAVE_PROVIDER
+    /* OSSL_PKEY_HAS_PRIVATE implies n/e/d are present */
+    if (p && q && dmp1 && dmq1 && iqmp)
+#endif
+        return 1;
+    return 0;
 }
 
 /*
@@ -478,6 +437,24 @@ ossl_rsa_get_params(VALUE self)
     return hash;
 }
 
+#ifndef OSSL_HAVE_PROVIDER /* Used by OSSL_PKEY_BN_DEF* */
+static void rsa_fix_selection(VALUE self, RSA *rsa)
+{
+    const BIGNUM *n, *e, *d, *p, *q, *dmp1, *dmq1, *iqmp;
+
+    RSA_get0_key(rsa, &n, &e, &d);
+    RSA_get0_factors(rsa, &p, &q);
+    RSA_get0_crt_params(rsa, &dmp1, &dmq1, &iqmp);
+
+    if (n && e && d)
+        ossl_pkey_set(self, OSSL_PKEY_HAS_PRIVATE);
+    else if (n && e)
+        ossl_pkey_set(self, OSSL_PKEY_HAS_PUBLIC);
+    else
+        ossl_pkey_set(self, OSSL_PKEY_HAS_NONE);
+}
+#endif
+
 /*
  * Document-method: OpenSSL::PKey::RSA#set_key
  * call-seq:
@@ -544,8 +521,6 @@ Init_ossl_rsa(void)
     rb_define_method(cRSA, "initialize_copy", ossl_rsa_initialize_copy, 1);
 #endif
 
-    rb_define_method(cRSA, "public?", ossl_rsa_is_public, 0);
-    rb_define_method(cRSA, "private?", ossl_rsa_is_private, 0);
     rb_define_method(cRSA, "export", ossl_rsa_export, -1);
     rb_define_alias(cRSA, "to_pem", "export");
     rb_define_alias(cRSA, "to_s", "export");

@@ -23,20 +23,6 @@
     (dsa) = EVP_PKEY_get0_DSA(_pkey); \
 } while (0)
 
-static inline int
-DSA_HAS_PRIVATE(DSA *dsa)
-{
-    const BIGNUM *bn;
-    DSA_get0_key(dsa, NULL, &bn);
-    return !!bn;
-}
-
-static inline int
-DSA_PRIVATE(VALUE obj, DSA *dsa)
-{
-    return DSA_HAS_PRIVATE(dsa) || OSSL_PKEY_IS_PRIVATE(obj);
-}
-
 /*
  * Classes
  */
@@ -89,6 +75,7 @@ ossl_dsa_initialize(int argc, VALUE *argv, VALUE self)
 #endif
     BIO *in = NULL;
     VALUE arg, pass;
+    enum ossl_pkey_feature ps;
 
     TypedData_Get_Struct(self, EVP_PKEY, &ossl_evp_pkey_type, pkey);
     if (pkey)
@@ -100,6 +87,7 @@ ossl_dsa_initialize(int argc, VALUE *argv, VALUE self)
 #ifdef OSSL_HAVE_PROVIDER
         rb_raise(eDHError, "empty DSA cannot be created");
 #else
+        ps = OSSL_PKEY_HAS_NONE;
         dsa = DSA_new();
         if (!dsa)
             ossl_raise(eDSAError, "DSA_new");
@@ -113,6 +101,7 @@ ossl_dsa_initialize(int argc, VALUE *argv, VALUE self)
 
 #ifndef OSSL_HAVE_PROVIDER
     /* DER-encoded DSAPublicKey format isn't supported by the generic routine */
+    ps = OSSL_PKEY_HAS_PUBLIC;
     dsa = (DSA *)PEM_ASN1_read_bio((d2i_of_void *)d2i_DSAPublicKey,
                                    PEM_STRING_DSA_PUBLIC,
                                    in, NULL, NULL, NULL);
@@ -121,11 +110,12 @@ ossl_dsa_initialize(int argc, VALUE *argv, VALUE self)
     OSSL_BIO_reset(in);
 #endif
 
-    pkey = ossl_pkey_read_generic(in, pass, "DSA");
+    pkey = ossl_pkey_read_generic(in, pass, "DSA", &ps);
     BIO_free(in);
     if (!pkey)
         ossl_raise(eDSAError, "Neither PUB key nor PRIV key");
     RTYPEDDATA_DATA(self) = pkey;
+    ossl_pkey_set(self, ps);
     return self;
 
 #ifndef OSSL_HAVE_PROVIDER
@@ -138,6 +128,7 @@ ossl_dsa_initialize(int argc, VALUE *argv, VALUE self)
         ossl_raise(eDSAError, "EVP_PKEY_assign_DSA");
     }
     RTYPEDDATA_DATA(self) = pkey;
+    ossl_pkey_set(self, ps);
     return self;
 #endif
 }
@@ -174,42 +165,6 @@ ossl_dsa_initialize_copy(VALUE self, VALUE other)
 
 /*
  *  call-seq:
- *    dsa.public? -> true | false
- *
- * Indicates whether this DSA instance has a public key associated with it or
- * not. The public key may be retrieved with DSA#public_key.
- */
-static VALUE
-ossl_dsa_is_public(VALUE self)
-{
-    DSA *dsa;
-    const BIGNUM *bn;
-
-    GetDSA(self, dsa);
-    DSA_get0_key(dsa, &bn, NULL);
-
-    return bn ? Qtrue : Qfalse;
-}
-
-/*
- *  call-seq:
- *    dsa.private? -> true | false
- *
- * Indicates whether this DSA instance has a private key associated with it or
- * not. The private key may be retrieved with DSA#private_key.
- */
-static VALUE
-ossl_dsa_is_private(VALUE self)
-{
-    DSA *dsa;
-
-    GetDSA(self, dsa);
-
-    return DSA_PRIVATE(self, dsa) ? Qtrue : Qfalse;
-}
-
-/*
- *  call-seq:
  *    dsa.export([cipher, password]) -> aString
  *    dsa.to_pem([cipher, password]) -> aString
  *    dsa.to_s([cipher, password]) -> aString
@@ -228,13 +183,19 @@ ossl_dsa_is_private(VALUE self)
 static VALUE
 ossl_dsa_export(int argc, VALUE *argv, VALUE self)
 {
+    EVP_PKEY *pkey;
+#ifndef OSSL_HAVE_PROVIDER
     DSA *dsa;
-
     GetDSA(self, dsa);
-    if (DSA_HAS_PRIVATE(dsa))
+#endif
+
+    GetPKey(self, pkey);
+    if (ossl_pkey_has(self, OSSL_PKEY_HAS_PRIVATE))
+#ifndef OSSL_HAVE_PROVIDER
+    if (!DSA_get0_engine(dsa))
+#endif
         return ossl_pkey_export_traditional(argc, argv, self, 0);
-    else
-        return ossl_pkey_export_spki(self, 0);
+    return ossl_pkey_export_spki(self, 0);
 }
 
 /*
@@ -247,13 +208,19 @@ ossl_dsa_export(int argc, VALUE *argv, VALUE self)
 static VALUE
 ossl_dsa_to_der(VALUE self)
 {
+    EVP_PKEY *pkey;
+#ifndef OSSL_HAVE_PROVIDER
     DSA *dsa;
-
     GetDSA(self, dsa);
-    if (DSA_HAS_PRIVATE(dsa))
+#endif
+
+    GetPKey(self, pkey);
+    if (ossl_pkey_has(self, OSSL_PKEY_HAS_PRIVATE))
+#ifndef OSSL_HAVE_PROVIDER
+    if (!DSA_get0_engine(dsa))
+#endif
         return ossl_pkey_export_traditional(0, NULL, self, 1);
-    else
-        return ossl_pkey_export_spki(self, 1);
+    return ossl_pkey_export_spki(self, 1);
 }
 
 
@@ -285,6 +252,22 @@ ossl_dsa_get_params(VALUE self)
 
     return hash;
 }
+
+#ifndef OSSL_HAVE_PROVIDER /* Used by OSSL_PKEY_BN_DEF* */
+static void dsa_fix_selection(VALUE self, DSA *dsa)
+{
+    const BIGNUM *pub_key, *priv_key;
+
+    DSA_get0_key(dsa, &pub_key, &priv_key);
+
+    if (priv_key)
+        ossl_pkey_set(self, OSSL_PKEY_HAS_PRIVATE);
+    else if (pub_key)
+        ossl_pkey_set(self, OSSL_PKEY_HAS_PUBLIC);
+    else
+        ossl_pkey_set(self, OSSL_PKEY_HAS_NONE);
+}
+#endif
 
 /*
  * Document-method: OpenSSL::PKey::DSA#set_pqg
@@ -336,8 +319,6 @@ Init_ossl_dsa(void)
     rb_define_method(cDSA, "initialize_copy", ossl_dsa_initialize_copy, 1);
 #endif
 
-    rb_define_method(cDSA, "public?", ossl_dsa_is_public, 0);
-    rb_define_method(cDSA, "private?", ossl_dsa_is_private, 0);
     rb_define_method(cDSA, "export", ossl_dsa_export, -1);
     rb_define_alias(cDSA, "to_pem", "export");
     rb_define_alias(cDSA, "to_s", "export");
