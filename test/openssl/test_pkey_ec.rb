@@ -199,6 +199,45 @@ class OpenSSL::TestEC < OpenSSL::PKeyTestCase
     assert_equal pem, p256.export
   end
 
+  def test_ECPrivateKey_with_parameters
+    p256 = Fixtures.pkey("p256")
+    asn1 = OpenSSL::ASN1::Sequence([
+      OpenSSL::ASN1::Integer(1),
+      OpenSSL::ASN1::OctetString(p256.private_key.to_s(2)),
+      OpenSSL::ASN1::ObjectId("prime256v1", 0, :EXPLICIT),
+      OpenSSL::ASN1::BitString(p256.public_key.to_octet_string(:uncompressed),
+                               1, :EXPLICIT)
+    ])
+    key = OpenSSL::PKey::EC.new(asn1.to_der)
+    assert_predicate key, :private?
+    assert_same_ec p256, key
+
+    in_pem = <<~EOF
+    -----BEGIN EC PARAMETERS-----
+    BggqhkjOPQMBBw==
+    -----END EC PARAMETERS-----
+    -----BEGIN EC PRIVATE KEY-----
+    MHcCAQEEIID49FDqcf1O1eO8saTgG70UbXQw9Fqwseliit2aWhH1oAoGCCqGSM49
+    AwEHoUQDQgAEFglk2c+oVUIKQ64eZG9bhLNPWB7lSZ/ArK41eGy5wAzU/0G51Xtt
+    CeBUl+MahZtn9fO1JKdF4qJmS39dXnpENg==
+    -----END EC PRIVATE KEY-----
+    EOF
+
+    out_pem = <<~EOF
+    -----BEGIN EC PRIVATE KEY-----
+    MHcCAQEEIID49FDqcf1O1eO8saTgG70UbXQw9Fqwseliit2aWhH1oAoGCCqGSM49
+    AwEHoUQDQgAEFglk2c+oVUIKQ64eZG9bhLNPWB7lSZ/ArK41eGy5wAzU/0G51Xtt
+    CeBUl+MahZtn9fO1JKdF4qJmS39dXnpENg==
+    -----END EC PRIVATE KEY-----
+    EOF
+
+    key = OpenSSL::PKey::EC.new(in_pem)
+    assert_same_ec p256, key
+
+    assert_equal asn1.to_der, p256.to_der
+    assert_equal out_pem, p256.export
+  end
+
   def test_ECPrivateKey_encrypted
     p256 = Fixtures.pkey("p256")
     # key = abcdef

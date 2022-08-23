@@ -104,7 +104,8 @@ ossl_pkey_read_generic(BIO *bio, VALUE pass)
     OSSL_BIO_reset(bio);
     if (OSSL_DECODER_CTX_set_input_type(dctx, "PEM") != 1)
         goto out;
-    while (OSSL_DECODER_from_bio(dctx, bio) != 1) {
+    for (;;) {
+        OSSL_DECODER_from_bio(dctx, bio);
         if (BIO_eof(bio))
             goto out;
         pos2 = BIO_tell(bio);
