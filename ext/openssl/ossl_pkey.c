@@ -116,6 +116,17 @@ ossl_pkey_read_generic(BIO *bio, VALUE pass)
 
   out:
     OSSL_DECODER_CTX_free(dctx);
+
+#if !defined(OPENSSL_NO_EC)
+    if (pkey && EVP_PKEY_base_id(pkey) == EVP_PKEY_EC) {
+        const EC_KEY *ec_key = EVP_PKEY_get0_EC_KEY(pkey);
+        if (!EC_KEY_get0_public_key(ec_key) && !EC_KEY_get0_private_key(ec_key)) {
+            EVP_PKEY_free(pkey);
+            pkey = NULL;
+        }
+    }
+#endif
+
     return pkey;
 }
 #else

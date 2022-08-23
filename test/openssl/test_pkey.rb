@@ -147,6 +147,16 @@ class OpenSSL::TestPKey < OpenSSL::PKeyTestCase
     assert_equal [shared_secret].pack("H*"), alice.derive(bob)
   end
 
+  def test_invalid_pkey_valid_ecparam
+    priv_pem = <<~EOF
+    -----BEGIN EC PARAMETERS-----
+    BggqhkjOPQMBBw==
+    -----END EC PARAMETERS-----
+    EOF
+
+    assert_raise(OpenSSL::PKey::PKeyError) { OpenSSL::PKey.read(priv_pem) }
+  end
+
   def test_compare?
     key1 = Fixtures.pkey("rsa1024")
     key2 = Fixtures.pkey("rsa1024")
