@@ -1,3 +1,9 @@
+Version 2.2.2
+=============
+
+Merged changes in 2.1.4.
+
+
 Version 2.2.1
 =============
 
