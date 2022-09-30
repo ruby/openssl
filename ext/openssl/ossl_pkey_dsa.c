@@ -84,7 +84,9 @@ static VALUE
 ossl_dsa_initialize(int argc, VALUE *argv, VALUE self)
 {
     EVP_PKEY *pkey;
+#ifndef OSSL_HAVE_PROVIDER
     DSA *dsa;
+#endif
     BIO *in = NULL;
     VALUE arg, pass;
     int type;
@@ -96,16 +98,21 @@ ossl_dsa_initialize(int argc, VALUE *argv, VALUE self)
     /* The DSA.new(size, generator) form is handled by lib/openssl/pkey.rb */
     rb_scan_args(argc, argv, "02", &arg, &pass);
     if (argc == 0) {
+#ifdef OSSL_HAVE_PROVIDER
+        rb_raise(eDHError, "empty DSA cannot be created");
+#else
         dsa = DSA_new();
         if (!dsa)
             ossl_raise(eDSAError, "DSA_new");
         goto legacy;
+#endif
     }
 
     pass = ossl_pem_passwd_value(pass);
     arg = ossl_to_der_if_possible(arg);
     in = ossl_obj2bio(&arg);
 
+#ifndef OSSL_HAVE_PROVIDER
     /* DER-encoded DSAPublicKey format isn't supported by the generic routine */
     dsa = (DSA *)PEM_ASN1_read_bio((d2i_of_void *)d2i_DSAPublicKey,
                                    PEM_STRING_DSA_PUBLIC,
@@ -113,6 +120,7 @@ ossl_dsa_initialize(int argc, VALUE *argv, VALUE self)
     if (dsa)
         goto legacy;
     OSSL_BIO_reset(in);
+#endif
 
     pkey = ossl_pkey_read_generic(in, pass);
     BIO_free(in);
@@ -127,6 +135,7 @@ ossl_dsa_initialize(int argc, VALUE *argv, VALUE self)
     RTYPEDDATA_DATA(self) = pkey;
     return self;
 
+#ifndef OSSL_HAVE_PROVIDER
   legacy:
     BIO_free(in);
     pkey = EVP_PKEY_new();
@@ -137,6 +146,7 @@ ossl_dsa_initialize(int argc, VALUE *argv, VALUE self)
     }
     RTYPEDDATA_DATA(self) = pkey;
     return self;
+#endif
 }
 
 #ifndef HAVE_EVP_PKEY_DUP
