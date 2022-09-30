@@ -77,7 +77,9 @@ static VALUE
 ossl_rsa_initialize(int argc, VALUE *argv, VALUE self)
 {
     EVP_PKEY *pkey;
+#ifndef OSSL_HAVE_PROVIDER
     RSA *rsa;
+#endif
     BIO *in = NULL;
     VALUE arg, pass;
     int type;
@@ -89,16 +91,21 @@ ossl_rsa_initialize(int argc, VALUE *argv, VALUE self)
     /* The RSA.new(size, generator) form is handled by lib/openssl/pkey.rb */
     rb_scan_args(argc, argv, "02", &arg, &pass);
     if (argc == 0) {
+#ifdef OSSL_HAVE_PROVIDER
+        rb_raise(eRSAError, "empty RSA cannot be created");
+#else
 	rsa = RSA_new();
         if (!rsa)
             ossl_raise(eRSAError, "RSA_new");
         goto legacy;
+#endif
     }
 
     pass = ossl_pem_passwd_value(pass);
     arg = ossl_to_der_if_possible(arg);
     in = ossl_obj2bio(&arg);
 
+#ifndef OSSL_HAVE_PROVIDER
     /* First try RSAPublicKey format */
     rsa = d2i_RSAPublicKey_bio(in, NULL);
     if (rsa)
@@ -108,6 +115,7 @@ ossl_rsa_initialize(int argc, VALUE *argv, VALUE self)
     if (rsa)
         goto legacy;
     OSSL_BIO_reset(in);
+#endif
 
     /* Use the generic routine */
     pkey = ossl_pkey_read_generic(in, pass);
@@ -123,6 +131,7 @@ ossl_rsa_initialize(int argc, VALUE *argv, VALUE self)
     RTYPEDDATA_DATA(self) = pkey;
     return self;
 
+#ifndef OSSL_HAVE_PROVIDER
   legacy:
     BIO_free(in);
     pkey = EVP_PKEY_new();
@@ -133,6 +142,7 @@ ossl_rsa_initialize(int argc, VALUE *argv, VALUE self)
     }
     RTYPEDDATA_DATA(self) = pkey;
     return self;
+#endif
 }
 
 #ifndef HAVE_EVP_PKEY_DUP
