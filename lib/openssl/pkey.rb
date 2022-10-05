@@ -363,13 +363,13 @@ module OpenSSL::PKey
     #    rsa.private_encrypt(string, padding) -> String
     #
     # Encrypt +string+ with the private key.  +padding+ defaults to
-    # PKCS1_PADDING. The encrypted string output can be decrypted using
+    # PKCS1_OAEP_PADDING. The encrypted string output can be decrypted using
     # #public_decrypt.
     #
     # <b>Deprecated in version 3.0</b>.
     # Consider using PKey::PKey#sign_raw and PKey::PKey#verify_raw, and
     # PKey::PKey#verify_recover instead.
-    def private_encrypt(string, padding = PKCS1_PADDING)
+    def private_encrypt(string, padding = PKCS1_OAEP_PADDING)
       n or raise OpenSSL::PKey::RSAError, "incomplete RSA"
       private? or raise OpenSSL::PKey::RSAError, "private key needed."
       begin
@@ -386,12 +386,12 @@ module OpenSSL::PKey
     #    rsa.public_decrypt(string, padding) -> String
     #
     # Decrypt +string+, which has been encrypted with the private key, with the
-    # public key.  +padding+ defaults to PKCS1_PADDING.
+    # public key.  +padding+ defaults to PKCS1_OAEP_PADDING.
     #
     # <b>Deprecated in version 3.0</b>.
     # Consider using PKey::PKey#sign_raw and PKey::PKey#verify_raw, and
     # PKey::PKey#verify_recover instead.
-    def public_decrypt(string, padding = PKCS1_PADDING)
+    def public_decrypt(string, padding = PKCS1_OAEP_PADDING)
       n or raise OpenSSL::PKey::RSAError, "incomplete RSA"
       begin
         verify_recover(nil, string, {
@@ -407,12 +407,12 @@ module OpenSSL::PKey
     #    rsa.public_encrypt(string, padding) -> String
     #
     # Encrypt +string+ with the public key.  +padding+ defaults to
-    # PKCS1_PADDING. The encrypted string output can be decrypted using
+    # PKCS1_OAEP_PADDING. The encrypted string output can be decrypted using
     # #private_decrypt.
     #
     # <b>Deprecated in version 3.0</b>.
     # Consider using PKey::PKey#encrypt and PKey::PKey#decrypt instead.
-    def public_encrypt(data, padding = PKCS1_PADDING)
+    def public_encrypt(data, padding = PKCS1_OAEP_PADDING)
       n or raise OpenSSL::PKey::RSAError, "incomplete RSA"
       begin
         encrypt(data, {
@@ -428,11 +428,11 @@ module OpenSSL::PKey
     #    rsa.private_decrypt(string, padding) -> String
     #
     # Decrypt +string+, which has been encrypted with the public key, with the
-    # private key. +padding+ defaults to PKCS1_PADDING.
+    # private key. +padding+ defaults to PKCS1_OAEP_PADDING.
     #
     # <b>Deprecated in version 3.0</b>.
     # Consider using PKey::PKey#encrypt and PKey::PKey#decrypt instead.
-    def private_decrypt(data, padding = PKCS1_PADDING)
+    def private_decrypt(data, padding = PKCS1_OAEP_PADDING)
       n or raise OpenSSL::PKey::RSAError, "incomplete RSA"
       private? or raise OpenSSL::PKey::RSAError, "private key needed."
       begin

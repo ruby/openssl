@@ -155,8 +155,8 @@ class OpenSSL::TestPKeyRSA < OpenSSL::PKeyTestCase
     plain1 = key.public_decrypt(cipher1, OpenSSL::PKey::RSA::PKCS1_PADDING)
     assert_equal(plain0, plain1)
 
-    cipherdef = key.private_encrypt(plain0) # PKCS1_PADDING is default
-    plain1 = key.public_decrypt(cipherdef)
+    cipherdef = key.private_encrypt(plain0, OpenSSL::PKey::RSA::PKCS1_PADDING)
+    plain1 = key.public_decrypt(cipherdef, OpenSSL::PKey::RSA::PKCS1_PADDING)
     assert_equal(plain0, plain1)
     assert_equal(cipher1, cipherdef)
 
@@ -226,19 +226,18 @@ class OpenSSL::TestPKeyRSA < OpenSSL::PKeyTestCase
     rsapriv = Fixtures.pkey("rsa-1")
     rsapub = OpenSSL::PKey.read(rsapriv.public_to_der)
 
-    # Defaults to PKCS #1 v1.5
     raw = "data"
-    enc_legacy = rsapub.public_encrypt(raw)
+    enc_legacy = rsapub.public_encrypt(raw, OpenSSL::PKey::RSA::PKCS1_PADDING)
     assert_equal raw, rsapriv.decrypt(enc_legacy)
     enc_new = rsapub.encrypt(raw)
-    assert_equal raw, rsapriv.private_decrypt(enc_new)
+    assert_equal raw, rsapriv.private_decrypt(enc_new, OpenSSL::PKey::RSA::PKCS1_PADDING)
 
-    # OAEP with default parameters
+    # Defaults to OAEP with default parameters
     raw = "data"
-    enc_legacy = rsapub.public_encrypt(raw, OpenSSL::PKey::RSA::PKCS1_OAEP_PADDING)
+    enc_legacy = rsapub.public_encrypt(raw)
     assert_equal raw, rsapriv.decrypt(enc_legacy, { "rsa_padding_mode" => "oaep" })
     enc_new = rsapub.encrypt(raw, { "rsa_padding_mode" => "oaep" })
-    assert_equal raw, rsapriv.private_decrypt(enc_legacy, OpenSSL::PKey::RSA::PKCS1_OAEP_PADDING)
+    assert_equal raw, rsapriv.private_decrypt(enc_legacy)
   end
 
   def test_export
