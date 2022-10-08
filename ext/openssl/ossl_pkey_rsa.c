@@ -417,8 +417,9 @@ ossl_rsa_to_der(VALUE self)
  *   rsa.public_encrypt(string)          => String
  *   rsa.public_encrypt(string, padding) => String
  *
- * Encrypt _string_ with the public key.  _padding_ defaults to PKCS1_PADDING.
- * The encrypted string output can be decrypted using #private_decrypt.
+ * Encrypt _string_ with the public key.  _padding_ defaults to PKCS1_PADDING,
+ * which is known to be insecure but is kept for backwards compatibility. The
+ * encrypted string output can be decrypted using #private_decrypt.
  */
 static VALUE
 ossl_rsa_public_encrypt(int argc, VALUE *argv, VALUE self)
@@ -450,7 +451,8 @@ ossl_rsa_public_encrypt(int argc, VALUE *argv, VALUE self)
  *   rsa.public_decrypt(string, padding) => String
  *
  * Decrypt _string_, which has been encrypted with the private key, with the
- * public key.  _padding_ defaults to PKCS1_PADDING.
+ * public key.  _padding_ defaults to PKCS1_PADDING, which is known to be
+ * insecure but is kept for backwards compatibility.
  */
 static VALUE
 ossl_rsa_public_decrypt(int argc, VALUE *argv, VALUE self)
@@ -481,8 +483,9 @@ ossl_rsa_public_decrypt(int argc, VALUE *argv, VALUE self)
  *   rsa.private_encrypt(string)          => String
  *   rsa.private_encrypt(string, padding) => String
  *
- * Encrypt _string_ with the private key.  _padding_ defaults to PKCS1_PADDING.
- * The encrypted string output can be decrypted using #public_decrypt.
+ * Encrypt _string_ with the private key.  _padding_ defaults to PKCS1_PADDING,
+ * which is known to be insecure but is kept for backwards compatibility. The
+ * encrypted string output can be decrypted using #public_decrypt.
  */
 static VALUE
 ossl_rsa_private_encrypt(int argc, VALUE *argv, VALUE self)
@@ -516,7 +519,8 @@ ossl_rsa_private_encrypt(int argc, VALUE *argv, VALUE self)
  *   rsa.private_decrypt(string, padding) => String
  *
  * Decrypt _string_, which has been encrypted with the public key, with the
- * private key.  _padding_ defaults to PKCS1_PADDING.
+ * private key.  _padding_ defaults to PKCS1_PADDING, which is known to be
+ * insecure but is kept for backwards compatibility.
  */
 static VALUE
 ossl_rsa_private_decrypt(int argc, VALUE *argv, VALUE self)
