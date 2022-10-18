@@ -54,10 +54,12 @@ jobs:
           - openssl-1.1.1s
           - openssl-3.0.7
           - libressl-3.1.5 # EOL
-          - libressl-3.2.7
-          - libressl-3.3.5
-          - libressl-3.4.2
-          - libressl-3.5.0
+          - libressl-3.2.7 # EOL
+          - libressl-3.3.6 # EOL
+          - libressl-3.4.3 # EOL
+          - libressl-3.5.3
+          - libressl-3.6.1
+          - libressl-3.7.0 # Development release
     steps:
       - name: repo checkout
         uses: actions/checkout@v3
