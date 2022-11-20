@@ -483,16 +483,38 @@ static VALUE ossl_ec_key_check_key(VALUE self)
 #ifdef HAVE_EVP_PKEY_CHECK
     EVP_PKEY *pkey;
     EVP_PKEY_CTX *pctx;
+    EC_KEY *ec;
+
     int ret;
 
     GetPKey(self, pkey);
     pctx = EVP_PKEY_CTX_new(pkey, /* engine */NULL);
     if (!pctx)
-        ossl_raise(eDHError, "EVP_PKEY_CTX_new");
-    ret = EVP_PKEY_public_check(pctx);
-    EVP_PKEY_CTX_free(pctx);
-    if (ret != 1)
+        ossl_raise(eECError, "EVP_PKEY_CTX_new");
+
+    if (EVP_PKEY_public_check(pctx) != 1) {
+        EVP_PKEY_CTX_free(pctx);
         ossl_raise(eECError, "EVP_PKEY_public_check");
+    }
+
+#if (defined(OPENSSL_VERSION_MAJOR) && OPENSSL_VERSION_MAJOR >= 3)
+    GetEC(self, ec);
+    if (EC_KEY_get0_private_key(ec) == NULL)
+        goto skip_priv_key;
+
+    if (EVP_PKEY_private_check(pctx) != 1) {
+        EVP_PKEY_CTX_free(pctx);
+        ossl_raise(eECError, "EVP_PKEY_private_check");
+    }
+
+    if (EVP_PKEY_pairwise_check(pctx) != 1) {
+        EVP_PKEY_CTX_free(pctx);
+        ossl_raise(eECError, "EVP_PKEY_pairwise_check");
+    }
+    skip_priv_key:
+#endif
+
+    EVP_PKEY_CTX_free(pctx);
 #else
     EC_KEY *ec;
 
