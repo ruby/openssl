@@ -1180,15 +1180,16 @@ Init_openssl(void)
     rb_define_const(mOSSL, "OPENSSL_VERSION", rb_str_new2(OPENSSL_VERSION_TEXT));
 
 #if !defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000
-    const char *ssl_version = OpenSSL_version(OPENSSL_VERSION);
-#else
-    const char *ssl_version = SSLeay_version(SSLEAY_VERSION);
-#endif
     /*
     * Version of OpenSSL the ruby OpenSSL extension is running with
     */
-    rb_define_const(mOSSL, "OPENSSL_LIBRARY_VERSION", rb_str_new2(ssl_version));
-
+    rb_define_const(mOSSL, "OPENSSL_LIBRARY_VERSION", rb_str_new2(OpenSSL_version(OPENSSL_VERSION)));
+#else
+    /*
+    * Version of OpenSSL the ruby OpenSSL extension is running with
+    */
+    rb_define_const(mOSSL, "OPENSSL_LIBRARY_VERSION", rb_str_new2(SSLeay_version(SSLEAY_VERSION)));
+#endif
 
     /*
      * Version number of OpenSSL the ruby OpenSSL extension was built with
