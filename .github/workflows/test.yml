@@ -10,12 +10,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest, macos-latest, windows-latest ]
+        # ubuntu-22.04 uses OpenSSL 3.0, ubuntu-20.04 uses OpenSSL 1.1.1
+        os: [ ubuntu-22.04, ubuntu-20.04, macos-latest, windows-latest ]
         ruby: [ head, "3.1", "3.0", "2.7", "2.6" ]
+        exclude:
+          # uses non-standard MSYS2 OpenSSL 3 package
+          - { os: windows-latest, ruby: head }
         include:
+          - { os: windows-latest, ruby: ucrt }
           - { os: windows-latest, ruby: mswin }
-          - { os: ubuntu-22.04, ruby: head }
-          - { os: ubuntu-22.04, ruby: "3.1" }
+          
     steps:
       - name: repo checkout
         uses: actions/checkout@v3
@@ -47,8 +51,8 @@ jobs:
         openssl:
           - openssl-1.0.2u # EOL
           - openssl-1.1.0l # EOL
-          - openssl-1.1.1q
-          - openssl-3.0.5
+          - openssl-1.1.1s
+          - openssl-3.0.7
           - libressl-3.1.5 # EOL
           - libressl-3.2.7
           - libressl-3.3.5
@@ -56,7 +60,7 @@ jobs:
           - libressl-3.5.0
     steps:
       - name: repo checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: prepare openssl
         run: |
