@@ -19,7 +19,7 @@ jobs:
         include:
           - { os: windows-latest, ruby: ucrt }
           - { os: windows-latest, ruby: mswin }
-          
+
     steps:
       - name: repo checkout
         uses: actions/checkout@v3

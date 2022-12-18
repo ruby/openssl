@@ -17,7 +17,7 @@ When reporting a bug, please make sure you include:
 * Ruby version (`ruby -v`)
 * `openssl` gem version (`gem list openssl` and `OpenSSL::VERSION`)
 * OpenSSL library version (`OpenSSL::OPENSSL_VERSION`)
-* A sample file that illustrates the problem or link to the repository or 
+* A sample file that illustrates the problem or link to the repository or
   gem that is associated with the bug.
 
 There are a number of unresolved issues and feature requests for openssl that
