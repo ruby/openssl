@@ -11,6 +11,7 @@
  */
 #include "ossl.h"
 
+#ifndef OPENSSL_NO_SOCK
 #define numberof(ary) (int)(sizeof(ary)/sizeof((ary)[0]))
 
 #if !defined(OPENSSL_NO_NEXTPROTONEG) && !OSSL_IS_LIBRESSL
@@ -33,7 +34,6 @@
 } while (0)
 
 VALUE mSSL;
-static VALUE mSSLExtConfig;
 static VALUE eSSLError;
 VALUE cSSLContext;
 VALUE cSSLSocket;
@@ -1541,7 +1541,6 @@ ossl_sslctx_flush_sessions(int argc, VALUE *argv, VALUE self)
 /*
  * SSLSocket class
  */
-#ifndef OPENSSL_NO_SOCK
 static inline int
 ssl_started(SSL *ssl)
 {
@@ -2569,6 +2568,7 @@ Init_ossl_ssl(void)
     rb_mWaitWritable = rb_define_module_under(rb_cIO, "WaitWritable");
 #endif
 
+#ifndef OPENSSL_NO_SOCK
     id_call = rb_intern_const("call");
     ID_callback_state = rb_intern_const("callback_state");
 
@@ -2590,16 +2590,6 @@ Init_ossl_ssl(void)
      * of SSLContext to set up connections.
      */
     mSSL = rb_define_module_under(mOSSL, "SSL");
-
-    /* Document-module: OpenSSL::ExtConfig
-     *
-     * This module contains configuration information about the SSL extension,
-     * for example if socket support is enabled, or the host name TLS extension
-     * is enabled.  Constants in this module will always be defined, but contain
-     * +true+ or +false+ values depending on the configuration of your OpenSSL
-     * installation.
-     */
-    mSSLExtConfig = rb_define_module_under(mOSSL, "ExtConfig");
 
     /* Document-class: OpenSSL::SSL::SSLError
      *
@@ -2762,8 +2752,6 @@ Init_ossl_ssl(void)
      * and it can randomly cause deadlock on Ruby thread switching.
      */
     rb_attr(cSSLContext, rb_intern_const("session_remove_cb"), 1, 1, Qfalse);
-
-    rb_define_const(mSSLExtConfig, "HAVE_TLSEXT_HOST_NAME", Qtrue);
 
     /*
      * A callback invoked whenever a new handshake is initiated on an
@@ -2955,11 +2943,6 @@ Init_ossl_ssl(void)
      * Document-class: OpenSSL::SSL::SSLSocket
      */
     cSSLSocket = rb_define_class_under(mSSL, "SSLSocket", rb_cObject);
-#ifdef OPENSSL_NO_SOCK
-    rb_define_const(mSSLExtConfig, "OPENSSL_NO_SOCK", Qtrue);
-    rb_define_method(cSSLSocket, "initialize", rb_f_notimplement, -1);
-#else
-    rb_define_const(mSSLExtConfig, "OPENSSL_NO_SOCK", Qfalse);
     rb_define_alloc_func(cSSLSocket, ossl_ssl_s_alloc);
     rb_define_method(cSSLSocket, "initialize", ossl_ssl_initialize, -1);
     rb_undef_method(cSSLSocket, "initialize_copy");
@@ -2994,7 +2977,6 @@ Init_ossl_ssl(void)
 # ifdef OSSL_USE_NEXTPROTONEG
     rb_define_method(cSSLSocket, "npn_protocol", ossl_ssl_npn_protocol, 0);
 # endif
-#endif
 
     rb_define_const(mSSL, "VERIFY_NONE", INT2NUM(SSL_VERIFY_NONE));
     rb_define_const(mSSL, "VERIFY_PEER", INT2NUM(SSL_VERIFY_PEER));
@@ -3156,4 +3138,5 @@ Init_ossl_ssl(void)
     DefIVarID(io);
     DefIVarID(context);
     DefIVarID(hostname);
+#endif /* !defined(OPENSSL_NO_SOCK) */
 }
