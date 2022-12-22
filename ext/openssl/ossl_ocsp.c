@@ -1069,7 +1069,8 @@ ossl_ocspbres_verify(int argc, VALUE *argv, VALUE self)
     x509st = GetX509StorePtr(store);
     flg = NIL_P(flags) ? 0 : NUM2INT(flags);
     x509s = ossl_x509_ary2sk(certs);
-#if (OPENSSL_VERSION_NUMBER < 0x1000202fL) || defined(LIBRESSL_VERSION_NUMBER)
+#if (OPENSSL_VERSION_NUMBER < 0x1000202fL) || \
+    defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER < 0x30500000
     /*
      * OpenSSL had a bug that it doesn't use the certificates in x509s for
      * verifying the chain. This can be a problem when the response is signed by
