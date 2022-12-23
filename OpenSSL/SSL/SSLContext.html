@@ -76,6 +76,7 @@
     <li ><a href="#method-i-add_certificate">#add_certificate</a>
     <li ><a href="#method-i-ciphers">#ciphers</a>
     <li ><a href="#method-i-ciphers-3D">#ciphers=</a>
+    <li ><a href="#method-i-ciphersuites-3D">#ciphersuites=</a>
     <li ><a href="#method-i-ecdh_curves-3D">#ecdh_curves=</a>
     <li ><a href="#method-i-enable_fallback_scsv">#enable_fallback_scsv</a>
     <li ><a href="#method-i-flush_sessions">#flush_sessions</a>
@@ -275,6 +276,29 @@
         <p>Context private key</p>
 
 <p>The <em>cert</em>, <em>key</em>, and <em>extra_chain_cert</em> attributes are deprecated. It is recommended to use <a href="SSLContext.html#method-i-add_certificate"><code>add_certificate</code></a> instead.</p>
+        </div>
+      </div>
+      <div id="attribute-i-keylog_cb" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">keylog_cb</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        <p>A callback invoked when TLS key material is generated or received, in order to allow applications to store this keying material for debugging purposes.</p>
+
+<p>The callback is invoked with an <a href="SSLSocket.html"><code>SSLSocket</code></a> and a string containing the key material in the format used by NSS for its SSLKEYLOGFILE debugging output.</p>
+
+<p>It is only compatible with <a href="../../OpenSSL.html"><code>OpenSSL</code></a> &gt;= 1.1.1. Even if LibreSSL implements SSL_CTX_set_keylog_callback() from v3.4.2, it does nothing (see <a href="https://github.com/libressl-portable/openbsd/commit/648d39f0f035835d0653342d139883b9661e9cb6">github.com/libressl-portable/openbsd/commit/648d39f0f035835d0653342d139883b9661e9cb6</a>).</p>
+
+<h3 id="attribute-i-keylog_cb-label-Example">Example<span><a href="#attribute-i-keylog_cb-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
+
+<pre class="ruby"><span class="ruby-identifier">context</span>.<span class="ruby-identifier">keylog_cb</span> = <span class="ruby-identifier">proc</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">_sock</span>, <span class="ruby-identifier">line</span><span class="ruby-operator">|</span>
+  <span class="ruby-constant">File</span>.<span class="ruby-identifier">open</span>(<span class="ruby-string">&#39;ssl_keylog_file&#39;</span>, <span class="ruby-string">&quot;a&quot;</span>) <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">f</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">f</span>.<span class="ruby-identifier">write</span>(<span class="ruby-node">&quot;#{line}\n&quot;</span>)
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span>
+</pre>
         </div>
       </div>
       <div id="attribute-i-npn_protocols" class="method-detail">
@@ -488,21 +512,23 @@
        </header>
 
       <div id="method-c-new" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            new           &rarr; ctx
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            new(:TLSv1)   &rarr; ctx
-          </span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            new(&quot;SSLv23&quot;) &rarr; ctx
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              new           &rarr; ctx
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              new(:TLSv1)   &rarr; ctx
+            </span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              new(&quot;SSLv23&quot;) &rarr; ctx
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -511,7 +537,7 @@
 <p>If an argument is given, <a href="SSLContext.html#method-i-ssl_version-3D"><code>ssl_version=</code></a> is called with the value. Note that this form is deprecated. New applications should use <a href="SSLContext.html#method-i-min_version-3D"><code>min_version=</code></a> and <a href="SSLContext.html#method-i-max_version-3D"><code>max_version=</code></a> as necessary.</p>
 
           <div class="method-source-code" id="new-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 124</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 127</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">initialize</span>(<span class="ruby-identifier">version</span> = <span class="ruby-keyword">nil</span>)
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">options</span> <span class="ruby-operator">|=</span> <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">OP_ALL</span>
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">ssl_version</span> = <span class="ruby-identifier">version</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">version</span>
@@ -532,11 +558,13 @@
        </header>
 
       <div id="method-i-add_certificate" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            add_certificate(certificate, pkey [, extra_certs]) &rarr; self
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              add_certificate(certificate, pkey [, extra_certs]) &rarr; self
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -621,11 +649,13 @@ ossl_sslctx_add_certificate(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-ciphers" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            ciphers &rarr; [[name, version, bits, alg_bits], ...]
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              ciphers &rarr; [[name, version, bits, alg_bits], ...]
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -661,21 +691,23 @@ ossl_sslctx_get_ciphers(VALUE self)
       </div>
 
       <div id="method-i-ciphers-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            ciphers = &quot;cipher1:cipher2:...&quot;
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            ciphers = [name, ...]
-          </span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            ciphers = [[name, version, bits, alg_bits], ...]
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              ciphers = &quot;cipher1:cipher2:...&quot;
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              ciphers = [name, ...]
+            </span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              ciphers = [[name, version, bits, alg_bits], ...]
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -686,30 +718,65 @@ ossl_sslctx_get_ciphers(VALUE self)
 ossl_sslctx_set_ciphers(VALUE self, VALUE v)
 {
     SSL_CTX *ctx;
-    VALUE str, elem;
-    int i;
+    VALUE str;
 
     rb_check_frozen(self);
     if (NIL_P(v))
         return v;
-    else if (RB_TYPE_P(v, T_ARRAY)) {
-        str = rb_str_new(0, 0);
-        for (i = 0; i &lt; RARRAY_LEN(v); i++) {
-            elem = rb_ary_entry(v, i);
-            if (RB_TYPE_P(elem, T_ARRAY)) elem = rb_ary_entry(elem, 0);
-            elem = rb_String(elem);
-            rb_str_append(str, elem);
-            if (i &lt; RARRAY_LEN(v)-1) rb_str_cat2(str, &quot;:&quot;);
-        }
-    } else {
-        str = v;
-        StringValue(str);
-    }
+
+    str = build_cipher_string(v);
 
     GetSSLCTX(self, ctx);
-    if (!SSL_CTX_set_cipher_list(ctx, StringValueCStr(str))) {
+    if (!SSL_CTX_set_cipher_list(ctx, StringValueCStr(str)))
         ossl_raise(eSSLError, &quot;SSL_CTX_set_cipher_list&quot;);
-    }
+
+    return v;
+}</pre>
+          </div>
+        </div>
+
+
+      </div>
+
+      <div id="method-i-ciphersuites-3D" class="method-detail ">
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              ciphersuites = &quot;cipher1:cipher2:...&quot;
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              ciphersuites = [name, ...]
+            </span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              ciphersuites = [[name, version, bits, alg_bits], ...]
+            </span>
+          </div>
+        </div>
+
+        <div class="method-description">
+          <p>Sets the list of available TLSv1.3 cipher suites for this context.</p>
+
+          <div class="method-source-code" id="ciphersuites-3D-source">
+            <pre>static VALUE
+ossl_sslctx_set_ciphersuites(VALUE self, VALUE v)
+{
+    SSL_CTX *ctx;
+    VALUE str;
+
+    rb_check_frozen(self);
+    if (NIL_P(v))
+        return v;
+
+    str = build_cipher_string(v);
+
+    GetSSLCTX(self, ctx);
+    if (!SSL_CTX_set_ciphersuites(ctx, StringValueCStr(str)))
+        ossl_raise(eSSLError, &quot;SSL_CTX_set_ciphersuites&quot;);
 
     return v;
 }</pre>
@@ -720,11 +787,13 @@ ossl_sslctx_set_ciphers(VALUE self, VALUE v)
       </div>
 
       <div id="method-i-ecdh_curves-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            ecdh_curves = curve_list &rarr; curve_list
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              ecdh_curves = curve_list &rarr; curve_list
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -769,11 +838,13 @@ ossl_sslctx_set_ecdh_curves(VALUE self, VALUE arg)
       </div>
 
       <div id="method-i-enable_fallback_scsv" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            enable_fallback_scsv() &rarr; nil
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              enable_fallback_scsv() &rarr; nil
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -797,11 +868,13 @@ ossl_sslctx_enable_fallback_scsv(VALUE self)
       </div>
 
       <div id="method-i-flush_sessions" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            flush_sessions(time) &rarr; self
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              flush_sessions(time) &rarr; self
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -838,9 +911,11 @@ ossl_sslctx_flush_sessions(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-freeze" class="method-detail method-alias">
-        <div class="method-heading">
-          <span class="method-name">freeze</span><span
-            class="method-args">()</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">freeze</span><span
+              class="method-args">()</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -855,28 +930,30 @@ ossl_sslctx_flush_sessions(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-max_version-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            max_version = OpenSSL::SSL::TLS1_2_VERSION
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            max_version = :TLS1_2
-          </span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            max_version = nil
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              max_version = OpenSSL::SSL::TLS1_2_VERSION
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              max_version = :TLS1_2
+            </span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              max_version = nil
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
           <p>Sets the upper bound of the supported SSL/TLS protocol version. See <a href="SSLContext.html#method-i-min_version-3D"><code>min_version=</code></a> for the possible values.</p>
 
           <div class="method-source-code" id="max_version-3D-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 187</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 190</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">max_version=</span>(<span class="ruby-identifier">version</span>)
   <span class="ruby-identifier">set_minmax_proto_version</span>(<span class="ruby-ivar">@min_proto_version</span> <span class="ruby-operator">||=</span> <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">version</span>)
   <span class="ruby-ivar">@max_proto_version</span> = <span class="ruby-identifier">version</span>
@@ -888,21 +965,23 @@ ossl_sslctx_flush_sessions(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-min_version-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            min_version = OpenSSL::SSL::TLS1_2_VERSION
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            min_version = :TLS1_2
-          </span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            min_version = nil
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              min_version = OpenSSL::SSL::TLS1_2_VERSION
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              min_version = :TLS1_2
+            </span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              min_version = nil
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -921,7 +1000,7 @@ ossl_sslctx_flush_sessions(int argc, VALUE *argv, VALUE self)
 </pre>
 
           <div class="method-source-code" id="min_version-3D-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 175</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 178</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">min_version=</span>(<span class="ruby-identifier">version</span>)
   <span class="ruby-identifier">set_minmax_proto_version</span>(<span class="ruby-identifier">version</span>, <span class="ruby-ivar">@max_proto_version</span> <span class="ruby-operator">||=</span> <span class="ruby-keyword">nil</span>)
   <span class="ruby-ivar">@min_proto_version</span> = <span class="ruby-identifier">version</span>
@@ -933,10 +1012,12 @@ ossl_sslctx_flush_sessions(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-options" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">options</span><span
-            class="method-args">()</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">options</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -961,10 +1042,12 @@ ossl_sslctx_get_options(VALUE self)
       </div>
 
       <div id="method-i-options-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">options=</span><span
-            class="method-args">(p1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">options=</span><span
+              class="method-args">(p1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -996,11 +1079,13 @@ ossl_sslctx_set_options(VALUE self, VALUE options)
       </div>
 
       <div id="method-i-security_level" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            security_level &rarr; Integer
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              security_level &rarr; Integer
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1030,11 +1115,13 @@ ossl_sslctx_get_security_level(VALUE self)
       </div>
 
       <div id="method-i-security_level-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            security_level = integer
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              security_level = integer
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1073,11 +1160,13 @@ ossl_sslctx_set_security_level(VALUE self, VALUE value)
       </div>
 
       <div id="method-i-session_add" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            session_add(session) &rarr; true | false
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              session_add(session) &rarr; true | false
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1102,11 +1191,13 @@ ossl_sslctx_session_add(VALUE self, VALUE arg)
       </div>
 
       <div id="method-i-session_cache_mode" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            session_cache_mode &rarr; Integer
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              session_cache_mode &rarr; Integer
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1129,11 +1220,13 @@ ossl_sslctx_get_session_cache_mode(VALUE self)
       </div>
 
       <div id="method-i-session_cache_mode-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            session_cache_mode=(integer) &rarr; Integer
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              session_cache_mode=(integer) &rarr; Integer
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1158,11 +1251,13 @@ ossl_sslctx_set_session_cache_mode(VALUE self, VALUE arg)
       </div>
 
       <div id="method-i-session_cache_size" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            session_cache_size &rarr; Integer
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              session_cache_size &rarr; Integer
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1185,11 +1280,13 @@ ossl_sslctx_get_session_cache_size(VALUE self)
       </div>
 
       <div id="method-i-session_cache_size-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            session_cache_size=(integer) &rarr; Integer
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              session_cache_size=(integer) &rarr; Integer
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1214,11 +1311,13 @@ ossl_sslctx_set_session_cache_size(VALUE self, VALUE arg)
       </div>
 
       <div id="method-i-session_cache_stats" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            session_cache_stats &rarr; Hash
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              session_cache_stats &rarr; Hash
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1293,11 +1392,13 @@ ossl_sslctx_get_session_cache_stats(VALUE self)
       </div>
 
       <div id="method-i-session_remove" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            session_remove(session) &rarr; true | false
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              session_remove(session) &rarr; true | false
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1322,11 +1423,13 @@ ossl_sslctx_session_remove(VALUE self, VALUE arg)
       </div>
 
       <div id="method-i-set_params" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            set_params(params = {}) &rarr; params
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              set_params(params = {}) &rarr; params
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1337,7 +1440,7 @@ ossl_sslctx_session_remove(VALUE self, VALUE arg)
 <p>If the <a href="SSLContext.html#attribute-i-verify_mode"><code>verify_mode</code></a> is not VERIFY_NONE and <a href="SSLContext.html#attribute-i-ca_file"><code>ca_file</code></a>, <a href="SSLContext.html#attribute-i-ca_path"><code>ca_path</code></a> and <a href="SSLContext.html#attribute-i-cert_store"><code>cert_store</code></a> are not set then the system default certificate store is used.</p>
 
           <div class="method-source-code" id="set_params-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 143</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 146</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">set_params</span>(<span class="ruby-identifier">params</span>={})
   <span class="ruby-identifier">params</span> = <span class="ruby-constant">DEFAULT_PARAMS</span>.<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">params</span>)
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">options</span> = <span class="ruby-identifier">params</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-value">:options</span>) <span class="ruby-comment"># set before min_version/max_version</span>
@@ -1356,16 +1459,18 @@ ossl_sslctx_session_remove(VALUE self, VALUE arg)
       </div>
 
       <div id="method-i-setup" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            setup &rarr; Qtrue # first time
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            setup &rarr; nil # thereafter
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              setup &rarr; Qtrue # first time
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              setup &rarr; nil # thereafter
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1473,7 +1578,7 @@ ossl_sslctx_setup(VALUE self)
     val = rb_attr_get(self, id_i_verify_depth);
     if(!NIL_P(val)) SSL_CTX_set_verify_depth(ctx, NUM2INT(val));
 
-#ifndef OPENSSL_NO_NEXTPROTONEG
+#ifdef OSSL_USE_NEXTPROTONEG
     val = rb_attr_get(self, id_i_npn_protocols);
     if (!NIL_P(val)) {
         VALUE encoded = ssl_encode_npn_protocols(val);
@@ -1532,6 +1637,18 @@ ossl_sslctx_setup(VALUE self)
         OSSL_Debug(&quot;SSL TLSEXT servername callback added&quot;);
     }
 
+#if OPENSSL_VERSION_NUMBER &gt;= 0x10101000 &amp;&amp; !defined(LIBRESSL_VERSION_NUMBER)
+    /*
+     * It is only compatible with OpenSSL &gt;= 1.1.1. Even if LibreSSL implements
+     * SSL_CTX_set_keylog_callback() from v3.4.2, it does nothing (see
+     * https://github.com/libressl-portable/openbsd/commit/648d39f0f035835d0653342d139883b9661e9cb6).
+     */
+    if (RTEST(rb_attr_get(self, id_i_keylog_cb))) {
+        SSL_CTX_set_keylog_callback(ctx, ossl_sslctx_keylog_cb);
+        OSSL_Debug(&quot;SSL keylog callback added&quot;);
+    }
+#endif
+
     return Qtrue;
 }</pre>
           </div>
@@ -1544,16 +1661,18 @@ ossl_sslctx_setup(VALUE self)
       </div>
 
       <div id="method-i-ssl_version-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            ssl_version = :TLSv1
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            ssl_version = &quot;SSLv23&quot;
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              ssl_version = :TLSv1
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              ssl_version = &quot;SSLv23&quot;
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1564,7 +1683,7 @@ ossl_sslctx_setup(VALUE self)
 <p>As the name hints, this used to call the SSL_CTX_set_ssl_version() function which sets the <a href="../SSL.html"><code>SSL</code></a> method used for connections created from the context. As of Ruby/OpenSSL 2.1, this accessor method is implemented to call <a href="SSLContext.html#method-i-min_version-3D"><code>min_version=</code></a> and <a href="SSLContext.html#method-i-max_version-3D"><code>max_version=</code></a> instead.</p>
 
           <div class="method-source-code" id="ssl_version-3D-source">
-            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 206</span>
+            <pre><span class="ruby-comment"># File lib/openssl/ssl.rb, line 209</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">ssl_version=</span>(<span class="ruby-identifier">meth</span>)
   <span class="ruby-identifier">meth</span> = <span class="ruby-identifier">meth</span>.<span class="ruby-identifier">to_s</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">meth</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Symbol</span>)
   <span class="ruby-keyword">if</span> <span class="ruby-regexp">/(?&lt;type&gt;_client|_server)\z/</span> <span class="ruby-operator">=~</span> <span class="ruby-identifier">meth</span>
@@ -1585,11 +1704,13 @@ ossl_sslctx_setup(VALUE self)
       </div>
 
       <div id="method-i-tmp_dh-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            tmp_dh = pkey
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              tmp_dh = pkey
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1646,7 +1767,7 @@ ossl_sslctx_set_tmp_dh(VALUE self, VALUE arg)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.5.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

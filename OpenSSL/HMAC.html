@@ -57,9 +57,12 @@
 <div class="nav-section">
   <h3>Table of Contents</h3>
 
+
+
   <ul class="link-list" role="directory">
-    <li><a href="#class-OpenSSL::HMAC-label-HMAC-SHA256+using+one-shot+interface">HMAC-SHA256 using one-shot interface</a>
-    <li><a href="#class-OpenSSL::HMAC-label-HMAC-SHA256+using+incremental+interface">HMAC-SHA256 using incremental interface</a>
+              <li>      <a href="#class-OpenSSL::HMAC-label-HMAC-SHA256+using+one-shot+interface">HMAC-SHA256 using one-shot interface</a>
+          <li>      <a href="#class-OpenSSL::HMAC-label-HMAC-SHA256+using+incremental+interface">HMAC-SHA256 using incremental interface</a>
+
   </ul>
 </div>
 
@@ -145,11 +148,13 @@
        </header>
 
       <div id="method-c-base64digest" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            base64digest(digest, key, data) &rarr; aString
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              base64digest(digest, key, data) &rarr; aString
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -176,11 +181,13 @@
       </div>
 
       <div id="method-c-digest" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            digest(digest, key, data) &rarr; aString
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              digest(digest, key, data) &rarr; aString
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -209,11 +216,13 @@
       </div>
 
       <div id="method-c-hexdigest" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            hexdigest(digest, key, data) &rarr; aString
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              hexdigest(digest, key, data) &rarr; aString
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -242,11 +251,13 @@
       </div>
 
       <div id="method-c-new" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            new(key, digest) &rarr; hmac
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              new(key, digest) &rarr; hmac
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -280,11 +291,19 @@ ossl_hmac_initialize(VALUE self, VALUE key, VALUE digest)
 
     GetHMAC(self, ctx);
     StringValue(key);
+#ifdef HAVE_EVP_PKEY_NEW_RAW_PRIVATE_KEY
+    pkey = EVP_PKEY_new_raw_private_key(EVP_PKEY_HMAC, NULL,
+                                        (unsigned char *)RSTRING_PTR(key),
+                                        RSTRING_LENINT(key));
+    if (!pkey)
+        ossl_raise(eHMACError, &quot;EVP_PKEY_new_raw_private_key&quot;);
+#else
     pkey = EVP_PKEY_new_mac_key(EVP_PKEY_HMAC, NULL,
                                 (unsigned char *)RSTRING_PTR(key),
                                 RSTRING_LENINT(key));
     if (!pkey)
         ossl_raise(eHMACError, &quot;EVP_PKEY_new_mac_key&quot;);
+#endif
     if (EVP_DigestSignInit(ctx, NULL, ossl_evp_get_digestbyname(digest),
                            NULL, pkey) != 1) {
         EVP_PKEY_free(pkey);
@@ -309,9 +328,11 @@ ossl_hmac_initialize(VALUE self, VALUE key, VALUE digest)
        </header>
 
       <div id="method-i-3C-3C" class="method-detail method-alias">
-        <div class="method-heading">
-          <span class="method-name">&lt;&lt;</span><span
-            class="method-args">(p1)</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">&lt;&lt;</span><span
+              class="method-args">(p1)</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -337,10 +358,12 @@ ossl_hmac_initialize(VALUE self, VALUE key, VALUE digest)
       </div>
 
       <div id="method-i-3D-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">==</span><span
-            class="method-args">(other)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">==</span><span
+              class="method-args">(other)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -361,11 +384,13 @@ ossl_hmac_initialize(VALUE self, VALUE key, VALUE digest)
       </div>
 
       <div id="method-i-base64digest" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            base64digest &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              base64digest &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -383,11 +408,13 @@ ossl_hmac_initialize(VALUE self, VALUE key, VALUE digest)
       </div>
 
       <div id="method-i-digest" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            digest &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              digest &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -425,11 +452,13 @@ ossl_hmac_digest(VALUE self)
       </div>
 
       <div id="method-i-hexdigest" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            hexdigest &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              hexdigest &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -462,10 +491,12 @@ ossl_hmac_hexdigest(VALUE self)
       </div>
 
       <div id="method-i-initialize_copy" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">initialize_copy</span><span
-            class="method-args">(p1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">initialize_copy</span><span
+              class="method-args">(p1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -493,9 +524,11 @@ ossl_hmac_copy(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-inspect" class="method-detail method-alias">
-        <div class="method-heading">
-          <span class="method-name">inspect</span><span
-            class="method-args">()</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">inspect</span><span
+              class="method-args">()</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -510,11 +543,13 @@ ossl_hmac_copy(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-reset" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            reset &rarr; self
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              reset &rarr; self
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -553,9 +588,11 @@ ossl_hmac_reset(VALUE self)
       </div>
 
       <div id="method-i-to_s" class="method-detail method-alias">
-        <div class="method-heading">
-          <span class="method-name">to_s</span><span
-            class="method-args">()</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">to_s</span><span
+              class="method-args">()</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -570,11 +607,13 @@ ossl_hmac_reset(VALUE self)
       </div>
 
       <div id="method-i-update" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            update(string) &rarr; self
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              update(string) &rarr; self
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -621,7 +660,7 @@ ossl_hmac_update(VALUE self, VALUE data)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.5.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

@@ -57,18 +57,45 @@
 <div class="nav-section">
   <h3>Table of Contents</h3>
 
+
+
   <ul class="link-list" role="directory">
-    <li><a href="#module-OpenSSL::ASN1-label-ASN.1+class+hierarchy">ASN.1 class hierarchy</a>
-    <li><a href="#module-OpenSSL::ASN1-label-Constructive">Constructive</a>
-    <li><a href="#module-OpenSSL::ASN1-label-ASN1-3A-3ASet+and+ASN1-3A-3ASequence">ASN1::Set and ASN1::Sequence</a>
-    <li><a href="#module-OpenSSL::ASN1-label-Primitive">Primitive</a>
-    <li><a href="#module-OpenSSL::ASN1-label-Possible+values+for+tagging">Possible values for <em>tagging</em></a>
-    <li><a href="#module-OpenSSL::ASN1-label-Possible+values+for+tag_class">Possible values for <em>tag_class</em></a>
-    <li><a href="#module-OpenSSL::ASN1-label-Tag+constants">Tag constants</a>
-    <li><a href="#module-OpenSSL::ASN1-label-UNIVERSAL_TAG_NAME+constant">UNIVERSAL_TAG_NAME constant</a>
-    <li><a href="#module-OpenSSL::ASN1-label-Example+usage">Example usage</a>
-    <li><a href="#module-OpenSSL::ASN1-label-Decoding+and+viewing+a+DER-encoded+file">Decoding and viewing a DER-encoded file</a>
-    <li><a href="#module-OpenSSL::ASN1-label-Creating+an+ASN.1+structure+and+DER-encoding+it">Creating an ASN.1 structure and DER-encoding it</a>
+              <li>
+            <details open>
+              <summary>      <a href="#module-OpenSSL::ASN1-label-ASN.1+class+hierarchy">ASN.1 class hierarchy</a>
+</summary>
+              <ul class="link-list" role="directory">
+                          <li>
+            <details open>
+              <summary>      <a href="#module-OpenSSL::ASN1-label-Constructive">Constructive</a>
+</summary>
+              <ul class="link-list" role="directory">
+                          <li>      <a href="#module-OpenSSL::ASN1-label-ASN1-3A-3ASet+and+ASN1-3A-3ASequence">ASN1::Set and ASN1::Sequence</a>
+
+              </ul>
+            </details>
+          </li>
+          <li>      <a href="#module-OpenSSL::ASN1-label-Primitive">Primitive</a>
+
+              </ul>
+            </details>
+          </li>
+          <li>      <a href="#module-OpenSSL::ASN1-label-Possible+values+for+tagging">Possible values for <em>tagging</em></a>
+          <li>      <a href="#module-OpenSSL::ASN1-label-Possible+values+for+tag_class">Possible values for <em>tag_class</em></a>
+          <li>      <a href="#module-OpenSSL::ASN1-label-Tag+constants">Tag constants</a>
+          <li>      <a href="#module-OpenSSL::ASN1-label-UNIVERSAL_TAG_NAME+constant">UNIVERSAL_TAG_NAME constant</a>
+          <li>
+            <details open>
+              <summary>      <a href="#module-OpenSSL::ASN1-label-Example+usage">Example usage</a>
+</summary>
+              <ul class="link-list" role="directory">
+                          <li>      <a href="#module-OpenSSL::ASN1-label-Decoding+and+viewing+a+DER-encoded+file">Decoding and viewing a DER-encoded file</a>
+          <li>      <a href="#module-OpenSSL::ASN1-label-Creating+an+ASN.1+structure+and+DER-encoding+it">Creating an ASN.1 structure and DER-encoding it</a>
+
+              </ul>
+            </details>
+          </li>
+
   </ul>
 </div>
 
@@ -188,7 +215,7 @@
 
 <h2 id="module-OpenSSL::ASN1-label-UNIVERSAL_TAG_NAME+constant"><a href="ASN1.html#UNIVERSAL_TAG_NAME"><code>UNIVERSAL_TAG_NAME</code></a> constant<span><a href="#module-OpenSSL::ASN1-label-UNIVERSAL_TAG_NAME+constant">&para;</a> <a href="#top">&uarr;</a></span></h2>
 
-<p>An Array that stores the name of a given tag number. These names are the same as the name of the tag constant that is additionally defined, e.g. +<a href="2">UNIVERSAL_TAG_NAME</a> = “INTEGER”+ and +OpenSSL::ASN1::INTEGER = 2+.</p>
+<p>An Array that stores the name of a given tag number. These names are the same as the name of the tag constant that is additionally defined, e.g. <code>UNIVERSAL_TAG_NAME[2] = &quot;INTEGER&quot;</code> and <code>OpenSSL::ASN1::INTEGER = 2</code>.</p>
 
 <h2 id="module-OpenSSL::ASN1-label-Example+usage">Example usage<span><a href="#module-OpenSSL::ASN1-label-Example+usage">&para;</a> <a href="#top">&uarr;</a></span></h2>
 
@@ -235,11 +262,13 @@
        </header>
 
       <div id="method-c-decode" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            OpenSSL::ASN1.decode(der) &rarr; ASN1Data
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              OpenSSL::ASN1.decode(der) &rarr; ASN1Data
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -276,11 +305,13 @@ ossl_asn1_decode(VALUE self, VALUE obj)
       </div>
 
       <div id="method-c-decode_all" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            OpenSSL::ASN1.decode_all(der) &rarr; Array of ASN1Data
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              OpenSSL::ASN1.decode_all(der) &rarr; Array of ASN1Data
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -325,11 +356,13 @@ ossl_asn1_decode_all(VALUE self, VALUE obj)
       </div>
 
       <div id="method-c-traverse" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            OpenSSL::ASN1.traverse(asn1) &rarr; nil
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              OpenSSL::ASN1.traverse(asn1) &rarr; nil
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -390,7 +423,7 @@ ossl_asn1_traverse(VALUE self, VALUE obj)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.5.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

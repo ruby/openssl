@@ -129,16 +129,18 @@
        </header>
 
       <div id="method-c-new" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            OpenSSL::Timestamp::Response.new(file)    &rarr; response
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            OpenSSL::Timestamp::Response.new(string)  &rarr; response
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              OpenSSL::Timestamp::Response.new(file)    &rarr; response
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              OpenSSL::Timestamp::Response.new(string)  &rarr; response
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -177,11 +179,13 @@ ossl_ts_resp_initialize(VALUE self, VALUE der)
        </header>
 
       <div id="method-i-failure_info" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            failure_info &rarr; nil or symbol
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              failure_info &rarr; nil or symbol
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -250,11 +254,13 @@ ossl_ts_resp_get_failure_info(VALUE self)
       </div>
 
       <div id="method-i-status" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            status &rarr; BN (never nil)
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              status &rarr; BN (never nil)
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -281,11 +287,13 @@ ossl_ts_resp_get_status(VALUE self)
       </div>
 
       <div id="method-i-status_text" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            status_text &rarr; Array of strings or nil
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              status_text &rarr; Array of strings or nil
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -320,11 +328,13 @@ ossl_ts_resp_get_status_text(VALUE self)
       </div>
 
       <div id="method-i-to_der" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            to_der &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              to_der &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -346,11 +356,13 @@ ossl_ts_resp_to_der(VALUE self)
       </div>
 
       <div id="method-i-token" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            token &rarr; nil or OpenSSL::PKCS7
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              token &rarr; nil or OpenSSL::PKCS7
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -384,11 +396,13 @@ ossl_ts_resp_get_token(VALUE self)
       </div>
 
       <div id="method-i-token_info" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            token_info &rarr; nil or OpenSSL::Timestamp::TokenInfo
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              token_info &rarr; nil or OpenSSL::Timestamp::TokenInfo
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -422,11 +436,13 @@ ossl_ts_resp_get_token_info(VALUE self)
       </div>
 
       <div id="method-i-tsa_certificate" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            tsa_certificate &rarr; OpenSSL::X509::Certificate or nil
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              tsa_certificate &rarr; OpenSSL::X509::Certificate or nil
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -457,16 +473,18 @@ ossl_ts_resp_get_tsa_certificate(VALUE self)
       </div>
 
       <div id="method-i-verify" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            verify(Request, root_store) &rarr; Response
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            verify(Request, root_store, [intermediate_cert]) &rarr; Response
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              verify(Request, root_store) &rarr; Response
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              verify(Request, root_store, [intermediate_cert]) &rarr; Response
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -562,7 +580,7 @@ ossl_ts_resp_verify(int argc, VALUE *argv, VALUE self)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.5.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

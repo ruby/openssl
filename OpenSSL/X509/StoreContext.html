@@ -115,11 +115,13 @@
        </header>
 
       <div id="method-c-new" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            new(store, cert = nil, untrusted = nil)
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              new(store, cert = nil, untrusted = nil)
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -174,11 +176,13 @@ ossl_x509stctx_initialize(int argc, VALUE *argv, VALUE self)
        </header>
 
       <div id="method-i-chain" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            chain &rarr; nil | Array of X509::Certificate
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              chain &rarr; nil | Array of X509::Certificate
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -206,10 +210,12 @@ ossl_x509stctx_get_chain(VALUE self)
       </div>
 
       <div id="method-i-cleanup" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">cleanup</span><span
-            class="method-args">()</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">cleanup</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -227,11 +233,13 @@ ossl_x509stctx_get_chain(VALUE self)
       </div>
 
       <div id="method-i-current_cert" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            current_cert &rarr; X509::Certificate
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              current_cert &rarr; X509::Certificate
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -256,11 +264,13 @@ ossl_x509stctx_get_curr_cert(VALUE self)
       </div>
 
       <div id="method-i-current_crl" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            current_crl &rarr; X509::CRL
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              current_crl &rarr; X509::CRL
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -289,11 +299,13 @@ ossl_x509stctx_get_curr_crl(VALUE self)
       </div>
 
       <div id="method-i-error" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            error &rarr; Integer
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              error &rarr; Integer
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -318,11 +330,13 @@ ossl_x509stctx_get_err(VALUE self)
       </div>
 
       <div id="method-i-error-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            error = error_code
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              error = error_code
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -348,11 +362,13 @@ ossl_x509stctx_set_error(VALUE self, VALUE err)
       </div>
 
       <div id="method-i-error_depth" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            error_depth &rarr; Integer
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              error_depth &rarr; Integer
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -377,11 +393,13 @@ ossl_x509stctx_get_err_depth(VALUE self)
       </div>
 
       <div id="method-i-error_string" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            error_string &rarr; String
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              error_string &rarr; String
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -408,11 +426,13 @@ ossl_x509stctx_get_err_string(VALUE self)
       </div>
 
       <div id="method-i-flags-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            flags = flags
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              flags = flags
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -439,11 +459,13 @@ ossl_x509stctx_set_flags(VALUE self, VALUE flags)
       </div>
 
       <div id="method-i-purpose-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            purpose = purpose
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              purpose = purpose
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -470,11 +492,13 @@ ossl_x509stctx_set_purpose(VALUE self, VALUE purpose)
       </div>
 
       <div id="method-i-time-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            time = time
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              time = time
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -502,11 +526,13 @@ ossl_x509stctx_set_time(VALUE self, VALUE time)
       </div>
 
       <div id="method-i-trust-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            trust = trust
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              trust = trust
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -533,11 +559,13 @@ ossl_x509stctx_set_trust(VALUE self, VALUE trust)
       </div>
 
       <div id="method-i-verify" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            verify &rarr; true | false
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              verify &rarr; true | false
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -579,7 +607,7 @@ ossl_x509stctx_verify(VALUE self)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.5.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

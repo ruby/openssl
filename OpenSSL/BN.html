@@ -114,6 +114,7 @@
     <li ><a href="#method-i-mod_inverse">#mod_inverse</a>
     <li ><a href="#method-i-mod_mul">#mod_mul</a>
     <li ><a href="#method-i-mod_sqr">#mod_sqr</a>
+    <li ><a href="#method-i-mod_sqrt">#mod_sqrt</a>
     <li ><a href="#method-i-mod_sub">#mod_sub</a>
     <li ><a href="#method-i-negative-3F">#negative?</a>
     <li ><a href="#method-i-num_bits">#num_bits</a>
@@ -173,11 +174,13 @@
        </header>
 
       <div id="method-c-generate_prime" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            generate_prime(bits, [, safe [, add [, rem]]]) &rarr; bn
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              generate_prime(bits, [, safe [, add [, rem]]]) &rarr; bn
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -232,21 +235,23 @@ ossl_bn_s_generate_prime(int argc, VALUE *argv, VALUE klass)
       </div>
 
       <div id="method-c-new" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            OpenSSL::BN.new(bn) &rarr; aBN
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            OpenSSL::BN.new(integer) &rarr; aBN
-          </span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            OpenSSL::BN.new(string, base = 10) &rarr; aBN
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              OpenSSL::BN.new(bn) &rarr; aBN
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              OpenSSL::BN.new(integer) &rarr; aBN
+            </span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              OpenSSL::BN.new(string, base = 10) &rarr; aBN
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -343,11 +348,13 @@ ossl_bn_initialize(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-c-rand" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            rand(bits [, fill [, odd]]) &rarr; aBN
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              rand(bits [, fill [, odd]]) &rarr; aBN
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -389,11 +396,13 @@ ossl_bn_s_rand(int argc, VALUE *argv, VALUE klass)
       </div>
 
       <div id="method-c-rand_range" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            rand_range(range) &rarr; aBN
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              rand_range(range) &rarr; aBN
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -430,10 +439,12 @@ ossl_bn_s_rand_range(VALUE klass, VALUE range)
        </header>
 
       <div id="method-i-25" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            bn % bn2 &rarr; aBN
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              bn % bn2 &rarr; aBN
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -445,10 +456,12 @@ ossl_bn_s_rand_range(VALUE klass, VALUE range)
       </div>
 
       <div id="method-i-2A" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            bn * bn2 &rarr; aBN
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              bn * bn2 &rarr; aBN
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -460,10 +473,12 @@ ossl_bn_s_rand_range(VALUE klass, VALUE range)
       </div>
 
       <div id="method-i-2A-2A" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            bn ** bn2 &rarr; aBN
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              bn ** bn2 &rarr; aBN
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -475,10 +490,12 @@ ossl_bn_s_rand_range(VALUE klass, VALUE range)
       </div>
 
       <div id="method-i-2B" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            bn + bn2 &rarr; aBN
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              bn + bn2 &rarr; aBN
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -490,11 +507,13 @@ ossl_bn_s_rand_range(VALUE klass, VALUE range)
       </div>
 
       <div id="method-i-2B-40" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            +bn &rarr; aBN
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              +bn &rarr; aBN
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -523,10 +542,12 @@ ossl_bn_uplus(VALUE self)
       </div>
 
       <div id="method-i-2D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            bn - bn2 &rarr; aBN
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              bn - bn2 &rarr; aBN
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -538,11 +559,13 @@ ossl_bn_uplus(VALUE self)
       </div>
 
       <div id="method-i-2D-40" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            -bn &rarr; aBN
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              -bn &rarr; aBN
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -572,11 +595,13 @@ ossl_bn_uminus(VALUE self)
       </div>
 
       <div id="method-i-2F" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            bn1 / bn2 &rarr; [result, remainder]
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              bn1 / bn2 &rarr; [result, remainder]
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -618,10 +643,12 @@ ossl_bn_div(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-3C-3C" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            bn &lt;&lt; bits &rarr; aBN
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              bn &lt;&lt; bits &rarr; aBN
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -633,9 +660,11 @@ ossl_bn_div(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-3C-3D-3E" class="method-detail method-alias">
-        <div class="method-heading">
-          <span class="method-name">&lt;=&gt;</span><span
-            class="method-args">(p1)</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">&lt;=&gt;</span><span
+              class="method-args">(p1)</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -650,11 +679,13 @@ ossl_bn_div(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-3D-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            bn == obj &rarr; true or false
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              bn == obj &rarr; true or false
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -687,9 +718,11 @@ ossl_bn_eq(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-3D-3D-3D" class="method-detail method-alias">
-        <div class="method-heading">
-          <span class="method-name">===</span><span
-            class="method-args">(p1)</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">===</span><span
+              class="method-args">(p1)</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -704,10 +737,12 @@ ossl_bn_eq(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-3E-3E" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            bn &gt;&gt; bits &rarr; aBN
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              bn &gt;&gt; bits &rarr; aBN
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -719,11 +754,13 @@ ossl_bn_eq(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-abs" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            abs &rarr; aBN
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              abs &rarr; aBN
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -750,11 +787,13 @@ ossl_bn_abs(VALUE self)
       </div>
 
       <div id="method-i-bit_set-3F" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            bit_set?(bit) &rarr; true | false
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              bit_set?(bit) &rarr; true | false
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -781,10 +820,12 @@ ossl_bn_is_bit_set(VALUE self, VALUE bit)
       </div>
 
       <div id="method-i-clear_bit-21" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            clear_bit!(bit) &rarr; self
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              clear_bit!(bit) &rarr; self
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -796,10 +837,12 @@ ossl_bn_is_bit_set(VALUE self, VALUE bit)
       </div>
 
       <div id="method-i-cmp" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            cmp(bn2) &rarr; integer
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              cmp(bn2) &rarr; integer
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -814,10 +857,12 @@ ossl_bn_is_bit_set(VALUE self, VALUE bit)
       </div>
 
       <div id="method-i-coerce" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">coerce</span><span
-            class="method-args">(p1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">coerce</span><span
+              class="method-args">(p1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -849,9 +894,11 @@ ossl_bn_coerce(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-copy" class="method-detail method-alias">
-        <div class="method-heading">
-          <span class="method-name">copy</span><span
-            class="method-args">(p1)</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">copy</span><span
+              class="method-args">(p1)</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -866,11 +913,13 @@ ossl_bn_coerce(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-eql-3F" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            eql?(obj) &rarr; true or false
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              eql?(obj) &rarr; true or false
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -896,10 +945,12 @@ ossl_bn_eql(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-gcd" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            gcd(bn2) &rarr; aBN
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              gcd(bn2) &rarr; aBN
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -911,11 +962,13 @@ ossl_bn_eql(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-get_flags" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            get_flags(flags) &rarr; flags
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              get_flags(flags) &rarr; flags
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -942,11 +995,13 @@ ossl_bn_get_flags(VALUE self, VALUE arg)
       </div>
 
       <div id="method-i-hash" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            hash &rarr; Integer
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              hash &rarr; Integer
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -983,10 +1038,12 @@ ossl_bn_hash(VALUE self)
       </div>
 
       <div id="method-i-initialize_copy" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">initialize_copy</span><span
-            class="method-args">(p1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">initialize_copy</span><span
+              class="method-args">(p1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1020,10 +1077,12 @@ ossl_bn_copy(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-lshift-21" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            lshift!(bits) &rarr; self
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              lshift!(bits) &rarr; self
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1035,10 +1094,12 @@ ossl_bn_copy(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-mod_add" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            mod_add(bn1, bn2) &rarr; aBN
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              mod_add(bn1, bn2) &rarr; aBN
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1050,10 +1111,12 @@ ossl_bn_copy(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-mod_exp" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            mod_exp(bn1, bn2) &rarr; aBN
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              mod_exp(bn1, bn2) &rarr; aBN
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1065,40 +1128,29 @@ ossl_bn_copy(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-mod_inverse" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            mod_inverse(bn2) &rarr; aBN
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              mod_inverse(bn2) &rarr; aBN
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
           
 
-          <div class="method-source-code" id="mod_inverse-source">
-            <pre>static VALUE
-ossl_bn_mod_inverse(VALUE self, VALUE other)
-{
-    BIGNUM *bn1, *bn2 = GetBNPtr(other), *result;
-    VALUE obj;
-    GetBN(self, bn1);
-    obj = NewBN(rb_obj_class(self));
-    if (!(result = BN_mod_inverse(NULL, bn1, bn2, ossl_bn_ctx)))
-        ossl_raise(eBNError, &quot;BN_mod_inverse&quot;);
-    SetBN(obj, result);
-    return obj;
-}</pre>
-          </div>
         </div>
 
 
       </div>
 
       <div id="method-i-mod_mul" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            mod_mul(bn1, bn2) &rarr; aBN
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              mod_mul(bn1, bn2) &rarr; aBN
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1110,10 +1162,29 @@ ossl_bn_mod_inverse(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-mod_sqr" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            mod_sqr(bn2) &rarr; aBN
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              mod_sqr(bn2) &rarr; aBN
+            </span>
+          </div>
+        </div>
+
+        <div class="method-description">
+          
+
+        </div>
+
+
+      </div>
+
+      <div id="method-i-mod_sqrt" class="method-detail ">
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              mod_sqrt(bn2) &rarr; aBN
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1125,10 +1196,12 @@ ossl_bn_mod_inverse(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-mod_sub" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            mod_sub(bn1, bn2) &rarr; aBN
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              mod_sub(bn1, bn2) &rarr; aBN
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1140,11 +1213,13 @@ ossl_bn_mod_inverse(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-negative-3F" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            negative? &rarr; true | false
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              negative? &rarr; true | false
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1168,10 +1243,12 @@ ossl_bn_is_negative(VALUE self)
       </div>
 
       <div id="method-i-num_bits" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            num_bits &rarr; integer
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              num_bits &rarr; integer
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1183,10 +1260,12 @@ ossl_bn_is_negative(VALUE self)
       </div>
 
       <div id="method-i-num_bytes" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            num_bytes &rarr; integer
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              num_bytes &rarr; integer
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1198,10 +1277,12 @@ ossl_bn_is_negative(VALUE self)
       </div>
 
       <div id="method-i-odd-3F" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            odd? &rarr; true | false
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              odd? &rarr; true | false
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1213,10 +1294,12 @@ ossl_bn_is_negative(VALUE self)
       </div>
 
       <div id="method-i-one-3F" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            one? &rarr; true | false
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              one? &rarr; true | false
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1228,10 +1311,12 @@ ossl_bn_is_negative(VALUE self)
       </div>
 
       <div id="method-i-pretty_print" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">pretty_print</span><span
-            class="method-args">(q)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">pretty_print</span><span
+              class="method-args">(q)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1252,16 +1337,18 @@ ossl_bn_is_negative(VALUE self)
       </div>
 
       <div id="method-i-prime-3F" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            prime? &rarr; true | false
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            prime?(checks) &rarr; true | false
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              prime? &rarr; true | false
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              prime?(checks) &rarr; true | false
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1297,21 +1384,23 @@ ossl_bn_is_prime(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-prime_fasttest-3F" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            prime_fasttest? &rarr; true | false
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            prime_fasttest?(checks) &rarr; true | false
-          </span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            prime_fasttest?(checks, trial_div) &rarr; true | false
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              prime_fasttest? &rarr; true | false
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              prime_fasttest?(checks) &rarr; true | false
+            </span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              prime_fasttest?(checks, trial_div) &rarr; true | false
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1335,10 +1424,12 @@ ossl_bn_is_prime_fasttest(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-rshift-21" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            rshift!(bits) &rarr; self
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              rshift!(bits) &rarr; self
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1350,10 +1441,12 @@ ossl_bn_is_prime_fasttest(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-set_bit-21" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            set_bit!(bit) &rarr; self
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              set_bit!(bit) &rarr; self
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1365,11 +1458,13 @@ ossl_bn_is_prime_fasttest(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-set_flags" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            set_flags(flags) &rarr; nil
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              set_flags(flags) &rarr; nil
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1392,10 +1487,12 @@ ossl_bn_set_flags(VALUE self, VALUE arg)
       </div>
 
       <div id="method-i-sqr" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            sqr &rarr; aBN
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              sqr &rarr; aBN
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1407,10 +1504,12 @@ ossl_bn_set_flags(VALUE self, VALUE arg)
       </div>
 
       <div id="method-i-to_bn" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">to_bn</span><span
-            class="method-args">()</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">to_bn</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1429,11 +1528,13 @@ ossl_bn_to_bn(VALUE self)
       </div>
 
       <div id="method-i-to_i" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            to_i &rarr; integer
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              to_i &rarr; integer
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1467,9 +1568,11 @@ ossl_bn_to_i(VALUE self)
       </div>
 
       <div id="method-i-to_int" class="method-detail method-alias">
-        <div class="method-heading">
-          <span class="method-name">to_int</span><span
-            class="method-args">()</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">to_int</span><span
+              class="method-args">()</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1484,11 +1587,13 @@ ossl_bn_to_i(VALUE self)
       </div>
 
       <div id="method-i-to_s" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            to_s(base = 10) &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              to_s(base = 10) &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1556,10 +1661,12 @@ ossl_bn_to_s(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-ucmp" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            ucmp(bn2) &rarr; integer
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              ucmp(bn2) &rarr; integer
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1571,10 +1678,12 @@ ossl_bn_to_s(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-zero-3F" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            zero? &rarr; true | false
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              zero? &rarr; true | false
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1593,7 +1702,7 @@ ossl_bn_to_s(int argc, VALUE *argv, VALUE self)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.5.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

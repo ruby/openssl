@@ -124,11 +124,13 @@
        </header>
 
       <div id="method-c-generate" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            generate(size) &rarr; dsa
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              generate(size) &rarr; dsa
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -143,8 +145,16 @@
           <div class="method-source-code" id="generate-source">
             <pre><span class="ruby-comment"># File lib/openssl/pkey.rb, line 169</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">generate</span>(<span class="ruby-identifier">size</span>, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">blk</span>)
+  <span class="ruby-comment"># FIPS 186-4 specifies four (L,N) pairs: (1024,160), (2048,224),</span>
+  <span class="ruby-comment"># (2048,256), and (3072,256).</span>
+  <span class="ruby-comment">#</span>
+  <span class="ruby-comment"># q size is derived here with compatibility with</span>
+  <span class="ruby-comment"># DSA_generator_parameters_ex() which previous versions of ruby/openssl</span>
+  <span class="ruby-comment"># used to call.</span>
+  <span class="ruby-identifier">qsize</span> = <span class="ruby-identifier">size</span> <span class="ruby-operator">&gt;=</span> <span class="ruby-value">2048</span> <span class="ruby-operator">?</span> <span class="ruby-value">256</span> <span class="ruby-operator">:</span> <span class="ruby-value">160</span>
   <span class="ruby-identifier">dsaparams</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span>.<span class="ruby-identifier">generate_parameters</span>(<span class="ruby-string">&quot;DSA&quot;</span>, {
     <span class="ruby-string">&quot;dsa_paramgen_bits&quot;</span> <span class="ruby-operator">=&gt;</span> <span class="ruby-identifier">size</span>,
+    <span class="ruby-string">&quot;dsa_paramgen_q_bits&quot;</span> <span class="ruby-operator">=&gt;</span> <span class="ruby-identifier">qsize</span>,
   }, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">blk</span>)
   <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span>.<span class="ruby-identifier">generate_key</span>(<span class="ruby-identifier">dsaparams</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -155,21 +165,23 @@
       </div>
 
       <div id="method-c-new" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            new &rarr; dsa
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            new(string [, pass]) &rarr; dsa
-          </span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            new(size) &rarr; dsa
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              new &rarr; dsa
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              new(string [, pass]) &rarr; dsa
+            </span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              new(size) &rarr; dsa
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -276,11 +288,13 @@ ossl_dsa_initialize(int argc, VALUE *argv, VALUE self)
        </header>
 
       <div id="method-i-export" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            export([cipher, password]) &rarr; aString
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              export([cipher, password]) &rarr; aString
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -302,7 +316,7 @@ DSA.to_pem(cipher, &#39;mypassword&#39;) -&gt; aString</pre>
             <pre>static VALUE
 ossl_dsa_export(int argc, VALUE *argv, VALUE self)
 {
-    DSA *dsa;
+    OSSL_3_const DSA *dsa;
 
     GetDSA(self, dsa);
     if (DSA_HAS_PRIVATE(dsa))
@@ -320,10 +334,12 @@ ossl_dsa_export(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-initialize_copy" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">initialize_copy</span><span
-            class="method-args">(p1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">initialize_copy</span><span
+              class="method-args">(p1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -364,11 +380,13 @@ ossl_dsa_initialize_copy(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-params" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            params &rarr; hash
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              params &rarr; hash
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -378,7 +396,7 @@ ossl_dsa_initialize_copy(VALUE self, VALUE other)
             <pre>static VALUE
 ossl_dsa_get_params(VALUE self)
 {
-    DSA *dsa;
+    OSSL_3_const DSA *dsa;
     VALUE hash;
     const BIGNUM *p, *q, *g, *pub_key, *priv_key;
 
@@ -402,11 +420,13 @@ ossl_dsa_get_params(VALUE self)
       </div>
 
       <div id="method-i-private-3F" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            private? &rarr; true | false
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              private? &rarr; true | false
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -416,7 +436,7 @@ ossl_dsa_get_params(VALUE self)
             <pre>static VALUE
 ossl_dsa_is_private(VALUE self)
 {
-    DSA *dsa;
+    OSSL_3_const DSA *dsa;
 
     GetDSA(self, dsa);
 
@@ -429,11 +449,13 @@ ossl_dsa_is_private(VALUE self)
       </div>
 
       <div id="method-i-public-3F" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            public? &rarr; true | false
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              public? &rarr; true | false
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -443,7 +465,7 @@ ossl_dsa_is_private(VALUE self)
             <pre>static VALUE
 ossl_dsa_is_public(VALUE self)
 {
-    DSA *dsa;
+    const DSA *dsa;
     const BIGNUM *bn;
 
     GetDSA(self, dsa);
@@ -458,11 +480,13 @@ ossl_dsa_is_public(VALUE self)
       </div>
 
       <div id="method-i-public_key" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            public_key &rarr; dsanew
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              public_key &rarr; dsanew
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -484,10 +508,12 @@ ossl_dsa_is_public(VALUE self)
       </div>
 
       <div id="method-i-set_key" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            set_key(pub_key, priv_key) &rarr; self
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              set_key(pub_key, priv_key) &rarr; self
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -499,10 +525,12 @@ ossl_dsa_is_public(VALUE self)
       </div>
 
       <div id="method-i-set_pqg" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            set_pqg(p, q, g) &rarr; self
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              set_pqg(p, q, g) &rarr; self
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -514,11 +542,13 @@ ossl_dsa_is_public(VALUE self)
       </div>
 
       <div id="method-i-syssign" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            syssign(string) &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              syssign(string) &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -546,7 +576,7 @@ ossl_dsa_is_public(VALUE self)
 </pre>
 
           <div class="method-source-code" id="syssign-source">
-            <pre><span class="ruby-comment"># File lib/openssl/pkey.rb, line 212</span>
+            <pre><span class="ruby-comment"># File lib/openssl/pkey.rb, line 220</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">syssign</span>(<span class="ruby-identifier">string</span>)
   <span class="ruby-identifier">q</span> <span class="ruby-keyword">or</span> <span class="ruby-identifier">raise</span> <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">DSAError</span>, <span class="ruby-string">&quot;incomplete DSA&quot;</span>
   <span class="ruby-identifier">private?</span> <span class="ruby-keyword">or</span> <span class="ruby-identifier">raise</span> <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">DSAError</span>, <span class="ruby-string">&quot;Private DSA key needed!&quot;</span>
@@ -563,11 +593,13 @@ ossl_dsa_is_public(VALUE self)
       </div>
 
       <div id="method-i-sysverify" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            sysverify(digest, sig) &rarr; true | false
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              sysverify(digest, sig) &rarr; true | false
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -583,7 +615,7 @@ ossl_dsa_is_public(VALUE self)
 </dd></dl>
 
           <div class="method-source-code" id="sysverify-source">
-            <pre><span class="ruby-comment"># File lib/openssl/pkey.rb, line 235</span>
+            <pre><span class="ruby-comment"># File lib/openssl/pkey.rb, line 243</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">sysverify</span>(<span class="ruby-identifier">digest</span>, <span class="ruby-identifier">sig</span>)
   <span class="ruby-identifier">verify_raw</span>(<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">sig</span>, <span class="ruby-identifier">digest</span>)
 <span class="ruby-keyword">rescue</span> <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">PKeyError</span>
@@ -596,11 +628,13 @@ ossl_dsa_is_public(VALUE self)
       </div>
 
       <div id="method-i-to_der" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            to_der &rarr; aString
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              to_der &rarr; aString
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -610,7 +644,7 @@ ossl_dsa_is_public(VALUE self)
             <pre>static VALUE
 ossl_dsa_to_der(VALUE self)
 {
-    DSA *dsa;
+    OSSL_3_const DSA *dsa;
 
     GetDSA(self, dsa);
     if (DSA_HAS_PRIVATE(dsa))
@@ -625,10 +659,12 @@ ossl_dsa_to_der(VALUE self)
       </div>
 
       <div id="method-i-to_pem" class="method-detail method-alias">
-        <div class="method-heading">
-          <span class="method-callseq">
-            to_pem([cipher, password]) &rarr; aString
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              to_pem([cipher, password]) &rarr; aString
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -655,10 +691,12 @@ DSA.to_pem(cipher, &#39;mypassword&#39;) -&gt; aString</pre>
       </div>
 
       <div id="method-i-to_s" class="method-detail method-alias">
-        <div class="method-heading">
-          <span class="method-callseq">
-            to_s([cipher, password]) &rarr; aString
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              to_s([cipher, password]) &rarr; aString
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -692,7 +730,7 @@ DSA.to_pem(cipher, &#39;mypassword&#39;) -&gt; aString</pre>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.5.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

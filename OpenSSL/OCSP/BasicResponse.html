@@ -112,11 +112,13 @@
        </header>
 
       <div id="method-c-new" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            OpenSSL::OCSP::BasicResponse.new(der_string = nil) &rarr; basic_response
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              OpenSSL::OCSP::BasicResponse.new(der_string = nil) &rarr; basic_response
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -159,11 +161,13 @@ ossl_ocspbres_initialize(int argc, VALUE *argv, VALUE self)
        </header>
 
       <div id="method-i-add_nonce" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            add_nonce(nonce = nil)
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              add_nonce(nonce = nil)
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -198,11 +202,13 @@ ossl_ocspbres_add_nonce(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-add_status" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            add_status(certificate_id, status, reason, revocation_time, this_update, next_update, extensions) &rarr; basic_response
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              add_status(certificate_id, status, reason, revocation_time, this_update, next_update, extensions) &rarr; basic_response
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -296,11 +302,13 @@ ossl_ocspbres_add_status(VALUE self, VALUE cid, VALUE status,
       </div>
 
       <div id="method-i-copy_nonce" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            copy_nonce(request) &rarr; Integer
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              copy_nonce(request) &rarr; Integer
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -327,11 +335,13 @@ ossl_ocspbres_copy_nonce(VALUE self, VALUE request)
       </div>
 
       <div id="method-i-find_response" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            find_response(certificate_id) &rarr; SingleResponse | nil
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              find_response(certificate_id) &rarr; SingleResponse | nil
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -366,10 +376,12 @@ ossl_ocspbres_find_response(VALUE self, VALUE target)
       </div>
 
       <div id="method-i-initialize_copy" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">initialize_copy</span><span
-            class="method-args">(p1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">initialize_copy</span><span
+              class="method-args">(p1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -401,11 +413,13 @@ ossl_ocspbres_initialize_copy(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-responses" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            responses &rarr; Array of SingleResponse
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              responses &rarr; Array of SingleResponse
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -443,11 +457,13 @@ ossl_ocspbres_get_responses(VALUE self)
       </div>
 
       <div id="method-i-sign" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            sign(cert, key, certs = nil, flags = 0, digest = nil) &rarr; self
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              sign(cert, key, certs = nil, flags = 0, digest = nil) &rarr; self
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -485,7 +501,7 @@ ossl_ocspbres_sign(int argc, VALUE *argv, VALUE self)
     if (!NIL_P(flags))
         flg = NUM2INT(flags);
     if (NIL_P(digest))
-        md = EVP_sha1();
+        md = NULL;
     else
         md = ossl_evp_get_digestbyname(digest);
     if (NIL_P(certs))
@@ -506,11 +522,13 @@ ossl_ocspbres_sign(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-status" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            status &rarr; statuses
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              status &rarr; statuses
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -570,11 +588,13 @@ ossl_ocspbres_get_status(VALUE self)
       </div>
 
       <div id="method-i-to_der" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            to_der &rarr; String
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              to_der &rarr; String
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -607,11 +627,13 @@ ossl_ocspbres_to_der(VALUE self)
       </div>
 
       <div id="method-i-verify" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            verify(certificates, store, flags = 0) &rarr; true or false
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              verify(certificates, store, flags = 0) &rarr; true or false
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -653,7 +675,7 @@ ossl_ocspbres_verify(int argc, VALUE *argv, VALUE self)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.5.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

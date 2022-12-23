@@ -112,11 +112,13 @@
        </header>
 
       <div id="method-c-new" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            OpenSSL::OCSP::SingleResponse.new(der_string) &rarr; SingleResponse
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              OpenSSL::OCSP::SingleResponse.new(der_string) &rarr; SingleResponse
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -156,11 +158,13 @@ ossl_ocspsres_initialize(VALUE self, VALUE arg)
        </header>
 
       <div id="method-i-cert_status" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            cert_status &rarr; Integer
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              cert_status &rarr; Integer
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -196,11 +200,13 @@ ossl_ocspsres_get_cert_status(VALUE self)
       </div>
 
       <div id="method-i-certid" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            certid &rarr; CertificateId
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              certid &rarr; CertificateId
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -225,11 +231,13 @@ ossl_ocspsres_get_certid(VALUE self)
       </div>
 
       <div id="method-i-check_validity" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            check_validity(nsec = 0, maxsec = -1) &rarr; true | false
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              check_validity(nsec = 0, maxsec = -1) &rarr; true | false
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -273,11 +281,13 @@ ossl_ocspsres_check_validity(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-extensions" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            extensions &rarr; Array of X509::Extension
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              extensions &rarr; Array of X509::Extension
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -310,10 +320,12 @@ ossl_ocspsres_get_extensions(VALUE self)
       </div>
 
       <div id="method-i-initialize_copy" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">initialize_copy</span><span
-            class="method-args">(p1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">initialize_copy</span><span
+              class="method-args">(p1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -345,11 +357,13 @@ ossl_ocspsres_initialize_copy(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-next_update" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            next_update &rarr; Time | nil
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              next_update &rarr; Time | nil
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -379,11 +393,13 @@ ossl_ocspsres_get_next_update(VALUE self)
       </div>
 
       <div id="method-i-revocation_reason" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            revocation_reason &rarr; Integer | nil
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              revocation_reason &rarr; Integer | nil
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -412,11 +428,13 @@ ossl_ocspsres_get_revocation_reason(VALUE self)
       </div>
 
       <div id="method-i-revocation_time" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            revocation_time &rarr; Time | nil
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              revocation_time &rarr; Time | nil
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -448,11 +466,13 @@ ossl_ocspsres_get_revocation_time(VALUE self)
       </div>
 
       <div id="method-i-this_update" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            this_update &rarr; Time
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              this_update &rarr; Time
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -482,11 +502,13 @@ ossl_ocspsres_get_this_update(VALUE self)
       </div>
 
       <div id="method-i-to_der" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            to_der &rarr; String
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              to_der &rarr; String
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -526,7 +548,7 @@ ossl_ocspsres_to_der(VALUE self)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.5.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

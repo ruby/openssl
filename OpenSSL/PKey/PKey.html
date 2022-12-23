@@ -126,11 +126,13 @@
        </header>
 
       <div id="method-c-new" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            new &rarr; self
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              new &rarr; self
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -159,11 +161,13 @@ ossl_pkey_initialize(VALUE self)
        </header>
 
       <div id="method-i-compare-3F" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            compare?(another_pkey) &rarr; true | false
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              compare?(another_pkey) &rarr; true | false
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -210,11 +214,13 @@ ossl_pkey_compare(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-decrypt" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            decrypt(data [, options]) &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              decrypt(data [, options]) &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -284,11 +290,13 @@ ossl_pkey_decrypt(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-derive" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            derive(peer_pkey) &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              derive(peer_pkey) &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -345,11 +353,13 @@ ossl_pkey_derive(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-encrypt" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            encrypt(data [, options]) &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              encrypt(data [, options]) &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -435,10 +445,12 @@ ossl_pkey_encrypt(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-initialize_copy" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">initialize_copy</span><span
-            class="method-args">(p1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">initialize_copy</span><span
+              class="method-args">(p1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -469,11 +481,13 @@ ossl_pkey_initialize_copy(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-inspect" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            inspect &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              inspect &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -499,11 +513,13 @@ ossl_pkey_inspect(VALUE self)
       </div>
 
       <div id="method-i-oid" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            oid &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              oid &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -527,16 +543,18 @@ ossl_pkey_oid(VALUE self)
       </div>
 
       <div id="method-i-private_to_der" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            private_to_der                   &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            private_to_der(cipher, password) &rarr; string
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              private_to_der                   &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              private_to_der(cipher, password) &rarr; string
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -555,16 +573,18 @@ ossl_pkey_private_to_der(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-private_to_pem" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            private_to_pem                   &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            private_to_pem(cipher, password) &rarr; string
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              private_to_pem                   &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              private_to_pem(cipher, password) &rarr; string
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -583,11 +603,13 @@ ossl_pkey_private_to_pem(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-public_to_der" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            public_to_der &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              public_to_der &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -606,11 +628,13 @@ ossl_pkey_public_to_der(VALUE self)
       </div>
 
       <div id="method-i-public_to_pem" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            public_to_pem &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              public_to_pem &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -629,11 +653,13 @@ ossl_pkey_public_to_pem(VALUE self)
       </div>
 
       <div id="method-i-sign" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            sign(digest, data [, options]) &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              sign(digest, data [, options]) &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -697,7 +723,7 @@ ossl_pkey_sign(int argc, VALUE *argv, VALUE self)
             rb_jump_tag(state);
         }
     }
-#if OPENSSL_VERSION_NUMBER &gt;= 0x10101000 &amp;&amp; !defined(LIBRESSL_VERSION_NUMBER)
+#if OSSL_OPENSSL_PREREQ(1, 1, 1) || OSSL_LIBRESSL_PREREQ(3, 4, 0)
     if (EVP_DigestSign(ctx, NULL, &amp;siglen, (unsigned char *)RSTRING_PTR(data),
                        RSTRING_LEN(data)) &lt; 1) {
         EVP_MD_CTX_free(ctx);
@@ -753,11 +779,13 @@ ossl_pkey_sign(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-sign_raw" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            sign_raw(digest, data [, options]) &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              sign_raw(digest, data [, options]) &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -856,11 +884,13 @@ ossl_pkey_sign_raw(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-to_text" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            to_text &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              to_text &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -903,11 +933,13 @@ ossl_pkey_to_text(VALUE self)
       </div>
 
       <div id="method-i-verify" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            verify(digest, signature, data [, options]) &rarr; true or false
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              verify(digest, signature, data [, options]) &rarr; true or false
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -965,7 +997,7 @@ ossl_pkey_verify(int argc, VALUE *argv, VALUE self)
             rb_jump_tag(state);
         }
     }
-#if OPENSSL_VERSION_NUMBER &gt;= 0x10101000 &amp;&amp; !defined(LIBRESSL_VERSION_NUMBER)
+#if OSSL_OPENSSL_PREREQ(1, 1, 1) || OSSL_LIBRESSL_PREREQ(3, 4, 0)
     ret = EVP_DigestVerify(ctx, (unsigned char *)RSTRING_PTR(sig),
                            RSTRING_LEN(sig), (unsigned char *)RSTRING_PTR(data),
                            RSTRING_LEN(data));
@@ -997,11 +1029,13 @@ ossl_pkey_verify(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-verify_raw" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            verify_raw(digest, signature, data [, options]) &rarr; true or false
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              verify_raw(digest, signature, data [, options]) &rarr; true or false
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1075,11 +1109,13 @@ ossl_pkey_verify_raw(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-verify_recover" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            verify_recover(digest, signature [, options]) &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              verify_recover(digest, signature [, options]) &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1162,7 +1198,7 @@ ossl_pkey_verify_recover(int argc, VALUE *argv, VALUE self)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.5.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

@@ -57,15 +57,18 @@
 <div class="nav-section">
   <h3>Table of Contents</h3>
 
+
+
   <ul class="link-list" role="directory">
-    <li><a href="#class-OpenSSL::Cipher-label-Listing+all+supported+algorithms">Listing all supported algorithms</a>
-    <li><a href="#class-OpenSSL::Cipher-label-Instantiating+a+Cipher">Instantiating a Cipher</a>
-    <li><a href="#class-OpenSSL::Cipher-label-Choosing+either+encryption+or+decryption+mode">Choosing either encryption or decryption mode</a>
-    <li><a href="#class-OpenSSL::Cipher-label-Choosing+a+key">Choosing a key</a>
-    <li><a href="#class-OpenSSL::Cipher-label-Choosing+an+IV">Choosing an IV</a>
-    <li><a href="#class-OpenSSL::Cipher-label-Calling+Cipher-23final">Calling Cipher#final</a>
-    <li><a href="#class-OpenSSL::Cipher-label-Encrypting+and+decrypting+some+data">Encrypting and decrypting some data</a>
-    <li><a href="#class-OpenSSL::Cipher-label-Authenticated+Encryption+and+Associated+Data+-28AEAD-29">Authenticated Encryption and Associated Data (AEAD)</a>
+              <li>      <a href="#class-OpenSSL::Cipher-label-Listing+all+supported+algorithms">Listing all supported algorithms</a>
+          <li>      <a href="#class-OpenSSL::Cipher-label-Instantiating+a+Cipher">Instantiating a Cipher</a>
+          <li>      <a href="#class-OpenSSL::Cipher-label-Choosing+either+encryption+or+decryption+mode">Choosing either encryption or decryption mode</a>
+          <li>      <a href="#class-OpenSSL::Cipher-label-Choosing+a+key">Choosing a key</a>
+          <li>      <a href="#class-OpenSSL::Cipher-label-Choosing+an+IV">Choosing an IV</a>
+          <li>      <a href="#class-OpenSSL::Cipher-label-Calling+Cipher-23final">Calling Cipher#final</a>
+          <li>      <a href="#class-OpenSSL::Cipher-label-Encrypting+and+decrypting+some+data">Encrypting and decrypting some data</a>
+          <li>      <a href="#class-OpenSSL::Cipher-label-Authenticated+Encryption+and+Associated+Data+-28AEAD-29">Authenticated Encryption and Associated Data (AEAD)</a>
+
   </ul>
 </div>
 
@@ -268,11 +271,13 @@
        </header>
 
       <div id="method-c-ciphers" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            OpenSSL::Cipher.ciphers &rarr; array[string...]
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              OpenSSL::Cipher.ciphers &rarr; array[string...]
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -298,11 +303,13 @@ ossl_s_ciphers(VALUE self)
       </div>
 
       <div id="method-c-new" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            new(string) &rarr; cipher
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              new(string) &rarr; cipher
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -346,11 +353,13 @@ ossl_cipher_initialize(VALUE self, VALUE str)
        </header>
 
       <div id="method-i-auth_data-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            auth_data = string &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              auth_data = string &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -387,11 +396,13 @@ ossl_cipher_set_auth_data(VALUE self, VALUE data)
       </div>
 
       <div id="method-i-auth_tag" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            auth_tag(tag_len = 16) &rarr; String
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              auth_tag(tag_len = 16) &rarr; String
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -431,11 +442,13 @@ ossl_cipher_get_auth_tag(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-auth_tag-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            auth_tag = string &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              auth_tag = string &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -471,11 +484,13 @@ ossl_cipher_set_auth_tag(VALUE self, VALUE vtag)
       </div>
 
       <div id="method-i-auth_tag_len-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            auth_tag_len = Integer &rarr; Integer
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              auth_tag_len = Integer &rarr; Integer
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -509,11 +524,13 @@ ossl_cipher_set_auth_tag_len(VALUE self, VALUE vlen)
       </div>
 
       <div id="method-i-authenticated-3F" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            authenticated? &rarr; true | false
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              authenticated? &rarr; true | false
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -536,11 +553,13 @@ ossl_cipher_is_authenticated(VALUE self)
       </div>
 
       <div id="method-i-block_size" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            block_size &rarr; integer
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              block_size &rarr; integer
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -563,11 +582,13 @@ ossl_cipher_block_size(VALUE self)
       </div>
 
       <div id="method-i-ccm_data_len-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            ccm_data_len = integer &rarr; integer
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              ccm_data_len = integer &rarr; integer
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -597,11 +618,13 @@ ossl_cipher_set_ccm_data_len(VALUE self, VALUE data_len)
       </div>
 
       <div id="method-i-decrypt" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            decrypt &rarr; self
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              decrypt &rarr; self
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -627,11 +650,13 @@ ossl_cipher_decrypt(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-encrypt" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            encrypt &rarr; self
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              encrypt &rarr; self
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -657,11 +682,13 @@ ossl_cipher_encrypt(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-final" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            final &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              final &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -693,10 +720,12 @@ ossl_cipher_final(VALUE self)
       </div>
 
       <div id="method-i-initialize_copy" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">initialize_copy</span><span
-            class="method-args">(p1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">initialize_copy</span><span
+              class="method-args">(p1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -728,11 +757,13 @@ ossl_cipher_copy(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-iv-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            iv = string &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              iv = string &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -769,11 +800,13 @@ ossl_cipher_set_iv(VALUE self, VALUE iv)
       </div>
 
       <div id="method-i-iv_len" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            iv_len &rarr; integer
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              iv_len &rarr; integer
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -801,11 +834,13 @@ ossl_cipher_iv_length(VALUE self)
       </div>
 
       <div id="method-i-iv_len-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            iv_len = integer &rarr; integer
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              iv_len = integer &rarr; integer
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -840,11 +875,13 @@ ossl_cipher_set_iv_length(VALUE self, VALUE iv_length)
       </div>
 
       <div id="method-i-key-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            key = string &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              key = string &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -880,11 +917,13 @@ ossl_cipher_set_key(VALUE self, VALUE key)
       </div>
 
       <div id="method-i-key_len" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            key_len &rarr; integer
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              key_len &rarr; integer
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -907,11 +946,13 @@ ossl_cipher_key_length(VALUE self)
       </div>
 
       <div id="method-i-key_len-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            key_len = integer &rarr; integer
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              key_len = integer &rarr; integer
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -941,11 +982,13 @@ ossl_cipher_set_key_length(VALUE self, VALUE key_length)
       </div>
 
       <div id="method-i-name" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            name &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              name &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -968,11 +1011,13 @@ ossl_cipher_name(VALUE self)
       </div>
 
       <div id="method-i-padding-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            padding = integer &rarr; integer
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              padding = integer &rarr; integer
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -999,11 +1044,13 @@ ossl_cipher_set_padding(VALUE self, VALUE padding)
       </div>
 
       <div id="method-i-pkcs5_keyivgen" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            pkcs5_keyivgen(pass, salt = nil, iterations = 2048, digest = &quot;MD5&quot;) &rarr; nil
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              pkcs5_keyivgen(pass, salt = nil, iterations = 2048, digest = &quot;MD5&quot;) &rarr; nil
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1063,11 +1110,13 @@ ossl_cipher_pkcs5_keyivgen(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-random_iv" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            random_iv &rarr; iv
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              random_iv &rarr; iv
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1088,11 +1137,13 @@ ossl_cipher_pkcs5_keyivgen(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-random_key" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            random_key &rarr; key
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              random_key &rarr; key
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1113,11 +1164,13 @@ ossl_cipher_pkcs5_keyivgen(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-reset" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            reset &rarr; self
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              reset &rarr; self
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1144,11 +1197,13 @@ ossl_cipher_reset(VALUE self)
       </div>
 
       <div id="method-i-update" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            update(data [, buffer]) &rarr; string or buffer
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              update(data [, buffer]) &rarr; string or buffer
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1172,8 +1227,7 @@ ossl_cipher_update(int argc, VALUE *argv, VALUE self)
 
     StringValue(data);
     in = (unsigned char *)RSTRING_PTR(data);
-    if ((in_len = RSTRING_LEN(data)) == 0)
-        ossl_raise(rb_eArgError, &quot;data must not be empty&quot;);
+    in_len = RSTRING_LEN(data);
     GetCipher(self, ctx);
     out_len = in_len+EVP_CIPHER_CTX_block_size(ctx);
     if (out_len &lt;= 0) {
@@ -1209,7 +1263,7 @@ ossl_cipher_update(int argc, VALUE *argv, VALUE self)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.5.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

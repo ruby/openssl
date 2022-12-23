@@ -57,10 +57,21 @@
 <div class="nav-section">
   <h3>Table of Contents</h3>
 
+
+
   <ul class="link-list" role="directory">
-    <li><a href="#class-OpenSSL::Netscape::SPKI-label-Examples">Examples</a>
-    <li><a href="#class-OpenSSL::Netscape::SPKI-label-Creating+an+SPKI">Creating an SPKI</a>
-    <li><a href="#class-OpenSSL::Netscape::SPKI-label-Verifying+an+SPKI+request">Verifying an SPKI request</a>
+              <li>
+            <details open>
+              <summary>      <a href="#class-OpenSSL::Netscape::SPKI-label-Examples">Examples</a>
+</summary>
+              <ul class="link-list" role="directory">
+                          <li>      <a href="#class-OpenSSL::Netscape::SPKI-label-Creating+an+SPKI">Creating an SPKI</a>
+          <li>      <a href="#class-OpenSSL::Netscape::SPKI-label-Verifying+an+SPKI+request">Verifying an SPKI request</a>
+
+              </ul>
+            </details>
+          </li>
+
   </ul>
 </div>
 
@@ -157,11 +168,13 @@ SignedPublicKeyAndChallenge ::= SEQUENCE {
        </header>
 
       <div id="method-c-new" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            new([request]) &rarr; spki
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              new([request]) &rarr; spki
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -208,11 +221,13 @@ ossl_spki_initialize(int argc, VALUE *argv, VALUE self)
        </header>
 
       <div id="method-i-challenge" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            challenge &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              challenge &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -240,11 +255,13 @@ ossl_spki_get_challenge(VALUE self)
       </div>
 
       <div id="method-i-challenge-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            challenge = str &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              challenge = str &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -277,11 +294,13 @@ ossl_spki_set_challenge(VALUE self, VALUE str)
       </div>
 
       <div id="method-i-public_key" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            public_key &rarr; pkey
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              public_key &rarr; pkey
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -308,11 +327,13 @@ ossl_spki_get_public_key(VALUE self)
       </div>
 
       <div id="method-i-public_key-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            public_key = pub &rarr; pkey
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              public_key = pub &rarr; pkey
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -344,11 +365,13 @@ ossl_spki_set_public_key(VALUE self, VALUE key)
       </div>
 
       <div id="method-i-sign" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            sign(key, digest) &rarr; spki
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              sign(key, digest) &rarr; spki
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -385,11 +408,13 @@ ossl_spki_sign(VALUE self, VALUE key, VALUE digest)
       </div>
 
       <div id="method-i-to_der" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            to_der &rarr; DER-encoded string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              to_der &rarr; DER-encoded string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -422,11 +447,13 @@ ossl_spki_to_der(VALUE self)
       </div>
 
       <div id="method-i-to_pem" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            to_pem &rarr; PEM-encoded string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              to_pem &rarr; PEM-encoded string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -458,9 +485,11 @@ ossl_spki_to_pem(VALUE self)
       </div>
 
       <div id="method-i-to_s" class="method-detail method-alias">
-        <div class="method-heading">
-          <span class="method-name">to_s</span><span
-            class="method-args">()</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">to_s</span><span
+              class="method-args">()</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -475,11 +504,13 @@ ossl_spki_to_pem(VALUE self)
       </div>
 
       <div id="method-i-to_text" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            to_text &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              to_text &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -510,11 +541,13 @@ ossl_spki_print(VALUE self)
       </div>
 
       <div id="method-i-verify" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            verify(key) &rarr; boolean
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              verify(key) &rarr; boolean
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -559,7 +592,7 @@ ossl_spki_verify(VALUE self, VALUE key)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.5.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

@@ -160,26 +160,28 @@
        </header>
 
       <div id="method-c-new" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            X509::Name.new                               &rarr; name
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            X509::Name.new(der)                          &rarr; name
-          </span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            X509::Name.new(distinguished_name)           &rarr; name
-          </span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            X509::Name.new(distinguished_name, template) &rarr; name
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              X509::Name.new                               &rarr; name
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              X509::Name.new(der)                          &rarr; name
+            </span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              X509::Name.new(distinguished_name)           &rarr; name
+            </span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              X509::Name.new(distinguished_name, template) &rarr; name
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -236,9 +238,11 @@ ossl_x509name_initialize(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-c-parse" class="method-detail method-alias">
-        <div class="method-heading">
-          <span class="method-name">parse</span><span
-            class="method-args">(str, template=OBJECT_TYPE_TEMPLATE)</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">parse</span><span
+              class="method-args">(str, template=OBJECT_TYPE_TEMPLATE)</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -253,10 +257,12 @@ ossl_x509name_initialize(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-c-parse_openssl" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">parse_openssl</span><span
-            class="method-args">(str, template=OBJECT_TYPE_TEMPLATE)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">parse_openssl</span><span
+              class="method-args">(str, template=OBJECT_TYPE_TEMPLATE)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -293,10 +299,12 @@ ossl_x509name_initialize(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-c-parse_rfc2253" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">parse_rfc2253</span><span
-            class="method-args">(str, template=OBJECT_TYPE_TEMPLATE)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">parse_rfc2253</span><span
+              class="method-args">(str, template=OBJECT_TYPE_TEMPLATE)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -324,10 +332,12 @@ ossl_x509name_initialize(int argc, VALUE *argv, VALUE self)
        </header>
 
       <div id="method-i-3C-3D-3E" class="method-detail method-alias">
-        <div class="method-heading">
-          <span class="method-callseq">
-            name &lt;=&gt; other  &rarr; -1 | 0 | 1 | nil
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              name &lt;=&gt; other  &rarr; -1 | 0 | 1 | nil
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -342,11 +352,13 @@ ossl_x509name_initialize(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-add_entry" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            add_entry(oid, value [, type], loc: -1, set: 0) &rarr; self
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              add_entry(oid, value [, type], loc: -1, set: 0) &rarr; self
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -410,11 +422,13 @@ VALUE ossl_x509name_add_entry(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-cmp" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            cmp(other) &rarr; -1 | 0 | 1 | nil
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              cmp(other) &rarr; -1 | 0 | 1 | nil
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -445,11 +459,13 @@ ossl_x509name_cmp(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-eql-3F" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            eql?(other) &rarr; true | false
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              eql?(other) &rarr; true | false
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -471,11 +487,13 @@ ossl_x509name_eql(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-hash" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            hash &rarr; integer
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              hash &rarr; integer
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -501,11 +519,13 @@ ossl_x509name_hash(VALUE self)
       </div>
 
       <div id="method-i-hash_old" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            hash_old &rarr; integer
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              hash_old &rarr; integer
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -531,10 +551,12 @@ ossl_x509name_hash_old(VALUE self)
       </div>
 
       <div id="method-i-initialize_copy" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">initialize_copy</span><span
-            class="method-args">(p1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">initialize_copy</span><span
+              class="method-args">(p1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -566,10 +588,12 @@ ossl_x509name_initialize_copy(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-pretty_print" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">pretty_print</span><span
-            class="method-args">(q)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">pretty_print</span><span
+              class="method-args">(q)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -590,11 +614,13 @@ ossl_x509name_initialize_copy(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-to_a" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            to_a &rarr; [[name, data, type], ...]
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              to_a &rarr; [[name, data, type], ...]
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -647,11 +673,13 @@ ossl_x509name_to_a(VALUE self)
       </div>
 
       <div id="method-i-to_der" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            to_der &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              to_der &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -684,16 +712,18 @@ ossl_x509name_to_der(VALUE self)
       </div>
 
       <div id="method-i-to_s" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            to_s         &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            to_s(format) &rarr; string
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              to_s         &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              to_s(format) &rarr; string
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -732,11 +762,13 @@ ossl_x509name_to_s(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-to_utf8" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            to_utf8 &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              to_utf8 &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -764,7 +796,7 @@ ossl_x509name_to_utf8(VALUE self)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.5.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

@@ -57,9 +57,12 @@
 <div class="nav-section">
   <h3>Table of Contents</h3>
 
+
+
   <ul class="link-list" role="directory">
-    <li><a href="#class-OpenSSL::PKey::DH-label-Accessor+methods+for+the+Diffie-Hellman+parameters">Accessor methods for the Diffie-Hellman parameters</a>
-    <li><a href="#class-OpenSSL::PKey::DH-label-Example+of+a+key+exchange">Example of a key exchange</a>
+              <li>      <a href="#class-OpenSSL::PKey::DH-label-Accessor+methods+for+the+Diffie-Hellman+parameters">Accessor methods for the Diffie-Hellman parameters</a>
+          <li>      <a href="#class-OpenSSL::PKey::DH-label-Example+of+a+key+exchange">Example of a key exchange</a>
+
   </ul>
 </div>
 
@@ -167,11 +170,13 @@
        </header>
 
       <div id="method-c-generate" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            generate(size, generator = 2) &rarr; dh
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              generate(size, generator = 2) &rarr; dh
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -202,21 +207,23 @@
       </div>
 
       <div id="method-c-new" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            new &rarr; dh
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            new(string) &rarr; dh
-          </span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            new(size [, generator]) &rarr; dh
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              new &rarr; dh
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              new(string) &rarr; dh
+            </span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              new(size [, generator]) &rarr; dh
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -325,11 +332,13 @@ ossl_dh_initialize(int argc, VALUE *argv, VALUE self)
        </header>
 
       <div id="method-i-compute_key" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            compute_key(pub_bn) &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              compute_key(pub_bn) &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -366,11 +375,13 @@ ossl_dh_initialize(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-export" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            export &rarr; aString
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              export &rarr; aString
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -380,7 +391,7 @@ ossl_dh_initialize(int argc, VALUE *argv, VALUE self)
             <pre>static VALUE
 ossl_dh_export(VALUE self)
 {
-    DH *dh;
+    OSSL_3_const DH *dh;
     BIO *out;
     VALUE str;
 
@@ -406,11 +417,13 @@ ossl_dh_export(VALUE self)
       </div>
 
       <div id="method-i-generate_key-21" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            generate_key! &rarr; self
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              generate_key! &rarr; self
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -456,10 +469,12 @@ ossl_dh_export(VALUE self)
       </div>
 
       <div id="method-i-initialize_copy" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">initialize_copy</span><span
-            class="method-args">(p1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">initialize_copy</span><span
+              class="method-args">(p1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -511,11 +526,13 @@ ossl_dh_initialize_copy(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-params" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            params &rarr; hash
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              params &rarr; hash
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -525,7 +542,7 @@ ossl_dh_initialize_copy(VALUE self, VALUE other)
             <pre>static VALUE
 ossl_dh_get_params(VALUE self)
 {
-    DH *dh;
+    OSSL_3_const DH *dh;
     VALUE hash;
     const BIGNUM *p, *q, *g, *pub_key, *priv_key;
 
@@ -549,11 +566,13 @@ ossl_dh_get_params(VALUE self)
       </div>
 
       <div id="method-i-params_ok-3F" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            params_ok? &rarr; true | false
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              params_ok? &rarr; true | false
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -599,11 +618,13 @@ ossl_dh_check_params(VALUE self)
       </div>
 
       <div id="method-i-private-3F" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            private? &rarr; true | false
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              private? &rarr; true | false
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -613,14 +634,14 @@ ossl_dh_check_params(VALUE self)
             <pre>static VALUE
 ossl_dh_is_private(VALUE self)
 {
-    DH *dh;
+    OSSL_3_const DH *dh;
     const BIGNUM *bn;
 
     GetDH(self, dh);
     DH_get0_key(dh, NULL, &amp;bn);
 
 #if !defined(OPENSSL_NO_ENGINE)
-    return (bn || DH_get0_engine(dh)) ? Qtrue : Qfalse;
+    return (bn || DH_get0_engine((DH *)dh)) ? Qtrue : Qfalse;
 #else
     return bn ? Qtrue : Qfalse;
 #endif
@@ -632,11 +653,13 @@ ossl_dh_is_private(VALUE self)
       </div>
 
       <div id="method-i-public-3F" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            public? &rarr; true | false
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              public? &rarr; true | false
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -646,7 +669,7 @@ ossl_dh_is_private(VALUE self)
             <pre>static VALUE
 ossl_dh_is_public(VALUE self)
 {
-    DH *dh;
+    OSSL_3_const DH *dh;
     const BIGNUM *bn;
 
     GetDH(self, dh);
@@ -661,11 +684,13 @@ ossl_dh_is_public(VALUE self)
       </div>
 
       <div id="method-i-public_key" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            public_key &rarr; dhnew
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              public_key &rarr; dhnew
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -698,10 +723,12 @@ ossl_dh_is_public(VALUE self)
       </div>
 
       <div id="method-i-set_key" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            set_key(pub_key, priv_key) &rarr; self
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              set_key(pub_key, priv_key) &rarr; self
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -713,10 +740,12 @@ ossl_dh_is_public(VALUE self)
       </div>
 
       <div id="method-i-set_pqg" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            set_pqg(p, q, g) &rarr; self
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              set_pqg(p, q, g) &rarr; self
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -728,11 +757,13 @@ ossl_dh_is_public(VALUE self)
       </div>
 
       <div id="method-i-to_der" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            to_der &rarr; aString
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              to_der &rarr; aString
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -742,7 +773,7 @@ ossl_dh_is_public(VALUE self)
             <pre>static VALUE
 ossl_dh_to_der(VALUE self)
 {
-    DH *dh;
+    OSSL_3_const DH *dh;
     unsigned char *p;
     long len;
     VALUE str;
@@ -765,10 +796,12 @@ ossl_dh_to_der(VALUE self)
       </div>
 
       <div id="method-i-to_pem" class="method-detail method-alias">
-        <div class="method-heading">
-          <span class="method-callseq">
-            to_pem &rarr; aString
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              to_pem &rarr; aString
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -783,10 +816,12 @@ ossl_dh_to_der(VALUE self)
       </div>
 
       <div id="method-i-to_s" class="method-detail method-alias">
-        <div class="method-heading">
-          <span class="method-callseq">
-            to_s &rarr; aString
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              to_s &rarr; aString
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -808,7 +843,7 @@ ossl_dh_to_der(VALUE self)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.5.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

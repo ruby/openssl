@@ -144,11 +144,13 @@
        </header>
 
       <div id="method-c-generate" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            generate(size, exponent = 65537) &rarr; RSA
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              generate(size, exponent = 65537) &rarr; RSA
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -164,7 +166,7 @@
 </dd></dl>
 
           <div class="method-source-code" id="generate-source">
-            <pre><span class="ruby-comment"># File lib/openssl/pkey.rb, line 335</span>
+            <pre><span class="ruby-comment"># File lib/openssl/pkey.rb, line 343</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">generate</span>(<span class="ruby-identifier">size</span>, <span class="ruby-identifier">exp</span> = <span class="ruby-value">0x10001</span>, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">blk</span>)
   <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span>.<span class="ruby-identifier">generate_key</span>(<span class="ruby-string">&quot;RSA&quot;</span>, {
     <span class="ruby-string">&quot;rsa_keygen_bits&quot;</span> <span class="ruby-operator">=&gt;</span> <span class="ruby-identifier">size</span>,
@@ -178,26 +180,28 @@
       </div>
 
       <div id="method-c-new" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            new &rarr; rsa
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            new(encoded_key [, passphrase]) &rarr; rsa
-          </span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            new(encoded_key) { passphrase } &rarr; rsa
-          </span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            new(size [, exponent]) &rarr; rsa
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              new &rarr; rsa
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              new(encoded_key [, passphrase]) &rarr; rsa
+            </span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              new(encoded_key) { passphrase } &rarr; rsa
+            </span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              new(size [, exponent]) &rarr; rsa
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -292,11 +296,13 @@ ossl_rsa_initialize(int argc, VALUE *argv, VALUE self)
        </header>
 
       <div id="method-i-export" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            export([cipher, pass_phrase]) &rarr; PEM-format String
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              export([cipher, pass_phrase]) &rarr; PEM-format String
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -321,10 +327,12 @@ ossl_rsa_export(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-initialize_copy" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">initialize_copy</span><span
-            class="method-args">(p1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">initialize_copy</span><span
+              class="method-args">(p1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -364,11 +372,13 @@ ossl_rsa_initialize_copy(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-params" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            params &rarr; hash
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              params &rarr; hash
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -382,7 +392,7 @@ ossl_rsa_initialize_copy(VALUE self, VALUE other)
             <pre>static VALUE
 ossl_rsa_get_params(VALUE self)
 {
-    RSA *rsa;
+    OSSL_3_const RSA *rsa;
     VALUE hash;
     const BIGNUM *n, *e, *d, *p, *q, *dmp1, *dmq1, *iqmp;
 
@@ -410,11 +420,13 @@ ossl_rsa_get_params(VALUE self)
       </div>
 
       <div id="method-i-private-3F" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            private? &rarr; true | false
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              private? &rarr; true | false
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -424,7 +436,7 @@ ossl_rsa_get_params(VALUE self)
             <pre>static VALUE
 ossl_rsa_is_private(VALUE self)
 {
-    RSA *rsa;
+    OSSL_3_const RSA *rsa;
 
     GetRSA(self, rsa);
 
@@ -437,25 +449,27 @@ ossl_rsa_is_private(VALUE self)
       </div>
 
       <div id="method-i-private_decrypt" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            private_decrypt(string)          &rarr; String
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            private_decrypt(string, padding) &rarr; String
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              private_decrypt(string)          &rarr; String
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              private_decrypt(string, padding) &rarr; String
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
-          <p>Decrypt <code>string</code>, which has been encrypted with the public key, with the private key. <code>padding</code> defaults to <a href="RSA.html#PKCS1_PADDING"><code>PKCS1_PADDING</code></a>.</p>
+          <p>Decrypt <code>string</code>, which has been encrypted with the public key, with the private key. <code>padding</code> defaults to <a href="RSA.html#PKCS1_PADDING"><code>PKCS1_PADDING</code></a>, which is known to be insecure but is kept for backwards compatibility.</p>
 
 <p><strong>Deprecated in version 3.0</strong>. Consider using <a href="PKey.html#method-i-encrypt"><code>PKey::PKey#encrypt</code></a> and <a href="PKey.html#method-i-decrypt"><code>PKey::PKey#decrypt</code></a> instead.</p>
 
           <div class="method-source-code" id="private_decrypt-source">
-            <pre><span class="ruby-comment"># File lib/openssl/pkey.rb, line 427</span>
+            <pre><span class="ruby-comment"># File lib/openssl/pkey.rb, line 439</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">private_decrypt</span>(<span class="ruby-identifier">data</span>, <span class="ruby-identifier">padding</span> = <span class="ruby-constant">PKCS1_PADDING</span>)
   <span class="ruby-identifier">n</span> <span class="ruby-keyword">or</span> <span class="ruby-identifier">raise</span> <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">RSAError</span>, <span class="ruby-string">&quot;incomplete RSA&quot;</span>
   <span class="ruby-identifier">private?</span> <span class="ruby-keyword">or</span> <span class="ruby-identifier">raise</span> <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">RSAError</span>, <span class="ruby-string">&quot;private key needed.&quot;</span>
@@ -474,25 +488,27 @@ ossl_rsa_is_private(VALUE self)
       </div>
 
       <div id="method-i-private_encrypt" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            private_encrypt(string)          &rarr; String
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            private_encrypt(string, padding) &rarr; String
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              private_encrypt(string)          &rarr; String
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              private_encrypt(string, padding) &rarr; String
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
-          <p>Encrypt <code>string</code> with the private key.  <code>padding</code> defaults to <a href="RSA.html#PKCS1_PADDING"><code>PKCS1_PADDING</code></a>. The encrypted string output can be decrypted using <a href="RSA.html#method-i-public_decrypt"><code>public_decrypt</code></a>.</p>
+          <p>Encrypt <code>string</code> with the private key.  <code>padding</code> defaults to <a href="RSA.html#PKCS1_PADDING"><code>PKCS1_PADDING</code></a>, which is known to be insecure but is kept for backwards compatibility. The encrypted string output can be decrypted using <a href="RSA.html#method-i-public_decrypt"><code>public_decrypt</code></a>.</p>
 
 <p><strong>Deprecated in version 3.0</strong>. Consider using <a href="PKey.html#method-i-sign_raw"><code>PKey::PKey#sign_raw</code></a> and <a href="PKey.html#method-i-verify_raw"><code>PKey::PKey#verify_raw</code></a>, and <a href="PKey.html#method-i-verify_recover"><code>PKey::PKey#verify_recover</code></a> instead.</p>
 
           <div class="method-source-code" id="private_encrypt-source">
-            <pre><span class="ruby-comment"># File lib/openssl/pkey.rb, line 364</span>
+            <pre><span class="ruby-comment"># File lib/openssl/pkey.rb, line 373</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">private_encrypt</span>(<span class="ruby-identifier">string</span>, <span class="ruby-identifier">padding</span> = <span class="ruby-constant">PKCS1_PADDING</span>)
   <span class="ruby-identifier">n</span> <span class="ruby-keyword">or</span> <span class="ruby-identifier">raise</span> <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">RSAError</span>, <span class="ruby-string">&quot;incomplete RSA&quot;</span>
   <span class="ruby-identifier">private?</span> <span class="ruby-keyword">or</span> <span class="ruby-identifier">raise</span> <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">RSAError</span>, <span class="ruby-string">&quot;private key needed.&quot;</span>
@@ -511,11 +527,13 @@ ossl_rsa_is_private(VALUE self)
       </div>
 
       <div id="method-i-public-3F" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            public? &rarr; true
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              public? &rarr; true
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -525,7 +543,7 @@ ossl_rsa_is_private(VALUE self)
             <pre>static VALUE
 ossl_rsa_is_public(VALUE self)
 {
-    RSA *rsa;
+    OSSL_3_const RSA *rsa;
 
     GetRSA(self, rsa);
     /*
@@ -541,25 +559,27 @@ ossl_rsa_is_public(VALUE self)
       </div>
 
       <div id="method-i-public_decrypt" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            public_decrypt(string)          &rarr; String
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            public_decrypt(string, padding) &rarr; String
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              public_decrypt(string)          &rarr; String
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              public_decrypt(string, padding) &rarr; String
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
-          <p>Decrypt <code>string</code>, which has been encrypted with the private key, with the public key.  <code>padding</code> defaults to <a href="RSA.html#PKCS1_PADDING"><code>PKCS1_PADDING</code></a>.</p>
+          <p>Decrypt <code>string</code>, which has been encrypted with the private key, with the public key.  <code>padding</code> defaults to <a href="RSA.html#PKCS1_PADDING"><code>PKCS1_PADDING</code></a> which is known to be insecure but is kept for backwards compatibility.</p>
 
 <p><strong>Deprecated in version 3.0</strong>. Consider using <a href="PKey.html#method-i-sign_raw"><code>PKey::PKey#sign_raw</code></a> and <a href="PKey.html#method-i-verify_raw"><code>PKey::PKey#verify_raw</code></a>, and <a href="PKey.html#method-i-verify_recover"><code>PKey::PKey#verify_recover</code></a> instead.</p>
 
           <div class="method-source-code" id="public_decrypt-source">
-            <pre><span class="ruby-comment"># File lib/openssl/pkey.rb, line 386</span>
+            <pre><span class="ruby-comment"># File lib/openssl/pkey.rb, line 396</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">public_decrypt</span>(<span class="ruby-identifier">string</span>, <span class="ruby-identifier">padding</span> = <span class="ruby-constant">PKCS1_PADDING</span>)
   <span class="ruby-identifier">n</span> <span class="ruby-keyword">or</span> <span class="ruby-identifier">raise</span> <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">RSAError</span>, <span class="ruby-string">&quot;incomplete RSA&quot;</span>
   <span class="ruby-keyword">begin</span>
@@ -577,25 +597,27 @@ ossl_rsa_is_public(VALUE self)
       </div>
 
       <div id="method-i-public_encrypt" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            public_encrypt(string)          &rarr; String
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            public_encrypt(string, padding) &rarr; String
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              public_encrypt(string)          &rarr; String
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              public_encrypt(string, padding) &rarr; String
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
-          <p>Encrypt <code>string</code> with the public key.  <code>padding</code> defaults to <a href="RSA.html#PKCS1_PADDING"><code>PKCS1_PADDING</code></a>. The encrypted string output can be decrypted using <a href="RSA.html#method-i-private_decrypt"><code>private_decrypt</code></a>.</p>
+          <p>Encrypt <code>string</code> with the public key.  <code>padding</code> defaults to <a href="RSA.html#PKCS1_PADDING"><code>PKCS1_PADDING</code></a>, which is known to be insecure but is kept for backwards compatibility. The encrypted string output can be decrypted using <a href="RSA.html#method-i-private_decrypt"><code>private_decrypt</code></a>.</p>
 
 <p><strong>Deprecated in version 3.0</strong>. Consider using <a href="PKey.html#method-i-encrypt"><code>PKey::PKey#encrypt</code></a> and <a href="PKey.html#method-i-decrypt"><code>PKey::PKey#decrypt</code></a> instead.</p>
 
           <div class="method-source-code" id="public_encrypt-source">
-            <pre><span class="ruby-comment"># File lib/openssl/pkey.rb, line 407</span>
+            <pre><span class="ruby-comment"># File lib/openssl/pkey.rb, line 418</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">public_encrypt</span>(<span class="ruby-identifier">data</span>, <span class="ruby-identifier">padding</span> = <span class="ruby-constant">PKCS1_PADDING</span>)
   <span class="ruby-identifier">n</span> <span class="ruby-keyword">or</span> <span class="ruby-identifier">raise</span> <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">RSAError</span>, <span class="ruby-string">&quot;incomplete RSA&quot;</span>
   <span class="ruby-keyword">begin</span>
@@ -613,11 +635,13 @@ ossl_rsa_is_public(VALUE self)
       </div>
 
       <div id="method-i-public_key" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            public_key &rarr; rsanew
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              public_key &rarr; rsanew
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -628,7 +652,7 @@ ossl_rsa_is_public(VALUE self)
 <p>For the purpose of serializing the public key, to PEM or DER encoding of X.509 SubjectPublicKeyInfo format, check <a href="PKey.html#method-i-public_to_pem"><code>PKey#public_to_pem</code></a> and <a href="PKey.html#method-i-public_to_der"><code>PKey#public_to_der</code></a>.</p>
 
           <div class="method-source-code" id="public_key-source">
-            <pre><span class="ruby-comment"># File lib/openssl/pkey.rb, line 319</span>
+            <pre><span class="ruby-comment"># File lib/openssl/pkey.rb, line 327</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">public_key</span>
   <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span>.<span class="ruby-identifier">read</span>(<span class="ruby-identifier">public_to_der</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -639,10 +663,12 @@ ossl_rsa_is_public(VALUE self)
       </div>
 
       <div id="method-i-set_crt_params" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            set_crt_params(dmp1, dmq1, iqmp) &rarr; self
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              set_crt_params(dmp1, dmq1, iqmp) &rarr; self
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -654,10 +680,12 @@ ossl_rsa_is_public(VALUE self)
       </div>
 
       <div id="method-i-set_factors" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            set_factors(p, q) &rarr; self
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              set_factors(p, q) &rarr; self
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -669,10 +697,12 @@ ossl_rsa_is_public(VALUE self)
       </div>
 
       <div id="method-i-set_key" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            set_key(n, e, d) &rarr; self
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              set_key(n, e, d) &rarr; self
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -684,11 +714,13 @@ ossl_rsa_is_public(VALUE self)
       </div>
 
       <div id="method-i-sign_pss" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            sign_pss(digest, data, salt_length:, mgf1_hash:) &rarr; String
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              sign_pss(digest, data, salt_length:, mgf1_hash:) &rarr; String
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -794,11 +826,13 @@ ossl_rsa_sign_pss(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-to_der" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            to_der &rarr; DER-format String
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              to_der &rarr; DER-format String
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -820,10 +854,12 @@ ossl_rsa_to_der(VALUE self)
       </div>
 
       <div id="method-i-to_pem" class="method-detail method-alias">
-        <div class="method-heading">
-          <span class="method-callseq">
-            to_pem([cipher, pass_phrase]) &rarr; PEM-format String
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              to_pem([cipher, pass_phrase]) &rarr; PEM-format String
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -838,10 +874,12 @@ ossl_rsa_to_der(VALUE self)
       </div>
 
       <div id="method-i-to_s" class="method-detail method-alias">
-        <div class="method-heading">
-          <span class="method-callseq">
-            to_s([cipher, pass_phrase]) &rarr; PEM-format String
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              to_s([cipher, pass_phrase]) &rarr; PEM-format String
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -856,11 +894,13 @@ ossl_rsa_to_der(VALUE self)
       </div>
 
       <div id="method-i-verify_pss" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            verify_pss(digest, signature, data, salt_length:, mgf1_hash:) &rarr; true | false
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              verify_pss(digest, signature, data, salt_length:, mgf1_hash:) &rarr; true | false
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -969,7 +1009,7 @@ ossl_rsa_verify_pss(int argc, VALUE *argv, VALUE self)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.5.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

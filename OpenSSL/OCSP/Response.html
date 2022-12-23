@@ -108,11 +108,13 @@
        </header>
 
       <div id="method-c-create" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            OpenSSL::OCSP::Response.create(status, basic_response = nil) &rarr; response
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              OpenSSL::OCSP::Response.create(status, basic_response = nil) &rarr; response
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -143,16 +145,18 @@ ossl_ocspres_s_create(VALUE klass, VALUE status, VALUE basic_resp)
       </div>
 
       <div id="method-c-new" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            OpenSSL::OCSP::Response.new               &rarr; response
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            OpenSSL::OCSP::Response.new(response_der) &rarr; response
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              OpenSSL::OCSP::Response.new               &rarr; response
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              OpenSSL::OCSP::Response.new(response_der) &rarr; response
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -195,11 +199,13 @@ ossl_ocspres_initialize(int argc, VALUE *argv, VALUE self)
        </header>
 
       <div id="method-i-basic" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            basic
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              basic
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -228,10 +234,12 @@ ossl_ocspres_get_basic(VALUE self)
       </div>
 
       <div id="method-i-initialize_copy" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">initialize_copy</span><span
-            class="method-args">(p1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">initialize_copy</span><span
+              class="method-args">(p1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -263,11 +271,13 @@ ossl_ocspres_initialize_copy(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-status" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            status &rarr; Integer
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              status &rarr; Integer
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -292,11 +302,13 @@ ossl_ocspres_status(VALUE self)
       </div>
 
       <div id="method-i-status_string" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            status_string &rarr; String
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              status_string &rarr; String
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -321,11 +333,13 @@ ossl_ocspres_status_string(VALUE self)
       </div>
 
       <div id="method-i-to_der" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            to_der &rarr; String
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              to_der &rarr; String
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -365,7 +379,7 @@ ossl_ocspres_to_der(VALUE self)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.5.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

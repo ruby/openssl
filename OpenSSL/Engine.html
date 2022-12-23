@@ -118,11 +118,13 @@
        </header>
 
       <div id="method-c-by_id" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            OpenSSL::Engine.by_id(name) &rarr; engine
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              OpenSSL::Engine.by_id(name) &rarr; engine
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -162,11 +164,13 @@ ossl_engine_s_by_id(VALUE klass, VALUE id)
       </div>
 
       <div id="method-c-cleanup" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            OpenSSL::Engine.cleanup
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              OpenSSL::Engine.cleanup
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -190,11 +194,13 @@ ossl_engine_s_cleanup(VALUE self)
       </div>
 
       <div id="method-c-engines" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            OpenSSL::Engine.engines &rarr; [engine, ...]
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              OpenSSL::Engine.engines &rarr; [engine, ...]
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -227,11 +233,13 @@ ossl_engine_s_engines(VALUE klass)
       </div>
 
       <div id="method-c-load" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            OpenSSL::Engine.load(name = nil)
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              OpenSSL::Engine.load(name = nil)
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -311,11 +319,13 @@ ossl_engine_s_load(int argc, VALUE *argv, VALUE klass)
        </header>
 
       <div id="method-i-cipher" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            cipher(name) &rarr; OpenSSL::Cipher
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              cipher(name) &rarr; OpenSSL::Cipher
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -352,11 +362,13 @@ ossl_engine_get_cipher(VALUE self, VALUE name)
       </div>
 
       <div id="method-i-cmds" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            cmds &rarr; [[&quot;name&quot;, &quot;description&quot;, &quot;flags&quot;], ...]
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              cmds &rarr; [[&quot;name&quot;, &quot;description&quot;, &quot;flags&quot;], ...]
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -391,11 +403,13 @@ ossl_engine_get_cmds(VALUE self)
       </div>
 
       <div id="method-i-ctrl_cmd" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            ctrl_cmd(command, value = nil) &rarr; engine
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              ctrl_cmd(command, value = nil) &rarr; engine
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -426,11 +440,13 @@ ossl_engine_ctrl_cmd(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-digest" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            digest(name) &rarr; OpenSSL::Digest
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              digest(name) &rarr; OpenSSL::Digest
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -470,11 +486,13 @@ ossl_engine_get_digest(VALUE self, VALUE name)
       </div>
 
       <div id="method-i-finish" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            finish &rarr; nil
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              finish &rarr; nil
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -500,11 +518,13 @@ ossl_engine_finish(VALUE self)
       </div>
 
       <div id="method-i-id" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            id &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              id &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -531,11 +551,13 @@ ossl_engine_get_id(VALUE self)
       </div>
 
       <div id="method-i-inspect" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            inspect &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              inspect &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -558,11 +580,13 @@ ossl_engine_inspect(VALUE self)
       </div>
 
       <div id="method-i-load_private_key" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            load_private_key(id = nil, data = nil) &rarr; OpenSSL::PKey
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              load_private_key(id = nil, data = nil) &rarr; OpenSSL::PKey
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -597,11 +621,13 @@ ossl_engine_load_privkey(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-load_public_key" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            load_public_key(id = nil, data = nil) &rarr; OpenSSL::PKey
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              load_public_key(id = nil, data = nil) &rarr; OpenSSL::PKey
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -634,11 +660,13 @@ ossl_engine_load_pubkey(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-name" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            name &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              name &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -665,11 +693,13 @@ ossl_engine_get_name(VALUE self)
       </div>
 
       <div id="method-i-set_default" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            set_default(flag)
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              set_default(flag)
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -714,7 +744,7 @@ ossl_engine_set_default(VALUE self, VALUE flag)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.5.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

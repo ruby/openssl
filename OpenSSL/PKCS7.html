@@ -163,11 +163,13 @@
        </header>
 
       <div id="method-c-encrypt" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            encrypt(certs, data, [, cipher [, flags]]) &rarr; pkcs7
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              encrypt(certs, data, [, cipher [, flags]]) &rarr; pkcs7
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -228,16 +230,18 @@ ossl_pkcs7_s_encrypt(int argc, VALUE *argv, VALUE klass)
       </div>
 
       <div id="method-c-new" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            new &rarr; pkcs7
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            new(string) &rarr; pkcs7
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              new &rarr; pkcs7
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              new(string) &rarr; pkcs7
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -278,11 +282,13 @@ ossl_pkcs7_initialize(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-c-read_smime" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            read_smime(string) &rarr; pkcs7
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              read_smime(string) &rarr; pkcs7
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -316,11 +322,13 @@ ossl_pkcs7_s_read_smime(VALUE klass, VALUE arg)
       </div>
 
       <div id="method-c-sign" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            sign(cert, key, data, [, certs [, flags]]) &rarr; pkcs7
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              sign(cert, key, data, [, certs [, flags]]) &rarr; pkcs7
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -373,11 +381,13 @@ ossl_pkcs7_s_sign(int argc, VALUE *argv, VALUE klass)
       </div>
 
       <div id="method-c-write_smime" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            write_smime(pkcs7 [, data [, flags]]) &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              write_smime(pkcs7 [, data [, flags]]) &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -428,10 +438,12 @@ ossl_pkcs7_s_write_smime(int argc, VALUE *argv, VALUE klass)
        </header>
 
       <div id="method-i-add_certificate" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">add_certificate</span><span
-            class="method-args">(p1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">add_certificate</span><span
+              class="method-args">(p1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -459,10 +471,12 @@ ossl_pkcs7_add_certificate(VALUE self, VALUE cert)
       </div>
 
       <div id="method-i-add_crl" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">add_crl</span><span
-            class="method-args">(p1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">add_crl</span><span
+              class="method-args">(p1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -490,10 +504,12 @@ ossl_pkcs7_add_crl(VALUE self, VALUE crl)
       </div>
 
       <div id="method-i-add_data" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">add_data</span><span
-            class="method-args">(p1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">add_data</span><span
+              class="method-args">(p1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -543,10 +559,12 @@ ossl_pkcs7_add_data(VALUE self, VALUE data)
       </div>
 
       <div id="method-i-add_recipient" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">add_recipient</span><span
-            class="method-args">(p1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">add_recipient</span><span
+              class="method-args">(p1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -580,10 +598,12 @@ ossl_pkcs7_add_recipient(VALUE self, VALUE recip)
       </div>
 
       <div id="method-i-add_signer" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">add_signer</span><span
-            class="method-args">(p1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">add_signer</span><span
+              class="method-args">(p1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -617,10 +637,12 @@ ossl_pkcs7_add_signer(VALUE self, VALUE signer)
       </div>
 
       <div id="method-i-certificates" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">certificates</span><span
-            class="method-args">()</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">certificates</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -639,10 +661,12 @@ ossl_pkcs7_get_certificates(VALUE self)
       </div>
 
       <div id="method-i-certificates-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">certificates=</span><span
-            class="method-args">(p1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">certificates=</span><span
+              class="method-args">(p1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -668,10 +692,12 @@ ossl_pkcs7_set_certificates(VALUE self, VALUE ary)
       </div>
 
       <div id="method-i-cipher-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">cipher=</span><span
-            class="method-args">(p1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">cipher=</span><span
+              class="method-args">(p1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -697,10 +723,12 @@ ossl_pkcs7_set_cipher(VALUE self, VALUE cipher)
       </div>
 
       <div id="method-i-crls" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">crls</span><span
-            class="method-args">()</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">crls</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -719,10 +747,12 @@ ossl_pkcs7_get_crls(VALUE self)
       </div>
 
       <div id="method-i-crls-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">crls=</span><span
-            class="method-args">(p1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">crls=</span><span
+              class="method-args">(p1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -748,9 +778,11 @@ ossl_pkcs7_set_crls(VALUE self, VALUE ary)
       </div>
 
       <div id="method-i-data-3D" class="method-detail method-alias">
-        <div class="method-heading">
-          <span class="method-name">data=</span><span
-            class="method-args">(p1)</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">data=</span><span
+              class="method-args">(p1)</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -765,10 +797,12 @@ ossl_pkcs7_set_crls(VALUE self, VALUE ary)
       </div>
 
       <div id="method-i-decrypt" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">decrypt</span><span
-            class="method-args">(p1, p2 = v2, p3 = v3)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">decrypt</span><span
+              class="method-args">(p1, p2 = v2, p3 = v3)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -808,10 +842,12 @@ ossl_pkcs7_decrypt(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-detached" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">detached</span><span
-            class="method-args">()</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">detached</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -832,10 +868,12 @@ ossl_pkcs7_get_detached(VALUE self)
       </div>
 
       <div id="method-i-detached-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">detached=</span><span
-            class="method-args">(p1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">detached=</span><span
+              class="method-args">(p1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -862,10 +900,12 @@ ossl_pkcs7_set_detached(VALUE self, VALUE flag)
       </div>
 
       <div id="method-i-detached-3F" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">detached?</span><span
-            class="method-args">()</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">detached?</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -886,10 +926,12 @@ ossl_pkcs7_detached_p(VALUE self)
       </div>
 
       <div id="method-i-initialize_copy" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">initialize_copy</span><span
-            class="method-args">(p1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">initialize_copy</span><span
+              class="method-args">(p1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -923,10 +965,12 @@ ossl_pkcs7_copy(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-recipients" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">recipients</span><span
-            class="method-args">()</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">recipients</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -967,10 +1011,12 @@ ossl_pkcs7_get_recipient(VALUE self)
       </div>
 
       <div id="method-i-signers" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">signers</span><span
-            class="method-args">()</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">signers</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1009,10 +1055,12 @@ ossl_pkcs7_get_signer(VALUE self)
       </div>
 
       <div id="method-i-to_der" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">to_der</span><span
-            class="method-args">()</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">to_der</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1045,10 +1093,12 @@ ossl_pkcs7_to_der(VALUE self)
       </div>
 
       <div id="method-i-to_pem" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">to_pem</span><span
-            class="method-args">()</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">to_pem</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1084,9 +1134,11 @@ ossl_pkcs7_to_pem(VALUE self)
       </div>
 
       <div id="method-i-to_s" class="method-detail method-alias">
-        <div class="method-heading">
-          <span class="method-name">to_s</span><span
-            class="method-args">()</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">to_s</span><span
+              class="method-args">()</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1101,11 +1153,13 @@ ossl_pkcs7_to_pem(VALUE self)
       </div>
 
       <div id="method-i-type" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            type &rarr; string or nil
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              type &rarr; string or nil
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1137,11 +1191,13 @@ ossl_pkcs7_get_type(VALUE self)
       </div>
 
       <div id="method-i-type-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            type = type &rarr; type
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              type = type &rarr; type
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1166,10 +1222,12 @@ ossl_pkcs7_set_type(VALUE self, VALUE type)
       </div>
 
       <div id="method-i-verify" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">verify</span><span
-            class="method-args">(p1, p2, p3 = v3, p4 = v4)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">verify</span><span
+              class="method-args">(p1, p2, p3 = v3, p4 = v4)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -1233,7 +1291,7 @@ ossl_pkcs7_verify(int argc, VALUE *argv, VALUE self)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.5.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

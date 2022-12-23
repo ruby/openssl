@@ -110,10 +110,12 @@
        </header>
 
       <div id="method-c-new" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">new</span><span
-            class="method-args">(*args)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">new</span><span
+              class="method-args">(*args)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -140,10 +142,12 @@ ossl_x509revoked_initialize(int argc, VALUE *argv, VALUE self)
        </header>
 
       <div id="method-i-3D-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">==</span><span
-            class="method-args">(other)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">==</span><span
+              class="method-args">(other)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -162,10 +166,12 @@ ossl_x509revoked_initialize(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-add_extension" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">add_extension</span><span
-            class="method-args">(p1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">add_extension</span><span
+              class="method-args">(p1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -191,10 +197,12 @@ ossl_x509revoked_add_extension(VALUE self, VALUE ext)
       </div>
 
       <div id="method-i-extensions" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">extensions</span><span
-            class="method-args">()</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">extensions</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -230,10 +238,12 @@ ossl_x509revoked_get_extensions(VALUE self)
       </div>
 
       <div id="method-i-extensions-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">extensions=</span><span
-            class="method-args">(p1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">extensions=</span><span
+              class="method-args">(p1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -253,13 +263,13 @@ ossl_x509revoked_set_extensions(VALUE self, VALUE ary)
         OSSL_Check_Kind(RARRAY_AREF(ary, i), cX509Ext);
     }
     GetX509Rev(self, rev);
-    while ((ext = X509_REVOKED_delete_ext(rev, 0)))
-        X509_EXTENSION_free(ext);
+    for (i = X509_REVOKED_get_ext_count(rev); i &gt; 0; i--)
+        X509_EXTENSION_free(X509_REVOKED_delete_ext(rev, 0));
     for (i=0; i&lt;RARRAY_LEN(ary); i++) {
         item = RARRAY_AREF(ary, i);
         ext = GetX509ExtPtr(item);
         if(!X509_REVOKED_add_ext(rev, ext, -1)) {
-            ossl_raise(eX509RevError, NULL);
+            ossl_raise(eX509RevError, &quot;X509_REVOKED_add_ext&quot;);
         }
     }
 
@@ -272,10 +282,12 @@ ossl_x509revoked_set_extensions(VALUE self, VALUE ary)
       </div>
 
       <div id="method-i-initialize_copy" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">initialize_copy</span><span
-            class="method-args">(p1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">initialize_copy</span><span
+              class="method-args">(p1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -307,10 +319,12 @@ ossl_x509revoked_initialize_copy(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-serial" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">serial</span><span
-            class="method-args">()</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">serial</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -333,10 +347,12 @@ ossl_x509revoked_get_serial(VALUE self)
       </div>
 
       <div id="method-i-serial-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">serial=</span><span
-            class="method-args">(p1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">serial=</span><span
+              class="method-args">(p1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -366,10 +382,12 @@ ossl_x509revoked_set_serial(VALUE self, VALUE num)
       </div>
 
       <div id="method-i-time" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">time</span><span
-            class="method-args">()</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">time</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -396,10 +414,12 @@ ossl_x509revoked_get_time(VALUE self)
       </div>
 
       <div id="method-i-time-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">time=</span><span
-            class="method-args">(p1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">time=</span><span
+              class="method-args">(p1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -429,10 +449,12 @@ ossl_x509revoked_set_time(VALUE self, VALUE time)
       </div>
 
       <div id="method-i-to_der" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">to_der</span><span
-            class="method-args">()</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">to_der</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -472,7 +494,7 @@ ossl_x509revoked_to_der(VALUE self)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.5.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

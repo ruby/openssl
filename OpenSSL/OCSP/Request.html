@@ -111,16 +111,18 @@
        </header>
 
       <div id="method-c-new" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            OpenSSL::OCSP::Request.new              &rarr; request
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            OpenSSL::OCSP::Request.new(request_der) &rarr; request
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              OpenSSL::OCSP::Request.new              &rarr; request
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              OpenSSL::OCSP::Request.new(request_der) &rarr; request
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -163,11 +165,13 @@ ossl_ocspreq_initialize(int argc, VALUE *argv, VALUE self)
        </header>
 
       <div id="method-i-add_certid" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            add_certid(certificate_id) &rarr; request
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              add_certid(certificate_id) &rarr; request
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -199,11 +203,13 @@ ossl_ocspreq_add_certid(VALUE self, VALUE certid)
       </div>
 
       <div id="method-i-add_nonce" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            add_nonce(nonce = nil) &rarr; request
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              add_nonce(nonce = nil) &rarr; request
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -240,11 +246,13 @@ ossl_ocspreq_add_nonce(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-certid" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            certid &rarr; [certificate_id, ...]
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              certid &rarr; [certificate_id, ...]
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -281,11 +289,13 @@ ossl_ocspreq_get_certid(VALUE self)
       </div>
 
       <div id="method-i-check_nonce" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            check_nonce(response) &rarr; result
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              check_nonce(response) &rarr; result
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -332,10 +342,12 @@ ossl_ocspreq_check_nonce(VALUE self, VALUE basic_resp)
       </div>
 
       <div id="method-i-initialize_copy" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">initialize_copy</span><span
-            class="method-args">(p1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">initialize_copy</span><span
+              class="method-args">(p1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -367,11 +379,13 @@ ossl_ocspreq_initialize_copy(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-sign" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            sign(cert, key, certs = nil, flags = 0, digest = nil) &rarr; self
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              sign(cert, key, certs = nil, flags = 0, digest = nil) &rarr; self
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -403,7 +417,7 @@ ossl_ocspreq_sign(int argc, VALUE *argv, VALUE self)
     if (!NIL_P(flags))
         flg = NUM2INT(flags);
     if (NIL_P(digest))
-        md = EVP_sha1();
+        md = NULL;
     else
         md = ossl_evp_get_digestbyname(digest);
     if (NIL_P(certs))
@@ -424,11 +438,13 @@ ossl_ocspreq_sign(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-signed-3F" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            signed? &rarr; true or false
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              signed? &rarr; true or false
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -450,10 +466,12 @@ ossl_ocspreq_signed_p(VALUE self)
       </div>
 
       <div id="method-i-to_der" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">to_der</span><span
-            class="method-args">()</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">to_der</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -486,11 +504,13 @@ ossl_ocspreq_to_der(VALUE self)
       </div>
 
       <div id="method-i-verify" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            verify(certificates, store, flags = 0) &rarr; true or false
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              verify(certificates, store, flags = 0) &rarr; true or false
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -534,7 +554,7 @@ ossl_ocspreq_verify(int argc, VALUE *argv, VALUE self)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.5.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

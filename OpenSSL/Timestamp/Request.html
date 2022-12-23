@@ -122,21 +122,23 @@
        </header>
 
       <div id="method-c-new" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            OpenSSL::Timestamp::Request.new(file)    &rarr; request
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            OpenSSL::Timestamp::Request.new(string)  &rarr; request
-          </span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            OpenSSL::Timestamp::Request.new          &rarr; empty request
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              OpenSSL::Timestamp::Request.new(file)    &rarr; request
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              OpenSSL::Timestamp::Request.new(string)  &rarr; request
+            </span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              OpenSSL::Timestamp::Request.new          &rarr; empty request
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -180,11 +182,13 @@ ossl_ts_req_initialize(int argc, VALUE *argv, VALUE self)
        </header>
 
       <div id="method-i-algorithm" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            algorithm    &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              algorithm    &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -210,11 +214,13 @@ ossl_ts_req_get_algorithm(VALUE self)
       </div>
 
       <div id="method-i-algorithm-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            algorithm = &quot;string&quot;    &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              algorithm = &quot;string&quot;    &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -252,11 +258,13 @@ ossl_ts_req_set_algorithm(VALUE self, VALUE algo)
       </div>
 
       <div id="method-i-cert_requested-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            cert_requested = boolean &rarr; true or false
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              cert_requested = boolean &rarr; true or false
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -280,11 +288,13 @@ ossl_ts_req_set_cert_requested(VALUE self, VALUE requested)
       </div>
 
       <div id="method-i-cert_requested-3F" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            cert_requested?  &rarr; true or false
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              cert_requested?  &rarr; true or false
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -306,11 +316,13 @@ ossl_ts_req_get_cert_requested(VALUE self)
       </div>
 
       <div id="method-i-message_imprint" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            message_imprint    &rarr; string or nil
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              message_imprint    &rarr; string or nil
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -340,11 +352,13 @@ ossl_ts_req_get_msg_imprint(VALUE self)
       </div>
 
       <div id="method-i-message_imprint-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            message_imprint = &quot;string&quot;    &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              message_imprint = &quot;string&quot;    &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -372,11 +386,13 @@ ossl_ts_req_set_msg_imprint(VALUE self, VALUE hash)
       </div>
 
       <div id="method-i-nonce" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            nonce    &rarr; BN or nil
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              nonce    &rarr; BN or nil
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -401,11 +417,13 @@ ossl_ts_req_get_nonce(VALUE self)
       </div>
 
       <div id="method-i-nonce-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            nonce = number    &rarr; BN
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              nonce = number    &rarr; BN
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -434,11 +452,13 @@ ossl_ts_req_set_nonce(VALUE self, VALUE num)
       </div>
 
       <div id="method-i-policy_id" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            policy_id    &rarr; string or nil
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              policy_id    &rarr; string or nil
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -462,11 +482,13 @@ ossl_ts_req_get_policy_id(VALUE self)
       </div>
 
       <div id="method-i-policy_id-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            policy_id = &quot;string&quot;   &rarr; string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              policy_id = &quot;string&quot;   &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -501,11 +523,13 @@ ossl_ts_req_set_policy_id(VALUE self, VALUE oid)
       </div>
 
       <div id="method-i-to_der" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            to_der    &rarr; DER-encoded string
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              to_der    &rarr; DER-encoded string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -540,11 +564,13 @@ ossl_ts_req_to_der(VALUE self)
       </div>
 
       <div id="method-i-version" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            version &rarr; Integer
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              version &rarr; Integer
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -566,11 +592,13 @@ ossl_ts_req_get_version(VALUE self)
       </div>
 
       <div id="method-i-version-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            version = number    &rarr; Integer
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              version = number    &rarr; Integer
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -605,7 +633,7 @@ ossl_ts_req_set_version(VALUE self, VALUE version)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.5.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

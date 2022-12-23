@@ -128,16 +128,18 @@
        </header>
 
       <div id="method-c-new" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            OpenSSL::PKey::EC::Point.new(point)
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            OpenSSL::PKey::EC::Point.new(group [, encoded_point])
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              OpenSSL::PKey::EC::Point.new(point)
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              OpenSSL::PKey::EC::Point.new(group [, encoded_point])
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -208,10 +210,12 @@
        </header>
 
       <div id="method-i-3D-3D" class="method-detail method-alias">
-        <div class="method-heading">
-          <span class="method-callseq">
-            point1 == point2 &rarr; true | false
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              point1 == point2 &rarr; true | false
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -226,11 +230,13 @@
       </div>
 
       <div id="method-i-add" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            add(point) &rarr; point
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              add(point) &rarr; point
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -265,11 +271,13 @@
       </div>
 
       <div id="method-i-eql-3F" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            eql?(point2) &rarr; true | false
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              eql?(point2) &rarr; true | false
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -290,10 +298,13 @@
     GetECPoint(b, point2);
     GetECGroup(group_v1, group);
 
-    if (EC_POINT_cmp(group, point1, point2, ossl_bn_ctx) == 1)
-        return Qfalse;
+    switch (EC_POINT_cmp(group, point1, point2, ossl_bn_ctx)) {
+    case 0: return Qtrue;
+    case 1: return Qfalse;
+    default: ossl_raise(eEC_POINT, &quot;EC_POINT_cmp&quot;);
+    }
 
-    return Qtrue;
+    UNREACHABLE;
 }</pre>
           </div>
         </div>
@@ -305,11 +316,13 @@
       </div>
 
       <div id="method-i-infinity-3F" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            infinity? &rarr; true | false
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              infinity? &rarr; true | false
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -327,7 +340,7 @@
     switch (EC_POINT_is_at_infinity(group, point)) {
     case 1: return Qtrue;
     case 0: return Qfalse;
-    default: ossl_raise(cEC_POINT, &quot;EC_POINT_is_at_infinity&quot;);
+    default: ossl_raise(eEC_POINT, &quot;EC_POINT_is_at_infinity&quot;);
     }
 
     UNREACHABLE;
@@ -339,10 +352,12 @@
       </div>
 
       <div id="method-i-initialize_copy" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">initialize_copy</span><span
-            class="method-args">(p1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">initialize_copy</span><span
+              class="method-args">(p1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -379,11 +394,13 @@ ossl_ec_point_initialize_copy(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-invert-21" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            invert! &rarr; self
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              invert! &rarr; self
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -399,7 +416,7 @@ ossl_ec_point_initialize_copy(VALUE self, VALUE other)
     GetECPointGroup(self, group);
 
     if (EC_POINT_invert(group, point, ossl_bn_ctx) != 1)
-        ossl_raise(cEC_POINT, &quot;EC_POINT_invert&quot;);
+        ossl_raise(eEC_POINT, &quot;EC_POINT_invert&quot;);
 
     return self;
 }</pre>
@@ -410,11 +427,13 @@ ossl_ec_point_initialize_copy(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-make_affine-21" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            make_affine! &rarr; self
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              make_affine! &rarr; self
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -432,7 +451,7 @@ ossl_ec_point_initialize_copy(VALUE self, VALUE other)
     rb_warn(&quot;OpenSSL::PKey::EC::Point#make_affine! is deprecated&quot;);
 #if !OSSL_OPENSSL_PREREQ(3, 0, 0)
     if (EC_POINT_make_affine(group, point, ossl_bn_ctx) != 1)
-        ossl_raise(cEC_POINT, &quot;EC_POINT_make_affine&quot;);
+        ossl_raise(eEC_POINT, &quot;EC_POINT_make_affine&quot;);
 #endif
 
     return self;
@@ -444,16 +463,18 @@ ossl_ec_point_initialize_copy(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-mul" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            mul(bn1 [, bn2]) &rarr; point
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            mul(bns, points [, bn2]) &rarr; point
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              mul(bn1 [, bn2]) &rarr; point
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              mul(bns, points [, bn2]) &rarr; point
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -546,11 +567,13 @@ ossl_ec_point_initialize_copy(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-on_curve-3F" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            on_curve? &rarr; true | false
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              on_curve? &rarr; true | false
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -568,7 +591,7 @@ ossl_ec_point_initialize_copy(VALUE self, VALUE other)
     switch (EC_POINT_is_on_curve(group, point, ossl_bn_ctx)) {
     case 1: return Qtrue;
     case 0: return Qfalse;
-    default: ossl_raise(cEC_POINT, &quot;EC_POINT_is_on_curve&quot;);
+    default: ossl_raise(eEC_POINT, &quot;EC_POINT_is_on_curve&quot;);
     }
 
     UNREACHABLE;
@@ -580,11 +603,13 @@ ossl_ec_point_initialize_copy(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-set_to_infinity-21" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            set_to_infinity! &rarr; self
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              set_to_infinity! &rarr; self
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -600,7 +625,7 @@ ossl_ec_point_initialize_copy(VALUE self, VALUE other)
     GetECPointGroup(self, group);
 
     if (EC_POINT_set_to_infinity(group, point) != 1)
-        ossl_raise(cEC_POINT, &quot;EC_POINT_set_to_infinity&quot;);
+        ossl_raise(eEC_POINT, &quot;EC_POINT_set_to_infinity&quot;);
 
     return self;
 }</pre>
@@ -611,11 +636,13 @@ ossl_ec_point_initialize_copy(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-to_bn" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            to_bn([conversion_form]) &rarr; OpenSSL::BN
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              to_bn([conversion_form]) &rarr; OpenSSL::BN
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -626,7 +653,7 @@ ossl_ec_point_initialize_copy(VALUE self, VALUE other)
 <p>See <a href="Point.html#method-i-to_octet_string"><code>to_octet_string</code></a> for more information.</p>
 
           <div class="method-source-code" id="to_bn-source">
-            <pre><span class="ruby-comment"># File lib/openssl/pkey.rb, line 299</span>
+            <pre><span class="ruby-comment"># File lib/openssl/pkey.rb, line 307</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier ruby-title">to_bn</span>(<span class="ruby-identifier">conversion_form</span> = <span class="ruby-identifier">group</span>.<span class="ruby-identifier">point_conversion_form</span>)
   <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">BN</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">to_octet_string</span>(<span class="ruby-identifier">conversion_form</span>), <span class="ruby-value">2</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -637,11 +664,13 @@ ossl_ec_point_initialize_copy(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-to_octet_string" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            to_octet_string(conversion_form) &rarr; String
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              to_octet_string(conversion_form) &rarr; String
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -694,7 +723,7 @@ ossl_ec_point_to_octet_string(VALUE self, VALUE conversion_form)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.5.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

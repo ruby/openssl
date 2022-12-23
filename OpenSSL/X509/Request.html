@@ -126,10 +126,12 @@
        </header>
 
       <div id="method-c-new" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">new</span><span
-            class="method-args">(p1 = v1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">new</span><span
+              class="method-args">(p1 = v1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -177,10 +179,12 @@ ossl_x509req_initialize(int argc, VALUE *argv, VALUE self)
        </header>
 
       <div id="method-i-3D-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">==</span><span
-            class="method-args">(other)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">==</span><span
+              class="method-args">(other)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -199,10 +203,12 @@ ossl_x509req_initialize(int argc, VALUE *argv, VALUE self)
       </div>
 
       <div id="method-i-add_attribute" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">add_attribute</span><span
-            class="method-args">(p1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">add_attribute</span><span
+              class="method-args">(p1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -228,10 +234,12 @@ ossl_x509req_add_attribute(VALUE self, VALUE attr)
       </div>
 
       <div id="method-i-attributes" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">attributes</span><span
-            class="method-args">()</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">attributes</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -268,10 +276,12 @@ ossl_x509req_get_attributes(VALUE self)
       </div>
 
       <div id="method-i-attributes-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">attributes=</span><span
-            class="method-args">(p1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">attributes=</span><span
+              class="method-args">(p1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -291,13 +301,13 @@ ossl_x509req_set_attributes(VALUE self, VALUE ary)
         OSSL_Check_Kind(RARRAY_AREF(ary, i), cX509Attr);
     }
     GetX509Req(self, req);
-    while ((attr = X509_REQ_delete_attr(req, 0)))
-        X509_ATTRIBUTE_free(attr);
+    for (i = X509_REQ_get_attr_count(req); i &gt; 0; i--)
+        X509_ATTRIBUTE_free(X509_REQ_delete_attr(req, 0));
     for (i=0;i&lt;RARRAY_LEN(ary); i++) {
         item = RARRAY_AREF(ary, i);
         attr = GetX509AttrPtr(item);
         if (!X509_REQ_add1_attr(req, attr)) {
-            ossl_raise(eX509ReqError, NULL);
+            ossl_raise(eX509ReqError, &quot;X509_REQ_add1_attr&quot;);
         }
     }
     return ary;
@@ -309,10 +319,12 @@ ossl_x509req_set_attributes(VALUE self, VALUE ary)
       </div>
 
       <div id="method-i-initialize_copy" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">initialize_copy</span><span
-            class="method-args">(p1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">initialize_copy</span><span
+              class="method-args">(p1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -343,10 +355,12 @@ ossl_x509req_copy(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-public_key" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">public_key</span><span
-            class="method-args">()</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">public_key</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -373,10 +387,12 @@ ossl_x509req_get_public_key(VALUE self)
       </div>
 
       <div id="method-i-public_key-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">public_key=</span><span
-            class="method-args">(p1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">public_key=</span><span
+              class="method-args">(p1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -403,10 +419,12 @@ ossl_x509req_set_public_key(VALUE self, VALUE key)
       </div>
 
       <div id="method-i-sign" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">sign</span><span
-            class="method-args">(p1, p2)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">sign</span><span
+              class="method-args">(p1, p2)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -436,10 +454,12 @@ ossl_x509req_sign(VALUE self, VALUE key, VALUE digest)
       </div>
 
       <div id="method-i-signature_algorithm" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">signature_algorithm</span><span
-            class="method-args">()</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">signature_algorithm</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -473,10 +493,12 @@ ossl_x509req_get_signature_algorithm(VALUE self)
       </div>
 
       <div id="method-i-subject" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">subject</span><span
-            class="method-args">()</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">subject</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -503,10 +525,12 @@ ossl_x509req_get_subject(VALUE self)
       </div>
 
       <div id="method-i-subject-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">subject=</span><span
-            class="method-args">(p1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">subject=</span><span
+              class="method-args">(p1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -533,10 +557,12 @@ ossl_x509req_set_subject(VALUE self, VALUE subject)
       </div>
 
       <div id="method-i-to_der" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">to_der</span><span
-            class="method-args">()</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">to_der</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -569,10 +595,12 @@ ossl_x509req_to_der(VALUE self)
       </div>
 
       <div id="method-i-to_pem" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">to_pem</span><span
-            class="method-args">()</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">to_pem</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -606,9 +634,11 @@ ossl_x509req_to_pem(VALUE self)
       </div>
 
       <div id="method-i-to_s" class="method-detail method-alias">
-        <div class="method-heading">
-          <span class="method-name">to_s</span><span
-            class="method-args">()</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">to_s</span><span
+              class="method-args">()</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -623,10 +653,12 @@ ossl_x509req_to_pem(VALUE self)
       </div>
 
       <div id="method-i-to_text" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">to_text</span><span
-            class="method-args">()</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">to_text</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -657,10 +689,12 @@ ossl_x509req_to_text(VALUE self)
       </div>
 
       <div id="method-i-verify" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">verify</span><span
-            class="method-args">(p1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">verify</span><span
+              class="method-args">(p1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -693,10 +727,12 @@ ossl_x509req_verify(VALUE self, VALUE key)
       </div>
 
       <div id="method-i-version" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">version</span><span
-            class="method-args">()</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">version</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -721,10 +757,12 @@ ossl_x509req_get_version(VALUE self)
       </div>
 
       <div id="method-i-version-3D" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">version=</span><span
-            class="method-args">(p1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">version=</span><span
+              class="method-args">(p1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -761,7 +799,7 @@ ossl_x509req_set_version(VALUE self, VALUE version)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.5.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

@@ -110,21 +110,23 @@
        </header>
 
       <div id="method-c-new" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            OpenSSL::OCSP::CertificateId.new(subject, issuer, digest = nil) &rarr; certificate_id
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            OpenSSL::OCSP::CertificateId.new(der_string)                    &rarr; certificate_id
-          </span>
-        </div>
-        <div class="method-heading">
-          <span class="method-callseq">
-            OpenSSL::OCSP::CertificateId.new(obj)                           &rarr; certificate_id
-          </span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              OpenSSL::OCSP::CertificateId.new(subject, issuer, digest = nil) &rarr; certificate_id
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              OpenSSL::OCSP::CertificateId.new(der_string)                    &rarr; certificate_id
+            </span>
+          </div>
+          <div class="method-heading">
+            <span class="method-callseq">
+              OpenSSL::OCSP::CertificateId.new(obj)                           &rarr; certificate_id
+            </span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -183,11 +185,13 @@ ossl_ocspcid_initialize(int argc, VALUE *argv, VALUE self)
        </header>
 
       <div id="method-i-cmp" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            cmp(other) &rarr; true or false
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              cmp(other) &rarr; true or false
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -213,11 +217,13 @@ ossl_ocspcid_cmp(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-cmp_issuer" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            cmp_issuer(other) &rarr; true or false
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              cmp_issuer(other) &rarr; true or false
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -243,11 +249,13 @@ ossl_ocspcid_cmp_issuer(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-hash_algorithm" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            hash_algorithm &rarr; String
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              hash_algorithm &rarr; String
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -280,10 +288,12 @@ ossl_ocspcid_get_hash_algorithm(VALUE self)
       </div>
 
       <div id="method-i-initialize_copy" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-name">initialize_copy</span><span
-            class="method-args">(p1)</span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-name">initialize_copy</span><span
+              class="method-args">(p1)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -315,11 +325,13 @@ ossl_ocspcid_initialize_copy(VALUE self, VALUE other)
       </div>
 
       <div id="method-i-issuer_key_hash" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            issuer_key_hash &rarr; String
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              issuer_key_hash &rarr; String
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -348,11 +360,13 @@ ossl_ocspcid_get_issuer_key_hash(VALUE self)
       </div>
 
       <div id="method-i-issuer_name_hash" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            issuer_name_hash &rarr; String
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              issuer_name_hash &rarr; String
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -381,11 +395,13 @@ ossl_ocspcid_get_issuer_name_hash(VALUE self)
       </div>
 
       <div id="method-i-serial" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            serial &rarr; Integer
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              serial &rarr; Integer
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -410,11 +426,13 @@ ossl_ocspcid_get_serial(VALUE self)
       </div>
 
       <div id="method-i-to_der" class="method-detail ">
-        <div class="method-heading">
-          <span class="method-callseq">
-            to_der &rarr; String
-          </span>
-          <span class="method-click-advice">click to toggle source</span>
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              to_der &rarr; String
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
         </div>
 
         <div class="method-description">
@@ -454,7 +472,7 @@ ossl_ocspcid_to_der(VALUE self)
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="https://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.2.
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.5.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 
