@@ -680,10 +680,11 @@ static VALUE ossl_ec_group_eql(VALUE a, VALUE b)
     GetECGroup(a, group1);
     GetECGroup(b, group2);
 
-    if (EC_GROUP_cmp(group1, group2, ossl_bn_ctx) == 1)
-       return Qfalse;
-
-    return Qtrue;
+    switch (EC_GROUP_cmp(group1, group2, ossl_bn_ctx)) {
+    case 0: return Qtrue;
+    case 1: return Qfalse;
+    default: ossl_raise(eEC_GROUP, "EC_GROUP_cmp");
+    }
 }
 
 /*
@@ -1244,10 +1245,13 @@ static VALUE ossl_ec_point_eql(VALUE a, VALUE b)
     GetECPoint(b, point2);
     GetECGroup(group_v1, group);
 
-    if (EC_POINT_cmp(group, point1, point2, ossl_bn_ctx) == 1)
-        return Qfalse;
+    switch (EC_POINT_cmp(group, point1, point2, ossl_bn_ctx)) {
+    case 0: return Qtrue;
+    case 1: return Qfalse;
+    default: ossl_raise(eEC_POINT, "EC_POINT_cmp");
+    }
 
-    return Qtrue;
+    UNREACHABLE;
 }
 
 /*
@@ -1265,7 +1269,7 @@ static VALUE ossl_ec_point_is_at_infinity(VALUE self)
     switch (EC_POINT_is_at_infinity(group, point)) {
     case 1: return Qtrue;
     case 0: return Qfalse;
-    default: ossl_raise(cEC_POINT, "EC_POINT_is_at_infinity");
+    default: ossl_raise(eEC_POINT, "EC_POINT_is_at_infinity");
     }
 
     UNREACHABLE;
@@ -1286,7 +1290,7 @@ static VALUE ossl_ec_point_is_on_curve(VALUE self)
     switch (EC_POINT_is_on_curve(group, point, ossl_bn_ctx)) {
     case 1: return Qtrue;
     case 0: return Qfalse;
-    default: ossl_raise(cEC_POINT, "EC_POINT_is_on_curve");
+    default: ossl_raise(eEC_POINT, "EC_POINT_is_on_curve");
     }
 
     UNREACHABLE;
@@ -1309,7 +1313,7 @@ static VALUE ossl_ec_point_make_affine(VALUE self)
     rb_warn("OpenSSL::PKey::EC::Point#make_affine! is deprecated");
 #if !OSSL_OPENSSL_PREREQ(3, 0, 0)
     if (EC_POINT_make_affine(group, point, ossl_bn_ctx) != 1)
-        ossl_raise(cEC_POINT, "EC_POINT_make_affine");
+        ossl_raise(eEC_POINT, "EC_POINT_make_affine");
 #endif
 
     return self;
@@ -1328,7 +1332,7 @@ static VALUE ossl_ec_point_invert(VALUE self)
     GetECPointGroup(self, group);
 
     if (EC_POINT_invert(group, point, ossl_bn_ctx) != 1)
-        ossl_raise(cEC_POINT, "EC_POINT_invert");
+        ossl_raise(eEC_POINT, "EC_POINT_invert");
 
     return self;
 }
@@ -1346,7 +1350,7 @@ static VALUE ossl_ec_point_set_to_infinity(VALUE self)
     GetECPointGroup(self, group);
 
     if (EC_POINT_set_to_infinity(group, point) != 1)
-        ossl_raise(cEC_POINT, "EC_POINT_set_to_infinity");
+        ossl_raise(eEC_POINT, "EC_POINT_set_to_infinity");
 
     return self;
 }
