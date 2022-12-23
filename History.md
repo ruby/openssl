@@ -1,3 +1,17 @@
+Version 3.0.2
+=============
+
+Merged changes in 2.2.3. Additionally, the following issues are fixed by this
+release.
+
+Bug fixes
+---------
+
+* Fix OpenSSL::PKey::EC#check_key not working correctly on OpenSSL 3.0.
+  [[GitHub #563]](https://github.com/ruby/openssl/issues/563)
+  [[GitHub #580]](https://github.com/ruby/openssl/pull/580)
+
+
 Version 3.0.1
 =============
 
@@ -122,6 +136,21 @@ Notable changes
     [[GitHub #371]](https://github.com/ruby/openssl/issues/371)
   - `OpenSSL::Config` uses native OpenSSL API to parse config files.
     [[GitHub #342]](https://github.com/ruby/openssl/issues/342)
+
+
+Version 2.2.3
+=============
+
+Bug fixes
+---------
+
+* Fix serveral methods in OpenSSL::PKey::EC::Point attempting to raise an error
+  with an incorrect class, which would end up with a TypeError.
+  [[GitHub #570]](https://github.com/ruby/openssl/pull/570)
+* Fix OpenSSL::PKey::EC::Point#eql? and OpenSSL::PKey::EC::Group#eql?
+  incorrectly treated OpenSSL's internal errors as "not equal".
+  [[GitHub #564]](https://github.com/ruby/openssl/pull/564)
+* Fix build with LibreSSL 3.5 or later.
 
 
 Version 2.2.2
