@@ -194,9 +194,7 @@ module Test
   }
   def pend(msg = nil) $stdout.syswrite [Marshal.dump(msg.to_s)].pack("m"); exit! 0 end
 #{src}
-  class Test::Unit::Runner
-    @@stop_auto_run = true
-  end
+  Test::Unit::AutoRunner.need_auto_run = false
 eom
         args = args.dup
         args.insert((Hash === args.first ? 1 : 0), "--disable=gems", *$:.map {|l| "-I#{l}"})
