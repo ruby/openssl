@@ -24,6 +24,7 @@ jobs:
           - { os: windows-latest, ruby: head }
           - { os: windows-latest, ruby: truffleruby }
           - { os: windows-latest, ruby: truffleruby-head }
+          - { os: macos-latest,   ruby: truffleruby }
         include:
           - { os: windows-latest, ruby: ucrt }
           - { os: windows-latest, ruby: mswin }
