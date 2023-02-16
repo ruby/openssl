@@ -9,6 +9,7 @@ jobs:
       engine: cruby-truffleruby
       min_version: 2.6
   test:
+    needs: ruby-versions
     name: >-
       ${{ matrix.os }} ${{ matrix.ruby }}
     runs-on: ${{ matrix.os }}
