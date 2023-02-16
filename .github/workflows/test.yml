@@ -6,7 +6,7 @@ jobs:
   ruby-versions:
     uses: ruby/actions/.github/workflows/ruby_versions.yml@master
     with:
-      engine: cruby
+      engine: cruby-truffleruby
       min_version: 2.6
   test:
     name: >-
@@ -21,6 +21,8 @@ jobs:
         exclude:
           # uses non-standard MSYS2 OpenSSL 3 package
           - { os: windows-latest, ruby: head }
+          - { os: windows-latest, ruby: truffleruby }
+          - { os: windows-latest, ruby: truffleruby-head }
         include:
           - { os: windows-latest, ruby: ucrt }
           - { os: windows-latest, ruby: mswin }
