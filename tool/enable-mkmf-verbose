@@ -1,0 +1,24 @@
+#!/bin/sh
+
+set -eux
+
+gem_home="$(gem environment home)"
+mkmf_rb_path="$(find "${gem_home}"/../.. -name mkmf.rb)"
+
+# Backup the original file.
+cp -p "${mkmf_rb_path}" "${mkmf_rb_path}.orig"
+
+# Replace the target line to set the verbose option.
+sed -i -e 's/^V = .*/V = 1/' "${mkmf_rb_path}"
+
+# Print the difference between the original and modified file. This is useful
+# to debug when the `mkmf.rb` may change in the future. And check if the
+#`mkmf.rb` was modified. Because the `sed` command returns the exit status 0 no
+# matter it replaces successfully or not.
+if diff "${mkmf_rb_path}.orig" "${mkmf_rb_path}"; then
+  echo "error: ${mkmf_rb_path} was not modified." 1>&2
+  exit 1
+elif [ "${?}" != 1 ]; then
+  echo "error: diff was failed." 1>&2
+  exit 1
+fi

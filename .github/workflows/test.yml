@@ -42,6 +42,11 @@ jobs:
       - name: depends
         run:  bundle install
 
+      # Enable the verbose option in mkmf.rb to print the compiling commands.
+      - name: enable mkmf verbose
+        run:  tool/enable-mkmf-verbose
+        if: runner.os == 'Linux' || runner.os == 'macOS'
+
       - name: compile
         run:  rake compile -- --enable-debug
 
@@ -128,6 +133,10 @@ jobs:
 
       - name: depends
         run:  bundle install
+
+      - name: enable mkmf verbose
+        run:  tool/enable-mkmf-verbose
+        if: runner.os == 'Linux' || runner.os == 'macOS'
 
       - name: compile
         run:  rake compile -- --enable-debug --with-openssl-dir=$HOME/.openssl/${{ matrix.openssl }}
