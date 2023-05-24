@@ -44,7 +44,7 @@ jobs:
 
       # Enable the verbose option in mkmf.rb to print the compiling commands.
       - name: enable mkmf verbose
-        run:  tool/enable-mkmf-verbose
+        run:  echo "MAKEFLAGS=V=1" >> $GITHUB_ENV
         if: runner.os == 'Linux' || runner.os == 'macOS'
 
       - name: compile
@@ -135,7 +135,7 @@ jobs:
         run:  bundle install
 
       - name: enable mkmf verbose
-        run:  tool/enable-mkmf-verbose
+        run:  echo "MAKEFLAGS=V=1" >> $GITHUB_ENV
         if: runner.os == 'Linux' || runner.os == 'macOS'
 
       - name: compile
