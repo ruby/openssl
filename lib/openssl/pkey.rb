@@ -251,6 +251,18 @@ module OpenSSL::PKey
   class EC
     include OpenSSL::Marshal
 
+    CurveNameAlias = {
+      'nistp256' => 'prime256v1',
+      'nistp384' => 'secp384r1',
+      'nistp521' => 'secp521r1'
+    }.freeze
+
+    CurveNameAliasInv = {
+      'prime256v1' => 'nistp256',
+      'secp384r1' => 'nistp384',
+      'secp521r1' => 'nistp521'
+    }.freeze
+
     # :call-seq:
     #    key.dsa_sign_asn1(data) -> String
     #
