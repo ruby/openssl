@@ -18,8 +18,6 @@ dir_config("kerberos")
 
 Logging::message "=== OpenSSL for Ruby configurator ===\n"
 
-have_func("rb_io_descriptor")
-
 ##
 # Adds -DOSSL_DEBUG for compilation and some more targets when GCC is used
 # To turn it on, use: --with-debug or --enable-debug
@@ -29,6 +27,7 @@ if with_config("debug") or enable_config("debug")
 end
 $defs.push("-D""OPENSSL_SUPPRESS_DEPRECATED")
 
+have_func("rb_io_descriptor")
 have_func("rb_io_maybe_wait(0, Qnil, Qnil, Qnil)", "ruby/io.h") # Ruby 3.1
 
 Logging::message "=== Checking for system dependent stuff... ===\n"
