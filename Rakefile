@@ -33,7 +33,7 @@ task :debug_compiler do
   when 'gcc', 'clang'
     sh "#{compiler} --version"
   else
-    puts "Compiler: #{RbConfig::CONFIG['CC']}"
+    Rake.rake_output_message "Compiler: #{RbConfig::CONFIG['CC']}"
   end
 end
 
