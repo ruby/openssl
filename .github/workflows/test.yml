@@ -149,5 +149,7 @@ jobs:
       # Run only the passing tests on the FIPS mode as a temporary workaround.
       # TODO Fix other tests, and run all the tests on FIPS mode.
       - name: test on fips mode
-        run:  ruby -Ilib test/openssl/test_fips.rb
+        run:  |
+          ruby -I./lib -ropenssl \
+            -e 'Dir.glob "./test/openssl/{test_fips.rb,test_pkey.rb}", &method(:require)'
         if: matrix.fips_enabled
