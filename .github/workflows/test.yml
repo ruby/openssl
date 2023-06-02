@@ -56,7 +56,7 @@ jobs:
 
   test-openssls:
     name: >-
-      ${{ matrix.openssl }} ${{ matrix.name_extra || '' }}
+      ${{ matrix.openssl }} ${{ matrix.name-extra || '' }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -75,9 +75,9 @@ jobs:
           - libressl-3.5.3
           - libressl-3.6.1
           - libressl-3.7.0 # Development release
-        fips_enabled: [ false ]
+        fips-enabled: [ false ]
         include:
-          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.0.8, fips_enabled: true, append_configure: 'enable-fips', name_extra: 'fips' }
+          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.0.8, fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
     steps:
       - name: repo checkout
         uses: actions/checkout@v3
@@ -91,7 +91,7 @@ jobs:
             tar xf ${{ matrix.openssl }}.tar.gz && cd ${{ matrix.openssl }}
             # shared is required for 1.0.x.
             ./Configure --prefix=$HOME/.openssl/${{ matrix.openssl }} --libdir=lib \
-                shared linux-x86_64 ${{ matrix.append_configure }}
+                shared linux-x86_64 ${{ matrix.append-configure }}
             make depend
             ;;
           libressl-*)
@@ -109,22 +109,22 @@ jobs:
       - name: prepare openssl fips
         run: make install_fips
         working-directory: tmp/build-openssl/${{ matrix.openssl }}
-        if: matrix.fips_enabled
+        if: matrix.fips-enabled
 
       - name: set the open installed directory
         run: >
           sed -e "s|OPENSSL_DIR|$HOME/.openssl/${{ matrix.openssl }}|"
           test/openssl/fixtures/ssl/openssl_fips.cnf.tmpl >
           test/openssl/fixtures/ssl/openssl_fips.cnf
-        if: matrix.fips_enabled
+        if: matrix.fips-enabled
 
       - name: set openssl config file path for fips.
         run: echo "OPENSSL_CONF=$(pwd)/test/openssl/fixtures/ssl/openssl_fips.cnf" >> $GITHUB_ENV
-        if: matrix.fips_enabled
+        if: matrix.fips-enabled
 
       - name: set fips enviornment variable for testing.
         run: echo "TEST_RUBY_OPENSSL_FIPS_ENABLED=true" >> $GITHUB_ENV
-        if: matrix.fips_enabled
+        if: matrix.fips-enabled
 
       - name: load ruby
         uses: ruby/setup-ruby@v1
@@ -144,7 +144,7 @@ jobs:
       - name: test
         run:  rake test TESTOPTS="-v --no-show-detail-immediately" OSSL_MDEBUG=1
         timeout-minutes: 5
-        if: ${{ !matrix.fips_enabled }}
+        if: ${{ !matrix.fips-enabled }}
 
       # Run only the passing tests on the FIPS mode as a temporary workaround.
       # TODO Fix other tests, and run all the tests on FIPS mode.
@@ -152,4 +152,4 @@ jobs:
         run:  |
           ruby -I./lib -ropenssl \
             -e 'Dir.glob "./test/openssl/{test_fips.rb,test_pkey.rb}", &method(:require)'
-        if: matrix.fips_enabled
+        if: matrix.fips-enabled
