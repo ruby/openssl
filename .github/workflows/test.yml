@@ -64,20 +64,24 @@ jobs:
         os: [ ubuntu-latest ]
         ruby: [ "3.0" ]
         openssl:
+          # https://www.openssl.org/source/
           - openssl-1.0.2u # EOL
           - openssl-1.1.0l # EOL
-          - openssl-1.1.1t
-          - openssl-3.0.8
+          - openssl-1.1.1u
+          - openssl-3.0.9
+          - openssl-3.1.1
+          # http://www.libressl.org/releases.html
           - libressl-3.1.5 # EOL
           - libressl-3.2.7 # EOL
           - libressl-3.3.6 # EOL
           - libressl-3.4.3 # EOL
-          - libressl-3.5.3
-          - libressl-3.6.1
-          - libressl-3.7.0 # Development release
+          - libressl-3.5.3 # EOL
+          - libressl-3.6.3
+          - libressl-3.7.3
+          - libressl-3.8.0 # Development release
         fips-enabled: [ false ]
         include:
-          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.0.8, fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
+          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.0.9, fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
     steps:
       - name: repo checkout
         uses: actions/checkout@v3
