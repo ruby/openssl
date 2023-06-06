@@ -7,7 +7,7 @@ jobs:
     uses: ruby/actions/.github/workflows/ruby_versions.yml@master
     with:
       engine: cruby-truffleruby
-      min_version: 2.6
+      min_version: 2.7
   test:
     needs: ruby-versions
     name: >-
