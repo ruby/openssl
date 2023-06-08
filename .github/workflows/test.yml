@@ -47,6 +47,10 @@ jobs:
         run:  echo "MAKEFLAGS=V=1" >> $GITHUB_ENV
         if: runner.os == 'Linux' || runner.os == 'macOS'
 
+      - name: set flags to check compiler warnings.
+        run:  echo "RUBY_OPENSSL_EXTCFLAGS=-Werror" >> $GITHUB_ENV
+        if: ${{ !matrix.skip-warnings }}
+
       - name: compile
         run:  rake compile -- --enable-debug
 
@@ -141,6 +145,10 @@ jobs:
       - name: enable mkmf verbose
         run:  echo "MAKEFLAGS=V=1" >> $GITHUB_ENV
         if: runner.os == 'Linux' || runner.os == 'macOS'
+
+      - name: set flags to check compiler warnings.
+        run:  echo "RUBY_OPENSSL_EXTCFLAGS=-Werror" >> $GITHUB_ENV
+        if: ${{ !matrix.skip-warnings }}
 
       - name: compile
         run:  rake compile -- --enable-debug --with-openssl-dir=$HOME/.openssl/${{ matrix.openssl }}
