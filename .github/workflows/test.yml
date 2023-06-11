@@ -51,6 +51,12 @@ jobs:
         run:  echo "RUBY_OPENSSL_EXTCFLAGS=-Werror" >> $GITHUB_ENV
         if: ${{ !matrix.skip-warnings }}
 
+      # Enable provider search path for OpenSSL 3.0 in MSYS2.
+      # Remove when Ruby 3.2 build is updated
+      - name: enable windows provider search path
+        run: echo "OPENSSL_MODULES=$($env:RI_DEVKIT)\$($env:MSYSTEM_PREFIX)\lib\ossl-modules" >> $env:GITHUB_ENV
+        if: runner.os == 'Windows' && matrix.ruby == '3.2'
+
       - name: compile
         run:  rake compile -- --enable-debug
 
