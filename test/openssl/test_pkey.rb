@@ -27,23 +27,24 @@ class OpenSSL::TestPKey < OpenSSL::PKeyTestCase
   end
 
   def test_s_generate_parameters
-    # 512 is non-default; 1024 is used if 'dsa_paramgen_bits' is not specified
-    # with OpenSSL 1.1.0.
-    pkey = OpenSSL::PKey.generate_parameters("DSA", {
-      "dsa_paramgen_bits" => 512,
-      "dsa_paramgen_q_bits" => 256,
+    pkey = OpenSSL::PKey.generate_parameters("EC", {
+      "ec_paramgen_curve" => "secp384r1",
     })
-    assert_instance_of OpenSSL::PKey::DSA, pkey
-    assert_equal 512, pkey.p.num_bits
-    assert_equal 256, pkey.q.num_bits
-    assert_equal nil, pkey.priv_key
+    assert_instance_of OpenSSL::PKey::EC, pkey
+    assert_equal "secp384r1", pkey.group.curve_name
+    assert_equal nil, pkey.private_key
 
     # Invalid options are checked
     assert_raise(OpenSSL::PKey::PKeyError) {
-      OpenSSL::PKey.generate_parameters("DSA", "invalid" => "option")
+      OpenSSL::PKey.generate_parameters("EC", "invalid" => "option")
     }
 
     # Parameter generation callback is called
+    if openssl?(3, 0, 0, 0) && !openssl?(3, 0, 0, 6)
+      # Errors in BN_GENCB were not properly handled. This special pend is to
+      # suppress failures on Ubuntu 22.04, which uses OpenSSL 3.0.2.
+      pend "unstable test on OpenSSL 3.0.[0-5]"
+    end
     cb_called = []
     assert_raise(RuntimeError) {
       OpenSSL::PKey.generate_parameters("DSA") { |*args|
@@ -59,14 +60,13 @@ class OpenSSL::TestPKey < OpenSSL::PKeyTestCase
       # DSA key pair cannot be generated without parameters
       OpenSSL::PKey.generate_key("DSA")
     }
-    pkey_params = OpenSSL::PKey.generate_parameters("DSA", {
-      "dsa_paramgen_bits" => 512,
-      "dsa_paramgen_q_bits" => 256,
+    pkey_params = OpenSSL::PKey.generate_parameters("EC", {
+      "ec_paramgen_curve" => "secp384r1",
     })
     pkey = OpenSSL::PKey.generate_key(pkey_params)
-    assert_instance_of OpenSSL::PKey::DSA, pkey
-    assert_equal 512, pkey.p.num_bits
-    assert_not_equal nil, pkey.priv_key
+    assert_instance_of OpenSSL::PKey::EC, pkey
+    assert_equal "secp384r1", pkey.group.curve_name
+    assert_not_equal nil, pkey.private_key
   end
 
   def test_hmac_sign_verify
@@ -82,6 +82,9 @@ class OpenSSL::TestPKey < OpenSSL::PKeyTestCase
   end
 
   def test_ed25519
+    # https://github.com/openssl/openssl/issues/20758
+    pend('Not supported on FIPS mode enabled') if OpenSSL.fips_mode
+
     # Test vector from RFC 8032 Section 7.1 TEST 2
     priv_pem = <<~EOF
     -----BEGIN PRIVATE KEY-----
@@ -145,6 +148,8 @@ class OpenSSL::TestPKey < OpenSSL::PKeyTestCase
   end
 
   def test_x25519
+    pend('Not supported on FIPS mode enabled') if OpenSSL.fips_mode
+
     # Test vector from RFC 7748 Section 6.1
     alice_pem = <<~EOF
     -----BEGIN PRIVATE KEY-----
@@ -189,5 +194,30 @@ class OpenSSL::TestPKey < OpenSSL::PKeyTestCase
     assert_raise(OpenSSL::PKey::PKeyError) { OpenSSL::PKey.private_new("ED25519", "xxx") }
     assert_raise(OpenSSL::PKey::PKeyError) { OpenSSL::PKey.public_new("foo123", "xxx") }
     assert_raise(OpenSSL::PKey::PKeyError) { OpenSSL::PKey.public_new("ED25519", "xxx") }
+  end
+
+  def test_compare?
+    pend('Not supported on FIPS mode enabled') if OpenSSL.fips_mode
+
+    key1 = Fixtures.pkey("rsa1024")
+    key2 = Fixtures.pkey("rsa1024")
+    key3 = Fixtures.pkey("rsa2048")
+    key4 = Fixtures.pkey("dh-1")
+
+    assert_equal(true, key1.compare?(key2))
+    assert_equal(true, key1.public_key.compare?(key2))
+    assert_equal(true, key2.compare?(key1))
+    assert_equal(true, key2.public_key.compare?(key1))
+
+    assert_equal(false, key1.compare?(key3))
+
+    assert_raise(TypeError) do
+      key1.compare?(key4)
+    end
+  end
+
+  def test_to_text
+    rsa = Fixtures.pkey("rsa1024")
+    assert_include rsa.to_text, "publicExponent"
   end
 end

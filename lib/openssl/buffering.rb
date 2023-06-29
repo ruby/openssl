@@ -31,7 +31,7 @@ module OpenSSL::Buffering
 
       force_encoding(BINARY)
     end
-    
+
     def << string
       if string.encoding == BINARY
         super(string)
@@ -100,6 +100,15 @@ module OpenSSL::Buffering
   end
 
   public
+
+  # call-seq:
+  #   ssl.getbyte => 81
+  #
+  # Get the next 8bit byte from `ssl`.  Returns `nil` on EOF
+  def getbyte
+    byte = read(1)
+    byte && byte.unpack1("C")
+  end
 
   ##
   # Reads _size_ bytes from the stream.  If _buf_ is provided it must

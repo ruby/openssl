@@ -9,13 +9,19 @@
  */
 #include "ossl.h"
 #include <stdarg.h> /* for ossl_raise */
-#include <ruby/thread_native.h> /* for OpenSSL < 1.1.0 locks */
+
+/* OpenSSL >= 1.1.0 and LibreSSL >= 2.9.0 */
+#if defined(LIBRESSL_VERSION_NUMBER) || OPENSSL_VERSION_NUMBER >= 0x10100000
+# define HAVE_OPENSSL_110_THREADING_API
+#else
+# include <ruby/thread_native.h>
+#endif
 
 /*
  * Data Conversion
  */
 #define OSSL_IMPL_ARY2SK(name, type, expected_class, dup)	\
-STACK_OF(type) *						\
+VALUE								\
 ossl_##name##_ary2sk0(VALUE ary)				\
 {								\
     STACK_OF(type) *sk;						\
@@ -37,7 +43,7 @@ ossl_##name##_ary2sk0(VALUE ary)				\
 	x = dup(val); /* NEED TO DUP */				\
 	sk_##type##_push(sk, x);				\
     }								\
-    return sk;							\
+    return (VALUE)sk;						\
 }								\
 								\
 STACK_OF(type) *						\
@@ -262,15 +268,11 @@ ossl_to_der_if_possible(VALUE obj)
 /*
  * Errors
  */
-static VALUE
-ossl_make_error(VALUE exc, const char *fmt, va_list args)
+VALUE
+ossl_make_error(VALUE exc, VALUE str)
 {
-    VALUE str = Qnil;
     unsigned long e;
 
-    if (fmt) {
-	str = rb_vsprintf(fmt, args);
-    }
     e = ERR_peek_last_error();
     if (e) {
 	const char *msg = ERR_reason_error_string(e);
@@ -294,37 +296,48 @@ ossl_raise(VALUE exc, const char *fmt, ...)
 {
     va_list args;
     VALUE err;
-    va_start(args, fmt);
-    err = ossl_make_error(exc, fmt, args);
-    va_end(args);
-    rb_exc_raise(err);
+
+    if (fmt) {
+	va_start(args, fmt);
+	err = rb_vsprintf(fmt, args);
+	va_end(args);
+    }
+    else {
+	err = Qnil;
+    }
+
+    rb_exc_raise(ossl_make_error(exc, err));
 }
 
 void
 ossl_clear_error(void)
 {
     if (dOSSL == Qtrue) {
-	unsigned long e;
-	const char *file, *data, *errstr;
-	int line, flags;
+        unsigned long e;
+        const char *file, *data, *func, *lib, *reason;
+        char append[256] = "";
+        int line, flags;
 
-	while ((e = ERR_get_error_line_data(&file, &line, &data, &flags))) {
-	    errstr = ERR_error_string(e, NULL);
-	    if (!errstr)
-		errstr = "(null)";
+#ifdef HAVE_ERR_GET_ERROR_ALL
+        while ((e = ERR_get_error_all(&file, &line, &func, &data, &flags))) {
+#else
+        while ((e = ERR_get_error_line_data(&file, &line, &data, &flags))) {
+            func = ERR_func_error_string(e);
+#endif
+            lib = ERR_lib_error_string(e);
+            reason = ERR_reason_error_string(e);
 
-	    if (flags & ERR_TXT_STRING) {
-		if (!data)
-		    data = "(null)";
-		rb_warn("error on stack: %s (%s)", errstr, data);
-	    }
-	    else {
-		rb_warn("error on stack: %s", errstr);
-	    }
-	}
+            if (flags & ERR_TXT_STRING) {
+                if (!data)
+                    data = "(null)";
+                snprintf(append, sizeof(append), " (%s)", data);
+            }
+            rb_warn("error on stack: error:%08lX:%s:%s:%s%s", e, lib ? lib : "",
+                    func ? func : "", reason ? reason : "", append);
+        }
     }
     else {
-	ERR_clear_error();
+        ERR_clear_error();
     }
 }
 
@@ -386,7 +399,7 @@ ossl_debug_get(VALUE self)
  * call-seq:
  *   OpenSSL.debug = boolean -> boolean
  *
- * Turns on or off debug mode. With debug mode, all erros added to the OpenSSL
+ * Turns on or off debug mode. With debug mode, all errors added to the OpenSSL
  * error queue will be printed to stderr.
  */
 static VALUE
@@ -405,7 +418,11 @@ static VALUE
 ossl_fips_mode_get(VALUE self)
 {
 
-#ifdef OPENSSL_FIPS
+#if OSSL_OPENSSL_PREREQ(3, 0, 0)
+    VALUE enabled;
+    enabled = EVP_default_properties_is_fips_enabled(NULL) ? Qtrue : Qfalse;
+    return enabled;
+#elif defined(OPENSSL_FIPS)
     VALUE enabled;
     enabled = FIPS_mode() ? Qtrue : Qfalse;
     return enabled;
@@ -429,8 +446,18 @@ ossl_fips_mode_get(VALUE self)
 static VALUE
 ossl_fips_mode_set(VALUE self, VALUE enabled)
 {
-
-#ifdef OPENSSL_FIPS
+#if OSSL_OPENSSL_PREREQ(3, 0, 0)
+    if (RTEST(enabled)) {
+        if (!EVP_default_properties_enable_fips(NULL, 1)) {
+            ossl_raise(eOSSLError, "Turning on FIPS mode failed");
+        }
+    } else {
+        if (!EVP_default_properties_enable_fips(NULL, 0)) {
+            ossl_raise(eOSSLError, "Turning off FIPS mode failed");
+        }
+    }
+    return enabled;
+#elif defined(OPENSSL_FIPS)
     if (RTEST(enabled)) {
 	int mode = FIPS_mode();
 	if(!mode && !FIPS_mode_set(1)) /* turning on twice leads to an error */
@@ -497,8 +524,11 @@ print_mem_leaks(VALUE self)
     int ret;
 #endif
 
-    BN_CTX_free(ossl_bn_ctx);
-    ossl_bn_ctx = NULL;
+#ifndef HAVE_RB_EXT_RACTOR_SAFE
+    // for Ruby 2.x
+    void ossl_bn_ctx_free(void); // ossl_bn.c
+    ossl_bn_ctx_free();
+#endif
 
 #if OPENSSL_VERSION_NUMBER >= 0x10100000
     ret = CRYPTO_mem_leaks_fp(stderr);
@@ -664,7 +694,7 @@ ossl_crypto_fixed_length_secure_compare(VALUE dummy, VALUE str1, VALUE str2)
  * ahold of the key may use it unless it is encrypted.  In order to securely
  * export a key you may export it with a pass phrase.
  *
- *   cipher = OpenSSL::Cipher.new 'AES-256-CBC'
+ *   cipher = OpenSSL::Cipher.new 'aes-256-cbc'
  *   pass_phrase = 'my secure pass phrase goes here'
  *
  *   key_secure = key.export cipher, pass_phrase
@@ -772,7 +802,7 @@ ossl_crypto_fixed_length_secure_compare(VALUE dummy, VALUE str1, VALUE str2)
  * using PBKDF2. PKCS #5 v2.0 recommends at least 8 bytes for the salt,
  * the number of iterations largely depends on the hardware being used.
  *
- *   cipher = OpenSSL::Cipher.new 'AES-256-CBC'
+ *   cipher = OpenSSL::Cipher.new 'aes-256-cbc'
  *   cipher.encrypt
  *   iv = cipher.random_iv
  *
@@ -795,7 +825,7 @@ ossl_crypto_fixed_length_secure_compare(VALUE dummy, VALUE str1, VALUE str2)
  * Use the same steps as before to derive the symmetric AES key, this time
  * setting the Cipher up for decryption.
  *
- *   cipher = OpenSSL::Cipher.new 'AES-256-CBC'
+ *   cipher = OpenSSL::Cipher.new 'aes-256-cbc'
  *   cipher.decrypt
  *   cipher.iv = iv # the one generated with #random_iv
  *
@@ -830,7 +860,7 @@ ossl_crypto_fixed_length_secure_compare(VALUE dummy, VALUE str1, VALUE str2)
  *
  * First set up the cipher for encryption
  *
- *   encryptor = OpenSSL::Cipher.new 'AES-256-CBC'
+ *   encryptor = OpenSSL::Cipher.new 'aes-256-cbc'
  *   encryptor.encrypt
  *   encryptor.pkcs5_keyivgen pass_phrase, salt
  *
@@ -843,7 +873,7 @@ ossl_crypto_fixed_length_secure_compare(VALUE dummy, VALUE str1, VALUE str2)
  *
  * Use a new Cipher instance set up for decryption
  *
- *   decryptor = OpenSSL::Cipher.new 'AES-256-CBC'
+ *   decryptor = OpenSSL::Cipher.new 'aes-256-cbc'
  *   decryptor.decrypt
  *   decryptor.pkcs5_keyivgen pass_phrase, salt
  *
@@ -931,7 +961,7 @@ ossl_crypto_fixed_length_secure_compare(VALUE dummy, VALUE str1, VALUE str2)
  *   ca_key = OpenSSL::PKey::RSA.new 2048
  *   pass_phrase = 'my secure pass phrase goes here'
  *
- *   cipher = OpenSSL::Cipher.new 'AES-256-CBC'
+ *   cipher = OpenSSL::Cipher.new 'aes-256-cbc'
  *
  *   open 'ca_key.pem', 'w', 0400 do |io|
  *     io.write ca_key.export(cipher, pass_phrase)
@@ -1069,13 +1099,13 @@ ossl_crypto_fixed_length_secure_compare(VALUE dummy, VALUE str1, VALUE str2)
  *   loop do
  *     ssl_connection = ssl_server.accept
  *
- *     data = connection.gets
+ *     data = ssl_connection.gets
  *
  *     response = "I got #{data.dump}"
  *     puts response
  *
- *     connection.puts "I got #{data.dump}"
- *     connection.close
+ *     ssl_connection.puts "I got #{data.dump}"
+ *     ssl_connection.close
  *   end
  *
  * === SSL client
@@ -1126,6 +1156,10 @@ ossl_crypto_fixed_length_secure_compare(VALUE dummy, VALUE str1, VALUE str2)
 void
 Init_openssl(void)
 {
+#ifdef HAVE_RB_EXT_RACTOR_SAFE
+    rb_ext_ractor_safe(true);
+#endif
+
 #undef rb_intern
     /*
      * Init timezone info
@@ -1150,8 +1184,8 @@ Init_openssl(void)
     /*
      * Init main module
      */
-    mOSSL = rb_define_module("OpenSSL");
     rb_global_variable(&mOSSL);
+    mOSSL = rb_define_module("OpenSSL");
     rb_define_singleton_method(mOSSL, "fixed_length_secure_compare", ossl_crypto_fixed_length_secure_compare, 2);
 
     /*
@@ -1178,7 +1212,10 @@ Init_openssl(void)
      * Boolean indicating whether OpenSSL is FIPS-capable or not
      */
     rb_define_const(mOSSL, "OPENSSL_FIPS",
-#ifdef OPENSSL_FIPS
+/* OpenSSL 3 is FIPS-capable even when it is installed without fips option */
+#if OSSL_OPENSSL_PREREQ(3, 0, 0)
+                    Qtrue
+#elif defined(OPENSSL_FIPS)
 		    Qtrue
 #else
 		    Qfalse
@@ -1188,12 +1225,12 @@ Init_openssl(void)
     rb_define_module_function(mOSSL, "fips_mode", ossl_fips_mode_get, 0);
     rb_define_module_function(mOSSL, "fips_mode=", ossl_fips_mode_set, 1);
 
+    rb_global_variable(&eOSSLError);
     /*
      * Generic error,
      * common for all classes under OpenSSL module
      */
     eOSSLError = rb_define_class_under(mOSSL,"OpenSSLError",rb_eStandardError);
-    rb_global_variable(&eOSSLError);
 
     /*
      * Init debug core

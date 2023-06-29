@@ -3,18 +3,36 @@ name: CI
 on: [push, pull_request]
 
 jobs:
+  ruby-versions:
+    uses: ruby/actions/.github/workflows/ruby_versions.yml@master
+    with:
+      engine: cruby-truffleruby
+      min_version: 2.6
   test:
+    needs: ruby-versions
     name: >-
       ${{ matrix.os }} ${{ matrix.ruby }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest, macos-latest ]
-        ruby: [ head, 2.7, 2.6, 2.5, 2.4, 2.3 ]
+        # ubuntu-22.04 uses OpenSSL 3.0, ubuntu-20.04 uses OpenSSL 1.1.1
+        os: [ ubuntu-22.04, ubuntu-20.04, macos-latest, windows-latest ]
+        ruby: ${{ fromJson(needs.ruby-versions.outputs.versions) }}
+        exclude:
+          # uses non-standard MSYS2 OpenSSL 3 package
+          - { os: windows-latest, ruby: head }
+          - { os: windows-latest, ruby: truffleruby }
+          - { os: windows-latest, ruby: truffleruby-head }
+          - { os: macos-latest,   ruby: truffleruby }
+          - { os: ubuntu-20.04,   ruby: truffleruby }
+        include:
+          - { os: windows-latest, ruby: ucrt }
+          - { os: windows-latest, ruby: mswin }
+
     steps:
       - name: repo checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: load ruby
         uses: ruby/setup-ruby@v1
@@ -22,70 +40,47 @@ jobs:
           ruby-version: ${{ matrix.ruby }}
 
       - name: depends
-        run:  rake install_dependencies
+        run:  bundle install
+
+      # Enable the verbose option in mkmf.rb to print the compiling commands.
+      - name: enable mkmf verbose
+        run:  echo "MAKEFLAGS=V=1" >> $GITHUB_ENV
+        if: runner.os == 'Linux' || runner.os == 'macOS'
 
       - name: compile
         run:  rake compile -- --enable-debug
 
       - name: test
         run:  rake test TESTOPTS="-v --no-show-detail-immediately" OSSL_MDEBUG=1
-
-  test-windows:
-    name: >-
-      ${{ matrix.os }} ${{ matrix.ruby }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ windows-latest ]
-        ruby: [ mswin, mingw, 2.7, 2.6, 2.5, 2.4, 2.3 ]
-    steps:
-      - name: repo checkout
-        uses: actions/checkout@v2
-
-      - name: load ruby, install/update gcc, install openssl
-        uses: MSP-Greg/setup-ruby-pkgs@v1
-        with:
-          ruby-version: ${{ matrix.ruby }}
-          mingw: _upgrade_ openssl
-
-      - name: depends
-        run:  rake install_dependencies
-
-      # SSL_DIR is set as needed by MSP-Greg/setup-ruby-pkgs
-      # only used with mswin
-      - name: compile
-        run:  rake compile -- --enable-debug $env:SSL_DIR
-
-      - name: test
-        run:  rake test TESTOPTS="-v --no-show-detail-immediately" OSSL_MDEBUG=1
+        timeout-minutes: 5
 
   test-openssls:
     name: >-
-      ${{ matrix.openssl }}
+      ${{ matrix.openssl }} ${{ matrix.name-extra || '' }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest ]
-        ruby: [ 2.7 ]
+        ruby: [ "3.0" ]
         openssl:
-          - openssl-1.0.1u # EOL
           - openssl-1.0.2u # EOL
           - openssl-1.1.0l # EOL
-          - openssl-1.1.1g
-          # - libressl-2.3.7 # EOL
-          # - libressl-2.4.5 # EOL
-          # - libressl-2.5.5 # EOL
-          # - libressl-2.6.5 # EOL
-          # - libressl-2.7.5 # EOL
-          # - libressl-2.8.3 # EOL
-          - libressl-2.9.2 # EOL
-          - libressl-3.0.2
-          - libressl-3.1.1
+          - openssl-1.1.1t
+          - openssl-3.0.8
+          - libressl-3.1.5 # EOL
+          - libressl-3.2.7 # EOL
+          - libressl-3.3.6 # EOL
+          - libressl-3.4.3 # EOL
+          - libressl-3.5.3
+          - libressl-3.6.1
+          - libressl-3.7.0 # Development release
+        fips-enabled: [ false ]
+        include:
+          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.0.8, fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
     steps:
       - name: repo checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: prepare openssl
         run: |
@@ -95,8 +90,8 @@ jobs:
             curl -OL https://ftp.openssl.org/source/${{ matrix.openssl }}.tar.gz
             tar xf ${{ matrix.openssl }}.tar.gz && cd ${{ matrix.openssl }}
             # shared is required for 1.0.x.
-            ./Configure --prefix=$HOME/.openssl/${{ matrix.openssl }} \
-                shared linux-x86_64
+            ./Configure --prefix=$HOME/.openssl/${{ matrix.openssl }} --libdir=lib \
+                shared linux-x86_64 ${{ matrix.append-configure }}
             make depend
             ;;
           libressl-*)
@@ -111,16 +106,50 @@ jobs:
           make -j4
           make install_sw
 
+      - name: prepare openssl fips
+        run: make install_fips
+        working-directory: tmp/build-openssl/${{ matrix.openssl }}
+        if: matrix.fips-enabled
+
+      - name: set the open installed directory
+        run: >
+          sed -e "s|OPENSSL_DIR|$HOME/.openssl/${{ matrix.openssl }}|"
+          test/openssl/fixtures/ssl/openssl_fips.cnf.tmpl >
+          test/openssl/fixtures/ssl/openssl_fips.cnf
+        if: matrix.fips-enabled
+
+      - name: set openssl config file path for fips.
+        run: echo "OPENSSL_CONF=$(pwd)/test/openssl/fixtures/ssl/openssl_fips.cnf" >> $GITHUB_ENV
+        if: matrix.fips-enabled
+
+      - name: set fips enviornment variable for testing.
+        run: echo "TEST_RUBY_OPENSSL_FIPS_ENABLED=true" >> $GITHUB_ENV
+        if: matrix.fips-enabled
+
       - name: load ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
 
       - name: depends
-        run:  rake install_dependencies
+        run:  bundle install
+
+      - name: enable mkmf verbose
+        run:  echo "MAKEFLAGS=V=1" >> $GITHUB_ENV
+        if: runner.os == 'Linux' || runner.os == 'macOS'
 
       - name: compile
         run:  rake compile -- --enable-debug --with-openssl-dir=$HOME/.openssl/${{ matrix.openssl }}
 
       - name: test
         run:  rake test TESTOPTS="-v --no-show-detail-immediately" OSSL_MDEBUG=1
+        timeout-minutes: 5
+        if: ${{ !matrix.fips-enabled }}
+
+      # Run only the passing tests on the FIPS mode as a temporary workaround.
+      # TODO Fix other tests, and run all the tests on FIPS mode.
+      - name: test on fips mode
+        run:  |
+          ruby -I./lib -ropenssl \
+            -e 'Dir.glob "./test/openssl/{test_fips.rb,test_pkey.rb}", &method(:require)'
+        if: matrix.fips-enabled
