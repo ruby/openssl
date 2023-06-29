@@ -639,14 +639,18 @@ static VALUE
 ossl_pkey_initialize_private(VALUE self, VALUE type, VALUE key)
 {
     EVP_PKEY *pkey;
-    int nid;
+    const EVP_PKEY_ASN1_METHOD *ameth;
+    int pkey_id;
     size_t keylen;
 
-    nid = OBJ_sn2nid(StringValueCStr(type));
-    if(!nid) ossl_raise(ePKeyError, "unknown OID `%"PRIsVALUE"'", type);
+    StringValue(type);
+    ameth = EVP_PKEY_asn1_find_str(NULL, RSTRING_PTR(type), RSTRING_LENINT(type));
+    if (!ameth)
+        ossl_raise(ePKeyError, "algorithm %"PRIsVALUE" not found", type);
+    EVP_PKEY_asn1_get0_info(&pkey_id, NULL, NULL, NULL, NULL, ameth);
 
     keylen = RSTRING_LEN(key);
-    pkey = EVP_PKEY_new_raw_private_key(nid, NULL, (unsigned char *)RSTRING_PTR(key), keylen);
+    pkey = EVP_PKEY_new_raw_private_key(pkey_id, NULL, (unsigned char *)RSTRING_PTR(key), keylen);
     if (!pkey)
         ossl_raise(ePKeyError, "Could not parse PKey");
 
@@ -664,14 +668,18 @@ static VALUE
 ossl_pkey_initialize_public(VALUE self, VALUE type, VALUE key)
 {
     EVP_PKEY *pkey;
-    int nid;
+    const EVP_PKEY_ASN1_METHOD *ameth;
+    int pkey_id;
     size_t keylen;
 
-    nid = OBJ_sn2nid(StringValueCStr(type));
-    if(!nid) ossl_raise(ePKeyError, "unknown OID `%"PRIsVALUE"'", type);
+    StringValue(type);
+    ameth = EVP_PKEY_asn1_find_str(NULL, RSTRING_PTR(type), RSTRING_LENINT(type));
+    if (!ameth)
+        ossl_raise(ePKeyError, "algorithm %"PRIsVALUE" not found", type);
+    EVP_PKEY_asn1_get0_info(&pkey_id, NULL, NULL, NULL, NULL, ameth);
 
     keylen = RSTRING_LEN(key);
-    pkey = EVP_PKEY_new_raw_public_key(nid, NULL, (unsigned char *)RSTRING_PTR(key), keylen);
+    pkey = EVP_PKEY_new_raw_public_key(pkey_id, NULL, (unsigned char *)RSTRING_PTR(key), keylen);
     if (!pkey)
         ossl_raise(ePKeyError, "Could not parse PKey");
 
