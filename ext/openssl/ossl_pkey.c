@@ -715,25 +715,6 @@ ossl_pkey_inspect(VALUE self)
 }
 
 /*
- *  call-seq:
- *     key.private? => true or false
- *
- *  Returns whether this PKey instance has a private key. The private key can
- *  be retrieved with PKey#private_to_{der,pem,raw}.
- */
-static VALUE ossl_pkey_is_private(VALUE self)
-{
-    EVP_PKEY *pkey;
-    size_t len;
-
-    GetPKey(self, pkey);
-    len = EVP_PKEY_size(pkey);
-    unsigned char str[len];
-
-    return EVP_PKEY_get_raw_private_key(pkey, str, &len) == 1 ? Qtrue : Qfalse;
-}
-
-/*
  * call-seq:
  *    pkey.to_text -> string
  *
@@ -932,25 +913,6 @@ ossl_pkey_export_spki(VALUE self, int to_der)
 	}
     }
     return ossl_membio2str(bio);
-}
-
-/*
- *  call-seq:
- *     key.public? => true or false
- *
- *  Returns whether this PKey instance has a public key. The public key can
- *  be retrieved with PKey#public_to_{der,pem,raw}.
- */
-static VALUE ossl_pkey_is_public(VALUE self)
-{
-    EVP_PKEY *pkey;
-    size_t len;
-
-    GetPKey(self, pkey);
-    len = EVP_PKEY_size(pkey);
-    unsigned char str[len];
-
-    return EVP_PKEY_get_raw_public_key(pkey, str, &len) == 1 ? Qtrue : Qfalse;
 }
 
 /*
@@ -1751,12 +1713,10 @@ Init_ossl_pkey(void)
 #endif
     rb_define_method(cPKey, "oid", ossl_pkey_oid, 0);
     rb_define_method(cPKey, "inspect", ossl_pkey_inspect, 0);
-    rb_define_method(cPKey, "private?", ossl_pkey_is_private, 0);
     rb_define_method(cPKey, "to_text", ossl_pkey_to_text, 0);
     rb_define_method(cPKey, "private_to_der", ossl_pkey_private_to_der, -1);
     rb_define_method(cPKey, "private_to_pem", ossl_pkey_private_to_pem, -1);
     rb_define_method(cPKey, "private_to_raw", ossl_pkey_private_to_raw, 0);
-    rb_define_method(cPKey, "public?", ossl_pkey_is_public, 0);
     rb_define_method(cPKey, "public_to_der", ossl_pkey_public_to_der, 0);
     rb_define_method(cPKey, "public_to_pem", ossl_pkey_public_to_pem, 0);
     rb_define_method(cPKey, "public_to_raw", ossl_pkey_public_to_raw, 0);
