@@ -638,10 +638,15 @@ ossl_pkey_initialize_copy(VALUE self, VALUE other)
 static VALUE
 ossl_pkey_initialize_private(VALUE self, VALUE type, VALUE key)
 {
+
     EVP_PKEY *pkey;
     const EVP_PKEY_ASN1_METHOD *ameth;
     int pkey_id;
     size_t keylen;
+
+#ifndef HAVE_EVP_PKEY_NEW_RAW_PRIVATE_KEY
+    ossl_raise(ePKeyError, "EVP_PKEY_new_raw_private_key is not implemented");
+#endif
 
     StringValue(type);
     ameth = EVP_PKEY_asn1_find_str(NULL, RSTRING_PTR(type), RSTRING_LENINT(type));
@@ -650,10 +655,11 @@ ossl_pkey_initialize_private(VALUE self, VALUE type, VALUE key)
     EVP_PKEY_asn1_get0_info(&pkey_id, NULL, NULL, NULL, NULL, ameth);
 
     keylen = RSTRING_LEN(key);
+
     pkey = EVP_PKEY_new_raw_private_key(pkey_id, NULL, (unsigned char *)RSTRING_PTR(key), keylen);
     if (!pkey)
         ossl_raise(ePKeyError, "Could not parse PKey");
-
+    
     return ossl_pkey_new(pkey);
 }
 
@@ -672,6 +678,10 @@ ossl_pkey_initialize_public(VALUE self, VALUE type, VALUE key)
     int pkey_id;
     size_t keylen;
 
+#ifndef HAVE_EVP_PKEY_NEW_RAW_PRIVATE_KEY
+    ossl_raise(ePKeyError, "EVP_PKEY_new_raw_private_key is not implemented");
+#endif
+
     StringValue(type);
     ameth = EVP_PKEY_asn1_find_str(NULL, RSTRING_PTR(type), RSTRING_LENINT(type));
     if (!ameth)
@@ -679,10 +689,11 @@ ossl_pkey_initialize_public(VALUE self, VALUE type, VALUE key)
     EVP_PKEY_asn1_get0_info(&pkey_id, NULL, NULL, NULL, NULL, ameth);
 
     keylen = RSTRING_LEN(key);
+
     pkey = EVP_PKEY_new_raw_public_key(pkey_id, NULL, (unsigned char *)RSTRING_PTR(key), keylen);
     if (!pkey)
         ossl_raise(ePKeyError, "Could not parse PKey");
-
+    
     return ossl_pkey_new(pkey);
 }
 
@@ -886,6 +897,10 @@ static VALUE ossl_pkey_private_to_raw(VALUE self)
     VALUE str;
     size_t len;
 
+#ifndef HAVE_EVP_PKEY_NEW_RAW_PRIVATE_KEY
+    ossl_raise(ePKeyError, "EVP_PKEY_get_raw_private_key is not implemented");
+#endif
+
     GetPKey(self, pkey);
     EVP_PKEY_get_raw_private_key(pkey, NULL, &len);
     str = rb_str_new(NULL, len);
@@ -958,6 +973,10 @@ static VALUE ossl_pkey_public_to_raw(VALUE self)
     EVP_PKEY *pkey;
     VALUE str;
     size_t len;
+
+#ifndef HAVE_EVP_PKEY_NEW_RAW_PRIVATE_KEY
+    ossl_raise(ePKeyError, "EVP_PKEY_get_raw_private_key is not implemented");
+#endif
 
     GetPKey(self, pkey);
     EVP_PKEY_get_raw_public_key(pkey, NULL, &len);

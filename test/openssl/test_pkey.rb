@@ -165,14 +165,23 @@ class OpenSSL::TestPKey < OpenSSL::PKeyTestCase
     assert_equal alice_pem, alice.private_to_pem
     assert_equal bob_pem, bob.public_to_pem
     assert_equal [shared_secret].pack("H*"), alice.derive(bob)
-    assert_equal "77076d0a7318a57d3c16c17251b26645df4c2f87ebc0992ab177fba51db92c2a",
-      alice.private_to_raw.unpack1("H*")
-    assert_equal OpenSSL::PKey.private_new("X25519", alice.private_to_raw).private_to_pem,
+    begin
+      alice_private = OpenSSL::PKey.private_new("X25519", alice.private_to_raw)
+      bob_public = OpenSSL::PKey.public_new("X25519", bob.public_to_raw)
+      alice_private_raw = alice.private_to_raw.unpack1("H*")
+      bob_public_raw = bob.public_to_raw.unpack1("H*")
+    rescue OpenSSL::PKey::PKeyError
+      # OpenSSL < 1.1.1
+      pend "EVP_PKEY_new_raw_private_key is not implemented"
+    end
+    assert_equal alice_private.private_to_pem,
       alice.private_to_pem
-    assert_equal "de9edb7d7b7dc1b4d35b61c2ece435373f8343c85b78674dadfc7e146f882b4f",
-      bob.public_to_raw.unpack1("H*")
-    assert_equal OpenSSL::PKey.public_new("X25519", bob.public_to_raw).public_to_pem,
+    assert_equal bob_public.public_to_pem,
       bob.public_to_pem
+    assert_equal "77076d0a7318a57d3c16c17251b26645df4c2f87ebc0992ab177fba51db92c2a",
+      alice_private_raw
+    assert_equal "de9edb7d7b7dc1b4d35b61c2ece435373f8343c85b78674dadfc7e146f882b4f",
+      bob_public_raw
   end
 
   def raw_initialize
