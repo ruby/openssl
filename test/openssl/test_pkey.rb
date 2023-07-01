@@ -106,18 +106,21 @@ class OpenSSL::TestPKey < OpenSSL::PKeyTestCase
     assert_instance_of OpenSSL::PKey::PKey, priv
     assert_instance_of OpenSSL::PKey::PKey, pub
     assert_equal priv_pem, priv.private_to_pem
-    assert_equal "4ccd089b28ff96da9db6c346ec114e0f5b8a319f35aba624da8cf6ed4fb8a6fb",
-      priv.private_to_raw.unpack1("H*")
-    assert_equal OpenSSL::PKey.private_new("ED25519", priv.private_to_raw).private_to_pem,
-      priv.private_to_pem
-
     assert_equal pub_pem, priv.public_to_pem
     assert_equal pub_pem, pub.public_to_pem
-    assert_equal "3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c",
-      priv.public_to_raw.unpack1("H*")
-    assert_equal OpenSSL::PKey.public_new("ED25519", priv.public_to_raw).public_to_pem,
-      pub.public_to_pem
 
+    begin
+      assert_equal "4ccd089b28ff96da9db6c346ec114e0f5b8a319f35aba624da8cf6ed4fb8a6fb",
+        priv.private_to_raw.unpack1("H*")
+      assert_equal OpenSSL::PKey.private_new("ED25519", priv.private_to_raw).private_to_pem,
+        priv.private_to_pem
+      assert_equal "3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c",
+        priv.public_to_raw.unpack1("H*")
+      assert_equal OpenSSL::PKey.public_new("ED25519", priv.public_to_raw).public_to_pem,
+        pub.public_to_pem
+    rescue NoMethodError
+      pend "running OpenSSL version does not have raw public key support"
+    end
 
     sig = [<<~EOF.gsub(/[^0-9a-f]/, "")].pack("H*")
     92a009a9f0d4cab8720e820b5f642540
@@ -170,9 +173,9 @@ class OpenSSL::TestPKey < OpenSSL::PKeyTestCase
       bob_public = OpenSSL::PKey.public_new("X25519", bob.public_to_raw)
       alice_private_raw = alice.private_to_raw.unpack1("H*")
       bob_public_raw = bob.public_to_raw.unpack1("H*")
-    rescue OpenSSL::PKey::PKeyError
+    rescue NoMethodError
       # OpenSSL < 1.1.1
-      pend "EVP_PKEY_new_raw_private_key is not implemented"
+      pend "running OpenSSL version does not have raw public key support"
     end
     assert_equal alice_private.private_to_pem,
       alice.private_to_pem
