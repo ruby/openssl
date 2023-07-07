@@ -656,7 +656,7 @@ ossl_pkey_initialize_private(VALUE self, VALUE type, VALUE key)
 
     pkey = EVP_PKEY_new_raw_private_key(pkey_id, NULL, (unsigned char *)RSTRING_PTR(key), keylen);
     if (!pkey)
-        ossl_raise(ePKeyError, "Could not parse PKey");
+        ossl_raise(ePKeyError, "EVP_PKEY_new_raw_private_key");
     
     return ossl_pkey_new(pkey);
 }
@@ -689,7 +689,7 @@ ossl_pkey_initialize_public(VALUE self, VALUE type, VALUE key)
 
     pkey = EVP_PKEY_new_raw_public_key(pkey_id, NULL, (unsigned char *)RSTRING_PTR(key), keylen);
     if (!pkey)
-        ossl_raise(ePKeyError, "Could not parse PKey");
+        ossl_raise(ePKeyError, "EVP_PKEY_new_raw_public_key");
     
     return ossl_pkey_new(pkey);
 }
