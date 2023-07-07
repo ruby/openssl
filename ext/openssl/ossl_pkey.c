@@ -628,6 +628,7 @@ ossl_pkey_initialize_copy(VALUE self, VALUE other)
 }
 #endif
 
+#ifdef HAVE_EVP_PKEY_NEW_RAW_PRIVATE_KEY
 /*
  *  call-seq:
  *      OpenSSL::PKey.private_new(algo, string) -> PKey
@@ -635,7 +636,6 @@ ossl_pkey_initialize_copy(VALUE self, VALUE other)
  * See the OpenSSL documentation for EVP_PKEY_new_raw_private_key()
  */
 
-#ifdef HAVE_EVP_PKEY_NEW_RAW_PRIVATE_KEY
 static VALUE
 ossl_pkey_initialize_private(VALUE self, VALUE type, VALUE key)
 {
@@ -661,6 +661,7 @@ ossl_pkey_initialize_private(VALUE self, VALUE type, VALUE key)
 }
 #endif
 
+#ifdef HAVE_EVP_PKEY_NEW_RAW_PRIVATE_KEY
 /*
  *  call-seq:
  *      OpenSSL::PKey.public_new(algo, string) -> PKey
@@ -668,7 +669,6 @@ ossl_pkey_initialize_private(VALUE self, VALUE type, VALUE key)
  * See the OpenSSL documentation for EVP_PKEY_new_raw_public_key()
  */
 
-#ifdef HAVE_EVP_PKEY_NEW_RAW_PRIVATE_KEY
 static VALUE
 ossl_pkey_initialize_public(VALUE self, VALUE type, VALUE key)
 {
@@ -881,6 +881,7 @@ ossl_pkey_private_to_pem(int argc, VALUE *argv, VALUE self)
     return do_pkcs8_export(argc, argv, self, 0);
 }
 
+#ifdef HAVE_EVP_PKEY_NEW_RAW_PRIVATE_KEY
 /*
  *  call-seq:
  *     key.private_to_raw   => string
@@ -888,7 +889,6 @@ ossl_pkey_private_to_pem(int argc, VALUE *argv, VALUE self)
  *  See the OpenSSL documentation for EVP_PKEY_get_raw_private_key()
  */
 
-#ifdef HAVE_EVP_PKEY_NEW_RAW_PRIVATE_KEY
 static VALUE ossl_pkey_private_to_raw(VALUE self)
 {
     EVP_PKEY *pkey;
@@ -957,6 +957,7 @@ ossl_pkey_public_to_pem(VALUE self)
     return ossl_pkey_export_spki(self, 0);
 }
 
+#ifdef HAVE_EVP_PKEY_NEW_RAW_PRIVATE_KEY
 /*
  *  call-seq:
  *     key.public_to_raw   => string
@@ -964,7 +965,6 @@ ossl_pkey_public_to_pem(VALUE self)
  *  See the OpenSSL documentation for EVP_PKEY_get_raw_public_key()
  */
 
-#ifdef HAVE_EVP_PKEY_NEW_RAW_PRIVATE_KEY
 static VALUE ossl_pkey_public_to_raw(VALUE self)
 {
     EVP_PKEY *pkey;
