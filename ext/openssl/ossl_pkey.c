@@ -899,7 +899,8 @@ ossl_pkey_private_to_raw(VALUE self)
     size_t len;
 
     GetPKey(self, pkey);
-    EVP_PKEY_get_raw_private_key(pkey, NULL, &len);
+    if (EVP_PKEY_get_raw_private_key(pkey, NULL, &len) != 1)
+        ossl_raise(ePKeyError, "EVP_PKEY_get_raw_private_key");
     str = rb_str_new(NULL, len);
 
     if (EVP_PKEY_get_raw_private_key(pkey, (unsigned char *)RSTRING_PTR(str), &len) != 1)
@@ -975,7 +976,8 @@ static VALUE ossl_pkey_public_to_raw(VALUE self)
     size_t len;
 
     GetPKey(self, pkey);
-    EVP_PKEY_get_raw_public_key(pkey, NULL, &len);
+    if (EVP_PKEY_get_raw_public_key(pkey, NULL, &len) != 1)
+        ossl_raise(ePKeyError, "EVP_PKEY_get_raw_public_key");
     str = rb_str_new(NULL, len);
 
     if (EVP_PKEY_get_raw_public_key(pkey, (unsigned char *)RSTRING_PTR(str), &len) != 1)
