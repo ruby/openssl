@@ -646,6 +646,7 @@ ossl_pkey_initialize_private(VALUE self, VALUE type, VALUE key)
     size_t keylen;
 
     StringValue(type);
+    StringValue(key);
     ameth = EVP_PKEY_asn1_find_str(NULL, RSTRING_PTR(type), RSTRING_LENINT(type));
     if (!ameth)
         ossl_raise(ePKeyError, "algorithm %"PRIsVALUE" not found", type);
@@ -678,6 +679,7 @@ ossl_pkey_initialize_public(VALUE self, VALUE type, VALUE key)
     size_t keylen;
 
     StringValue(type);
+    StringValue(key);
     ameth = EVP_PKEY_asn1_find_str(NULL, RSTRING_PTR(type), RSTRING_LENINT(type));
     if (!ameth)
         ossl_raise(ePKeyError, "algorithm %"PRIsVALUE" not found", type);
