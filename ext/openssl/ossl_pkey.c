@@ -1728,8 +1728,8 @@ Init_ossl_pkey(void)
     rb_define_module_function(mPKey, "generate_parameters", ossl_pkey_s_generate_parameters, -1);
     rb_define_module_function(mPKey, "generate_key", ossl_pkey_s_generate_key, -1);
 #ifdef HAVE_EVP_PKEY_NEW_RAW_PRIVATE_KEY
-    rb_define_module_function(mPKey, "private_new", ossl_pkey_initialize_private, 2);
-    rb_define_module_function(mPKey, "public_new", ossl_pkey_initialize_public, 2);
+    rb_define_module_function(mPKey, "new_raw_private_key", ossl_pkey_initialize_private, 2);
+    rb_define_module_function(mPKey, "new_raw_public_key", ossl_pkey_initialize_public, 2);
 #endif
 
     rb_define_alloc_func(cPKey, ossl_pkey_alloc);
@@ -1745,12 +1745,12 @@ Init_ossl_pkey(void)
     rb_define_method(cPKey, "private_to_der", ossl_pkey_private_to_der, -1);
     rb_define_method(cPKey, "private_to_pem", ossl_pkey_private_to_pem, -1);
 #ifdef HAVE_EVP_PKEY_NEW_RAW_PRIVATE_KEY
-    rb_define_method(cPKey, "private_to_raw", ossl_pkey_private_to_raw, 0);
+    rb_define_method(cPKey, "raw_private_key", ossl_pkey_private_to_raw, 0);
 #endif
     rb_define_method(cPKey, "public_to_der", ossl_pkey_public_to_der, 0);
     rb_define_method(cPKey, "public_to_pem", ossl_pkey_public_to_pem, 0);
 #ifdef HAVE_EVP_PKEY_NEW_RAW_PRIVATE_KEY
-    rb_define_method(cPKey, "public_to_raw", ossl_pkey_public_to_raw, 0);
+    rb_define_method(cPKey, "raw_public_key", ossl_pkey_public_to_raw, 0);
 #endif
     rb_define_method(cPKey, "compare?", ossl_pkey_compare, 1);
 
