@@ -891,7 +891,8 @@ ossl_pkey_private_to_pem(int argc, VALUE *argv, VALUE self)
  *  See the OpenSSL documentation for EVP_PKEY_get_raw_private_key()
  */
 
-static VALUE ossl_pkey_private_to_raw(VALUE self)
+static VALUE
+ossl_pkey_private_to_raw(VALUE self)
 {
     EVP_PKEY *pkey;
     VALUE str;
