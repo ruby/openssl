@@ -310,12 +310,6 @@ module OpenSSL::PKey
   end
   end
 
-  class PKey
-    def self._load(string)
-      OpenSSL::PKey.read(string)
-    end
-  end
-
   class RSA
     include OpenSSL::Marshal
 
