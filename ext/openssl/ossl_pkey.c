@@ -639,7 +639,6 @@ ossl_pkey_initialize_copy(VALUE self, VALUE other)
 static VALUE
 ossl_pkey_new_raw_private_key(VALUE self, VALUE type, VALUE key)
 {
-
     EVP_PKEY *pkey;
     const EVP_PKEY_ASN1_METHOD *ameth;
     int pkey_id;
@@ -657,7 +656,7 @@ ossl_pkey_new_raw_private_key(VALUE self, VALUE type, VALUE key)
     pkey = EVP_PKEY_new_raw_private_key(pkey_id, NULL, (unsigned char *)RSTRING_PTR(key), keylen);
     if (!pkey)
         ossl_raise(ePKeyError, "EVP_PKEY_new_raw_private_key");
-    
+
     return ossl_pkey_new(pkey);
 }
 #endif
@@ -690,7 +689,7 @@ ossl_pkey_new_raw_public_key(VALUE self, VALUE type, VALUE key)
     pkey = EVP_PKEY_new_raw_public_key(pkey_id, NULL, (unsigned char *)RSTRING_PTR(key), keylen);
     if (!pkey)
         ossl_raise(ePKeyError, "EVP_PKEY_new_raw_public_key");
-    
+
     return ossl_pkey_new(pkey);
 }
 #endif
@@ -969,7 +968,8 @@ ossl_pkey_public_to_pem(VALUE self)
  *  See the OpenSSL documentation for EVP_PKEY_get_raw_public_key()
  */
 
-static VALUE ossl_pkey_raw_public_key(VALUE self)
+static VALUE
+ossl_pkey_raw_public_key(VALUE self)
 {
     EVP_PKEY *pkey;
     VALUE str;
@@ -991,7 +991,6 @@ static VALUE ossl_pkey_raw_public_key(VALUE self)
 
 /*
  *  call-seq:
- *      pkey.sign(digest, data) -> String
  *      pkey.compare?(another_pkey) -> true | false
  *
  * Used primarily to check if an OpenSSL::X509::Certificate#public_key compares to its private key.
@@ -1744,12 +1743,10 @@ Init_ossl_pkey(void)
     rb_define_method(cPKey, "to_text", ossl_pkey_to_text, 0);
     rb_define_method(cPKey, "private_to_der", ossl_pkey_private_to_der, -1);
     rb_define_method(cPKey, "private_to_pem", ossl_pkey_private_to_pem, -1);
-#ifdef HAVE_EVP_PKEY_NEW_RAW_PRIVATE_KEY
-    rb_define_method(cPKey, "raw_private_key", ossl_pkey_raw_private_key, 0);
-#endif
     rb_define_method(cPKey, "public_to_der", ossl_pkey_public_to_der, 0);
     rb_define_method(cPKey, "public_to_pem", ossl_pkey_public_to_pem, 0);
 #ifdef HAVE_EVP_PKEY_NEW_RAW_PRIVATE_KEY
+    rb_define_method(cPKey, "raw_private_key", ossl_pkey_raw_private_key, 0);
     rb_define_method(cPKey, "raw_public_key", ossl_pkey_raw_public_key, 0);
 #endif
     rb_define_method(cPKey, "compare?", ossl_pkey_compare, 1);
