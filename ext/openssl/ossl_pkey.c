@@ -885,7 +885,7 @@ ossl_pkey_private_to_pem(int argc, VALUE *argv, VALUE self)
 #ifdef HAVE_EVP_PKEY_NEW_RAW_PRIVATE_KEY
 /*
  *  call-seq:
- *     key.raw_private_key   => string
+ *     pkey.raw_private_key   => string
  *
  *  See the OpenSSL documentation for EVP_PKEY_get_raw_private_key()
  */
@@ -963,7 +963,7 @@ ossl_pkey_public_to_pem(VALUE self)
 #ifdef HAVE_EVP_PKEY_NEW_RAW_PRIVATE_KEY
 /*
  *  call-seq:
- *     key.raw_public_key   => string
+ *     pkey.raw_public_key   => string
  *
  *  See the OpenSSL documentation for EVP_PKEY_get_raw_public_key()
  */
