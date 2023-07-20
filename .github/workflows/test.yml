@@ -51,6 +51,12 @@ jobs:
         run:  echo "RUBY_OPENSSL_EXTCFLAGS=-Werror" >> $GITHUB_ENV
         if: ${{ !matrix.skip-warnings }}
 
+      # A temporary workaround to pass the CI case.
+      # https://github.com/ruby/openssl/issues/650
+      - name: remove openssl 3 include directory
+        run:  rm -rfv "$(brew --prefix openssl@3)/include"
+        if: matrix.os == 'macos-latest' && matrix.ruby == 'truffleruby-head'
+
       # Enable provider search path for OpenSSL 3.0 in MSYS2.
       # Remove when Ruby 3.2 build is updated
       - name: enable windows provider search path
