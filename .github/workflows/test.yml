@@ -92,6 +92,7 @@ jobs:
         fips-enabled: [ false ]
         include:
           - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.0.9, fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
+          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.1.1, fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
     steps:
       - name: repo checkout
         uses: actions/checkout@v3
