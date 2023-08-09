@@ -93,17 +93,28 @@ jobs:
         include:
           - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.0.10, fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
           - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.1.2, fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
+          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-head, git: 'git://git.openssl.org/openssl.git', branch: 'master' }
+          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-head, git: 'git://git.openssl.org/openssl.git', branch: 'master', fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
     steps:
       - name: repo checkout
         uses: actions/checkout@v3
 
       - name: prepare openssl
         run: |
+          # Enable Bash debugging option temporarily for debugging use.
+          set -x
           mkdir -p tmp/build-openssl && cd tmp/build-openssl
           case ${{ matrix.openssl }} in
           openssl-*)
-            curl -OL https://ftp.openssl.org/source/${{ matrix.openssl }}.tar.gz
-            tar xf ${{ matrix.openssl }}.tar.gz && cd ${{ matrix.openssl }}
+            if [ -z "${{ matrix.git }}" ]; then
+              curl -OL https://ftp.openssl.org/source/${{ matrix.openssl }}.tar.gz
+              tar xf ${{ matrix.openssl }}.tar.gz && cd ${{ matrix.openssl }}
+            else
+              git clone -b ${{ matrix.branch }} --depth 1 ${{ matrix.git }} ${{ matrix.openssl }}
+              cd ${{ matrix.openssl }}
+              # Log the commit hash.
+              echo "Git commit: $(git rev-parse HEAD)"
+            fi
             # shared is required for 1.0.x.
             ./Configure --prefix=$HOME/.openssl/${{ matrix.openssl }} --libdir=lib \
                 shared linux-x86_64 ${{ matrix.append-configure }}
