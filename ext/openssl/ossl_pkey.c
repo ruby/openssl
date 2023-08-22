@@ -79,7 +79,7 @@ ossl_pkey_new(EVP_PKEY *pkey)
     return obj;
 }
 
-#if OSSL_OPENSSL_PREREQ(3, 0, 0)
+#if OSSL_OPENSSL_PREREQ(3, 0, 0, 0)
 # include <openssl/decoder.h>
 
 EVP_PKEY *
@@ -372,7 +372,7 @@ pkey_generate(int argc, VALUE *argv, VALUE self, int genparam)
             ossl_raise(ePKeyError, "EVP_PKEY_CTX_new");
     }
     else {
-#if OSSL_OPENSSL_PREREQ(3, 0, 0)
+#if OSSL_OPENSSL_PREREQ(3, 0, 0, 0)
         ctx = EVP_PKEY_CTX_new_from_name(NULL, StringValueCStr(alg), NULL);
         if (!ctx)
             ossl_raise(ePKeyError, "EVP_PKEY_CTX_new_from_name");
@@ -500,7 +500,7 @@ ossl_pkey_s_generate_key(int argc, VALUE *argv, VALUE self)
 void
 ossl_pkey_check_public_key(const EVP_PKEY *pkey)
 {
-#if OSSL_OPENSSL_PREREQ(3, 0, 0)
+#if OSSL_OPENSSL_PREREQ(3, 0, 0, 0)
     if (EVP_PKEY_missing_parameters(pkey))
         ossl_raise(ePKeyError, "parameters missing");
 #else
@@ -792,7 +792,7 @@ ossl_pkey_export_traditional(int argc, VALUE *argv, VALUE self, int to_der)
 	}
     }
     else {
-#if OSSL_OPENSSL_PREREQ(1, 1, 0) || OSSL_LIBRESSL_PREREQ(3, 5, 0)
+#if OSSL_OPENSSL_PREREQ(1, 1, 0, 0) || OSSL_LIBRESSL_PREREQ(3, 5, 0)
 	if (!PEM_write_bio_PrivateKey_traditional(bio, pkey, enc, NULL, 0,
 						  ossl_pem_passwd_cb,
 						  (void *)pass)) {
@@ -1109,7 +1109,7 @@ ossl_pkey_sign(int argc, VALUE *argv, VALUE self)
             rb_jump_tag(state);
         }
     }
-#if OSSL_OPENSSL_PREREQ(1, 1, 1) || OSSL_LIBRESSL_PREREQ(3, 4, 0)
+#if OSSL_OPENSSL_PREREQ(1, 1, 1, 0) || OSSL_LIBRESSL_PREREQ(3, 4, 0)
     if (EVP_DigestSign(ctx, NULL, &siglen, (unsigned char *)RSTRING_PTR(data),
                        RSTRING_LEN(data)) < 1) {
         EVP_MD_CTX_free(ctx);
@@ -1214,7 +1214,7 @@ ossl_pkey_verify(int argc, VALUE *argv, VALUE self)
             rb_jump_tag(state);
         }
     }
-#if OSSL_OPENSSL_PREREQ(1, 1, 1) || OSSL_LIBRESSL_PREREQ(3, 4, 0)
+#if OSSL_OPENSSL_PREREQ(1, 1, 1, 0) || OSSL_LIBRESSL_PREREQ(3, 4, 0)
     ret = EVP_DigestVerify(ctx, (unsigned char *)RSTRING_PTR(sig),
                            RSTRING_LEN(sig), (unsigned char *)RSTRING_PTR(data),
                            RSTRING_LEN(data));
