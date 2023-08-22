@@ -180,6 +180,7 @@ jobs:
       # TODO Fix other tests, and run all the tests on FIPS mode.
       - name: test on fips mode
         run:  |
-          ruby -I./lib -ropenssl \
+          bundle exec rake debug &&
+            ruby -I./lib -ropenssl \
             -e 'Dir.glob "./test/openssl/{test_fips.rb,test_pkey.rb}", &method(:require)'
         if: matrix.fips-enabled
