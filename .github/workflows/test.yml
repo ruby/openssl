@@ -176,9 +176,9 @@ jobs:
         timeout-minutes: 5
         if: ${{ !matrix.fips-enabled }}
 
-      # Run only the passing tests on the FIPS mode as a temporary workaround.
-      # TODO Fix other tests, and run all the tests on FIPS mode.
-      - name: test on fips mode
+      # Run only the passing tests on the FIPS module as a temporary workaround.
+      # TODO Fix other tests, and run all the tests on FIPS module.
+      - name: test on fips module
         run:  |
           bundle exec rake debug &&
             ruby -I./lib -ropenssl \
