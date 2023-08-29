@@ -25,14 +25,9 @@ if ENV["OSSL_MDEBUG"] == "1"
 end
 
 require "test/unit"
+require "core_assertions"
 require "tempfile"
 require "socket"
-
-begin
-  require_relative "../lib/core_assertions"
-rescue LoadError
-  # for ruby/ruby repository
-end
 
 if defined?(OpenSSL)
 
