@@ -205,7 +205,7 @@ eom
         assert(!abort, FailDesc[status, nil, stderr])
         #self._assertions += stdout[/^assertions=(\d+)/, 1].to_i
         begin
-          res = Marshal.load(stdout.unpack1("m"))
+          res = Marshal.load(stdout.unpack("m")[0])
         rescue => marshal_error
           ignore_stderr = nil
         end
