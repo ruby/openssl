@@ -58,10 +58,10 @@ jobs:
         if: runner.os == 'Windows' && matrix.ruby == '3.2'
 
       - name: compile
-        run:  rake compile -- --enable-debug
+        run:  rake compile
 
       - name: test
-        run:  rake test TESTOPTS="-v --no-show-detail-immediately" OSSL_MDEBUG=1
+        run:  rake test TESTOPTS="-v --no-show-detail-immediately"
         timeout-minutes: 5
 
   test-openssls:
@@ -169,10 +169,10 @@ jobs:
         if: ${{ !matrix.skip-warnings }}
 
       - name: compile
-        run:  rake compile -- --enable-debug --with-openssl-dir=$HOME/.openssl/${{ matrix.openssl }}
+        run:  rake compile -- --with-openssl-dir=$HOME/.openssl/${{ matrix.openssl }}
 
       - name: test
-        run:  rake test TESTOPTS="-v --no-show-detail-immediately" OSSL_MDEBUG=1
+        run:  rake test TESTOPTS="-v --no-show-detail-immediately"
         timeout-minutes: 5
         if: ${{ !matrix.fips-enabled }}
 
