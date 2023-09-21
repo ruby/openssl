@@ -32,7 +32,7 @@ jobs:
 
     steps:
       - name: repo checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: load ruby
         uses: ruby/setup-ruby@v1
@@ -97,7 +97,7 @@ jobs:
           - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-head, git: 'git://git.openssl.org/openssl.git', branch: 'master', fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
     steps:
       - name: repo checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: prepare openssl
         run: |
