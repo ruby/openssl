@@ -41,7 +41,7 @@
     <div id="search-field-wrapper">
       <input id="search-field" role="combobox" aria-label="Search"
              aria-autocomplete="list" aria-controls="search-results"
-             type="text" name="search" placeholder="Search" spellcheck="false"
+             type="text" name="search" placeholder="Search (/) for a class, method, ..." spellcheck="false"
              title="Type to search, Up and Down to navigate, Enter to load">
     </div>
 
@@ -191,14 +191,9 @@
         <div class="method-description">
           <p>Return the hash value computed with <em>name</em> <a href="Digest.html"><code>Digest</code></a>. <em>name</em> is either the long name or short name of a supported digest algorithm.</p>
 
-<h3 id="method-c-digest-label-Examples">Examples<span><a href="#method-c-digest-label-Examples">&para;</a> <a href="#top">&uarr;</a></span></h3>
+<h3 id="method-c-digest-label-Example">Example<span><a href="#method-c-digest-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
 <pre class="ruby"><span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">digest</span>(<span class="ruby-string">&quot;SHA256&quot;</span>, <span class="ruby-string">&quot;abc&quot;</span>)
-</pre>
-
-<p>which is equivalent to:</p>
-
-<pre class="ruby"><span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">digest</span>(<span class="ruby-string">&#39;SHA256&#39;</span>, <span class="ruby-string">&quot;abc&quot;</span>)
 </pre>
             <div class="method-calls-super">
               Calls superclass method
@@ -206,7 +201,7 @@
             </div>
 
           <div class="method-source-code" id="digest-source">
-            <pre><span class="ruby-comment"># File lib/openssl/digest.rb, line 29</span>
+            <pre><span class="ruby-comment"># File lib/openssl/digest.rb, line 25</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier ruby-title">digest</span>(<span class="ruby-identifier">name</span>, <span class="ruby-identifier">data</span>)
   <span class="ruby-keyword">super</span>(<span class="ruby-identifier">data</span>, <span class="ruby-identifier">name</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -281,23 +276,10 @@ ossl_digest_initialize(int argc, VALUE *argv, VALUE self)
       <div id="method-i-3C-3C" class="method-detail method-alias">
         <div class="method-header">
           <div class="method-heading">
-            <span class="method-name">&lt;&lt;</span><span
-              class="method-args">(p1)</span>
+            <span class="method-name">&lt;&lt;</span>
           </div>
         </div>
 
-        <div class="method-description">
-          <p>Not every message digest can be computed in one single pass. If a message digest is to be computed from several subsequent sources, then each may be passed individually to the <a href="Digest.html"><code>Digest</code></a> instance.</p>
-
-<h3 id="method-i-3C-3C-label-Example">Example<span><a href="#method-i-3C-3C-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
-
-<pre class="ruby"><span class="ruby-identifier">digest</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&#39;SHA256&#39;</span>)
-<span class="ruby-identifier">digest</span>.<span class="ruby-identifier">update</span>(<span class="ruby-string">&#39;First input&#39;</span>)
-<span class="ruby-identifier">digest</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-string">&#39;Second input&#39;</span> <span class="ruby-comment"># equivalent to digest.update(&#39;Second input&#39;)</span>
-<span class="ruby-identifier">result</span> = <span class="ruby-identifier">digest</span>.<span class="ruby-identifier">digest</span>
-</pre>
-
-        </div>
 
 
         <div class="aliases">

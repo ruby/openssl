@@ -42,7 +42,7 @@
     <div id="search-field-wrapper">
       <input id="search-field" role="combobox" aria-label="Search"
              aria-autocomplete="list" aria-controls="search-results"
-             type="text" name="search" placeholder="Search" spellcheck="false"
+             type="text" name="search" placeholder="Search (/) for a class, method, ..." spellcheck="false"
              title="Type to search, Up and Down to navigate, Enter to load">
     </div>
 
@@ -166,6 +166,10 @@
   <li><code><a href="./OpenSSL/PKey/RSA.html">RSA</a></code>
   <li><code><a href="./OpenSSL/PKey/RSAError.html">RSAError</a></code>
   </ul></details>
+  <li><details><summary><code><a href="./OpenSSL/Provider.html">Provider</a></code></summary>
+  <ul class="link-list">
+  <li><code><a href="./OpenSSL/Provider/ProviderError.html">ProviderError</a></code>
+  </ul></details>
   <li><details><summary><code><a href="./OpenSSL/Random.html">Random</a></code></summary>
   <ul class="link-list">
   <li><code><a href="./OpenSSL/Random/RandomError.html">RandomError</a></code>
@@ -236,20 +240,81 @@
 
 <p><a href="https://github.com/ruby/openssl/actions?workflow=CI"><img src="https://github.com/ruby/openssl/workflows/CI/badge.svg"></a></p>
 
-<p><a href="OpenSSL.html"><code>OpenSSL</code></a> provides SSL, TLS and general purpose cryptography. It wraps the <a href="OpenSSL.html"><code>OpenSSL</code></a> library.</p>
+<p><strong>OpenSSL for Ruby</strong> provides access to SSL/TLS and general-purpose cryptography based on the <a href="OpenSSL.html"><code>OpenSSL</code></a> library.</p>
+
+<p><a href="OpenSSL.html"><code>OpenSSL</code></a> for Ruby is sometimes referred to as <strong>openssl</strong> in all lowercase or <strong>Ruby/OpenSSL</strong> for disambiguation.</p>
+
+<h2 id="label-Compatibility+and+maintenance+policy">Compatibility and maintenance policy<span><a href="#label-Compatibility+and+maintenance+policy">&para;</a> <a href="#top">&uarr;</a></span></h2>
+
+<p><a href="OpenSSL.html"><code>OpenSSL</code></a> for Ruby is released as a RubyGems gem. At the same time, it is part of the standard library of Ruby. This is called a <a href="https://docs.ruby-lang.org/en/master/standard_library_rdoc.html">default gem</a>.</p>
+
+<p>Each stable branch of <a href="OpenSSL.html"><code>OpenSSL</code></a> for Ruby will remain supported as long as it is included as a default gem in <a href="https://www.ruby-lang.org/en/downloads/branches/">supported Ruby branches</a>.</p>
+
+<table role="table">
+<thead>
+<tr>
+<th>Version</th>
+<th>Maintenance status</th>
+<th>Ruby compatibility</th>
+<th><a href="OpenSSL.html"><code>OpenSSL</code></a> compatibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>3.2.x</td>
+<td>normal maintenance (Ruby 3.3)</td>
+<td>Ruby 2.7+</td>
+<td><a href="OpenSSL.html"><code>OpenSSL</code></a> 1.0.2-3.1 (current) or LibreSSL 3.1+</td>
+</tr>
+<tr>
+<td>3.1.x</td>
+<td>normal maintenance (Ruby 3.2)</td>
+<td>Ruby 2.6+</td>
+<td><a href="OpenSSL.html"><code>OpenSSL</code></a> 1.0.2-3.1 (current) or LibreSSL 3.1+</td>
+</tr>
+<tr>
+<td>3.0.x</td>
+<td>normal maintenance (Ruby 3.1)</td>
+<td>Ruby 2.6+</td>
+<td><a href="OpenSSL.html"><code>OpenSSL</code></a> 1.0.2-3.1 (current) or LibreSSL 3.1+</td>
+</tr>
+<tr>
+<td>2.2.x</td>
+<td>security maintenance (Ruby 3.0)</td>
+<td>Ruby 2.3+</td>
+<td><a href="OpenSSL.html"><code>OpenSSL</code></a> 1.0.1-1.1.1 or LibreSSL 2.9+</td>
+</tr>
+<tr>
+<td>2.1.x</td>
+<td>end-of-life (Ruby 2.5-2.7)</td>
+<td>Ruby 2.3+</td>
+<td><a href="OpenSSL.html"><code>OpenSSL</code></a> 1.0.1-1.1.1 or LibreSSL 2.5+</td>
+</tr>
+<tr>
+<td>2.0.x</td>
+<td>end-of-life (Ruby 2.4)</td>
+<td>Ruby 2.3+</td>
+<td><a href="OpenSSL.html"><code>OpenSSL</code></a> 0.9.8-1.1.1 or LibreSSL 2.3+</td>
+</tr>
+</tbody>
+</table>
 
 <h2 id="label-Installation">Installation<span><a href="#label-Installation">&para;</a> <a href="#top">&uarr;</a></span></h2>
 
-<p>The openssl gem is available at <a href="https://rubygems.org/gems/openssl">rubygems.org</a>. You can install with:</p>
+<blockquote>
+<p><strong>Note</strong> The openssl gem is included with Ruby by default, but you may wish to upgrade it to a newer version available at <a href="https://rubygems.org/gems/openssl">rubygems.org</a>.</p>
+</blockquote>
+
+<p>To upgrade it, you can use RubyGems:</p>
 
 <pre class="ruby"><span class="ruby-identifier">gem</span> <span class="ruby-identifier">install</span> <span class="ruby-identifier">openssl</span>
 </pre>
 
-<p>You may need to specify the path where <a href="OpenSSL.html"><code>OpenSSL</code></a> is installed.</p>
+<p>In some cases, it may be necessary to specify the path to the installation directory of the <a href="OpenSSL.html"><code>OpenSSL</code></a> library.</p>
 
 <pre>gem install openssl -- --with-openssl-dir=/opt/openssl</pre>
 
-<p>Alternatively, you can install the gem with <code>bundler</code>:</p>
+<p>Alternatively, you can install the gem with Bundler:</p>
 
 <pre class="ruby"><span class="ruby-comment"># Gemfile</span>
 <span class="ruby-identifier">gem</span> <span class="ruby-string">&#39;openssl&#39;</span>
@@ -257,19 +322,13 @@
 <span class="ruby-identifier">gem</span> <span class="ruby-string">&#39;openssl&#39;</span>, <span class="ruby-value">git:</span> <span class="ruby-string">&#39;https://github.com/ruby/openssl&#39;</span>
 </pre>
 
-<p>After doing <code>bundle install</code>, you should have the gem installed in your bundle.</p>
+<p>After running <code>bundle install</code>, you should have the gem installed in your bundle.</p>
 
 <h2 id="label-Usage">Usage<span><a href="#label-Usage">&para;</a> <a href="#top">&uarr;</a></span></h2>
 
 <p>Once installed, you can require “openssl” in your application.</p>
 
 <pre class="ruby"><span class="ruby-identifier">require</span> <span class="ruby-string">&quot;openssl&quot;</span>
-</pre>
-
-<p><strong>NOTE</strong>: If you are using Ruby 2.3 (and not Bundler), you <strong>must</strong> activate the gem version of openssl, otherwise the default gem packaged with the Ruby installation will be used:</p>
-
-<pre class="ruby"><span class="ruby-identifier">gem</span> <span class="ruby-string">&quot;openssl&quot;</span>
-<span class="ruby-identifier">require</span> <span class="ruby-string">&quot;openssl&quot;</span>
 </pre>
 
 <h2 id="label-Documentation">Documentation<span><a href="#label-Documentation">&para;</a> <a href="#top">&uarr;</a></span></h2>

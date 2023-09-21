@@ -41,7 +41,7 @@
     <div id="search-field-wrapper">
       <input id="search-field" role="combobox" aria-label="Search"
              aria-autocomplete="list" aria-controls="search-results"
-             type="text" name="search" placeholder="Search" spellcheck="false"
+             type="text" name="search" placeholder="Search (/) for a class, method, ..." spellcheck="false"
              title="Type to search, Up and Down to navigate, Enter to load">
     </div>
 
@@ -125,7 +125,7 @@
         <h3>Constants</h3>
       </header>
       <dl>
-        <dt id="DEFAULT_2048">DEFAULT_2048
+        <dt id="DH_ffdhe2048">DH_ffdhe2048
         <dd>
         <dt id="METHODS">METHODS
         <dd><p>The list of available SSL/TLS methods. This constant is only provided for backwards compatibility.</p>
@@ -913,15 +913,10 @@ ossl_sslctx_flush_sessions(int argc, VALUE *argv, VALUE self)
       <div id="method-i-freeze" class="method-detail method-alias">
         <div class="method-header">
           <div class="method-heading">
-            <span class="method-name">freeze</span><span
-              class="method-args">()</span>
+            <span class="method-name">freeze</span>
           </div>
         </div>
 
-        <div class="method-description">
-          <p>This method is called automatically when a new <a href="SSLSocket.html"><code>SSLSocket</code></a> is created. However, it is not thread-safe and must be called before creating <a href="SSLSocket.html"><code>SSLSocket</code></a> objects in a multi-threaded program.</p>
-
-        </div>
 
 
         <div class="aliases">
@@ -1560,9 +1555,9 @@ ossl_sslctx_setup(VALUE self)
     if (ca_path &amp;&amp; !SSL_CTX_load_verify_dir(ctx, ca_path))
         ossl_raise(eSSLError, &quot;SSL_CTX_load_verify_dir&quot;);
 #else
-    if(ca_file || ca_path){
+    if (ca_file || ca_path) {
         if (!SSL_CTX_load_verify_locations(ctx, ca_file, ca_path))
-            rb_warning(&quot;can&#39;t set verify locations&quot;);
+            ossl_raise(eSSLError, &quot;SSL_CTX_load_verify_locations&quot;);
     }
 #endif
 

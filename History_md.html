@@ -41,7 +41,7 @@
     <div id="search-field-wrapper">
       <input id="search-field" role="combobox" aria-label="Search"
              aria-autocomplete="list" aria-controls="search-results"
-             type="text" name="search" placeholder="Search" spellcheck="false"
+             type="text" name="search" placeholder="Search (/) for a class, method, ..." spellcheck="false"
              title="Type to search, Up and Down to navigate, Enter to load">
     </div>
 
@@ -61,6 +61,17 @@
 
   <ul class="link-list" role="directory">
               <li>
+            <details open>
+              <summary>      <a href="#label-Version+3.2.0">Version 3.2.0</a>
+</summary>
+              <ul class="link-list" role="directory">
+                          <li>      <a href="#label-Compatibility">Compatibility</a>
+          <li>      <a href="#label-Notable+changes">Notable changes</a>
+
+              </ul>
+            </details>
+          </li>
+          <li>
             <details open>
               <summary>      <a href="#label-Version+3.1.0">Version 3.1.0</a>
 </summary>
@@ -291,6 +302,36 @@
 </nav>
 
 <main role="main" aria-label="Page History.md">
+
+<h1 id="label-Version+3.2.0">Version 3.2.0<span><a href="#label-Version+3.2.0">&para;</a> <a href="#top">&uarr;</a></span></h1>
+
+<h2 id="label-Compatibility">Compatibility<span><a href="#label-Compatibility">&para;</a> <a href="#top">&uarr;</a></span></h2>
+<ul><li>
+<p>Ruby &gt;= 2.7</p>
+</li><li>
+<p>Support for Ruby 2.6 has been removed. Note that Ruby 2.6 reached the end-of-life in 2022-04. <a href="https://github.com/ruby/openssl/pull/639">[GitHub #639]</a></p>
+</li><li>
+<p><a href="OpenSSL.html"><code>OpenSSL</code></a> &gt;= 1.0.2 or LibreSSL &gt;= 3.1</p>
+</li></ul>
+
+<h2 id="label-Notable+changes">Notable changes<span><a href="#label-Notable+changes">&para;</a> <a href="#top">&uarr;</a></span></h2>
+<ul><li>
+<p>Add a stub gemspec for JRuby, which depends on the <code>jruby-openssl</code> gem.  <a href="https://github.com/ruby/openssl/pull/598">[GitHub #598]</a></p>
+</li><li>
+<p>Add support for the FIPS module in <a href="OpenSSL.html"><code>OpenSSL</code></a> 3.0/3.1.  <a href="https://github.com/ruby/openssl/pull/608">[GitHub #608]</a></p>
+</li><li>
+<p>Rework <code>OpenSSL::PKey</code> routines for loading DER or PEM encoded keys for better  compatibility with <a href="OpenSSL.html"><code>OpenSSL</code></a> 3.0/3.1 with the FIPS module.  <a href="https://github.com/ruby/openssl/pull/615">[GitHub #615]</a>  <a href="https://github.com/ruby/openssl/pull/669">[GitHub #669]</a></p>
+</li><li>
+<p>Add <code>OpenSSL::Provider</code> module for loading and unloading <a href="OpenSSL.html"><code>OpenSSL</code></a> 3 providers.  <a href="https://github.com/ruby/openssl/pull/635">[GitHub #635]</a></p>
+</li><li>
+<p>Add <code>OpenSSL::PKey.new_raw_private_key</code>, <code>.new_raw_public_key</code>,  <code>OpenSSL::PKey::PKey#raw_private_key</code>, and <code>#raw_public_key</code> for public key  algorithms that use “raw private/public key”, such as X25519 and Ed25519.  <a href="https://github.com/ruby/openssl/pull/646">[GitHub #646]</a></p>
+</li><li>
+<p>Improve <a href="OpenSSL.html"><code>OpenSSL</code></a> error messages to include additional information when  it is available in OpenSSL’s error queue.  <a href="https://github.com/ruby/openssl/pull/648">[GitHub #648]</a></p>
+</li><li>
+<p>Change <code>OpenSSL::SSL::SSLContext#ca_file=</code> and <code>#ca_path=</code> to raise  <code>OpenSSL::SSL::SSLError</code> instead of printing a warning message.  <a href="https://github.com/ruby/openssl/pull/659">[GitHub #659]</a></p>
+</li><li>
+<p>Allow <code>OpenSSL::X509::ExtensionFactory#create_extension</code> to take OIDs in the  dotted-decimal notation.  <a href="https://github.com/ruby/openssl/pull/141">[GitHub #141]</a></p>
+</li></ul>
 
 <h1 id="label-Version+3.1.0">Version 3.1.0<span><a href="#label-Version+3.1.0">&para;</a> <a href="#top">&uarr;</a></span></h1>
 

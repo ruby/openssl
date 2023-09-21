@@ -41,7 +41,7 @@
     <div id="search-field-wrapper">
       <input id="search-field" role="combobox" aria-label="Search"
              aria-autocomplete="list" aria-controls="search-results"
-             type="text" name="search" placeholder="Search" spellcheck="false"
+             type="text" name="search" placeholder="Search (/) for a class, method, ..." spellcheck="false"
              title="Type to search, Up and Down to navigate, Enter to load">
     </div>
 
@@ -239,15 +239,16 @@ ossl_x509extfactory_create_ext(int argc, VALUE *argv, VALUE self)
     int nid;
     VALUE rconf;
     CONF *conf;
+    const char *oid_cstr = NULL;
 
     rb_scan_args(argc, argv, &quot;21&quot;, &amp;oid, &amp;value, &amp;critical);
-    StringValueCStr(oid);
     StringValue(value);
     if(NIL_P(critical)) critical = Qfalse;
 
-    nid = OBJ_ln2nid(RSTRING_PTR(oid));
-    if(!nid) nid = OBJ_sn2nid(RSTRING_PTR(oid));
-    if(!nid) ossl_raise(eX509ExtError, &quot;unknown OID `%&quot;PRIsVALUE&quot;&#39;&quot;, oid);
+    oid_cstr = StringValueCStr(oid);
+    nid = OBJ_ln2nid(oid_cstr);
+    if (nid != NID_undef)
+      oid_cstr = OBJ_nid2sn(nid);
 
     valstr = rb_str_new2(RTEST(critical) ? &quot;critical,&quot; : &quot;&quot;);
     rb_str_append(valstr, value);
@@ -258,7 +259,12 @@ ossl_x509extfactory_create_ext(int argc, VALUE *argv, VALUE self)
     rconf = rb_iv_get(self, &quot;@config&quot;);
     conf = NIL_P(rconf) ? NULL : GetConfig(rconf);
     X509V3_set_nconf(ctx, conf);
-    ext = X509V3_EXT_nconf_nid(conf, ctx, nid, RSTRING_PTR(valstr));
+
+#if OSSL_OPENSSL_PREREQ(1, 1, 0) || OSSL_IS_LIBRESSL
+    ext = X509V3_EXT_nconf(conf, ctx, oid_cstr, RSTRING_PTR(valstr));
+#else
+    ext = X509V3_EXT_nconf(conf, ctx, (char *)oid_cstr, RSTRING_PTR(valstr));
+#endif
     X509V3_set_ctx_nodb(ctx);
     if (!ext){
         ossl_raise(eX509ExtError, &quot;%&quot;PRIsVALUE&quot; = %&quot;PRIsVALUE, oid, valstr);

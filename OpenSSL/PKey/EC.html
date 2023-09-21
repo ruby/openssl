@@ -41,7 +41,7 @@
     <div id="search-field-wrapper">
       <input id="search-field" role="combobox" aria-label="Search"
              aria-autocomplete="list" aria-controls="search-results"
-             type="text" name="search" placeholder="Search" spellcheck="false"
+             type="text" name="search" placeholder="Search (/) for a class, method, ..." spellcheck="false"
              title="Type to search, Up and Down to navigate, Enter to load">
     </div>
 
@@ -376,7 +376,7 @@ ossl_ec_key_s_generate(VALUE klass, VALUE arg)
 #ifdef HAVE_EVP_PKEY_CHECK
     EVP_PKEY *pkey;
     EVP_PKEY_CTX *pctx;
-    EC_KEY *ec;
+    const EC_KEY *ec;
 
     GetPKey(self, pkey);
     GetEC(self, ec);
@@ -503,14 +503,53 @@ ossl_ec_key_s_generate(VALUE klass, VALUE arg)
         <div class="method-header">
           <div class="method-heading">
             <span class="method-callseq">
-              export([cipher, pass_phrase]) &rarr; String
+              export([cipher, password]) &rarr; String
             </span>
             <span class="method-click-advice">click to toggle source</span>
           </div>
         </div>
 
         <div class="method-description">
-          <p>Outputs the <a href="EC.html"><code>EC</code></a> key in PEM encoding.  If <em>cipher</em> and <em>pass_phrase</em> are given they will be used to encrypt the key.  <em>cipher</em> must be an <a href="../Cipher.html"><code>OpenSSL::Cipher</code></a> instance. Note that encryption will only be effective for a private key, public keys will always be encoded in plain text.</p>
+          <p>Serializes a private or public key to a PEM-encoding.</p>
+<dl class="rdoc-list label-list"><dt>When the key contains public components only
+<dd>
+<p>Serializes it into an X.509 SubjectPublicKeyInfo. The parameters <em>cipher</em> and <em>password</em> are ignored.</p>
+
+<p>A PEM-encoded key will look like:</p>
+
+<pre>-----BEGIN PUBLIC KEY-----
+[...]
+-----END PUBLIC KEY-----</pre>
+
+<p>Consider using <a href="PKey.html#method-i-public_to_pem"><code>public_to_pem</code></a> instead. This serializes the key into an X.509 SubjectPublicKeyInfo regardless of whether it is a public key or a private key.</p>
+</dd><dt>When the key contains private components, and no parameters are given
+<dd>
+<p>Serializes it into a SEC 1/RFC 5915 ECPrivateKey.</p>
+
+<p>A PEM-encoded key will look like:</p>
+
+<pre>-----BEGIN EC PRIVATE KEY-----
+[...]
+-----END EC PRIVATE KEY-----</pre>
+</dd><dt>When the key contains private components, and <em>cipher</em> and <em>password</em> are given
+<dd>
+<p>Serializes it into a SEC 1/RFC 5915 ECPrivateKey and encrypts it in OpenSSL’s traditional PEM encryption format. <em>cipher</em> must be a cipher name understood by <a href="../Cipher.html#method-c-new"><code>OpenSSL::Cipher.new</code></a> or an instance of <a href="../Cipher.html"><code>OpenSSL::Cipher</code></a>.</p>
+
+<p>An encrypted PEM-encoded key will look like:</p>
+
+<pre>-----BEGIN EC PRIVATE KEY-----
+Proc-Type: 4,ENCRYPTED
+DEK-Info: AES-128-CBC,733F5302505B34701FC41F5C0746E4C0
+
+[...]
+-----END EC PRIVATE KEY-----</pre>
+
+<p>Note that this format uses MD5 to derive the encryption key, and hence will not be available on FIPS-compliant systems.</p>
+</dd></dl>
+
+<p><strong>This method is kept for compatibility.</strong> This should only be used when the SEC 1/RFC 5915 ECPrivateKey format is required.</p>
+
+<p>Consider using <a href="PKey.html#method-i-public_to_pem"><code>public_to_pem</code></a> (X.509 SubjectPublicKeyInfo) or <a href="PKey.html#method-i-private_to_pem"><code>private_to_pem</code></a> (PKCS #8 PrivateKeyInfo or EncryptedPrivateKeyInfo) instead.</p>
 
           <div class="method-source-code" id="export-source">
             <pre>static VALUE
@@ -538,25 +577,10 @@ ossl_ec_key_export(int argc, VALUE *argv, VALUE self)
       <div id="method-i-generate_key" class="method-detail method-alias">
         <div class="method-header">
           <div class="method-heading">
-            <span class="method-name">generate_key</span><span
-              class="method-args">()</span>
+            <span class="method-name">generate_key</span>
           </div>
         </div>
 
-        <div class="method-description">
-          <p>Generates a new random private and public key.</p>
-
-<p>See also the <a href="../../OpenSSL.html"><code>OpenSSL</code></a> documentation for EC_KEY_generate_key()</p>
-
-<h3 id="method-i-generate_key-label-Example">Example<span><a href="#method-i-generate_key-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
-
-<pre class="ruby"><span class="ruby-identifier">ec</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">EC</span>.<span class="ruby-identifier">new</span>(<span class="ruby-string">&quot;prime256v1&quot;</span>)
-<span class="ruby-identifier">p</span> <span class="ruby-identifier">ec</span>.<span class="ruby-identifier">private_key</span> <span class="ruby-comment"># =&gt; nil</span>
-<span class="ruby-identifier">ec</span>.<span class="ruby-identifier">generate_key!</span>
-<span class="ruby-identifier">p</span> <span class="ruby-identifier">ec</span>.<span class="ruby-identifier">private_key</span> <span class="ruby-comment"># =&gt; #&lt;OpenSSL::BN XXXXXX&gt;</span>
-</pre>
-
-        </div>
 
 
         <div class="aliases">
@@ -836,15 +860,10 @@ ossl_ec_key_initialize_copy(VALUE self, VALUE other)
       <div id="method-i-private_key-3F" class="method-detail method-alias">
         <div class="method-header">
           <div class="method-heading">
-            <span class="method-name">private_key?</span><span
-              class="method-args">()</span>
+            <span class="method-name">private_key?</span>
           </div>
         </div>
 
-        <div class="method-description">
-          <p>Returns whether this <a href="EC.html"><code>EC</code></a> instance has a private key. The private key (<a href="../BN.html"><code>BN</code></a>) can be retrieved with <a href="EC.html#method-i-private_key"><code>EC#private_key</code></a>.</p>
-
-        </div>
 
 
         <div class="aliases">
@@ -963,15 +982,10 @@ ossl_ec_key_initialize_copy(VALUE self, VALUE other)
       <div id="method-i-public_key-3F" class="method-detail method-alias">
         <div class="method-header">
           <div class="method-heading">
-            <span class="method-name">public_key?</span><span
-              class="method-args">()</span>
+            <span class="method-name">public_key?</span>
           </div>
         </div>
 
-        <div class="method-description">
-          <p>Returns whether this <a href="EC.html"><code>EC</code></a> instance has a public key. The public key (<a href="EC/Point.html"><code>EC::Point</code></a>) can be retrieved with <a href="EC.html#method-i-public_key"><code>EC#public_key</code></a>.</p>
-
-        </div>
 
 
         <div class="aliases">
@@ -990,7 +1004,13 @@ ossl_ec_key_initialize_copy(VALUE self, VALUE other)
         </div>
 
         <div class="method-description">
-          <p>See the <a href="../../OpenSSL.html"><code>OpenSSL</code></a> documentation for i2d_ECPrivateKey_bio()</p>
+          <p>Serializes a private or public key to a DER-encoding.</p>
+
+<p>See <a href="EC.html#method-i-to_pem"><code>to_pem</code></a> for details.</p>
+
+<p><strong>This method is kept for compatibility.</strong> This should only be used when the SEC 1/RFC 5915 ECPrivateKey format is required.</p>
+
+<p>Consider using <a href="PKey.html#method-i-public_to_der"><code>public_to_der</code></a> or <a href="PKey.html#method-i-private_to_der"><code>private_to_der</code></a> instead.</p>
 
           <div class="method-source-code" id="to_der-source">
             <pre>static VALUE
@@ -1016,13 +1036,52 @@ ossl_ec_key_to_der(VALUE self)
         <div class="method-header">
           <div class="method-heading">
             <span class="method-callseq">
-              to_pem([cipher, pass_phrase]) &rarr; String
+              to_pem([cipher, password]) &rarr; String
             </span>
           </div>
         </div>
 
         <div class="method-description">
-          <p>Outputs the <a href="EC.html"><code>EC</code></a> key in PEM encoding.  If <em>cipher</em> and <em>pass_phrase</em> are given they will be used to encrypt the key.  <em>cipher</em> must be an <a href="../Cipher.html"><code>OpenSSL::Cipher</code></a> instance. Note that encryption will only be effective for a private key, public keys will always be encoded in plain text.</p>
+          <p>Serializes a private or public key to a PEM-encoding.</p>
+<dl class="rdoc-list label-list"><dt>When the key contains public components only
+<dd>
+<p>Serializes it into an X.509 SubjectPublicKeyInfo. The parameters <em>cipher</em> and <em>password</em> are ignored.</p>
+
+<p>A PEM-encoded key will look like:</p>
+
+<pre>-----BEGIN PUBLIC KEY-----
+[...]
+-----END PUBLIC KEY-----</pre>
+
+<p>Consider using <a href="PKey.html#method-i-public_to_pem"><code>public_to_pem</code></a> instead. This serializes the key into an X.509 SubjectPublicKeyInfo regardless of whether it is a public key or a private key.</p>
+</dd><dt>When the key contains private components, and no parameters are given
+<dd>
+<p>Serializes it into a SEC 1/RFC 5915 ECPrivateKey.</p>
+
+<p>A PEM-encoded key will look like:</p>
+
+<pre>-----BEGIN EC PRIVATE KEY-----
+[...]
+-----END EC PRIVATE KEY-----</pre>
+</dd><dt>When the key contains private components, and <em>cipher</em> and <em>password</em> are given
+<dd>
+<p>Serializes it into a SEC 1/RFC 5915 ECPrivateKey and encrypts it in OpenSSL’s traditional PEM encryption format. <em>cipher</em> must be a cipher name understood by <a href="../Cipher.html#method-c-new"><code>OpenSSL::Cipher.new</code></a> or an instance of <a href="../Cipher.html"><code>OpenSSL::Cipher</code></a>.</p>
+
+<p>An encrypted PEM-encoded key will look like:</p>
+
+<pre>-----BEGIN EC PRIVATE KEY-----
+Proc-Type: 4,ENCRYPTED
+DEK-Info: AES-128-CBC,733F5302505B34701FC41F5C0746E4C0
+
+[...]
+-----END EC PRIVATE KEY-----</pre>
+
+<p>Note that this format uses MD5 to derive the encryption key, and hence will not be available on FIPS-compliant systems.</p>
+</dd></dl>
+
+<p><strong>This method is kept for compatibility.</strong> This should only be used when the SEC 1/RFC 5915 ECPrivateKey format is required.</p>
+
+<p>Consider using <a href="PKey.html#method-i-public_to_pem"><code>public_to_pem</code></a> (X.509 SubjectPublicKeyInfo) or <a href="PKey.html#method-i-private_to_pem"><code>private_to_pem</code></a> (PKCS #8 PrivateKeyInfo or EncryptedPrivateKeyInfo) instead.</p>
 
         </div>
 

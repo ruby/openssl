@@ -41,7 +41,7 @@
     <div id="search-field-wrapper">
       <input id="search-field" role="combobox" aria-label="Search"
              aria-autocomplete="list" aria-controls="search-results"
-             type="text" name="search" placeholder="Search" spellcheck="false"
+             type="text" name="search" placeholder="Search (/) for a class, method, ..." spellcheck="false"
              title="Type to search, Up and Down to navigate, Enter to load">
     </div>
 
@@ -385,7 +385,17 @@ ossl_dh_initialize(int argc, VALUE *argv, VALUE self)
         </div>
 
         <div class="method-description">
-          <p>Encodes this <a href="DH.html"><code>DH</code></a> to its PEM encoding. Note that any existing per-session public/private keys will <strong>not</strong> get encoded, just the Diffie-Hellman parameters will be encoded.</p>
+          <p>Serializes the <a href="DH.html"><code>DH</code></a> parameters to a PEM-encoding.</p>
+
+<p>Note that any existing per-session public/private keys will <strong>not</strong> get encoded, just the Diffie-Hellman parameters will be encoded.</p>
+
+<p>PEM-encoded parameters will look like:</p>
+
+<pre>-----BEGIN DH PARAMETERS-----
+[...]
+-----END DH PARAMETERS-----</pre>
+
+<p>See also <a href="PKey.html#method-i-public_to_pem"><code>public_to_pem</code></a> (X.509 SubjectPublicKeyInfo) and <a href="PKey.html#method-i-private_to_pem"><code>private_to_pem</code></a> (PKCS #8 PrivateKeyInfo or EncryptedPrivateKeyInfo) for serialization with the private or public key components.</p>
 
           <div class="method-source-code" id="export-source">
             <pre>static VALUE
@@ -767,7 +777,11 @@ ossl_dh_is_public(VALUE self)
         </div>
 
         <div class="method-description">
-          <p>Encodes this <a href="DH.html"><code>DH</code></a> to its DER encoding. Note that any existing per-session public/private keys will <strong>not</strong> get encoded, just the Diffie-Hellman parameters will be encoded.</p>
+          <p>Serializes the <a href="DH.html"><code>DH</code></a> parameters to a DER-encoding</p>
+
+<p>Note that any existing per-session public/private keys will <strong>not</strong> get encoded, just the Diffie-Hellman parameters will be encoded.</p>
+
+<p>See also <a href="PKey.html#method-i-public_to_der"><code>public_to_der</code></a> (X.509 SubjectPublicKeyInfo) and <a href="PKey.html#method-i-private_to_der"><code>private_to_der</code></a> (PKCS #8 PrivateKeyInfo or EncryptedPrivateKeyInfo) for serialization with the private or public key components.</p>
 
           <div class="method-source-code" id="to_der-source">
             <pre>static VALUE
@@ -805,7 +819,17 @@ ossl_dh_to_der(VALUE self)
         </div>
 
         <div class="method-description">
-          <p>Encodes this <a href="DH.html"><code>DH</code></a> to its PEM encoding. Note that any existing per-session public/private keys will <strong>not</strong> get encoded, just the Diffie-Hellman parameters will be encoded.</p>
+          <p>Serializes the <a href="DH.html"><code>DH</code></a> parameters to a PEM-encoding.</p>
+
+<p>Note that any existing per-session public/private keys will <strong>not</strong> get encoded, just the Diffie-Hellman parameters will be encoded.</p>
+
+<p>PEM-encoded parameters will look like:</p>
+
+<pre>-----BEGIN DH PARAMETERS-----
+[...]
+-----END DH PARAMETERS-----</pre>
+
+<p>See also <a href="PKey.html#method-i-public_to_pem"><code>public_to_pem</code></a> (X.509 SubjectPublicKeyInfo) and <a href="PKey.html#method-i-private_to_pem"><code>private_to_pem</code></a> (PKCS #8 PrivateKeyInfo or EncryptedPrivateKeyInfo) for serialization with the private or public key components.</p>
 
         </div>
 
@@ -825,7 +849,17 @@ ossl_dh_to_der(VALUE self)
         </div>
 
         <div class="method-description">
-          <p>Encodes this <a href="DH.html"><code>DH</code></a> to its PEM encoding. Note that any existing per-session public/private keys will <strong>not</strong> get encoded, just the Diffie-Hellman parameters will be encoded.</p>
+          <p>Serializes the <a href="DH.html"><code>DH</code></a> parameters to a PEM-encoding.</p>
+
+<p>Note that any existing per-session public/private keys will <strong>not</strong> get encoded, just the Diffie-Hellman parameters will be encoded.</p>
+
+<p>PEM-encoded parameters will look like:</p>
+
+<pre>-----BEGIN DH PARAMETERS-----
+[...]
+-----END DH PARAMETERS-----</pre>
+
+<p>See also <a href="PKey.html#method-i-public_to_pem"><code>public_to_pem</code></a> (X.509 SubjectPublicKeyInfo) and <a href="PKey.html#method-i-private_to_pem"><code>private_to_pem</code></a> (PKCS #8 PrivateKeyInfo or EncryptedPrivateKeyInfo) for serialization with the private or public key components.</p>
 
         </div>
 

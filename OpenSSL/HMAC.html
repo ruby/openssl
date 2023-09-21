@@ -41,7 +41,7 @@
     <div id="search-field-wrapper">
       <input id="search-field" role="combobox" aria-label="Search"
              aria-autocomplete="list" aria-controls="search-results"
-             type="text" name="search" placeholder="Search" spellcheck="false"
+             type="text" name="search" placeholder="Search (/) for a class, method, ..." spellcheck="false"
              title="Type to search, Up and Down to navigate, Enter to load">
     </div>
 
@@ -330,26 +330,10 @@ ossl_hmac_initialize(VALUE self, VALUE key, VALUE digest)
       <div id="method-i-3C-3C" class="method-detail method-alias">
         <div class="method-header">
           <div class="method-heading">
-            <span class="method-name">&lt;&lt;</span><span
-              class="method-args">(p1)</span>
+            <span class="method-name">&lt;&lt;</span>
           </div>
         </div>
 
-        <div class="method-description">
-          <p>Returns <em>hmac</em> updated with the message to be authenticated. Can be called repeatedly with chunks of the message.</p>
-
-<h3 id="method-i-3C-3C-label-Example">Example<span><a href="#method-i-3C-3C-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
-
-<pre class="ruby"><span class="ruby-identifier">first_chunk</span> = <span class="ruby-string">&#39;The quick brown fox jumps &#39;</span>
-<span class="ruby-identifier">second_chunk</span> = <span class="ruby-string">&#39;over the lazy dog&#39;</span>
-
-<span class="ruby-identifier">instance</span>.<span class="ruby-identifier">update</span>(<span class="ruby-identifier">first_chunk</span>)
-<span class="ruby-comment">#=&gt; 5b9a8038a65d571076d97fe783989e52278a492a</span>
-<span class="ruby-identifier">instance</span>.<span class="ruby-identifier">update</span>(<span class="ruby-identifier">second_chunk</span>)
-<span class="ruby-comment">#=&gt; de7c9b85b8b78aa6bc8a7a36f70a90701c9db4d9</span>
-</pre>
-
-        </div>
 
 
         <div class="aliases">
@@ -526,15 +510,10 @@ ossl_hmac_copy(VALUE self, VALUE other)
       <div id="method-i-inspect" class="method-detail method-alias">
         <div class="method-header">
           <div class="method-heading">
-            <span class="method-name">inspect</span><span
-              class="method-args">()</span>
+            <span class="method-name">inspect</span>
           </div>
         </div>
 
-        <div class="method-description">
-          <p>Returns the authentication code an instance represents as a hex-encoded string.</p>
-
-        </div>
 
 
         <div class="aliases">
@@ -590,15 +569,10 @@ ossl_hmac_reset(VALUE self)
       <div id="method-i-to_s" class="method-detail method-alias">
         <div class="method-header">
           <div class="method-heading">
-            <span class="method-name">to_s</span><span
-              class="method-args">()</span>
+            <span class="method-name">to_s</span>
           </div>
         </div>
 
-        <div class="method-description">
-          <p>Returns the authentication code an instance represents as a hex-encoded string.</p>
-
-        </div>
 
 
         <div class="aliases">

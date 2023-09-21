@@ -41,7 +41,7 @@
     <div id="search-field-wrapper">
       <input id="search-field" role="combobox" aria-label="Search"
              aria-autocomplete="list" aria-controls="search-results"
-             type="text" name="search" placeholder="Search" spellcheck="false"
+             type="text" name="search" placeholder="Search (/) for a class, method, ..." spellcheck="false"
              title="Type to search, Up and Down to navigate, Enter to load">
     </div>
 
@@ -155,7 +155,7 @@
   <span class="ruby-keyword">unless</span> <span class="ruby-identifier">ctx</span>.<span class="ruby-identifier">session_id_context</span>
     <span class="ruby-comment"># see #6137 - session id may not exceed 32 bytes</span>
     <span class="ruby-identifier">prng</span> = <span class="ruby-operator">::</span><span class="ruby-constant">Random</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">$0</span>.<span class="ruby-identifier">hash</span>)
-    <span class="ruby-identifier">session_id</span> = <span class="ruby-identifier">prng</span>.<span class="ruby-identifier">bytes</span>(<span class="ruby-value">16</span>).<span class="ruby-identifier">unpack</span>(<span class="ruby-string">&#39;H*&#39;</span>)[<span class="ruby-value">0</span>]
+    <span class="ruby-identifier">session_id</span> = <span class="ruby-identifier">prng</span>.<span class="ruby-identifier">bytes</span>(<span class="ruby-value">16</span>).<span class="ruby-identifier">unpack1</span>(<span class="ruby-string">&#39;H*&#39;</span>)
     <span class="ruby-ivar">@ctx</span>.<span class="ruby-identifier">session_id_context</span> = <span class="ruby-identifier">session_id</span>
   <span class="ruby-keyword">end</span>
   <span class="ruby-ivar">@start_immediately</span> = <span class="ruby-keyword">true</span>

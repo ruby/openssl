@@ -41,7 +41,7 @@
     <div id="search-field-wrapper">
       <input id="search-field" role="combobox" aria-label="Search"
              aria-autocomplete="list" aria-controls="search-results"
-             type="text" name="search" placeholder="Search" spellcheck="false"
+             type="text" name="search" placeholder="Search (/) for a class, method, ..." spellcheck="false"
              title="Type to search, Up and Down to navigate, Enter to load">
     </div>
 
@@ -298,19 +298,46 @@ ossl_dsa_initialize(int argc, VALUE *argv, VALUE self)
         </div>
 
         <div class="method-description">
-          <p>Encodes this <a href="DSA.html"><code>DSA</code></a> to its PEM encoding.</p>
+          <p>Serializes a private or public key to a PEM-encoding.</p>
+<dl class="rdoc-list label-list"><dt>When the key contains public components only
+<dd>
+<p>Serializes it into an X.509 SubjectPublicKeyInfo. The parameters <em>cipher</em> and <em>password</em> are ignored.</p>
 
-<h3 id="method-i-export-label-Parameters">Parameters<span><a href="#method-i-export-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
-<ul><li>
-<p><em>cipher</em> is an <a href="../Cipher.html"><code>OpenSSL::Cipher</code></a>.</p>
-</li><li>
-<p><em>password</em> is a string containing your password.</p>
-</li></ul>
+<p>A PEM-encoded key will look like:</p>
 
-<h3 id="method-i-export-label-Examples">Examples<span><a href="#method-i-export-label-Examples">&para;</a> <a href="#top">&uarr;</a></span></h3>
+<pre>-----BEGIN PUBLIC KEY-----
+[...]
+-----END PUBLIC KEY-----</pre>
 
-<pre>DSA.to_pem -&gt; aString
-DSA.to_pem(cipher, &#39;mypassword&#39;) -&gt; aString</pre>
+<p>Consider using <a href="PKey.html#method-i-public_to_pem"><code>public_to_pem</code></a> instead. This serializes the key into an X.509 SubjectPublicKeyInfo regardless of whether it is a public key or a private key.</p>
+</dd><dt>When the key contains private components, and no parameters are given
+<dd>
+<p>Serializes it into a traditional OpenSSL DSAPrivateKey.</p>
+
+<p>A PEM-encoded key will look like:</p>
+
+<pre>-----BEGIN DSA PRIVATE KEY-----
+[...]
+-----END DSA PRIVATE KEY-----</pre>
+</dd><dt>When the key contains private components, and <em>cipher</em> and <em>password</em> are given
+<dd>
+<p>Serializes it into a traditional OpenSSL DSAPrivateKey and encrypts it in OpenSSL’s traditional PEM encryption format. <em>cipher</em> must be a cipher name understood by <a href="../Cipher.html#method-c-new"><code>OpenSSL::Cipher.new</code></a> or an instance of <a href="../Cipher.html"><code>OpenSSL::Cipher</code></a>.</p>
+
+<p>An encrypted PEM-encoded key will look like:</p>
+
+<pre>-----BEGIN DSA PRIVATE KEY-----
+Proc-Type: 4,ENCRYPTED
+DEK-Info: AES-128-CBC,733F5302505B34701FC41F5C0746E4C0
+
+[...]
+-----END DSA PRIVATE KEY-----</pre>
+
+<p>Note that this format uses MD5 to derive the encryption key, and hence will not be available on FIPS-compliant systems.</p>
+</dd></dl>
+
+<p><strong>This method is kept for compatibility.</strong> This should only be used when the traditional, non-standard OpenSSL format is required.</p>
+
+<p>Consider using <a href="PKey.html#method-i-public_to_pem"><code>public_to_pem</code></a> (X.509 SubjectPublicKeyInfo) or <a href="PKey.html#method-i-private_to_pem"><code>private_to_pem</code></a> (PKCS #8 PrivateKeyInfo or EncryptedPrivateKeyInfo) instead.</p>
 
           <div class="method-source-code" id="export-source">
             <pre>static VALUE
@@ -638,7 +665,13 @@ ossl_dsa_is_public(VALUE self)
         </div>
 
         <div class="method-description">
-          <p>Encodes this <a href="DSA.html"><code>DSA</code></a> to its DER encoding.</p>
+          <p>Serializes a private or public key to a DER-encoding.</p>
+
+<p>See <a href="DSA.html#method-i-to_pem"><code>to_pem</code></a> for details.</p>
+
+<p><strong>This method is kept for compatibility.</strong> This should only be used when the traditional, non-standard OpenSSL format is required.</p>
+
+<p>Consider using <a href="PKey.html#method-i-public_to_der"><code>public_to_der</code></a> or <a href="PKey.html#method-i-private_to_der"><code>private_to_der</code></a> instead.</p>
 
           <div class="method-source-code" id="to_der-source">
             <pre>static VALUE
@@ -668,19 +701,46 @@ ossl_dsa_to_der(VALUE self)
         </div>
 
         <div class="method-description">
-          <p>Encodes this <a href="DSA.html"><code>DSA</code></a> to its PEM encoding.</p>
+          <p>Serializes a private or public key to a PEM-encoding.</p>
+<dl class="rdoc-list label-list"><dt>When the key contains public components only
+<dd>
+<p>Serializes it into an X.509 SubjectPublicKeyInfo. The parameters <em>cipher</em> and <em>password</em> are ignored.</p>
 
-<h3 id="method-i-to_pem-label-Parameters">Parameters<span><a href="#method-i-to_pem-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
-<ul><li>
-<p><em>cipher</em> is an <a href="../Cipher.html"><code>OpenSSL::Cipher</code></a>.</p>
-</li><li>
-<p><em>password</em> is a string containing your password.</p>
-</li></ul>
+<p>A PEM-encoded key will look like:</p>
 
-<h3 id="method-i-to_pem-label-Examples">Examples<span><a href="#method-i-to_pem-label-Examples">&para;</a> <a href="#top">&uarr;</a></span></h3>
+<pre>-----BEGIN PUBLIC KEY-----
+[...]
+-----END PUBLIC KEY-----</pre>
 
-<pre>DSA.to_pem -&gt; aString
-DSA.to_pem(cipher, &#39;mypassword&#39;) -&gt; aString</pre>
+<p>Consider using <a href="PKey.html#method-i-public_to_pem"><code>public_to_pem</code></a> instead. This serializes the key into an X.509 SubjectPublicKeyInfo regardless of whether it is a public key or a private key.</p>
+</dd><dt>When the key contains private components, and no parameters are given
+<dd>
+<p>Serializes it into a traditional OpenSSL DSAPrivateKey.</p>
+
+<p>A PEM-encoded key will look like:</p>
+
+<pre>-----BEGIN DSA PRIVATE KEY-----
+[...]
+-----END DSA PRIVATE KEY-----</pre>
+</dd><dt>When the key contains private components, and <em>cipher</em> and <em>password</em> are given
+<dd>
+<p>Serializes it into a traditional OpenSSL DSAPrivateKey and encrypts it in OpenSSL’s traditional PEM encryption format. <em>cipher</em> must be a cipher name understood by <a href="../Cipher.html#method-c-new"><code>OpenSSL::Cipher.new</code></a> or an instance of <a href="../Cipher.html"><code>OpenSSL::Cipher</code></a>.</p>
+
+<p>An encrypted PEM-encoded key will look like:</p>
+
+<pre>-----BEGIN DSA PRIVATE KEY-----
+Proc-Type: 4,ENCRYPTED
+DEK-Info: AES-128-CBC,733F5302505B34701FC41F5C0746E4C0
+
+[...]
+-----END DSA PRIVATE KEY-----</pre>
+
+<p>Note that this format uses MD5 to derive the encryption key, and hence will not be available on FIPS-compliant systems.</p>
+</dd></dl>
+
+<p><strong>This method is kept for compatibility.</strong> This should only be used when the traditional, non-standard OpenSSL format is required.</p>
+
+<p>Consider using <a href="PKey.html#method-i-public_to_pem"><code>public_to_pem</code></a> (X.509 SubjectPublicKeyInfo) or <a href="PKey.html#method-i-private_to_pem"><code>private_to_pem</code></a> (PKCS #8 PrivateKeyInfo or EncryptedPrivateKeyInfo) instead.</p>
 
         </div>
 
@@ -700,19 +760,46 @@ DSA.to_pem(cipher, &#39;mypassword&#39;) -&gt; aString</pre>
         </div>
 
         <div class="method-description">
-          <p>Encodes this <a href="DSA.html"><code>DSA</code></a> to its PEM encoding.</p>
+          <p>Serializes a private or public key to a PEM-encoding.</p>
+<dl class="rdoc-list label-list"><dt>When the key contains public components only
+<dd>
+<p>Serializes it into an X.509 SubjectPublicKeyInfo. The parameters <em>cipher</em> and <em>password</em> are ignored.</p>
 
-<h3 id="method-i-to_s-label-Parameters">Parameters<span><a href="#method-i-to_s-label-Parameters">&para;</a> <a href="#top">&uarr;</a></span></h3>
-<ul><li>
-<p><em>cipher</em> is an <a href="../Cipher.html"><code>OpenSSL::Cipher</code></a>.</p>
-</li><li>
-<p><em>password</em> is a string containing your password.</p>
-</li></ul>
+<p>A PEM-encoded key will look like:</p>
 
-<h3 id="method-i-to_s-label-Examples">Examples<span><a href="#method-i-to_s-label-Examples">&para;</a> <a href="#top">&uarr;</a></span></h3>
+<pre>-----BEGIN PUBLIC KEY-----
+[...]
+-----END PUBLIC KEY-----</pre>
 
-<pre>DSA.to_pem -&gt; aString
-DSA.to_pem(cipher, &#39;mypassword&#39;) -&gt; aString</pre>
+<p>Consider using <a href="PKey.html#method-i-public_to_pem"><code>public_to_pem</code></a> instead. This serializes the key into an X.509 SubjectPublicKeyInfo regardless of whether it is a public key or a private key.</p>
+</dd><dt>When the key contains private components, and no parameters are given
+<dd>
+<p>Serializes it into a traditional OpenSSL DSAPrivateKey.</p>
+
+<p>A PEM-encoded key will look like:</p>
+
+<pre>-----BEGIN DSA PRIVATE KEY-----
+[...]
+-----END DSA PRIVATE KEY-----</pre>
+</dd><dt>When the key contains private components, and <em>cipher</em> and <em>password</em> are given
+<dd>
+<p>Serializes it into a traditional OpenSSL DSAPrivateKey and encrypts it in OpenSSL’s traditional PEM encryption format. <em>cipher</em> must be a cipher name understood by <a href="../Cipher.html#method-c-new"><code>OpenSSL::Cipher.new</code></a> or an instance of <a href="../Cipher.html"><code>OpenSSL::Cipher</code></a>.</p>
+
+<p>An encrypted PEM-encoded key will look like:</p>
+
+<pre>-----BEGIN DSA PRIVATE KEY-----
+Proc-Type: 4,ENCRYPTED
+DEK-Info: AES-128-CBC,733F5302505B34701FC41F5C0746E4C0
+
+[...]
+-----END DSA PRIVATE KEY-----</pre>
+
+<p>Note that this format uses MD5 to derive the encryption key, and hence will not be available on FIPS-compliant systems.</p>
+</dd></dl>
+
+<p><strong>This method is kept for compatibility.</strong> This should only be used when the traditional, non-standard OpenSSL format is required.</p>
+
+<p>Consider using <a href="PKey.html#method-i-public_to_pem"><code>public_to_pem</code></a> (X.509 SubjectPublicKeyInfo) or <a href="PKey.html#method-i-private_to_pem"><code>private_to_pem</code></a> (PKCS #8 PrivateKeyInfo or EncryptedPrivateKeyInfo) instead.</p>
 
         </div>
 

@@ -41,7 +41,7 @@
     <div id="search-field-wrapper">
       <input id="search-field" role="combobox" aria-label="Search"
              aria-autocomplete="list" aria-controls="search-results"
-             type="text" name="search" placeholder="Search" spellcheck="false"
+             type="text" name="search" placeholder="Search (/) for a class, method, ..." spellcheck="false"
              title="Type to search, Up and Down to navigate, Enter to load">
     </div>
 
@@ -80,6 +80,8 @@
   <ul class="link-list" role="directory">
     <li ><a href="#method-c-generate_key">::generate_key</a>
     <li ><a href="#method-c-generate_parameters">::generate_parameters</a>
+    <li ><a href="#method-c-new_raw_private_key">::new_raw_private_key</a>
+    <li ><a href="#method-c-new_raw_public_key">::new_raw_public_key</a>
     <li ><a href="#method-c-read">::read</a>
   </ul>
 </div>
@@ -200,6 +202,92 @@ ossl_pkey_s_generate_key(int argc, VALUE *argv, VALUE self)
 ossl_pkey_s_generate_parameters(int argc, VALUE *argv, VALUE self)
 {
     return pkey_generate(argc, argv, self, 1);
+}</pre>
+          </div>
+        </div>
+
+
+      </div>
+
+      <div id="method-c-new_raw_private_key" class="method-detail ">
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              OpenSSL::PKey.new_raw_private_key(algo, string) &rarr; PKey
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+        </div>
+
+        <div class="method-description">
+          <p>See the <a href="../OpenSSL.html"><code>OpenSSL</code></a> documentation for EVP_PKEY_new_raw_private_key()</p>
+
+          <div class="method-source-code" id="new_raw_private_key-source">
+            <pre>static VALUE
+ossl_pkey_new_raw_private_key(VALUE self, VALUE type, VALUE key)
+{
+    EVP_PKEY *pkey;
+    const EVP_PKEY_ASN1_METHOD *ameth;
+    int pkey_id;
+    size_t keylen;
+
+    StringValue(type);
+    StringValue(key);
+    ameth = EVP_PKEY_asn1_find_str(NULL, RSTRING_PTR(type), RSTRING_LENINT(type));
+    if (!ameth)
+        ossl_raise(ePKeyError, &quot;algorithm %&quot;PRIsVALUE&quot; not found&quot;, type);
+    EVP_PKEY_asn1_get0_info(&amp;pkey_id, NULL, NULL, NULL, NULL, ameth);
+
+    keylen = RSTRING_LEN(key);
+
+    pkey = EVP_PKEY_new_raw_private_key(pkey_id, NULL, (unsigned char *)RSTRING_PTR(key), keylen);
+    if (!pkey)
+        ossl_raise(ePKeyError, &quot;EVP_PKEY_new_raw_private_key&quot;);
+
+    return ossl_pkey_new(pkey);
+}</pre>
+          </div>
+        </div>
+
+
+      </div>
+
+      <div id="method-c-new_raw_public_key" class="method-detail ">
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              OpenSSL::PKey.new_raw_public_key(algo, string) &rarr; PKey
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+        </div>
+
+        <div class="method-description">
+          <p>See the <a href="../OpenSSL.html"><code>OpenSSL</code></a> documentation for EVP_PKEY_new_raw_public_key()</p>
+
+          <div class="method-source-code" id="new_raw_public_key-source">
+            <pre>static VALUE
+ossl_pkey_new_raw_public_key(VALUE self, VALUE type, VALUE key)
+{
+    EVP_PKEY *pkey;
+    const EVP_PKEY_ASN1_METHOD *ameth;
+    int pkey_id;
+    size_t keylen;
+
+    StringValue(type);
+    StringValue(key);
+    ameth = EVP_PKEY_asn1_find_str(NULL, RSTRING_PTR(type), RSTRING_LENINT(type));
+    if (!ameth)
+        ossl_raise(ePKeyError, &quot;algorithm %&quot;PRIsVALUE&quot; not found&quot;, type);
+    EVP_PKEY_asn1_get0_info(&amp;pkey_id, NULL, NULL, NULL, NULL, ameth);
+
+    keylen = RSTRING_LEN(key);
+
+    pkey = EVP_PKEY_new_raw_public_key(pkey_id, NULL, (unsigned char *)RSTRING_PTR(key), keylen);
+    if (!pkey)
+        ossl_raise(ePKeyError, &quot;EVP_PKEY_new_raw_public_key&quot;);
+
+    return ossl_pkey_new(pkey);
 }</pre>
           </div>
         </div>

@@ -41,7 +41,7 @@
     <div id="search-field-wrapper">
       <input id="search-field" role="combobox" aria-label="Search"
              aria-autocomplete="list" aria-controls="search-results"
-             type="text" name="search" placeholder="Search" spellcheck="false"
+             type="text" name="search" placeholder="Search (/) for a class, method, ..." spellcheck="false"
              title="Type to search, Up and Down to navigate, Enter to load">
     </div>
 
@@ -189,12 +189,12 @@
           </div>
           <div class="method-heading">
             <span class="method-callseq">
-              new(encoded_key [, passphrase]) &rarr; rsa
+              new(encoded_key [, password ]) &rarr; rsa
             </span>
           </div>
           <div class="method-heading">
             <span class="method-callseq">
-              new(encoded_key) { passphrase } &rarr; rsa
+              new(encoded_key) { password } &rarr; rsa
             </span>
           </div>
           <div class="method-heading">
@@ -209,7 +209,7 @@
 
 <p>If called without arguments, creates a new instance with no key components set. They can be set individually by <a href="RSA.html#method-i-set_key"><code>set_key</code></a>, <a href="RSA.html#method-i-set_factors"><code>set_factors</code></a>, and <a href="RSA.html#method-i-set_crt_params"><code>set_crt_params</code></a>.</p>
 
-<p>If called with a String, tries to parse as DER or PEM encoding of an RSA key. Note that, if <em>passphrase</em> is not specified but the key is encrypted with a passphrase, OpenSSL will prompt for it. See also <a href="../PKey.html#method-c-read"><code>OpenSSL::PKey.read</code></a> which can parse keys of any kinds.</p>
+<p>If called with a String, tries to parse as DER or PEM encoding of an RSA key. Note that if <em>password</em> is not specified, but the key is encrypted with a password, OpenSSL will prompt for it. See also <a href="../PKey.html#method-c-read"><code>OpenSSL::PKey.read</code></a> which can parse keys of any kind.</p>
 
 <p>If called with a number, generates a new key pair. This form works as an alias of <a href="RSA.html#method-c-generate"><code>RSA.generate</code></a>.</p>
 
@@ -217,7 +217,7 @@
 
 <pre class="ruby"><span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">RSA</span>.<span class="ruby-identifier">new</span> <span class="ruby-value">2048</span>
 <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">RSA</span>.<span class="ruby-identifier">new</span> <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span> <span class="ruby-string">&#39;rsa.pem&#39;</span>
-<span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">RSA</span>.<span class="ruby-identifier">new</span> <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span>(<span class="ruby-string">&#39;rsa.pem&#39;</span>), <span class="ruby-string">&#39;my pass phrase&#39;</span>
+<span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">RSA</span>.<span class="ruby-identifier">new</span> <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span>(<span class="ruby-string">&#39;rsa.pem&#39;</span>), <span class="ruby-string">&#39;my password&#39;</span>
 </pre>
 
           <div class="method-source-code" id="new-source">
@@ -299,14 +299,53 @@ ossl_rsa_initialize(int argc, VALUE *argv, VALUE self)
         <div class="method-header">
           <div class="method-heading">
             <span class="method-callseq">
-              export([cipher, pass_phrase]) &rarr; PEM-format String
+              export([cipher, password]) &rarr; PEM-format String
             </span>
             <span class="method-click-advice">click to toggle source</span>
           </div>
         </div>
 
         <div class="method-description">
-          <p>Outputs this keypair in PEM encoding.  If <em>cipher</em> and <em>pass_phrase</em> are given they will be used to encrypt the key.  <em>cipher</em> must be an <a href="../Cipher.html"><code>OpenSSL::Cipher</code></a> instance.</p>
+          <p>Serializes a private or public key to a PEM-encoding.</p>
+<dl class="rdoc-list label-list"><dt>When the key contains public components only
+<dd>
+<p>Serializes it into an X.509 SubjectPublicKeyInfo. The parameters <em>cipher</em> and <em>password</em> are ignored.</p>
+
+<p>A PEM-encoded key will look like:</p>
+
+<pre>-----BEGIN PUBLIC KEY-----
+[...]
+-----END PUBLIC KEY-----</pre>
+
+<p>Consider using <a href="PKey.html#method-i-public_to_pem"><code>public_to_pem</code></a> instead. This serializes the key into an X.509 SubjectPublicKeyInfo regardless of whether the key is a public key or a private key.</p>
+</dd><dt>When the key contains private components, and no parameters are given
+<dd>
+<p>Serializes it into a PKCS #1 RSAPrivateKey.</p>
+
+<p>A PEM-encoded key will look like:</p>
+
+<pre>-----BEGIN RSA PRIVATE KEY-----
+[...]
+-----END RSA PRIVATE KEY-----</pre>
+</dd><dt>When the key contains private components, and <em>cipher</em> and <em>password</em> are given
+<dd>
+<p>Serializes it into a PKCS #1 RSAPrivateKey and encrypts it in OpenSSL’s traditional PEM encryption format. <em>cipher</em> must be a cipher name understood by <a href="../Cipher.html#method-c-new"><code>OpenSSL::Cipher.new</code></a> or an instance of <a href="../Cipher.html"><code>OpenSSL::Cipher</code></a>.</p>
+
+<p>An encrypted PEM-encoded key will look like:</p>
+
+<pre>-----BEGIN RSA PRIVATE KEY-----
+Proc-Type: 4,ENCRYPTED
+DEK-Info: AES-128-CBC,733F5302505B34701FC41F5C0746E4C0
+
+[...]
+-----END RSA PRIVATE KEY-----</pre>
+
+<p>Note that this format uses MD5 to derive the encryption key, and hence will not be available on FIPS-compliant systems.</p>
+</dd></dl>
+
+<p><strong>This method is kept for compatibility.</strong> This should only be used when the PKCS #1 RSAPrivateKey format is required.</p>
+
+<p>Consider using <a href="PKey.html#method-i-public_to_pem"><code>public_to_pem</code></a> (X.509 SubjectPublicKeyInfo) or <a href="PKey.html#method-i-private_to_pem"><code>private_to_pem</code></a> (PKCS #8 PrivateKeyInfo or EncryptedPrivateKeyInfo) instead.</p>
 
           <div class="method-source-code" id="export-source">
             <pre>static VALUE
@@ -836,7 +875,13 @@ ossl_rsa_sign_pss(int argc, VALUE *argv, VALUE self)
         </div>
 
         <div class="method-description">
-          <p>Outputs this keypair in DER encoding.</p>
+          <p>Serializes a private or public key to a DER-encoding.</p>
+
+<p>See <a href="RSA.html#method-i-to_pem"><code>to_pem</code></a> for details.</p>
+
+<p><strong>This method is kept for compatibility.</strong> This should only be used when the PKCS #1 RSAPrivateKey format is required.</p>
+
+<p>Consider using <a href="PKey.html#method-i-public_to_der"><code>public_to_der</code></a> or <a href="PKey.html#method-i-private_to_der"><code>private_to_der</code></a> instead.</p>
 
           <div class="method-source-code" id="to_der-source">
             <pre>static VALUE
@@ -857,13 +902,52 @@ ossl_rsa_to_der(VALUE self)
         <div class="method-header">
           <div class="method-heading">
             <span class="method-callseq">
-              to_pem([cipher, pass_phrase]) &rarr; PEM-format String
+              to_pem([cipher, password]) &rarr; PEM-format String
             </span>
           </div>
         </div>
 
         <div class="method-description">
-          <p>Outputs this keypair in PEM encoding.  If <em>cipher</em> and <em>pass_phrase</em> are given they will be used to encrypt the key.  <em>cipher</em> must be an <a href="../Cipher.html"><code>OpenSSL::Cipher</code></a> instance.</p>
+          <p>Serializes a private or public key to a PEM-encoding.</p>
+<dl class="rdoc-list label-list"><dt>When the key contains public components only
+<dd>
+<p>Serializes it into an X.509 SubjectPublicKeyInfo. The parameters <em>cipher</em> and <em>password</em> are ignored.</p>
+
+<p>A PEM-encoded key will look like:</p>
+
+<pre>-----BEGIN PUBLIC KEY-----
+[...]
+-----END PUBLIC KEY-----</pre>
+
+<p>Consider using <a href="PKey.html#method-i-public_to_pem"><code>public_to_pem</code></a> instead. This serializes the key into an X.509 SubjectPublicKeyInfo regardless of whether the key is a public key or a private key.</p>
+</dd><dt>When the key contains private components, and no parameters are given
+<dd>
+<p>Serializes it into a PKCS #1 RSAPrivateKey.</p>
+
+<p>A PEM-encoded key will look like:</p>
+
+<pre>-----BEGIN RSA PRIVATE KEY-----
+[...]
+-----END RSA PRIVATE KEY-----</pre>
+</dd><dt>When the key contains private components, and <em>cipher</em> and <em>password</em> are given
+<dd>
+<p>Serializes it into a PKCS #1 RSAPrivateKey and encrypts it in OpenSSL’s traditional PEM encryption format. <em>cipher</em> must be a cipher name understood by <a href="../Cipher.html#method-c-new"><code>OpenSSL::Cipher.new</code></a> or an instance of <a href="../Cipher.html"><code>OpenSSL::Cipher</code></a>.</p>
+
+<p>An encrypted PEM-encoded key will look like:</p>
+
+<pre>-----BEGIN RSA PRIVATE KEY-----
+Proc-Type: 4,ENCRYPTED
+DEK-Info: AES-128-CBC,733F5302505B34701FC41F5C0746E4C0
+
+[...]
+-----END RSA PRIVATE KEY-----</pre>
+
+<p>Note that this format uses MD5 to derive the encryption key, and hence will not be available on FIPS-compliant systems.</p>
+</dd></dl>
+
+<p><strong>This method is kept for compatibility.</strong> This should only be used when the PKCS #1 RSAPrivateKey format is required.</p>
+
+<p>Consider using <a href="PKey.html#method-i-public_to_pem"><code>public_to_pem</code></a> (X.509 SubjectPublicKeyInfo) or <a href="PKey.html#method-i-private_to_pem"><code>private_to_pem</code></a> (PKCS #8 PrivateKeyInfo or EncryptedPrivateKeyInfo) instead.</p>
 
         </div>
 
@@ -877,13 +961,52 @@ ossl_rsa_to_der(VALUE self)
         <div class="method-header">
           <div class="method-heading">
             <span class="method-callseq">
-              to_s([cipher, pass_phrase]) &rarr; PEM-format String
+              to_s([cipher, password]) &rarr; PEM-format String
             </span>
           </div>
         </div>
 
         <div class="method-description">
-          <p>Outputs this keypair in PEM encoding.  If <em>cipher</em> and <em>pass_phrase</em> are given they will be used to encrypt the key.  <em>cipher</em> must be an <a href="../Cipher.html"><code>OpenSSL::Cipher</code></a> instance.</p>
+          <p>Serializes a private or public key to a PEM-encoding.</p>
+<dl class="rdoc-list label-list"><dt>When the key contains public components only
+<dd>
+<p>Serializes it into an X.509 SubjectPublicKeyInfo. The parameters <em>cipher</em> and <em>password</em> are ignored.</p>
+
+<p>A PEM-encoded key will look like:</p>
+
+<pre>-----BEGIN PUBLIC KEY-----
+[...]
+-----END PUBLIC KEY-----</pre>
+
+<p>Consider using <a href="PKey.html#method-i-public_to_pem"><code>public_to_pem</code></a> instead. This serializes the key into an X.509 SubjectPublicKeyInfo regardless of whether the key is a public key or a private key.</p>
+</dd><dt>When the key contains private components, and no parameters are given
+<dd>
+<p>Serializes it into a PKCS #1 RSAPrivateKey.</p>
+
+<p>A PEM-encoded key will look like:</p>
+
+<pre>-----BEGIN RSA PRIVATE KEY-----
+[...]
+-----END RSA PRIVATE KEY-----</pre>
+</dd><dt>When the key contains private components, and <em>cipher</em> and <em>password</em> are given
+<dd>
+<p>Serializes it into a PKCS #1 RSAPrivateKey and encrypts it in OpenSSL’s traditional PEM encryption format. <em>cipher</em> must be a cipher name understood by <a href="../Cipher.html#method-c-new"><code>OpenSSL::Cipher.new</code></a> or an instance of <a href="../Cipher.html"><code>OpenSSL::Cipher</code></a>.</p>
+
+<p>An encrypted PEM-encoded key will look like:</p>
+
+<pre>-----BEGIN RSA PRIVATE KEY-----
+Proc-Type: 4,ENCRYPTED
+DEK-Info: AES-128-CBC,733F5302505B34701FC41F5C0746E4C0
+
+[...]
+-----END RSA PRIVATE KEY-----</pre>
+
+<p>Note that this format uses MD5 to derive the encryption key, and hence will not be available on FIPS-compliant systems.</p>
+</dd></dl>
+
+<p><strong>This method is kept for compatibility.</strong> This should only be used when the PKCS #1 RSAPrivateKey format is required.</p>
+
+<p>Consider using <a href="PKey.html#method-i-public_to_pem"><code>public_to_pem</code></a> (X.509 SubjectPublicKeyInfo) or <a href="PKey.html#method-i-private_to_pem"><code>private_to_pem</code></a> (PKCS #8 PrivateKeyInfo or EncryptedPrivateKeyInfo) instead.</p>
 
         </div>
 

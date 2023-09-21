@@ -41,7 +41,7 @@
     <div id="search-field-wrapper">
       <input id="search-field" role="combobox" aria-label="Search"
              aria-autocomplete="list" aria-controls="search-results"
-             type="text" name="search" placeholder="Search" spellcheck="false"
+             type="text" name="search" placeholder="Search (/) for a class, method, ..." spellcheck="false"
              title="Type to search, Up and Down to navigate, Enter to load">
     </div>
 
@@ -84,6 +84,8 @@
     <li ><a href="#method-i-private_to_pem">#private_to_pem</a>
     <li ><a href="#method-i-public_to_der">#public_to_der</a>
     <li ><a href="#method-i-public_to_pem">#public_to_pem</a>
+    <li ><a href="#method-i-raw_private_key">#raw_private_key</a>
+    <li ><a href="#method-i-raw_public_key">#raw_public_key</a>
     <li ><a href="#method-i-sign">#sign</a>
     <li ><a href="#method-i-sign_raw">#sign_raw</a>
     <li ><a href="#method-i-to_text">#to_text</a>
@@ -590,6 +592,18 @@ ossl_pkey_private_to_der(int argc, VALUE *argv, VALUE self)
         <div class="method-description">
           <p>Serializes the private key to PEM-encoded PKCS #8 format. See <a href="PKey.html#method-i-private_to_der"><code>private_to_der</code></a> for more details.</p>
 
+<p>An unencrypted PEM-encoded key will look like:</p>
+
+<pre>-----BEGIN PRIVATE KEY-----
+[...]
+-----END PRIVATE KEY-----</pre>
+
+<p>An encrypted PEM-encoded key will look like:</p>
+
+<pre>-----BEGIN ENCRYPTED PRIVATE KEY-----
+[...]
+-----END ENCRYPTED PRIVATE KEY-----</pre>
+
           <div class="method-source-code" id="private_to_pem-source">
             <pre>static VALUE
 ossl_pkey_private_to_pem(int argc, VALUE *argv, VALUE self)
@@ -640,11 +654,95 @@ ossl_pkey_public_to_der(VALUE self)
         <div class="method-description">
           <p>Serializes the public key to PEM-encoded X.509 SubjectPublicKeyInfo format.</p>
 
+<p>A PEM-encoded key will look like:</p>
+
+<pre>-----BEGIN PUBLIC KEY-----
+[...]
+-----END PUBLIC KEY-----</pre>
+
           <div class="method-source-code" id="public_to_pem-source">
             <pre>static VALUE
 ossl_pkey_public_to_pem(VALUE self)
 {
     return ossl_pkey_export_spki(self, 0);
+}</pre>
+          </div>
+        </div>
+
+
+      </div>
+
+      <div id="method-i-raw_private_key" class="method-detail ">
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              raw_private_key   &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+        </div>
+
+        <div class="method-description">
+          <p>See the <a href="../../OpenSSL.html"><code>OpenSSL</code></a> documentation for EVP_PKEY_get_raw_private_key()</p>
+
+          <div class="method-source-code" id="raw_private_key-source">
+            <pre>static VALUE
+ossl_pkey_raw_private_key(VALUE self)
+{
+    EVP_PKEY *pkey;
+    VALUE str;
+    size_t len;
+
+    GetPKey(self, pkey);
+    if (EVP_PKEY_get_raw_private_key(pkey, NULL, &amp;len) != 1)
+        ossl_raise(ePKeyError, &quot;EVP_PKEY_get_raw_private_key&quot;);
+    str = rb_str_new(NULL, len);
+
+    if (EVP_PKEY_get_raw_private_key(pkey, (unsigned char *)RSTRING_PTR(str), &amp;len) != 1)
+        ossl_raise(ePKeyError, &quot;EVP_PKEY_get_raw_private_key&quot;);
+
+    rb_str_set_len(str, len);
+
+    return str;
+}</pre>
+          </div>
+        </div>
+
+
+      </div>
+
+      <div id="method-i-raw_public_key" class="method-detail ">
+        <div class="method-header">
+          <div class="method-heading">
+            <span class="method-callseq">
+              raw_public_key   &rarr; string
+            </span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+        </div>
+
+        <div class="method-description">
+          <p>See the <a href="../../OpenSSL.html"><code>OpenSSL</code></a> documentation for EVP_PKEY_get_raw_public_key()</p>
+
+          <div class="method-source-code" id="raw_public_key-source">
+            <pre>static VALUE
+ossl_pkey_raw_public_key(VALUE self)
+{
+    EVP_PKEY *pkey;
+    VALUE str;
+    size_t len;
+
+    GetPKey(self, pkey);
+    if (EVP_PKEY_get_raw_public_key(pkey, NULL, &amp;len) != 1)
+        ossl_raise(ePKeyError, &quot;EVP_PKEY_get_raw_public_key&quot;);
+    str = rb_str_new(NULL, len);
+
+    if (EVP_PKEY_get_raw_public_key(pkey, (unsigned char *)RSTRING_PTR(str), &amp;len) != 1)
+        ossl_raise(ePKeyError, &quot;EVP_PKEY_get_raw_public_key&quot;);
+
+    rb_str_set_len(str, len);
+
+    return str;
 }</pre>
           </div>
         </div>

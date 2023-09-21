@@ -41,7 +41,7 @@
     <div id="search-field-wrapper">
       <input id="search-field" role="combobox" aria-label="Search"
              aria-autocomplete="list" aria-controls="search-results"
-             type="text" name="search" placeholder="Search" spellcheck="false"
+             type="text" name="search" placeholder="Search (/) for a class, method, ..." spellcheck="false"
              title="Type to search, Up and Down to navigate, Enter to load">
     </div>
 
@@ -92,17 +92,6 @@
           <li>
             <details open>
               <summary>      <a href="#module-OpenSSL-label-PBKDF2+Password-based+Encryption">PBKDF2 Password-based Encryption</a>
-</summary>
-              <ul class="link-list" role="directory">
-                          <li>      <a href="#module-OpenSSL-label-Encryption">Encryption</a>
-          <li>      <a href="#module-OpenSSL-label-Decryption">Decryption</a>
-
-              </ul>
-            </details>
-          </li>
-          <li>
-            <details open>
-              <summary>      <a href="#module-OpenSSL-label-PKCS+-235+Password-based+Encryption">PKCS #5 Password-based Encryption</a>
 </summary>
               <ul class="link-list" role="directory">
                           <li>      <a href="#module-OpenSSL-label-Encryption">Encryption</a>
@@ -177,8 +166,6 @@
     <li ><a href="#method-c-fips_mode">::fips_mode</a>
     <li ><a href="#method-c-fips_mode-3D">::fips_mode=</a>
     <li ><a href="#method-c-fixed_length_secure_compare">::fixed_length_secure_compare</a>
-    <li ><a href="#method-c-mem_check_start">::mem_check_start</a>
-    <li ><a href="#method-c-print_mem_leaks">::print_mem_leaks</a>
     <li ><a href="#method-c-secure_compare">::secure_compare</a>
   </ul>
 </div>
@@ -212,22 +199,20 @@
 
 <pre class="ruby"><span class="ruby-identifier">key</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">RSA</span>.<span class="ruby-identifier">new</span> <span class="ruby-value">2048</span>
 
-<span class="ruby-identifier">open</span> <span class="ruby-string">&#39;private_key.pem&#39;</span>, <span class="ruby-string">&#39;w&#39;</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">io</span><span class="ruby-operator">|</span> <span class="ruby-identifier">io</span>.<span class="ruby-identifier">write</span> <span class="ruby-identifier">key</span>.<span class="ruby-identifier">to_pem</span> <span class="ruby-keyword">end</span>
-<span class="ruby-identifier">open</span> <span class="ruby-string">&#39;public_key.pem&#39;</span>, <span class="ruby-string">&#39;w&#39;</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">io</span><span class="ruby-operator">|</span> <span class="ruby-identifier">io</span>.<span class="ruby-identifier">write</span> <span class="ruby-identifier">key</span>.<span class="ruby-identifier">public_key</span>.<span class="ruby-identifier">to_pem</span> <span class="ruby-keyword">end</span>
+<span class="ruby-constant">File</span>.<span class="ruby-identifier">write</span> <span class="ruby-string">&#39;private_key.pem&#39;</span>, <span class="ruby-identifier">key</span>.<span class="ruby-identifier">private_to_pem</span>
+<span class="ruby-constant">File</span>.<span class="ruby-identifier">write</span> <span class="ruby-string">&#39;public_key.pem&#39;</span>, <span class="ruby-identifier">key</span>.<span class="ruby-identifier">public_to_pem</span>
 </pre>
 
 <h3 id="module-OpenSSL-label-Exporting+a+Key">Exporting a Key<span><a href="#module-OpenSSL-label-Exporting+a+Key">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
-<p>Keys saved to disk without encryption are not secure as anyone who gets ahold of the key may use it unless it is encrypted.  In order to securely export a key you may export it with a pass phrase.</p>
+<p>Keys saved to disk without encryption are not secure as anyone who gets ahold of the key may use it unless it is encrypted.  In order to securely export a key you may export it with a password.</p>
 
 <pre class="ruby"><span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">new</span> <span class="ruby-string">&#39;aes-256-cbc&#39;</span>
-<span class="ruby-identifier">pass_phrase</span> = <span class="ruby-string">&#39;my secure pass phrase goes here&#39;</span>
+<span class="ruby-identifier">password</span> = <span class="ruby-string">&#39;my secure password goes here&#39;</span>
 
-<span class="ruby-identifier">key_secure</span> = <span class="ruby-identifier">key</span>.<span class="ruby-identifier">export</span> <span class="ruby-identifier">cipher</span>, <span class="ruby-identifier">pass_phrase</span>
+<span class="ruby-identifier">key_secure</span> = <span class="ruby-identifier">key</span>.<span class="ruby-identifier">private_to_pem</span> <span class="ruby-identifier">cipher</span>, <span class="ruby-identifier">password</span>
 
-<span class="ruby-identifier">open</span> <span class="ruby-string">&#39;private.secure.pem&#39;</span>, <span class="ruby-string">&#39;w&#39;</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">io</span><span class="ruby-operator">|</span>
-  <span class="ruby-identifier">io</span>.<span class="ruby-identifier">write</span> <span class="ruby-identifier">key_secure</span>
-<span class="ruby-keyword">end</span>
+<span class="ruby-constant">File</span>.<span class="ruby-identifier">write</span> <span class="ruby-string">&#39;private.secure.pem&#39;</span>, <span class="ruby-identifier">key_secure</span>
 </pre>
 
 <p><a href="OpenSSL/Cipher.html#method-c-ciphers"><code>OpenSSL::Cipher.ciphers</code></a> returns a list of available ciphers.</p>
@@ -250,11 +235,11 @@
 
 <h3 id="module-OpenSSL-label-Loading+an+Encrypted+Key">Loading an Encrypted Key<span><a href="#module-OpenSSL-label-Loading+an+Encrypted+Key">&para;</a> <a href="#top">&uarr;</a></span></h3>
 
-<p><a href="OpenSSL.html"><code>OpenSSL</code></a> will prompt you for your pass phrase when loading an encrypted key. If you will not be able to type in the pass phrase you may provide it when loading the key:</p>
+<p><a href="OpenSSL.html"><code>OpenSSL</code></a> will prompt you for your password when loading an encrypted key. If you will not be able to type in the password you may provide it when loading the key:</p>
 
 <pre class="ruby"><span class="ruby-identifier">key4_pem</span> = <span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span> <span class="ruby-string">&#39;private.secure.pem&#39;</span>
-<span class="ruby-identifier">pass_phrase</span> = <span class="ruby-string">&#39;my secure pass phrase goes here&#39;</span>
-<span class="ruby-identifier">key4</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span>.<span class="ruby-identifier">read</span> <span class="ruby-identifier">key4_pem</span>, <span class="ruby-identifier">pass_phrase</span>
+<span class="ruby-identifier">password</span> = <span class="ruby-string">&#39;my secure password goes here&#39;</span>
+<span class="ruby-identifier">key4</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span>.<span class="ruby-identifier">read</span> <span class="ruby-identifier">key4_pem</span>, <span class="ruby-identifier">password</span>
 </pre>
 
 <h2 id="module-OpenSSL-label-RSA+Encryption">RSA Encryption<span><a href="#module-OpenSSL-label-RSA+Encryption">&para;</a> <a href="#top">&uarr;</a></span></h2>
@@ -343,46 +328,6 @@ Now decrypt the data:
 decrypted = cipher.update encrypted
 decrypted &lt;&lt; cipher.final</pre>
 
-<h2 id="module-OpenSSL-label-PKCS+-235+Password-based+Encryption">PKCS #5 Password-based Encryption<span><a href="#module-OpenSSL-label-PKCS+-235+Password-based+Encryption">&para;</a> <a href="#top">&uarr;</a></span></h2>
-
-<p>PKCS #5 is a password-based encryption standard documented at <a href="http://www.ietf.org/rfc/rfc2898.txt">RFC2898</a>.  It allows a short password or passphrase to be used to create a secure encryption key. If possible, PBKDF2 as described above should be used if the circumstances allow it.</p>
-
-<p>PKCS #5 uses a <a href="OpenSSL/Cipher.html"><code>Cipher</code></a>, a pass phrase and a salt to generate an encryption key.</p>
-
-<pre class="ruby"><span class="ruby-identifier">pass_phrase</span> = <span class="ruby-string">&#39;my secure pass phrase goes here&#39;</span>
-<span class="ruby-identifier">salt</span> = <span class="ruby-string">&#39;8 octets&#39;</span>
-</pre>
-
-<h3 id="module-OpenSSL-label-Encryption">Encryption<span><a href="#module-OpenSSL-label-Encryption">&para;</a> <a href="#top">&uarr;</a></span></h3>
-
-<p>First set up the cipher for encryption</p>
-
-<pre class="ruby"><span class="ruby-identifier">encryptor</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">new</span> <span class="ruby-string">&#39;aes-256-cbc&#39;</span>
-<span class="ruby-identifier">encryptor</span>.<span class="ruby-identifier">encrypt</span>
-<span class="ruby-identifier">encryptor</span>.<span class="ruby-identifier">pkcs5_keyivgen</span> <span class="ruby-identifier">pass_phrase</span>, <span class="ruby-identifier">salt</span>
-</pre>
-
-<p>Then pass the data you want to encrypt through</p>
-
-<pre class="ruby"><span class="ruby-identifier">encrypted</span> = <span class="ruby-identifier">encryptor</span>.<span class="ruby-identifier">update</span> <span class="ruby-string">&#39;top secret document&#39;</span>
-<span class="ruby-identifier">encrypted</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">encryptor</span>.<span class="ruby-identifier">final</span>
-</pre>
-
-<h3 id="module-OpenSSL-label-Decryption">Decryption<span><a href="#module-OpenSSL-label-Decryption">&para;</a> <a href="#top">&uarr;</a></span></h3>
-
-<p>Use a new <a href="OpenSSL/Cipher.html"><code>Cipher</code></a> instance set up for decryption</p>
-
-<pre class="ruby"><span class="ruby-identifier">decryptor</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">new</span> <span class="ruby-string">&#39;aes-256-cbc&#39;</span>
-<span class="ruby-identifier">decryptor</span>.<span class="ruby-identifier">decrypt</span>
-<span class="ruby-identifier">decryptor</span>.<span class="ruby-identifier">pkcs5_keyivgen</span> <span class="ruby-identifier">pass_phrase</span>, <span class="ruby-identifier">salt</span>
-</pre>
-
-<p>Then pass the data you want to decrypt through</p>
-
-<pre class="ruby"><span class="ruby-identifier">plain</span> = <span class="ruby-identifier">decryptor</span>.<span class="ruby-identifier">update</span> <span class="ruby-identifier">encrypted</span>
-<span class="ruby-identifier">plain</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">decryptor</span>.<span class="ruby-identifier">final</span>
-</pre>
-
 <h2 id="module-OpenSSL-label-X509+Certificates"><a href="OpenSSL/X509.html"><code>X509</code></a> Certificates<span><a href="#module-OpenSSL-label-X509+Certificates">&para;</a> <a href="#top">&uarr;</a></span></h2>
 
 <h3 id="module-OpenSSL-label-Creating+a+Certificate">Creating a Certificate<span><a href="#module-OpenSSL-label-Creating+a+Certificate">&para;</a> <a href="#top">&uarr;</a></span></h3>
@@ -454,12 +399,12 @@ decrypted &lt;&lt; cipher.final</pre>
 <p>CA keys are valuable, so we encrypt and save it to disk and make sure it is not readable by other users.</p>
 
 <pre class="ruby"><span class="ruby-identifier">ca_key</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">RSA</span>.<span class="ruby-identifier">new</span> <span class="ruby-value">2048</span>
-<span class="ruby-identifier">pass_phrase</span> = <span class="ruby-string">&#39;my secure pass phrase goes here&#39;</span>
+<span class="ruby-identifier">password</span> = <span class="ruby-string">&#39;my secure password goes here&#39;</span>
 
-<span class="ruby-identifier">cipher</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Cipher</span>.<span class="ruby-identifier">new</span> <span class="ruby-string">&#39;aes-256-cbc&#39;</span>
+<span class="ruby-identifier">cipher</span> = <span class="ruby-string">&#39;aes-256-cbc&#39;</span>
 
 <span class="ruby-identifier">open</span> <span class="ruby-string">&#39;ca_key.pem&#39;</span>, <span class="ruby-string">&#39;w&#39;</span>, <span class="ruby-value">0400</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">io</span><span class="ruby-operator">|</span>
-  <span class="ruby-identifier">io</span>.<span class="ruby-identifier">write</span> <span class="ruby-identifier">ca_key</span>.<span class="ruby-identifier">export</span>(<span class="ruby-identifier">cipher</span>, <span class="ruby-identifier">pass_phrase</span>)
+  <span class="ruby-identifier">io</span>.<span class="ruby-identifier">write</span> <span class="ruby-identifier">ca_key</span>.<span class="ruby-identifier">private_to_pem</span>(<span class="ruby-identifier">cipher</span>, <span class="ruby-identifier">password</span>)
 <span class="ruby-keyword">end</span>
 </pre>
 
@@ -657,6 +602,10 @@ decrypted &lt;&lt; cipher.final</pre>
         <h3>Constants</h3>
       </header>
       <dl>
+        <dt id="LIBRESSL_VERSION_NUMBER">LIBRESSL_VERSION_NUMBER
+        <dd><p>Version number of LibreSSL the ruby <a href="OpenSSL.html"><code>OpenSSL</code></a> extension was built with (base 16). The format is <code>0xMNNFF00f (major minor fix 00 status)</code>. This constant is only defined in LibreSSL cases.</p>
+
+<p>See also the man page <a href="OpenSSL.html#LIBRESSL_VERSION_NUMBER"><code>LIBRESSL_VERSION_NUMBER</code></a>(3).</p>
         <dt id="OPENSSL_FIPS">OPENSSL_FIPS
         <dd><p>Boolean indicating whether <a href="OpenSSL.html"><code>OpenSSL</code></a> is FIPS-capable or not</p>
         <dt id="OPENSSL_LIBRARY_VERSION">OPENSSL_LIBRARY_VERSION
@@ -664,7 +613,19 @@ decrypted &lt;&lt; cipher.final</pre>
         <dt id="OPENSSL_VERSION">OPENSSL_VERSION
         <dd><p>Version of <a href="OpenSSL.html"><code>OpenSSL</code></a> the ruby <a href="OpenSSL.html"><code>OpenSSL</code></a> extension was built with</p>
         <dt id="OPENSSL_VERSION_NUMBER">OPENSSL_VERSION_NUMBER
-        <dd><p>Version number of <a href="OpenSSL.html"><code>OpenSSL</code></a> the ruby <a href="OpenSSL.html"><code>OpenSSL</code></a> extension was built with (base 16)</p>
+        <dd><p>Version number of <a href="OpenSSL.html"><code>OpenSSL</code></a> the ruby <a href="OpenSSL.html"><code>OpenSSL</code></a> extension was built with (base 16). The formats are below.</p>
+<dl class="rdoc-list label-list"><dt><a href="OpenSSL.html"><code>OpenSSL</code></a> 3
+<dd>
+<p><code>0xMNN00PP0 (major minor 00 patch 0)</code></p>
+</dd><dt><a href="OpenSSL.html"><code>OpenSSL</code></a> before 3
+<dd>
+<p><code>0xMNNFFPPS (major minor fix patch status)</code></p>
+</dd><dt>LibreSSL
+<dd>
+<p><code>0x20000000 (fixed value)</code></p>
+</dd></dl>
+
+<p>See also the man page <a href="OpenSSL.html#OPENSSL_VERSION_NUMBER"><code>OPENSSL_VERSION_NUMBER</code></a>(3).</p>
         <dt id="VERSION">VERSION
         <dd>
       </dl>
@@ -699,7 +660,7 @@ decrypted &lt;&lt; cipher.final</pre>
 </pre>
 
           <div class="method-source-code" id="Digest-source">
-            <pre><span class="ruby-comment"># File lib/openssl/digest.rb, line 67</span>
+            <pre><span class="ruby-comment"># File lib/openssl/digest.rb, line 63</span>
 <span class="ruby-keyword">def</span> <span class="ruby-constant">Digest</span>(<span class="ruby-identifier ruby-title">name</span>)
   <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">Digest</span>.<span class="ruby-identifier">const_get</span>(<span class="ruby-identifier">name</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -814,7 +775,11 @@ ossl_get_errors(VALUE _)
 ossl_fips_mode_get(VALUE self)
 {
 
-#ifdef OPENSSL_FIPS
+#if OSSL_OPENSSL_PREREQ(3, 0, 0)
+    VALUE enabled;
+    enabled = EVP_default_properties_is_fips_enabled(NULL) ? Qtrue : Qfalse;
+    return enabled;
+#elif defined(OPENSSL_FIPS)
     VALUE enabled;
     enabled = FIPS_mode() ? Qtrue : Qfalse;
     return enabled;
@@ -851,8 +816,18 @@ ossl_fips_mode_get(VALUE self)
             <pre>static VALUE
 ossl_fips_mode_set(VALUE self, VALUE enabled)
 {
-
-#ifdef OPENSSL_FIPS
+#if OSSL_OPENSSL_PREREQ(3, 0, 0)
+    if (RTEST(enabled)) {
+        if (!EVP_default_properties_enable_fips(NULL, 1)) {
+            ossl_raise(eOSSLError, &quot;Turning on FIPS mode failed&quot;);
+        }
+    } else {
+        if (!EVP_default_properties_enable_fips(NULL, 0)) {
+            ossl_raise(eOSSLError, &quot;Turning off FIPS mode failed&quot;);
+        }
+    }
+    return enabled;
+#elif defined(OPENSSL_FIPS)
     if (RTEST(enabled)) {
         int mode = FIPS_mode();
         if(!mode &amp;&amp; !FIPS_mode_set(1)) /* turning on twice leads to an error */
@@ -906,92 +881,6 @@ ossl_crypto_fixed_length_secure_compare(VALUE dummy, VALUE str1, VALUE str2)
         case 0: return Qtrue;
         default: return Qfalse;
     }
-}</pre>
-          </div>
-        </div>
-
-
-      </div>
-
-      <div id="method-c-mem_check_start" class="method-detail ">
-        <div class="method-header">
-          <div class="method-heading">
-            <span class="method-callseq">
-              mem_check_start &rarr; nil
-            </span>
-            <span class="method-click-advice">click to toggle source</span>
-          </div>
-        </div>
-
-        <div class="method-description">
-          <p>Calls CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_ON). Starts tracking memory allocations. See also <a href="OpenSSL.html#method-c-print_mem_leaks"><code>OpenSSL.print_mem_leaks</code></a>.</p>
-
-<p>This is available only when built with a capable <a href="OpenSSL.html"><code>OpenSSL</code></a> and –enable-debug configure option.</p>
-
-          <div class="method-source-code" id="mem_check_start-source">
-            <pre>static VALUE
-mem_check_start(VALUE self)
-{
-        CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_ON);
-        return Qnil;
-}</pre>
-          </div>
-        </div>
-
-
-      </div>
-
-      <div id="method-c-print_mem_leaks" class="method-detail ">
-        <div class="method-header">
-          <div class="method-heading">
-            <span class="method-callseq">
-              print_mem_leaks &rarr; true | false
-            </span>
-            <span class="method-click-advice">click to toggle source</span>
-          </div>
-        </div>
-
-        <div class="method-description">
-          <p>For debugging the Ruby/OpenSSL library. Calls CRYPTO_mem_leaks_fp(stderr). Prints detected memory leaks to standard error. This cleans the global state up thus you cannot use any methods of the library after calling this.</p>
-
-<p>Returns <code>true</code> if leaks detected, <code>false</code> otherwise.</p>
-
-<p>This is available only when built with a capable <a href="OpenSSL.html"><code>OpenSSL</code></a> and –enable-debug configure option.</p>
-
-<h3 id="method-c-print_mem_leaks-label-Example">Example<span><a href="#method-c-print_mem_leaks-label-Example">&para;</a> <a href="#top">&uarr;</a></span></h3>
-
-<pre class="ruby"><span class="ruby-constant">OpenSSL</span>.<span class="ruby-identifier">mem_check_start</span>
-<span class="ruby-constant">NOT_GCED</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">PKey</span><span class="ruby-operator">::</span><span class="ruby-constant">RSA</span>.<span class="ruby-identifier">new</span>(<span class="ruby-value">256</span>)
-
-<span class="ruby-keyword">END</span> {
-  <span class="ruby-constant">GC</span>.<span class="ruby-identifier">start</span>
-  <span class="ruby-constant">OpenSSL</span>.<span class="ruby-identifier">print_mem_leaks</span> <span class="ruby-comment"># will print the leakage</span>
-}
-</pre>
-
-          <div class="method-source-code" id="print_mem_leaks-source">
-            <pre>static VALUE
-print_mem_leaks(VALUE self)
-{
-#if OPENSSL_VERSION_NUMBER &gt;= 0x10100000
-    int ret;
-#endif
-
-#ifndef HAVE_RB_EXT_RACTOR_SAFE
-    // for Ruby 2.x
-    void ossl_bn_ctx_free(void); // ossl_bn.c
-    ossl_bn_ctx_free();
-#endif
-
-#if OPENSSL_VERSION_NUMBER &gt;= 0x10100000
-    ret = CRYPTO_mem_leaks_fp(stderr);
-    if (ret &lt; 0)
-        ossl_raise(eOSSLError, &quot;CRYPTO_mem_leaks_fp&quot;);
-    return ret ? Qfalse : Qtrue;
-#else
-    CRYPTO_mem_leaks_fp(stderr);
-    return Qnil;
-#endif
 }</pre>
           </div>
         </div>
