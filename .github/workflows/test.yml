@@ -148,10 +148,6 @@ jobs:
         run: echo "OPENSSL_CONF=$(pwd)/test/openssl/fixtures/ssl/openssl_fips.cnf" >> $GITHUB_ENV
         if: matrix.fips-enabled
 
-      - name: set fips environment variable for testing.
-        run: echo "TEST_RUBY_OPENSSL_FIPS_ENABLED=true" >> $GITHUB_ENV
-        if: matrix.fips-enabled
-
       - name: load ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -180,7 +176,5 @@ jobs:
       # TODO Fix other tests, and run all the tests on FIPS module.
       - name: test on fips module
         run:  |
-          bundle exec rake debug &&
-            ruby -I./lib -ropenssl \
-            -e 'Dir.glob "./test/openssl/{test_fips.rb,test_pkey.rb}", &method(:require)'
+          rake test_fips TESTOPTS="-v --no-show-detail-immediately"
         if: matrix.fips-enabled
