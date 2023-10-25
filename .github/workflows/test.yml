@@ -77,9 +77,9 @@ jobs:
           # https://www.openssl.org/source/
           - openssl-1.0.2u # EOL
           - openssl-1.1.0l # EOL
-          - openssl-1.1.1v
-          - openssl-3.0.10
-          - openssl-3.1.2
+          - openssl-1.1.1w # EOL
+          - openssl-3.0.12
+          - openssl-3.1.4
           # http://www.libressl.org/releases.html
           - libressl-3.1.5 # EOL
           - libressl-3.2.7 # EOL
@@ -88,11 +88,11 @@ jobs:
           - libressl-3.5.3 # EOL
           - libressl-3.6.3
           - libressl-3.7.3
-          - libressl-3.8.0 # Development release
+          - libressl-3.8.1 # Development release
         fips-enabled: [ false ]
         include:
-          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.0.10, fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
-          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.1.2, fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
+          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.0.12, fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
+          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.1.4, fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
           - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-head, git: 'git://git.openssl.org/openssl.git', branch: 'master' }
           - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-head, git: 'git://git.openssl.org/openssl.git', branch: 'master', fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
     steps:
