@@ -333,6 +333,7 @@ ossl_pkcs7_initialize(int argc, VALUE *argv, VALUE self)
     PKCS7 *p7, *p7_orig = RTYPEDDATA_DATA(self);
     BIO *in;
     VALUE arg;
+    int i;
 
     if(rb_scan_args(argc, argv, "01", &arg) == 0)
 	return self;
@@ -346,6 +347,16 @@ ossl_pkcs7_initialize(int argc, VALUE *argv, VALUE self)
     BIO_free(in);
     if (!p7)
         ossl_raise(rb_eArgError, "Could not parse the PKCS7");
+
+    i = OBJ_obj2nid(p7->type);
+    switch(i){
+      case NID_pkcs7_signed:
+      case NID_pkcs7_signedAndEnveloped:
+        if (!p7->d.sign)
+            ossl_raise(rb_eArgError, "No signed data in PKCS7");
+      default:
+        ; /* nothing */
+    }
 
     RTYPEDDATA_DATA(self) = p7;
     PKCS7_free(p7_orig);
