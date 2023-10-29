@@ -1666,6 +1666,23 @@ ossl_pkey_decrypt(int argc, VALUE *argv, VALUE self)
     return str;
 }
 
+
+/*
+ * Returns bit length of the PKEy
+ */ 
+static VALUE
+ossl_pkey_length_in_bits(VALUE self)
+{
+  EVP_PKEY * pkey;
+  int bits;
+
+  GetPKey(self, pkey);
+
+  bits = EVP_PKEY_get_bits(pkey);
+  return INT2NUM(bits);
+  
+}
+
 /*
  * INIT
  */
@@ -1784,6 +1801,9 @@ Init_ossl_pkey(void)
     rb_define_method(cPKey, "derive", ossl_pkey_derive, -1);
     rb_define_method(cPKey, "encrypt", ossl_pkey_encrypt, -1);
     rb_define_method(cPKey, "decrypt", ossl_pkey_decrypt, -1);
+
+
+    rb_define_method(cPKey, "keysize_in_bits", ossl_pkey_length_in_bits, 0);
 
     id_private_q = rb_intern("private?");
 

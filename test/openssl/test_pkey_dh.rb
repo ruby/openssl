@@ -36,6 +36,9 @@ class OpenSSL::TestPKeyDH < OpenSSL::PKeyTestCase
     assert_equal z, dh1.derive(dh2_pub)
     assert_equal z, dh2.derive(dh1_pub)
 
+    assert_equal(1024, dh1.keysize_in_bits)
+    assert_equal(1024, dh2.keysize_in_bits)
+
     assert_raise(OpenSSL::PKey::PKeyError) { params.derive(dh1_pub) }
     assert_raise(OpenSSL::PKey::PKeyError) { dh1_pub.derive(params) }
 

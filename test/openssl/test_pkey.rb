@@ -24,6 +24,7 @@ class OpenSSL::TestPKey < OpenSSL::PKeyTestCase
     assert_instance_of OpenSSL::PKey::PKey, x25519
     assert_equal "X25519", x25519.oid
     assert_match %r{oid=X25519}, x25519.inspect
+    assert_equal 253, x25519.keysize_in_bits
   end
 
   def test_s_generate_parameters
