@@ -81,6 +81,23 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     }
   end
 
+  def test_socket_timeout
+    start_server { |port|
+      begin
+        ssl = OpenSSL::SSL::SSLSocket.open("127.0.0.1", port)
+        ssl.sync_close = true
+        assert_nil ssl.timeout
+        ssl.timeout = 1
+        assert_equal 1, ssl.timeout
+        ssl.connect
+
+        ssl.puts "abc"; assert_equal "abc\n", ssl.gets
+      ensure
+        ssl&.close
+      end
+    }
+  end
+
   def test_socket_open_with_context
     start_server { |port|
       begin

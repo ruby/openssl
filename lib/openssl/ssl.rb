@@ -421,6 +421,18 @@ ssbzSibBsu/6iGtCOGEoXJf//////////wIBAg==
         nil
       end
 
+      if IO.method_defined?(:timeout)
+        def timeout
+          @io.timeout
+        end
+      end
+
+      if IO.method_defined?(:timeout=)
+        def timeout=(timeout)
+          @io.timeout = timeout
+        end
+      end
+
       private
 
       def using_anon_cipher?
