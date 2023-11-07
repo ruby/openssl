@@ -29,6 +29,7 @@ Rake::TestTask.new(:test_fips_internal) do |t|
   t.test_files = FileList[
     'test/openssl/test_fips.rb',
     'test/openssl/test_pkey.rb',
+    'test/openssl/test_pkey_dh.rb',
     'test/openssl/test_pkey_ec.rb',
   ]
   t.warning = true
