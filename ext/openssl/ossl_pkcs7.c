@@ -159,6 +159,7 @@ ossl_pkcs7_s_read_smime(VALUE klass, VALUE arg)
     BIO *in, *out;
     PKCS7 *pkcs7;
     VALUE ret, data;
+    int i;
 
     ret = NewPKCS7(cPKCS7);
     in = ossl_obj2bio(&arg);
@@ -166,6 +167,17 @@ ossl_pkcs7_s_read_smime(VALUE klass, VALUE arg)
     pkcs7 = SMIME_read_PKCS7(in, &out);
     BIO_free(in);
     if(!pkcs7) ossl_raise(ePKCS7Error, NULL);
+
+    i = OBJ_obj2nid(pkcs7->type);
+    switch(i){
+      case NID_pkcs7_signed:
+      case NID_pkcs7_signedAndEnveloped:
+        if (!pkcs7->d.sign)
+            ossl_raise(rb_eArgError, "No signed data in PKCS7");
+      default:
+        ; /* nothing */
+    }
+
     data = out ? ossl_membio2str(out) : Qnil;
     SetPKCS7(ret, pkcs7);
     ossl_pkcs7_set_data(ret, data);
