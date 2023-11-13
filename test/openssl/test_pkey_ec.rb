@@ -71,6 +71,32 @@ class OpenSSL::TestEC < OpenSSL::PKeyTestCase
     assert_equal key.to_der, deserialized.to_der
   end
 
+  def test_keysize_in_bits
+    OpenSSL::PKey::EC.builtin_curves.map { |name, comment| name }.each do |curve|
+      if !openssl?(3, 0, 0)
+        ec = OpenSSL::PKey::EC.new(curve)
+        ec.generate_key!
+      else
+        ec = OpenSSL::PKey::EC.generate(curve)
+      end
+
+      case curve
+      when "secp224r1"
+        assert_equal(224, ec.keysize_in_bits)
+      when "secp256r1", "brainpoolP256r1", "brainpoolP256t1", "prime256v1"
+        assert_equal(256, ec.keysize_in_bits)
+      when "secp384r1", "brainpoolP384r1", "brainpoolP384t1"
+        assert_equal(384, ec.keysize_in_bits)
+      when "secp521r1"
+        assert_equal(521, ec.keysize_in_bits)
+      when "brainpoolP512r1", "brainpoolP512t1"
+        assert_equal(512, ec.keysize_in_bits)
+      when "brainpoolP320r1", "brainpoolP320t1"
+        assert_equal(320, ec.keysize_in_bits)
+      end
+    end
+  end
+
   def test_check_key
     key0 = Fixtures.pkey("p256")
     assert_equal(true, key0.check_key)

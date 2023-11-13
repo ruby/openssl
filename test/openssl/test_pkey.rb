@@ -24,7 +24,6 @@ class OpenSSL::TestPKey < OpenSSL::PKeyTestCase
     assert_instance_of OpenSSL::PKey::PKey, x25519
     assert_equal "X25519", x25519.oid
     assert_match %r{oid=X25519}, x25519.inspect
-    assert_equal 253, x25519.keysize_in_bits
   end
 
   def test_s_generate_parameters
@@ -245,4 +244,54 @@ class OpenSSL::TestPKey < OpenSSL::PKeyTestCase
     rsa = Fixtures.pkey("rsa1024")
     assert_include rsa.to_text, "publicExponent"
   end
+
+  def test_keysize_in_bits
+    # Test vector from RFC 7748 Section 6.1
+    alice_pem = <<~EOF
+    -----BEGIN PRIVATE KEY-----
+    MC4CAQAwBQYDK2VuBCIEIHcHbQpzGKV9PBbBclGyZkXfTC+H68CZKrF3+6UduSwq
+    -----END PRIVATE KEY-----
+    EOF
+    bob_pem = <<~EOF
+    -----BEGIN PUBLIC KEY-----
+    MCowBQYDK2VuAyEA3p7bfXt9wbTTW2HC7OQ1Nz+DQ8hbeGdNrfx+FG+IK08=
+    -----END PUBLIC KEY-----
+    EOF
+    begin
+      alice = OpenSSL::PKey.read(alice_pem)
+      bob = OpenSSL::PKey.read(bob_pem)
+      
+      assert_equal 253, alice.keysize_in_bits
+      assert_equal 253, bob.keysize_in_bits
+
+    rescue OpenSSL::PKey::PKeyError
+      # OpenSSL < 1.1.0
+      pend "X25519 is not implemented"
+    end
+
+    # Test vector from RFC 8032 Section 7.1 TEST 2
+    priv_pem = <<~EOF
+    -----BEGIN PRIVATE KEY-----
+    MC4CAQAwBQYDK2VwBCIEIEzNCJso/5banbbDRuwRTg9bijGfNaumJNqM9u1PuKb7
+    -----END PRIVATE KEY-----
+    EOF
+    pub_pem = <<~EOF
+    -----BEGIN PUBLIC KEY-----
+    MCowBQYDK2VwAyEAPUAXw+hDiVqStwqnTRt+vJyYLM8uxJaMwM1V8Sr0Zgw=
+    -----END PUBLIC KEY-----
+    EOF
+    begin
+      priv = OpenSSL::PKey.read(priv_pem)
+      pub = OpenSSL::PKey.read(pub_pem)
+
+      assert_equal 256, priv.keysize_in_bits
+      assert_equal 256, pub.keysize_in_bits
+
+    rescue OpenSSL::PKey::PKeyError => e
+      # OpenSSL < 1.1.1
+      pend "Ed25519 is not implemented" unless openssl?(1, 1, 1)
+    end
+
+  end
+
 end
