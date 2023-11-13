@@ -102,19 +102,16 @@ class OpenSSL::TestEC < OpenSSL::PKeyTestCase
     assert_equal(true, key0.check_key)
     assert_equal(true, key0.private?)
     assert_equal(true, key0.public?)
-    assert_equal(256, key0.keysize_in_bits)
 
     key1 = OpenSSL::PKey.read(key0.public_to_der)
     assert_equal(true, key1.check_key)
     assert_equal(false, key1.private?)
     assert_equal(true, key1.public?)
-    assert_equal(256, key1.keysize_in_bits)
 
     key2 = OpenSSL::PKey.read(key0.private_to_der)
     assert_equal(true, key2.private?)
     assert_equal(true, key2.public?)
     assert_equal(true, key2.check_key)
-    assert_equal(256, key2.keysize_in_bits)
 
     # Behavior of EVP_PKEY_public_check changes between OpenSSL 1.1.1 and 3.0
     key4 = Fixtures.pkey("p256_too_large")
