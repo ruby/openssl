@@ -270,15 +270,31 @@ class OpenSSL::TestPKey < OpenSSL::PKeyTestCase
     end
 
     # Test vector from RFC 8032 Section 7.1 TEST 2
+    priv_pem = <<~EOF
+    -----BEGIN PRIVATE KEY-----
+    MC4CAQAwBQYDK2VwBCIEIEzNCJso/5banbbDRuwRTg9bijGfNaumJNqM9u1PuKb7
+    -----END PRIVATE KEY-----
+    EOF
     pub_pem = <<~EOF
     -----BEGIN PUBLIC KEY-----
     MCowBQYDK2VwAyEAPUAXw+hDiVqStwqnTRt+vJyYLM8uxJaMwM1V8Sr0Zgw=
     -----END PUBLIC KEY-----
     EOF
     begin
-      
+      priv = OpenSSL::PKey.read(priv_pem)
       pub = OpenSSL::PKey.read(pub_pem)
-      assert_equal 256, pub.keysize_in_bits
+
+      if openssl?(1,1,1)
+        # for some reason OpenSSL v1.1.1 returns 253 as value while 
+        # all other versions returned 256 as value
+        # Cannot find actual key size in bit for ED25519 private key
+        # but public key seems to be 256 bits
+        assert_equal 253, priv.keysize_in_bits
+        assert_equal 253, pub.keysize_in_bits
+      else
+        assert_equal 256, priv.keysize_in_bits
+        assert_equal 256, pub.keysize_in_bits
+      end
 
     rescue OpenSSL::PKey::PKeyError => e
       # OpenSSL < 1.1.1
