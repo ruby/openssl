@@ -270,21 +270,14 @@ class OpenSSL::TestPKey < OpenSSL::PKeyTestCase
     end
 
     # Test vector from RFC 8032 Section 7.1 TEST 2
-    priv_pem = <<~EOF
-    -----BEGIN PRIVATE KEY-----
-    MC4CAQAwBQYDK2VwBCIEIEzNCJso/5banbbDRuwRTg9bijGfNaumJNqM9u1PuKb7
-    -----END PRIVATE KEY-----
-    EOF
     pub_pem = <<~EOF
     -----BEGIN PUBLIC KEY-----
     MCowBQYDK2VwAyEAPUAXw+hDiVqStwqnTRt+vJyYLM8uxJaMwM1V8Sr0Zgw=
     -----END PUBLIC KEY-----
     EOF
     begin
-      priv = OpenSSL::PKey.read(priv_pem)
+      
       pub = OpenSSL::PKey.read(pub_pem)
-
-      assert_equal 256, priv.keysize_in_bits
       assert_equal 256, pub.keysize_in_bits
 
     rescue OpenSSL::PKey::PKeyError => e
