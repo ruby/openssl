@@ -10,7 +10,7 @@ Bugs and feature requests are tracked on [GitHub].
 
 If you think you found a bug, file a ticket on GitHub. Please DO NOT report
 security issues here, there is a separate procedure which is described on
-["Security at ruby-lang.org"](https://www.ruby-lang.org/en/security/).
+["Security at ruby-lang.org"][Ruby Security].
 
 When reporting a bug, please make sure you include:
 
@@ -22,26 +22,25 @@ When reporting a bug, please make sure you include:
 
 There are a number of unresolved issues and feature requests for openssl that
 need review. Before submitting a new ticket, it is recommended to check
-[known issues].
+[known issues][Issues].
 
 ## Submitting patches
 
 Patches are also very welcome!
 
-Please submit a [pull request] with your changes.
+Please submit a [pull request][Compare changes] with your changes.
 
 Make sure that your branch does:
 
 * Have good commit messages
-* Follow Ruby's coding style ([DeveloperHowTo])
+* Follow Ruby's coding style ([Developer-How-To][Ruby Developer-How-To])
 * Pass the test suite successfully (see "Testing")
 
 ## Testing
 
 We have a test suite!
 
-Test cases are located under the
-[`test/openssl`](https://github.com/ruby/openssl/tree/master/test/openssl)
+Test cases are located under the [`test/openssl`][GitHub test/openssl]
 directory.
 
 You can run it with the following three commands:
@@ -58,9 +57,9 @@ Ruby OpenSSL supports various versions of the OpenSSL library. The test suite
 needs to pass on all supported combinations.
 
 If you want to test, debug, report an issue, or contribute to the Ruby OpenSSL
-or [the OpenSSL project](https://www.openssl.org/) in the non-FIPS or
-the [FIPS](https://github.com/openssl/openssl/blob/master/README-FIPS.md) case,
-compiling OpenSSL from the source by yourself is a good practice.
+or [the OpenSSL project][OpenSSL] in the non-FIPS or the
+[FIPS][OpenSSL README-FIPS] case, compiling OpenSSL from the source by yourself
+is a good practice.
 
 The following steps are tested in Linux and GCC environment. You can adjust the
 commands in the steps for a different environment.
@@ -104,20 +103,16 @@ $ OPENSSL_DIR=$HOME/.openssl/openssl-fips-debug-0bf18140f4
 ```
 
 The following configuration options are useful in this case.
-You can check
-[OpenSSL installation document](https://github.com/openssl/openssl/blob/master/INSTALL.md)
-for details.
+You can check [OpenSSL installation document][OpenSSL INSTALL] for details.
 
 * `enable-fips`: Add an option to run with the OpenSSL FIPS module.
 * `enable-trace`: Add an option to enabling tracing log. You can trace logs by
-  implementing a code. See the man page
-  [OSSL_TRACE(3)](https://www.openssl.org/docs/man3.0/man3/OSSL_TRACE.html) for
+  implementing a code. See the man page [OSSL_TRACE(3)][OpenSSL OSSL_TRACE] for
   details.
 * compiler flags
   * `-Wl,-rpath,$(LIBRPATH)`: Set the runtime shared library path to run the
     `openssl` command without the `LD_LIBRARY_PATH`. You can check
-    [this document](https://github.com/openssl/openssl/blob/master/NOTES-UNIX.md)
-    for details.
+    [this document][OpenSSL NOTES-UNIX] for details.
   * `-O0 -g3 -ggdb3 -gdwarf-5`: You can set debugging compiler flags.
 
 ```
@@ -173,8 +168,7 @@ To use OpenSSL 3.0 or later versions in a FIPS-approved manner, you must load th
 property query is used when fetching cryptographic algorithm implementations.
 This must be done at the startup of a process to avoid implicitly loading the
 `default` provider which has the non-FIPS cryptographic algorithm
-implementations. See also the man page
-[fips_module(7)](https://www.openssl.org/docs/manmaster/man7/fips_module.html).
+implementations. See also the man page [fips_module(7)][OpenSSL fips_module].
 
 You can set this in your OpenSSL configuration file by either appropriately
 modifying the default OpenSSL configuration file located at
@@ -227,10 +221,8 @@ $ OPENSSL_CONF=$OPENSSL_DIR/ssl/openssl_fips.cnf \
   bundle exec rake test
 ```
 
-The GitHub Actions workflow file
-[`test.yml`](https://github.com/ruby/openssl/tree/master/.github/workflows/test.yml)
-contains useful information for building OpenSSL/LibreSSL and testing against
-them.
+The GitHub Actions workflow file [`test.yml`][GitHub test.yml] contains useful
+information for building OpenSSL/LibreSSL and testing against them.
 
 
 ## Relation with Ruby source tree
@@ -255,7 +247,7 @@ security issue handling procedure for Ruby core.
 
 You can either use [HackerOne] or send an email to security@ruby-lang.org.
 
-Please see [Security] page on ruby-lang.org website for details.
+Please see [Security][Ruby Security] page on ruby-lang.org website for details.
 
 Reported problems will be published after a fix is released.
 
@@ -264,9 +256,16 @@ _Thanks for your contributions!_
   _\- The Ruby OpenSSL team_
 
 [GitHub]: https://github.com/ruby/openssl
-[known issues]: https://github.com/ruby/openssl/issues
-[DeveloperHowTo]: https://bugs.ruby-lang.org/projects/ruby/wiki/DeveloperHowto
+[Issues]: https://github.com/ruby/openssl/issues
+[Compare changes]: https://github.com/ruby/openssl/compare
+[GitHub test/openssl]: https://github.com/ruby/openssl/tree/master/test/openssl
+[GitHub test.yml]: https://github.com/ruby/openssl/tree/master/.github/workflows/test.yml
+[Ruby Developer-How-To]: https://github.com/ruby/ruby/wiki/Developer-How-To
+[Ruby Security]: https://www.ruby-lang.org/en/security/
 [HackerOne]: https://hackerone.com/ruby
-[Security]: https://www.ruby-lang.org/en/security/
-[pull request]: https://github.com/ruby/openssl/compare
-[History.md]: https://github.com/ruby/openssl/tree/master/History.md
+[OpenSSL]: https://www.openssl.org/
+[OpenSSL INSTALL]: https://github.com/openssl/openssl/blob/master/INSTALL.md
+[OpenSSL README-FIPS]: https://github.com/openssl/openssl/blob/master/README-FIPS.md
+[OpenSSL NOTES-UNIX]: https://github.com/openssl/openssl/blob/master/NOTES-UNIX.md
+[OpenSSL OSSL_TRACE]: https://www.openssl.org/docs/manmaster/man3/OSSL_TRACE.html
+[OpenSSL fips_module]: https://www.openssl.org/docs/manmaster/man7/fips_module.html

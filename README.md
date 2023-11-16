@@ -32,8 +32,7 @@ included as a default gem in [supported Ruby branches][Ruby Maintenance Branches
 
 > **Note**
 > The openssl gem is included with Ruby by default, but you may wish to upgrade
-> it to a newer version available at
-> [rubygems.org](https://rubygems.org/gems/openssl).
+> it to a newer version available at [rubygems.org][RubyGems.org openssl].
 
 To upgrade it, you can use RubyGems:
 
@@ -59,6 +58,8 @@ gem 'openssl', git: 'https://github.com/ruby/openssl'
 
 After running `bundle install`, you should have the gem installed in your bundle.
 
+[RubyGems.org openssl]: https://rubygems.org/gems/openssl
+
 ## Usage
 
 Once installed, you can require "openssl" in your application.
@@ -80,4 +81,6 @@ Please read our [CONTRIBUTING.md] for instructions.
 ## Security
 
 Security issues should be reported to ruby-core by following the process
-described on ["Security at ruby-lang.org"](https://www.ruby-lang.org/en/security/).
+described on ["Security at ruby-lang.org"][Security].
+
+[Security]: https://www.ruby-lang.org/en/security/
