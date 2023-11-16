@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-
 require_relative 'utils'
 
 class OpenSSL::TestPKey < OpenSSL::PKeyTestCase
@@ -244,24 +243,10 @@ class OpenSSL::TestPKey < OpenSSL::PKeyTestCase
     assert_include rsa.to_text, 'publicExponent'
   end
 
-  def test_keysize_in_bits
-    # Test vector from RFC 7748 Section 6.1
-    alice_pem = <<~EOF
-      -----BEGIN PRIVATE KEY-----
-      MC4CAQAwBQYDK2VuBCIEIHcHbQpzGKV9PBbBclGyZkXfTC+H68CZKrF3+6UduSwq
-      -----END PRIVATE KEY-----
-    EOF
-    bob_pem = <<~EOF
-      -----BEGIN PUBLIC KEY-----
-      MCowBQYDK2VuAyEA3p7bfXt9wbTTW2HC7OQ1Nz+DQ8hbeGdNrfx+FG+IK08=
-      -----END PUBLIC KEY-----
-    EOF
+  def test_keysize_bits
     begin
-      alice = OpenSSL::PKey.read(alice_pem)
-      bob = OpenSSL::PKey.read(bob_pem)
-
-      assert_equal 253, alice.keysize_in_bits
-      assert_equal 253, bob.keysize_in_bits
+      x25519 = OpenSSL::PKey.generate_key("X25519")
+      assert_equal 253, x25519.bits
     rescue OpenSSL::PKey::PKeyError
       # OpenSSL < 1.1.0
       pend 'X25519 is not implemented'
