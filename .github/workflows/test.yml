@@ -39,7 +39,10 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby }}
 
-      - name: depends
+      - name: bundle config
+        run:  bundle config set --local without development
+
+      - name: bundle install
         run:  bundle install
 
       # Enable the verbose option in mkmf.rb to print the compiling commands.
@@ -154,7 +157,10 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby }}
 
-      - name: depends
+      - name: bundle config
+        run:  bundle config set --local without development
+
+      - name: bundle install
         run:  bundle install
 
       - name: enable mkmf verbose
