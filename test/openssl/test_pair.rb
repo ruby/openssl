@@ -115,6 +115,41 @@ module OpenSSL::TestPairM
     }
   end
 
+  def test_gets_chomp
+    ssl_pair {|s1, s2|
+      s1 << "abcd\r\n" * 50
+      s1.close
+
+      50.times do
+        assert_equal "abcd", s2.gets(chomp: true)
+      end
+    }
+  end
+
+  def test_gets_chomp_rs
+    rs = ":"
+    ssl_pair {|s1, s2|
+      s1 << "aaa:bbb"
+      s1.close
+
+      assert_equal "aaa", s2.gets(rs, chomp: true)
+      assert_equal "bbb", s2.gets(rs, chomp: true)
+      assert_nil s2.gets(rs, chomp: true)
+    }
+  end
+
+  def test_gets_chomp_default_rs
+    ssl_pair {|s1, s2|
+      s1 << "aaa\r\nbbb\nccc"
+      s1.close
+
+      assert_equal "aaa", s2.gets(chomp: true)
+      assert_equal "bbb", s2.gets(chomp: true)
+      assert_equal "ccc", s2.gets(chomp: true)
+      assert_nil s2.gets
+    }
+  end
+
   def test_gets_eof_limit
     ssl_pair {|s1, s2|
       s1.write("hello")
