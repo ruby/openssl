@@ -52,10 +52,10 @@ jobs:
         if: ${{ !matrix.skip-warnings }}
 
       # Enable provider search path for OpenSSL 3.0 in MSYS2.
-      # Remove when Ruby 3.2 build is updated
+      # Remove when Ruby 3.2, and 3.3 builds are updated.
       - name: enable windows provider search path
         run: echo "OPENSSL_MODULES=$($env:RI_DEVKIT)\$($env:MSYSTEM_PREFIX)\lib\ossl-modules" >> $env:GITHUB_ENV
-        if: runner.os == 'Windows' && matrix.ruby == '3.2'
+        if: runner.os == 'Windows' && (matrix.ruby == '3.2' || matrix.ruby == '3.3')
 
       - name: compile
         run:  rake compile
