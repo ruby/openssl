@@ -200,6 +200,8 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
       server_connect(port) do |ssl|
         ssl.timeout = 0.001
         assert_raise(IO::TimeoutError) {ssl.read(1)}
+      ensure
+        ssl.close
       end
     end
   end
