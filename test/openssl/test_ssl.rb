@@ -198,10 +198,15 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
 
     start_server do |port|
       server_connect(port) do |ssl|
-        ssl.timeout = 0.001
+        str = +("x" * 100 + "\n")
+        ssl.syswrite(str)
+        assert_equal(str, ssl.sysread(str.bytesize))
+
+        ssl.timeout = 0.01
         assert_raise(IO::TimeoutError) {ssl.read(1)}
-      ensure
-        ssl.close
+
+        ssl.syswrite(str)
+        assert_equal(str, ssl.sysread(str.bytesize))
       end
     end
   end
