@@ -1725,7 +1725,7 @@ no_exception_p(VALUE opts)
 #define RUBY_IO_TIMEOUT_DEFAULT Qnil
 #endif
 
-#ifdef HAVE_RB_EIOTIMEOUTERROR
+#ifdef HAVE_RB_IO_TIMEOUT
 #define IO_TIMEOUT_ERROR rb_eIOTimeoutError
 #else
 #define IO_TIMEOUT_ERROR rb_eIOError
