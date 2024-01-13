@@ -202,7 +202,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
         ssl.syswrite(str)
         assert_equal(str, ssl.sysread(str.bytesize))
 
-        ssl.timeout = 0.01
+        ssl.timeout = 1
         assert_raise(IO::TimeoutError) {ssl.read(1)}
 
         ssl.syswrite(str)
