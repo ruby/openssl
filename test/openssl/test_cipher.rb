@@ -359,6 +359,22 @@ class OpenSSL::TestCipher < OpenSSL::TestCase
     end
   end
 
+  def test_aes_keywrap_pad
+    # RFC 5649 Section 6; The second example
+    kek = ["5840df6e29b02af1ab493b705bf16ea1ae8338f4dcc176a8"].pack("H*")
+    key = ["466f7250617369"].pack("H*")
+    wrap = ["afbeb0f07dfbf5419200f2ccb50bb24f"].pack("H*")
+
+    begin
+      cipher = OpenSSL::Cipher.new("id-aes192-wrap-pad").encrypt
+    rescue OpenSSL::Cipher::CipherError
+      omit "id-aes192-wrap-pad is not supported: #$!"
+    end
+    cipher.key = kek
+    ct = cipher.update(key) << cipher.final
+    assert_equal wrap, ct
+  end
+
   private
 
   def new_encryptor(algo, **kwargs)
