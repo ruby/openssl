@@ -100,6 +100,7 @@ jobs:
           - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.2.1, fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
           - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-head, git: 'git://git.openssl.org/openssl.git', branch: 'master' }
           - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-head, git: 'git://git.openssl.org/openssl.git', branch: 'master', fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
+          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-head, git: 'git://git.openssl.org/openssl.git', branch: 'master', append-configure: 'no-legacy', name-extra: 'no-legacy' }
     steps:
       - name: repo checkout
         uses: actions/checkout@v4
