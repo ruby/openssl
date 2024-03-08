@@ -67,6 +67,7 @@ ossl_##name##_ary2sk(VALUE ary)					\
     return sk;							\
 }
 OSSL_IMPL_ARY2SK(x509, X509, cX509Cert, DupX509CertPtr)
+OSSL_IMPL_ARY2SK(x509_attr, X509_ATTRIBUTE, cX509Attr, DupX509AttrPtr)
 
 #define OSSL_IMPL_SK2ARY(name, type)	        \
 VALUE						\

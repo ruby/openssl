@@ -32,6 +32,7 @@ extern VALUE eX509AttrError;
 
 VALUE ossl_x509attr_new(X509_ATTRIBUTE *);
 X509_ATTRIBUTE *GetX509AttrPtr(VALUE);
+X509_ATTRIBUTE *DupX509AttrPtr(VALUE);
 void Init_ossl_x509attr(void);
 
 /*
