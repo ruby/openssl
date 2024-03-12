@@ -79,11 +79,40 @@ ossl_pkey_new(EVP_PKEY *pkey)
     return obj;
 }
 
+EVP_PKEY *
+ossl_pkey_read(BIO *bio, VALUE pass)
+{
+    void *ppass = (void *)pass;
+    EVP_PKEY *pkey;
+
+    if ((pkey = d2i_PrivateKey_bio(bio, NULL)))
+	goto out;
+    OSSL_BIO_reset(bio);
+    if ((pkey = d2i_PKCS8PrivateKey_bio(bio, NULL, ossl_pem_passwd_cb, ppass)))
+	goto out;
+    OSSL_BIO_reset(bio);
+    if ((pkey = d2i_PUBKEY_bio(bio, NULL)))
+	goto out;
+    OSSL_BIO_reset(bio);
+    /* PEM_read_bio_PrivateKey() also parses PKCS #8 formats */
+    if ((pkey = PEM_read_bio_PrivateKey(bio, NULL, ossl_pem_passwd_cb, ppass)))
+	goto out;
+    OSSL_BIO_reset(bio);
+    if ((pkey = PEM_read_bio_PUBKEY(bio, NULL, NULL, NULL)))
+	goto out;
+    OSSL_BIO_reset(bio);
+    if ((pkey = PEM_read_bio_Parameters(bio, NULL)))
+	goto out;
+
+  out:
+    return pkey;
+}
+
 #if OSSL_OPENSSL_PREREQ(3, 0, 0)
 # include <openssl/decoder.h>
 
 static EVP_PKEY *
-ossl_pkey_read(BIO *bio, const char *input_type, int selection, VALUE pass)
+ossl_pkey_decoder_read(BIO *bio, const char *input_type, int selection, VALUE pass)
 {
     void *ppass = (void *)pass;
     OSSL_DECODER_CTX *dctx;
@@ -170,11 +199,17 @@ ossl_pkey_read_generic(BIO *bio, VALUE pass)
 
     for (i = 0; i < input_type_num; i++) {
         for (j = 0; j < selection_num; j++) {
-            pkey = ossl_pkey_read(bio, input_types[i], selections[j], pass);
+            pkey = ossl_pkey_decoder_read(bio, input_types[i], selections[j], pass);
             if (pkey) {
                 goto out;
             }
         }
+    }
+
+    pkey = ossl_pkey_read(bio, pass);
+
+    if (pkey) {
+        goto out;
     }
   out:
     return pkey;
@@ -183,30 +218,7 @@ ossl_pkey_read_generic(BIO *bio, VALUE pass)
 EVP_PKEY *
 ossl_pkey_read_generic(BIO *bio, VALUE pass)
 {
-    void *ppass = (void *)pass;
-    EVP_PKEY *pkey;
-
-    if ((pkey = d2i_PrivateKey_bio(bio, NULL)))
-	goto out;
-    OSSL_BIO_reset(bio);
-    if ((pkey = d2i_PKCS8PrivateKey_bio(bio, NULL, ossl_pem_passwd_cb, ppass)))
-	goto out;
-    OSSL_BIO_reset(bio);
-    if ((pkey = d2i_PUBKEY_bio(bio, NULL)))
-	goto out;
-    OSSL_BIO_reset(bio);
-    /* PEM_read_bio_PrivateKey() also parses PKCS #8 formats */
-    if ((pkey = PEM_read_bio_PrivateKey(bio, NULL, ossl_pem_passwd_cb, ppass)))
-	goto out;
-    OSSL_BIO_reset(bio);
-    if ((pkey = PEM_read_bio_PUBKEY(bio, NULL, NULL, NULL)))
-	goto out;
-    OSSL_BIO_reset(bio);
-    if ((pkey = PEM_read_bio_Parameters(bio, NULL)))
-	goto out;
-
-  out:
-    return pkey;
+    return ossl_pkey_read(bio, pass);
 }
 #endif
 
