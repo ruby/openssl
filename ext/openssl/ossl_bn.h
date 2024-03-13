@@ -19,6 +19,7 @@ BN_CTX *ossl_bn_ctx_get(void);
 #define GetBNPtr(obj) ossl_bn_value_ptr(&(obj))
 
 VALUE ossl_bn_new(const BIGNUM *);
+VALUE ossl_try_convert_to_bn(VALUE obj);
 BIGNUM *ossl_bn_value_ptr(volatile VALUE *);
 void Init_ossl_bn(void);
 
