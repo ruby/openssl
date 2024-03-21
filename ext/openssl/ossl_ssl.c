@@ -2046,7 +2046,6 @@ static VALUE
 ossl_ssl_write_internal(VALUE self, VALUE str, VALUE opts)
 {
     SSL *ssl;
-    rb_io_t *fptr;
     int num, nonblock = opts != Qfalse;
     VALUE tmp;
 
@@ -2056,7 +2055,6 @@ ossl_ssl_write_internal(VALUE self, VALUE str, VALUE opts)
 
     tmp = rb_str_new_frozen(StringValue(str));
     VALUE io = rb_attr_get(self, id_i_io);
-    GetOpenFile(io, fptr);
 
     /* SSL_write(3ssl) manpage states num == 0 is undefined */
     num = RSTRING_LENINT(tmp);
