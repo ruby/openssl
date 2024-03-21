@@ -2097,7 +2097,6 @@ ossl_ssl_write_internal_safe(VALUE _args)
     VALUE opts = args[2];
 
     SSL *ssl;
-    rb_io_t *fptr;
     int num, nonblock = opts != Qfalse;
     VALUE cb_state;
 
@@ -2106,7 +2105,6 @@ ossl_ssl_write_internal_safe(VALUE _args)
         rb_raise(eSSLError, "SSL session is not started yet");
 
     VALUE io = rb_attr_get(self, id_i_io);
-    GetOpenFile(io, fptr);
 
     /* SSL_write(3ssl) manpage states num == 0 is undefined */
     num = RSTRING_LENINT(str);
