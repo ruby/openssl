@@ -57,7 +57,7 @@ module OpenSSL::Buffering
     super
     @eof = false
     @rbuffer = String.new
-    @sync = io.sync
+    @sync = io.respond_to?(:sync) ? io.sync : true
   end
 
   #

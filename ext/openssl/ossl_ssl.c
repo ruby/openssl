@@ -1923,23 +1923,24 @@ ssl_call_end(VALUE self)
 static VALUE
 peer_ip_address(VALUE io)
 {
-    VALUE remote_address = rb_funcall(io, rb_intern("remote_address"), 0);
-
+    VALUE remote_address =
+        rb_check_funcall(io, rb_intern("remote_address"), 0, NULL);
+    if (remote_address == Qundef)
+        return rb_str_new_cstr("(error: remote_address not supported)");
     return rb_funcall(remote_address, rb_intern("inspect_sockaddr"), 0);
 }
 
 static VALUE
 fallback_peer_ip_address(VALUE self, VALUE exc)
 {
-    return rb_str_new_cstr("(null)");
+    return rb_sprintf("(error: %"PRIsVALUE")", exc);
 }
 
 static VALUE
 peeraddr_ip_str(VALUE self)
 {
     VALUE io = ossl_ssl_get_io(self);
-    return rb_rescue2(peer_ip_address, io, fallback_peer_ip_address, Qnil,
-                      rb_eSystemCallError, (VALUE)0);
+    return rb_rescue(peer_ip_address, io, fallback_peer_ip_address, Qnil);
 }
 
 static VALUE
