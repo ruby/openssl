@@ -1592,8 +1592,9 @@ ossl_ssl_s_alloc(VALUE klass)
 static VALUE
 peer_ip_address(VALUE io)
 {
-    VALUE remote_address = rb_funcall(io, rb_intern("remote_address"), 0);
-
+    VALUE remote_address = rb_check_funcall(io, rb_intern("remote_address"), 0, NULL);
+    if (remote_address == Qundef)
+        return rb_str_new_cstr("(unsupported)");
     return rb_funcall(remote_address, rb_intern("inspect_sockaddr"), 0);
 }
 
