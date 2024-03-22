@@ -67,6 +67,32 @@ module OpenSSL::SSLPairLowlevelSocket
   end
 end
 
+module OpenSSL::SSLPairIOish
+  include OpenSSL::SSLPairM
+
+  def create_tcp_server(host, port)
+    Addrinfo.tcp(host, port).listen
+  end
+
+  class TCPSocketWrapper
+    def initialize(io) @io = io end
+    def read_nonblock(*args, **kwargs) @io.read_nonblock(*args, **kwargs) end
+    def write_nonblock(*args, **kwargs) @io.write_nonblock(*args, **kwargs) end
+    def wait_readable() @io.wait_readable end
+    def wait_writable() @io.wait_writable end
+    def flush() @io.flush end
+    def close() @io.close end
+    def closed?() @io.closed? end
+
+    # Only used within test_pair.rb
+    def write(*args) @io.write(*args) end
+  end
+
+  def create_tcp_client(host, port)
+    TCPSocketWrapper.new(Addrinfo.tcp(host, port).connect)
+  end
+end
+
 module OpenSSL::TestEOF1M
   def open_file(content)
     ssl_pair { |s1, s2|
@@ -518,6 +544,12 @@ class OpenSSL::TestEOF1LowlevelSocket < OpenSSL::TestCase
   include OpenSSL::TestEOF1M
 end
 
+class OpenSSL::TestEOF1IOish < OpenSSL::TestCase
+  include OpenSSL::TestEOF
+  include OpenSSL::SSLPairIOish
+  include OpenSSL::TestEOF1M
+end
+
 class OpenSSL::TestEOF2 < OpenSSL::TestCase
   include OpenSSL::TestEOF
   include OpenSSL::SSLPair
@@ -530,6 +562,12 @@ class OpenSSL::TestEOF2LowlevelSocket < OpenSSL::TestCase
   include OpenSSL::TestEOF2M
 end
 
+class OpenSSL::TestEOF2IOish < OpenSSL::TestCase
+  include OpenSSL::TestEOF
+  include OpenSSL::SSLPairIOish
+  include OpenSSL::TestEOF2M
+end
+
 class OpenSSL::TestPair < OpenSSL::TestCase
   include OpenSSL::SSLPair
   include OpenSSL::TestPairM
@@ -537,6 +575,11 @@ end
 
 class OpenSSL::TestPairLowlevelSocket < OpenSSL::TestCase
   include OpenSSL::SSLPairLowlevelSocket
+  include OpenSSL::TestPairM
+end
+
+class OpenSSL::TestPairIOish < OpenSSL::TestCase
+  include OpenSSL::SSLPairIOish
   include OpenSSL::TestPairM
 end
 
