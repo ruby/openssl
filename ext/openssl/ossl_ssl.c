@@ -1583,7 +1583,11 @@ ossl_ssl_s_alloc(VALUE klass)
 static VALUE
 peer_ip_address(VALUE self)
 {
-    VALUE remote_address = rb_funcall(rb_attr_get(self, id_i_io), rb_intern("remote_address"), 0);
+    VALUE io = rb_attr_get(self, id_i_io);
+    if (!rb_respond_to(io, rb_intern("remote_address")))
+        return rb_str_new_cstr("(unsupported)");
+
+    VALUE remote_address = rb_funcall(io, rb_intern("remote_address"), 0);
 
     return rb_funcall(remote_address, rb_intern("inspect_sockaddr"), 0);
 }
