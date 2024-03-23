@@ -1724,6 +1724,10 @@ ossl_ssl_setup(VALUE self)
         if (!bio)
             ossl_raise(eSSLError, "BIO_new(ossl_bio_meth)");
         BIO_set_data(bio, (void *)io);
+#if OSSL_IS_LIBRESSL
+        // Incompatibility with OpenSSL?
+        BIO_set_init(bio, 1);
+#endif
         // Returns void currently (but wouldn't it be technically possible to fail?)
         SSL_set_bio(ssl, bio, bio);
     }
