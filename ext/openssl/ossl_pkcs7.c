@@ -65,7 +65,7 @@ const rb_data_type_t ossl_pkcs7_type = {
     {
 	0, ossl_pkcs7_free,
     },
-    0, 0, RUBY_TYPED_FREE_IMMEDIATELY,
+    0, 0, RUBY_TYPED_FREE_IMMEDIATELY | RUBY_TYPED_WB_PROTECTED,
 };
 
 static void
@@ -79,7 +79,7 @@ static const rb_data_type_t ossl_pkcs7_signer_info_type = {
     {
 	0, ossl_pkcs7_signer_info_free,
     },
-    0, 0, RUBY_TYPED_FREE_IMMEDIATELY,
+    0, 0, RUBY_TYPED_FREE_IMMEDIATELY | RUBY_TYPED_WB_PROTECTED,
 };
 
 static void
@@ -93,7 +93,7 @@ static const rb_data_type_t ossl_pkcs7_recip_info_type = {
     {
 	0, ossl_pkcs7_recip_info_free,
     },
-    0, 0, RUBY_TYPED_FREE_IMMEDIATELY,
+    0, 0, RUBY_TYPED_FREE_IMMEDIATELY | RUBY_TYPED_WB_PROTECTED,
 };
 
 /*
@@ -159,6 +159,7 @@ ossl_pkcs7_s_read_smime(VALUE klass, VALUE arg)
     BIO *in, *out;
     PKCS7 *pkcs7;
     VALUE ret, data;
+    int i;
 
     ret = NewPKCS7(cPKCS7);
     in = ossl_obj2bio(&arg);
@@ -166,6 +167,17 @@ ossl_pkcs7_s_read_smime(VALUE klass, VALUE arg)
     pkcs7 = SMIME_read_PKCS7(in, &out);
     BIO_free(in);
     if(!pkcs7) ossl_raise(ePKCS7Error, NULL);
+
+    i = OBJ_obj2nid(pkcs7->type);
+    switch(i){
+      case NID_pkcs7_signed:
+      case NID_pkcs7_signedAndEnveloped:
+        if (!pkcs7->d.sign)
+            ossl_raise(rb_eArgError, "No signed data in PKCS7");
+      default:
+        ; /* nothing */
+    }
+
     data = out ? ossl_membio2str(out) : Qnil;
     SetPKCS7(ret, pkcs7);
     ossl_pkcs7_set_data(ret, data);
@@ -333,6 +345,7 @@ ossl_pkcs7_initialize(int argc, VALUE *argv, VALUE self)
     PKCS7 *p7, *p7_orig = RTYPEDDATA_DATA(self);
     BIO *in;
     VALUE arg;
+    int i;
 
     if(rb_scan_args(argc, argv, "01", &arg) == 0)
 	return self;
@@ -346,6 +359,16 @@ ossl_pkcs7_initialize(int argc, VALUE *argv, VALUE self)
     BIO_free(in);
     if (!p7)
         ossl_raise(rb_eArgError, "Could not parse the PKCS7");
+
+    i = OBJ_obj2nid(p7->type);
+    switch(i){
+      case NID_pkcs7_signed:
+      case NID_pkcs7_signedAndEnveloped:
+        if (!p7->d.sign)
+            ossl_raise(rb_eArgError, "No signed data in PKCS7");
+      default:
+        ; /* nothing */
+    }
 
     RTYPEDDATA_DATA(self) = p7;
     PKCS7_free(p7_orig);

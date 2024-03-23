@@ -42,7 +42,7 @@ static const rb_data_type_t ossl_cipher_type = {
     {
 	0, ossl_cipher_free,
     },
-    0, 0, RUBY_TYPED_FREE_IMMEDIATELY,
+    0, 0, RUBY_TYPED_FREE_IMMEDIATELY | RUBY_TYPED_WB_PROTECTED,
 };
 
 /*
@@ -384,8 +384,7 @@ ossl_cipher_update(int argc, VALUE *argv, VALUE self)
 
     StringValue(data);
     in = (unsigned char *)RSTRING_PTR(data);
-    if ((in_len = RSTRING_LEN(data)) == 0)
-        ossl_raise(rb_eArgError, "data must not be empty");
+    in_len = RSTRING_LEN(data);
     GetCipher(self, ctx);
     out_len = in_len+EVP_CIPHER_CTX_block_size(ctx);
     if (out_len <= 0) {
