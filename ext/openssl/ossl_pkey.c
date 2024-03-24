@@ -739,6 +739,31 @@ ossl_pkey_inspect(VALUE self)
 
 /*
  * call-seq:
+ *    pkey.keysize_in_bits -> integer
+ *
+ * Returns an integer representing cryptographic length of the cryptosystem to which the key
+ * in _pkey_ belongs, in bits.
+ *
+ * See man page EVP_PKEY_get_bits(3)
+ */
+static VALUE
+ossl_pkey_length_in_bits(VALUE self)
+{
+    EVP_PKEY * pkey;
+    int bits;
+
+    GetPKey(self, pkey);
+
+#if OSSL_OPENSSL_PREREQ(3, 0, 0)
+    bits = EVP_PKEY_get_bits(pkey);
+#else
+    bits = EVP_PKEY_bits(pkey);
+#endif
+    return INT2NUM(bits);
+}
+
+/*
+ * call-seq:
  *    pkey.to_text -> string
  *
  * Dumps key parameters, public key, and private key components contained in
@@ -1765,6 +1790,7 @@ Init_ossl_pkey(void)
 #endif
     rb_define_method(cPKey, "oid", ossl_pkey_oid, 0);
     rb_define_method(cPKey, "inspect", ossl_pkey_inspect, 0);
+    rb_define_method(cPKey, "bits", ossl_pkey_length_in_bits, 0);
     rb_define_method(cPKey, "to_text", ossl_pkey_to_text, 0);
     rb_define_method(cPKey, "private_to_der", ossl_pkey_private_to_der, -1);
     rb_define_method(cPKey, "private_to_pem", ossl_pkey_private_to_pem, -1);
