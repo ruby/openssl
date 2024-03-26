@@ -1732,6 +1732,22 @@ no_exception_p(VALUE opts)
 #endif
 
 
+int ossl_ssl_connect_impl(SSL *ssl)
+{
+    return SSL_connect(ssl);
+}
+
+int ossl_ssl_read_impl(SSL *ssl, VALUE str, int ilen)
+{
+    return SSL_read(ssl, RSTRING_PTR(str), ilen);
+}
+
+int ossl_ssl_write_impl(SSL *ssl, VALUE tmp, int num)
+{
+    return SSL_write(ssl, RSTRING_PTR(tmp), num);
+}
+
+
 static void
 io_wait_writable(VALUE io)
 {
@@ -1848,7 +1864,7 @@ ossl_ssl_connect(VALUE self)
 {
     ossl_ssl_setup(self);
 
-    return ossl_start_ssl(self, SSL_connect, "SSL_connect", Qfalse);
+    return ossl_start_ssl(self, ossl_ssl_connect_impl, "SSL_connect", Qfalse);
 }
 
 /*
@@ -1881,7 +1897,7 @@ ossl_ssl_connect_nonblock(int argc, VALUE *argv, VALUE self)
 
     ossl_ssl_setup(self);
 
-    return ossl_start_ssl(self, SSL_connect, "SSL_connect", opts);
+    return ossl_start_ssl(self, ossl_ssl_connect_impl, "SSL_connect", opts);
 }
 
 /*
@@ -1966,7 +1982,7 @@ ossl_ssl_read_internal(int argc, VALUE *argv, VALUE self, int nonblock)
 
     rb_str_locktmp(str);
     for (;;) {
-        int nread = SSL_read(ssl, RSTRING_PTR(str), ilen);
+        int nread = ossl_ssl_read_impl(ssl, str, ilen);
         switch (ssl_get_error(ssl, nread)) {
           case SSL_ERROR_NONE:
             rb_str_unlocktmp(str);
@@ -2072,7 +2088,7 @@ ossl_ssl_write_internal(VALUE self, VALUE str, VALUE opts)
         return INT2FIX(0);
 
     for (;;) {
-        int nwritten = SSL_write(ssl, RSTRING_PTR(tmp), num);
+        int nwritten = ossl_ssl_write_impl(ssl, tmp, num);
         switch (ssl_get_error(ssl, nwritten)) {
           case SSL_ERROR_NONE:
             return INT2NUM(nwritten);
