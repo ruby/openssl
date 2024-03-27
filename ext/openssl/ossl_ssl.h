@@ -10,8 +10,12 @@
 #if !defined(_OSSL_SSL_H_)
 #define _OSSL_SSL_H_
 
+typedef struct rb_ssl {
+  SSL *ssl;
+} rb_ssl_str;
+
 #define GetSSL(obj, ssl) do { \
-	TypedData_Get_Struct((obj), SSL, &ossl_ssl_type, (ssl)); \
+	TypedData_Get_Struct((obj), rb_ssl_str, &ossl_ssl_type, (ssl)); \
 	if (!(ssl)) { \
 		ossl_raise(rb_eRuntimeError, "SSL is not initialized"); \
 	} \
