@@ -44,11 +44,11 @@ ossl_ssl_session_initialize(VALUE self, VALUE arg1)
         ossl_raise(eSSLSession, "SSL Session already initialized");
 
     if (rb_obj_is_instance_of(arg1, cSSLSocket)) {
-        SSL *ssl;
+        rb_ssl_str *ssl;
 
         GetSSL(arg1, ssl);
 
-        if ((ctx = SSL_get1_session(ssl)) == NULL)
+        if ((ctx = SSL_get1_session(ssl->ssl)) == NULL)
             ossl_raise(eSSLSession, "no session available");
     }
     else {
