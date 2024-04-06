@@ -230,12 +230,16 @@ ossl_pkcs7_s_sign(int argc, VALUE *argv, VALUE klass)
     pkey = GetPrivPKeyPtr(key); /* NO NEED TO DUP */
     flg = NIL_P(flags) ? 0 : NUM2INT(flags);
     ret = NewPKCS7(cPKCS7);
-    in = ossl_obj2bio(&data);
+
+    if (!(flg & PKCS7_PARTIAL))
+        in = ossl_obj2bio(&data);
+
     if(NIL_P(certs)) x509s = NULL;
     else{
 	x509s = ossl_protect_x509_ary2sk(certs, &status);
 	if(status){
-	    BIO_free(in);
+        if (!(flg & PKCS7_PARTIAL))
+	        BIO_free(in);
 	    rb_jump_tag(status);
 	}
     }
@@ -244,10 +248,17 @@ ossl_pkcs7_s_sign(int argc, VALUE *argv, VALUE klass)
 	sk_X509_pop_free(x509s, X509_free);
 	ossl_raise(ePKCS7Error, NULL);
     }
+
     SetPKCS7(ret, pkcs7);
-    ossl_pkcs7_set_data(ret, data);
+
+    if (!(flg & PKCS7_PARTIAL))
+        ossl_pkcs7_set_data(ret, data);
+
     ossl_pkcs7_set_err_string(ret, Qnil);
-    BIO_free(in);
+
+    if (!(flg & PKCS7_PARTIAL))
+        BIO_free(in);
+
     sk_X509_pop_free(x509s, X509_free);
 
     return ret;
@@ -861,6 +872,24 @@ ossl_pkcs7_to_pem(VALUE self)
     return str;
 }
 
+static VALUE
+ossl_pkcs7_finalize(VALUE self, VALUE data, VALUE flags)
+{
+    PKCS7 *pkcs7;
+    BIO *in;
+
+    GetPKCS7(self, pkcs7);
+
+    int flg = NIL_P(flags) ? 0 : NUM2INT(flags);
+    in = ossl_obj2bio(&data);
+
+    if (!PKCS7_final(pkcs7, in, flg)) {
+	    ossl_raise(ePKCS7Error, NULL);
+    };
+
+    return self;
+}
+
 /*
  * SIGNER INFO
  */
@@ -939,6 +968,28 @@ ossl_pkcs7si_get_signed_time(VALUE self)
      */
 
     return Qnil;
+}
+
+static VALUE
+ossl_pkcs7si_set_signed_attributes(VALUE self, VALUE ary)
+{
+    PKCS7_SIGNER_INFO *p7si;
+    STACK_OF(X509_ATTRIBUTE) *sk;
+    int status, result;
+
+    GetPKCS7si(self, p7si);
+    Check_Type(ary, T_ARRAY);
+
+    // TODO: reset attributes
+
+    // build list of x509 attrs of length RARRAY_LEN(ary)
+    sk = ossl_protect_x509_attr_ary2sk(ary, &status);
+
+    result = PKCS7_set_signed_attributes(p7si, sk);
+
+    fprintf(stderr, "set signed attributes result is: '%d'\n", result);
+
+    return Qtrue;
 }
 
 /*
@@ -1050,6 +1101,7 @@ Init_ossl_pkcs7(void)
     rb_define_method(cPKCS7, "to_pem", ossl_pkcs7_to_pem, 0);
     rb_define_alias(cPKCS7,  "to_s", "to_pem");
     rb_define_method(cPKCS7, "to_der", ossl_pkcs7_to_der, 0);
+    rb_define_method(cPKCS7, "finalize", ossl_pkcs7_finalize, 2);
 
     cPKCS7Signer = rb_define_class_under(cPKCS7, "SignerInfo", rb_cObject);
     rb_define_const(cPKCS7, "Signer", cPKCS7Signer);
@@ -1058,6 +1110,7 @@ Init_ossl_pkcs7(void)
     rb_define_method(cPKCS7Signer, "issuer", ossl_pkcs7si_get_issuer, 0);
     rb_define_method(cPKCS7Signer, "serial", ossl_pkcs7si_get_serial,0);
     rb_define_method(cPKCS7Signer,"signed_time",ossl_pkcs7si_get_signed_time,0);
+    rb_define_method(cPKCS7Signer, "signed_attributes=", ossl_pkcs7si_set_signed_attributes, 1);
 
     cPKCS7Recipient = rb_define_class_under(cPKCS7,"RecipientInfo",rb_cObject);
     rb_define_alloc_func(cPKCS7Recipient, ossl_pkcs7ri_alloc);
@@ -1078,4 +1131,5 @@ Init_ossl_pkcs7(void)
     DefPKCS7Const(BINARY);
     DefPKCS7Const(NOATTR);
     DefPKCS7Const(NOSMIMECAP);
+    DefPKCS7Const(PARTIAL);
 }
