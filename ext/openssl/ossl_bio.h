@@ -13,4 +13,9 @@
 BIO *ossl_obj2bio(volatile VALUE *);
 VALUE ossl_membio2str(BIO*);
 
+extern BIO_METHOD *ossl_bio_meth;
+int ossl_bio_restore_error(BIO *bio);
+
+void Init_ossl_bio(void);
+
 #endif
