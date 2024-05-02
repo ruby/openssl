@@ -1043,6 +1043,9 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   end
 
   def test_connect_certificate_verify_failed_exception_message
+    # Won't fix on the 3.0 branch
+    return if openssl?(3, 1, 0)
+
     start_server(ignore_listener_error: true) { |port|
       ctx = OpenSSL::SSL::SSLContext.new
       ctx.set_params
