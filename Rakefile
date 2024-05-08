@@ -1,6 +1,6 @@
 require 'rake/testtask'
 require 'rdoc/task'
-require 'bundler/gem_tasks'
+require 'bundler/shared_helpers'
 
 begin
   require 'rake/extensiontask'
