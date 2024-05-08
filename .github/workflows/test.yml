@@ -20,8 +20,6 @@ jobs:
         os: [ ubuntu-22.04, ubuntu-20.04, macos-latest, windows-latest ]
         ruby: ${{ fromJson(needs.ruby-versions.outputs.versions) }}
         exclude:
-          # uses non-standard MSYS2 OpenSSL 3 package
-          - { os: windows-latest, ruby: head }
           - { os: windows-latest, ruby: truffleruby }
           - { os: windows-latest, ruby: truffleruby-head }
           - { os: macos-latest,   ruby: truffleruby }
@@ -38,9 +36,7 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
-
-      - name: depends
-        run:  bundle install
+          bundler-cache: true # `bundle install` and cache
 
       # Enable the verbose option in mkmf.rb to print the compiling commands.
       - name: enable mkmf verbose
@@ -52,10 +48,10 @@ jobs:
         if: ${{ !matrix.skip-warnings }}
 
       - name: compile
-        run:  rake compile
+        run:  bundle exec rake compile
 
       - name: test
-        run:  rake test TESTOPTS="-v --no-show-detail-immediately"
+        run:  bundle exec rake test TESTOPTS="-v --no-show-detail-immediately"
         timeout-minutes: 5
 
   test-openssls:
