@@ -140,6 +140,7 @@ evp_h = "openssl/evp.h".freeze
 x509_h = "openssl/x509.h".freeze
 ts_h = "openssl/ts.h".freeze
 ssl_h = "openssl/ssl.h".freeze
+asn1_h = "openssl/asn1.h".freeze
 
 # compile options
 have_func("RAND_egd()", "openssl/rand.h")
@@ -192,6 +193,7 @@ have_func("SSL_CTX_set_post_handshake_auth(NULL, 0)", ssl_h)
 have_func("EVP_PKEY_check(NULL)", evp_h)
 have_func("EVP_PKEY_new_raw_private_key(0, NULL, (unsigned char *)\"\", 0)", evp_h)
 have_func("SSL_CTX_set_ciphersuites(NULL, \"\")", ssl_h)
+have_func("ASN1_TIME_to_tm(NULL, NULL)", asn1_h)
 
 # added in 3.0.0
 have_func("SSL_set0_tmp_dh_pkey(NULL, NULL)", ssl_h)

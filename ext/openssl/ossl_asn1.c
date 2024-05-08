@@ -20,11 +20,51 @@ VALUE
 asn1time_to_time(const ASN1_TIME *time)
 {
     struct tm tm;
-    VALUE argv[6];
+    VALUE argv[7];
     int count;
+    int usec = 0;
 
     memset(&tm, 0, sizeof(struct tm));
 
+#ifdef HAVE_ASN1_TIME_TO_TM
+    (void)count;
+    if (!ASN1_TIME_to_tm(time, &tm)) {
+        ossl_raise(eASN1Error, "ASN1_TIME_to_tm");
+    }
+
+    tm.tm_year += 1900;
+    tm.tm_mon += 1;
+
+    if (time->length > 15 && time->data[14] == '.') {
+        const unsigned char *f = &time->data[14];
+        unsigned long f_len = 1;
+        while (14 + f_len < time->length && ISDIGIT(f[f_len]))
+            ++f_len;
+        if (f_len > 1) {
+            char buf[10];
+            if (f_len > sizeof(buf) - 1)
+                f_len = sizeof(buf) - 1;
+            memcpy(buf, f + 1, f_len - 1);
+            buf[f_len - 1] = '\0';
+
+            usec = atoi(buf);
+            // adjust based on the number of digits
+            if (f_len < 2) {
+                usec *= 1000000;
+            } else if (f_len < 3) {
+                usec *= 100000;
+            } else if (f_len < 4) {
+                usec *= 10000;
+            } else if (f_len < 5) {
+                usec *= 1000;
+            } else if (f_len < 6) {
+                usec *= 100;
+            } else if (f_len < 7) {
+                usec *= 10;
+            }
+        }
+    }
+#else
     switch (time->type) {
     case V_ASN1_UTCTIME:
 	count = sscanf((const char *)time->data, "%2d%2d%2d%2d%2d%2dZ",
@@ -59,14 +99,17 @@ asn1time_to_time(const ASN1_TIME *time)
 	rb_warning("unknown time format");
         return Qnil;
     }
+#endif
+
     argv[0] = INT2NUM(tm.tm_year);
     argv[1] = INT2NUM(tm.tm_mon);
     argv[2] = INT2NUM(tm.tm_mday);
     argv[3] = INT2NUM(tm.tm_hour);
     argv[4] = INT2NUM(tm.tm_min);
     argv[5] = INT2NUM(tm.tm_sec);
+    argv[6] = INT2NUM(usec);
 
-    return rb_funcall2(rb_cTime, rb_intern("utc"), 6, argv);
+    return rb_funcall2(rb_cTime, rb_intern("utc"), 7, argv);
 }
 
 static VALUE
