@@ -98,7 +98,7 @@ jobs:
           case ${{ matrix.openssl }} in
           openssl-*)
             if [ -z "${{ matrix.git }}" ]; then
-              curl -OL https://ftp.openssl.org/source/${{ matrix.openssl }}.tar.gz
+              curl -OL https://openssl.org/source/${{ matrix.openssl }}.tar.gz
               tar xf ${{ matrix.openssl }}.tar.gz && cd ${{ matrix.openssl }}
             else
               git clone -b ${{ matrix.branch }} --depth 1 ${{ matrix.git }} ${{ matrix.openssl }}
