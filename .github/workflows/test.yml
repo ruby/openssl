@@ -88,9 +88,9 @@ jobs:
           - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.1.5, fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
           - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.2.1, fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
           - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.3.0, fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
-          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-head, git: 'git://git.openssl.org/openssl.git', branch: 'master' }
-          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-head, git: 'git://git.openssl.org/openssl.git', branch: 'master', fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
-          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-head, git: 'git://git.openssl.org/openssl.git', branch: 'master', append-configure: 'no-legacy', name-extra: 'no-legacy' }
+          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-head, git: 'https://github.com/openssl/openssl.git', branch: 'master' }
+          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-head, git: 'https://github.com/openssl/openssl.git', branch: 'master', fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
+          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-head, git: 'https://github.com/openssl/openssl.git', branch: 'master', append-configure: 'no-legacy', name-extra: 'no-legacy' }
     steps:
       - name: repo checkout
         uses: actions/checkout@v4
@@ -103,7 +103,7 @@ jobs:
           case ${{ matrix.openssl }} in
           openssl-*)
             if [ -z "${{ matrix.git }}" ]; then
-              curl -OL https://ftp.openssl.org/source/${{ matrix.openssl }}.tar.gz
+              curl -OL https://openssl.org/source/${{ matrix.openssl }}.tar.gz
               tar xf ${{ matrix.openssl }}.tar.gz && cd ${{ matrix.openssl }}
             else
               git clone -b ${{ matrix.branch }} --depth 1 ${{ matrix.git }} ${{ matrix.openssl }}
