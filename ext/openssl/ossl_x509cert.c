@@ -540,9 +540,9 @@ ossl_x509_sign(VALUE self, VALUE key, VALUE digest)
 
     pkey = GetPrivPKeyPtr(key); /* NO NEED TO DUP */
     if (NIL_P(digest)) {
-      md = NULL; /* needed for some key types, e.g. Ed25519 */
+        md = NULL; /* needed for some key types, e.g. Ed25519 */
     } else {
-      md = ossl_evp_get_digestbyname(digest);
+        md = ossl_evp_get_digestbyname(digest);
     }
     GetX509(self, x509);
     if (!X509_sign(x509, pkey, md)) {
