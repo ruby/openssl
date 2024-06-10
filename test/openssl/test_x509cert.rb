@@ -229,7 +229,7 @@ class OpenSSL::TestX509Certificate < OpenSSL::TestCase
     omit_on_fips
 
     begin
-      ed25519  = Fixtures.pkey("ed25519")
+      ed25519  = OpenSSL::PKey::generate_key("ED25519")
     rescue OpenSSL::PKey::PKeyError => e
       # OpenSSL < 1.1.1
       #
