@@ -238,6 +238,9 @@ class OpenSSL::TestX509Certificate < OpenSSL::TestCase
       raise e
     end
 
+    # See ASN1_item_sign_ctx in ChangeLog for 3.8.1: https://github.com/libressl/portable/blob/master/ChangeLog
+    pend 'ASN1 signing with Ed25519 not yet working' unless openssl? or libressl?(3, 8, 1)
+
     cert = issue_cert(@ca, ed25519, 1, [], nil, nil, digest: nil)
     assert_equal(true, cert.verify(ed25519))
   end
