@@ -233,6 +233,27 @@ fWLOqqkzFeRrYMDzUpl36XktY6Yq8EJYlW9pCMmBVNy/dQ==
     assert_equal(nil, key.priv_key)
   end
 
+  def test_params
+    key = Fixtures.pkey("dsa2048")
+    assert_not_nil key.p
+    assert_equal key.p, key.params["p"]
+    assert_not_nil key.q
+    assert_equal key.q, key.params["q"]
+    assert_not_nil key.g
+    assert_equal key.g, key.params["g"]
+    assert_not_nil key.pub_key
+    assert_equal key.pub_key, key.params["pub_key"]
+    assert_not_nil key.priv_key
+    assert_equal key.priv_key, key.params["priv_key"]
+
+    pubkey = OpenSSL::PKey.read(key.public_to_der)
+    assert_equal key.params["p"], pubkey.params["p"]
+    assert_equal key.pub_key, pubkey.pub_key
+    assert_equal key.pub_key, pubkey.params["pub_key"]
+    assert_nil pubkey.priv_key
+    assert_equal 0, pubkey.params["priv_key"]
+  end
+
   def test_dup
     key = Fixtures.pkey("dsa1024")
     key2 = key.dup
