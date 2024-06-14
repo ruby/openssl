@@ -535,7 +535,7 @@ class OpenSSL::TestPKeyRSA < OpenSSL::PKeyTestCase
     pubkey = OpenSSL::PKey.read(key.public_to_der)
     [:d, :p, :q, :dmp1, :dmq1, :iqmp].each do |name|
       assert_nil pubkey.send(name)
-      assert_equal 0, pubkey.params[name.to_s]
+      assert_nil pubkey.params[name.to_s]
     end
   end
 
