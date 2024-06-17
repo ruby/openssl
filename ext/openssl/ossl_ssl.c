@@ -1103,6 +1103,36 @@ ossl_sslctx_set_ciphersuites(VALUE self, VALUE v)
 }
 #endif
 
+#ifdef HAVE_SSL_CTX_SET1_SIGALGS
+/*
+ * call-seq:
+ *    ctx.sigalgs = sigalgs_list -> sigalgs_list
+ *
+ * Sets the list of "supported signature algorithms" for this context.
+ *
+ * For a TLS client, the list is directly used in the supported
+ * signature algorithm list in the client hello message. For a server,
+ * the list is used by OpenSSL to determine the set of shared signature
+ * algorithms. OpenSSL will pick the most appropriate one from it.
+ */
+static VALUE
+ossl_sslctx_set_sigalgs(VALUE self, VALUE v)
+{
+    SSL_CTX *ctx;
+
+    if (NIL_P(v))
+        return v;
+
+    rb_check_frozen(self);
+    GetSSLCTX(self, ctx);
+
+    if (!SSL_CTX_set1_sigalgs_list(ctx, StringValueCStr(v)))
+        ossl_raise(eSSLError, "SSL_CTX_set1_sigalgs_list");
+
+    return v;
+}
+#endif
+
 #ifndef OPENSSL_NO_DH
 /*
  * call-seq:
@@ -2897,6 +2927,9 @@ Init_ossl_ssl(void)
     rb_define_method(cSSLContext, "ciphers=",    ossl_sslctx_set_ciphers, 1);
 #ifdef HAVE_SSL_CTX_SET_CIPHERSUITES
     rb_define_method(cSSLContext, "ciphersuites=", ossl_sslctx_set_ciphersuites, 1);
+#endif
+#ifdef HAVE_SSL_CTX_SET1_SIGALGS
+    rb_define_method(cSSLContext, "sigalgs=", ossl_sslctx_set_sigalgs, 1);
 #endif
 #ifndef OPENSSL_NO_DH
     rb_define_method(cSSLContext, "tmp_dh=", ossl_sslctx_set_tmp_dh, 1);
