@@ -1755,6 +1755,36 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     end
   end
 
+  def test_sigalgs_method_nil_argument
+    ssl_ctx = OpenSSL::SSL::SSLContext.new
+    pend 'sigalgs= method is missing' unless ssl_ctx.respond_to?(:sigalgs=)
+
+    assert_nothing_raised { ssl_ctx.sigalgs = nil }
+  end
+
+  def test_sigalgs_method_frozen_object
+    ssl_ctx = OpenSSL::SSL::SSLContext.new
+    pend 'sigalgs= method is missing' unless ssl_ctx.respond_to?(:sigalgs=)
+
+    ssl_ctx.freeze
+    assert_raise(FrozenError) { ssl_ctx.sigalgs = '"ECDSA+SHA256:RSA+SHA256"' }
+  end
+
+  def test_sigalgs_method_valid_sigalgs
+    ssl_ctx = OpenSSL::SSL::SSLContext.new
+    pend 'sigalgs= method is missing' unless ssl_ctx.respond_to?(:sigalgs=)
+
+    ssl_ctx.freeze
+    assert_raise(FrozenError) { ssl_ctx.sigalgs = '"ECDSA+SHA256:RSA+SHA256"' }
+  end
+
+  def test_sigalgs_method_bogus_sigalgs
+    ssl_ctx = OpenSSL::SSL::SSLContext.new
+    pend 'sigalgs= method is missing' unless ssl_ctx.respond_to?(:sigalgs=)
+
+    assert_raise(OpenSSL::SSL::SSLError) { ssl_ctx.sigalgs = 'BOGUS' }
+  end
+
   def test_ciphers_method_nil_argument
     ssl_ctx = OpenSSL::SSL::SSLContext.new
     assert_nothing_raised { ssl_ctx.ciphers = nil }
