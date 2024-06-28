@@ -207,6 +207,11 @@ have_func("EVP_MD_CTX_get_pkey_ctx(NULL)", evp_h)
 have_func("EVP_PKEY_eq(NULL, NULL)", evp_h)
 have_func("EVP_PKEY_dup(NULL)", evp_h)
 
+# added in 1.1.1
+have_func("EC_POINT_get_affine_coordinates")
+have_func("EC_POINT_set_affine_coordinates")
+have_func("EC_POINT_set_compressed_coordinates")
+
 Logging::message "=== Checking done. ===\n"
 
 # Append flags from environment variables.
