@@ -332,7 +332,7 @@ ossl_x509store_set_time(VALUE self, VALUE time)
     X509_VERIFY_PARAM *param;
 
     GetX509Store(self, store);
-#if HAVE_X509_STORE_GET0_PARAM
+#ifdef HAVE_X509_STORE_GET0_PARAM
     param = X509_STORE_get0_param(store);
 #else
     param = store->param;
