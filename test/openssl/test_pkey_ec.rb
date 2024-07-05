@@ -71,6 +71,16 @@ class OpenSSL::TestEC < OpenSSL::PKeyTestCase
     assert_equal key.to_der, deserialized.to_der
   end
 
+  def test_keysize_bits
+    if !openssl?(3, 0, 0)
+      ec = OpenSSL::PKey::EC.new("prime256v1")
+      ec.generate_key!
+    else
+      ec = OpenSSL::PKey::EC.generate("prime256v1")
+    end
+    assert_equal(256, ec.bits)
+  end
+
   def test_check_key
     key0 = Fixtures.pkey("p256")
     assert_equal(true, key0.check_key)
