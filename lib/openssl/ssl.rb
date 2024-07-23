@@ -15,7 +15,6 @@ require "openssl/buffering"
 if defined?(OpenSSL::SSL)
 
 require "io/nonblock"
-require "ipaddr"
 require "socket"
 
 module OpenSSL
@@ -311,6 +310,28 @@ ssbzSibBsu/6iGtCOGEoXJf//////////wIBAg==
       end
     end
 
+    private def ip_to_bytes(ip)
+      if ip.count('.') == 3 # IPv4
+        ip.split('.').map(&:to_i).pack('C*')
+      elsif ip.include?(':') # IPv6
+        hextets = ip.split(':')
+        if hextets.count('') > 1
+          raise ArgumentError, "Invalid IP address format"
+        end
+        if hextets.include?('')
+          empty_index = hextets.index('')
+          sub_hextets = hextets[empty_index + 1..-1]
+          hextets.delete_at(empty_index)
+          hextets.fill('0', empty_index, 8 - hextets.size)
+          hextets += sub_hextets
+        end
+        hextets.map { |h| h.hex }.pack('n*')
+      else
+        raise ArgumentError, "Invalid IP address format"
+      end
+    end
+    module_function :ip_to_bytes
+
     def verify_certificate_identity(cert, hostname)
       should_verify_common_name = true
       cert.extensions.each{|ext|
@@ -326,8 +347,8 @@ ssbzSibBsu/6iGtCOGEoXJf//////////wIBAg==
             should_verify_common_name = false
             if san.value.size == 4 || san.value.size == 16
               begin
-                return true if san.value == IPAddr.new(hostname).hton
-              rescue IPAddr::InvalidAddressError
+                return true if san.value == ip_to_bytes(hostname)
+              rescue ArgumentError
               end
             end
           end
