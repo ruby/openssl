@@ -112,7 +112,10 @@ jobs:
               echo "Git commit: $(git rev-parse HEAD)"
             fi
             # shared is required for 1.0.x.
-            ./Configure --prefix=$HOME/.openssl/${{ matrix.openssl }} --libdir=lib \
+            ./Configure \
+                --prefix=$HOME/.openssl/${{ matrix.openssl }} \
+                --libdir=lib \
+                '-Wl,-rpath,$(LIBRPATH)' \
                 shared linux-x86_64 ${{ matrix.append-configure }}
             make depend
             ;;
@@ -141,6 +144,11 @@ jobs:
 
       - name: set openssl config file path for fips.
         run: echo "OPENSSL_CONF=$(pwd)/tmp/openssl_fips.cnf" >> $GITHUB_ENV
+        if: matrix.fips-enabled
+
+      # Check if the base and fips providers are loaded.
+      - name: list providers.
+        run: $HOME/.openssl/${{ matrix.openssl }}/bin/openssl list -providers
         if: matrix.fips-enabled
 
       - name: load ruby
