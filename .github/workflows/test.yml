@@ -64,6 +64,14 @@ jobs:
         os: [ ubuntu-latest ]
         ruby: [ "3.0" ]
         openssl:
+          # https://www.openssl.org/source/
+          - openssl-1.0.2u # EOL
+          - openssl-1.1.0l # EOL
+          - openssl-1.1.1w # EOL
+          - openssl-3.0.13
+          - openssl-3.1.5
+          - openssl-3.2.1
+          - openssl-3.3.0
           # http://www.libressl.org/releases.html
           - libressl-3.1.5 # EOL
           - libressl-3.2.7 # EOL
@@ -76,19 +84,10 @@ jobs:
           - libressl-3.9.1
         fips-enabled: [ false ]
         include:
-          # A temporary workaround for OpenSSL source files.
-          # https://openssl-library.org/source/old/
-          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-1.0.2u, openssl-site-dir: '1.0.2' } # EOL
-          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-1.1.0l, openssl-site-dir: '1.1.0' } # EOL
-          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-1.1.1w, openssl-site-dir: '1.1.1' } # EOL
-          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.0.13, openssl-site-dir: '3.0' }
-          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.1.5, openssl-site-dir: '3.1' }
-          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.2.1, openssl-site-dir: '3.2' }
-          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.3.0, openssl-site-dir: '3.3' }
-          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.0.13, openssl-site-dir: '3.0', fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
-          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.1.5, openssl-site-dir: '3.1', fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
-          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.2.1, openssl-site-dir: '3.2', fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
-          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.3.0, openssl-site-dir: '3.3', fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
+          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.0.13, fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
+          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.1.5, fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
+          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.2.1, fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
+          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.3.0, fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
           - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-head, git: 'https://github.com/openssl/openssl.git', branch: 'master' }
           - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-head, git: 'https://github.com/openssl/openssl.git', branch: 'master', fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
           - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-head, git: 'https://github.com/openssl/openssl.git', branch: 'master', append-configure: 'no-legacy', name-extra: 'no-legacy' }
@@ -104,7 +103,7 @@ jobs:
           case ${{ matrix.openssl }} in
           openssl-*)
             if [ -z "${{ matrix.git }}" ]; then
-              curl -OL https://openssl.org/source/old/${{ matrix.openssl-site-dir }}/${{ matrix.openssl }}.tar.gz
+              curl -OL https://openssl.org/source/${{ matrix.openssl }}.tar.gz
               tar xf ${{ matrix.openssl }}.tar.gz && cd ${{ matrix.openssl }}
             else
               git clone -b ${{ matrix.branch }} --depth 1 ${{ matrix.git }} ${{ matrix.openssl }}
