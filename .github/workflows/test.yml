@@ -64,14 +64,14 @@ jobs:
         os: [ ubuntu-latest ]
         ruby: [ "3.0" ]
         openssl:
-          # https://www.openssl.org/source/
+          # https://openssl-library.org/source/
           - openssl-1.0.2u # EOL
           - openssl-1.1.0l # EOL
           - openssl-1.1.1w # EOL
-          - openssl-3.0.13
-          - openssl-3.1.5
-          - openssl-3.2.1
-          - openssl-3.3.0
+          - openssl-3.0.14
+          - openssl-3.1.6
+          - openssl-3.2.2
+          - openssl-3.3.1
           # http://www.libressl.org/releases.html
           - libressl-3.1.5 # EOL
           - libressl-3.2.7 # EOL
@@ -81,13 +81,13 @@ jobs:
           - libressl-3.6.3 # EOL
           - libressl-3.7.3 # EOL
           - libressl-3.8.4
-          - libressl-3.9.1
+          - libressl-3.9.2
         fips-enabled: [ false ]
         include:
-          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.0.13, fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
-          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.1.5, fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
-          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.2.1, fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
-          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.3.0, fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
+          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.0.14, fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
+          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.1.6, fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
+          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.2.2, fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
+          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.3.1, fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
           - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-head, git: 'https://github.com/openssl/openssl.git', branch: 'master' }
           - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-head, git: 'https://github.com/openssl/openssl.git', branch: 'master', fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
           - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-head, git: 'https://github.com/openssl/openssl.git', branch: 'master', append-configure: 'no-legacy', name-extra: 'no-legacy' }
