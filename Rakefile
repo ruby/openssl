@@ -72,7 +72,7 @@ task :debug do
       Providers: #{providers_str}
     MESSAGE
   EOF
-  ruby %Q(-I./lib -ropenssl -ve'#{ruby_code}')
+  ruby %Q(-I./lib -ropenssl.so -ve'#{ruby_code}')
 end
 
 task :default => :test
