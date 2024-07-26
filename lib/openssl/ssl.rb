@@ -314,18 +314,16 @@ ssbzSibBsu/6iGtCOGEoXJf//////////wIBAg==
       if ip.count('.') == 3 # IPv4
         ip.split('.').map(&:to_i).pack('C*')
       elsif ip.include?(':') # IPv6
-        hextets = ip.split(':')
-        if hextets.count('') > 1
-          raise ArgumentError, "Invalid IP address format"
+        if ip.include?('::')
+          parts = ip.split('::')
+          left = parts[0].split(':')
+          right = parts[1] ? parts[1].split(':') : []
+          middle = ['0'] * (8 - left.size - right.size)
+          ip = (left + middle + right)
+        else
+          ip = ip.split(':')
         end
-        if hextets.include?('')
-          empty_index = hextets.index('')
-          sub_hextets = hextets[empty_index + 1..-1]
-          hextets.delete_at(empty_index)
-          hextets.fill('0', empty_index, 8 - hextets.size)
-          hextets += sub_hextets
-        end
-        hextets.map { |h| h.hex }.pack('n*')
+        ip.map { |h| h.hex }.pack('n*')
       else
         raise ArgumentError, "Invalid IP address format"
       end
