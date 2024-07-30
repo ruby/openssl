@@ -23,8 +23,6 @@ jobs:
         exclude:
           - { os: windows-latest, ruby: truffleruby }
           - { os: windows-latest, ruby: truffleruby-head }
-          - { os: macos-latest,   ruby: truffleruby }
-          - { os: ubuntu-20.04,   ruby: truffleruby }
         include:
           - { os: windows-latest, ruby: ucrt }
           - { os: windows-latest, ruby: mswin }
