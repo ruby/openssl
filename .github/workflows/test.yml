@@ -8,6 +8,7 @@ jobs:
     with:
       engine: cruby-truffleruby
       min_version: 2.7
+
   test:
     needs: ruby-versions
     name: >-
@@ -22,8 +23,6 @@ jobs:
         exclude:
           - { os: windows-latest, ruby: truffleruby }
           - { os: windows-latest, ruby: truffleruby-head }
-          - { os: macos-latest,   ruby: truffleruby }
-          - { os: ubuntu-20.04,   ruby: truffleruby }
         include:
           - { os: windows-latest, ruby: ucrt }
           - { os: windows-latest, ruby: mswin }
@@ -43,26 +42,25 @@ jobs:
         run:  echo "MAKEFLAGS=V=1" >> $GITHUB_ENV
         if: runner.os == 'Linux' || runner.os == 'macOS'
 
-      - name: set flags to check compiler warnings.
+      - name: set flags to check compiler warnings
         run:  echo "RUBY_OPENSSL_EXTCFLAGS=-Werror" >> $GITHUB_ENV
         if: ${{ !matrix.skip-warnings }}
 
-      - name: compile
+      - name: rake compile
         run:  bundle exec rake compile
 
-      - name: test
+      - name: rake test
         run:  bundle exec rake test TESTOPTS="-v --no-show-detail-immediately"
         timeout-minutes: 5
 
   test-openssls:
     name: >-
-      ${{ matrix.openssl }} ${{ matrix.name-extra || '' }}
-    runs-on: ${{ matrix.os }}
+      ${{ matrix.openssl }} ${{ matrix.name-extra }}
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest ]
-        ruby: [ "3.0" ]
+        name-extra: [ '' ]
         openssl:
           # https://openssl-library.org/source/
           - openssl-1.0.2u # EOL
@@ -72,6 +70,7 @@ jobs:
           - openssl-3.1.6
           - openssl-3.2.2
           - openssl-3.3.1
+          - openssl-master
           # http://www.libressl.org/releases.html
           - libressl-3.1.5 # EOL
           - libressl-3.2.7 # EOL
@@ -82,94 +81,87 @@ jobs:
           - libressl-3.7.3 # EOL
           - libressl-3.8.4
           - libressl-3.9.2
-        fips-enabled: [ false ]
         include:
-          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.0.14, fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
-          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.1.6, fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
-          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.2.2, fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
-          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-3.3.1, fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
-          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-head, git: 'https://github.com/openssl/openssl.git', branch: 'master' }
-          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-head, git: 'https://github.com/openssl/openssl.git', branch: 'master', fips-enabled: true, append-configure: 'enable-fips', name-extra: 'fips' }
-          - { os: ubuntu-latest, ruby: "3.0", openssl: openssl-head, git: 'https://github.com/openssl/openssl.git', branch: 'master', append-configure: 'no-legacy', name-extra: 'no-legacy' }
+          - { name-extra: 'with fips provider', openssl: openssl-3.0.14, fips-enabled: true }
+          - { name-extra: 'with fips provider', openssl: openssl-3.1.6, fips-enabled: true }
+          - { name-extra: 'with fips provider', openssl: openssl-3.2.2, fips-enabled: true }
+          - { name-extra: 'with fips provider', openssl: openssl-3.3.1, fips-enabled: true }
+          - { name-extra: 'with fips provider', openssl: openssl-master, fips-enabled: true }
+          - { name-extra: 'without legacy provider', openssl: openssl-3.3.1, append-configure: 'no-legacy' }
     steps:
       - name: repo checkout
         uses: actions/checkout@v4
 
-      - name: prepare openssl
+      - id: cache-openssl
+        uses: actions/cache@v4
+        with:
+          path: ~/openssl
+          key: openssl-${{ runner.os }}-${{ matrix.openssl }}-${{ matrix.append-configure || 'default' }}
+        if: matrix.openssl != 'openssl-master' && matrix.openssl != 'libressl-master'
+
+      - name: Compile OpenSSL library
+        if: steps.cache-openssl.outputs.cache-hit != 'true'
         run: |
           # Enable Bash debugging option temporarily for debugging use.
           set -x
           mkdir -p tmp/build-openssl && cd tmp/build-openssl
           case ${{ matrix.openssl }} in
-          openssl-*)
-            if [ -z "${{ matrix.git }}" ]; then
-              curl -OL https://openssl.org/source/${{ matrix.openssl }}.tar.gz
-              tar xf ${{ matrix.openssl }}.tar.gz && cd ${{ matrix.openssl }}
-            else
-              git clone -b ${{ matrix.branch }} --depth 1 ${{ matrix.git }} ${{ matrix.openssl }}
-              cd ${{ matrix.openssl }}
-              # Log the commit hash.
-              echo "Git commit: $(git rev-parse HEAD)"
-            fi
+          openssl-1.*)
+            OPENSSL_COMMIT=$(echo ${{ matrix.openssl }} | sed -e 's/^openssl-/OpenSSL_/' | sed -e 's/\./_/g')
+            git clone -b $OPENSSL_COMMIT --depth 1 https://github.com/openssl/openssl.git .
+            echo "Git commit: $(git rev-parse HEAD)"
             # shared is required for 1.0.x.
-            ./Configure --prefix=$HOME/.openssl/${{ matrix.openssl }} --libdir=lib \
-                shared linux-x86_64 ${{ matrix.append-configure }}
-            make depend
+            ./Configure --prefix=$HOME/openssl --libdir=lib shared linux-x86_64
+            make depend && make -j4 && make install_sw
+            ;;
+          openssl-*)
+            OPENSSL_COMMIT=${{ matrix.openssl == 'openssl-master' && 'master' || matrix.openssl }}
+            git clone -b $OPENSSL_COMMIT --depth 1 https://github.com/openssl/openssl.git .
+            echo "Git commit: $(git rev-parse HEAD)"
+            ./Configure --prefix=$HOME/openssl --libdir=lib enable-fips ${{ matrix.append-configure }}
+            make -j4 && make install_sw && make install_fips
             ;;
           libressl-*)
-            curl -OL https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/${{ matrix.openssl }}.tar.gz
-            tar xf ${{ matrix.openssl }}.tar.gz && cd ${{ matrix.openssl }}
-            ./configure --prefix=$HOME/.openssl/${{ matrix.openssl }}
+            curl -L https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/${{ matrix.openssl }}.tar.gz | \
+              tar xzf - --strip-components=1
+            ./configure --prefix=$HOME/openssl
+            make -j4 && make install
             ;;
           *)
             false
             ;;
           esac
-          make -j4
-          make install_sw
-
-      - name: prepare openssl fips
-        run: make install_fips
-        working-directory: tmp/build-openssl/${{ matrix.openssl }}
-        if: matrix.fips-enabled
-
-      - name: set the open installed directory
-        run: >
-          sed -e "s|OPENSSL_DIR|$HOME/.openssl/${{ matrix.openssl }}|"
-          tool/openssl_fips.cnf.tmpl > tmp/openssl_fips.cnf
-        if: matrix.fips-enabled
-
-      - name: set openssl config file path for fips.
-        run: echo "OPENSSL_CONF=$(pwd)/tmp/openssl_fips.cnf" >> $GITHUB_ENV
-        if: matrix.fips-enabled
 
       - name: load ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: ${{ matrix.ruby }}
-
-      - name: depends
-        run:  bundle install
+          ruby-version: '3.0'
+          bundler-cache: true
 
       - name: enable mkmf verbose
         run:  echo "MAKEFLAGS=V=1" >> $GITHUB_ENV
-        if: runner.os == 'Linux' || runner.os == 'macOS'
 
-      - name: set flags to check compiler warnings.
+      - name: set flags to check compiler warnings
         run:  echo "RUBY_OPENSSL_EXTCFLAGS=-Werror" >> $GITHUB_ENV
         if: ${{ !matrix.skip-warnings }}
 
-      - name: compile
-        run:  rake compile -- --with-openssl-dir=$HOME/.openssl/${{ matrix.openssl }}
+      - name: rake compile
+        run:  bundle exec rake compile -- --with-openssl-dir=$HOME/openssl
 
-      - name: test
-        run:  rake test TESTOPTS="-v --no-show-detail-immediately"
+      - name: setup OpenSSL config file for fips
+        run: |
+          sed -e "s|OPENSSL_DIR|$HOME/openssl|" tool/openssl_fips.cnf.tmpl > tmp/openssl_fips.cnf
+          echo "OPENSSL_CONF=$(pwd)/tmp/openssl_fips.cnf" >> $GITHUB_ENV
+        if: matrix.fips-enabled
+
+      - name: rake test
+        run:  bundle exec rake test TESTOPTS="-v --no-show-detail-immediately"
         timeout-minutes: 5
         if: ${{ !matrix.fips-enabled }}
 
       # Run only the passing tests on the FIPS module as a temporary workaround.
       # TODO Fix other tests, and run all the tests on FIPS module.
-      - name: test on fips module
-        run:  |
-          rake test_fips TESTOPTS="-v --no-show-detail-immediately"
+      - name: rake test_fips
+        run:  bundle exec rake test_fips TESTOPTS="-v --no-show-detail-immediately"
+        timeout-minutes: 5
         if: matrix.fips-enabled
