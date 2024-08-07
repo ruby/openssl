@@ -1736,25 +1736,6 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     ) { ssl_ctx.ciphersuites = 'BOGUS' }
   end
 
-  def test_ciphers_method_tls_connection
-    csuite = ['ECDHE-RSA-AES256-GCM-SHA384', 'TLSv1.2', 256, 256]
-    inputs = [csuite[0], [csuite[0]], [csuite]]
-
-    start_server do |port|
-      inputs.each do |input|
-        cli_ctx = OpenSSL::SSL::SSLContext.new
-        cli_ctx.min_version = cli_ctx.max_version = OpenSSL::SSL::TLS1_2_VERSION
-        cli_ctx.ciphers = input
-
-        server_connect(port, cli_ctx) do |ssl|
-          assert_equal('TLSv1.2', ssl.ssl_version)
-          assert_equal(csuite[0], ssl.cipher[0])
-          ssl.puts('abc'); assert_equal("abc\n", ssl.gets)
-        end
-      end
-    end
-  end
-
   def test_sigalgs_method_nil_argument
     ssl_ctx = OpenSSL::SSL::SSLContext.new
     pend 'sigalgs= method is missing' unless ssl_ctx.respond_to?(:sigalgs=)
@@ -1783,6 +1764,25 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     pend 'sigalgs= method is missing' unless ssl_ctx.respond_to?(:sigalgs=)
 
     assert_raise(OpenSSL::SSL::SSLError) { ssl_ctx.sigalgs = 'BOGUS' }
+  end
+
+  def test_ciphers_method_tls_connection
+    csuite = ['ECDHE-RSA-AES256-GCM-SHA384', 'TLSv1.2', 256, 256]
+    inputs = [csuite[0], [csuite[0]], [csuite]]
+
+    start_server do |port|
+      inputs.each do |input|
+        cli_ctx = OpenSSL::SSL::SSLContext.new
+        cli_ctx.min_version = cli_ctx.max_version = OpenSSL::SSL::TLS1_2_VERSION
+        cli_ctx.ciphers = input
+
+        server_connect(port, cli_ctx) do |ssl|
+          assert_equal('TLSv1.2', ssl.ssl_version)
+          assert_equal(csuite[0], ssl.cipher[0])
+          ssl.puts('abc'); assert_equal("abc\n", ssl.gets)
+        end
+      end
+    end
   end
 
   def test_ciphers_method_nil_argument

@@ -1120,9 +1120,6 @@ ossl_sslctx_set_sigalgs(VALUE self, VALUE v)
 {
     SSL_CTX *ctx;
 
-    if (NIL_P(v))
-        return v;
-
     rb_check_frozen(self);
     GetSSLCTX(self, ctx);
 
