@@ -196,6 +196,7 @@ have_func("X509_STORE_get0_param(NULL)", x509_h)
 have_func("EVP_PKEY_check(NULL)", evp_h)
 have_func("EVP_PKEY_new_raw_private_key(0, NULL, (unsigned char *)\"\", 0)", evp_h)
 have_func("SSL_CTX_set_ciphersuites(NULL, \"\")", ssl_h)
+have_func("SSL_CTX_set1_sigalgs(NULL, NULL, 0L)", ssl_h)
 
 # added in 3.0.0
 have_func("SSL_set0_tmp_dh_pkey(NULL, NULL)", ssl_h)
