@@ -1740,7 +1740,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     ssl_ctx = OpenSSL::SSL::SSLContext.new
     pend 'sigalgs= method is missing' unless ssl_ctx.respond_to?(:sigalgs=)
 
-    assert_nothing_raised { ssl_ctx.sigalgs = nil }
+    assert_raise(TypeError) { ssl_ctx.sigalgs = nil }
   end
 
   def test_sigalgs_method_frozen_object
