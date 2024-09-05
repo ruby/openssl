@@ -32,6 +32,7 @@ Rake::TestTask.new(:test_fips_internal) do |t|
     'test/openssl/test_pkey_dh.rb',
     'test/openssl/test_pkey_dsa.rb',
     'test/openssl/test_pkey_ec.rb',
+    'test/openssl/test_pkey_rsa.rb',
   ]
   t.warning = true
 end
