@@ -55,7 +55,6 @@ static ID id_i_cert_store, id_i_ca_file, id_i_ca_path, id_i_verify_mode,
 	  id_i_verify_hostname, id_i_keylog_cb;
 static ID id_i_io, id_i_context, id_i_hostname;
 
-static int ossl_ssl_ex_vcb_idx;
 static int ossl_ssl_ex_ptr_idx;
 static int ossl_sslctx_ex_ptr_idx;
 
@@ -327,9 +326,9 @@ ossl_ssl_verify_callback(int preverify_ok, X509_STORE_CTX *ctx)
     int status;
 
     ssl = X509_STORE_CTX_get_ex_data(ctx, SSL_get_ex_data_X509_STORE_CTX_idx());
-    cb = (VALUE)SSL_get_ex_data(ssl, ossl_ssl_ex_vcb_idx);
     ssl_obj = (VALUE)SSL_get_ex_data(ssl, ossl_ssl_ex_ptr_idx);
     sslctx_obj = rb_attr_get(ssl_obj, id_i_context);
+    cb = rb_attr_get(sslctx_obj, id_i_verify_callback);
     verify_hostname = rb_attr_get(sslctx_obj, id_i_verify_hostname);
 
     if (preverify_ok && RTEST(verify_hostname) && !SSL_is_server(ssl) &&
@@ -1552,12 +1551,11 @@ static void
 ossl_ssl_mark(void *ptr)
 {
     SSL *ssl = ptr;
-    rb_gc_mark((VALUE)SSL_get_ex_data(ssl, ossl_ssl_ex_ptr_idx));
+    VALUE obj = (VALUE)SSL_get_ex_data(ssl, ossl_ssl_ex_ptr_idx);
 
-    // Note: this reference is stored as @verify_callback so we don't need to mark it.
-    // However we do need to ensure GC compaction won't move it, hence why
-    // we call rb_gc_mark here.
-    rb_gc_mark((VALUE)SSL_get_ex_data(ssl, ossl_ssl_ex_vcb_idx));
+    // Ensure GC compaction won't move objects referenced by OpenSSL objects
+    rb_gc_mark(obj);
+    rb_gc_mark(rb_attr_get(obj, id_i_io));
 }
 
 static void
@@ -1583,7 +1581,11 @@ ossl_ssl_s_alloc(VALUE klass)
 static VALUE
 peer_ip_address(VALUE self)
 {
-    VALUE remote_address = rb_funcall(rb_attr_get(self, id_i_io), rb_intern("remote_address"), 0);
+    VALUE io = rb_attr_get(self, id_i_io);
+    if (!rb_respond_to(io, rb_intern("remote_address")))
+        return rb_str_new_cstr("(unsupported)");
+
+    VALUE remote_address = rb_funcall(io, rb_intern("remote_address"), 0);
 
     return rb_funcall(remote_address, rb_intern("inspect_sockaddr"), 0);
 }
@@ -1603,13 +1605,29 @@ peeraddr_ip_str(VALUE self)
     return rb_rescue2(peer_ip_address, self, fallback_peer_ip_address, (VALUE)0, rb_eSystemCallError, NULL);
 }
 
+static int
+is_real_socket(VALUE io)
+{
+    // FIXME: DO NOT MERGE
+    return 0;
+    return RB_TYPE_P(io, T_FILE);
+}
+
 /*
  * call-seq:
  *    SSLSocket.new(io) => aSSLSocket
  *    SSLSocket.new(io, ctx) => aSSLSocket
  *
- * Creates a new SSL socket from _io_ which must be a real IO object (not an
- * IO-like object that responds to read/write).
+ * Creates a new SSL socket from _io_ which must be an IO object
+ * or an IO-like object that at least implements the following methods:
+ *
+ *  - <tt>write_nonblock</tt> with <tt>exception: false</tt>
+ *  - <tt>read_nonblock</tt> with <tt>exception: false</tt>
+ *  - <tt>wait_readable</tt>
+ *  - <tt>wait_writable</tt>
+ *  - <tt>flush</tt>
+ *  - <tt>close</tt>
+ *  - <tt>closed?</tt>
  *
  * If _ctx_ is provided the SSL Sockets initial params will be taken from
  * the context.
@@ -1622,7 +1640,7 @@ peeraddr_ip_str(VALUE self)
 static VALUE
 ossl_ssl_initialize(int argc, VALUE *argv, VALUE self)
 {
-    VALUE io, v_ctx, verify_cb;
+    VALUE io, v_ctx;
     SSL *ssl;
     SSL_CTX *ctx;
 
@@ -1637,9 +1655,18 @@ ossl_ssl_initialize(int argc, VALUE *argv, VALUE self)
     rb_ivar_set(self, id_i_context, v_ctx);
     ossl_sslctx_setup(v_ctx);
 
-    if (rb_respond_to(io, rb_intern("nonblock=")))
-	rb_funcall(io, rb_intern("nonblock="), 1, Qtrue);
-    Check_Type(io, T_FILE);
+    if (is_real_socket(io)) {
+        rb_io_t *fptr;
+        GetOpenFile(io, fptr);
+        rb_io_set_nonblock(fptr);
+    }
+    else {
+        // Not meant to be a comprehensive check
+        if (!rb_respond_to(io, rb_intern("read_nonblock")) ||
+            !rb_respond_to(io, rb_intern("write_nonblock")))
+            rb_raise(rb_eTypeError, "io must be a real IO object or an IO-like "
+                     "object that responds to read_nonblock and write_nonblock");
+    }
     rb_ivar_set(self, id_i_io, io);
 
     ssl = SSL_new(ctx);
@@ -1649,10 +1676,6 @@ ossl_ssl_initialize(int argc, VALUE *argv, VALUE self)
 
     SSL_set_ex_data(ssl, ossl_ssl_ex_ptr_idx, (void *)self);
     SSL_set_info_callback(ssl, ssl_info_cb);
-    verify_cb = rb_attr_get(v_ctx, id_i_verify_callback);
-    // We don't need to trigger a write barrier because it's already
-    // an instance variable of this object.
-    SSL_set_ex_data(ssl, ossl_ssl_ex_vcb_idx, (void *)verify_cb);
 
     rb_call_super(0, NULL);
 
@@ -1675,18 +1698,24 @@ ossl_ssl_setup(VALUE self)
 {
     VALUE io;
     SSL *ssl;
-    rb_io_t *fptr;
 
     GetSSL(self, ssl);
     if (ssl_started(ssl))
 	return Qtrue;
 
     io = rb_attr_get(self, id_i_io);
-    GetOpenFile(io, fptr);
-    rb_io_check_readable(fptr);
-    rb_io_check_writable(fptr);
-    if (!SSL_set_fd(ssl, TO_SOCKET(rb_io_descriptor(io))))
-        ossl_raise(eSSLError, "SSL_set_fd");
+    if (is_real_socket(io)) {
+        rb_io_t *fptr;
+        GetOpenFile(io, fptr);
+        rb_io_check_readable(fptr);
+        rb_io_check_writable(fptr);
+        if (!SSL_set_fd(ssl, TO_SOCKET(rb_io_descriptor(io))))
+            ossl_raise(eSSLError, "SSL_set_fd");
+    }
+    else {
+        BIO *bio = ossl_bio_new(io);
+        SSL_set_bio(ssl, bio, bio);
+    }
 
     return Qtrue;
 }
@@ -1696,6 +1725,38 @@ ossl_ssl_setup(VALUE self)
 #else
 #define ssl_get_error(ssl, ret) SSL_get_error((ssl), (ret))
 #endif
+
+static void
+check_bio_error(SSL *ssl, VALUE io, int ret)
+{
+    if (is_real_socket(io))
+        return;
+
+    BIO *bio = SSL_get_rbio(ssl);
+    int state = ossl_bio_state(bio);
+    if (!state)
+        return;
+
+    /*
+     * Operation may succeed while the underlying socket reports an error in
+     * some cases. For example, when TLS 1.3 server tries to send a
+     * NewSessionTicket on a closed socket (IOW, when the client disconnects
+     * right after finishing a handshake).
+     *
+     * According to ssl/statem/statem_srvr.c conn_is_closed(), EPIPE and
+     * ECONNRESET may be ignored.
+     *
+     * FIXME BEFORE MERGE: Currently ignoring all SystemCallError.
+     */
+    int error_code = SSL_get_error(ssl, ret);
+    if ((ret > 0 || error_code == SSL_ERROR_ZERO_RETURN || error_code == SSL_ERROR_SSL) &&
+        rb_obj_is_kind_of(rb_errinfo(), rb_eSystemCallError)) {
+        rb_set_errinfo(Qnil);
+        return;
+    }
+    ossl_clear_error();
+    rb_jump_tag(state);
+}
 
 static void
 write_would_block(int nonblock)
@@ -1735,6 +1796,11 @@ no_exception_p(VALUE opts)
 static void
 io_wait_writable(VALUE io)
 {
+    if (!is_real_socket(io)) {
+        if (!RTEST(rb_funcallv(io, rb_intern("wait_writable"), 0, NULL)))
+            rb_raise(IO_TIMEOUT_ERROR, "Timed out while waiting to become writable!");
+        return;
+    }
 #ifdef HAVE_RB_IO_MAYBE_WAIT
     if (!rb_io_maybe_wait_writable(errno, io, RUBY_IO_TIMEOUT_DEFAULT)) {
         rb_raise(IO_TIMEOUT_ERROR, "Timed out while waiting to become writable!");
@@ -1749,6 +1815,11 @@ io_wait_writable(VALUE io)
 static void
 io_wait_readable(VALUE io)
 {
+    if (!is_real_socket(io)) {
+        if (!RTEST(rb_funcallv(io, rb_intern("wait_readable"), 0, NULL)))
+            rb_raise(IO_TIMEOUT_ERROR, "Timed out while waiting to become readable!");
+        return;
+    }
 #ifdef HAVE_RB_IO_MAYBE_WAIT
     if (!rb_io_maybe_wait_readable(errno, io, RUBY_IO_TIMEOUT_DEFAULT)) {
         rb_raise(IO_TIMEOUT_ERROR, "Timed out while waiting to become readable!");
@@ -1773,8 +1844,10 @@ ossl_start_ssl(VALUE self, int (*func)(SSL *), const char *funcname, VALUE opts)
     GetSSL(self, ssl);
 
     VALUE io = rb_attr_get(self, id_i_io);
+
     for (;;) {
         ret = func(ssl);
+        check_bio_error(ssl, io, ret);
 
         cb_state = rb_attr_get(self, ID_callback_state);
         if (!NIL_P(cb_state)) {
@@ -1969,6 +2042,8 @@ ossl_ssl_read_internal(int argc, VALUE *argv, VALUE self, int nonblock)
     rb_str_locktmp(str);
     for (;;) {
         int nread = SSL_read(ssl, RSTRING_PTR(str), ilen);
+        check_bio_error(ssl, io, nread);
+
         switch (ssl_get_error(ssl, nread)) {
           case SSL_ERROR_NONE:
             rb_str_unlocktmp(str);
@@ -2056,7 +2131,6 @@ static VALUE
 ossl_ssl_write_internal(VALUE self, VALUE str, VALUE opts)
 {
     SSL *ssl;
-    rb_io_t *fptr;
     int num, nonblock = opts != Qfalse;
     VALUE tmp;
 
@@ -2066,7 +2140,6 @@ ossl_ssl_write_internal(VALUE self, VALUE str, VALUE opts)
 
     tmp = rb_str_new_frozen(StringValue(str));
     VALUE io = rb_attr_get(self, id_i_io);
-    GetOpenFile(io, fptr);
 
     /* SSL_write(3ssl) manpage states num == 0 is undefined */
     num = RSTRING_LENINT(tmp);
@@ -2075,6 +2148,8 @@ ossl_ssl_write_internal(VALUE self, VALUE str, VALUE opts)
 
     for (;;) {
         int nwritten = SSL_write(ssl, RSTRING_PTR(tmp), num);
+        check_bio_error(ssl, io, nwritten);
+
         switch (ssl_get_error(ssl, nwritten)) {
           case SSL_ERROR_NONE:
             return INT2NUM(nwritten);
@@ -2152,7 +2227,15 @@ ossl_ssl_stop(VALUE self)
     GetSSL(self, ssl);
     if (!ssl_started(ssl))
 	return Qnil;
+
     ret = SSL_shutdown(ssl);
+
+    /* XXX: Suppressing errors from the underlying socket */
+    VALUE io = rb_attr_get(self, id_i_io);
+    BIO *bio = SSL_get_rbio(ssl);
+    if (!is_real_socket(io) && ossl_bio_state(bio))
+        rb_set_errinfo(Qnil);
+
     if (ret == 1) /* Have already received close_notify */
 	return Qnil;
     if (ret == 0) /* Sent close_notify, but we don't wait for reply */
@@ -2603,9 +2686,6 @@ Init_ossl_ssl(void)
     id_call = rb_intern_const("call");
     ID_callback_state = rb_intern_const("callback_state");
 
-    ossl_ssl_ex_vcb_idx = SSL_get_ex_new_index(0, (void *)"ossl_ssl_ex_vcb_idx", 0, 0, 0);
-    if (ossl_ssl_ex_vcb_idx < 0)
-	ossl_raise(rb_eRuntimeError, "SSL_get_ex_new_index");
     ossl_ssl_ex_ptr_idx = SSL_get_ex_new_index(0, (void *)"ossl_ssl_ex_ptr_idx", 0, 0, 0);
     if (ossl_ssl_ex_ptr_idx < 0)
 	ossl_raise(rb_eRuntimeError, "SSL_get_ex_new_index");
