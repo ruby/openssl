@@ -180,6 +180,7 @@ extern VALUE dOSSL;
 #include "ossl_config.h"
 #include "ossl_digest.h"
 #include "ossl_hmac.h"
+#include "ossl_cmac.h"
 #include "ossl_ns_spki.h"
 #include "ossl_ocsp.h"
 #include "ossl_pkcs12.h"
