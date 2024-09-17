@@ -39,6 +39,7 @@
 #include <openssl/dsa.h>
 #include <openssl/evp.h>
 #include <openssl/dh.h>
+#include <openssl/cmac.h>
 
 #ifndef LIBRESSL_VERSION_NUMBER
 # define OSSL_IS_LIBRESSL 0
@@ -180,6 +181,7 @@ extern VALUE dOSSL;
 #include "ossl_config.h"
 #include "ossl_digest.h"
 #include "ossl_hmac.h"
+#include "ossl_cmac.h"
 #include "ossl_ns_spki.h"
 #include "ossl_ocsp.h"
 #include "ossl_pkcs12.h"
