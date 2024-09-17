@@ -229,17 +229,25 @@ ossl_cmac_mac(VALUE self)
     return ret;
 #else
     VALUE ret;
-    CMAC_CTX *ctx;
+    CMAC_CTX *ctx1, *ctx2;
     size_t len;
 
-    GetCMAC(self, ctx);
-    if (CMAC_Final(ctx, NULL, &len) != 1)
+    GetCMAC(self, ctx1);
+    if (CMAC_Final(ctx1, NULL, &len) != 1)
         ossl_raise(eCMACError, "CMAC_Final");
     ret = rb_str_new(NULL, len);
-    if (CMAC_Final(ctx, (unsigned char *)RSTRING_PTR(ret), &len) != 1)
+    ctx2 = CMAC_CTX_new();
+    if (!ctx2)
+        ossl_raise(eCMACError, "CMAC_CTX_new");
+    if (CMAC_CTX_copy(ctx2, ctx1) != 1) {
+        CMAC_CTX_free(ctx2);
+        ossl_raise(eCMACError, "CMAC_CTX_copy");
+    }
+    if (CMAC_Final(ctx2, (unsigned char *)RSTRING_PTR(ret), &len) != 1) {
+        CMAC_CTX_free(ctx2);
         ossl_raise(eCMACError, "CMAC_Final");
-    if (CMAC_resume(ctx) != 1)
-        ossl_raise(eCMACError, "CMAC_resume");
+    }
+    CMAC_CTX_free(ctx2);
 
     return ret;
 #endif
