@@ -29,6 +29,7 @@ extern const rb_data_type_t ossl_ssl_session_type;
 extern VALUE mSSL;
 extern VALUE cSSLSocket;
 extern VALUE cSSLSession;
+static VALUE nonblock_kwargs;
 
 void Init_ossl_ssl(void);
 void Init_ossl_ssl_session(void);
