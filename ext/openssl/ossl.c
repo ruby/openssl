@@ -1155,6 +1155,7 @@ Init_openssl(void)
     Init_ossl_config();
     Init_ossl_digest();
     Init_ossl_hmac();
+    Init_ossl_cmac();
     Init_ossl_ns_spki();
     Init_ossl_pkcs12();
     Init_ossl_pkcs7();
