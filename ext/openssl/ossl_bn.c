@@ -10,10 +10,6 @@
 /* modified by Michal Rokos <m.rokos@sh.cvut.cz> */
 #include "ossl.h"
 
-#ifdef HAVE_RB_EXT_RACTOR_SAFE
-#include <ruby/ractor.h>
-#endif
-
 #define NewBN(klass) \
   TypedData_Wrap_Struct((klass), &ossl_bn_type, 0)
 #define SetBN(obj, bn) do { \
@@ -41,7 +37,7 @@ static const rb_data_type_t ossl_bn_type = {
     {
 	0, ossl_bn_free,
     },
-    0, 0, RUBY_TYPED_FREE_IMMEDIATELY | RUBY_TYPED_WB_PROTECTED,
+    0, 0, RUBY_TYPED_FREE_IMMEDIATELY | RUBY_TYPED_WB_PROTECTED | RUBY_TYPED_FROZEN_SHAREABLE,
 };
 
 /*
