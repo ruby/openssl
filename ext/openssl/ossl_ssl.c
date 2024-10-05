@@ -77,7 +77,7 @@ static const rb_data_type_t ossl_sslctx_type = {
     {
         ossl_sslctx_mark, ossl_sslctx_free,
     },
-    0, 0, RUBY_TYPED_FREE_IMMEDIATELY | RUBY_TYPED_WB_PROTECTED,
+    0, 0, RUBY_TYPED_FREE_IMMEDIATELY | RUBY_TYPED_WB_PROTECTED | RUBY_TYPED_FROZEN_SHAREABLE,
 };
 
 static VALUE
@@ -1571,7 +1571,7 @@ const rb_data_type_t ossl_ssl_type = {
     {
         ossl_ssl_mark, ossl_ssl_free,
     },
-    0, 0, RUBY_TYPED_FREE_IMMEDIATELY | RUBY_TYPED_WB_PROTECTED,
+    0, 0, RUBY_TYPED_FREE_IMMEDIATELY | RUBY_TYPED_WB_PROTECTED | RUBY_TYPED_FROZEN_SHAREABLE,
 };
 
 static VALUE
