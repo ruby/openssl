@@ -17,7 +17,11 @@ class OpenSSL::TestX509Request < OpenSSL::TestCase
     req = OpenSSL::X509::Request.new
     req.version = ver
     req.subject = dn
-    req.public_key = key.public_key
+    if key.oid == "ED25519"
+      req.public_key = key
+    else
+      req.public_key = key.public_key
+    end
     req.sign(key, digest)
     req
   end
@@ -130,6 +134,29 @@ class OpenSSL::TestX509Request < OpenSSL::TestCase
   def test_sign_and_verify_dsa_md5
     assert_raise(OpenSSL::X509::RequestError){
       issue_csr(0, @dn, @dsa512, OpenSSL::Digest.new('MD5')) }
+  end
+
+  def test_sign_and_verify_ed25519
+    # See test_ed25519 in test_pkey.rb
+
+    # Ed25519 is not FIPS-approved.
+    omit_on_fips
+
+    begin
+      ed25519  = OpenSSL::PKey::generate_key("ED25519")
+    rescue OpenSSL::PKey::PKeyError => e
+      # OpenSSL < 1.1.1
+      #
+      pend "Ed25519 is not implemented" unless openssl?(1, 1, 1)
+
+      raise e
+    end
+
+    # See ASN1_item_sign_ctx in ChangeLog for 3.8.1: https://github.com/libressl/portable/blob/master/ChangeLog
+    pend 'ASN1 signing with Ed25519 not yet working' unless openssl? or libressl?(3, 8, 1)
+
+    req = issue_csr(0, @dn, ed25519, nil)
+    assert_equal(true, req.verify(ed25519))
   end
 
   def test_dup
