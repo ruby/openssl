@@ -133,7 +133,7 @@ static const rb_data_type_t ossl_x509store_type = {
     {
         ossl_x509store_mark, ossl_x509store_free,
     },
-    0, 0, RUBY_TYPED_FREE_IMMEDIATELY | RUBY_TYPED_WB_PROTECTED,
+    0, 0, RUBY_TYPED_FREE_IMMEDIATELY | RUBY_TYPED_WB_PROTECTED | RUBY_TYPED_FROZEN_SHAREABLE,
 };
 
 /*
