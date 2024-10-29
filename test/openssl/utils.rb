@@ -106,6 +106,26 @@ module OpenSSL::TestUtils
     end
   end
 
+  def generate_ed25519
+    # Ed25519 is not FIPS-approved.
+    omit_on_fips
+
+    begin
+      ed25519  = OpenSSL::PKey::generate_key("ED25519")
+    rescue OpenSSL::PKey::PKeyError => e
+      # OpenSSL < 1.1.1
+      #
+      pend "Ed25519 is not implemented" unless openssl?(1, 1, 1)
+
+      raise e
+    end
+
+    # See ASN1_item_sign_ctx in ChangeLog for 3.8.1: https://github.com/libressl/portable/blob/master/ChangeLog
+    pend 'ASN1 signing with Ed25519 not yet working' unless openssl? or libressl?(3, 8, 1)
+
+    ed25519
+  end
+
   def openssl?(major = nil, minor = nil, fix = nil, patch = 0, status = 0)
     return false if OpenSSL::OPENSSL_VERSION.include?("LibreSSL")
     return true unless major
