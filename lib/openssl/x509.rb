@@ -333,6 +333,14 @@ module OpenSSL
       end
     end
 
+    class Store
+      def freeze
+        super
+        @certificates.each(&:freeze)
+        @crls.each(&:freeze)
+      end
+    end
+
     class StoreContext
       def cleanup
         warn "(#{caller.first}) OpenSSL::X509::StoreContext#cleanup is deprecated with no replacement" if $VERBOSE
