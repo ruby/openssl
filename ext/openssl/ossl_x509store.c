@@ -133,7 +133,7 @@ static const rb_data_type_t ossl_x509store_type = {
     {
         ossl_x509store_mark, ossl_x509store_free,
     },
-    0, 0, RUBY_TYPED_FREE_IMMEDIATELY | RUBY_TYPED_WB_PROTECTED,
+    0, 0, RUBY_TYPED_FREE_IMMEDIATELY | RUBY_TYPED_WB_PROTECTED | RUBY_TYPED_FROZEN_SHAREABLE,
 };
 
 /*
@@ -223,6 +223,7 @@ ossl_x509store_initialize(int argc, VALUE *argv, VALUE self)
     rb_iv_set(self, "@error", Qnil);
     rb_iv_set(self, "@error_string", Qnil);
     rb_iv_set(self, "@chain", Qnil);
+    rb_iv_set(self, "@certificates", rb_ary_new());
 
     return self;
 }
@@ -246,6 +247,7 @@ static VALUE
 ossl_x509store_set_flags(VALUE self, VALUE flags)
 {
     X509_STORE *store;
+    rb_check_frozen(self);
     long f = NUM2LONG(flags);
 
     GetX509Store(self, store);
@@ -281,6 +283,7 @@ static VALUE
 ossl_x509store_set_purpose(VALUE self, VALUE purpose)
 {
     X509_STORE *store;
+    rb_check_frozen(self);
     int p = NUM2INT(purpose);
 
     GetX509Store(self, store);
@@ -305,6 +308,7 @@ static VALUE
 ossl_x509store_set_trust(VALUE self, VALUE trust)
 {
     X509_STORE *store;
+    rb_check_frozen(self);
     int t = NUM2INT(trust);
 
     GetX509Store(self, store);
@@ -331,6 +335,7 @@ ossl_x509store_set_time(VALUE self, VALUE time)
     X509_STORE *store;
     X509_VERIFY_PARAM *param;
 
+    rb_check_frozen(self);
     GetX509Store(self, store);
 #ifdef HAVE_X509_STORE_GET0_PARAM
     param = X509_STORE_get0_param(store);
@@ -358,6 +363,7 @@ ossl_x509store_add_file(VALUE self, VALUE file)
     X509_LOOKUP *lookup;
     const char *path;
 
+    rb_check_frozen(self);
     GetX509Store(self, store);
     path = StringValueCStr(file);
     lookup = X509_STORE_add_lookup(store, X509_LOOKUP_file());
@@ -393,6 +399,7 @@ ossl_x509store_add_path(VALUE self, VALUE dir)
     X509_LOOKUP *lookup;
     const char *path;
 
+    rb_check_frozen(self);
     GetX509Store(self, store);
     path = StringValueCStr(dir);
     lookup = X509_STORE_add_lookup(store, X509_LOOKUP_hash_dir());
@@ -422,6 +429,7 @@ ossl_x509store_set_default_paths(VALUE self)
 {
     X509_STORE *store;
 
+    rb_check_frozen(self);
     GetX509Store(self, store);
     if (X509_STORE_set_default_paths(store) != 1)
         ossl_raise(eX509StoreError, "X509_STORE_set_default_paths");
@@ -442,6 +450,15 @@ ossl_x509store_add_cert(VALUE self, VALUE arg)
 {
     X509_STORE *store;
     X509 *cert;
+    VALUE certificates;
+
+    rb_check_frozen(self);
+
+    certificates = rb_iv_get(self, "@certificates");
+
+
+    if(RTEST(rb_funcall(certificates, rb_intern("include?"), 1, arg)))
+        return self;
 
     cert = GetX509CertPtr(arg); /* NO NEED TO DUP */
     GetX509Store(self, store);
@@ -465,6 +482,7 @@ ossl_x509store_add_crl(VALUE self, VALUE arg)
     X509_STORE *store;
     X509_CRL *crl;
 
+    rb_check_frozen(self);
     crl = GetX509CRLPtr(arg); /* NO NEED TO DUP */
     GetX509Store(self, store);
     if (X509_STORE_add_crl(store, crl) != 1)
@@ -498,6 +516,7 @@ ossl_x509store_verify(int argc, VALUE *argv, VALUE self)
     VALUE cert, chain;
     VALUE ctx, proc, result;
 
+    rb_check_frozen(self);
     rb_scan_args(argc, argv, "11", &cert, &chain);
     ctx = rb_funcall(cX509StoreContext, rb_intern("new"), 3, self, cert, chain);
     proc = rb_block_given_p() ?  rb_block_proc() :
@@ -695,6 +714,7 @@ ossl_x509stctx_set_error(VALUE self, VALUE err)
 {
     X509_STORE_CTX *ctx;
 
+    rb_check_frozen(self);
     GetX509StCtx(self, ctx);
     X509_STORE_CTX_set_error(ctx, NUM2INT(err));
 
@@ -793,6 +813,7 @@ static VALUE
 ossl_x509stctx_set_flags(VALUE self, VALUE flags)
 {
     X509_STORE_CTX *store;
+    rb_check_frozen(self);
     long f = NUM2LONG(flags);
 
     GetX509StCtx(self, store);
@@ -814,6 +835,7 @@ static VALUE
 ossl_x509stctx_set_purpose(VALUE self, VALUE purpose)
 {
     X509_STORE_CTX *store;
+    rb_check_frozen(self);
     int p = NUM2INT(purpose);
 
     GetX509StCtx(self, store);
@@ -835,6 +857,7 @@ static VALUE
 ossl_x509stctx_set_trust(VALUE self, VALUE trust)
 {
     X509_STORE_CTX *store;
+    rb_check_frozen(self);
     int t = NUM2INT(trust);
 
     GetX509StCtx(self, store);
@@ -857,6 +880,7 @@ ossl_x509stctx_set_time(VALUE self, VALUE time)
     X509_STORE_CTX *store;
     long t;
 
+    rb_check_frozen(self);
     t = NUM2LONG(rb_Integer(time));
     GetX509StCtx(self, store);
     X509_STORE_CTX_set_time(store, 0, t);
