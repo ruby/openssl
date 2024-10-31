@@ -223,6 +223,7 @@ ossl_x509store_initialize(int argc, VALUE *argv, VALUE self)
     rb_iv_set(self, "@error", Qnil);
     rb_iv_set(self, "@error_string", Qnil);
     rb_iv_set(self, "@chain", Qnil);
+    rb_iv_set(self, "@certificates", rb_ary_new());
 
     return self;
 }
@@ -449,8 +450,16 @@ ossl_x509store_add_cert(VALUE self, VALUE arg)
 {
     X509_STORE *store;
     X509 *cert;
+    VALUE certificates;
 
     rb_check_frozen(self);
+
+    certificates = rb_iv_get(self, "@certificates");
+
+
+    if(RTEST(rb_funcall(certificates, rb_intern("include?"), 1, arg)))
+        return self;
+
     cert = GetX509CertPtr(arg); /* NO NEED TO DUP */
     GetX509Store(self, store);
     if (X509_STORE_add_cert(store, cert) != 1)
