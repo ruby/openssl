@@ -46,7 +46,7 @@ static const rb_data_type_t ossl_x509name_type = {
     {
 	0, ossl_x509name_free,
     },
-    0, 0, RUBY_TYPED_FREE_IMMEDIATELY | RUBY_TYPED_WB_PROTECTED,
+    0, 0, RUBY_TYPED_FREE_IMMEDIATELY | RUBY_TYPED_WB_PROTECTED
 };
 
 /*
@@ -148,6 +148,7 @@ ossl_x509name_initialize(int argc, VALUE *argv, VALUE self)
     X509_NAME *name;
     VALUE arg, template;
 
+    rb_check_frozen(self);
     GetX509Name(self, name);
     if (rb_scan_args(argc, argv, "02", &arg, &template) == 0) {
 	return self;
@@ -229,6 +230,7 @@ VALUE ossl_x509name_add_entry(int argc, VALUE *argv, VALUE self)
 	kwargs_ids[1] = rb_intern_const("set");
     }
     rb_scan_args(argc, argv, "21:", &oid, &value, &type, &opts);
+    rb_check_frozen(self);
     rb_get_kwargs(opts, kwargs_ids, 0, 2, kwargs);
     oid_name = StringValueCStr(oid);
     StringValue(value);
