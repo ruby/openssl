@@ -148,6 +148,7 @@ ossl_x509name_initialize(int argc, VALUE *argv, VALUE self)
     X509_NAME *name;
     VALUE arg, template;
 
+    rb_check_frozen(self);
     GetX509Name(self, name);
     if (rb_scan_args(argc, argv, "02", &arg, &template) == 0) {
 	return self;
@@ -230,6 +231,7 @@ VALUE ossl_x509name_add_entry(int argc, VALUE *argv, VALUE self)
     }
     rb_scan_args(argc, argv, "21:", &oid, &value, &type, &opts);
     rb_get_kwargs(opts, kwargs_ids, 0, 2, kwargs);
+    rb_check_frozen(self);
     oid_name = StringValueCStr(oid);
     StringValue(value);
     if(NIL_P(type)) type = rb_aref(OBJECT_TYPE_TEMPLATE, oid);
