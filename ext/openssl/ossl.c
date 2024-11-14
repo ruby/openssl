@@ -1150,6 +1150,7 @@ Init_openssl(void)
     /*
      * Init components
      */
+    Init_ossl_bio();
     Init_ossl_bn();
     Init_ossl_cipher();
     Init_ossl_config();

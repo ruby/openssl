@@ -156,6 +156,26 @@ IMPL_PKEY_GETTER(EC_KEY, ec)
 #undef IMPL_PKEY_GETTER
 #undef IMPL_KEY_ACCESSOR2
 #undef IMPL_KEY_ACCESSOR3
+
+// BIO
+static inline void *BIO_get_data(BIO *bio) { return bio->ptr; }
+static inline void BIO_set_data(BIO *bio, void *data) { bio->ptr = data; }
+static inline void BIO_set_init(BIO *bio, int init) { bio->init = init; }
+static inline BIO_METHOD *BIO_meth_new(int type, const char *name) {
+    BIO_METHOD *meth = OPENSSL_malloc(sizeof(*meth));
+    if (!meth)
+        return NULL;
+    memset(meth, 0, sizeof(*meth));
+    meth->type = type;
+    meth->name = name;
+    return meth;
+}
+static inline void BIO_meth_free(BIO_METHOD *meth) { OPENSSL_free(meth); }
+static inline int BIO_meth_set_create(BIO_METHOD *meth, int (*f)(BIO *)) { meth->create = f; return 1; }
+static inline int BIO_meth_set_destroy(BIO_METHOD *meth, int (*f)(BIO *)) { meth->destroy = f; return 1; }
+static inline int BIO_meth_set_write(BIO_METHOD *meth, int (*f)(BIO *, const char *, int)) { meth->bwrite = f; return 1; }
+static inline int BIO_meth_set_read(BIO_METHOD *meth, int (*f)(BIO *, char *, int)) { meth->bread = f; return 1; }
+static inline int BIO_meth_set_ctrl(BIO_METHOD *meth, long (*f)(BIO *, int, long, void *)) { meth->ctrl = f; return 1; }
 #endif /* HAVE_OPAQUE_OPENSSL */
 
 #if !defined(EVP_CTRL_AEAD_GET_TAG)
