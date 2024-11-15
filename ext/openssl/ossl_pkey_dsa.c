@@ -125,6 +125,7 @@ ossl_dsa_initialize(int argc, VALUE *argv, VALUE self)
         rb_raise(eDSAError, "incorrect pkey type: %s", OBJ_nid2sn(type));
     }
     RTYPEDDATA_DATA(self) = pkey;
+    EVP_PKEY_set_ex_data(pkey, ossl_pkey_ex_ptr_idx, (void *)self);
     return self;
 
   legacy:
@@ -136,6 +137,7 @@ ossl_dsa_initialize(int argc, VALUE *argv, VALUE self)
         ossl_raise(eDSAError, "EVP_PKEY_assign_DSA");
     }
     RTYPEDDATA_DATA(self) = pkey;
+    EVP_PKEY_set_ex_data(pkey, ossl_pkey_ex_ptr_idx, (void *)self);
     return self;
 }
 
@@ -164,6 +166,7 @@ ossl_dsa_initialize_copy(VALUE self, VALUE other)
         ossl_raise(eDSAError, "EVP_PKEY_assign_DSA");
     }
     RTYPEDDATA_DATA(self) = pkey;
+    EVP_PKEY_set_ex_data(pkey, ossl_pkey_ex_ptr_idx, (void *)self);
 
     return self;
 }

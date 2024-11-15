@@ -14,6 +14,7 @@ extern VALUE mPKey;
 extern VALUE cPKey;
 extern VALUE ePKeyError;
 extern const rb_data_type_t ossl_evp_pkey_type;
+extern int ossl_pkey_ex_ptr_idx;
 
 /* For ENGINE */
 #define OSSL_PKEY_SET_PRIVATE(obj) rb_ivar_set((obj), rb_intern("private"), Qtrue)
@@ -24,6 +25,7 @@ extern const rb_data_type_t ossl_evp_pkey_type;
     if (!(pkey)) { \
 	rb_raise(rb_eRuntimeError, "PKEY wasn't initialized!");\
     } \
+    RUBY_ASSERT(obj == (VALUE)EVP_PKEY_get_ex_data(pkey, ossl_pkey_ex_ptr_idx)); \
 } while (0)
 
 /* Takes ownership of the EVP_PKEY */

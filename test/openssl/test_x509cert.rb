@@ -42,6 +42,17 @@ class OpenSSL::TestX509Certificate < OpenSSL::TestCase
     }
   end
 
+  def test_public_key_instance
+    # Repeated calls of X509_get_pubkey() return the same EVP_PKEY object with
+    # increased reference count
+    cert = OpenSSL::X509::Certificate.new
+    cert.public_key = @rsa2048
+
+    p1 = cert.public_key
+    p2 = cert.public_key
+    assert_same(p1, p2)
+  end
+
   def test_validity
     now = Time.at(Time.now.to_i + 0.9)
     cert = issue_cert(@ca, @rsa2048, 1, [], nil, nil,

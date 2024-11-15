@@ -111,6 +111,10 @@ ossl_ec_key_s_generate(VALUE klass, VALUE arg)
     obj = rb_obj_alloc(klass);
 
     ec = ec_key_new_from_group(arg);
+    if (!EC_KEY_generate_key(ec)) {
+        EC_KEY_free(ec);
+        ossl_raise(eECError, "EC_KEY_generate_key");
+    }
     pkey = EVP_PKEY_new();
     if (!pkey || EVP_PKEY_assign_EC_KEY(pkey, ec) != 1) {
         EVP_PKEY_free(pkey);
@@ -118,9 +122,7 @@ ossl_ec_key_s_generate(VALUE klass, VALUE arg)
         ossl_raise(eECError, "EVP_PKEY_assign_EC_KEY");
     }
     RTYPEDDATA_DATA(obj) = pkey;
-
-    if (!EC_KEY_generate_key(ec))
-	ossl_raise(eECError, "EC_KEY_generate_key");
+    EVP_PKEY_set_ex_data(pkey, ossl_pkey_ex_ptr_idx, (void *)obj);
 
     return obj;
 }
@@ -177,6 +179,7 @@ static VALUE ossl_ec_key_initialize(int argc, VALUE *argv, VALUE self)
         rb_raise(eDSAError, "incorrect pkey type: %s", OBJ_nid2sn(type));
     }
     RTYPEDDATA_DATA(self) = pkey;
+    EVP_PKEY_set_ex_data(pkey, ossl_pkey_ex_ptr_idx, (void *)self);
     return self;
 
   legacy:
@@ -187,6 +190,7 @@ static VALUE ossl_ec_key_initialize(int argc, VALUE *argv, VALUE self)
         ossl_raise(eECError, "EVP_PKEY_assign_EC_KEY");
     }
     RTYPEDDATA_DATA(self) = pkey;
+    EVP_PKEY_set_ex_data(pkey, ossl_pkey_ex_ptr_idx, (void *)self);
     return self;
 }
 
@@ -212,6 +216,7 @@ ossl_ec_key_initialize_copy(VALUE self, VALUE other)
         ossl_raise(eECError, "EVP_PKEY_assign_EC_KEY");
     }
     RTYPEDDATA_DATA(self) = pkey;
+    EVP_PKEY_set_ex_data(pkey, ossl_pkey_ex_ptr_idx, (void *)self);
 
     return self;
 }

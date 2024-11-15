@@ -20,11 +20,27 @@ VALUE mPKey;
 VALUE cPKey;
 VALUE ePKeyError;
 static ID id_private_q;
+int ossl_pkey_ex_ptr_idx;
+
+static void
+ossl_evp_pkey_mark(void *ptr)
+{
+    VALUE obj = (VALUE)EVP_PKEY_get_ex_data(ptr, ossl_pkey_ex_ptr_idx);
+    rb_gc_mark_movable(obj);
+}
 
 static void
 ossl_evp_pkey_free(void *ptr)
 {
+    EVP_PKEY_set_ex_data(ptr, ossl_pkey_ex_ptr_idx, NULL);
     EVP_PKEY_free(ptr);
+}
+
+static void
+ossl_evp_pkey_compact(void *ptr)
+{
+    VALUE obj = (VALUE)EVP_PKEY_get_ex_data(ptr, ossl_pkey_ex_ptr_idx);
+    EVP_PKEY_set_ex_data(ptr, ossl_pkey_ex_ptr_idx, (void *)rb_gc_location(obj));
 }
 
 /*
@@ -33,7 +49,9 @@ ossl_evp_pkey_free(void *ptr)
 const rb_data_type_t ossl_evp_pkey_type = {
     "OpenSSL/EVP_PKEY",
     {
-	0, ossl_evp_pkey_free,
+        .dmark = ossl_evp_pkey_mark,
+        .dfree = ossl_evp_pkey_free,
+        .dcompact = ossl_evp_pkey_compact,
     },
     0, 0, RUBY_TYPED_FREE_IMMEDIATELY | RUBY_TYPED_WB_PROTECTED,
 };
@@ -61,6 +79,7 @@ pkey_wrap0(VALUE arg)
     }
     obj = rb_obj_alloc(klass);
     RTYPEDDATA_DATA(obj) = pkey;
+    EVP_PKEY_set_ex_data(pkey, ossl_pkey_ex_ptr_idx, (void *)obj);
     return obj;
 }
 
@@ -69,6 +88,10 @@ ossl_pkey_wrap(EVP_PKEY *pkey)
 {
     VALUE obj;
     int status;
+
+    obj = (VALUE)EVP_PKEY_get_ex_data(pkey, ossl_pkey_ex_ptr_idx);
+    if (obj)
+        return obj;
 
     obj = rb_protect(pkey_wrap0, (VALUE)pkey, &status);
     if (status) {
@@ -630,6 +653,7 @@ ossl_pkey_initialize_copy(VALUE self, VALUE other)
         if (!pkey)
             ossl_raise(ePKeyError, "EVP_PKEY_dup");
         RTYPEDDATA_DATA(self) = pkey;
+        EVP_PKEY_set_ex_data(pkey, ossl_pkey_ex_ptr_idx, (void *)self);
     }
     return self;
 }
@@ -1677,6 +1701,10 @@ Init_ossl_pkey(void)
     mOSSL = rb_define_module("OpenSSL");
     eOSSLError = rb_define_class_under(mOSSL, "OpenSSLError", rb_eStandardError);
 #endif
+
+    ossl_pkey_ex_ptr_idx = EVP_PKEY_get_ex_new_index(0, (void *)"ossl_pkey_ex_ptr_idx", 0, 0, 0);
+    if (ossl_pkey_ex_ptr_idx < 0)
+        ossl_raise(rb_eRuntimeError, "EVP_PKEY_get_ex_new_index");
 
     /* Document-module: OpenSSL::PKey
      *
