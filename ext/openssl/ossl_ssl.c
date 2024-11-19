@@ -1550,10 +1550,8 @@ fallback_peer_ip_address(VALUE self, VALUE args)
 static VALUE
 peeraddr_ip_str(VALUE self)
 {
-    VALUE rb_mErrno = rb_const_get(rb_cObject, rb_intern("Errno"));
-    VALUE rb_eSystemCallError = rb_const_get(rb_mErrno, rb_intern("SystemCallError"));
-
-    return rb_rescue2(peer_ip_address, self, fallback_peer_ip_address, (VALUE)0, rb_eSystemCallError, NULL);
+    return rb_rescue2(peer_ip_address, self, fallback_peer_ip_address, Qnil,
+                      rb_eSystemCallError, (VALUE)0);
 }
 
 /*
