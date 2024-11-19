@@ -12,5 +12,7 @@
 
 BIO *ossl_obj2bio(volatile VALUE *);
 VALUE ossl_membio2str(BIO*);
+int ossl_membio_sock_read(BIO *, VALUE);
+int ossl_membio_sock_write(BIO * , VALUE);
 
 #endif

@@ -56,7 +56,14 @@ static ID id_i_cert_store, id_i_ca_file, id_i_ca_path, id_i_verify_mode,
 static ID id_i_io, id_i_context, id_i_hostname;
 
 static int ossl_ssl_ex_ptr_idx;
+static int ossl_ssl_ex_rbio_idx;
+static int ossl_ssl_ex_wbio_idx;
 static int ossl_sslctx_ex_ptr_idx;
+
+
+int IsSock(VALUE io) {
+	return RB_TYPE_P(io, T_FILE);
+}
 
 static void
 ossl_sslctx_mark(void *ptr)
@@ -1633,7 +1640,7 @@ ossl_ssl_initialize(int argc, VALUE *argv, VALUE self)
 
     if (rb_respond_to(io, rb_intern("nonblock=")))
 	rb_funcall(io, rb_intern("nonblock="), 1, Qtrue);
-    Check_Type(io, T_FILE);
+    // Check_Type(io, T_FILE);
     rb_ivar_set(self, id_i_io, io);
 
     ssl = SSL_new(ctx);
@@ -1672,11 +1679,22 @@ ossl_ssl_setup(VALUE self)
 	return Qtrue;
 
     io = rb_attr_get(self, id_i_io);
-    GetOpenFile(io, fptr);
-    rb_io_check_readable(fptr);
-    rb_io_check_writable(fptr);
-    if (!SSL_set_fd(ssl, TO_SOCKET(rb_io_descriptor(io))))
-        ossl_raise(eSSLError, "SSL_set_fd");
+
+    if (IsSock(io)) {
+        GetOpenFile(io, fptr);
+        rb_io_check_readable(fptr);
+        rb_io_check_writable(fptr);
+        if (!SSL_set_fd(ssl, TO_SOCKET(rb_io_descriptor(io))))
+            ossl_raise(eSSLError, "SSL_set_fd");
+    } else {
+        // something which quacks like an IO
+        // TODO: how to best ensure this from the C API??
+        BIO *rbio = BIO_new(BIO_s_mem());
+        BIO *wbio = BIO_new(BIO_s_mem());
+        SSL_set_bio(ssl, rbio, wbio);
+        SSL_set_ex_data(ssl, ossl_ssl_ex_rbio_idx, (void *)rbio);
+        SSL_set_ex_data(ssl, ossl_ssl_ex_wbio_idx, (void *)wbio);
+    }
 
     return Qtrue;
 }
@@ -1722,6 +1740,22 @@ no_exception_p(VALUE opts)
 #endif
 
 
+int ossl_ssl_connect_impl(SSL *ssl)
+{
+    return SSL_connect(ssl);
+}
+
+int ossl_ssl_read_impl(SSL *ssl, VALUE str, int ilen)
+{
+    return SSL_read(ssl, RSTRING_PTR(str), ilen);
+}
+
+int ossl_ssl_write_impl(SSL *ssl, VALUE tmp, int num)
+{
+    return SSL_write(ssl, RSTRING_PTR(tmp), num);
+}
+
+
 static void
 io_wait_writable(VALUE io)
 {
@@ -1763,6 +1797,15 @@ ossl_start_ssl(VALUE self, int (*func)(SSL *), const char *funcname, VALUE opts)
     GetSSL(self, ssl);
 
     VALUE io = rb_attr_get(self, id_i_io);
+
+    int is_sock = IsSock(io);
+    BIO *rbio, *wbio;
+
+    if (!is_sock) {
+        rbio = (BIO *)SSL_get_ex_data(ssl, ossl_ssl_ex_rbio_idx);
+        wbio = (BIO *)SSL_get_ex_data(ssl, ossl_ssl_ex_wbio_idx);
+    }
+
     for (;;) {
         ret = func(ssl);
 
@@ -1772,11 +1815,35 @@ ossl_start_ssl(VALUE self, int (*func)(SSL *), const char *funcname, VALUE opts)
             ossl_clear_error();
             rb_jump_tag(NUM2INT(cb_state));
         }
+        printf("connect ret: %d\n", ret);
 
         if (ret > 0)
             break;
 
-        switch ((ret2 = ssl_get_error(ssl, ret))) {
+        ret2 = ssl_get_error(ssl, ret);
+        printf("WANT_READ: %d, WANT_WRITE. %d\n", SSL_ERROR_WANT_READ, SSL_ERROR_WANT_WRITE);
+        printf("connect ret2: %d\n", ret2);
+
+        if (!is_sock) {
+            if(ret2 == SSL_ERROR_WANT_WRITE) {
+                ret2 = ossl_membio_sock_read(rbio, io);
+                if (ret2 == SSL_ERROR_NONE) {
+                    ret2 = SSL_ERROR_WANT_WRITE;
+                    printf("out fuckerz\n");
+                    break;
+                }
+            } else if (ret2 == SSL_ERROR_WANT_READ) {
+                ret2 = ossl_membio_sock_write(wbio, io);
+                if (ret2 == SSL_ERROR_NONE) {
+                    printf("out fuckerz\n");
+                    break;
+                    // continue;
+                }
+            }
+        }
+        printf("connect after is_sock ret2: %d\n", ret2);
+
+        switch ((ret2)) {
           case SSL_ERROR_WANT_WRITE:
             if (no_exception_p(opts)) { return sym_wait_writable; }
             write_would_block(nonblock);
@@ -1838,7 +1905,7 @@ ossl_ssl_connect(VALUE self)
 {
     ossl_ssl_setup(self);
 
-    return ossl_start_ssl(self, SSL_connect, "SSL_connect", Qfalse);
+    return ossl_start_ssl(self, ossl_ssl_connect_impl, "SSL_connect", Qfalse);
 }
 
 /*
@@ -1871,7 +1938,7 @@ ossl_ssl_connect_nonblock(int argc, VALUE *argv, VALUE self)
 
     ossl_ssl_setup(self);
 
-    return ossl_start_ssl(self, SSL_connect, "SSL_connect", opts);
+    return ossl_start_ssl(self, ossl_ssl_connect_impl, "SSL_connect", opts);
 }
 
 /*
@@ -1928,6 +1995,7 @@ ossl_ssl_read_internal(int argc, VALUE *argv, VALUE self, int nonblock)
     int ilen;
     VALUE len, str;
     VALUE opts = Qnil;
+    BIO *rbio, *wbio;
 
     if (nonblock) {
 	rb_scan_args(argc, argv, "11:", &len, &str, &opts);
@@ -1955,11 +2023,28 @@ ossl_ssl_read_internal(int argc, VALUE *argv, VALUE self, int nonblock)
     }
 
     VALUE io = rb_attr_get(self, id_i_io);
+    int is_sock = IsSock(io);
+
+    if (!is_sock) {
+        rbio = (BIO *)SSL_get_ex_data(ssl, ossl_ssl_ex_rbio_idx);
+        wbio = (BIO *)SSL_get_ex_data(ssl, ossl_ssl_ex_wbio_idx);
+    }
 
     rb_str_locktmp(str);
     for (;;) {
-        int nread = SSL_read(ssl, RSTRING_PTR(str), ilen);
-        switch (ssl_get_error(ssl, nread)) {
+        int ret, nread;
+
+        if (!is_sock) {
+            ret = ossl_membio_sock_read(rbio, io);
+            if (ret == SSL_ERROR_NONE) {
+                ret = ossl_membio_sock_write(wbio, io);
+            }
+        } else {
+            nread = ossl_ssl_read_impl(ssl, str, ilen);
+            ret = ssl_get_error(ssl, nread);
+        }
+
+        switch (ret) {
           case SSL_ERROR_NONE:
             rb_str_unlocktmp(str);
             rb_str_set_len(str, nread);
@@ -2056,7 +2141,16 @@ ossl_ssl_write_internal(VALUE self, VALUE str, VALUE opts)
 
     tmp = rb_str_new_frozen(StringValue(str));
     VALUE io = rb_attr_get(self, id_i_io);
-    GetOpenFile(io, fptr);
+    int is_sock = IsSock(io);
+    // BIO *rbio;
+    BIO *wbio;
+
+    if (!is_sock) {
+        // rbio = (BIO *)SSL_get_ex_data(ssl, ossl_ssl_ex_rbio_idx);
+        wbio = (BIO *)SSL_get_ex_data(ssl, ossl_ssl_ex_wbio_idx);
+    } else {
+        GetOpenFile(io, fptr);
+    }
 
     /* SSL_write(3ssl) manpage states num == 0 is undefined */
     num = RSTRING_LENINT(tmp);
@@ -2064,8 +2158,18 @@ ossl_ssl_write_internal(VALUE self, VALUE str, VALUE opts)
         return INT2FIX(0);
 
     for (;;) {
-        int nwritten = SSL_write(ssl, RSTRING_PTR(tmp), num);
-        switch (ssl_get_error(ssl, nwritten)) {
+
+
+        int nwritten = ossl_ssl_write_impl(ssl, tmp, num);
+        int ret = ssl_get_error(ssl, nwritten);
+
+        if (!is_sock) {
+            if (ret == SSL_ERROR_NONE) {
+                ret = ossl_membio_sock_write(wbio, io);
+            }
+        }
+
+        switch (ret) {
           case SSL_ERROR_NONE:
             return INT2NUM(nwritten);
           case SSL_ERROR_WANT_WRITE:
@@ -2596,6 +2700,12 @@ Init_ossl_ssl(void)
     ossl_ssl_ex_ptr_idx = SSL_get_ex_new_index(0, (void *)"ossl_ssl_ex_ptr_idx", 0, 0, 0);
     if (ossl_ssl_ex_ptr_idx < 0)
 	ossl_raise(rb_eRuntimeError, "SSL_get_ex_new_index");
+    ossl_ssl_ex_rbio_idx = SSL_get_ex_new_index(0, (void *)"ossl_ssl_ex_rbio_idx", 0, 0, 0);
+    if (ossl_ssl_ex_rbio_idx < 0)
+	ossl_raise(rb_eRuntimeError, "SSL_get_ex_new_index");
+    ossl_ssl_ex_wbio_idx = SSL_get_ex_new_index(0, (void *)"ossl_ssl_ex_wbio_idx", 0, 0, 0);
+    if (ossl_ssl_ex_wbio_idx < 0)
+	ossl_raise(rb_eRuntimeError, "SSL_get_ex_new_index");
     ossl_sslctx_ex_ptr_idx = SSL_CTX_get_ex_new_index(0, (void *)"ossl_sslctx_ex_ptr_idx", 0, 0, 0);
     if (ossl_sslctx_ex_ptr_idx < 0)
 	ossl_raise(rb_eRuntimeError, "SSL_CTX_get_ex_new_index");
@@ -3124,6 +3234,11 @@ Init_ossl_ssl(void)
     id_tmp_dh_callback = rb_intern_const("tmp_dh_callback");
     id_npn_protocols_encoded = rb_intern_const("npn_protocols_encoded");
     id_each = rb_intern_const("each");
+
+    nonblock_kwargs = rb_hash_new();
+    rb_hash_aset(nonblock_kwargs, sym_exception, Qfalse);
+    rb_obj_freeze(nonblock_kwargs);
+    rb_global_variable(&nonblock_kwargs);
 
 #define DefIVarID(name) do \
     id_i_##name = rb_intern_const("@"#name); while (0)
