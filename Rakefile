@@ -26,25 +26,24 @@ end
 
 Rake::TestTask.new(:test_fips_internal) do |t|
   t.libs << 'test/openssl'
-  t.test_files = FileList[
-    'test/openssl/test_bn.rb',
-    'test/openssl/test_buffering.rb',
-    'test/openssl/test_config.rb',
-    'test/openssl/test_engine.rb',
-    'test/openssl/test_fips.rb',
-    'test/openssl/test_ossl.rb',
-    'test/openssl/test_pair.rb',
-    'test/openssl/test_pkey.rb',
-    'test/openssl/test_pkey_dh.rb',
-    'test/openssl/test_pkey_dsa.rb',
-    'test/openssl/test_pkey_ec.rb',
-    'test/openssl/test_pkey_rsa.rb',
-    'test/openssl/test_provider.rb',
-    'test/openssl/test_random.rb',
-    'test/openssl/test_ssl_session.rb',
-    'test/openssl/test_x509attr.rb',
-    'test/openssl/test_x509ext.rb',
-    'test/openssl/test_x509store.rb',
+  # Exclude failing test files in FIPS for this task to pass.
+  # TODO: Fix failing test files.
+  t.test_files = FileList['test/**/test_*.rb'] - FileList[
+    'test/openssl/test_asn1.rb',
+    'test/openssl/test_cipher.rb',
+    'test/openssl/test_digest.rb',
+    'test/openssl/test_hmac.rb',
+    'test/openssl/test_kdf.rb',
+    'test/openssl/test_ns_spki.rb',
+    'test/openssl/test_ocsp.rb',
+    'test/openssl/test_pkcs12.rb',
+    'test/openssl/test_pkcs7.rb',
+    'test/openssl/test_ssl.rb',
+    'test/openssl/test_ts.rb',
+    'test/openssl/test_x509cert.rb',
+    'test/openssl/test_x509crl.rb',
+    'test/openssl/test_x509name.rb',
+    'test/openssl/test_x509req.rb',
   ]
   t.warning = true
 end
