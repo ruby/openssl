@@ -125,7 +125,6 @@ ssbzSibBsu/6iGtCOGEoXJf//////////wIBAg==
       # that this form is deprecated. New applications should use #min_version=
       # and #max_version= as necessary.
       def initialize(version = nil)
-        self.options |= OpenSSL::SSL::OP_ALL
         self.ssl_version = version if version
         self.verify_mode = OpenSSL::SSL::VERIFY_NONE
         self.verify_hostname = false
@@ -145,7 +144,7 @@ ssbzSibBsu/6iGtCOGEoXJf//////////wIBAg==
       # used.
       def set_params(params={})
         params = DEFAULT_PARAMS.merge(params)
-        self.options = params.delete(:options) # set before min_version/max_version
+        self.options |= params.delete(:options) # set before min_version/max_version
         params.each{|name, value| self.__send__("#{name}=", value) }
         if self.verify_mode != OpenSSL::SSL::VERIFY_NONE
           unless self.ca_file or self.ca_path or self.cert_store
