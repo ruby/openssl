@@ -161,8 +161,11 @@ get_asn1obj(ASN1_OBJECT *obj)
         ret = rb_str_new2(OBJ_nid2sn(nid));
     else{
         if (!(out = BIO_new(BIO_s_mem())))
-            ossl_raise(eX509AttrError, NULL);
-        i2a_ASN1_OBJECT(out, obj);
+            ossl_raise(eTimestampError, "BIO_new(BIO_s_mem())");
+        if (i2a_ASN1_OBJECT(out, obj) <= 0) {
+            BIO_free(out);
+            ossl_raise(eTimestampError, "i2a_ASN1_OBJECT");
+        }
         ret = ossl_membio2str(out);
     }
 
@@ -691,21 +694,12 @@ static VALUE
 ossl_ts_resp_get_token(VALUE self)
 {
     TS_RESP *resp;
-    PKCS7 *p7, *copy;
-    VALUE obj;
+    PKCS7 *p7;
 
     GetTSResponse(self, resp);
     if (!(p7 = TS_RESP_get_token(resp)))
         return Qnil;
-
-    obj = NewPKCS7(cPKCS7);
-
-    if (!(copy = PKCS7_dup(p7)))
-        ossl_raise(eTimestampError, NULL);
-
-    SetPKCS7(obj, copy);
-
-    return obj;
+    return ossl_pkcs7_new(p7);
 }
 
 /*
@@ -1595,5 +1589,9 @@ Init_ossl_ts(void)
     rb_attr(cTimestampFactory, rb_intern_const("additional_certs"), 1, 1, 0);
     rb_define_method(cTimestampFactory, "create_timestamp", ossl_tsfac_create_ts, 3);
 }
-
+#else /* OPENSSL_NO_TS */
+void
+Init_ossl_ts(void)
+{
+}
 #endif
