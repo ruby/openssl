@@ -414,6 +414,7 @@ ossl_cipher_update(int argc, VALUE *argv, VALUE self)
     if (!ossl_cipher_update_long(ctx, (unsigned char *)RSTRING_PTR(str), &out_len, in, in_len))
 	ossl_raise(eCipherError, NULL);
     assert(out_len <= RSTRING_LEN(str));
+    rb_str_modify(str);
     rb_str_set_len(str, out_len);
 
     return str;

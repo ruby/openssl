@@ -369,6 +369,14 @@ class OpenSSL::TestCipher < OpenSSL::TestCase
     end
   end
 
+  def test_update_shared_string
+    cipher = OpenSSL::Cipher.new("aes-256-ecb").encrypt
+    cipher.random_key
+    str = ("a"*12345).freeze
+    shared_str = str.byteslice(-132..)
+    cipher.update("a"*100, shared_str)
+  end
+
   private
 
   def new_encryptor(algo, **kwargs)
