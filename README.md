@@ -18,9 +18,10 @@ included as a default gem in [supported Ruby branches][Ruby Maintenance Branches
 
 |Version|Maintenance status             |Ruby compatibility|OpenSSL compatibility                       |
 |-------|-------------------------------|------------------|--------------------------------------------|
-|3.2.x  |normal maintenance (Ruby 3.3)  |Ruby 2.7+         |OpenSSL 1.0.2-3.3 (current) or LibreSSL 3.1+|
-|3.1.x  |normal maintenance (Ruby 3.2)  |Ruby 2.6+         |OpenSSL 1.0.2-3.3 (current) or LibreSSL 3.1+|
-|3.0.x  |security maintenance (Ruby 3.1)|Ruby 2.6+         |OpenSSL 1.0.2-3.3 (current) or LibreSSL 3.1+|
+|3.3.x  |normal maintenance (Ruby 3.4)  |Ruby 2.7+         |OpenSSL 1.0.2-3.4 (current) or LibreSSL 3.1+|
+|3.2.x  |normal maintenance (Ruby 3.3)  |Ruby 2.7+         |OpenSSL 1.0.2-3.4 (current) or LibreSSL 3.1+|
+|3.1.x  |normal maintenance (Ruby 3.2)  |Ruby 2.6+         |OpenSSL 1.0.2-3.4 (current) or LibreSSL 3.1+|
+|3.0.x  |security maintenance (Ruby 3.1)|Ruby 2.6+         |OpenSSL 1.0.2-3.4 (current) or LibreSSL 3.1+|
 |2.2.x  |end-of-life (Ruby 3.0)         |Ruby 2.3+         |OpenSSL 1.0.1-1.1.1 or LibreSSL 2.9+        |
 |2.1.x  |end-of-life (Ruby 2.5-2.7)     |Ruby 2.3+         |OpenSSL 1.0.1-1.1.1 or LibreSSL 2.5+        |
 |2.0.x  |end-of-life (Ruby 2.4)         |Ruby 2.3+         |OpenSSL 0.9.8-1.1.1 or LibreSSL 2.3+        |
