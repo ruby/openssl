@@ -23,26 +23,20 @@ module OpenSSL::Buffering
   include Enumerable
 
   # A buffer which will retain binary encoding.
-  class Buffer < String
-    BINARY = Encoding::BINARY
-
-    def initialize
-      super
-
-      force_encoding(BINARY)
-    end
-
-    def << string
-      if string.encoding == BINARY
-        super(string)
-      else
-        super(string.b)
+  if String.method_defined?(:append_as_bytes)
+    Buffer = String
+  else
+    class Buffer
+      class Buffer < String
+        def append_as_bytes(string)
+          if string.encoding == Encoding::BINARY || string.ascii_only?
+            self << string
+          else
+            self << string.b
+          end
+        end
       end
-
-      return self
     end
-
-    alias concat <<
   end
 
   ##
@@ -352,22 +346,32 @@ module OpenSSL::Buffering
 
   def do_write(s)
     @wbuffer = Buffer.new unless defined? @wbuffer
-    @wbuffer << s
-    @wbuffer.force_encoding(Encoding::BINARY)
+    @wbuffer.append_as_bytes(s)
+
     @sync ||= false
-    buffer_size = @wbuffer.size
+    buffer_size = @wbuffer.bytesize
     if @sync or buffer_size > BLOCK_SIZE
       nwrote = 0
       begin
         while nwrote < buffer_size do
           begin
-            nwrote += syswrite(@wbuffer[nwrote, buffer_size - nwrote])
+            chunk = if nwrote > 0
+              @wbuffer.byteslice(nwrote..-1)
+            else
+              @wbuffer
+            end
+
+            nwrote += syswrite(chunk)
           rescue Errno::EAGAIN
             retry
           end
         end
       ensure
-        @wbuffer[0, nwrote] = ""
+        if nwrote < @wbuffer.bytesize
+          @wbuffer[0, nwrote] = ""
+        else
+          @wbuffer.clear
+        end
       end
     end
   end

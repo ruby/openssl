@@ -2065,14 +2065,16 @@ ossl_ssl_write_internal(VALUE self, VALUE str, VALUE opts)
     if (!ssl_started(ssl))
         rb_raise(eSSLError, "SSL session is not started yet");
 
-    tmp = rb_str_new_frozen(StringValue(str));
+    tmp = rb_str_locktmp(StringValue(str));
     VALUE io = rb_attr_get(self, id_i_io);
     GetOpenFile(io, fptr);
 
     /* SSL_write(3ssl) manpage states num == 0 is undefined */
     num = RSTRING_LENINT(tmp);
-    if (num == 0)
+    if (num == 0) {
+        rb_str_unlocktmp(tmp);
         return INT2FIX(0);
+    }
 
     for (;;) {
         int nwritten = SSL_write(ssl, RSTRING_PTR(tmp), num);
@@ -2081,19 +2083,27 @@ ossl_ssl_write_internal(VALUE self, VALUE str, VALUE opts)
         if (!NIL_P(cb_state)) {
             rb_ivar_set(self, ID_callback_state, Qnil);
             ossl_clear_error();
+            rb_str_unlocktmp(tmp);
             rb_jump_tag(NUM2INT(cb_state));
         }
 
         switch (ssl_get_error(ssl, nwritten)) {
           case SSL_ERROR_NONE:
+            rb_str_unlocktmp(tmp);
             return INT2NUM(nwritten);
           case SSL_ERROR_WANT_WRITE:
-            if (no_exception_p(opts)) { return sym_wait_writable; }
+            if (no_exception_p(opts)) {
+                rb_str_unlocktmp(tmp);
+                return sym_wait_writable;
+            }
             write_would_block(nonblock);
             io_wait_writable(io);
             continue;
           case SSL_ERROR_WANT_READ:
-            if (no_exception_p(opts)) { return sym_wait_readable; }
+            if (no_exception_p(opts)) {
+                rb_str_unlocktmp(tmp);
+                return sym_wait_readable;
+            }
             read_would_block(nonblock);
             io_wait_readable(io);
             continue;
@@ -2108,9 +2118,13 @@ ossl_ssl_write_internal(VALUE self, VALUE str, VALUE opts)
             if (errno == EPROTOTYPE)
                 continue;
 #endif
-            if (errno) rb_sys_fail(0);
+            if (errno) {
+                rb_str_unlocktmp(tmp);
+                rb_sys_fail(0);
+            }
             /* fallthrough */
           default:
+            rb_str_unlocktmp(tmp);
             ossl_raise(eSSLError, "SSL_write");
         }
     }
