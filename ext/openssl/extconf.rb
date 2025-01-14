@@ -120,14 +120,15 @@ end
 
 version_ok = if have_macro("LIBRESSL_VERSION_NUMBER", "openssl/opensslv.h")
   is_libressl = true
-  checking_for("LibreSSL version >= 3.1.0") {
-    try_static_assert("LIBRESSL_VERSION_NUMBER >= 0x30100000L", "openssl/opensslv.h") }
+  checking_for("LibreSSL version >= 3.9.0") {
+    try_static_assert("LIBRESSL_VERSION_NUMBER >= 0x30900000L", "openssl/opensslv.h") }
 else
+  is_openssl = true
   checking_for("OpenSSL version >= 1.0.2") {
     try_static_assert("OPENSSL_VERSION_NUMBER >= 0x10002000L", "openssl/opensslv.h") }
 end
 unless version_ok
-  raise "OpenSSL >= 1.0.2 or LibreSSL >= 3.1.0 is required"
+  raise "OpenSSL >= 1.0.2 or LibreSSL >= 3.9.0 is required"
 end
 
 # Prevent wincrypt.h from being included, which defines conflicting macro with openssl/x509.h
@@ -143,14 +144,13 @@ ssl_h = "openssl/ssl.h".freeze
 
 # compile options
 have_func("RAND_egd()", "openssl/rand.h")
-engines = %w{dynamic 4758cca aep atalla chil
-             cswift nuron sureware ubsec padlock capi gmp gost cryptodev}
-engines.each { |name|
-  have_func("ENGINE_load_#{name}()", "openssl/engine.h")
-}
-
-# missing in libressl < 3.5
-have_func("i2d_re_X509_tbs(NULL, NULL)", x509_h)
+if is_openssl
+  engines = %w{dynamic 4758cca aep atalla chil
+               cswift nuron sureware ubsec padlock capi gmp gost cryptodev}
+  engines.each { |name|
+    have_func("ENGINE_load_#{name}()", "openssl/engine.h")
+  }
+end
 
 # added in 1.1.0
 if !have_struct_member("SSL", "ctx", "openssl/ssl.h") || is_libressl

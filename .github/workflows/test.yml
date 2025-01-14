@@ -73,16 +73,8 @@ jobs:
           - openssl-3.4.0 # Supported until 2026-10-22
           - openssl-master
           # http://www.libressl.org/releases.html
-          - libressl-3.1.5 # EOL
-          - libressl-3.2.7 # EOL
-          - libressl-3.3.6 # EOL
-          - libressl-3.4.3 # EOL
-          - libressl-3.5.3 # EOL
-          - libressl-3.6.3 # EOL
-          - libressl-3.7.3 # EOL
-          - libressl-3.8.4 # EOL 2024-10-16
           - libressl-3.9.2 # Supported until 2025-04-05
-          - libressl-4.0.0
+          - libressl-4.0.0 # Supported until 2025-10-08
         include:
           - { name-extra: 'with fips provider', openssl: openssl-3.0.15, fips-enabled: true }
           - { name-extra: 'with fips provider', openssl: openssl-3.1.7, fips-enabled: true }
