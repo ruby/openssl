@@ -63,7 +63,6 @@ jobs:
         name-extra: [ '' ]
         openssl:
           # https://openssl-library.org/source/
-          - openssl-1.0.2u # EOL
           - openssl-1.1.0l # EOL
           - openssl-1.1.1w # EOL 2023-09-11, still used by RHEL 8 and Ubuntu 20.04
           - openssl-3.0.15 # Supported until 2026-09-07
