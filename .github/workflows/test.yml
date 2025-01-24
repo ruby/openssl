@@ -73,6 +73,8 @@ jobs:
           # http://www.libressl.org/releases.html
           - libressl-3.9.2 # Supported until 2025-04-05
           - libressl-4.0.0 # Supported until 2025-10-08
+          # https://github.com/aws/aws-lc/tags
+          - aws-lc-latest
         include:
           - { name-extra: 'with fips provider', openssl: openssl-3.0.15, fips-enabled: true }
           - { name-extra: 'with fips provider', openssl: openssl-3.1.7, fips-enabled: true }
@@ -81,6 +83,7 @@ jobs:
           - { name-extra: 'with fips provider', openssl: openssl-3.4.0, fips-enabled: true }
           - { name-extra: 'with fips provider', openssl: openssl-master, fips-enabled: true }
           - { name-extra: 'without legacy provider', openssl: openssl-3.4.0, append-configure: 'no-legacy' }
+          - { openssl: aws-lc-latest, skip-warnings: true, skip-tests: true } # Remove "skip-tests" once AWS-LC tests are working.
     steps:
       - name: repo checkout
         uses: actions/checkout@v4
@@ -120,6 +123,13 @@ jobs:
             ./configure --prefix=$HOME/openssl
             make -j4 && make install
             ;;
+          aws-lc-*)
+            git clone https://github.com/aws/aws-lc.git .
+            AWS_LC_RELEASE=$(git tag --sort=-creatordate --list "v*"  | head -1)
+            git checkout $AWS_LC_RELEASE
+            cmake -DCMAKE_INSTALL_PREFIX=$HOME/openssl
+            make -j4 && make install
+            ;;
           *)
             false
             ;;
@@ -150,7 +160,7 @@ jobs:
       - name: rake test
         run:  bundle exec rake test TESTOPTS="-v --no-show-detail-immediately"
         timeout-minutes: 5
-        if: ${{ !matrix.fips-enabled }}
+        if: ${{ !matrix.fips-enabled && !matrix.skip-tests }}
 
       # Run only the passing tests on the FIPS module as a temporary workaround.
       # TODO Fix other tests, and run all the tests on FIPS module.
