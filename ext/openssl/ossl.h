@@ -73,6 +73,10 @@
 # define OSSL_USE_PROVIDER
 #endif
 
+#if OSSL_OPENSSL_PREREQ(3, 0, 0)
+# define OSSL_HAVE_IMMUTABLE_PKEY 1
+#endif
+
 /*
  * Common Module
  */
