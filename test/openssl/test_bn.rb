@@ -102,10 +102,21 @@ class OpenSSL::TestBN < OpenSSL::TestCase
     assert_equal(false, 2.to_bn.odd?)
   end
 
+  def test_even_p
+    assert_equal(false, 1.to_bn.even?)
+    assert_equal(true, 2.to_bn.even?)
+  end
+
   def test_negative_p
     assert_equal(false, 0.to_bn.negative?)
     assert_equal(false, @e1.negative?)
     assert_equal(true, @e2.negative?)
+  end
+
+  def test_positive_p
+    assert_equal(false, 0.to_bn.positive?)
+    assert_equal(true, @e1.positive?)
+    assert_equal(false, @e2.positive?)
   end
 
   def test_sqr
