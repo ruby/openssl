@@ -7,9 +7,15 @@ class OpenSSL::TestPKeyDH < OpenSSL::PKeyTestCase
   NEW_KEYLEN = 2048
 
   def test_new_empty
+    # pkeys are immutable in OpenSSL >= 3.0
+    if openssl?(3, 0, 0)
+      assert_raise(ArgumentError) { OpenSSL::PKey::DH.new }
+      return
+    end
+
     dh = OpenSSL::PKey::DH.new
-    assert_equal nil, dh.p
-    assert_equal nil, dh.priv_key
+    assert_nil(dh.p)
+    assert_nil(dh.priv_key)
   end
 
   def test_new_generate

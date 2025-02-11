@@ -43,6 +43,7 @@ static VALUE eDHError;
  * If called without arguments, an empty instance without any parameter or key
  * components is created. Use #set_pqg to manually set the parameters afterwards
  * (and optionally #set_key to set private and public key components).
+ * This form is deprecated and will not work on OpenSSL 3.0 or later.
  *
  * If a String is given, tries to parse it as a DER- or PEM- encoded parameters.
  * See also OpenSSL::PKey.read which can parse keys of any kinds.
@@ -84,10 +85,15 @@ ossl_dh_initialize(int argc, VALUE *argv, VALUE self)
 
     /* The DH.new(size, generator) form is handled by lib/openssl/pkey.rb */
     if (rb_scan_args(argc, argv, "01", &arg) == 0) {
+#ifdef OSSL_HAVE_IMMUTABLE_PKEY
+        rb_raise(rb_eArgError, "OpenSSL::PKey::DH.new without arguments is " \
+                 "not supported in this version of OpenSSL");
+#else
         dh = DH_new();
         if (!dh)
             ossl_raise(eDHError, "DH_new");
         goto legacy;
+#endif
     }
 
     arg = ossl_to_der_if_possible(arg);
