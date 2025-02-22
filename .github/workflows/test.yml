@@ -83,7 +83,7 @@ jobs:
           - { name-extra: 'with fips provider', openssl: openssl-3.4.0, fips-enabled: true }
           - { name-extra: 'with fips provider', openssl: openssl-master, fips-enabled: true }
           - { name-extra: 'without legacy provider', openssl: openssl-3.4.0, append-configure: 'no-legacy' }
-          - { openssl: aws-lc-latest, skip-warnings: true, skip-tests: true } # Remove "skip-tests" once AWS-LC tests are working.
+          - { openssl: aws-lc-latest, skip-warnings: true }
     steps:
       - name: repo checkout
         uses: actions/checkout@v4
@@ -160,7 +160,7 @@ jobs:
       - name: rake test
         run:  bundle exec rake test TESTOPTS="-v --no-show-detail-immediately"
         timeout-minutes: 5
-        if: ${{ !matrix.fips-enabled && !matrix.skip-tests }}
+        if: ${{ !matrix.fips-enabled }}
 
       # Run only the passing tests on the FIPS module as a temporary workaround.
       # TODO Fix other tests, and run all the tests on FIPS module.
