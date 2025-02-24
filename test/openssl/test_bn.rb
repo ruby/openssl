@@ -321,7 +321,7 @@ class OpenSSL::TestBN < OpenSSL::TestCase
   end
 
   def test_get_flags_and_set_flags
-    return if aws_lc? # AWS-LC does not support BN::CONSTTIME.
+    omit "AWS-LC does not support BN::CONSTTIME" if aws_lc?
 
     e = OpenSSL::BN.new(999)
 

@@ -39,7 +39,9 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   end
 
   def test_ctx_options_config
-    omit "LibreSSL and AWS-LC do not support OPENSSL_CONF" if libressl? || aws_lc?
+    if libressl? || aws_lc?
+      omit "LibreSSL and AWS-LC do not support OPENSSL_CONF"
+    end
 
     Tempfile.create("openssl.cnf") { |f|
       f.puts(<<~EOF)
@@ -838,7 +840,9 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
 
     # LibreSSL 3.5.0+ doesn't support other wildcard certificates
     # (it isn't required to, as RFC states MAY, not MUST)
-    return if libressl?
+    if libressl?
+      omit "LibreSSL 3.5.0+ doesn't support some wildcard certificates"
+    end
 
     assert_equal(true, OpenSSL::SSL.verify_certificate_identity(
       create_cert_with_san('DNS:*baz.example.com'), 'foobaz.example.com'))
@@ -1412,7 +1416,9 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   end
 
   def test_minmax_version_system_default
-    omit "LibreSSL and AWS-LC do not support OPENSSL_CONF" if libressl? || aws_lc?
+    if libressl? || aws_lc?
+      omit "LibreSSL and AWS-LC do not support OPENSSL_CONF"
+    end
 
     Tempfile.create("openssl.cnf") { |f|
       f.puts(<<~EOF)
@@ -1456,7 +1462,9 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   end
 
   def test_respect_system_default_min
-    omit "LibreSSL and AWS-LC do not support OPENSSL_CONF" if libressl? || aws_lc?
+    if libressl? || aws_lc?
+      omit "LibreSSL and AWS-LC do not support OPENSSL_CONF"
+    end
 
     Tempfile.create("openssl.cnf") { |f|
       f.puts(<<~EOF)
@@ -1619,7 +1627,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   end
 
   def test_npn_protocol_selection_ary
-    return unless OpenSSL::SSL::SSLContext.method_defined?(:npn_select_cb)
+    omit unless OpenSSL::SSL::SSLContext.method_defined?(:npn_select_cb)
 
     advertised = ["http/1.1", "spdy/2"]
     ctx_proc = proc { |ctx| ctx.npn_protocols = advertised }
@@ -1638,7 +1646,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   end
 
   def test_npn_protocol_selection_enum
-    return unless OpenSSL::SSL::SSLContext.method_defined?(:npn_select_cb)
+    omit unless OpenSSL::SSL::SSLContext.method_defined?(:npn_select_cb)
 
     advertised = Object.new
     def advertised.each
@@ -1661,7 +1669,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   end
 
   def test_npn_protocol_selection_cancel
-    return unless OpenSSL::SSL::SSLContext.method_defined?(:npn_select_cb)
+    omit unless OpenSSL::SSL::SSLContext.method_defined?(:npn_select_cb)
 
     ctx_proc = Proc.new { |ctx| ctx.npn_protocols = ["http/1.1"] }
     start_server(ctx_proc: ctx_proc, ignore_listener_error: true) { |port|
@@ -1673,7 +1681,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   end
 
   def test_npn_advertised_protocol_too_long
-    return unless OpenSSL::SSL::SSLContext.method_defined?(:npn_select_cb)
+    omit unless OpenSSL::SSL::SSLContext.method_defined?(:npn_select_cb)
 
     ctx = OpenSSL::SSL::SSLContext.new
     assert_raise(OpenSSL::SSL::SSLError) do
@@ -1683,7 +1691,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   end
 
   def test_npn_selected_protocol_too_long
-    return unless OpenSSL::SSL::SSLContext.method_defined?(:npn_select_cb)
+    omit unless OpenSSL::SSL::SSLContext.method_defined?(:npn_select_cb)
 
     ctx_proc = Proc.new { |ctx| ctx.npn_protocols = ["http/1.1"] }
     start_server(ctx_proc: ctx_proc, ignore_listener_error: true) { |port|
@@ -1774,7 +1782,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
 
   def test_fallback_scsv
     supported = check_supported_protocol_versions
-    return unless supported.include?(OpenSSL::SSL::TLS1_1_VERSION) &&
+    omit unless supported.include?(OpenSSL::SSL::TLS1_1_VERSION) &&
       supported.include?(OpenSSL::SSL::TLS1_2_VERSION)
 
     pend "Fallback SCSV is not supported" unless \
@@ -2023,9 +2031,9 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   def test_security_level
     ctx = OpenSSL::SSL::SSLContext.new
     ctx.security_level = 1
-    if aws_lc? # AWS-LC does not support security levels.
+    if aws_lc?
       assert_equal(0, ctx.security_level)
-      return
+      omit "AWS-LC does not support security levels"
     end
     assert_equal(1, ctx.security_level)
 

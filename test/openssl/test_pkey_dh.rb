@@ -29,7 +29,7 @@ class OpenSSL::TestPKeyDH < OpenSSL::PKeyTestCase
 
   def test_new_break_on_fips
     omit_on_non_fips
-    return unless openssl? # This behavior only applies to OpenSSL.
+    omit "This test only applies to OpenSSL" unless openssl?
 
     # The block argument is not executed in FIPS case.
     # See https://github.com/ruby/openssl/issues/692 for details.
