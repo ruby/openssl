@@ -366,7 +366,7 @@ class OpenSSL::TestBN < OpenSSL::TestCase
       assert_equal(true, Ractor.new(@e2) { _1.negative? }.take)
       assert_include(128..255, Ractor.new { OpenSSL::BN.rand(8)}.take)
       assert_include(0...2**32, Ractor.new { OpenSSL::BN.generate_prime(32) }.take)
-      if !aws_lc? # AWS-LC does not support BN::CONSTTIME.
+      unless aws_lc? # AWS-LC does not support BN::CONSTTIME.
         assert_equal(0, Ractor.new { OpenSSL::BN.new(999).get_flags(OpenSSL::BN::CONSTTIME) }.take)
       end
       # test if shareable when frozen

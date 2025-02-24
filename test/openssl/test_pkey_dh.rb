@@ -19,7 +19,7 @@ class OpenSSL::TestPKeyDH < OpenSSL::PKeyTestCase
   end if ENV["OSSL_TEST_ALL"]
 
   def test_new_break_on_non_fips
-    omit_on_fips if !aws_lc?
+    omit_on_fips unless aws_lc?
 
     assert_nil(OpenSSL::PKey::DH.new(NEW_KEYLEN) { break })
     assert_raise(RuntimeError) do

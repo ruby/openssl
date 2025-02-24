@@ -1747,7 +1747,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
       end
     end
 
-    if !aws_lc? # AWS-LC does not support DHE ciphersuites.
+    unless aws_lc? # AWS-LC does not support DHE ciphersuites.
       # DHE
       # TODO: SSL_CTX_set1_groups() is required for testing this with TLS 1.3
       ctx_proc2 = proc { |ctx|
