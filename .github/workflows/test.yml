@@ -93,7 +93,7 @@ jobs:
         with:
           path: ~/openssl
           key: openssl-${{ runner.os }}-${{ matrix.openssl }}-${{ matrix.append-configure || 'default' }}
-        if: matrix.openssl != 'openssl-master' && matrix.openssl != 'libressl-master'
+        if: matrix.openssl != 'openssl-master' && matrix.openssl != 'libressl-master' && matrix.openssl != 'aws-lc-latest'
 
       - name: Compile OpenSSL library
         if: steps.cache-openssl.outputs.cache-hit != 'true'
