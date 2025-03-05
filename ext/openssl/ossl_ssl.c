@@ -1896,6 +1896,8 @@ io_descriptor_fallback(VALUE io)
 static int
 ssl_io_p(VALUE io)
 {
+    // FIXME: DO NOT MERGE
+    return 0;
     return RB_TYPE_P(io, T_FILE);
 }
 
