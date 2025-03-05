@@ -218,6 +218,88 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     end
   end
 
+  def test_synthetic_io_errors_in_servername_cb
+    assert_separately(["-ropenssl"], <<~"end;")
+  begin
+    #sock1, sock2 = socketpair
+    sock1, sock2 = if defined? UNIXSocket
+      UNIXSocket.pair
+    else
+      Socket.pair(Socket::AF_INET, Socket::SOCK_STREAM, 0)
+    end
+
+    t = Thread.new {
+      s1 = OpenSSL::SSL::SSLSocket.new(sock1)
+      s1.hostname = "localhost"
+      assert_raise_with_message(OpenSSL::SSL::SSLError, /unrecognized.name/i) {
+        s1.connect
+      }
+    }
+
+    ctx2 = OpenSSL::SSL::SSLContext.new
+    ctx2.servername_cb = lambda { |args| raise RuntimeError, "exc in servername_cb" }
+    obj = Object.new
+    obj.define_singleton_method(:method_missing) { |name, *args, **kwargs| sock2.__send__(name, *args, **kwargs) }
+    obj.define_singleton_method(:respond_to_missing?) { |name, *args, **kwargs| sock2.respond_to?(name, *args, **kwargs) }
+    obj.define_singleton_method(:write_nonblock) { |*args, **kwargs|
+      begin
+        raise "exc in write_nonblock"
+      rescue
+        p $!
+      end
+      p $!
+      sock2.write_nonblock(*args, **kwargs)
+    }
+    s2 = OpenSSL::SSL::SSLSocket.new(obj, ctx2)
+    assert_raise_with_message(RuntimeError, "exc in servername_cb") { s2.accept }
+    assert t.join
+  ensure
+    sock1.close
+    sock2.close
+  end
+    end;
+  end
+
+  def test_synthetic_io_errors_in_callback_and_socket
+    assert_separately(["-ropenssl"], <<~"end;")
+  begin
+    #sock1, sock2 = socketpair
+    sock1, sock2 = if defined? UNIXSocket
+      UNIXSocket.pair
+    else
+      Socket.pair(Socket::AF_INET, Socket::SOCK_STREAM, 0)
+    end
+
+    t = Thread.new {
+      s1 = OpenSSL::SSL::SSLSocket.new(sock1)
+      s1.hostname = "localhost"
+      assert_raise_with_message(OpenSSL::SSL::SSLError, /unrecognized.name/i) {
+        s1.connect
+      }
+    }
+
+    ctx2 = OpenSSL::SSL::SSLContext.new
+    ctx2.servername_cb = lambda { |args|
+      throw :throw_from, :servername_cb
+    }
+    obj = Object.new
+    obj.define_singleton_method(:method_missing) { |name, *args, **kwargs| sock2.__send__(name, *args, **kwargs) }
+    obj.define_singleton_method(:respond_to_missing?) { |name, *args, **kwargs| sock2.respond_to?(name, *args, **kwargs) }
+    obj.define_singleton_method(:write_nonblock) { |*args, **kwargs|
+      raise "write_nonblock"
+    }
+    s2 = OpenSSL::SSL::SSLSocket.new(obj, ctx2)
+
+    ret = catch(:throw_from) { s2.accept }
+    assert_equal(:servername_cb, ret)
+    assert t.join
+  ensure
+    sock1.close
+    sock2.close
+  end
+    end;
+  end
+
   def test_add_certificate
     ctx_proc = -> ctx {
       # Unset values set by start_server
