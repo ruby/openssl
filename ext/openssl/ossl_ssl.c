@@ -1560,6 +1560,8 @@ peeraddr_ip_str(VALUE self)
 static int
 is_real_socket(VALUE io)
 {
+    // FIXME: DO NOT MERGE
+    return 0;
     return RB_TYPE_P(io, T_FILE);
 }
 
