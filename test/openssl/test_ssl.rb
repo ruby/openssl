@@ -1631,7 +1631,12 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
       # Client only supports TLS 1.3
       ctx2 = OpenSSL::SSL::SSLContext.new
       ctx2.min_version = ctx2.max_version = OpenSSL::SSL::TLS1_3_VERSION
-      assert_nothing_raised { server_connect(port, ctx2) { } }
+      assert_nothing_raised {
+        server_connect(port, ctx2) { |ssl|
+          # Ensure SSL_accept() finishes successfully
+          ssl.puts("abc"); ssl.gets
+        }
+      }
     }
 
     # Server only supports TLS 1.2
