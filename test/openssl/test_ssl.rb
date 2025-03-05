@@ -218,6 +218,60 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     end
   end
 
+  def test_synthetic_io_double_error_in_write_then_in_read
+    pend "FIXME: Write a test case. It appears that OpenSSL may try to write " \
+      "to the underlying IO after reading from it fails."
+  end
+
+  def test_synthetic_io_double_error_in_cb_then_in_write
+    # If SSLContext#servername_cb fails, it must send the "unrecognized_name"
+    # alert. If another error occurs while writing the alert to the underlying
+    # socket, the original exception from the servername_cb is suppressed.
+    sock1, sock2 = socketpair
+
+    t = Thread.new {
+      s1 = OpenSSL::SSL::SSLSocket.new(sock1)
+      s1.hostname = "localhost"
+      begin
+        s1.connect
+      rescue
+      end
+    }
+
+    called = []
+    ctx2 = OpenSSL::SSL::SSLContext.new
+    ctx2.servername_cb = lambda { |args|
+      called << :servername_cb
+      raise "servername_cb"
+    }
+    obj = Object.new
+    obj.define_singleton_method(:method_missing) { |name, *args, **kwargs| sock2.__send__(name, *args, **kwargs) }
+    obj.define_singleton_method(:respond_to_missing?) { |name, *args, **kwargs| sock2.respond_to?(name, *args, **kwargs) }
+    obj.define_singleton_method(:write_nonblock) { |*args, **kwargs|
+      called << :write_nonblock
+      throw :throw_from, :write_nonblock
+    }
+    s2 = OpenSSL::SSL::SSLSocket.new(obj, ctx2)
+
+    ret = assert_warning(/exception ignored/) {
+      catch(:throw_from) { s2.accept }
+    }
+    assert_equal(:write_nonblock, ret)
+    assert_equal([:servername_cb, :write_nonblock], called)
+    sock2.close
+    assert t.join
+  ensure
+    sock1.close
+    sock2.close
+    t.kill.join
+  end
+
+  def test_synthetic_io_double_error_in_write_then_in_cb
+    pend "FIXME: if an underlying IO fails with an exception " \
+      "and then a callback is called, it will likely lead to crash. " \
+      "Does this actually happen? Need to review the code paths."
+  end
+
   def test_add_certificate
     ctx_proc = -> ctx {
       # Unset values set by start_server
