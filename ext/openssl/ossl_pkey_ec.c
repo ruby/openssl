@@ -191,6 +191,9 @@ static VALUE ossl_ec_key_initialize(int argc, VALUE *argv, VALUE self)
 }
 
 #ifndef HAVE_EVP_PKEY_DUP
+/*
+ * See Object#dup.
+ */
 static VALUE
 ossl_ec_key_initialize_copy(VALUE self, VALUE other)
 {
@@ -706,6 +709,9 @@ static VALUE ossl_ec_group_initialize(int argc, VALUE *argv, VALUE self)
     return self;
 }
 
+/*
+ * See Object#dup.
+ */
 static VALUE
 ossl_ec_group_initialize_copy(VALUE self, VALUE other)
 {
@@ -1261,6 +1267,9 @@ static VALUE ossl_ec_point_initialize(int argc, VALUE *argv, VALUE self)
     return self;
 }
 
+/*
+ * See Object#dup.
+ */
 static VALUE
 ossl_ec_point_initialize_copy(VALUE self, VALUE other)
 {

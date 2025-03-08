@@ -136,6 +136,9 @@ ossl_rsa_initialize(int argc, VALUE *argv, VALUE self)
 }
 
 #ifndef HAVE_EVP_PKEY_DUP
+/*
+ * See Object#dup.
+ */
 static VALUE
 ossl_rsa_initialize_copy(VALUE self, VALUE other)
 {

@@ -113,6 +113,9 @@ ossl_hmac_initialize(VALUE self, VALUE key, VALUE digest)
     return self;
 }
 
+/*
+ * See Object#dup.
+ */
 static VALUE
 ossl_hmac_copy(VALUE self, VALUE other)
 {
