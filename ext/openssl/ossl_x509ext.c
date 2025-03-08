@@ -295,6 +295,9 @@ ossl_x509ext_initialize(int argc, VALUE *argv, VALUE self)
     return self;
 }
 
+/*
+ * See Object#dup.
+ */
 static VALUE
 ossl_x509ext_initialize_copy(VALUE self, VALUE other)
 {

@@ -173,6 +173,9 @@ ossl_ocspreq_alloc(VALUE klass)
     return obj;
 }
 
+/*
+ * See Object#dup.
+ */
 static VALUE
 ossl_ocspreq_initialize_copy(VALUE self, VALUE other)
 {
@@ -513,6 +516,9 @@ ossl_ocspres_alloc(VALUE klass)
     return obj;
 }
 
+/*
+ * See Object#dup.
+ */
 static VALUE
 ossl_ocspres_initialize_copy(VALUE self, VALUE other)
 {
@@ -669,6 +675,9 @@ ossl_ocspbres_alloc(VALUE klass)
     return obj;
 }
 
+/*
+ * See Object#dup.
+ */
 static VALUE
 ossl_ocspbres_initialize_copy(VALUE self, VALUE other)
 {
@@ -1157,6 +1166,9 @@ ossl_ocspsres_initialize(VALUE self, VALUE arg)
     return self;
 }
 
+/*
+ * See Object#dup.
+ */
 static VALUE
 ossl_ocspsres_initialize_copy(VALUE self, VALUE other)
 {
@@ -1418,6 +1430,9 @@ ossl_ocspcid_alloc(VALUE klass)
     return obj;
 }
 
+/*
+ * See Object#dup.
+ */
 static VALUE
 ossl_ocspcid_initialize_copy(VALUE self, VALUE other)
 {

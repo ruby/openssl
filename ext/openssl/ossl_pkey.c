@@ -615,6 +615,9 @@ ossl_pkey_initialize(VALUE self)
 }
 
 #ifdef HAVE_EVP_PKEY_DUP
+/*
+ * See Object#dup.
+ */
 static VALUE
 ossl_pkey_initialize_copy(VALUE self, VALUE other)
 {

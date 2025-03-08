@@ -929,6 +929,9 @@ BIGNUM_NUM(num_bytes)
  */
 BIGNUM_NUM(num_bits)
 
+/*
+ * See Object#dup.
+ */
 static VALUE
 ossl_bn_copy(VALUE self, VALUE other)
 {

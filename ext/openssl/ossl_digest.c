@@ -141,6 +141,9 @@ ossl_digest_initialize(int argc, VALUE *argv, VALUE self)
     return self;
 }
 
+/*
+ * See Object#dup.
+ */
 static VALUE
 ossl_digest_copy(VALUE self, VALUE other)
 {

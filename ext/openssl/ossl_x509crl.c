@@ -117,6 +117,9 @@ ossl_x509crl_initialize(int argc, VALUE *argv, VALUE self)
     return self;
 }
 
+/*
+ * See Object#dup.
+ */
 static VALUE
 ossl_x509crl_copy(VALUE self, VALUE other)
 {
