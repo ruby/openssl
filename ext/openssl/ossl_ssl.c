@@ -1690,28 +1690,26 @@ ossl_ssl_setup(VALUE self)
 static void
 check_bio_error(VALUE self, SSL *ssl, VALUE bobj, int ret)
 {
+    if (NIL_P(bobj)) {
+#ifdef _WIN32
+        errno = rb_w32_map_errno(WSAGetLastError());
+#endif
+    }
+    else {
+        int state = ossl_bio_state(bobj);
+        if (state) {
+            ossl_clear_error();
+            rb_jump_tag(state);
+        }
+        errno = 0;
+    }
+
     VALUE cb_state = rb_attr_get(self, ID_callback_state);
     if (!NIL_P(cb_state)) {
         /* must cleanup OpenSSL error stack before re-raising */
         ossl_clear_error();
         rb_jump_tag(NUM2INT(cb_state));
     }
-
-    // Socket BIO -> nothing to do
-    if (NIL_P(bobj)) {
-#ifdef _WIN32
-        errno = rb_w32_map_errno(WSAGetLastError());
-#endif
-        return;
-    }
-
-    int state = ossl_bio_state(bobj);
-    if (!state) {
-        errno = 0;
-        return;
-    }
-    ossl_clear_error();
-    rb_jump_tag(state);
 }
 
 static void

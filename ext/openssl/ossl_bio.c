@@ -175,6 +175,56 @@ bio_bwrite0(VALUE args)
     }
 }
 
+struct call0_args {
+    VALUE (*func)(VALUE);
+    VALUE args;
+    VALUE ret;
+};
+
+static VALUE
+do_nothing(VALUE _)
+{
+    return Qnil;
+}
+
+static VALUE
+call_protect1(VALUE args_)
+{
+    struct call0_args *args = (void *)args_;
+    rb_set_errinfo(Qnil);
+    args->ret = args->func(args->args);
+    return Qnil;
+}
+
+static VALUE
+call_protect0(VALUE args_)
+{
+    /*
+     * At this point rb_errinfo() may be set by another callback called from
+     * the same OpenSSL function (e.g., SSL_accept()).
+     *
+     * Abusing rb_ensure() to temporarily save errinfo and restore it after
+     * the BIO callback successfully returns.
+     */
+    rb_ensure(do_nothing, Qnil, call_protect1, args_);
+    return Qnil;
+}
+
+static VALUE
+call_protect(VALUE (*func)(VALUE), VALUE args, int *state)
+{
+    /*
+     * FIXME: should check !NIL_P(rb_ivar_get(ssl_obj, ID_callback_state))
+     * instead to see if a tag jump is pending or not.
+     */
+    int pending = !NIL_P(rb_errinfo());
+    struct call0_args call0_args = { func, args, Qfalse };
+    rb_protect(call_protect0, (VALUE)&call0_args, state);
+    if (pending && *state)
+        rb_warn("exception ignored in BIO callback: pending=%d", pending);
+    return call0_args.ret;
+}
+
 static int
 bio_bwrite(BIO *bio, const char *data, int dlen)
 {
@@ -185,7 +235,7 @@ bio_bwrite(BIO *bio, const char *data, int dlen)
     if (ctx->state)
         return -1;
 
-    VALUE ok = rb_protect(bio_bwrite0, (VALUE)&args, &state);
+    VALUE ok = call_protect(bio_bwrite0, (VALUE)&args, &state);
     if (state) {
         ctx->state = state;
         return -1;
@@ -250,7 +300,7 @@ bio_bread(BIO *bio, char *data, int dlen)
     if (ctx->state)
         return -1;
 
-    VALUE ok = rb_protect(bio_bread0, (VALUE)&args, &state);
+    VALUE ok = call_protect(bio_bread0, (VALUE)&args, &state);
     if (state) {
         ctx->state = state;
         return -1;
@@ -280,7 +330,7 @@ bio_ctrl(BIO *bio, int cmd, long larg, void *parg)
       case BIO_CTRL_EOF:
         return ctx->eof;
       case BIO_CTRL_FLUSH:
-        rb_protect(bio_flush0, (VALUE)ctx, &state);
+        call_protect(bio_flush0, (VALUE)ctx, &state);
         ctx->state = state;
         return !state;
       default:

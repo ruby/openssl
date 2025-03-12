@@ -261,7 +261,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
   end
 
   def test_synthetic_io_errors_in_callback_and_socket
-    assert_separately(["-ropenssl"], <<~"end;")
+    assert_separately(["-ropenssl"], <<~"end;", ignore_stderr: true)
   begin
     #sock1, sock2 = socketpair
     sock1, sock2 = if defined? UNIXSocket
@@ -273,25 +273,33 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     t = Thread.new {
       s1 = OpenSSL::SSL::SSLSocket.new(sock1)
       s1.hostname = "localhost"
-      assert_raise_with_message(OpenSSL::SSL::SSLError, /unrecognized.name/i) {
+      begin
         s1.connect
-      }
+      rescue
+      end
     }
 
+    called = []
     ctx2 = OpenSSL::SSL::SSLContext.new
     ctx2.servername_cb = lambda { |args|
-      throw :throw_from, :servername_cb
+      called << :servername_cb
+      raise "servername_cb"
     }
     obj = Object.new
     obj.define_singleton_method(:method_missing) { |name, *args, **kwargs| sock2.__send__(name, *args, **kwargs) }
     obj.define_singleton_method(:respond_to_missing?) { |name, *args, **kwargs| sock2.respond_to?(name, *args, **kwargs) }
     obj.define_singleton_method(:write_nonblock) { |*args, **kwargs|
-      raise "write_nonblock"
+      called << :write_nonblock
+      throw :throw_from, :write_nonblock
     }
     s2 = OpenSSL::SSL::SSLSocket.new(obj, ctx2)
 
-    ret = catch(:throw_from) { s2.accept }
-    assert_equal(:servername_cb, ret)
+    ret = assert_warning(/exception ignored/) {
+      catch(:throw_from) { s2.accept }
+    }
+    assert_equal(:write_nonblock, ret)
+    assert_equal([:servername_cb, :write_nonblock], called)
+    sock2.close
     assert t.join
   ensure
     sock1.close
