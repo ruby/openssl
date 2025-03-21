@@ -47,11 +47,13 @@ static VALUE eEC_GROUP;
 static VALUE cEC_POINT;
 static VALUE eEC_POINT;
 
-static ID s_GFp, s_GF2m;
+static ID id_GFp, id_GF2m;
 
-static ID ID_uncompressed;
-static ID ID_compressed;
-static ID ID_hybrid;
+static ID id_odd, id_even;
+
+static ID id_uncompressed;
+static ID id_compressed;
+static ID id_hybrid;
 
 static ID id_i_group;
 
@@ -680,10 +682,10 @@ static VALUE ossl_ec_group_initialize(int argc, VALUE *argv, VALUE self)
             const BIGNUM *a = GetBNPtr(arg3);
             const BIGNUM *b = GetBNPtr(arg4);
 
-            if (id == s_GFp) {
+            if (id == id_GFp) {
                 new_curve = EC_GROUP_new_curve_GFp;
 #if !defined(OPENSSL_NO_EC2M)
-            } else if (id == s_GF2m) {
+            } else if (id == id_GF2m) {
                 new_curve = EC_GROUP_new_curve_GF2m;
 #endif
             } else {
@@ -966,9 +968,9 @@ static VALUE ossl_ec_group_get_point_conversion_form(VALUE self)
     form = EC_GROUP_get_point_conversion_form(group);
 
     switch (form) {
-    case POINT_CONVERSION_UNCOMPRESSED:	ret = ID_uncompressed; break;
-    case POINT_CONVERSION_COMPRESSED:	ret = ID_compressed; break;
-    case POINT_CONVERSION_HYBRID:	ret = ID_hybrid; break;
+    case POINT_CONVERSION_UNCOMPRESSED:	ret = id_uncompressed; break;
+    case POINT_CONVERSION_COMPRESSED:	ret = id_compressed; break;
+    case POINT_CONVERSION_HYBRID:	ret = id_hybrid; break;
     default:	ossl_raise(eEC_GROUP, "unsupported point conversion form: %d, this module should be updated", form);
     }
 
@@ -980,11 +982,11 @@ parse_point_conversion_form_symbol(VALUE sym)
 {
     ID id = SYM2ID(sym);
 
-    if (id == ID_uncompressed)
+    if (id == id_uncompressed)
 	return POINT_CONVERSION_UNCOMPRESSED;
-    else if (id == ID_compressed)
+    else if (id == id_compressed)
 	return POINT_CONVERSION_COMPRESSED;
-    else if (id == ID_hybrid)
+    else if (id == id_hybrid)
 	return POINT_CONVERSION_HYBRID;
     else
 	ossl_raise(rb_eArgError, "unsupported point conversion form %+"PRIsVALUE
@@ -1288,6 +1290,14 @@ ossl_ec_point_initialize_copy(VALUE self, VALUE other)
     return self;
 }
 
+static VALUE
+ossl_ec_point_dup(VALUE self)
+{
+    VALUE other;
+    other = ossl_ec_point_alloc(eEC_POINT);
+    return ossl_ec_point_initialize_copy(other, self);
+}
+
 /*
  * call-seq:
  *   point1.eql?(point2) => true | false
@@ -1416,6 +1426,118 @@ static VALUE ossl_ec_point_set_to_infinity(VALUE self)
 
     return self;
 }
+
+#ifdef HAVE_EC_POINT_GET_AFFINE_COORDINATES
+
+/*
+ * call-seq:
+ *   point.affine_coords => [ xBN, yBN ]
+ */
+static VALUE
+ossl_ec_point_get_affine_coords(VALUE self)
+{
+    VALUE x, y, result;
+    EC_POINT *point;
+    BIGNUM *xBN, *yBN;
+    const EC_GROUP *group;
+
+    GetECPoint(self, point);
+    GetECPointGroup(self, group);
+
+    if (point == NULL || group == NULL) {
+        rb_raise(eEC_POINT, "unable to get point and group");
+    }
+
+    x = ossl_bn_new(NULL);
+    y = ossl_bn_new(NULL);
+
+    xBN = GetBNPtr(x);
+    yBN = GetBNPtr(y);
+
+    if (!EC_POINT_get_affine_coordinates(group, point, xBN, yBN, NULL)) {
+        ossl_raise(eEC_POINT, "EC_POINT_get_affine_coordinates");
+    }
+
+    result = rb_ary_new_from_args(2, x, y)
+
+    return result;
+}
+#endif
+
+#ifdef HAVE_EC_POINT_SET_AFFINE_COORDINATES
+/*
+ * call-seq:
+ *   point.affine_coords = [ xBN, yBN ]
+ */
+static VALUE
+ossl_ec_point_set_affine_coords(VALUE self, VALUE coords)
+{
+    VALUE x, y;
+    EC_POINT *point;
+    BIGNUM *xBN, *yBN;
+    const EC_GROUP *group;
+
+    GetECPoint(self, point);
+    GetECPointGroup(self, group);
+
+    if (point == NULL || group == NULL) {
+        rb_raise(eEC_POINT, "unable to get point and group");
+    }
+
+    if (TYPE(coords) != T_ARRAY || RARRAY_LEN(coords) != 2) {
+        rb_raise(eEC_POINT, "argument must be an array of [ x, y ]");
+    }
+
+    x = ossl_try_convert_to_bn(RARRAY_AREF(coords, 0));
+    y = ossl_try_convert_to_bn(RARRAY_AREF(coords, 1));
+
+    xBN = GetBNPtr(x);
+    yBN = GetBNPtr(y);
+
+    if (!EC_POINT_set_affine_coordinates(group, point, xBN, yBN, NULL)) {
+        ossl_raise(eEC_POINT, "EC_POINT_set_affine_coordinates");
+    }
+
+    return self;
+}
+#endif
+
+#ifdef HAVE_EC_POINT_SET_COMPRESSED_COORDINATES
+/*
+ * call-seq:
+ *   point.set_compressed_coords x, y_bit
+ */
+static VALUE
+ossl_ec_point_set_compressed_coords(VALUE self, VALUE x, VALUE y_bit)
+{
+    EC_POINT *point;
+    BIGNUM *xBN;
+    const EC_GROUP *group;
+    int y;
+
+    GetECPoint(self, point);
+    GetECPointGroup(self, group);
+
+    if (point == NULL || group == NULL) {
+        rb_raise(eEC_POINT, "unable to get point and group");
+    }
+
+    if (RB_INTEGER_TYPE_P(y_bit)) {
+        y = NUM2INT(y_bit);
+    } else {
+        rb_raise(eEC_POINT, "y_bit must be Integer");
+    }
+
+    x = ossl_try_convert_to_bn(x);
+    xBN = GetBNPtr(x);
+
+    if (!EC_POINT_set_compressed_coordinates(group, point, xBN, y, NULL)) {
+        ossl_raise(eEC_POINT, "EC_POINT_set_affine_coordinates");
+    }
+
+    return self;
+}
+#endif
 
 /*
  * call-seq:
@@ -1557,12 +1679,15 @@ void Init_ossl_ec(void)
     eEC_GROUP = rb_define_class_under(cEC_GROUP, "Error", eOSSLError);
     eEC_POINT = rb_define_class_under(cEC_POINT, "Error", eOSSLError);
 
-    s_GFp = rb_intern("GFp");
-    s_GF2m = rb_intern("GF2m");
+    id_GFp = rb_intern("GFp");
+    id_GF2m = rb_intern("GF2m");
 
-    ID_uncompressed = rb_intern("uncompressed");
-    ID_compressed = rb_intern("compressed");
-    ID_hybrid = rb_intern("hybrid");
+    id_even = rb_intern("even");
+    id_odd = rb_intern("odd");
+
+    id_uncompressed = rb_intern("uncompressed");
+    id_compressed = rb_intern("compressed");
+    id_hybrid = rb_intern("hybrid");
 
     rb_define_const(cEC, "NAMED_CURVE", INT2NUM(OPENSSL_EC_NAMED_CURVE));
     rb_define_const(cEC, "EXPLICIT_CURVE", INT2NUM(OPENSSL_EC_EXPLICIT_CURVE));
@@ -1640,7 +1765,10 @@ void Init_ossl_ec(void)
     rb_define_alloc_func(cEC_POINT, ossl_ec_point_alloc);
     rb_define_method(cEC_POINT, "initialize", ossl_ec_point_initialize, -1);
     rb_define_method(cEC_POINT, "initialize_copy", ossl_ec_point_initialize_copy, 1);
+    rb_define_method(cEC_POINT, "dup", ossl_ec_point_dup, 0);
+
     rb_attr(cEC_POINT, rb_intern("group"), 1, 0, 0);
+
     rb_define_method(cEC_POINT, "eql?", ossl_ec_point_eql, 1);
     rb_define_alias(cEC_POINT, "==", "eql?");
 
@@ -1649,7 +1777,16 @@ void Init_ossl_ec(void)
     rb_define_method(cEC_POINT, "make_affine!", ossl_ec_point_make_affine, 0);
     rb_define_method(cEC_POINT, "invert!", ossl_ec_point_invert, 0);
     rb_define_method(cEC_POINT, "set_to_infinity!", ossl_ec_point_set_to_infinity, 0);
-/* all the other methods */
+
+#ifdef HAVE_EC_POINT_GET_AFFINE_COORDINATES
+    rb_define_method(cEC_POINT, "affine_coords", ossl_ec_point_get_affine_coords, 0);
+#endif
+#ifdef HAVE_EC_POINT_SET_AFFINE_COORDINATES
+    rb_define_method(cEC_POINT, "affine_coords=", ossl_ec_point_set_affine_coords, 1);
+#endif
+#ifdef HAVE_EC_POINT_SET_COMPRESSED_COORDINATES
+    rb_define_method(cEC_POINT, "set_compressed_coords", ossl_ec_point_set_compressed_coords, 2);
+#endif
 
     rb_define_method(cEC_POINT, "to_octet_string", ossl_ec_point_to_octet_string, 1);
     rb_define_method(cEC_POINT, "add", ossl_ec_point_add, 1);
