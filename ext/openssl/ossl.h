@@ -65,7 +65,7 @@
 # define OSSL_3_const /* const */
 #endif
 
-#if !defined(OPENSSL_NO_ENGINE) && !OSSL_OPENSSL_PREREQ(3, 0, 0)
+#if !defined(OPENSSL_NO_ENGINE)
 # define OSSL_USE_ENGINE
 #endif
 
