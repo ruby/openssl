@@ -64,11 +64,11 @@ jobs:
         openssl:
           # https://openssl-library.org/source/
           - openssl-1.1.1w # EOL 2023-09-11, still used by RHEL 8 and Ubuntu 20.04
-          - openssl-3.0.15 # Supported until 2026-09-07
-          - openssl-3.1.7 # Supported until 2025-03-14
-          - openssl-3.2.3 # Supported until 2025-11-23
-          - openssl-3.3.2 # Supported until 2026-04-09
-          - openssl-3.4.0 # Supported until 2026-10-22
+          - openssl-3.0.16 # Supported until 2026-09-07
+          - openssl-3.1.8 # EOL 2025-03-14
+          - openssl-3.2.4 # Supported until 2025-11-23
+          - openssl-3.3.3 # Supported until 2026-04-09
+          - openssl-3.4.1 # Supported until 2026-10-22
           - openssl-master
           # http://www.libressl.org/releases.html
           - libressl-3.9.2 # Supported until 2025-04-05
@@ -76,13 +76,13 @@ jobs:
           # https://github.com/aws/aws-lc/tags
           - aws-lc-latest
         include:
-          - { name-extra: 'with fips provider', openssl: openssl-3.0.15, fips-enabled: true }
-          - { name-extra: 'with fips provider', openssl: openssl-3.1.7, fips-enabled: true }
-          - { name-extra: 'with fips provider', openssl: openssl-3.2.3, fips-enabled: true }
-          - { name-extra: 'with fips provider', openssl: openssl-3.3.2, fips-enabled: true }
-          - { name-extra: 'with fips provider', openssl: openssl-3.4.0, fips-enabled: true }
+          - { name-extra: 'with fips provider', openssl: openssl-3.0.16, fips-enabled: true }
+          - { name-extra: 'with fips provider', openssl: openssl-3.1.8, fips-enabled: true }
+          - { name-extra: 'with fips provider', openssl: openssl-3.2.4, fips-enabled: true }
+          - { name-extra: 'with fips provider', openssl: openssl-3.3.3, fips-enabled: true }
+          - { name-extra: 'with fips provider', openssl: openssl-3.4.1, fips-enabled: true }
           - { name-extra: 'with fips provider', openssl: openssl-master, fips-enabled: true }
-          - { name-extra: 'without legacy provider', openssl: openssl-3.4.0, append-configure: 'no-legacy' }
+          - { name-extra: 'without legacy provider', openssl: openssl-3.4.1, append-configure: 'no-legacy' }
           - { openssl: aws-lc-latest, skip-warnings: true }
     steps:
       - name: repo checkout
