@@ -17,8 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # ubuntu-22.04 uses OpenSSL 3.0, ubuntu-20.04 uses OpenSSL 1.1.1
-        os: [ ubuntu-22.04, ubuntu-20.04, macos-latest, windows-latest ]
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
         ruby: ${{ fromJson(needs.ruby-versions.outputs.versions) }}
         exclude:
           - { os: windows-latest, ruby: truffleruby }
