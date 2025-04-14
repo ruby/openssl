@@ -22,7 +22,6 @@
 #else
 #define RUBY_TYPED_FROZEN_SHAREABLE 0
 #endif
-
 #include <openssl/opensslv.h>
 
 #include <openssl/err.h>
