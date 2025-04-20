@@ -74,19 +74,6 @@ module OpenSSL
       DEFAULT_CERT_STORE.set_default_paths
       DEFAULT_CERT_STORE.flags = OpenSSL::X509::V_FLAG_CRL_CHECK_ALL
 
-      # A callback invoked when DH parameters are required for ephemeral DH key
-      # exchange.
-      #
-      # The callback is invoked with the SSLSocket, a
-      # flag indicating the use of an export cipher and the keylength
-      # required.
-      #
-      # The callback must return an OpenSSL::PKey::DH instance of the correct
-      # key length.
-      #
-      # <b>Deprecated in version 3.0.</b> Use #tmp_dh= instead.
-      attr_accessor :tmp_dh_callback
-
       # A callback invoked at connect time to distinguish between multiple
       # server names.
       #
@@ -436,10 +423,6 @@ module OpenSSL
 
       def client_cert_cb
         @context.client_cert_cb
-      end
-
-      def tmp_dh_callback
-        @context.tmp_dh_callback
       end
 
       def session_new_cb
