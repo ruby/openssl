@@ -8,6 +8,7 @@ class OpenSSL::TestPKey < OpenSSL::PKeyTestCase
     assert_instance_of OpenSSL::PKey::RSA, rsa
     assert_equal "rsaEncryption", rsa.oid
     assert_match %r{oid=rsaEncryption}, rsa.inspect
+    assert_match %r{type_name=RSA}, rsa.inspect if openssl?(3, 0, 0)
 
     # X25519 private key
     x25519_pem = <<~EOF
@@ -171,6 +172,8 @@ class OpenSSL::TestPKey < OpenSSL::PKeyTestCase
       pend "X25519 is not implemented"
     end
     assert_instance_of OpenSSL::PKey::PKey, alice
+    assert_equal "X25519", alice.oid
+    assert_match %r{oid=X25519}, alice.inspect
     assert_equal alice_pem, alice.private_to_pem
     assert_equal bob_pem, bob.public_to_pem
     assert_equal [shared_secret].pack("H*"), alice.derive(bob)
