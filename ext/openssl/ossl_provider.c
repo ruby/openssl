@@ -57,11 +57,11 @@ ossl_provider_s_load(VALUE klass, VALUE name)
 
     const char *provider_name_ptr = StringValueCStr(name);
 
+    obj = NewProvider(klass);
     provider = OSSL_PROVIDER_load(NULL, provider_name_ptr);
     if (provider == NULL) {
         ossl_raise(eProviderError, "Failed to load %s provider", provider_name_ptr);
     }
-    obj = NewProvider(klass);
     SetProvider(obj, provider);
 
     return obj;
