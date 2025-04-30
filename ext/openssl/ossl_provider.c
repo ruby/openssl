@@ -182,6 +182,32 @@ ossl_provider_inspect(VALUE self)
                       rb_obj_class(self), OSSL_PROVIDER_get0_name(prov));
 }
 
+#if OSSL_OPENSSL_PREREQ(3, 5, 0)
+/*
+ * call-seq:
+ *    provider.add_conf_parameter(name, value) -> nil
+ *
+ * Sets the provider configuration parameter _name_ to _value_. Both name and
+ * value must be given as strings.
+ *
+ * See the documentation of the provider for possible parameters. See also the
+ * man page OSSL_PROVIDER_add_conf_parameter(3).
+ *
+ * This requires OpenSSL 3.5.0 or later.
+ */
+static VALUE
+ossl_provider_add_conf_parameter(VALUE self, VALUE name, VALUE value)
+{
+    OSSL_PROVIDER *prov;
+
+    GetProvider(self, prov);
+    if (OSSL_PROVIDER_add_conf_parameter(prov, StringValueCStr(name),
+                                         StringValueCStr(value)) != 1)
+        ossl_raise(eProviderError, "OSSL_PROVIDER_add_conf_parameter");
+    return Qnil;
+}
+#endif
+
 void
 Init_ossl_provider(void)
 {
@@ -200,6 +226,9 @@ Init_ossl_provider(void)
     rb_define_method(cProvider, "unload", ossl_provider_unload, 0);
     rb_define_method(cProvider, "name", ossl_provider_get_name, 0);
     rb_define_method(cProvider, "inspect", ossl_provider_inspect, 0);
+#if OSSL_OPENSSL_PREREQ(3, 5, 0)
+    rb_define_method(cProvider, "add_conf_parameter", ossl_provider_add_conf_parameter, 2);
+#endif
 }
 #else
 void
