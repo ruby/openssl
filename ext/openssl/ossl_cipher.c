@@ -312,8 +312,8 @@ ossl_cipher_pkcs5_keyivgen(int argc, VALUE *argv, VALUE self)
     StringValue(vpass);
     if(!NIL_P(vsalt)){
 	StringValue(vsalt);
-	if(RSTRING_LEN(vsalt) != PKCS5_SALT_LEN)
-	    ossl_raise(eCipherError, "salt must be an 8-octet string");
+	if(RSTRING_LEN(vsalt) >= 8)
+	    ossl_raise(eCipherError, "salt must be at least an 8-octet string");
 	salt = (unsigned char *)RSTRING_PTR(vsalt);
     }
     iter = NIL_P(viter) ? 2048 : NUM2INT(viter);
