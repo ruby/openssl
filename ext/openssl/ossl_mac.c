@@ -19,6 +19,7 @@
  * Classes
  */
 static VALUE cMAC;
+static VALUE cCMAC;
 static VALUE eMACError;
 
 /*
@@ -63,6 +64,26 @@ ossl_mac_initialize(VALUE self, VALUE algorithm)
         ossl_raise(eMACError, "EVP_MAC_CTX_new");
     }
     SetMAC(self, ctx);
+
+    return self;
+}
+
+static VALUE
+ossl_cmac_initialize(VALUE self, VALUE cipher, VALUE key)
+{
+    EVP_MAC_CTX *ctx;
+    VALUE algorithm;
+    OSSL_PARAM params[2];
+
+    algorithm = rb_str_new_literal("CMAC");
+    rb_call_super(1, &algorithm);
+
+    GetMAC(self, ctx);
+    StringValue(key);
+    params[0] = OSSL_PARAM_construct_utf8_string("cipher", StringValueCStr(cipher), 0);
+    params[1] = OSSL_PARAM_construct_end();
+    if (EVP_MAC_init(ctx, (unsigned char *)RSTRING_PTR(key), RSTRING_LEN(key), params) != 1)
+        ossl_raise(eMACError, "EVP_MAC_init");
 
     return self;
 }
@@ -139,6 +160,9 @@ Init_ossl_mac(void)
     rb_define_method(cMAC, "update", ossl_mac_update, 1);
     rb_define_alias(cMAC, "<<", "update");
     rb_define_method(cMAC, "mac", ossl_mac_mac, 0);
+
+    cCMAC = rb_define_class_under(cMAC, "CMAC", cMAC);
+    rb_define_method(cCMAC, "initialize", ossl_cmac_initialize, 2);
 
     eMACError = rb_define_class_under(mOSSL, "MACError", eOSSLError);
 }
