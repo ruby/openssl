@@ -164,6 +164,14 @@ void ossl_clear_error(void);
 VALUE ossl_to_der(VALUE);
 VALUE ossl_to_der_if_possible(VALUE);
 
+#ifdef OSSL_PARAM_INTEGER
+/*
+ * Build OSSL_PARAM array from Hash/Enumerable. The OSSL_PARAM array is
+ * allocated by OpenSSL, so it must be freed by OSSL_PARAM_free() after use.
+ */
+OSSL_PARAM *ossl_build_params(const OSSL_PARAM *settable, VALUE hash, int *state);
+#endif
+
 /*
  * Debug
  */
