@@ -170,6 +170,37 @@ class OpenSSL::TestKDF < OpenSSL::TestCase
     assert_equal(okm, OpenSSL::KDF.hkdf(ikm, salt: salt, info: info, length: l, hash: hash))
   end
 
+  def test_derive
+    ret = OpenSSL::KDF.derive("PBKDF2", 20, {
+      "pass" => "password",
+      "salt" => "salt",
+      "iter" => 4096,
+      "digest" => "SHA1",
+    })
+    assert_equal(B("4b007901b765489abead49d926f721d065a429c1"), ret)
+
+    # param name not in settable_params
+    assert_raise_with_message(OpenSSL::OpenSSLError, /unknown.*'nosucha'/) {
+      OpenSSL::KDF.derive("PBKDF2", 20, [["nosucha", "param"]])
+    }
+
+    # "pass" for PBKDF2 is an OSSL_PARAM_OCTET_STRING
+    assert_raise_with_message(OpenSSL::OpenSSLError, /'pass'.*String value/) {
+      OpenSSL::KDF.derive("PBKDF2", 20, [["pass", 123]])
+    }
+
+    # "iter" for PBKDF2 is an OSSL_PARAM_UNSIGNED_INTEGER
+    assert_raise_with_message(OpenSSL::OpenSSLError, /'iter'.*non-negative/) {
+      OpenSSL::KDF.derive("PBKDF2", 20, [["iter", -1]])
+    }
+
+    # "digest" for PBKDF2 is an OSSL_PARAM_UTF8_STRING, which requires a
+    # NUL-terminated string
+    assert_raise_with_message(ArgumentError, /string contains null byte/) {
+      OpenSSL::KDF.derive("PBKDF2", 20, [["digest", "SHA1\0"]])
+    }
+  end if openssl?(3, 0, 0) || OpenSSL::KDF.respond_to?(:derive)
+
   private
 
   def B(ary)
