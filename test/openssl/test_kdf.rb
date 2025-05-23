@@ -201,6 +201,20 @@ class OpenSSL::TestKDF < OpenSSL::TestCase
     }
   end if openssl?(3, 0, 0) || OpenSSL::KDF.respond_to?(:derive)
 
+  def test_argon2id_rfc9106
+    # https://www.rfc-editor.org/rfc/rfc9106.html#section-5.3
+    # 5.3. Argon2id Test Vectors
+    password = B("01" * 32)
+    salt = B("02" * 16)
+    secret = B("03" * 8)
+    ad = B("04" * 12)
+    tag = B("0d640df58d78766c08c037a34a8b53c9d0" \
+            "1ef0452d75b65eb52520e96b01e659")
+    ret = OpenSSL::KDF.argon2id(password, salt: salt, lanes: 4, length: 32,
+                                memcost: 32, iter: 3, secret: secret, ad: ad)
+    assert_equal(tag, ret)
+  end if openssl?(3, 2, 0)
+
   private
 
   def B(ary)
