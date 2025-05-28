@@ -187,6 +187,7 @@ ssbzSibBsu/6iGtCOGEoXJf//////////wIBAg==
         TLSv1: OpenSSL::SSL::TLS1_VERSION,
         TLSv1_1: OpenSSL::SSL::TLS1_1_VERSION,
         TLSv1_2: OpenSSL::SSL::TLS1_2_VERSION,
+        TLSv1_3: OpenSSL::SSL::TLS1_3_VERSION,
       }.freeze
       private_constant :METHODS_MAP
 

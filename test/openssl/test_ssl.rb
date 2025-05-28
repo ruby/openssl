@@ -1577,7 +1577,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
 
   def test_ssl_methods_constant
     EnvUtil.suppress_warning { # Deprecated in v2.1.0
-      base = [:TLSv1_2, :TLSv1_1, :TLSv1, :SSLv3, :SSLv2, :SSLv23]
+      base = [:TLSv1_3, :TLSv1_2, :TLSv1_1, :TLSv1, :SSLv3, :SSLv2, :SSLv23]
       base.each do |name|
         assert_include OpenSSL::SSL::SSLContext::METHODS, name
         assert_include OpenSSL::SSL::SSLContext::METHODS, :"#{name}_client"
