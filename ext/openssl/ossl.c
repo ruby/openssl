@@ -1040,6 +1040,7 @@ Init_openssl(void)
     Init_ossl_engine();
     Init_ossl_hmac();
     Init_ossl_kdf();
+    Init_ossl_mac();
     Init_ossl_ns_spki();
     Init_ossl_ocsp();
     Init_ossl_pkcs12();
