@@ -55,6 +55,10 @@ ossl_mac_initialize(VALUE self, VALUE algorithm)
     EVP_MAC *mac;
     EVP_MAC_CTX *ctx;
 
+    TypedData_Get_Struct(self, EVP_MAC_CTX, &ossl_mac_type, ctx);
+    if (ctx)
+        rb_raise(rb_eTypeError, "MAC already initialized");
+
     mac = EVP_MAC_fetch(NULL, StringValueCStr(algorithm), NULL);
     if (!mac)
         ossl_raise(eMACError, "EVP_MAC_fetch");
@@ -92,6 +96,10 @@ static VALUE
 ossl_mac_copy(VALUE self, VALUE other)
 {
     EVP_MAC_CTX *ctx1, *ctx2;
+
+    TypedData_Get_Struct(self, EVP_MAC_CTX, &ossl_mac_type, ctx2);
+    if (ctx2)
+        rb_raise(rb_eTypeError, "MAC already initialized");
 
     rb_check_frozen(self);
     if (self == other)
