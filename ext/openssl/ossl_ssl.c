@@ -1123,22 +1123,24 @@ ossl_sslctx_set_tmp_dh(VALUE self, VALUE arg)
 #if !defined(OPENSSL_NO_EC)
 /*
  * call-seq:
- *    ctx.ecdh_curves = curve_list -> curve_list
+ *    ctx.groups = groups_list -> groups_list
  *
- * Sets the list of "supported elliptic curves" for this context.
+ * Sets the list of "supported groups" or "supported elliptic curves" for this
+ * context.
  *
- * For a TLS client, the list is directly used in the Supported Elliptic Curves
- * Extension. For a server, the list is used by OpenSSL to determine the set of
- * shared curves. OpenSSL will pick the most appropriate one from it.
+ * For a TLS client, the list is directly used in the "supported_groups"
+ * extension or Supported Elliptic Curves Extension. For a server, the list is
+ * used by OpenSSL to determine the set of shared groups or curves. OpenSSL
+ * will pick the most appropriate one from it.
  *
  * === Example
  *   ctx1 = OpenSSL::SSL::SSLContext.new
- *   ctx1.ecdh_curves = "X25519:P-256:P-224"
+ *   ctx1.groups = "X25519:P-256:P-224"
  *   svr = OpenSSL::SSL::SSLServer.new(tcp_svr, ctx1)
  *   Thread.new { svr.accept }
  *
  *   ctx2 = OpenSSL::SSL::SSLContext.new
- *   ctx2.ecdh_curves = "P-256"
+ *   ctx2.groups = "P-256"
  *   cli = OpenSSL::SSL::SSLSocket.new(tcp_sock, ctx2)
  *   cli.connect
  *
@@ -1146,7 +1148,7 @@ ossl_sslctx_set_tmp_dh(VALUE self, VALUE arg)
  *   # => "prime256v1" (is an alias for NIST P-256)
  */
 static VALUE
-ossl_sslctx_set_ecdh_curves(VALUE self, VALUE arg)
+ossl_sslctx_set_groups(VALUE self, VALUE arg)
 {
     SSL_CTX *ctx;
 
@@ -1154,12 +1156,12 @@ ossl_sslctx_set_ecdh_curves(VALUE self, VALUE arg)
     GetSSLCTX(self, ctx);
     StringValueCStr(arg);
 
-    if (!SSL_CTX_set1_curves_list(ctx, RSTRING_PTR(arg)))
+    if (!SSL_CTX_set1_groups_list(ctx, RSTRING_PTR(arg)))
 	ossl_raise(eSSLError, NULL);
     return arg;
 }
 #else
-#define ossl_sslctx_set_ecdh_curves rb_f_notimplement
+#define ossl_sslctx_set_groups rb_f_notimplement
 #endif
 
 /*
@@ -2890,7 +2892,7 @@ Init_ossl_ssl(void)
 #ifndef OPENSSL_NO_DH
     rb_define_method(cSSLContext, "tmp_dh=", ossl_sslctx_set_tmp_dh, 1);
 #endif
-    rb_define_method(cSSLContext, "ecdh_curves=", ossl_sslctx_set_ecdh_curves, 1);
+    rb_define_method(cSSLContext, "groups=", ossl_sslctx_set_groups, 1);
     rb_define_method(cSSLContext, "security_level", ossl_sslctx_get_security_level, 0);
     rb_define_method(cSSLContext, "security_level=", ossl_sslctx_set_security_level, 1);
 #ifdef SSL_MODE_SEND_FALLBACK_SCSV

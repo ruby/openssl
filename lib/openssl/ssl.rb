@@ -113,6 +113,9 @@ ssbzSibBsu/6iGtCOGEoXJf//////////wIBAg==
       # callback must return an SSLContext for the server name or nil.
       attr_accessor :servername_cb
 
+      # An alias of the #groups=.
+      alias ecdh_curves= groups=
+
       # call-seq:
       #    SSLContext.new           -> ctx
       #    SSLContext.new(:TLSv1)   -> ctx

@@ -1785,7 +1785,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     # ECDHE
     ctx_proc3 = proc { |ctx|
       ctx.ciphers = "DEFAULT:!kRSA:!kEDH"
-      ctx.ecdh_curves = "P-256"
+      ctx.groups = "P-256"
     }
     start_server(ctx_proc: ctx_proc3) do |port|
       ctx = OpenSSL::SSL::SSLContext.new
@@ -2001,17 +2001,17 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     end
   end
 
-  def test_ecdh_curves_tls12
+  def test_groups_tls12
     ctx_proc = -> ctx {
       # Enable both ECDHE (~ TLS 1.2) cipher suites and TLS 1.3
       ctx.max_version = OpenSSL::SSL::TLS1_2_VERSION
       ctx.ciphers = "kEECDH"
-      ctx.ecdh_curves = "P-384:P-521"
+      ctx.groups = "P-384:P-521"
     }
     start_server(ctx_proc: ctx_proc, ignore_listener_error: true) do |port|
       # Test 1: Client=P-256:P-384, Server=P-384:P-521 --> P-384
       ctx = OpenSSL::SSL::SSLContext.new
-      ctx.ecdh_curves = "P-256:P-384"
+      ctx.groups = "P-256:P-384"
       server_connect(port, ctx) { |ssl|
         cs = ssl.cipher[0]
         assert_match (/\AECDH/), cs
@@ -2021,14 +2021,14 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
 
       # Test 2: Client=P-256, Server=P-521:P-384 --> Fail
       ctx = OpenSSL::SSL::SSLContext.new
-      ctx.ecdh_curves = "P-256"
+      ctx.groups = "P-256"
       assert_raise(OpenSSL::SSL::SSLError) {
         server_connect(port, ctx) { }
       }
 
       # Test 3: Client=P-521:P-384, Server=P-521:P-384 --> P-521
       ctx = OpenSSL::SSL::SSLContext.new
-      ctx.ecdh_curves = "P-521:P-384"
+      ctx.groups = "P-521:P-384"
       server_connect(port, ctx) { |ssl|
         assert_equal "secp521r1", ssl.tmp_key.group.curve_name
         ssl.puts "abc"; assert_equal "abc\n", ssl.gets
@@ -2036,14 +2036,14 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     end
   end
 
-  def test_ecdh_curves_tls13
+  def test_groups_tls13
     ctx_proc = -> ctx {
       # Assume TLS 1.3 is enabled and chosen by default
-      ctx.ecdh_curves = "P-384:P-521"
+      ctx.groups = "P-384:P-521"
     }
     start_server(ctx_proc: ctx_proc, ignore_listener_error: true) do |port|
       ctx = OpenSSL::SSL::SSLContext.new
-      ctx.ecdh_curves = "P-256:P-384" # disable P-521
+      ctx.groups = "P-256:P-384" # disable P-521
 
       server_connect(port, ctx) { |ssl|
         assert_equal "TLSv1.3", ssl.ssl_version
