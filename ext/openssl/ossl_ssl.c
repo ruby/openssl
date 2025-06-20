@@ -999,11 +999,10 @@ static VALUE
 build_cipher_string(VALUE v)
 {
     VALUE str, elem;
-    int i;
 
     if (RB_TYPE_P(v, T_ARRAY)) {
         str = rb_str_new(0, 0);
-        for (i = 0; i < RARRAY_LEN(v); i++) {
+        for (long i = 0; i < RARRAY_LEN(v); i++) {
             elem = rb_ary_entry(v, i);
             if (RB_TYPE_P(elem, T_ARRAY)) elem = rb_ary_entry(elem, 0);
             elem = rb_String(elem);
@@ -1024,9 +1023,14 @@ build_cipher_string(VALUE v)
  *    ctx.ciphers = [name, ...]
  *    ctx.ciphers = [[name, version, bits, alg_bits], ...]
  *
- * Sets the list of available cipher suites for this context.  Note in a server
- * context some ciphers require the appropriate certificates.  For example, an
- * RSA cipher suite can only be chosen when an RSA certificate is available.
+ * Sets the list of available cipher suites for TLS 1.2 and below for this
+ * context.
+ *
+ * Note in a server context some ciphers require the appropriate certificates.
+ * For example, an RSA cipher suite can only be chosen when an RSA certificate
+ * is available.
+ *
+ * This method does not affect TLS 1.3 connections. See also #ciphersuites=.
  */
 static VALUE
 ossl_sslctx_set_ciphers(VALUE self, VALUE v)
@@ -1035,6 +1039,7 @@ ossl_sslctx_set_ciphers(VALUE self, VALUE v)
     VALUE str;
 
     rb_check_frozen(self);
+    // Assigning nil is a no-op for compatibility
     if (NIL_P(v))
         return v;
 
@@ -1051,9 +1056,8 @@ ossl_sslctx_set_ciphers(VALUE self, VALUE v)
  * call-seq:
  *    ctx.ciphersuites = "cipher1:cipher2:..."
  *    ctx.ciphersuites = [name, ...]
- *    ctx.ciphersuites = [[name, version, bits, alg_bits], ...]
  *
- * Sets the list of available TLSv1.3 cipher suites for this context.
+ * Sets the list of available TLS 1.3 cipher suites for this context.
  */
 static VALUE
 ossl_sslctx_set_ciphersuites(VALUE self, VALUE v)
@@ -1062,6 +1066,7 @@ ossl_sslctx_set_ciphersuites(VALUE self, VALUE v)
     VALUE str;
 
     rb_check_frozen(self);
+    // Assigning nil is a no-op for compatibility
     if (NIL_P(v))
         return v;
 
@@ -1073,6 +1078,63 @@ ossl_sslctx_set_ciphersuites(VALUE self, VALUE v)
 
     return v;
 }
+
+#ifdef HAVE_SSL_CTX_SET1_SIGALGS_LIST
+/*
+ * call-seq:
+ *    ctx.sigalgs = "sigalg1:sigalg2:..."
+ *
+ * Sets the list of "supported signature algorithms" for this context.
+ *
+ * For a TLS client, the list is used in the "signature_algorithms" extension
+ * in the ClientHello message. For a server, the list is used by OpenSSL to
+ * determine the set of shared signature algorithms. OpenSSL will pick the most
+ * appropriate one from it.
+ *
+ * See also #client_sigalgs= for the client authentication equivalent.
+ */
+static VALUE
+ossl_sslctx_set_sigalgs(VALUE self, VALUE v)
+{
+    SSL_CTX *ctx;
+
+    rb_check_frozen(self);
+    GetSSLCTX(self, ctx);
+
+    if (!SSL_CTX_set1_sigalgs_list(ctx, StringValueCStr(v)))
+        ossl_raise(eSSLError, "SSL_CTX_set1_sigalgs_list");
+
+    return v;
+}
+#endif
+
+#ifdef HAVE_SSL_CTX_SET1_CLIENT_SIGALGS_LIST
+/*
+ * call-seq:
+ *    ctx.client_sigalgs = "sigalg1:sigalg2:..."
+ *
+ * Sets the list of "supported signature algorithms" for client authentication
+ * for this context.
+ *
+ * For a TLS server, the list is sent to the client as part of the
+ * CertificateRequest message.
+ *
+ * See also #sigalgs= for the server authentication equivalent.
+ */
+static VALUE
+ossl_sslctx_set_client_sigalgs(VALUE self, VALUE v)
+{
+    SSL_CTX *ctx;
+
+    rb_check_frozen(self);
+    GetSSLCTX(self, ctx);
+
+    if (!SSL_CTX_set1_client_sigalgs_list(ctx, StringValueCStr(v)))
+        ossl_raise(eSSLError, "SSL_CTX_set1_client_sigalgs_list");
+
+    return v;
+}
+#endif
 
 #ifndef OPENSSL_NO_DH
 /*
@@ -2887,6 +2949,12 @@ Init_ossl_ssl(void)
     rb_define_method(cSSLContext, "ciphers",     ossl_sslctx_get_ciphers, 0);
     rb_define_method(cSSLContext, "ciphers=",    ossl_sslctx_set_ciphers, 1);
     rb_define_method(cSSLContext, "ciphersuites=", ossl_sslctx_set_ciphersuites, 1);
+#ifdef HAVE_SSL_CTX_SET1_SIGALGS_LIST // Not in LibreSSL yet
+    rb_define_method(cSSLContext, "sigalgs=", ossl_sslctx_set_sigalgs, 1);
+#endif
+#ifdef HAVE_SSL_CTX_SET1_CLIENT_SIGALGS_LIST // Not in LibreSSL or AWS-LC yet
+    rb_define_method(cSSLContext, "client_sigalgs=", ossl_sslctx_set_client_sigalgs, 1);
+#endif
 #ifndef OPENSSL_NO_DH
     rb_define_method(cSSLContext, "tmp_dh=", ossl_sslctx_set_tmp_dh, 1);
 #endif
