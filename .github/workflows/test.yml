@@ -36,6 +36,20 @@ jobs:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true # `bundle install` and cache
 
+      # See https://github.com/oneclick/rubyinstaller2/issues/60
+      # The builtin DLLs are preferred over the mingw-w64/vcpkg DLLs. This is a
+      # temporary workaround until they update the DLLs to OpenSSL 3.5.x.
+      - name: Update RI2/mswin builtin DLLs
+        run: |
+          $dst = "$((Get-Item (Get-Command ruby).Definition).DirectoryName)\ruby_builtin_dlls"
+          if ("${{ matrix.ruby }}" -eq "mswin") {
+            $src = "C:\vcpkg\installed\x64-windows\bin"
+          } else {
+            $src = "$((Get-Item (Get-Command ruby).Definition).DirectoryName)\..\msys64\ucrt64\bin"
+          }
+          Copy-Item "$src\libcrypto-3-x64.dll", "$src\libssl-3-x64.dll" $dst
+        if: ${{ matrix.os == 'windows-latest' && (matrix.ruby == '3.2' || matrix.ruby == '3.3' || matrix.ruby == 'mswin') }}
+
       # Enable the verbose option in mkmf.rb to print the compiling commands.
       - name: enable mkmf verbose
         run:  echo "MAKEFLAGS=V=1" >> $GITHUB_ENV
