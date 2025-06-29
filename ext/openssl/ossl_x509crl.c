@@ -41,7 +41,7 @@ static const rb_data_type_t ossl_x509crl_type = {
     {
 	0, ossl_x509crl_free,
     },
-    0, 0, RUBY_TYPED_FREE_IMMEDIATELY | RUBY_TYPED_WB_PROTECTED,
+    0, 0, RUBY_TYPED_FREE_IMMEDIATELY | RUBY_TYPED_WB_PROTECTED | RUBY_TYPED_FROZEN_SHAREABLE,
 };
 
 /*
@@ -154,6 +154,7 @@ ossl_x509crl_set_version(VALUE self, VALUE version)
     X509_CRL *crl;
     long ver;
 
+    rb_check_frozen(self);
     if ((ver = NUM2LONG(version)) < 0) {
 	ossl_raise(eX509CRLError, "version must be >= 0!");
     }
@@ -202,6 +203,7 @@ ossl_x509crl_set_issuer(VALUE self, VALUE issuer)
 {
     X509_CRL *crl;
 
+    rb_check_frozen(self);
     GetX509CRL(self, crl);
 
     if (!X509_CRL_set_issuer_name(crl, GetX509NamePtr(issuer))) { /* DUPs name */
@@ -230,6 +232,7 @@ ossl_x509crl_set_last_update(VALUE self, VALUE time)
     X509_CRL *crl;
     ASN1_TIME *asn1time;
 
+    rb_check_frozen(self);
     GetX509CRL(self, crl);
     asn1time = ossl_x509_time_adjust(NULL, time);
     if (!X509_CRL_set1_lastUpdate(crl, asn1time)) {
@@ -261,6 +264,7 @@ ossl_x509crl_set_next_update(VALUE self, VALUE time)
     X509_CRL *crl;
     ASN1_TIME *asn1time;
 
+    rb_check_frozen(self);
     GetX509CRL(self, crl);
     asn1time = ossl_x509_time_adjust(NULL, time);
     if (!X509_CRL_set1_nextUpdate(crl, asn1time)) {
@@ -303,6 +307,7 @@ ossl_x509crl_set_revoked(VALUE self, VALUE ary)
     STACK_OF(X509_REVOKED) *sk;
     long i;
 
+    rb_check_frozen(self);
     Check_Type(ary, T_ARRAY);
     /* All ary members should be X509 Revoked */
     for (i=0; i<RARRAY_LEN(ary); i++) {
@@ -331,6 +336,7 @@ ossl_x509crl_add_revoked(VALUE self, VALUE revoked)
     X509_CRL *crl;
     X509_REVOKED *rev;
 
+    rb_check_frozen(self);
     GetX509CRL(self, crl);
     rev = DupX509RevokedPtr(revoked);
     if (!X509_CRL_add0_revoked(crl, rev)) { /* NO DUP - don't free! */
@@ -349,6 +355,7 @@ ossl_x509crl_sign(VALUE self, VALUE key, VALUE digest)
     EVP_PKEY *pkey;
     const EVP_MD *md;
 
+    rb_check_frozen(self);
     GetX509CRL(self, crl);
     pkey = GetPrivPKeyPtr(key); /* NO NEED TO DUP */
     if (NIL_P(digest)) {
@@ -470,6 +477,7 @@ ossl_x509crl_set_extensions(VALUE self, VALUE ary)
     long i;
 
     Check_Type(ary, T_ARRAY);
+    rb_check_frozen(self);
     /* All ary members should be X509 Extensions */
     for (i=0; i<RARRAY_LEN(ary); i++) {
 	OSSL_Check_Kind(RARRAY_AREF(ary, i), cX509Ext);
@@ -493,6 +501,7 @@ ossl_x509crl_add_extension(VALUE self, VALUE extension)
     X509_CRL *crl;
     X509_EXTENSION *ext;
 
+    rb_check_frozen(self);
     GetX509CRL(self, crl);
     ext = GetX509ExtPtr(extension);
     if (!X509_CRL_add_ext(crl, ext, -1)) {
