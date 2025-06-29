@@ -159,6 +159,11 @@ have_func("EVP_PKEY_dup(NULL)", evp_h)
 # added in 3.4.0
 have_func("TS_VERIFY_CTX_set0_certs(NULL, NULL)", ts_h)
 
+# added in 1.1.1
+have_func("EC_POINT_get_affine_coordinates")
+have_func("EC_POINT_set_affine_coordinates")
+have_func("EC_POINT_set_compressed_coordinates")
+
 Logging::message "=== Checking done. ===\n"
 
 # Append flags from environment variables.

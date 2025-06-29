@@ -115,8 +115,7 @@ integer_to_bnptr(VALUE obj, BIGNUM *orig)
     return bn;
 }
 
-static VALUE
-try_convert_to_bn(VALUE obj)
+VALUE ossl_try_convert_to_bn(VALUE obj)
 {
     BIGNUM *bn;
     VALUE newobj = Qnil;
@@ -138,7 +137,7 @@ ossl_bn_value_ptr(volatile VALUE *ptr)
     VALUE tmp;
     BIGNUM *bn;
 
-    tmp = try_convert_to_bn(*ptr);
+    tmp = ossl_try_convert_to_bn(*ptr);
     if (NIL_P(tmp))
 	ossl_raise(rb_eTypeError, "Cannot convert into OpenSSL::BN");
     GetBN(tmp, bn);
@@ -446,6 +445,22 @@ BIGNUM_BOOL1(is_one)
  */
 BIGNUM_BOOL1(is_odd)
 
+static VALUE
+ossl_bn_is_even(VALUE self)
+{
+    VALUE is_odd;
+
+    is_odd = ossl_bn_is_odd(self);
+    if (is_odd == Qtrue) {
+        return Qfalse;
+    }
+    else if (is_odd == Qfalse) {
+        return Qtrue;
+    }
+
+    rb_raise(eBNError, "ossl_bn_is_odd didn't return a boolean");
+}
+
 /*
  * call-seq:
  *   bn.negative? => true | false
@@ -459,6 +474,21 @@ ossl_bn_is_negative(VALUE self)
     if (BN_is_zero(bn))
 	return Qfalse;
     return BN_is_negative(bn) ? Qtrue : Qfalse;
+}
+
+/*
+ * call-seq:
+ *   bn.positive? => true | false
+ */
+static VALUE
+ossl_bn_is_positive(VALUE self)
+{
+    BIGNUM *bn;
+
+    GetBN(self, bn);
+    if (BN_is_zero(bn))
+	return Qfalse;
+    return BN_is_negative(bn) ? Qfalse : Qtrue;
 }
 
 #define BIGNUM_1c(func)					\
@@ -950,10 +980,11 @@ ossl_bn_copy(VALUE self, VALUE other)
 
 /*
  * call-seq:
- *   +bn -> aBN
+ *   bn.dup -> aBN
+ *   +bn    -> aBN
  */
 static VALUE
-ossl_bn_uplus(VALUE self)
+ossl_bn_dup(VALUE self)
 {
     VALUE obj;
     BIGNUM *bn1, *bn2;
@@ -1003,7 +1034,7 @@ ossl_bn_abs(VALUE self)
         return ossl_bn_uminus(self);
     }
     else {
-        return ossl_bn_uplus(self);
+        return ossl_bn_dup(self);
     }
 }
 
@@ -1048,7 +1079,7 @@ ossl_bn_eq(VALUE self, VALUE other)
     BIGNUM *bn1, *bn2;
 
     GetBN(self, bn1);
-    other = try_convert_to_bn(other);
+    other = ossl_try_convert_to_bn(other);
     if (NIL_P(other))
 	return Qfalse;
     GetBN(other, bn2);
@@ -1223,6 +1254,7 @@ Init_ossl_bn(void)
 
     rb_define_method(cBN, "initialize_copy", ossl_bn_copy, 1);
     rb_define_method(cBN, "copy", ossl_bn_copy, 1);
+    rb_define_method(cBN, "dup", ossl_bn_dup, 0);
 
     /* swap (=coerce?) */
 
@@ -1230,7 +1262,7 @@ Init_ossl_bn(void)
     rb_define_method(cBN, "num_bits", ossl_bn_num_bits, 0);
     /* num_bits_word */
 
-    rb_define_method(cBN, "+@", ossl_bn_uplus, 0);
+    rb_define_alias(cBN, "+@", "dup");
     rb_define_method(cBN, "-@", ossl_bn_uminus, 0);
     rb_define_method(cBN, "abs", ossl_bn_abs, 0);
 
@@ -1268,7 +1300,9 @@ Init_ossl_bn(void)
     rb_define_method(cBN, "one?", ossl_bn_is_one, 0);
     /* is_word */
     rb_define_method(cBN, "odd?", ossl_bn_is_odd, 0);
+    rb_define_method(cBN, "even?", ossl_bn_is_even, 0);
     rb_define_method(cBN, "negative?", ossl_bn_is_negative, 0);
+    rb_define_method(cBN, "positive?", ossl_bn_is_positive, 0);
 
     /* zero
      * one
