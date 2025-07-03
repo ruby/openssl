@@ -493,7 +493,6 @@ BIGNUM_1c(sqr)
 	BIGNUM *bn1, *bn2 = GetBNPtr(other), *result;	\
 	VALUE obj;					\
 	GetBN(self, bn1);				\
-	obj = NewBN(rb_obj_class(self));		\
 	if (!(result = BN_new())) {			\
 	    ossl_raise(eBNError, NULL);			\
 	}						\
@@ -501,6 +500,7 @@ BIGNUM_1c(sqr)
 	    BN_free(result);				\
 	    ossl_raise(eBNError, NULL);			\
 	}						\
+	obj = NewBN(rb_obj_class(self));		\
 	SetBN(obj, result);				\
 	return obj;					\
     }
