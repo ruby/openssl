@@ -1,3 +1,4 @@
+# coding: binary
 # frozen_string_literal: true
 #--
 #
@@ -102,7 +103,10 @@ module OpenSSL
 
       def cons_to_der
         ary = @value.to_a
-        str = "".b
+
+        return to_der_internal(nil, true) if ary.empty?
+
+        str = +""
 
         @value.each_with_index do |item, idx|
           if @indefinite_length && item.is_a?(EndOfContent)
@@ -142,13 +146,13 @@ module OpenSSL
 
           str << body
           if @indefinite_length
-            str << "\x00\x00\x00\x00".b
+            str << "\x00\x00\x00\x00"
           end
         else
           str = ASN1.put_object(constructed, @indefinite_length, body_len, @tag, @tag_class)
           str << body
           if @indefinite_length
-            str << "\x00\x00".b
+            str << "\x00\x00"
           end
         end
 
@@ -246,7 +250,7 @@ module OpenSSL
 
     class Null < Primitive
       def der_value
-        "".b
+        ""
       end
     end
 
@@ -254,7 +258,7 @@ module OpenSSL
       def der_value
         raise TypeError, "Can't convert nil into Boolean" if @value.nil?
 
-        @value ? "\xff".b : "\x00".b
+        @value ? "\xff" : "\x00"
       end
     end
 
@@ -285,7 +289,7 @@ module OpenSSL
 		        "the range 0 to 7"
         end
 
-        return "\x00".b if @value.empty?
+        return "\x00" if @value.empty?
 
         @unused_bits.chr << super
       end
@@ -338,7 +342,7 @@ module OpenSSL
     end
 
     class UTCTime < Primitive
-      FORMAT = "%y%m%d%H%M%SZ".b.freeze
+      FORMAT = "%y%m%d%H%M%SZ".freeze
 
       def der_value
         value = if @value.is_a?(Time)
@@ -352,7 +356,7 @@ module OpenSSL
     end
 
     class GeneralizedTime < Primitive
-      FORMAT = "%Y%m%d%H%M%SZ".b.freeze
+      FORMAT = "%Y%m%d%H%M%SZ".freeze
       def der_value
         value = if @value.is_a?(Time)
           @value
@@ -370,7 +374,7 @@ module OpenSSL
       end
 
       def to_der
-        "\x00\x00".b
+        "\x00\x00"
       end
     end
 
@@ -398,7 +402,7 @@ module OpenSSL
       end
 
       if constructed && indefinite_length
-        str << 0x80.chr
+        str << "\x80"
       else
         str << put_length(length)
       end
@@ -421,12 +425,12 @@ module OpenSSL
 
       if value >= 0
         data = value.to_bn.to_s(2)
-        data.prepend("\x00".b) if data.empty? || data.getbyte(0) >= 0x80
+        data.prepend("\x00") if data.empty? || data.getbyte(0) >= 0x80
       else
         value = value.to_bn
         value += (1 << (value.num_bits + 7) / 8 * 8)
         data = value.to_s(2)
-        data.prepend("\xff".b) if data.empty? || data.getbyte(0) < 0x80
+        data.prepend("\xff") if data.empty? || data.getbyte(0) < 0x80
       end
 
       data
