@@ -411,7 +411,8 @@ module OpenSSL
         length.chr
       else
         data = integer_to_octets(length)
-        (data.size | 0x80).chr << data
+        data.unshift(data.size | 0x80)
+        data.pack("C*")
       end
     end
 
@@ -432,16 +433,14 @@ module OpenSSL
     end
 
     def integer_to_octets(i)
-      if i >= 0
-        done = 0
-      else
-        done = -1
+      done = i >= 0 ? 0 : -1
+
+      octets = []
+
+      until i == done
+        octets.unshift(i & 0xff)
+        i >>= 8
       end
-      octets = "".b
-      begin
-        octets = (i & 0xff).chr << octets
-        i = i >> 8
-      end until i == done
       octets
     end
 
