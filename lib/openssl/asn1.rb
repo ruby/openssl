@@ -333,11 +333,27 @@ module OpenSSL
 
     class ObjectId < Primitive
       def der_value
-        value = oid.split(".").map(&:to_i)
+        value = oid
 
-        return (40 * value[0]).chr if value.length == 1
+        dot_index = value.index(".")
 
-        [value[0] * 40 + value[1], *value[2..]].pack("w*")
+        if dot_index == value.size - 1
+          return (value.to_i * 40).chr
+        else
+          codes = [value.byteslice(0..dot_index-1).to_i * 40]
+        end
+
+        add_to_top = false
+        value.byteslice(dot_index+1..-1).split(".") do |sub|
+          if add_to_top
+            codes << sub.to_i
+          else
+            codes[0] += sub.to_i
+            add_to_top = true
+          end
+        end
+
+        codes.pack("w*")
       end
     end
 
