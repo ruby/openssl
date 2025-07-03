@@ -418,12 +418,12 @@ module OpenSSL
     def put_integer(value)
       raise TypeError, "Can't convert nil into OpenSSL::BN" if value.nil?
 
-      value = value.to_bn
       if value >= 0
-        data = value.to_s(2)
+        data = value.to_bn.to_s(2)
         data.prepend("\x00".b) if data.empty? || data.getbyte(0) >= 0x80
       else
-        value = (1.to_bn << (value.num_bits + 7) / 8 * 8) + value
+        value = value.to_bn
+        value += (1 << (value.num_bits + 7) / 8 * 8)
         data = value.to_s(2)
         data.prepend("\xff".b) if data.empty? || data.getbyte(0) < 0x80
       end
