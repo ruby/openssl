@@ -108,7 +108,7 @@ module OpenSSL
 
         str = +""
 
-        @value.each_with_index do |item, idx|
+        ary.each_with_index do |item, idx|
           if @indefinite_length && item.is_a?(EndOfContent)
             if idx != ary.size - 1
               raise ASN1Error, "illegal EOC octets in value"
@@ -131,7 +131,7 @@ module OpenSSL
 
       def to_der_internal(body, constructed = false)
         default_tag = ASN1.take_default_tag(self.class)
-        body_len = body.size
+        body_len = body ? body.size : 0
 
         if @tagging == :EXPLICIT
           raise ASN1Error, "explicit tagging of unknown tag" unless default_tag
@@ -144,13 +144,13 @@ module OpenSSL
           # Put explicit tag
           str = ASN1.put_object(true, @indefinite_length, inner_len, @tag, @tag_class) << inner_obj
 
-          str << body
+          str << body if body
           if @indefinite_length
             str << "\x00\x00\x00\x00"
           end
         else
           str = ASN1.put_object(constructed, @indefinite_length, body_len, @tag, @tag_class)
-          str << body
+          str << body if body
           if @indefinite_length
             str << "\x00\x00"
           end
@@ -250,7 +250,6 @@ module OpenSSL
 
     class Null < Primitive
       def der_value
-        ""
       end
     end
 
