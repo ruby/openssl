@@ -93,13 +93,14 @@ module OpenSSL
         end
       end
 
+      private
+
+      # :nodoc:
       def der_value
         raise TypeError, "no implicit conversion of #{self.class} into String" unless @value.respond_to?(:to_str)
 
         @value.to_str.b
       end
-
-      private
 
       def cons_to_der
         ary = @value.to_a
@@ -249,11 +250,17 @@ module OpenSSL
     end
 
     class Null < Primitive
+      private
+
+      # :nodoc:
       def der_value
       end
     end
 
     class Boolean < Primitive
+      private
+
+      # :nodoc:
       def der_value
         raise TypeError, "Can't convert nil into Boolean" if @value.nil?
 
@@ -262,12 +269,18 @@ module OpenSSL
     end
 
     class Integer < Primitive
+      private
+
+      # :nodoc:
       def der_value
         ASN1.put_integer(@value)
       end
     end
 
     class Enumerated < Primitive
+      private
+
+      # :nodoc:
       def der_value
         ASN1.put_integer(@value)
       end
@@ -282,6 +295,9 @@ module OpenSSL
         @unused_bits = 0
       end
 
+      private
+
+      # :nodoc:
       def der_value
         if @unused_bits < 0 || @unused_bits > 7
           raise ASN1Error,  "unused_bits for a bitstring value must be in " \
@@ -331,6 +347,9 @@ module OpenSSL
     end
 
     class ObjectId < Primitive
+      private
+
+      # :nodoc:
       def der_value
         value = oid
 
@@ -359,6 +378,9 @@ module OpenSSL
     class UTCTime < Primitive
       FORMAT = "%y%m%d%H%M%SZ".freeze
 
+      private
+
+      # :nodoc:
       def der_value
         value = if @value.is_a?(Time)
           @value
@@ -372,6 +394,10 @@ module OpenSSL
 
     class GeneralizedTime < Primitive
       FORMAT = "%Y%m%d%H%M%SZ".freeze
+
+      private
+
+      # :nodoc:
       def der_value
         value = if @value.is_a?(Time)
           @value
