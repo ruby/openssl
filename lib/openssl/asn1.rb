@@ -376,9 +376,10 @@ module OpenSSL
     end
 
     class UTCTime < Primitive
-      FORMAT = "%y%m%d%H%M%SZ".freeze
-
       private
+
+      YEAR_RANGE = 1950..2049
+      private_constant :YEAR_RANGE
 
       # :nodoc:
       def der_value
@@ -386,15 +387,15 @@ module OpenSSL
           @value
         else
           Time.at(Integer(@value))
-        end
+        end.utc
 
-        value.utc.strftime(FORMAT)
+        raise OpenSSL::ASN1::ASN1Error unless YEAR_RANGE.include?(value.year)
+
+        value.strftime("%y%m%d%H%M%SZ")
       end
     end
 
     class GeneralizedTime < Primitive
-      FORMAT = "%Y%m%d%H%M%SZ".freeze
-
       private
 
       # :nodoc:
@@ -403,9 +404,12 @@ module OpenSSL
           @value
         else
           Time.at(Integer(@value))
-        end
+        end.utc
 
-        value.utc.strftime(FORMAT)
+        # per  In X.680 (02/2021) section 46: the year has to be exactly 4 digits for GeneralizedTime.
+        raise OpenSSL::ASN1::ASN1Error unless value.year < 10_000
+
+        value.strftime("%Y%m%d%H%M%SZ")
       end
     end
 
