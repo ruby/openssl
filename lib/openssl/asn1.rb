@@ -306,7 +306,7 @@ module OpenSSL
 
         return "\x00" if @value.empty?
 
-        @unused_bits.chr << super
+        @unused_bits.chr.force_encoding(Encoding::BINARY) << super
       end
     end
 
@@ -356,7 +356,7 @@ module OpenSSL
         dot_index = value.index(".")
 
         if dot_index == value.size - 1
-          return (value.to_i * 40).chr
+          return (value.to_i * 40).chr.force_encoding(Encoding::BINARY)
         else
           codes = [value.byteslice(0..dot_index-1).to_i * 40]
         end
@@ -436,7 +436,7 @@ module OpenSSL
       i |= (xclass & 0xc0) # PRIVATE
 
       if tag < 31
-        str = (i | tag).chr
+        str = (i | tag).chr.force_encoding(Encoding::BINARY)
 
       else
         str = [i | 0x1f, tag].pack("Cw")
@@ -453,7 +453,7 @@ module OpenSSL
 
     def put_length(length)
       if length < 0x80
-        length.chr
+        length.chr.force_encoding(Encoding::BINARY)
       else
         data = integer_to_octets(length)
         data.unshift(data.size | 0x80)
