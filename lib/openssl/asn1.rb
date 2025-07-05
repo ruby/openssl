@@ -1,3 +1,4 @@
+# coding: binary
 # frozen_string_literal: true
 #--
 #
@@ -71,6 +72,93 @@ module OpenSSL
         @tag_class = tag_class
         @indefinite_length = false
       end
+
+      #
+      # :call-seq:
+      #    asn1.to_der => DER-encoded String
+      #
+      # Encodes this ASN1Data into a DER-encoded String value. The result is
+      # DER-encoded except for the possibility of indefinite length forms.
+      # Indefinite length forms are not allowed in strict DER, so strictly speaking
+      # the result of such an encoding would be a BER-encoding.
+      #
+      def to_der
+        if @value.is_a?(Array)
+          cons_to_der
+        elsif @indefinite_length
+          raise ASN1Error, "indefinite length form cannot be used " \
+		        "with primitive encoding"
+        else
+          to_der_internal(der_value)
+        end
+      end
+
+      private
+
+      # :nodoc:
+      def der_value
+        raise TypeError, "no implicit conversion of #{self.class} into String" unless @value.respond_to?(:to_str)
+
+        @value.to_str.b
+      end
+
+      def cons_to_der
+        ary = @value.to_a
+
+        return to_der_internal(nil, true) if ary.empty?
+
+        str = +""
+
+        ary.each_with_index do |item, idx|
+          if @indefinite_length && item.is_a?(EndOfContent)
+            if idx != ary.size - 1
+              raise ASN1Error, "illegal EOC octets in value"
+            end
+
+            break
+          end
+
+          item = item.to_der if item.respond_to?(:to_der)
+
+          str << item
+        end
+
+        to_der_internal(str, true)
+      end
+
+      def prim_to_der
+        to_der_internal(der_value)
+      end
+
+      def to_der_internal(body, constructed = false)
+        default_tag = ASN1.take_default_tag(self.class)
+        body_len = body ? body.size : 0
+
+        if @tagging == :EXPLICIT
+          raise ASN1Error, "explicit tagging of unknown tag" unless default_tag
+
+          inner_obj = ASN1.put_object(constructed, @indefinite_length, body_len, default_tag, :UNIVERSAL)
+
+          inner_len = body_len + inner_obj.size
+
+
+          # Put explicit tag
+          str = ASN1.put_object(true, @indefinite_length, inner_len, @tag, @tag_class) << inner_obj
+
+          str << body if body
+          if @indefinite_length
+            str << "\x00\x00\x00\x00"
+          end
+        else
+          str = ASN1.put_object(constructed, @indefinite_length, body_len, @tag, @tag_class)
+          str << body if body
+          if @indefinite_length
+            str << "\x00\x00"
+          end
+        end
+
+        str
+      end
     end
 
     module TaggedASN1Data
@@ -127,6 +215,11 @@ module OpenSSL
 
       undef_method :indefinite_length=
       undef_method :infinite_length=
+
+
+      def to_der
+        prim_to_der
+      end
     end
 
     class Constructive < ASN1Data
@@ -150,11 +243,48 @@ module OpenSSL
 
         self
       end
+
+      def to_der
+        cons_to_der
+      end
     end
 
-    class Boolean < Primitive ; end
-    class Integer < Primitive ; end
-    class Enumerated < Primitive ; end
+    class Null < Primitive
+      private
+
+      # :nodoc:
+      def der_value
+      end
+    end
+
+    class Boolean < Primitive
+      private
+
+      # :nodoc:
+      def der_value
+        raise TypeError, "Can't convert nil into Boolean" if @value.nil?
+
+        @value ? "\xff" : "\x00"
+      end
+    end
+
+    class Integer < Primitive
+      private
+
+      # :nodoc:
+      def der_value
+        ASN1.put_integer(@value)
+      end
+    end
+
+    class Enumerated < Primitive
+      private
+
+      # :nodoc:
+      def der_value
+        ASN1.put_integer(@value)
+      end
+    end
 
     class BitString < Primitive
       attr_accessor :unused_bits
@@ -164,16 +294,204 @@ module OpenSSL
 
         @unused_bits = 0
       end
+
+      private
+
+      # :nodoc:
+      def der_value
+        if @unused_bits < 0 || @unused_bits > 7
+          raise ASN1Error,  "unused_bits for a bitstring value must be in " \
+		        "the range 0 to 7"
+        end
+
+        return "\x00" if @value.empty?
+
+        @unused_bits.chr.force_encoding(Encoding::BINARY) << super
+      end
+    end
+
+    class OctetString < Primitive
+    end
+
+    class UTF8String < Primitive
+    end
+
+    class NumericString < Primitive
+    end
+
+    class PrintableString < Primitive
+    end
+
+    class T61String < Primitive
+    end
+
+    class VideotexString < Primitive
+    end
+
+    class IA5String < Primitive
+    end
+
+    class GraphicString < Primitive
+    end
+
+    class ISO64String < Primitive
+    end
+
+    class GeneralString < Primitive
+    end
+
+    class UniversalString < Primitive
+    end
+
+    class BMPString < Primitive
+    end
+
+    class ObjectId < Primitive
+      private
+
+      # :nodoc:
+      def der_value
+        value = oid
+
+        dot_index = value.index(".")
+
+        if dot_index == value.size - 1
+          return (value.to_i * 40).chr.force_encoding(Encoding::BINARY)
+        else
+          codes = [value.byteslice(0..dot_index-1).to_i * 40]
+        end
+
+        add_to_top = false
+        value.byteslice(dot_index+1..-1).split(".") do |sub|
+          if add_to_top
+            codes << sub.to_i
+          else
+            codes[0] += sub.to_i
+            add_to_top = true
+          end
+        end
+
+        codes.pack("w*")
+      end
+    end
+
+    class UTCTime < Primitive
+      private
+
+      YEAR_RANGE = 1950..2049
+      private_constant :YEAR_RANGE
+
+      # :nodoc:
+      def der_value
+        value = if @value.is_a?(Time)
+          @value
+        else
+          Time.at(Integer(@value))
+        end
+
+        raise OpenSSL::ASN1::ASN1Error unless YEAR_RANGE.include?(value.year)
+
+        value.utc.strftime("%y%m%d%H%M%SZ")
+      end
+    end
+
+    class GeneralizedTime < Primitive
+      private
+
+      # :nodoc:
+      def der_value
+        value = if @value.is_a?(Time)
+          @value
+        else
+          Time.at(Integer(@value))
+        end
+
+        value.utc.strftime("%Y%m%d%H%M%SZ")
+      end
     end
 
     class EndOfContent < ASN1Data
       def initialize
         super("", 0, :UNIVERSAL)
       end
+
+      def to_der
+        "\x00\x00"
+      end
+    end
+
+    class Set < Constructive
+    end
+
+    class Sequence < Constructive
+
+    end
+
+    module_function
+
+    # ruby port of openssl ASN1_put_object
+    def put_object(constructed, indefinite_length, length, tag, tag_class)
+      xclass = take_asn1_tag_class(tag_class)
+
+      i = constructed ? 0x20 : 0
+      i |= (xclass & 0xc0) # PRIVATE
+
+      if tag < 31
+        str = (i | tag).chr.force_encoding(Encoding::BINARY)
+
+      else
+        str = [i | 0x1f, tag].pack("Cw")
+      end
+
+      if constructed && indefinite_length
+        str << "\x80"
+      else
+        str << put_length(length)
+      end
+      str
+    end
+
+
+    def put_length(length)
+      if length < 0x80
+        length.chr.force_encoding(Encoding::BINARY)
+      else
+        data = integer_to_octets(length)
+        data.unshift(data.size | 0x80)
+        data.pack("C*")
+      end
+    end
+
+    def put_integer(value)
+      raise TypeError, "Can't convert nil into OpenSSL::BN" if value.nil?
+
+      if value >= 0
+        data = value.to_bn.to_s(2)
+        data.prepend("\x00") if data.empty? || data.getbyte(0) >= 0x80
+      else
+        value = value.to_bn
+        value += (1 << (value.num_bits + 7) / 8 * 8)
+        data = value.to_s(2)
+        data.prepend("\xff") if data.empty? || data.getbyte(0) < 0x80
+      end
+
+      data
+    end
+
+    def integer_to_octets(i)
+      done = i >= 0 ? 0 : -1
+
+      octets = []
+
+      until i == done
+        octets.unshift(i & 0xff)
+        i >>= 8
+      end
+      octets
     end
 
     # :nodoc:
-    def self.take_default_tag(klass)
+    def take_default_tag(klass)
       tag = CLASS_TAG_MAP[klass]
 
       return tag if tag
@@ -183,6 +501,18 @@ module OpenSSL
       return unless sklass
 
       take_default_tag(sklass)
+    end
+
+    # from ossl_asn1.c : ossl_asn1_tag_class
+    def take_asn1_tag_class(tag_class)
+      case tag_class
+      when :UNIVERSAL, nil then 0x00
+      when :APPLICATION then 0x40
+      when :CONTEXT_SPECIFIC then 0x80
+      when :PRIVATE then 0xc0
+      else
+        raise ASN1Error,  "invalid tag class"
+      end
     end
   end
 end
