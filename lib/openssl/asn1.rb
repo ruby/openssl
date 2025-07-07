@@ -85,11 +85,8 @@ module OpenSSL
       def to_der
         if @value.is_a?(Array)
           cons_to_der
-        elsif @indefinite_length
-          raise ASN1Error, "indefinite length form cannot be used " \
-		        "with primitive encoding"
         else
-          to_der_internal(der_value)
+          prim_to_der
         end
       end
 
@@ -127,6 +124,10 @@ module OpenSSL
       end
 
       def prim_to_der
+        if @indefinite_length
+          raise ASN1Error, "indefinite length form cannot be used " \
+            "with primitive encoding"
+        end
         to_der_internal(der_value)
       end
 
