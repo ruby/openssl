@@ -254,6 +254,7 @@ module OpenSSL
 
       # :nodoc:
       def der_value
+        raise ASN1Error, "nil expected" unless @value == nil
       end
     end
 
