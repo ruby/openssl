@@ -461,9 +461,8 @@ module OpenSSL
       if length < 0x80
         length.chr.force_encoding(Encoding::BINARY)
       else
-        data = integer_to_octets(length)
-        data.unshift(data.size | 0x80)
-        data.pack("C*")
+        data = length.to_bn.to_s(2)
+        [data.size | 0x80].pack("C") << data
       end
     end
 
@@ -481,18 +480,6 @@ module OpenSSL
       end
 
       data
-    end
-
-    def integer_to_octets(i)
-      done = i >= 0 ? 0 : -1
-
-      octets = []
-
-      until i == done
-        octets.unshift(i & 0xff)
-        i >>= 8
-      end
-      octets
     end
 
     # :nodoc:
