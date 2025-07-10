@@ -13,7 +13,6 @@ rescue LoadError
 end
 
 Rake::TestTask.new do |t|
-  t.libs << 'test/openssl'
   t.test_files = FileList["test/**/test_*.rb"]
   t.warning = true
 end
@@ -25,7 +24,6 @@ task :test_fips do
 end
 
 Rake::TestTask.new(:test_fips_internal) do |t|
-  t.libs << 'test/openssl'
   # Exclude failing test files in FIPS for this task to pass.
   # TODO: Fix failing test files.
   t.test_files = FileList['test/**/test_*.rb'] - FileList[
