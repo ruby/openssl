@@ -15,13 +15,13 @@ class OpenSSL::TestCMAC < OpenSSL::TestCase
   def test_dup
     cmac1 = OpenSSL::MAC::CMAC.new("AES-192-CBC", ["8e73b0f7da0e6452c810f32b809079e562f8ead2522c6b7b"].pack("H*"))
     cmac2 = cmac1.dup
-    assert_equal cmac2, cmac1
+    assert_equal cmac2.mac, cmac1.mac
 
     cmac1.update("message")
-    assert_not_equal cmac2, cmac1
+    assert_not_equal cmac2.mac, cmac1.mac
 
     cmac2.update("message")
-    assert_equal cmac2, cmac1
+    assert_equal cmac2.mac, cmac1.mac
   end
 
   def test_class_methods
