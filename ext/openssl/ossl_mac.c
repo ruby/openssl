@@ -1,6 +1,6 @@
 #include "ossl.h"
 
-#if OSSL_OPENSSL_PREREQ(3, 0, 0)
+#ifdef HAVE_TYPE_EVP_MAC_P
 
 #define NewMAC(klass)                                   \
     TypedData_Wrap_Struct((klass), &ossl_mac_type, 0)
