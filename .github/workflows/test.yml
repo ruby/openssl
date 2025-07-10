@@ -66,7 +66,7 @@ jobs:
         run:  bundle exec rake debug
 
       - name: rake test
-        run:  bundle exec rake test TESTOPTS="-v --no-show-detail-immediately"
+        run:  bundle exec rake test TESTOPTS="-v --no-show-detail-immediately" OSSL_TEST_ALL=1
         timeout-minutes: 5
 
   test-openssls:
@@ -167,7 +167,7 @@ jobs:
         run:  bundle exec rake debug
 
       - name: rake test
-        run:  bundle exec rake test TESTOPTS="-v --no-show-detail-immediately"
+        run:  bundle exec rake test TESTOPTS="-v --no-show-detail-immediately" OSSL_TEST_ALL=1
         timeout-minutes: 5
 
       # Run only the passing tests on the FIPS module as a temporary workaround.
@@ -177,6 +177,6 @@ jobs:
           sed -e "s|OPENSSL_DIR|$HOME/openssl|" tool/openssl_fips.cnf.tmpl > tmp/openssl_fips.cnf
           export OPENSSL_CONF=$(pwd)/tmp/openssl_fips.cnf
           bundle exec rake debug
-          bundle exec rake test_fips TESTOPTS="-v --no-show-detail-immediately"
+          bundle exec rake test_fips TESTOPTS="-v --no-show-detail-immediately" OSSL_TEST_ALL=1
         timeout-minutes: 5
         if: ${{ startsWith(matrix.openssl, 'openssl-3') || matrix.openssl == 'openssl-master' }}
