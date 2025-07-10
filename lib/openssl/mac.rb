@@ -13,7 +13,6 @@ module OpenSSL
       def hexmac
         mac.unpack1('H*')
       end
-      alias inspect hexmac
       alias to_s hexmac
 
       def base64mac
