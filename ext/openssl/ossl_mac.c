@@ -128,7 +128,7 @@ ossl_mac_update(VALUE self, VALUE chunk)
 }
 
 static VALUE
-ossl_mac_mac(VALUE self)
+ossl_mac_digest(VALUE self)
 {
     VALUE ret;
     EVP_MAC_CTX *ctx1, *ctx2;
@@ -167,7 +167,7 @@ Init_ossl_mac(void)
     rb_define_method(cMAC, "initialize_copy", ossl_mac_copy, 1);
     rb_define_method(cMAC, "update", ossl_mac_update, 1);
     rb_define_alias(cMAC, "<<", "update");
-    rb_define_method(cMAC, "mac", ossl_mac_mac, 0);
+    rb_define_method(cMAC, "digest", ossl_mac_digest, 0);
 
     cCMAC = rb_define_class_under(cMAC, "CMAC", cMAC);
     rb_define_method(cCMAC, "initialize", ossl_cmac_initialize, 2);

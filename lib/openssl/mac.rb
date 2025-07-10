@@ -3,24 +3,24 @@
 module OpenSSL
   if defined?(MAC)
     class MAC
-      def hexmac
-        mac.unpack1('H*')
+      def hexdigest
+        digest.unpack1('H*')
       end
-      alias to_s hexmac
+      alias to_s hexdigest
 
-      def base64mac
-        [mac].pack('m0')
+      def base64digest
+        [digest].pack('m0')
       end
 
       class CMAC < MAC
         class << self
-          def mac(cipher, key, message)
+          def digest(cipher, key, message)
             cmac = new(cipher, key)
             cmac << message
             cmac.send(__callee__)
           end
-          alias hexmac mac
-          alias base64mac mac
+          alias hexdigest digest
+          alias base64digest digest
         end
       end
     end
