@@ -10,13 +10,14 @@ rescue LoadError
     "install testing dependency gems."
 end
 
+task :test => :compile
 Rake::TestTask.new do |t|
   t.test_files = FileList["test/**/test_*.rb"]
   t.warning = true
 end
 
 desc 'Run tests for fips'
-task :test_fips do
+task :test_fips => :compile do
   ENV['TEST_RUBY_OPENSSL_FIPS_ENABLED'] = 'true'
   Rake::Task['test_fips_internal'].invoke
 end
