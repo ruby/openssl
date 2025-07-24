@@ -35,10 +35,6 @@ Rake::TestTask.new(:test_fips_internal) do |t|
     'test/openssl/test_ocsp.rb',
     'test/openssl/test_pkcs12.rb',
     'test/openssl/test_ts.rb',
-    'test/openssl/test_x509cert.rb',
-    'test/openssl/test_x509crl.rb',
-    'test/openssl/test_x509name.rb',
-    'test/openssl/test_x509req.rb',
   ]
   t.warning = true
 end
