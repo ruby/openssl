@@ -91,6 +91,13 @@ class OpenSSL::TestX509Store < OpenSSL::TestCase
     assert_match(/ok/i, store.error_string)
     assert_equal(OpenSSL::X509::V_OK, store.error)
     assert_equal([ee1_cert, ca2_cert, ca1_cert], store.chain)
+
+    # frozen, operation invalid
+    store = OpenSSL::X509::Store.new
+    store.freeze
+    assert_raise(FrozenError) do
+      store.verify(ee1_cert, [ca2_cert, ca1_cert])
+    end
   end
 
   def test_verify_callback
