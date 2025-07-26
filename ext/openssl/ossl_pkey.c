@@ -499,6 +499,41 @@ ossl_pkey_s_generate_key(int argc, VALUE *argv, VALUE self)
 }
 
 /*
+ *
+ *  call-seq:
+ *     OpenSSL::PKey.read_derpub(string [, pwd ]) -> PKey
+ *     OpenSSL::PKey.read_derpub(io [, pwd ]) -> PKey
+ *
+ * Reads a DER encoded string from _string_ or _io_ and returns an
+ * instance of the a public key object.
+ *
+ * === Parameters
+ * * _string+ is a DER-encoded string containing an arbitrary public key.
+ * * _io_ is an instance of IO containing a DER-encoded
+ *   arbitrary public key.
+ */
+static VALUE
+ossl_pkey_new_pub_from_data(int argc, VALUE *argv, VALUE self)
+{
+    EVP_PKEY *pkey;
+    BIO *bio;
+    VALUE data;
+
+    rb_scan_args(argc, argv, "1", &data);
+
+    bio = ossl_obj2bio(&data);
+    if (!(pkey = d2i_PUBKEY_bio(bio, NULL))) {
+      OSSL_BIO_reset(bio);
+    }
+
+    BIO_free(bio);
+    if (!pkey)
+	ossl_raise(ePKeyError, "Could not parse PKey");
+
+    return ossl_pkey_new(pkey);
+}
+
+/*
  * TODO: There is no convenient way to check the presence of public key
  * components on OpenSSL 3.0. But since keys are immutable on 3.0, pkeys without
  * these should only be created by OpenSSL::PKey.generate_parameters or by
@@ -1737,6 +1772,7 @@ Init_ossl_pkey(void)
     rb_define_module_function(mPKey, "generate_key", ossl_pkey_s_generate_key, -1);
     rb_define_module_function(mPKey, "new_raw_private_key", ossl_pkey_new_raw_private_key, 2);
     rb_define_module_function(mPKey, "new_raw_public_key", ossl_pkey_new_raw_public_key, 2);
+    rb_define_module_function(mPKey, "read_derpub", ossl_pkey_new_pub_from_data, -1);
 
     rb_define_alloc_func(cPKey, ossl_pkey_alloc);
     rb_define_method(cPKey, "initialize", ossl_pkey_initialize, 0);
