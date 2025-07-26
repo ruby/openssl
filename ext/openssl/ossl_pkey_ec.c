@@ -503,6 +503,9 @@ ossl_ec_key_to_der(VALUE self)
  *
  * See also the OpenSSL documentation for EC_KEY_generate_key()
  *
+ * With OpenSSL 3.0, PKEY objects are immutable, so to generate a new keypair,
+ * use OpenSSL::PKey.generate_key("EC", "ec_paramgen_curve" => "prime256v1")
+ *
  * === Example
  *   ec = OpenSSL::PKey::EC.new("prime256v1")
  *   p ec.private_key # => nil
