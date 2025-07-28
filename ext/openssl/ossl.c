@@ -1035,6 +1035,7 @@ Init_openssl(void)
     Init_ossl_asn1();
     Init_ossl_bn();
     Init_ossl_cipher();
+    Init_ossl_cms();
     Init_ossl_config();
     Init_ossl_digest();
     Init_ossl_engine();
@@ -1044,9 +1045,6 @@ Init_openssl(void)
     Init_ossl_ocsp();
     Init_ossl_pkcs12();
     Init_ossl_pkcs7();
-#if defined(HAVE_CMS_SIGN)
-    Init_ossl_cms();
-#endif
     Init_ossl_pkey();
     Init_ossl_provider();
     Init_ossl_rand();
