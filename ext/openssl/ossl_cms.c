@@ -356,22 +356,18 @@ ossl_cmsci_get_signers(VALUE self)
 {
     CMS_ContentInfo *cms;
     STACK_OF(CMS_SignerInfo) *sk;
-    CMS_SignerInfo *si;
     int num, i;
     VALUE ary;
 
     GetCMSContentInfo(self, cms);
     if (!(sk = CMS_get0_SignerInfos(cms))) {
-	OSSL_Debug("OpenSSL::CMS#get_signer_info == NULL!");
 	return rb_ary_new();
     }
-    if ((num = sk_CMS_SignerInfo_num(sk)) < 0) {
-	ossl_raise(eCMSError, "Negative number of signers!");
-    }
+    num = sk_CMS_SignerInfo_num(sk);
     ary = rb_ary_new2(num);
     for (i=0; i<num; i++) {
-	si = sk_CMS_SignerInfo_value(sk, i);
-	rb_ary_push(ary, ossl_cmssi_new(si));
+        CMS_SignerInfo *si = sk_CMS_SignerInfo_value(sk, i);
+        rb_ary_push(ary, ossl_cmssi_new(si));
     }
 
     return ary;
