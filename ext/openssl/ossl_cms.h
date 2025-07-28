@@ -10,12 +10,6 @@
 #if !defined(_OSSL_CMS_H_)
 #define _OSSL_CMS_H_
 
-extern VALUE cCMS;
-extern VALUE cCMSContentInfo;
-extern VALUE cCMSSigner;
-extern VALUE cCMSRecipient;
-extern VALUE eCMSError;
-
 void Init_ossl_cms(void);
 
 #endif /* _OSSL_CMS_H_ */

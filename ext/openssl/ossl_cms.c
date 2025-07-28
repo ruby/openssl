@@ -54,11 +54,14 @@
 #define ossl_cmsci_set_err_string(o,v) rb_iv_set((o), "@error_string", (v))
 #define ossl_cmsci_get_err_string(o)   rb_iv_get((o), "@error_string")
 
-VALUE cCMS;
-VALUE cCMSContentInfo;
-VALUE cCMSSignerInfo;
-VALUE cCMSRecipient;
-VALUE eCMSError;
+static VALUE cCMS;
+static VALUE cCMSContentInfo;
+static VALUE cCMSSignerInfo;
+#if 0
+/* not yet implemented. */
+static VALUE cCMSRecipient;
+#endif
+static VALUE eCMSError;
 
 
 static void
@@ -104,7 +107,7 @@ ossl_cmsci_to_pem(VALUE self)
     }
     if (!PEM_write_bio_CMS(out, cmsci)) {
 	BIO_free(out);
-	ossl_raise(ePKCS7Error, NULL);
+	ossl_raise(eCMSError, NULL);
     }
     str = ossl_membio2str(out);
 
@@ -423,7 +426,7 @@ ossl_cms_s_sign(int argc, VALUE *argv, VALUE klass)
     if(!(cms_cinfo = CMS_sign(x509, pkey, x509s, in, flg))){
 	BIO_free(in);
 	sk_X509_pop_free(x509s, X509_free);
-	ossl_raise(ePKCS7Error, NULL);
+	ossl_raise(eCMSError, NULL);
     }
     SetCMSContentInfo(ret, cms_cinfo);
     ossl_cmsci_set_data(ret, data);
@@ -470,6 +473,7 @@ Init_ossl_cms(void)
     rb_define_method(cCMSSignerInfo,"serial", ossl_cmssi_get_serial,0);
 
 #if 0
+    /* not yet implemented. */
     rb_define_singleton_method(cCMS, "read_smime", ossl_cms_s_read_smime, 1);
     rb_define_singleton_method(cCMS, "write_smime", ossl_cms_s_write_smime, -1);
     rb_define_singleton_method(cCMS, "encrypt", ossl_cms_s_encrypt, -1);
