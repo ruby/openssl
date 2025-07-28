@@ -302,6 +302,7 @@ ossl_cmssi_new(CMS_SignerInfo *cmssi)
 
     obj = NewCMSsi(cCMSSignerInfo);
     SetCMSsi(obj, cmssi);
+    rb_ivar_set(obj, rb_intern("cms"), cmssi);
 
     return obj;
 }
