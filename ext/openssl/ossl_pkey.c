@@ -460,11 +460,25 @@ pkey_generate(int argc, VALUE *argv, VALUE self, int genparam)
  * may be called once or multiple times, or may not even be called.
  *
  * For the supported options, see the documentation for the 'openssl genpkey'
- * utility command.
+ * utility command, visible as the manpage genpkey(1).
+ *
+ * The algorithm name will generally be RSA, DSA, EC, or DH.
+ * EcDSA keys are of type "EC" (not DSA), but have an 'ec_paramgen_curve' value
+ * set to values like secp384r1 or prime256v1.
+ * Note that the genpkey manpage can be mis-read to suggest it is
+ * 'ec_paramgen_curve:curve', but that incorrect, on the command line the colon
+ * separates the key from value.
+ *
+ * RSA keys are of type "RSA", and have a parameter "rsa_keygen_bits"
+ * giving the strength.
  *
  * == Example
  *   pkey = OpenSSL::PKey.generate_parameters("DSA", "dsa_paramgen_bits" => 2048)
  *   p pkey.p.num_bits #=> 2048
+ *
+ *   pkey = OpenSSL::PKey.generate_parameters("EC", "ec_paramgen_curve"=> "prime256v1")
+ *   p key.group.curve_name #=> "prime256v1"
+ *
  */
 static VALUE
 ossl_pkey_s_generate_parameters(int argc, VALUE *argv, VALUE self)
