@@ -7,6 +7,27 @@
 
 static VALUE mKDF, eKDF;
 
+struct pbkdf2_hmac_args {
+    char *pass;
+    int passlen;
+    unsigned char *salt;
+    int saltlen;
+    int iter;
+    const EVP_MD *md;
+    int len;
+    unsigned char *out;
+};
+
+static void *
+pbkdf2_hmac_nogvl(void *args_)
+{
+    struct pbkdf2_hmac_args *args = (struct pbkdf2_hmac_args *)args_;
+    int ret = PKCS5_PBKDF2_HMAC(args->pass, args->passlen, args->salt,
+                                args->saltlen, args->iter, args->md,
+                                args->len, args->out);
+    return (void *)(uintptr_t)ret;
+}
+
 /*
  * call-seq:
  *   KDF.pbkdf2_hmac(pass, salt:, iterations:, length:, hash:) -> aString
@@ -35,10 +56,9 @@ static VALUE mKDF, eKDF;
 static VALUE
 kdf_pbkdf2_hmac(int argc, VALUE *argv, VALUE self)
 {
-    VALUE pass, salt, opts, kwargs[4], str, md_holder;
+    VALUE pass, salt, opts, kwargs[4], str, md_holder, pass_tmp, salt_tmp;
     static ID kwargs_ids[4];
-    int iters, len;
-    const EVP_MD *md;
+    int passlen, saltlen, len;
 
     if (!kwargs_ids[0]) {
 	kwargs_ids[0] = rb_intern_const("salt");
@@ -50,18 +70,28 @@ kdf_pbkdf2_hmac(int argc, VALUE *argv, VALUE self)
     rb_get_kwargs(opts, kwargs_ids, 4, 0, kwargs);
 
     StringValue(pass);
+    passlen = RSTRING_LENINT(pass);
     salt = StringValue(kwargs[0]);
-    iters = NUM2INT(kwargs[1]);
+    saltlen = RSTRING_LENINT(salt);
     len = NUM2INT(kwargs[2]);
-    md = ossl_evp_md_fetch(kwargs[3], &md_holder);
-
-    str = rb_str_new(0, len);
-    if (!PKCS5_PBKDF2_HMAC(RSTRING_PTR(pass), RSTRING_LENINT(pass),
-			   (unsigned char *)RSTRING_PTR(salt),
-			   RSTRING_LENINT(salt), iters, md, len,
-			   (unsigned char *)RSTRING_PTR(str)))
+    str = rb_str_new(NULL, len);
+    struct pbkdf2_hmac_args args = {
+        .pass = ALLOCV(pass_tmp, passlen),
+        .passlen = passlen,
+        .salt = ALLOCV(salt_tmp, saltlen),
+        .saltlen = saltlen,
+        .iter = NUM2INT(kwargs[1]),
+        .md = ossl_evp_md_fetch(kwargs[3], &md_holder),
+        .len = len,
+        .out = (unsigned char *)RSTRING_PTR(str),
+    };
+    memcpy(args.pass, RSTRING_PTR(pass), passlen);
+    memcpy(args.salt, RSTRING_PTR(salt), saltlen);
+    if (!rb_thread_call_without_gvl(pbkdf2_hmac_nogvl, &args, NULL, NULL))
 	ossl_raise(eKDF, "PKCS5_PBKDF2_HMAC");
-
+    OPENSSL_cleanse(&args.pass, passlen);
+    ALLOCV_END(pass_tmp);
+    ALLOCV_END(salt_tmp);
     return str;
 }
 
