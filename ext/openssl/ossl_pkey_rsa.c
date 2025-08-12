@@ -42,7 +42,6 @@ RSA_PRIVATE(VALUE obj, OSSL_3_const RSA *rsa)
  * Classes
  */
 VALUE cRSA;
-static VALUE eRSAError;
 
 /*
  * Private
@@ -91,7 +90,7 @@ ossl_rsa_initialize(int argc, VALUE *argv, VALUE self)
     if (argc == 0) {
 	rsa = RSA_new();
         if (!rsa)
-            ossl_raise(eRSAError, "RSA_new");
+            ossl_raise(ePKeyError, "RSA_new");
         goto legacy;
     }
 
@@ -113,12 +112,12 @@ ossl_rsa_initialize(int argc, VALUE *argv, VALUE self)
     pkey = ossl_pkey_read_generic(in, pass);
     BIO_free(in);
     if (!pkey)
-        ossl_raise(eRSAError, "Neither PUB key nor PRIV key");
+        ossl_raise(ePKeyError, "Neither PUB key nor PRIV key");
 
     type = EVP_PKEY_base_id(pkey);
     if (type != EVP_PKEY_RSA) {
         EVP_PKEY_free(pkey);
-        rb_raise(eRSAError, "incorrect pkey type: %s", OBJ_nid2sn(type));
+        rb_raise(ePKeyError, "incorrect pkey type: %s", OBJ_nid2sn(type));
     }
     RTYPEDDATA_DATA(self) = pkey;
     return self;
@@ -129,7 +128,7 @@ ossl_rsa_initialize(int argc, VALUE *argv, VALUE self)
     if (!pkey || EVP_PKEY_assign_RSA(pkey, rsa) != 1) {
         EVP_PKEY_free(pkey);
         RSA_free(rsa);
-        ossl_raise(eRSAError, "EVP_PKEY_assign_RSA");
+        ossl_raise(ePKeyError, "EVP_PKEY_assign_RSA");
     }
     RTYPEDDATA_DATA(self) = pkey;
     return self;
@@ -152,12 +151,12 @@ ossl_rsa_initialize_copy(VALUE self, VALUE other)
                               (d2i_of_void *)d2i_RSAPrivateKey,
                               (char *)rsa);
     if (!rsa_new)
-	ossl_raise(eRSAError, "ASN1_dup");
+	ossl_raise(ePKeyError, "ASN1_dup");
 
     pkey = EVP_PKEY_new();
     if (!pkey || EVP_PKEY_assign_RSA(pkey, rsa_new) != 1) {
         RSA_free(rsa_new);
-        ossl_raise(eRSAError, "EVP_PKEY_assign_RSA");
+        ossl_raise(ePKeyError, "EVP_PKEY_assign_RSA");
     }
     RTYPEDDATA_DATA(self) = pkey;
 
@@ -312,7 +311,7 @@ ossl_rsa_to_der(VALUE self)
  * Signs _data_ using the Probabilistic Signature Scheme (RSA-PSS) and returns
  * the calculated signature.
  *
- * RSAError will be raised if an error occurs.
+ * PKeyError will be raised if an error occurs.
  *
  * See #verify_pss for the verification operation.
  *
@@ -399,7 +398,7 @@ ossl_rsa_sign_pss(int argc, VALUE *argv, VALUE self)
 
   err:
     EVP_MD_CTX_free(md_ctx);
-    ossl_raise(eRSAError, NULL);
+    ossl_raise(ePKeyError, NULL);
 }
 
 /*
@@ -409,7 +408,7 @@ ossl_rsa_sign_pss(int argc, VALUE *argv, VALUE self)
  * Verifies _data_ using the Probabilistic Signature Scheme (RSA-PSS).
  *
  * The return value is +true+ if the signature is valid, +false+ otherwise.
- * RSAError will be raised if an error occurs.
+ * PKeyError will be raised if an error occurs.
  *
  * See #sign_pss for the signing operation and an example code.
  *
@@ -492,7 +491,7 @@ ossl_rsa_verify_pss(int argc, VALUE *argv, VALUE self)
 
   err:
     EVP_MD_CTX_free(md_ctx);
-    ossl_raise(eRSAError, NULL);
+    ossl_raise(ePKeyError, NULL);
 }
 
 /*
@@ -535,14 +534,6 @@ Init_ossl_rsa(void)
     cPKey = rb_define_class_under(mPKey, "PKey", rb_cObject);
     ePKeyError = rb_define_class_under(mPKey, "PKeyError", eOSSLError);
 #endif
-
-    /* Document-class: OpenSSL::PKey::RSAError
-     *
-     * Generic exception that is raised if an operation on an RSA PKey
-     * fails unexpectedly or in case an instantiation of an instance of RSA
-     * fails due to non-conformant input data.
-     */
-    eRSAError = rb_define_class_under(mPKey, "RSAError", ePKeyError);
 
     /* Document-class: OpenSSL::PKey::RSA
      *
