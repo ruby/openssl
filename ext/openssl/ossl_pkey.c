@@ -283,7 +283,7 @@ ossl_pkey_load_from_handle(int argc, VALUE *argv, VALUE self)
     if(pkey == NULL)
       ossl_raise(ePKeyError, "Could not decode as keyh");
 
-    return ossl_pkey_new(pkey);
+    return ossl_pkey_wrap(pkey);
 }
 #endif
 
