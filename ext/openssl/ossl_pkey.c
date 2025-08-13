@@ -244,6 +244,7 @@ ossl_pkey_new_from_data(int argc, VALUE *argv, VALUE self)
     return ossl_pkey_wrap(pkey);
 }
 
+#if OSSL_OPENSSL_PREREQ(3, 0, 0)
 /*
  *  call-seq:
  *     OpenSSL::PKey.load(uri [, pwd ]) -> PKey
@@ -284,6 +285,7 @@ ossl_pkey_load_from_handle(int argc, VALUE *argv, VALUE self)
 
     return ossl_pkey_new(pkey);
 }
+#endif
 
 static VALUE
 pkey_ctx_apply_options_i(RB_BLOCK_CALL_FUNC_ARGLIST(i, ctx_v))
@@ -1776,7 +1778,9 @@ Init_ossl_pkey(void)
     cPKey = rb_define_class_under(mPKey, "PKey", rb_cObject);
 
     rb_define_module_function(mPKey, "read", ossl_pkey_new_from_data, -1);
+#if OSSL_OPENSSL_PREREQ(3, 0, 0)
     rb_define_module_function(mPKey, "load_from_handle", ossl_pkey_load_from_handle, -1);
+#endif
 
     rb_define_module_function(mPKey, "generate_parameters", ossl_pkey_s_generate_parameters, -1);
     rb_define_module_function(mPKey, "generate_key", ossl_pkey_s_generate_key, -1);
