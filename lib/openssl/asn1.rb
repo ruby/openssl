@@ -495,16 +495,282 @@ module OpenSSL
       take_default_tag(sklass)
     end
 
+    # :nodoc:
+    TAG_CLASS_TYPES = {
+      UNIVERSAL: 0x00,
+      APPLICATION: 0x40,
+      CONTEXT_SPECIFIC: 0x80,
+      PRIVATE: 0xc0
+    }
+    private_constant :TAG_CLASS_TYPES
+
     # from ossl_asn1.c : ossl_asn1_tag_class
     def take_asn1_tag_class(tag_class)
-      case tag_class
-      when :UNIVERSAL, nil then 0x00
-      when :APPLICATION then 0x40
-      when :CONTEXT_SPECIFIC then 0x80
-      when :PRIVATE then 0xc0
-      else
+      tag_class ||= :UNIVERSAL
+
+      TAG_CLASS_TYPES.fetch(tag_class) do
         raise ASN1Error,  "invalid tag class"
       end
+    end
+
+    #
+    # call-seq:
+    #    OpenSSL::ASN1.decode_all(der) -> Array of ASN1Data
+    #
+    # Similar to #decode with the difference that #decode expects one
+    # distinct value represented in _der_. #decode_all on the contrary
+    # decodes a sequence of sequential BER/DER values lined up in _der_
+    # and returns them as an array.
+    #
+    # == Example
+    #   ders = File.binread('asn1data_seq')
+    #   asn1_ary = OpenSSL::ASN1.decode_all(ders)
+    #
+    def decode_all(data)
+      data = data.to_der if data.respond_to?(:to_der)
+
+      datalen = data.size
+
+      objs = []
+
+      loop do
+        obj, data = decode0(data)
+
+        if obj.nil?
+          raise ASN1Error, "Type mismatch. Total bytes read: #{datalen} Bytes available: #{data.size} Offset: #{datalen - data.size}"
+        end
+
+        objs << obj
+
+        break if data.nil? || data.empty?
+      end
+
+      objs
+    end
+
+    def decode(data)
+      decode0(data).first
+    end
+
+    def decode0(data)
+      data = data.to_der if data.respond_to?(:to_der)
+
+      first_byte, length = data.unpack('CC')
+      length_bytes = 1
+      tag_class = TAG_CLASS_TYPES.key(first_byte & 0xc0) || :UNIVERSAL
+      is_constructed = first_byte.anybits?(0x20)
+      is_indefinite_length = length == 0x80 # indefinite length
+      id = first_byte & 0x1f
+
+      no_id_idx = if id == 0x1f
+        id = 0
+        count = 1
+        data[1..].each_byte do |byte|
+          count += 1
+
+          id = (id << 7) | (byte & 0x7f)
+          break if byte.nobits?(0x80)
+        end
+        length = data.getbyte(count)
+        count
+      else
+        1
+      end
+
+      value = if is_indefinite_length
+        unless is_constructed
+          raise ASN1Error, "indefinite length for primitive value"
+        end
+
+        data[no_id_idx + 1..-1]
+      elsif length > 0x80
+        # ASN.1 says this octet can't be 0xff
+        raise ASN1Error, "invalid length" if length == 0xff
+        length_bytes = length & 0x7f
+        length = data[no_id_idx + 1, length_bytes].unpack('C*').reduce(0) { |len, b| (len << 8) | b }
+        data[no_id_idx + length_bytes + 1..-1]
+      else
+        data[no_id_idx + 1..-1]
+      end
+
+      if is_constructed
+        decode_cons(tag_class, id, length, value, is_indefinite_length)
+      else
+        decode_prim(tag_class, id, length, value)
+      end
+    end
+
+    def decode_cons(tag_class, id, length, data, is_indefinite_length)
+      remaining = data[length..-1]
+      data = data[0, length]
+
+      objs = []
+      has_eoc = false
+      until data.empty?
+        obj, data = decode0(data)
+
+        case obj
+        when EndOfContent
+          has_eoc = true
+
+          break if is_indefinite_length
+
+          # next if is_indefinite_length
+
+          objs << obj
+
+          break
+        else
+          objs << obj
+        end
+      end
+
+      if is_indefinite_length && !has_eoc
+        raise ASN1Error, "missing EOC"
+      end
+
+      obj = if tag_class == :UNIVERSAL
+        case id
+        when 16 # Sequence
+          Sequence.new(objs, id, nil, tag_class)
+        when 17 # Set
+          Set.new(objs, id, nil, tag_class)
+        else
+          Constructive.new(objs, id, nil, tag_class)
+        end
+      else
+        ASN1Data.new(objs, id, tag_class)
+      end
+      obj.indefinite_length = is_indefinite_length
+
+      if data && !data.empty?
+        if remaining.nil?
+          remaining = data
+        else
+          remaining << data
+        end
+      end
+
+      return obj, remaining
+    end
+
+    def decode_prim(tag_class, id, length, data)
+      remaining = data[length..-1]
+      data = data[0, length]
+
+      obj = if tag_class == :UNIVERSAL
+        case id
+        when 0 # EOC
+          if length != 0 || !data.empty?
+            raise ASN1Error, "too long"
+          end
+          EndOfContent.new
+        when 1 # BOOLEAN
+          if length < 1
+            raise ASN1Error, "invalid length for BOOLEAN"
+          elsif length > 1
+            raise ASN1Error, "too long"
+          else
+            Boolean.new(data != "\x00", id, nil, tag_class)
+          end
+        when 2 # INTEGER
+          number = data.unpack('C*').reduce(0) { |len, b| (len << 8) | b }
+          if data[0].ord[7] == 1
+            number -= (1 << (8 * length))
+          end
+          OpenSSL::ASN1::Integer.new(number.to_bn, id, nil, tag_class)
+        when 3 # BIT_STRING
+          if data.empty?
+            raise ASN1Error, "string too short"
+          end
+          unused = data.unpack1('C')
+          if (unused > 7)
+            raise ASN1Error, "invalid bit string bits left"
+          end
+          str = data.byteslice(1..-1) || ""
+          BitString.new(str, id, nil, tag_class).tap do |b|
+            b.unused_bits = unused
+          end
+        when 4 # OCTET_STRING
+          OctetString.new(data, id, nil, tag_class)
+        when 5 # NULL
+          unless length.zero?
+            raise ASN1Error, "null is wrong length"
+          end
+
+          Null.new(nil, id, nil, tag_class)
+        when 6 # OBJECT
+          top, *codes = data.unpack("w*")
+
+          if top
+            first = [2, top / 40].min
+            second = top - first * 40
+            codes = [first, second, *codes]
+          else
+            raise ASN1Error, "invalid object encoding"
+          end
+
+          obj = ObjectId.new(codes.join("."), id, nil, tag_class)
+
+          if (sn = obj.sn)
+            # on decoding, if there's a short name in the table, then
+            # that's the value
+            obj.value = sn
+          end
+          obj
+        # when 7 # V_ASN1_OBJECT_DESCRIPTOR
+        # when 8 # EXTERNAL
+        # when 9 # REAL
+        when 10 # ENUMERATED
+          number = data.unpack('C*').reduce(0) { |len, b| (len << 8) | b }
+          if data[0].ord[7] == 1
+            number -= (1 << (8 * length))
+          end
+          OpenSSL::ASN1::Enumerated.new(number.to_bn, id, nil, tag_class)
+        when 12 # UTF8String
+          UTF8String.new(data, id, nil, tag_class)
+        when 18
+          NumericString.new(data, id, nil, tag_class)
+        when 19
+          PrintableString.new(data, id, nil, tag_class)
+        when 20
+          T61String.new(data, id, nil, tag_class)
+        when 21
+          VideotexString.new(data, id, nil, tag_class)
+        when 22
+          IA5String.new(data, id, nil, tag_class)
+        when 23
+          unless (c = /\A(?<year>\d{2})(?<month>\d{2})(?<day>\d{2})(?<hour>\d{2})(?<min>\d{2})(?<sec>\d{2})Z\z/.match(data))
+            raise ASN1Error, "too long"
+          end
+          year = c[:year].to_i
+          year = year > 49 ? 1900 + year : 2000 + year
+          time = Time.utc(year, c[:month], c[:day], c[:hour], c[:min], c[:sec])
+          UTCTime.new(time, id, nil, tag_class)
+        when 24
+          unless (c = /\A(?<year>\d{4})(?<month>\d{2})(?<day>\d{2})(?<hour>\d{2})(?<min>\d{2})(?<sec>\d{2})Z\z/.match(data))
+            raise ASN1Error, "too long"
+          end
+          time = Time.utc(c[:year], c[:month], c[:day], c[:hour], c[:min], c[:sec])
+          GeneralizedTime.new(time, id, nil, tag_class)
+        when 25
+          GraphicString.new(data, id, nil, tag_class)
+        when 26
+          ISO64String.new(data, id, nil, tag_class)
+        when 27
+          GeneralString.new(data, id, nil, tag_class)
+        when 28
+          UniversalString.new(data, id, nil, tag_class)
+        when 30
+          BMPString.new(data, id, nil, tag_class)
+        else
+          ASN1Data.new(data, id, tag_class)
+        end
+      else
+        ASN1Data.new(data, id, tag_class)
+      end
+
+      return obj, remaining
     end
   end
 end
