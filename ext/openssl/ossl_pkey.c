@@ -13,6 +13,8 @@
 # include <openssl/engine.h>
 #endif
 
+#include <openssl/store.h>
+
 /*
  * Classes
  */
@@ -241,6 +243,49 @@ ossl_pkey_new_from_data(int argc, VALUE *argv, VALUE self)
 	ossl_raise(ePKeyError, "Could not parse PKey");
     return ossl_pkey_wrap(pkey);
 }
+
+#if OSSL_OPENSSL_PREREQ(3, 0, 0)
+/*
+ *  call-seq:
+ *     OpenSSL::PKey.load(uri [, pwd ]) -> PKey
+ *
+ * Loads a private or public key from a URI.
+ * It can be a file://, or a provider specific handle.
+ *
+ * === Parameters
+ * * _uri_ is a file:// or provider specific thing, like a TPM2 handle:
+ * * _pwd_ is an optional password in case the thing is an encrypted
+ *   PEM resource.
+ */
+static VALUE
+ossl_pkey_load_from_handle(int argc, VALUE *argv, VALUE self)
+{
+    EVP_PKEY *pkey;
+    VALUE handle, pass;
+    OSSL_STORE_CTX *sctx;
+
+    rb_scan_args(argc, argv, "11", &handle, &pass);
+    StringValue(handle);
+
+    const char *uri = RSTRING_PTR(handle);
+    sctx = OSSL_STORE_open(uri, NULL /* ui_method */, NULL /* ui_data */,
+                            NULL /* post_process */,
+                            NULL /* post_process_data */);
+
+    if(sctx == NULL)
+      ossl_raise(ePKeyError, "Could not initialize load ctx");
+
+    OSSL_STORE_INFO *store1 = OSSL_STORE_load(sctx);
+    if(store1 == NULL)
+      ossl_raise(ePKeyError, "Could not load key");
+
+    pkey = OSSL_STORE_INFO_get1_PKEY(store1);
+    if(pkey == NULL)
+      ossl_raise(ePKeyError, "Could not decode as keyh");
+
+    return ossl_pkey_wrap(pkey);
+}
+#endif
 
 static VALUE
 pkey_ctx_apply_options_i(RB_BLOCK_CALL_FUNC_ARGLIST(i, ctx_v))
@@ -1733,6 +1778,10 @@ Init_ossl_pkey(void)
     cPKey = rb_define_class_under(mPKey, "PKey", rb_cObject);
 
     rb_define_module_function(mPKey, "read", ossl_pkey_new_from_data, -1);
+#if OSSL_OPENSSL_PREREQ(3, 0, 0)
+    rb_define_module_function(mPKey, "load_from_handle", ossl_pkey_load_from_handle, -1);
+#endif
+
     rb_define_module_function(mPKey, "generate_parameters", ossl_pkey_s_generate_parameters, -1);
     rb_define_module_function(mPKey, "generate_key", ossl_pkey_s_generate_key, -1);
     rb_define_module_function(mPKey, "new_raw_private_key", ossl_pkey_new_raw_private_key, 2);
