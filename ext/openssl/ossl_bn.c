@@ -114,8 +114,8 @@ integer_to_bnptr(VALUE obj, BIGNUM *orig)
     return bn;
 }
 
-static VALUE
-try_convert_to_bn(VALUE obj)
+VALUE
+ossl_try_convert_to_bn(VALUE obj)
 {
     BIGNUM *bn;
     VALUE newobj = Qnil;
@@ -137,7 +137,7 @@ ossl_bn_value_ptr(volatile VALUE *ptr)
     VALUE tmp;
     BIGNUM *bn;
 
-    tmp = try_convert_to_bn(*ptr);
+    tmp = ossl_try_convert_to_bn(*ptr);
     if (NIL_P(tmp))
 	ossl_raise(rb_eTypeError, "Cannot convert into OpenSSL::BN");
     GetBN(tmp, bn);
@@ -1047,7 +1047,7 @@ ossl_bn_eq(VALUE self, VALUE other)
     BIGNUM *bn1, *bn2;
 
     GetBN(self, bn1);
-    other = try_convert_to_bn(other);
+    other = ossl_try_convert_to_bn(other);
     if (NIL_P(other))
 	return Qfalse;
     GetBN(other, bn2);
