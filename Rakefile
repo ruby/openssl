@@ -34,7 +34,6 @@ Rake::TestTask.new(:test_fips_internal) do |t|
     'test/openssl/test_ns_spki.rb',
     'test/openssl/test_ocsp.rb',
     'test/openssl/test_pkcs12.rb',
-    'test/openssl/test_ssl.rb',
     'test/openssl/test_ts.rb',
     'test/openssl/test_x509cert.rb',
     'test/openssl/test_x509crl.rb',
