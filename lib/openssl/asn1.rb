@@ -548,11 +548,24 @@ module OpenSSL
       objs
     end
 
+    def traverse(der, &blk)
+      raise LocalJumpError unless blk
+
+      _, remaining = decode0(der, &blk)
+
+      unless remaining.nil? || remaining.empty?
+        total_read = der.size - remaining.size
+        raise ASN1Error, "Type mismatch. Total bytes read: #{total_read} Bytes available: #{remaining.size} Offset: #{total_read}"
+      end
+
+      nil
+    end
+
     def decode(data)
       decode0(data).first
     end
 
-    def decode0(data)
+    def decode0(data, depth = 0, offset = 0, &block)
       data = data.to_der if data.respond_to?(:to_der)
 
       first_byte, length = data.unpack('CC')
@@ -593,29 +606,49 @@ module OpenSSL
         data[no_id_idx + 1..-1]
       end
 
+      hlength = no_id_idx + length_bytes
+
       if is_constructed
-        decode_cons(tag_class, id, length, value, is_indefinite_length)
+        decode_cons(tag_class, id, hlength, length, value, is_indefinite_length, depth, offset, &block)
       else
-        decode_prim(tag_class, id, length, value)
+        decode_prim(tag_class, id, hlength, length, value, depth, offset, &block)
       end
     end
 
-    def decode_cons(tag_class, id, length, data, is_indefinite_length)
-      remaining = data[length..-1]
-      data = data[0, length]
+    def decode_cons(tag_class, id, hlength, length, data, is_indefinite_length, depth, offset, &block)
+      datalen = data.size
+
+      if is_indefinite_length
+        remaining = nil
+
+      else
+        remaining = data[length..-1]
+        data = data[0, length]
+
+        if length > datalen
+          raise ASN1Error, "too long"
+        end
+      end
+
+      traverse0(depth, offset, hlength, length == 0x80 ? 0 : length, true, tag_class, id, &block) if block
+
+      offset += hlength
 
       objs = []
       has_eoc = false
-      until data.empty?
-        obj, data = decode0(data)
+      until data.nil? || data.empty?
+        datalen = data.size
+
+        obj, data = decode0(data, depth + 1, offset, &block)
+
+        offset += datalen
+        offset -= data.size if data
 
         case obj
         when EndOfContent
           has_eoc = true
 
           break if is_indefinite_length
-
-          # next if is_indefinite_length
 
           objs << obj
 
@@ -654,9 +687,13 @@ module OpenSSL
       return obj, remaining
     end
 
-    def decode_prim(tag_class, id, length, data)
+    def decode_prim(tag_class, id, hlength, length, data, depth, offset, &block)
       remaining = data[length..-1]
       data = data[0, length]
+
+      traverse0(depth, offset, hlength, length, false, tag_class, id, &block) if block
+
+      offset += hlength
 
       obj = if tag_class == :UNIVERSAL
         case id
@@ -771,6 +808,27 @@ module OpenSSL
       end
 
       return obj, remaining
+    end
+
+    def traverse0(depth, offset, hlength, length, is_constructed, tag_class, id, &block)
+      elems = [
+        depth, offset,
+        hlength, length,
+        is_constructed,
+        tag_class,
+        id
+      ]
+
+      arity = block.arity
+      if arity == 1
+        block.call(elems)
+      else
+        if arity < elems.size
+          elems = elems[0, arity]
+        end
+
+        yield elems
+      end
     end
   end
 end
