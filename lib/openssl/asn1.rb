@@ -515,6 +515,19 @@ module OpenSSL
 
     PRIMITIVE_TAG_IDS = [*(0..10), 12, *(18..28), 30]
 
+    #
+    # call-seq:
+    #    OpenSSL::ASN1.decode_all(der) -> Array of ASN1Data
+    #
+    # Similar to #decode with the difference that #decode expects one
+    # distinct value represented in _der_. #decode_all on the contrary
+    # decodes a sequence of sequential BER/DER values lined up in _der_
+    # and returns them as an array.
+    #
+    # == Example
+    #   ders = File.binread('asn1data_seq')
+    #   asn1_ary = OpenSSL::ASN1.decode_all(ders)
+    #
     def decode_all(data)
       data = data.to_der if data.respond_to?(:to_der)
 
@@ -537,6 +550,27 @@ module OpenSSL
       objs
     end
 
+    #
+    # call-seq:
+    #    OpenSSL::ASN1.traverse(asn1) -> nil
+    #
+    # If a block is given, it prints out each of the elements encountered.
+    # Block parameters are (in that order):
+    # * depth: The recursion depth, plus one with each constructed value being encountered (Integer)
+    # * offset: Current byte offset (Integer)
+    # * header length: Combined length in bytes of the Tag and Length headers. (Integer)
+    # * length: The overall remaining length of the entire data (Integer)
+    # * constructed: Whether this value is constructed or not (Boolean)
+    # * tag_class: Current tag class (Symbol)
+    # * tag: The current tag number (Integer)
+    #
+    # == Example
+    #   der = File.binread('asn1data.der')
+    #   OpenSSL::ASN1.traverse(der) do | depth, offset, header_len, length, constructed, tag_class, tag|
+    #     puts "Depth: #{depth} Offset: #{offset} Length: #{length}"
+    #     puts "Header length: #{header_len} Tag: #{tag} Tag class: #{tag_class} Constructed: #{constructed}"
+    #   end
+    #
     def traverse(der, &blk)
       raise LocalJumpError unless blk
 
@@ -550,6 +584,18 @@ module OpenSSL
       nil
     end
 
+    #
+    # call-seq:
+    #    OpenSSL::ASN1.decode(der) -> ASN1Data
+    #
+    # Decodes a BER- or DER-encoded value and creates an ASN1Data instance. _der_
+    # may be a String or any object that features a +.to_der+ method transforming
+    # it into a BER-/DER-encoded String+
+    #
+    # == Example
+    #   der = File.binread('asn1data')
+    #   asn1 = OpenSSL::ASN1.decode(der)
+    #
     def decode(data)
       decode0(data).first
     end
