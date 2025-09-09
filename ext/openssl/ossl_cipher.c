@@ -423,7 +423,8 @@ ossl_cipher_final(VALUE self)
             VALUE str = rb_str_new_cstr("AEAD authentication tag verification failed");
             VALUE exc = ossl_make_error(eAuthTagError, str);
             rb_exc_raise(exc);
-        } else {
+        }
+        else {
             /* For non-AEAD ciphers */
             VALUE exc = ossl_make_error(eCipherError, rb_str_new_cstr("cipher final failed"));
             rb_exc_raise(exc);
