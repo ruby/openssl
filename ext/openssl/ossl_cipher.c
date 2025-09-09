@@ -420,14 +420,11 @@ ossl_cipher_final(VALUE self)
         /* For AEAD ciphers, this is likely an authentication failure */
         if (EVP_CIPHER_flags(EVP_CIPHER_CTX_cipher(ctx)) & EVP_CIPH_FLAG_AEAD_CIPHER) {
             /* For AEAD ciphers, EVP_CipherFinal_ex failures are authentication tag verification failures */
-            VALUE str = rb_str_new_cstr("AEAD authentication tag verification failed");
-            VALUE exc = ossl_make_error(eAuthTagError, str);
-            rb_exc_raise(exc);
+            ossl_raise(eAuthTagError, "AEAD authentication tag verification failed");
         }
         else {
             /* For non-AEAD ciphers */
-            VALUE exc = ossl_make_error(eCipherError, rb_str_new_cstr("cipher final failed"));
-            rb_exc_raise(exc);
+            ossl_raise(eCipherError, "cipher final failed");
         }
     }
     assert(out_len <= RSTRING_LEN(str));
