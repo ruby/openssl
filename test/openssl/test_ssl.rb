@@ -2129,11 +2129,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
       ctx.tmp_dh_callback = nil
     }
     start_server(ctx_proc: ctx_proc) do |port|
-      EnvUtil.suppress_warning { # uses default callback
-        assert_nothing_raised {
-          server_connect(port) { }
-        }
-      }
+      assert_nothing_raised { server_connect(port) }
     end
   end
 
@@ -2318,6 +2314,40 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
         assert_operator(5, :==, ssl.export_keying_material('test', 5, 'context').b.length)
         ssl.puts "abc"; ssl.gets # workaround to make tests work on windows
       end
+    end
+  end
+
+  # $/ must be accessible from non-main Ractors
+  # https://bugs.ruby-lang.org/issues/21109
+  if respond_to?(:ractor) && RUBY_VERSION >= "3.5"
+    ractor
+    def test_ractor_client
+      start_server { |port|
+        s = Ractor.new(port) { |port|
+          sock = TCPSocket.new("127.0.0.1", port)
+          begin
+            ssl = OpenSSL::SSL::SSLSocket.new(sock)
+            ssl.connect
+            ssl.puts("abc")
+            ssl.gets
+          ensure
+            ssl.close
+            sock.close
+          end
+        }.value
+        assert_equal("abc\n", s)
+      }
+    end
+
+    ractor
+    def test_ractor_set_params
+      # Cannot test the default store here, but it should not raise an exception
+      ok = Ractor.new {
+        ctx = OpenSSL::SSL::SSLContext.new
+        ctx.set_params
+        ctx.cert_store.kind_of?(OpenSSL::X509::Store)
+      }.value
+      assert(ok, "ctx.cert_store is an instance of OpenSSL::X509::Store")
     end
   end
 
