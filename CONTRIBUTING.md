@@ -224,6 +224,9 @@ $ OPENSSL_CONF=$OPENSSL_DIR/ssl/openssl_fips.cnf \
 The GitHub Actions workflow file [`test.yml`][GitHub test.yml] contains useful
 information for building OpenSSL/LibreSSL and testing against them.
 
+## Debugging
+
+You can use the `OpenSSL.debug = true` to print additional error strings.
 
 ## Relation with Ruby source tree
 
