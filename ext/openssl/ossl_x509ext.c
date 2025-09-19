@@ -55,7 +55,7 @@ static const rb_data_type_t ossl_x509ext_type = {
     {
 	0, ossl_x509ext_free,
     },
-    0, 0, RUBY_TYPED_FREE_IMMEDIATELY | RUBY_TYPED_WB_PROTECTED,
+    0, 0, RUBY_TYPED_FREE_IMMEDIATELY | RUBY_TYPED_WB_PROTECTED | RUBY_TYPED_FROZEN_SHAREABLE,
 };
 
 /*
@@ -103,7 +103,7 @@ static const rb_data_type_t ossl_x509extfactory_type = {
     {
 	0, ossl_x509extfactory_free,
     },
-    0, 0, RUBY_TYPED_FREE_IMMEDIATELY | RUBY_TYPED_WB_PROTECTED,
+    0, 0, RUBY_TYPED_FREE_IMMEDIATELY | RUBY_TYPED_WB_PROTECTED | RUBY_TYPED_FROZEN_SHAREABLE,
 };
 
 static VALUE
@@ -123,6 +123,7 @@ ossl_x509extfactory_set_issuer_cert(VALUE self, VALUE cert)
 {
     X509V3_CTX *ctx;
 
+    rb_check_frozen(self);
     GetX509ExtFactory(self, ctx);
     rb_iv_set(self, "@issuer_certificate", cert);
     ctx->issuer_cert = GetX509CertPtr(cert); /* NO DUP NEEDED */
@@ -135,6 +136,7 @@ ossl_x509extfactory_set_subject_cert(VALUE self, VALUE cert)
 {
     X509V3_CTX *ctx;
 
+    rb_check_frozen(self);
     GetX509ExtFactory(self, ctx);
     rb_iv_set(self, "@subject_certificate", cert);
     ctx->subject_cert = GetX509CertPtr(cert); /* NO DUP NEEDED */
@@ -147,6 +149,7 @@ ossl_x509extfactory_set_subject_req(VALUE self, VALUE req)
 {
     X509V3_CTX *ctx;
 
+    rb_check_frozen(self);
     GetX509ExtFactory(self, ctx);
     rb_iv_set(self, "@subject_request", req);
     ctx->subject_req = GetX509ReqPtr(req); /* NO DUP NEEDED */
@@ -159,6 +162,7 @@ ossl_x509extfactory_set_crl(VALUE self, VALUE crl)
 {
     X509V3_CTX *ctx;
 
+    rb_check_frozen(self);
     GetX509ExtFactory(self, ctx);
     rb_iv_set(self, "@crl", crl);
     ctx->crl = GetX509CRLPtr(crl); /* NO DUP NEEDED */
@@ -176,6 +180,7 @@ ossl_x509extfactory_initialize(int argc, VALUE *argv, VALUE self)
 
     rb_scan_args(argc, argv, "04",
 		 &issuer_cert, &subject_cert, &subject_req, &crl);
+    rb_check_frozen(self);
     if (!NIL_P(issuer_cert))
 	ossl_x509extfactory_set_issuer_cert(self, issuer_cert);
     if (!NIL_P(subject_cert))
@@ -272,6 +277,7 @@ ossl_x509ext_initialize(int argc, VALUE *argv, VALUE self)
     const unsigned char *p;
     X509_EXTENSION *ext, *x;
 
+    rb_check_frozen(self);
     GetX509Ext(self, ext);
     if(rb_scan_args(argc, argv, "12", &oid, &value, &critical) == 1){
 	oid = ossl_to_der_if_possible(oid);
@@ -310,12 +316,17 @@ ossl_x509ext_initialize_copy(VALUE self, VALUE other)
     return self;
 }
 
+/*
+ * call-seq:
+ *    extension.oid = string
+ */
 static VALUE
 ossl_x509ext_set_oid(VALUE self, VALUE oid)
 {
     X509_EXTENSION *ext;
     ASN1_OBJECT *obj;
 
+    rb_check_frozen(self);
     GetX509Ext(self, ext);
     obj = OBJ_txt2obj(StringValueCStr(oid), 0);
     if (!obj)
@@ -329,12 +340,17 @@ ossl_x509ext_set_oid(VALUE self, VALUE oid)
     return oid;
 }
 
+/*
+ * call-seq:
+ *    extension.value = string => string
+ */
 static VALUE
 ossl_x509ext_set_value(VALUE self, VALUE data)
 {
     X509_EXTENSION *ext;
     ASN1_OCTET_STRING *asn1s;
 
+    rb_check_frozen(self);
     GetX509Ext(self, ext);
     data = ossl_to_der_if_possible(data);
     StringValue(data);
@@ -348,17 +364,26 @@ ossl_x509ext_set_value(VALUE self, VALUE data)
     return data;
 }
 
+/*
+ * call-seq:
+ *    extension.critical = bool => bool
+ */
 static VALUE
 ossl_x509ext_set_critical(VALUE self, VALUE flag)
 {
     X509_EXTENSION *ext;
 
+    rb_check_frozen(self);
     GetX509Ext(self, ext);
     X509_EXTENSION_set_critical(ext, RTEST(flag) ? 1 : 0);
 
     return flag;
 }
 
+/*
+ * call-seq:
+ *    extension.oid => string
+ */
 static VALUE
 ossl_x509ext_get_oid(VALUE obj)
 {
@@ -382,6 +407,10 @@ ossl_x509ext_get_oid(VALUE obj)
     return ret;
 }
 
+/*
+ * call-seq:
+ *    extension.value => string
+ */
 static VALUE
 ossl_x509ext_get_value(VALUE obj)
 {
@@ -412,6 +441,10 @@ ossl_x509ext_get_value_der(VALUE obj)
     return rb_str_new((const char *)value->data, value->length);
 }
 
+/*
+ * call-seq:
+ *    extension.critical? => bool
+ */
 static VALUE
 ossl_x509ext_get_critical(VALUE obj)
 {
@@ -421,6 +454,10 @@ ossl_x509ext_get_critical(VALUE obj)
     return X509_EXTENSION_get_critical(ext) ? Qtrue : Qfalse;
 }
 
+/*
+ * call-seq:
+ *    extension.to_der => string
+ */
 static VALUE
 ossl_x509ext_to_der(VALUE obj)
 {
