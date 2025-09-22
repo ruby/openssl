@@ -26,7 +26,7 @@ included as a default gem in [supported Ruby branches][Ruby Maintenance Branches
 |2.1.x  |end-of-life (Ruby 2.5-2.7)     |Ruby 2.3+         |OpenSSL 1.0.1-1.1.1 or LibreSSL 2.5+        |
 |2.0.x  |end-of-life (Ruby 2.4)         |Ruby 2.3+         |OpenSSL 0.9.8-1.1.1 or LibreSSL 2.3+        |
 
-[default gem]: https://docs.ruby-lang.org/en/master/standard_library_rdoc.html
+[default gem]: https://docs.ruby-lang.org/en/master/standard_library_md.html
 [Ruby Maintenance Branches]: https://www.ruby-lang.org/en/downloads/branches/
 
 ## Installation
