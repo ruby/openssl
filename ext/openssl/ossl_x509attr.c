@@ -100,6 +100,7 @@ ossl_x509attr_initialize(int argc, VALUE *argv, VALUE self)
     X509_ATTRIBUTE *attr, *x;
     const unsigned char *p;
 
+    rb_check_frozen(self);
     GetX509Attr(self, attr);
     if(rb_scan_args(argc, argv, "11", &oid, &value) == 1){
 	oid = ossl_to_der_if_possible(oid);
@@ -149,6 +150,7 @@ ossl_x509attr_set_oid(VALUE self, VALUE oid)
     ASN1_OBJECT *obj;
     char *s;
 
+    rb_check_frozen(self);
     GetX509Attr(self, attr);
     s = StringValueCStr(oid);
     obj = OBJ_txt2obj(s, 0);
@@ -197,9 +199,12 @@ static VALUE
 ossl_x509attr_set_value(VALUE self, VALUE value)
 {
     X509_ATTRIBUTE *attr;
-    GetX509Attr(self, attr);
+
+    rb_check_frozen(self);
 
     OSSL_Check_Kind(value, cASN1Data);
+    GetX509Attr(self, attr);
+
     VALUE der = ossl_to_der(value);
     const unsigned char *p = (const unsigned char *)RSTRING_PTR(der);
     STACK_OF(ASN1_TYPE) *sk = d2i_ASN1_SET_ANY(NULL, &p, RSTRING_LEN(der));
