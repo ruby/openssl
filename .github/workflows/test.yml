@@ -26,7 +26,7 @@ jobs:
           - { os: windows-latest, ruby: ucrt }
           - { os: windows-latest, ruby: mswin }
 
-    steps:
+    steps: &test-steps
       - name: repo checkout
         uses: actions/checkout@v5
 
@@ -35,6 +35,14 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true # `bundle install` and cache
+        if: ${{ !endsWith(matrix.os, 'ppc64le') && !endsWith(matrix.os, 's390x') }}
+
+      - name: load ruby from deb package
+        run: |
+          sudo apt update
+          sudo apt install ruby-full bundler
+          sudo bundle install --jobs $(nproc)
+        if: ${{ endsWith(matrix.os, 'ppc64le') || endsWith(matrix.os, 's390x') }}
 
       # See https://github.com/oneclick/rubyinstaller2/issues/60
       # The builtin DLLs are preferred over the mingw-w64/vcpkg DLLs. This is a
@@ -68,6 +76,19 @@ jobs:
       - name: rake test
         run:  bundle exec rake test TESTOPTS="-v --no-show-detail-immediately" OSSL_TEST_ALL=1
         timeout-minutes: 5
+
+  test-ibm:
+    if: github.repository == 'ruby/openssl'
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04-ppc64le
+          - os: ubuntu-24.04-s390x
+
+    steps: *test-steps
 
   test-openssls:
     name: >-
