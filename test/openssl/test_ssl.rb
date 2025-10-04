@@ -4,17 +4,6 @@ require_relative "utils"
 if defined?(OpenSSL::SSL)
 
 class OpenSSL::TestSSL < OpenSSL::SSLTestCase
-  def test_bad_socket
-    bad_socket = Struct.new(:sync).new
-    assert_raise TypeError do
-      socket = OpenSSL::SSL::SSLSocket.new bad_socket
-      # if the socket is not a T_FILE, `connect` will segv because it tries
-      # to get the underlying file descriptor but the API it calls assumes
-      # the object type is T_FILE
-      socket.connect
-    end
-  end
-
   def test_ctx_setup
     ctx = OpenSSL::SSL::SSLContext.new
     assert_equal true, ctx.setup
@@ -168,6 +157,155 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     ensure
       ssl&.close
     end
+  end
+
+  def test_synthetic_io_sanity_check
+    obj = Object.new
+    assert_raise_with_message(TypeError, /read_nonblock/) { OpenSSL::SSL::SSLSocket.new(obj) }
+
+    obj = Object.new
+    obj.define_singleton_method(:read_nonblock) { |*args, **kwargs| }
+    obj.define_singleton_method(:write_nonblock) { |*args, **kwargs| }
+    assert_nothing_raised { OpenSSL::SSL::SSLSocket.new(obj) }
+  end
+
+  def test_synthetic_io
+    start_server do |port|
+      tcp = TCPSocket.new("127.0.0.1", port)
+      obj = Object.new
+      obj.define_singleton_method(:read_nonblock) { |maxlen, exception:|
+        tcp.read_nonblock(maxlen, exception: exception) }
+      obj.define_singleton_method(:write_nonblock) { |str, exception:|
+        tcp.write_nonblock(str, exception: exception) }
+      obj.define_singleton_method(:wait_readable) { tcp.wait_readable }
+      obj.define_singleton_method(:wait_writable) { tcp.wait_writable }
+      obj.define_singleton_method(:flush) { tcp.flush }
+      obj.define_singleton_method(:closed?) { tcp.closed? }
+
+      ssl = OpenSSL::SSL::SSLSocket.new(obj)
+      assert_same obj, ssl.to_io
+
+      ssl.connect
+      ssl.puts "abc"; assert_equal "abc\n", ssl.gets
+    ensure
+      ssl&.close
+      tcp&.close
+    end
+  end
+
+  def test_synthetic_io_write_nonblock_exception
+    start_server(ignore_listener_error: true) do |port|
+      tcp = TCPSocket.new("127.0.0.1", port)
+      obj = Object.new
+      [:read_nonblock, :wait_readable, :wait_writable, :flush, :closed?].each do |name|
+        obj.define_singleton_method(name) { |*args, **kwargs|
+          tcp.__send__(name, *args, **kwargs) }
+      end
+
+      # SSLSocket#connect calls write_nonblock at least twice: to write
+      # ClientHello and Finished. Let's raise an exception in the 2nd call.
+      called = 0
+      obj.define_singleton_method(:write_nonblock) { |*args, **kwargs|
+        raise "foo" if (called += 1) == 2
+        tcp.write_nonblock(*args, **kwargs)
+      }
+
+      ssl = OpenSSL::SSL::SSLSocket.new(obj)
+      assert_raise_with_message(RuntimeError, "foo") { ssl.connect }
+    ensure
+      ssl&.close
+      tcp&.close
+    end
+  end
+
+  def test_synthetic_io_errors_in_servername_cb
+    assert_separately(["-ropenssl"], <<~"end;")
+  begin
+    #sock1, sock2 = socketpair
+    sock1, sock2 = if defined? UNIXSocket
+      UNIXSocket.pair
+    else
+      Socket.pair(Socket::AF_INET, Socket::SOCK_STREAM, 0)
+    end
+
+    t = Thread.new {
+      s1 = OpenSSL::SSL::SSLSocket.new(sock1)
+      s1.hostname = "localhost"
+      assert_raise_with_message(OpenSSL::SSL::SSLError, /unrecognized.name/i) {
+        s1.connect
+      }
+    }
+
+    ctx2 = OpenSSL::SSL::SSLContext.new
+    ctx2.servername_cb = lambda { |args| raise RuntimeError, "exc in servername_cb" }
+    obj = Object.new
+    obj.define_singleton_method(:method_missing) { |name, *args, **kwargs| sock2.__send__(name, *args, **kwargs) }
+    obj.define_singleton_method(:respond_to_missing?) { |name, *args, **kwargs| sock2.respond_to?(name, *args, **kwargs) }
+    obj.define_singleton_method(:write_nonblock) { |*args, **kwargs|
+      begin
+        raise "exc in write_nonblock"
+      rescue
+        p $!
+      end
+      p $!
+      sock2.write_nonblock(*args, **kwargs)
+    }
+    s2 = OpenSSL::SSL::SSLSocket.new(obj, ctx2)
+    assert_raise_with_message(RuntimeError, "exc in servername_cb") { s2.accept }
+    assert t.join
+  ensure
+    sock1.close
+    sock2.close
+  end
+    end;
+  end
+
+  def test_synthetic_io_errors_in_callback_and_socket
+    assert_separately(["-ropenssl"], <<~"end;", ignore_stderr: true)
+  begin
+    #sock1, sock2 = socketpair
+    sock1, sock2 = if defined? UNIXSocket
+      UNIXSocket.pair
+    else
+      Socket.pair(Socket::AF_INET, Socket::SOCK_STREAM, 0)
+    end
+
+    t = Thread.new {
+      s1 = OpenSSL::SSL::SSLSocket.new(sock1)
+      s1.hostname = "localhost"
+      begin
+        s1.connect
+      rescue
+      end
+    }
+
+    called = []
+    ctx2 = OpenSSL::SSL::SSLContext.new
+    ctx2.servername_cb = lambda { |args|
+      called << :servername_cb
+      raise "servername_cb"
+    }
+    obj = Object.new
+    obj.define_singleton_method(:method_missing) { |name, *args, **kwargs| sock2.__send__(name, *args, **kwargs) }
+    obj.define_singleton_method(:respond_to_missing?) { |name, *args, **kwargs| sock2.respond_to?(name, *args, **kwargs) }
+    obj.define_singleton_method(:write_nonblock) { |*args, **kwargs|
+      called << :write_nonblock
+      throw :throw_from, :write_nonblock
+    }
+    s2 = OpenSSL::SSL::SSLSocket.new(obj, ctx2)
+
+    ret = assert_warning(/exception ignored/) {
+      catch(:throw_from) { s2.accept }
+    }
+    assert_equal(:write_nonblock, ret)
+    assert_equal([:servername_cb, :write_nonblock], called)
+    sock2.close
+    assert t.join
+  ensure
+    sock1.close
+    sock2.close
+  end
+    end;
   end
 
   def test_add_certificate
@@ -1064,36 +1202,44 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     end
   end
 
-  def test_servername_cb_raises_an_exception_on_unknown_objects
-    hostname = 'example.org'
-
-    ctx2 = OpenSSL::SSL::SSLContext.new
-    ctx2.cert = @svr_cert
-    ctx2.key = @svr_key
-    ctx2.servername_cb = lambda { |args| Object.new }
-
+  def test_servername_cb_exception
     sock1, sock2 = socketpair
 
-    s2 = OpenSSL::SSL::SSLSocket.new(sock2, ctx2)
-
-    ctx1 = OpenSSL::SSL::SSLContext.new
-
-    s1 = OpenSSL::SSL::SSLSocket.new(sock1, ctx1)
-    s1.hostname = hostname
     t = Thread.new {
-      assert_raise(OpenSSL::SSL::SSLError) do
+      s1 = OpenSSL::SSL::SSLSocket.new(sock1)
+      s1.hostname = "localhost"
+      assert_raise_with_message(OpenSSL::SSL::SSLError, /unrecognized.name/i) {
         s1.connect
-      end
+      }
     }
 
-    assert_raise(ArgumentError) do
-      s2.accept
-    end
-
+    ctx2 = OpenSSL::SSL::SSLContext.new
+    ctx2.servername_cb = lambda { |args| raise RuntimeError, "foo" }
+    s2 = OpenSSL::SSL::SSLSocket.new(sock2, ctx2)
+    assert_raise_with_message(RuntimeError, "foo") { s2.accept }
     assert t.join
   ensure
-    sock1.close if sock1
-    sock2.close if sock2
+    sock1.close
+    sock2.close
+  end
+
+  def test_servername_cb_raises_an_exception_on_unknown_objects
+    sock1, sock2 = socketpair
+
+    t = Thread.new {
+      s1 = OpenSSL::SSL::SSLSocket.new(sock1)
+      s1.hostname = "localhost"
+      assert_raise(OpenSSL::SSL::SSLError) { s1.connect }
+    }
+
+    ctx2 = OpenSSL::SSL::SSLContext.new
+    ctx2.servername_cb = lambda { |args| Object.new }
+    s2 = OpenSSL::SSL::SSLSocket.new(sock2, ctx2)
+    assert_raise(ArgumentError) { s2.accept }
+    assert t.join
+  ensure
+    sock1.close
+    sock2.close
   end
 
   def test_accept_errors_include_peeraddr
@@ -1557,7 +1703,12 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
       # Client only supports TLS 1.3
       ctx2 = OpenSSL::SSL::SSLContext.new
       ctx2.min_version = ctx2.max_version = OpenSSL::SSL::TLS1_3_VERSION
-      assert_nothing_raised { server_connect(port, ctx2) { } }
+      assert_nothing_raised {
+        server_connect(port, ctx2) { |ssl|
+          # Ensure SSL_accept() finishes successfully
+          ssl.puts("abc"); ssl.gets
+        }
+      }
     }
 
     # Server only supports TLS 1.2
