@@ -27,7 +27,6 @@
  * Classes
  */
 VALUE cDH;
-static VALUE eDHError;
 
 /*
  * Private
@@ -92,7 +91,7 @@ ossl_dh_initialize(int argc, VALUE *argv, VALUE self)
 #else
         dh = DH_new();
         if (!dh)
-            ossl_raise(eDHError, "DH_new");
+            ossl_raise(ePKeyError, "DH_new");
         goto legacy;
 #endif
     }
@@ -112,12 +111,12 @@ ossl_dh_initialize(int argc, VALUE *argv, VALUE self)
     pkey = ossl_pkey_read_generic(in, Qnil);
     BIO_free(in);
     if (!pkey)
-        ossl_raise(eDHError, "could not parse pkey");
+        ossl_raise(ePKeyError, "could not parse pkey");
 
     type = EVP_PKEY_base_id(pkey);
     if (type != EVP_PKEY_DH) {
         EVP_PKEY_free(pkey);
-        rb_raise(eDHError, "incorrect pkey type: %s", OBJ_nid2sn(type));
+        rb_raise(ePKeyError, "incorrect pkey type: %s", OBJ_nid2sn(type));
     }
     RTYPEDDATA_DATA(self) = pkey;
     return self;
@@ -128,7 +127,7 @@ ossl_dh_initialize(int argc, VALUE *argv, VALUE self)
     if (!pkey || EVP_PKEY_assign_DH(pkey, dh) != 1) {
         EVP_PKEY_free(pkey);
         DH_free(dh);
-        ossl_raise(eDHError, "EVP_PKEY_assign_DH");
+        ossl_raise(ePKeyError, "EVP_PKEY_assign_DH");
     }
     RTYPEDDATA_DATA(self) = pkey;
     return self;
@@ -150,7 +149,7 @@ ossl_dh_initialize_copy(VALUE self, VALUE other)
 
     dh = DHparams_dup(dh_other);
     if (!dh)
-	ossl_raise(eDHError, "DHparams_dup");
+	ossl_raise(ePKeyError, "DHparams_dup");
 
     DH_get0_key(dh_other, &pub, &priv);
     if (pub) {
@@ -160,7 +159,7 @@ ossl_dh_initialize_copy(VALUE self, VALUE other)
         if (!pub2 || (priv && !priv2)) {
 	    BN_clear_free(pub2);
 	    BN_clear_free(priv2);
-	    ossl_raise(eDHError, "BN_dup");
+	    ossl_raise(ePKeyError, "BN_dup");
 	}
 	DH_set0_key(dh, pub2, priv2);
     }
@@ -169,7 +168,7 @@ ossl_dh_initialize_copy(VALUE self, VALUE other)
     if (!pkey || EVP_PKEY_assign_DH(pkey, dh) != 1) {
         EVP_PKEY_free(pkey);
         DH_free(dh);
-        ossl_raise(eDHError, "EVP_PKEY_assign_DH");
+        ossl_raise(ePKeyError, "EVP_PKEY_assign_DH");
     }
     RTYPEDDATA_DATA(self) = pkey;
     return self;
@@ -248,11 +247,11 @@ ossl_dh_export(VALUE self)
 
     GetDH(self, dh);
     if (!(out = BIO_new(BIO_s_mem()))) {
-	ossl_raise(eDHError, NULL);
+	ossl_raise(ePKeyError, NULL);
     }
     if (!PEM_write_bio_DHparams(out, dh)) {
 	BIO_free(out);
-	ossl_raise(eDHError, NULL);
+	ossl_raise(ePKeyError, NULL);
     }
     str = ossl_membio2str(out);
 
@@ -282,11 +281,11 @@ ossl_dh_to_der(VALUE self)
 
     GetDH(self, dh);
     if((len = i2d_DHparams(dh, NULL)) <= 0)
-	ossl_raise(eDHError, NULL);
+	ossl_raise(ePKeyError, NULL);
     str = rb_str_new(0, len);
     p = (unsigned char *)RSTRING_PTR(str);
     if(i2d_DHparams(dh, &p) < 0)
-	ossl_raise(eDHError, NULL);
+	ossl_raise(ePKeyError, NULL);
     ossl_str_adjust(str, p);
 
     return str;
@@ -313,7 +312,7 @@ ossl_dh_check_params(VALUE self)
     GetPKey(self, pkey);
     pctx = EVP_PKEY_CTX_new(pkey, /* engine */NULL);
     if (!pctx)
-        ossl_raise(eDHError, "EVP_PKEY_CTX_new");
+        ossl_raise(ePKeyError, "EVP_PKEY_CTX_new");
     ret = EVP_PKEY_param_check(pctx);
     EVP_PKEY_CTX_free(pctx);
 #else
@@ -362,13 +361,6 @@ Init_ossl_dh(void)
     ePKeyError = rb_define_class_under(mPKey, "PKeyError", eOSSLError);
 #endif
 
-    /* Document-class: OpenSSL::PKey::DHError
-     *
-     * Generic exception that is raised if an operation on a DH PKey
-     * fails unexpectedly or in case an instantiation of an instance of DH
-     * fails due to non-conformant input data.
-     */
-    eDHError = rb_define_class_under(mPKey, "DHError", ePKeyError);
     /* Document-class: OpenSSL::PKey::DH
      *
      * An implementation of the Diffie-Hellman key exchange protocol based on

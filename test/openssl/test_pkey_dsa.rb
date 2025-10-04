@@ -97,7 +97,7 @@ class OpenSSL::TestPKeyDSA < OpenSSL::PKeyTestCase
     sig = key.syssign(digest)
     assert_equal true, key.sysverify(digest, sig)
     assert_equal false, key.sysverify(digest, invalid_sig)
-    assert_sign_verify_false_or_error{ key.sysverify(digest, malformed_sig) }
+    assert_sign_verify_false_or_error { key.sysverify(digest, malformed_sig) }
     assert_equal true, key.verify_raw(nil, sig, digest)
     assert_equal false, key.verify_raw(nil, invalid_sig, digest)
     assert_sign_verify_false_or_error { key.verify_raw(nil, malformed_sig, digest) }
@@ -168,7 +168,7 @@ class OpenSSL::TestPKeyDSA < OpenSSL::PKeyTestCase
     cipher = OpenSSL::Cipher.new("aes-128-cbc")
     exported = dsa512.to_pem(cipher, "abcdef\0\1")
     assert_same_dsa dsa512, OpenSSL::PKey::DSA.new(exported, "abcdef\0\1")
-    assert_raise(OpenSSL::PKey::DSAError) {
+    assert_raise(OpenSSL::PKey::PKeyError) {
       OpenSSL::PKey::DSA.new(exported, "abcdef")
     }
   end
