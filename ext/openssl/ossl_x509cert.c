@@ -112,19 +112,51 @@ ossl_x509_initialize(int argc, VALUE *argv, VALUE self)
     BIO *in;
     X509 *x509, *x509_orig = RTYPEDDATA_DATA(self);
     VALUE arg;
+    VALUE kwargs;
+    const char *propq = NULL;
 
     rb_check_frozen(self);
-    if (rb_scan_args(argc, argv, "01", &arg) == 0) {
+
+    if (rb_scan_args(argc, argv, "01:", &arg, &kwargs) == 0) {
 	/* create just empty X509Cert */
 	return self;
     }
+    ID table[2];
+    table[0] = rb_intern("der");
+    table[1] = rb_intern("propq");
+
+    VALUE values[2];
+    rb_get_kwargs(kwargs, table, 0, 2, values);
+
+#ifdef OSSL_USE_PROVIDER
+    if(values[1] != Qundef) {
+      propq = (char *)RSTRING_PTR(values[1]);
+    }
+
+    x509 = X509_new_ex(/*libctx*/NULL, propq);
+#else
+    x509 = X509_new();
+#endif
+    if (!x509) ossl_raise(eX509CertError, NULL);
+
+    if(arg == Qundef && values[0] != Qundef) {
+      arg = values[0];
+    }
+
+    if(arg == Qundef) {
+      return self;
+    }
+
+    /* something to read in */
     arg = ossl_to_der_if_possible(arg);
     in = ossl_obj2bio(&arg);
-    x509 = d2i_X509_bio(in, NULL);
+    x509 = d2i_X509_bio(in, &x509);
+
     if (!x509) {
-        OSSL_BIO_reset(in);
-        x509 = PEM_read_bio_X509(in, NULL, NULL, NULL);
+      OSSL_BIO_reset(in);
+      x509 = PEM_read_bio_X509(in, &x509, NULL, NULL);
     }
+
     BIO_free(in);
     if (!x509)
         ossl_raise(eX509CertError, "PEM_read_bio_X509");
