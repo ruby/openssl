@@ -1,3 +1,9 @@
+Version 3.2.2
+=============
+
+Merged changes in 3.1.2.
+
+
 Version 3.2.1
 =============
 
