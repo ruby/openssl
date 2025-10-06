@@ -1,3 +1,20 @@
+Version 3.1.2
+=============
+
+Bug fixes
+---------
+
+* Fix crash when attempting to export an incomplete `OpenSSL::PKey::DSA` key.
+  [[GitHub #845]](https://github.com/ruby/openssl/issues/845)
+  [[GitHub #847]](https://github.com/ruby/openssl/pull/847)
+* Remove the `OpenSSL::X509::V_FLAG_CRL_CHECK_ALL` flag from the default store
+  used by `OpenSSL::SSL::SSLContext#set_params`. It causes certificate
+  verification to fail with OpenSSL 3.6.0. It has no effect with any other
+  OpenSSL versions.
+  [[GitHub #949]](https://github.com/ruby/openssl/issues/949)
+  [[GitHub #950]](https://github.com/ruby/openssl/pull/950)
+
+
 Version 3.1.1
 =============
 
