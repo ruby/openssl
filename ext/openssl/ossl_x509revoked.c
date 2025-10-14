@@ -120,6 +120,10 @@ ossl_x509revoked_initialize_copy(VALUE self, VALUE other)
     return self;
 }
 
+/*
+ * call-seq:
+ *    revoked.serial => aBN
+ */
 static VALUE
 ossl_x509revoked_get_serial(VALUE self)
 {
@@ -130,12 +134,17 @@ ossl_x509revoked_get_serial(VALUE self)
     return asn1integer_to_num(X509_REVOKED_get0_serialNumber(rev));
 }
 
+/*
+ * call-seq:
+ *    revoked.serial = integer => integer
+ */
 static VALUE
 ossl_x509revoked_set_serial(VALUE self, VALUE num)
 {
     X509_REVOKED *rev;
     ASN1_INTEGER *asn1int;
 
+    rb_check_frozen(self);
     GetX509Rev(self, rev);
     asn1int = num_to_asn1integer(num, NULL);
     if (!X509_REVOKED_set_serialNumber(rev, asn1int)) {
@@ -147,6 +156,10 @@ ossl_x509revoked_set_serial(VALUE self, VALUE num)
     return num;
 }
 
+/*
+ * call-seq:
+ *    revoked.time => OpenSSL::ASN1::GeneralizedTime or OpenSSL::ASN1::UTCTime
+ */
 static VALUE
 ossl_x509revoked_get_time(VALUE self)
 {
@@ -161,12 +174,17 @@ ossl_x509revoked_get_time(VALUE self)
     return asn1time_to_time(time);
 }
 
+/*
+ * call-seq:
+ *    revoked.time = time => time
+ */
 static VALUE
 ossl_x509revoked_set_time(VALUE self, VALUE time)
 {
     X509_REVOKED *rev;
     ASN1_TIME *asn1time;
 
+    rb_check_frozen(self);
     GetX509Rev(self, rev);
     asn1time = ossl_x509_time_adjust(NULL, time);
     if (!X509_REVOKED_set_revocationDate(rev, asn1time)) {
@@ -177,8 +195,10 @@ ossl_x509revoked_set_time(VALUE self, VALUE time)
 
     return time;
 }
+
 /*
- * Gets X509v3 extensions as array of X509Ext objects
+ * call-seq:
+ *    revoked.extensions => [extension, ...]
  */
 static VALUE
 ossl_x509revoked_get_extensions(VALUE self)
@@ -200,7 +220,8 @@ ossl_x509revoked_get_extensions(VALUE self)
 }
 
 /*
- * Sets X509_EXTENSIONs
+ * call-seq:
+ *    revoked.extensions = [extension, ...] => [extension, ...]
  */
 static VALUE
 ossl_x509revoked_set_extensions(VALUE self, VALUE ary)
@@ -211,6 +232,7 @@ ossl_x509revoked_set_extensions(VALUE self, VALUE ary)
     VALUE item;
 
     Check_Type(ary, T_ARRAY);
+    rb_check_frozen(self);
     for (i=0; i<RARRAY_LEN(ary); i++) {
 	OSSL_Check_Kind(RARRAY_AREF(ary, i), cX509Ext);
     }
@@ -228,11 +250,16 @@ ossl_x509revoked_set_extensions(VALUE self, VALUE ary)
     return ary;
 }
 
+/*
+ * call-seq:
+ *    revoked.add_extension(extension) => extension
+ */
 static VALUE
 ossl_x509revoked_add_extension(VALUE self, VALUE ext)
 {
     X509_REVOKED *rev;
 
+    rb_check_frozen(self);
     GetX509Rev(self, rev);
     if (!X509_REVOKED_add_ext(rev, GetX509ExtPtr(ext), -1)) {
 	ossl_raise(eX509RevError, NULL);
@@ -241,6 +268,10 @@ ossl_x509revoked_add_extension(VALUE self, VALUE ext)
     return ext;
 }
 
+/*
+ * call-seq:
+ *    revoked.to_der => string
+ */
 static VALUE
 ossl_x509revoked_to_der(VALUE self)
 {

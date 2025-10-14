@@ -425,6 +425,12 @@ class OpenSSL::TestX509Certificate < OpenSSL::TestCase
     assert_equal 7, seq.value.size
   end
 
+  if respond_to?(:ractor)
+    ractor
+    def test_ractor
+      assert Ractor.shareable?(issue_cert(@ca, @rsa2048, 1, [], nil, nil).freeze)
+    end
+  end
   private
 
   def certificate_error_returns_false
