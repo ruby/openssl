@@ -388,12 +388,6 @@ ossl_bn_to_i(VALUE self)
 }
 
 static VALUE
-ossl_bn_to_bn(VALUE self)
-{
-    return self;
-}
-
-static VALUE
 ossl_bn_coerce(VALUE self, VALUE other)
 {
     switch(TYPE(other)) {
@@ -493,7 +487,6 @@ BIGNUM_1c(sqr)
 	BIGNUM *bn1, *bn2 = GetBNPtr(other), *result;	\
 	VALUE obj;					\
 	GetBN(self, bn1);				\
-	obj = NewBN(rb_obj_class(self));		\
 	if (!(result = BN_new())) {			\
 	    ossl_raise(eBNError, NULL);			\
 	}						\
@@ -501,6 +494,7 @@ BIGNUM_1c(sqr)
 	    BN_free(result);				\
 	    ossl_raise(eBNError, NULL);			\
 	}						\
+	obj = NewBN(rb_obj_class(self));		\
 	SetBN(obj, result);				\
 	return obj;					\
     }
@@ -1327,7 +1321,6 @@ Init_ossl_bn(void)
     rb_define_method(cBN, "to_s", ossl_bn_to_s, -1);
     rb_define_method(cBN, "to_i", ossl_bn_to_i, 0);
     rb_define_alias(cBN, "to_int", "to_i");
-    rb_define_method(cBN, "to_bn", ossl_bn_to_bn, 0);
     rb_define_method(cBN, "coerce", ossl_bn_coerce, 1);
 
     /*
