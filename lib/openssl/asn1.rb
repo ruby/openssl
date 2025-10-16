@@ -339,13 +339,13 @@ module OpenSSL
       end
 
       def to_der_internal(body, constructed = false)
-        default_tag = ASN1.take_default_tag(self.class)
+        tag = default_tag
         body_len = body ? body.size : 0
 
         if @tagging == :EXPLICIT
-          raise ASN1Error, "explicit tagging of unknown tag" unless default_tag
+          raise ASN1Error, "explicit tagging of unknown tag" unless tag
 
-          inner_obj = ASN1.put_object(constructed, @indefinite_length, body_len, default_tag, :UNIVERSAL)
+          inner_obj = ASN1.put_object(constructed, @indefinite_length, body_len, tag, :UNIVERSAL)
 
           inner_len = body_len + inner_obj.size
 
@@ -367,9 +367,26 @@ module OpenSSL
 
         str
       end
+
+      def default_tag
+        return unless self.class.const_defined?(:TAG)
+
+        self.class::TAG
+      end
     end
 
     module TaggedASN1Data
+      def self.included(klass)
+        klass.singleton_class.class_eval do
+          def inherited(subklass)
+            base_klassname = subklass.name.delete_prefix("OpenSSL::ASN1::")
+
+            ASN1.define_singleton_method(base_klassname.to_sym) do |*args|
+              subklass.new(*args)
+            end
+          end
+        end
+      end
       #
       # May be used as a hint for encoding a value either implicitly or
       # explicitly by setting it either to +:IMPLICIT+ or to +:EXPLICIT+.
@@ -401,7 +418,7 @@ module OpenSSL
       #   private_explicit_zero_tagged_int = OpenSSL::ASN1::Integer.new(42, 0, :EXPLICIT, :PRIVATE)
       #
       def initialize(value, tag = nil, tagging = nil, tag_class = nil)
-        tag ||= ASN1.take_default_tag(self.class)
+        tag ||= default_tag
 
         raise ASN1Error, "must specify tag number" unless tag
 
@@ -546,6 +563,8 @@ module OpenSSL
     end
 
     class Null < Primitive
+      TAG = 5
+
       private
 
       # :nodoc:
@@ -555,6 +574,8 @@ module OpenSSL
     end
 
     class Boolean < Primitive
+      TAG = 1
+
       private
 
       # :nodoc:
@@ -566,6 +587,8 @@ module OpenSSL
     end
 
     class Integer < Primitive
+      TAG = 2
+
       private
 
       # :nodoc:
@@ -575,6 +598,8 @@ module OpenSSL
     end
 
     class Enumerated < Primitive
+      TAG = 10
+
       private
 
       # :nodoc:
@@ -584,6 +609,8 @@ module OpenSSL
     end
 
     class BitString < Primitive
+      TAG = 3
+
       attr_accessor :unused_bits
 
       def initialize(*)
@@ -608,45 +635,59 @@ module OpenSSL
     end
 
     class OctetString < Primitive
+      TAG = 4
     end
 
     class UTF8String < Primitive
+      TAG = 12
     end
 
     class NumericString < Primitive
+      TAG = 18
     end
 
     class PrintableString < Primitive
+      TAG = 19
     end
 
     class T61String < Primitive
+      TAG = 20
     end
 
     class VideotexString < Primitive
+      TAG = 21
     end
 
     class IA5String < Primitive
+      TAG = 22
     end
 
     class GraphicString < Primitive
+      TAG = 25
     end
 
     class ISO64String < Primitive
+      TAG = 26
     end
 
     class GeneralString < Primitive
+      TAG = 27
     end
 
     class UniversalString < Primitive
+      TAG = 28
     end
 
     class BMPString < Primitive
+      TAG = 30
     end
 
     #
     # Represents the primitive object id for OpenSSL::ASN1
     #
     class ObjectId < Primitive
+      TAG = 6
+
       private
 
       # :nodoc:
@@ -676,6 +717,8 @@ module OpenSSL
     end
 
     class UTCTime < Primitive
+      TAG = 23
+
       private
 
       YEAR_RANGE = 1950..2049
@@ -696,6 +739,8 @@ module OpenSSL
     end
 
     class GeneralizedTime < Primitive
+      TAG = 24
+
       private
 
       # :nodoc:
@@ -714,6 +759,8 @@ module OpenSSL
     end
 
     class EndOfContent < ASN1Data
+      TAG = 0
+
       def initialize
         super("", 0, :UNIVERSAL)
       end
@@ -724,10 +771,11 @@ module OpenSSL
     end
 
     class Set < Constructive
+      TAG = 17
     end
 
     class Sequence < Constructive
-
+      TAG = 16
     end
 
     module_function
@@ -782,18 +830,37 @@ module OpenSSL
       data
     end
 
-    # :nodoc:
-    def take_default_tag(klass)
-      tag = CLASS_TAG_MAP[klass]
-
-      return tag if tag
-
-      sklass = klass.superclass
-
-      return unless sklass
-
-      take_default_tag(sklass)
-    end
+    EOC = EndOfContent::TAG
+    BOOLEAN = Boolean::TAG
+    INTEGER = Integer::TAG
+    BIT_STRING = BitString::TAG
+    OCTET_STRING = OctetString::TAG
+    NULL = Null::TAG
+    OBJECT = ObjectId::TAG
+    OBJECT_DESCRIPTOR = 7
+    EXTERNAL = 8
+    REAL = 9
+    ENUMERATED = Enumerated::TAG
+    EMBEDDED_PDV = 11
+    UTF8STRING = UTF8String::TAG
+    RELATIVE_OID = 13
+    # [UNIVERSAL 14] = 14
+    # [UNIVERSAL 15] = 15
+    SEQUENCE = Sequence::TAG
+    SET = Set::TAG
+    NUMERICSTRING = NumericString::TAG
+    PRINTABLESTRING = PrintableString::TAG
+    T61STRING = T61String::TAG
+    VIDEOTEXSTRING = VideotexString::TAG
+    IA5STRING = IA5String::TAG
+    UTCTIME = UTCTime::TAG
+    GENERALIZEDTIME = GeneralizedTime::TAG
+    GRAPHICSTRING = GraphicString::TAG
+    ISO64STRING = ISO64String::TAG
+    GENERALSTRING = GeneralString::TAG
+    UNIVERSALSTRING = UniversalString::TAG
+    CHARACTER_STRING = 29
+    BMPSTRING = BMPString::TAG
 
     # :nodoc:
     TAG_CLASS_TYPES = {
@@ -1000,9 +1067,9 @@ module OpenSSL
 
       obj = if tag_class == :UNIVERSAL
         case id
-        when 16 # Sequence
+        when SEQUENCE
           Sequence.new(objs, id, nil, tag_class)
-        when 17 # Set
+        when SET
           Set.new(objs, id, nil, tag_class)
         else
           Constructive.new(objs, id, nil, tag_class)
@@ -1034,12 +1101,12 @@ module OpenSSL
 
       obj = if tag_class == :UNIVERSAL
         case id
-        when 0 # EOC
+        when EOC
           if length != 0 || !data.empty?
             raise ASN1Error, "too long"
           end
           EndOfContent.new
-        when 1 # BOOLEAN
+        when BOOLEAN
           if length < 1
             raise ASN1Error, "invalid length for BOOLEAN"
           elsif length > 1
@@ -1047,13 +1114,13 @@ module OpenSSL
           else
             Boolean.new(data != "\x00", id, nil, tag_class)
           end
-        when 2 # INTEGER
+        when INTEGER
           number = data.unpack('C*').reduce(0) { |len, b| (len << 8) | b }
           if data[0].ord[7] == 1
             number -= (1 << (8 * length))
           end
           OpenSSL::ASN1::Integer.new(number.to_bn, id, nil, tag_class)
-        when 3 # BIT_STRING
+        when BIT_STRING
           if data.empty?
             raise ASN1Error, "string too short"
           end
@@ -1065,15 +1132,15 @@ module OpenSSL
           BitString.new(str, id, nil, tag_class).tap do |b|
             b.unused_bits = unused
           end
-        when 4 # OCTET_STRING
+        when OCTET_STRING
           OctetString.new(data, id, nil, tag_class)
-        when 5 # NULL
+        when NULL
           unless length.zero?
             raise ASN1Error, "null is wrong length"
           end
 
           Null.new(nil, id, nil, tag_class)
-        when 6 # OBJECT
+        when OBJECT
           top, *codes = data.unpack("w*")
 
           if top
@@ -1095,25 +1162,25 @@ module OpenSSL
         # when 7 # V_ASN1_OBJECT_DESCRIPTOR
         # when 8 # EXTERNAL
         # when 9 # REAL
-        when 10 # ENUMERATED
+        when ENUMERATED
           number = data.unpack('C*').reduce(0) { |len, b| (len << 8) | b }
           if data[0].ord[7] == 1
             number -= (1 << (8 * length))
           end
           OpenSSL::ASN1::Enumerated.new(number.to_bn, id, nil, tag_class)
-        when 12 # UTF8String
+        when UTF8STRING
           UTF8String.new(data, id, nil, tag_class)
-        when 18
+        when NUMERICSTRING
           NumericString.new(data, id, nil, tag_class)
-        when 19
+        when PRINTABLESTRING
           PrintableString.new(data, id, nil, tag_class)
-        when 20
+        when T61STRING
           T61String.new(data, id, nil, tag_class)
-        when 21
+        when VIDEOTEXSTRING
           VideotexString.new(data, id, nil, tag_class)
-        when 22
+        when IA5STRING
           IA5String.new(data, id, nil, tag_class)
-        when 23
+        when UTCTIME
           unless (c = /\A(?<year>\d{2})(?<month>\d{2})(?<day>\d{2})(?<hour>\d{2})(?<min>\d{2})(?<sec>\d{2})Z\z/.match(data))
             raise ASN1Error, "too long"
           end
@@ -1121,21 +1188,21 @@ module OpenSSL
           year = year > 49 ? 1900 + year : 2000 + year
           time = Time.utc(year, c[:month], c[:day], c[:hour], c[:min], c[:sec])
           UTCTime.new(time, id, nil, tag_class)
-        when 24
+        when GENERALIZEDTIME
           unless (c = /\A(?<year>\d{4})(?<month>\d{2})(?<day>\d{2})(?<hour>\d{2})(?<min>\d{2})(?<sec>\d{2})Z\z/.match(data))
             raise ASN1Error, "too long"
           end
           time = Time.utc(c[:year], c[:month], c[:day], c[:hour], c[:min], c[:sec])
           GeneralizedTime.new(time, id, nil, tag_class)
-        when 25
+        when GRAPHICSTRING
           GraphicString.new(data, id, nil, tag_class)
-        when 26
+        when ISO64STRING
           ISO64String.new(data, id, nil, tag_class)
-        when 27
+        when GENERALSTRING
           GeneralString.new(data, id, nil, tag_class)
-        when 28
+        when UNIVERSALSTRING
           UniversalString.new(data, id, nil, tag_class)
-        when 30
+        when BMPSTRING
           BMPString.new(data, id, nil, tag_class)
         else
           ASN1Data.new(data, id, tag_class)
