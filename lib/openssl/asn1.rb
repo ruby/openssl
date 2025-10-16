@@ -975,15 +975,15 @@ module OpenSSL
       tag_class = TAG_CLASS_TYPES.key(first_byte & 0xc0) || :UNIVERSAL
       is_constructed = first_byte.anybits?(0x20)
       is_indefinite_length = length == 0x80 # indefinite length
-      id = first_byte & 0x1f
+      number = first_byte & 0x1f
 
-      no_id_idx = if id == 0x1f
-        id = 0
+      no_id_idx = if number == 0x1f
+        number = 0
         count = 1
         data[1..].each_byte do |byte|
           count += 1
 
-          id = (id << 7) | (byte & 0x7f)
+          number = (number << 7) | (byte & 0x7f)
           break if byte.nobits?(0x80)
         end
         length = data.getbyte(count)
@@ -1011,14 +1011,14 @@ module OpenSSL
       hlength = no_id_idx + length_bytes
 
       if is_constructed
-        decode_cons(tag_class, id, hlength, length, value, is_indefinite_length, depth, offset, &block)
+        decode_cons(tag_class, number, hlength, length, value, is_indefinite_length, depth, offset, &block)
       else
-        decode_prim(tag_class, id, hlength, length, value, depth, offset, &block)
+        decode_prim(tag_class, number, hlength, length, value, depth, offset, &block)
       end
     end
 
     # :nodoc:
-    def decode_cons(tag_class, id, hlength, length, data, is_indefinite_length, depth, offset, &block)
+    def decode_cons(tag_class, number, hlength, length, data, is_indefinite_length, depth, offset, &block)
       datalen = data.size
 
       if is_indefinite_length
@@ -1033,7 +1033,7 @@ module OpenSSL
         end
       end
 
-      traverse0(depth, offset, hlength, length == 0x80 ? 0 : length, true, tag_class, id, &block) if block
+      traverse0(depth, offset, hlength, length == 0x80 ? 0 : length, true, tag_class, number, &block) if block
 
       offset += hlength
 
@@ -1066,16 +1066,16 @@ module OpenSSL
       end
 
       obj = if tag_class == :UNIVERSAL
-        case id
+        case number
         when SEQUENCE
-          Sequence.new(objs, id, nil, tag_class)
+          Sequence.new(objs, number, nil, tag_class)
         when SET
-          Set.new(objs, id, nil, tag_class)
+          Set.new(objs, number, nil, tag_class)
         else
-          Constructive.new(objs, id, nil, tag_class)
+          Constructive.new(objs, number, nil, tag_class)
         end
       else
-        ASN1Data.new(objs, id, tag_class)
+        ASN1Data.new(objs, number, tag_class)
       end
       obj.indefinite_length = is_indefinite_length
 
@@ -1091,16 +1091,16 @@ module OpenSSL
     end
 
     # :nodoc:
-    def decode_prim(tag_class, id, hlength, length, data, depth, offset, &block)
+    def decode_prim(tag_class, number, hlength, length, data, depth, offset, &block)
       remaining = data[length..-1]
       data = data[0, length]
 
-      traverse0(depth, offset, hlength, length, false, tag_class, id, &block) if block
+      traverse0(depth, offset, hlength, length, false, tag_class, number, &block) if block
 
       offset += hlength
 
       obj = if tag_class == :UNIVERSAL
-        case id
+        case number
         when EOC
           if length != 0 || !data.empty?
             raise ASN1Error, "too long"
@@ -1112,14 +1112,14 @@ module OpenSSL
           elsif length > 1
             raise ASN1Error, "too long"
           else
-            Boolean.new(data != "\x00", id, nil, tag_class)
+            Boolean.new(data != "\x00", number, nil, tag_class)
           end
         when INTEGER
-          number = data.unpack('C*').reduce(0) { |len, b| (len << 8) | b }
+          value = data.unpack('C*').reduce(0) { |len, b| (len << 8) | b }
           if data[0].ord[7] == 1
-            number -= (1 << (8 * length))
+            value -= (1 << (8 * length))
           end
-          OpenSSL::ASN1::Integer.new(number.to_bn, id, nil, tag_class)
+          OpenSSL::ASN1::Integer.new(value.to_bn, number, nil, tag_class)
         when BIT_STRING
           if data.empty?
             raise ASN1Error, "string too short"
@@ -1129,17 +1129,17 @@ module OpenSSL
             raise ASN1Error, "invalid bit string bits left"
           end
           str = data.byteslice(1..-1) || ""
-          BitString.new(str, id, nil, tag_class).tap do |b|
+          BitString.new(str, number, nil, tag_class).tap do |b|
             b.unused_bits = unused
           end
         when OCTET_STRING
-          OctetString.new(data, id, nil, tag_class)
+          OctetString.new(data, number, nil, tag_class)
         when NULL
           unless length.zero?
             raise ASN1Error, "null is wrong length"
           end
 
-          Null.new(nil, id, nil, tag_class)
+          Null.new(nil, number, nil, tag_class)
         when OBJECT
           top, *codes = data.unpack("w*")
 
@@ -1151,7 +1151,7 @@ module OpenSSL
             raise ASN1Error, "invalid object encoding"
           end
 
-          obj = ObjectId.new(codes.join("."), id, nil, tag_class)
+          obj = ObjectId.new(codes.join("."), number, nil, tag_class)
 
           if (sn = obj.sn)
             # on decoding, if there's a short name in the table, then
@@ -1163,23 +1163,23 @@ module OpenSSL
         # when 8 # EXTERNAL
         # when 9 # REAL
         when ENUMERATED
-          number = data.unpack('C*').reduce(0) { |len, b| (len << 8) | b }
+          value = data.unpack('C*').reduce(0) { |len, b| (len << 8) | b }
           if data[0].ord[7] == 1
-            number -= (1 << (8 * length))
+            value -= (1 << (8 * length))
           end
-          OpenSSL::ASN1::Enumerated.new(number.to_bn, id, nil, tag_class)
+          OpenSSL::ASN1::Enumerated.new(value.to_bn, number, nil, tag_class)
         when UTF8STRING
-          UTF8String.new(data, id, nil, tag_class)
+          UTF8String.new(data, number, nil, tag_class)
         when NUMERICSTRING
-          NumericString.new(data, id, nil, tag_class)
+          NumericString.new(data, number, nil, tag_class)
         when PRINTABLESTRING
-          PrintableString.new(data, id, nil, tag_class)
+          PrintableString.new(data, number, nil, tag_class)
         when T61STRING
-          T61String.new(data, id, nil, tag_class)
+          T61String.new(data, number, nil, tag_class)
         when VIDEOTEXSTRING
-          VideotexString.new(data, id, nil, tag_class)
+          VideotexString.new(data, number, nil, tag_class)
         when IA5STRING
-          IA5String.new(data, id, nil, tag_class)
+          IA5String.new(data, number, nil, tag_class)
         when UTCTIME
           unless (c = /\A(?<year>\d{2})(?<month>\d{2})(?<day>\d{2})(?<hour>\d{2})(?<min>\d{2})(?<sec>\d{2})Z\z/.match(data))
             raise ASN1Error, "too long"
@@ -1187,40 +1187,40 @@ module OpenSSL
           year = c[:year].to_i
           year = year > 49 ? 1900 + year : 2000 + year
           time = Time.utc(year, c[:month], c[:day], c[:hour], c[:min], c[:sec])
-          UTCTime.new(time, id, nil, tag_class)
+          UTCTime.new(time, number, nil, tag_class)
         when GENERALIZEDTIME
           unless (c = /\A(?<year>\d{4})(?<month>\d{2})(?<day>\d{2})(?<hour>\d{2})(?<min>\d{2})(?<sec>\d{2})Z\z/.match(data))
             raise ASN1Error, "too long"
           end
           time = Time.utc(c[:year], c[:month], c[:day], c[:hour], c[:min], c[:sec])
-          GeneralizedTime.new(time, id, nil, tag_class)
+          GeneralizedTime.new(time, number, nil, tag_class)
         when GRAPHICSTRING
-          GraphicString.new(data, id, nil, tag_class)
+          GraphicString.new(data, number, nil, tag_class)
         when ISO64STRING
-          ISO64String.new(data, id, nil, tag_class)
+          ISO64String.new(data, number, nil, tag_class)
         when GENERALSTRING
-          GeneralString.new(data, id, nil, tag_class)
+          GeneralString.new(data, number, nil, tag_class)
         when UNIVERSALSTRING
-          UniversalString.new(data, id, nil, tag_class)
+          UniversalString.new(data, number, nil, tag_class)
         when BMPSTRING
-          BMPString.new(data, id, nil, tag_class)
+          BMPString.new(data, number, nil, tag_class)
         else
-          ASN1Data.new(data, id, tag_class)
+          ASN1Data.new(data, number, tag_class)
         end
       else
-        ASN1Data.new(data, id, tag_class)
+        ASN1Data.new(data, number, tag_class)
       end
 
       return obj, remaining
     end
 
-    def traverse0(depth, offset, hlength, length, is_constructed, tag_class, id, &block)
+    def traverse0(depth, offset, hlength, length, is_constructed, tag_class, number, &block)
       elems = [
         depth, offset,
         hlength, length,
         is_constructed,
         tag_class,
-        id
+        number
       ]
 
       arity = block.arity
