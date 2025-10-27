@@ -1,3 +1,13 @@
+Version 3.1.3
+=============
+
+Bug fixes
+---------
+
+* Fix missing NULL check for `EVP_PKEY_get0()` functions with OpenSSL 3.x.
+  [[GitHub #957]](https://github.com/ruby/openssl/pull/957)
+
+
 Version 3.1.2
 =============
 
