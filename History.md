@@ -1,3 +1,9 @@
+Version 3.3.2
+=============
+
+Merged changes in 3.1.3 and 3.2.3.
+
+
 Version 3.3.1
 =============
 
