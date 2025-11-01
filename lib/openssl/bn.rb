@@ -23,6 +23,10 @@ module OpenSSL
         q.text to_i.to_s
       }
     end
+
+    def to_bn
+      self
+    end
   end # BN
 end # OpenSSL
 
@@ -35,6 +39,6 @@ class Integer
   #
   # See `man bn` for more info.
   def to_bn
-    OpenSSL::BN::new(self)
+    OpenSSL::BN.new(self)
   end
 end # Integer
