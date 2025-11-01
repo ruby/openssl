@@ -10,6 +10,10 @@ class OpenSSL::TestDigest < OpenSSL::TestCase
     @d2 = OpenSSL::Digest::MD5.new
   end
 
+  def test_initialize
+    assert_raise(ArgumentError) { OpenSSL::Digest.new("no such algorithm") }
+  end
+
   def test_digest
     null_hex = "d41d8cd98f00b204e9800998ecf8427e"
     null_bin = [null_hex].pack("H*")
@@ -62,8 +66,17 @@ class OpenSSL::TestDigest < OpenSSL::TestCase
   end
 
   def test_digest_by_oid_and_name
-    check_digest(OpenSSL::ASN1::ObjectId.new("MD5"))
-    check_digest(OpenSSL::ASN1::ObjectId.new("SHA1"))
+    # SHA256
+    o1 = OpenSSL::Digest.digest("SHA256", "")
+    o2 = OpenSSL::Digest.digest("sha256", "")
+    assert_equal(o1, o2)
+    o3 = OpenSSL::Digest.digest("2.16.840.1.101.3.4.2.1", "")
+    assert_equal(o1, o3)
+
+    # An alias for SHA256 recognized by EVP_get_digestbyname(), but not by
+    # EVP_MD_fetch()
+    o4 = OpenSSL::Digest.digest("RSA-SHA256", "")
+    assert_equal(o1, o4)
   end
 
   def encode16(str)
@@ -109,11 +122,13 @@ class OpenSSL::TestDigest < OpenSSL::TestCase
     assert_equal(s512, OpenSSL::Digest.hexdigest('SHA3-512', ""))
   end
 
-  def test_digest_by_oid_and_name_sha2
-    check_digest(OpenSSL::ASN1::ObjectId.new("SHA224"))
-    check_digest(OpenSSL::ASN1::ObjectId.new("SHA256"))
-    check_digest(OpenSSL::ASN1::ObjectId.new("SHA384"))
-    check_digest(OpenSSL::ASN1::ObjectId.new("SHA512"))
+  def test_fetched_evp_md
+    return unless openssl?(3, 2, 0)
+
+    # Pre-NIST Keccak is an example of a digest algorithm that doesn't have an
+    # NID and requires dynamic allocation of EVP_MD
+    hex = "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470"
+    assert_equal(hex, OpenSSL::Digest.hexdigest("KECCAK-256", ""))
   end
 
   def test_openssl_digest
@@ -131,17 +146,6 @@ class OpenSSL::TestDigest < OpenSSL::TestCase
     assert_include digests, "sha1"
     assert_include digests, "sha256"
     assert_include digests, "sha512"
-  end
-
-  private
-
-  def check_digest(oid)
-    d = OpenSSL::Digest.new(oid.sn)
-    assert_not_nil(d)
-    d = OpenSSL::Digest.new(oid.ln)
-    assert_not_nil(d)
-    d = OpenSSL::Digest.new(oid.oid)
-    assert_not_nil(d)
   end
 end
 
