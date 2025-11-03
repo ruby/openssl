@@ -96,6 +96,32 @@ kdf_pbkdf2_hmac(int argc, VALUE *argv, VALUE self)
 }
 
 #if defined(HAVE_EVP_PBE_SCRYPT)
+struct scrypt_args {
+    char *pass;
+    size_t passlen;
+    unsigned char *salt;
+    size_t saltlen;
+    uint64_t N, r, p;
+    size_t len;
+    unsigned char *out;
+};
+
+static void *
+scrypt_nogvl(void *args_)
+{
+    struct scrypt_args *args = (struct scrypt_args *)args_;
+    /*
+     * OpenSSL uses 32MB by default (if zero is specified), which is too
+     * small. Let's not limit memory consumption but just let malloc() fail
+     * inside OpenSSL. The amount is controllable by other parameters.
+     */
+    uint64_t maxmem = UINT64_MAX;
+    int ret = EVP_PBE_scrypt(args->pass, args->passlen,
+                             args->salt, args->saltlen, args->N, args->r,
+                             args->p, maxmem, args->out, args->len);
+    return (void *)(uintptr_t)ret;
+}
+
 /*
  * call-seq:
  *   KDF.scrypt(pass, salt:, N:, r:, p:, length:) -> aString
@@ -131,10 +157,10 @@ kdf_pbkdf2_hmac(int argc, VALUE *argv, VALUE self)
 static VALUE
 kdf_scrypt(int argc, VALUE *argv, VALUE self)
 {
-    VALUE pass, salt, opts, kwargs[5], str;
+    VALUE pass, salt, opts, kwargs[5], str, pass_tmp, salt_tmp;
     static ID kwargs_ids[5];
-    size_t len;
-    uint64_t N, r, p, maxmem;
+    size_t passlen, saltlen;
+    long len;
 
     if (!kwargs_ids[0]) {
 	kwargs_ids[0] = rb_intern_const("salt");
@@ -147,24 +173,29 @@ kdf_scrypt(int argc, VALUE *argv, VALUE self)
     rb_get_kwargs(opts, kwargs_ids, 5, 0, kwargs);
 
     StringValue(pass);
+    passlen = RSTRING_LEN(pass);
     salt = StringValue(kwargs[0]);
-    N = NUM2UINT64T(kwargs[1]);
-    r = NUM2UINT64T(kwargs[2]);
-    p = NUM2UINT64T(kwargs[3]);
+    saltlen = RSTRING_LEN(salt);
     len = NUM2LONG(kwargs[4]);
-    /*
-     * OpenSSL uses 32MB by default (if zero is specified), which is too small.
-     * Let's not limit memory consumption but just let malloc() fail inside
-     * OpenSSL. The amount is controllable by other parameters.
-     */
-    maxmem = SIZE_MAX;
-
-    str = rb_str_new(0, len);
-    if (!EVP_PBE_scrypt(RSTRING_PTR(pass), RSTRING_LEN(pass),
-			(unsigned char *)RSTRING_PTR(salt), RSTRING_LEN(salt),
-			N, r, p, maxmem, (unsigned char *)RSTRING_PTR(str), len))
+    str = rb_str_new(NULL, len);
+    struct scrypt_args args = {
+        .pass = ALLOCV(pass_tmp, passlen),
+        .passlen = passlen,
+        .salt = ALLOCV(salt_tmp, saltlen),
+        .saltlen = saltlen,
+        .N = NUM2UINT64T(kwargs[1]),
+        .r = NUM2UINT64T(kwargs[2]),
+        .p = NUM2UINT64T(kwargs[3]),
+        .len = len,
+        .out = (unsigned char *)RSTRING_PTR(str),
+    };
+    memcpy(args.pass, RSTRING_PTR(pass), passlen);
+    memcpy(args.salt, RSTRING_PTR(salt), saltlen);
+    if (!rb_thread_call_without_gvl(scrypt_nogvl, &args, NULL, NULL))
 	ossl_raise(eKDF, "EVP_PBE_scrypt");
-
+    OPENSSL_cleanse(&args.pass, passlen);
+    ALLOCV_END(pass_tmp);
+    ALLOCV_END(salt_tmp);
     return str;
 }
 #endif
