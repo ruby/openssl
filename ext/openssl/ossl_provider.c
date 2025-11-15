@@ -182,6 +182,20 @@ ossl_provider_inspect(VALUE self)
                       rb_obj_class(self), OSSL_PROVIDER_get0_name(prov));
 }
 
+static int
+ossl_provider_at_exit_i(OSSL_PROVIDER *provider, void *cbdata)
+{
+    OSSL_PROVIDER_unload(provider);
+
+    return 1;
+}
+
+static void
+ossl_provider_at_exit(ruby_vm_t *vm)
+{
+    OSSL_PROVIDER_do_all(NULL, ossl_provider_at_exit_i, NULL);
+}
+
 void
 Init_ossl_provider(void)
 {
@@ -200,6 +214,8 @@ Init_ossl_provider(void)
     rb_define_method(cProvider, "unload", ossl_provider_unload, 0);
     rb_define_method(cProvider, "name", ossl_provider_get_name, 0);
     rb_define_method(cProvider, "inspect", ossl_provider_inspect, 0);
+
+    ruby_vm_at_exit(ossl_provider_at_exit);
 }
 #else
 void

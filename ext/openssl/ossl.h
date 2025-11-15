@@ -22,6 +22,7 @@
 #else
 #define RUBY_TYPED_FROZEN_SHAREABLE 0
 #endif
+#include <ruby/vm.h>
 
 #include <openssl/opensslv.h>
 
