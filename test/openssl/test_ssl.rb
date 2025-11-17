@@ -2325,6 +2325,32 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     end
   end
 
+  def test_msg_callback
+    messages = []
+    msg_proc = proc do |write_p, version, content_type, details1, details2, buf|
+      details = [details1, details2].compact.join(", ")
+      details = " #{details}" unless details.empty?
+      messages << "#{write_p ? ">>>" : "<<<"} #{version}, #{content_type}#{details}"
+    end
+
+    start_server(ignore_listener_error: true) do |port|
+      ctx = OpenSSL::SSL::SSLContext.new
+      ctx.msg_callback = msg_proc
+
+      begin
+        sock = TCPSocket.new("127.0.0.1", port)
+        ssl = OpenSSL::SSL::SSLSocket.new(sock, ctx)
+        ssl.connect
+      ensure
+        ssl.close if ssl
+        sock.close if sock
+      end
+    end
+
+    assert_not_predicate messages, :empty?
+    assert_not_predicate messages.grep(/>>> .* Handshake ClientHello/), :empty?
+  end
+
   # OpenSSL::Buffering requires $/ accessible from non-main Ractors (Ruby 4.0)
   # https://bugs.ruby-lang.org/issues/21109
   #
