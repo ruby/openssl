@@ -203,6 +203,62 @@ class  OpenSSL::TestASN1 < OpenSSL::TestCase
     end
   end
 
+  def test_traverse
+    assert_raise(LocalJumpError) {
+      OpenSSL::ASN1.traverse(B(%w{ 00 00 }))
+    }
+    # primitive
+    expected = [[0, 0, 2, 1, false, :UNIVERSAL, 2]]
+    received = []
+    OpenSSL::ASN1.traverse(B((%w{ 02 01 00 }))) do |args|
+      received << args
+    end
+    assert_equal expected, received
+
+    # asn1data
+    expected = [[0, 0, 2, 0, false, :APPLICATION, 1]]
+    received = []
+    OpenSSL::ASN1.traverse(B((%w{ 41 00 }))) do |args|
+       received << args
+    end
+    assert_equal expected, received
+    #constructed
+    expected = [
+      [0, 0, 2, 7, true, :UNIVERSAL, 16],
+      [1, 2, 2, 0, false, :UNIVERSAL, 5],
+      [1, 4, 2, 0, true, :UNIVERSAL, 16],
+      [1, 6, 2, 1, false, :UNIVERSAL, 4]
+    ]
+    received = []
+    OpenSSL::ASN1.traverse(B(%w{ 30 07 05 00 30 00 04 01 00 })) do |args|
+      received << args
+    end
+    assert_equal expected, received
+    # indefinite length
+    expected = [
+      [0, 0, 2, 7, true, :UNIVERSAL, 16],
+      [1, 2, 2, 0, false, :UNIVERSAL, 5],
+      [1, 4, 2, 0, true, :UNIVERSAL, 16],
+      [1, 6, 2, 1, false, :UNIVERSAL, 4]
+    ]
+    received = []
+    OpenSSL::ASN1.traverse(B(%w{ 30 07 05 00 30 00 04 01 00 })) do |args|
+      received << args
+    end
+    # multiple ders
+    # it yields while traversing, and fails if there's more data beyond the first DER
+    expected = [
+      [0, 0, 2, 1, false, :UNIVERSAL, 2]
+    ]
+    received = []
+    assert_raise(OpenSSL::ASN1::ASN1Error) do
+      OpenSSL::ASN1.traverse(B(%w{ 02 01 01 02 01 02 02 01 03 })) do |args|
+        received << args
+      end
+    end
+    assert_equal expected, received
+  end
+
   def test_object_id_register
     oid = "1.2.34.56789"
     pend "OID 1.2.34.56789 is already registered" if OpenSSL::ASN1::ObjectId(oid).sn
