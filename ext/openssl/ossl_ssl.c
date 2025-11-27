@@ -505,17 +505,29 @@ ssl_servername_cb(SSL *ssl, int *ad, void *arg)
     return SSL_TLSEXT_ERR_OK;
 }
 
+static VALUE
+call_renegotiation_cb(VALUE args_)
+{
+    VALUE *args = (VALUE *)args_;
+    return rb_funcall(args[0], id_call, 1, args[1]);
+}
+
+/* This function may serve as the entry point to support further callbacks. */
 static void
-ssl_renegotiation_cb(const SSL *ssl)
+ssl_info_cb(const SSL *ssl, int where, int val)
 {
     struct ossl_ssl_data *p = ssl_data(ssl);
-    VALUE sslctx_obj, cb;
 
-    sslctx_obj = rb_attr_get(p->self, id_i_context);
-    cb = rb_attr_get(sslctx_obj, id_i_renegotiation_cb);
-    if (NIL_P(cb)) return;
-
-    rb_funcallv(cb, id_call, 1, &p->self);
+    if (p->cb_state)
+        return;
+    if (where & SSL_CB_HANDSHAKE_START && SSL_is_server(ssl)) {
+        VALUE sslctx_obj = rb_attr_get(p->self, id_i_context);
+        VALUE cb = rb_attr_get(sslctx_obj, id_i_renegotiation_cb);
+        if (!NIL_P(cb)) {
+            VALUE args[] = { cb, p->self };
+            rb_protect(call_renegotiation_cb, (VALUE)args, &p->cb_state);
+        }
+    }
 }
 
 static VALUE
@@ -648,17 +660,6 @@ ssl_alpn_select_cb(SSL *ssl, const unsigned char **out, unsigned char *outlen,
     cb = rb_attr_get(sslctx_obj, id_i_alpn_select_cb);
 
     return ssl_npn_select_cb_common(ssl, cb, out, outlen, in, inlen);
-}
-
-/* This function may serve as the entry point to support further callbacks. */
-static void
-ssl_info_cb(const SSL *ssl, int where, int val)
-{
-    int is_server = SSL_is_server((SSL *)ssl);
-
-    if (is_server && where & SSL_CB_HANDSHAKE_START) {
-        ssl_renegotiation_cb(ssl);
-    }
 }
 
 /*
@@ -833,6 +834,9 @@ ossl_sslctx_setup(VALUE self)
 
     val = rb_attr_get(self, id_i_verify_depth);
     if(!NIL_P(val)) SSL_CTX_set_verify_depth(ctx, NUM2INT(val));
+
+    if (!NIL_P(rb_attr_get(self, id_i_renegotiation_cb)))
+        SSL_CTX_set_info_callback(ctx, ssl_info_cb);
 
 #ifdef OSSL_USE_NEXTPROTONEG
     val = rb_attr_get(self, id_i_npn_protocols);
@@ -1759,8 +1763,6 @@ ossl_ssl_initialize(int argc, VALUE *argv, VALUE self)
         ossl_raise(eSSLError, "SSL_set_ex_data");
     }
     RTYPEDDATA_DATA(self) = ssl;
-
-    SSL_set_info_callback(ssl, ssl_info_cb);
 
     rb_call_super(0, NULL);
 
