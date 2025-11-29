@@ -15,7 +15,7 @@ jobs:
         with:
           ruby-version: ruby
           bundler-cache: true # 'bundle install' and cache gems
-      - run: rake rdoc
+      - run: bundle exec rake rdoc
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
