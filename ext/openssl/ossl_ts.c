@@ -1521,7 +1521,7 @@ Init_ossl_ts(void)
      * If none of both is present, a TimestampError will be raised when trying
      * to create a Response.
      *
-     * call-seq:
+     * \call-seq:
      *       factory.default_policy_id = "string" -> string
      *       factory.default_policy_id            -> string or nil
      *
@@ -1530,7 +1530,7 @@ Init_ossl_ts(void)
      * Sets or retrieves the serial number to be used for timestamp creation.
      * Must be present for timestamp creation.
      *
-     * call-seq:
+     * \call-seq:
      *       factory.serial_number = number -> number
      *       factory.serial_number          -> number or nil
      *
@@ -1539,7 +1539,7 @@ Init_ossl_ts(void)
      * Sets or retrieves the Time value to be used in the Response. Must be
      * present for timestamp creation.
      *
-     * call-seq:
+     * \call-seq:
      *       factory.gen_time = Time -> Time
      *       factory.gen_time        -> Time or nil
      *
@@ -1549,7 +1549,7 @@ Init_ossl_ts(void)
      * certificate (e.g. intermediate certificates) to be added to the Response.
      * Must be an Array of OpenSSL::X509::Certificate.
      *
-     * call-seq:
+     * \call-seq:
      *       factory.additional_certs = [cert1, cert2] -> [ cert1, cert2 ]
      *       factory.additional_certs                  -> array or nil
      *
@@ -1560,7 +1560,7 @@ Init_ossl_ts(void)
      * allowed where possible.
      * Must be an Array of String or OpenSSL::Digest subclass instances.
      *
-     * call-seq:
+     * \call-seq:
      *       factory.allowed_digests = ["sha1", OpenSSL::Digest.new('SHA256').new] -> [ "sha1", OpenSSL::Digest) ]
      *       factory.allowed_digests                                               -> array or nil
      *
