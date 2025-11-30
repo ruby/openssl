@@ -46,7 +46,8 @@ static ID id_i_cert_store, id_i_ca_file, id_i_ca_path, id_i_verify_mode,
 	  id_i_session_id_context, id_i_session_get_cb, id_i_session_new_cb,
 	  id_i_session_remove_cb, id_i_npn_select_cb, id_i_npn_protocols,
 	  id_i_alpn_select_cb, id_i_alpn_protocols, id_i_servername_cb,
-	  id_i_verify_hostname, id_i_keylog_cb, id_i_tmp_dh_callback;
+	  id_i_verify_hostname, id_i_keylog_cb, id_i_tmp_dh_callback,
+      id_i_msg_callback;
 static ID id_i_io, id_i_context, id_i_hostname;
 
 static int ossl_ssl_ex_ptr_idx;
@@ -222,6 +223,199 @@ ossl_ssl_verify_callback(int preverify_ok, X509_STORE_CTX *ctx)
     }
 
     return ossl_verify_cb_call(cb, preverify_ok, ctx);
+}
+
+typedef struct string_int_pair_st {
+    const char *name;
+    int retval;
+} STRINT_PAIR;
+
+static STRINT_PAIR ssl_versions[] = {
+    {"SSL 3.0", SSL3_VERSION},
+    {"TLS 1.0", TLS1_VERSION},
+    {"TLS 1.1", TLS1_1_VERSION},
+    {"TLS 1.2", TLS1_2_VERSION},
+    {"TLS 1.3", TLS1_3_VERSION},
+    {"DTLS 1.0", DTLS1_VERSION},
+    {"DTLS 1.0 (bad)", DTLS1_BAD_VER},
+    {NULL}
+};
+
+static STRINT_PAIR alert_types[] = {
+    {"close_notify", 0},
+    {"end_of_early_data", 1},
+    {"unexpected_message", 10},
+    {"bad_record_mac", 20},
+    {"decryption_failed", 21},
+    {"record_overflow", 22},
+    {"decompression_failure", 30},
+    {"handshake_failure", 40},
+    {"bad_certificate", 42},
+    {"unsupported_certificate", 43},
+    {"certificate_revoked", 44},
+    {"certificate_expired", 45},
+    {"certificate_unknown", 46},
+    {"illegal_parameter", 47},
+    {"unknown_ca", 48},
+    {"access_denied", 49},
+    {"decode_error", 50},
+    {"decrypt_error", 51},
+    {"export_restriction", 60},
+    {"protocol_version", 70},
+    {"insufficient_security", 71},
+    {"internal_error", 80},
+    {"inappropriate_fallback", 86},
+    {"user_canceled", 90},
+    {"no_renegotiation", 100},
+    {"missing_extension", 109},
+    {"unsupported_extension", 110},
+    {"certificate_unobtainable", 111},
+    {"unrecognized_name", 112},
+    {"bad_certificate_status_response", 113},
+    {"bad_certificate_hash_value", 114},
+    {"unknown_psk_identity", 115},
+    {"certificate_required", 116},
+    {NULL}
+};
+
+static STRINT_PAIR handshakes[] = {
+    {"HelloRequest", SSL3_MT_HELLO_REQUEST},
+    {"ClientHello", SSL3_MT_CLIENT_HELLO},
+    {"ServerHello", SSL3_MT_SERVER_HELLO},
+    {"HelloVerifyRequest", DTLS1_MT_HELLO_VERIFY_REQUEST},
+    {"NewSessionTicket", SSL3_MT_NEWSESSION_TICKET},
+    {"EndOfEarlyData", SSL3_MT_END_OF_EARLY_DATA},
+    {"EncryptedExtensions", SSL3_MT_ENCRYPTED_EXTENSIONS},
+    {"Certificate", SSL3_MT_CERTIFICATE},
+    {"ServerKeyExchange", SSL3_MT_SERVER_KEY_EXCHANGE},
+    {"CertificateRequest", SSL3_MT_CERTIFICATE_REQUEST},
+    {"ServerHelloDone", SSL3_MT_SERVER_DONE},
+    {"CertificateVerify", SSL3_MT_CERTIFICATE_VERIFY},
+    {"ClientKeyExchange", SSL3_MT_CLIENT_KEY_EXCHANGE},
+    {"Finished", SSL3_MT_FINISHED},
+    {"CertificateUrl", SSL3_MT_CERTIFICATE_URL},
+    {"CertificateStatus", SSL3_MT_CERTIFICATE_STATUS},
+    {"SupplementalData", SSL3_MT_SUPPLEMENTAL_DATA},
+    {"KeyUpdate", SSL3_MT_KEY_UPDATE},
+    {"CompressedCertificate", SSL3_MT_COMPRESSED_CERTIFICATE},
+#ifndef OPENSSL_NO_NEXTPROTONEG
+    {"NextProto", SSL3_MT_NEXT_PROTO},
+#endif
+    {"MessageHash", SSL3_MT_MESSAGE_HASH},
+    {NULL}
+};
+
+
+static const char *lookup(int val, const STRINT_PAIR* list, const char* def)
+{
+  for ( ; list->name; ++list)
+    if (list->retval == val)
+      return list->name;
+  return def;
+}
+
+struct ossl_msg_cb_args {
+  VALUE proc;
+  VALUE write_p;
+  VALUE version;
+  VALUE content_type;
+  VALUE details1;
+  VALUE details2;
+  VALUE buf;
+};
+
+static VALUE
+call_msg_cb_proc(VALUE arg)
+{
+  struct ossl_msg_cb_args *args = (struct ossl_msg_cb_args *)arg;
+  return rb_funcall(args->proc, rb_intern("call"), 6,
+                    args->write_p,
+                    args->version,
+                    args->content_type,
+                    args->details1,
+                    args->details2,
+                    args->buf);
+}
+
+static void imp_ssl_msg_callback(int write_p, int version, int content_type,
+                                        const void *buf, size_t len, SSL *ssl, void *arg)
+{
+  struct ossl_msg_cb_args args = { .content_type = Qnil,
+                                   .details1 = Qnil,
+                                   .details2 = Qnil,
+                                   .buf = Qnil };
+  const char* bp = buf;
+
+  args.proc = (VALUE)arg;
+  args.write_p = write_p ? Qtrue : Qfalse;
+
+  if (version == SSL3_VERSION ||
+        version == TLS1_VERSION ||
+        version == TLS1_1_VERSION ||
+        version == TLS1_2_VERSION ||
+        version == TLS1_3_VERSION ||
+        version == DTLS1_VERSION || version == DTLS1_BAD_VER) {
+    const char *str_version = lookup(version, ssl_versions, "???");
+
+    args.version = rb_str_new_cstr(str_version);
+    switch (content_type) {
+      case SSL3_RT_CHANGE_CIPHER_SPEC:
+          /* type 20 */
+          args.content_type = rb_str_new_cstr("ChangeCipherSpec");
+          break;
+      case SSL3_RT_ALERT:
+          /* type 21 */
+          args.content_type = rb_str_new_cstr("Alert");
+          if (len == 2) {
+              switch (bp[0]) {
+              case 1:
+                  args.details1 = rb_str_new_cstr("warning");
+                  break;
+              case 2:
+                  args.details1 = rb_str_new_cstr("fatal");
+                  break;
+              }
+              args.details2 = rb_str_new_cstr(lookup((int)bp[1], alert_types, "???"));
+          } else {
+            args.details1 = rb_str_new_cstr("???");
+          }
+          break;
+      case SSL3_RT_HANDSHAKE:
+          /* type 22 */
+          args.content_type = rb_str_new_cstr("Handshake");
+          if (len > 0) {
+              args.details1 = rb_str_new_cstr(lookup((int)bp[0], handshakes, "???"));
+          } else {
+            args.details1 = rb_str_new_cstr("???");
+          }
+          break;
+      case SSL3_RT_APPLICATION_DATA:
+          /* type 23 */
+          args.content_type = rb_str_new_cstr("ApplicationData");
+          break;
+      case SSL3_RT_HEADER:
+          /* type 256 */
+          args.content_type = rb_str_new_cstr("RecordHeader");
+          break;
+      case SSL3_RT_INNER_CONTENT_TYPE:
+          /* type 257 */
+          args.content_type = rb_str_new_cstr("InnerContent");
+          break;
+      default:
+          args.content_type = rb_sprintf("Unknown (content_type=%d)", content_type);
+      }
+  } else {
+    args.version = rb_sprintf("Not TLS data or unknown version (version=%d, content_type=%d)", version, content_type);
+  }
+
+  args.buf = rb_str_new(bp, len);
+
+  int state;
+  rb_protect(call_msg_cb_proc, (VALUE)&args, &state);
+  if (state) {
+    rb_set_errinfo(Qnil);
+    rb_warn("exception in msg_callback is ignored");
+  }
 }
 
 static VALUE
@@ -1631,7 +1825,7 @@ peeraddr_ip_str(VALUE self)
 static VALUE
 ossl_ssl_initialize(int argc, VALUE *argv, VALUE self)
 {
-    VALUE io, v_ctx;
+    VALUE io, v_ctx, cb;
     SSL *ssl;
     SSL_CTX *ctx;
 
@@ -1658,6 +1852,12 @@ ossl_ssl_initialize(int argc, VALUE *argv, VALUE self)
 
     SSL_set_ex_data(ssl, ossl_ssl_ex_ptr_idx, (void *)self);
     SSL_set_info_callback(ssl, ssl_info_cb);
+
+    cb = rb_attr_get(v_ctx, id_i_msg_callback);
+    if (!NIL_P(cb)) {
+        SSL_set_msg_callback(ssl, imp_ssl_msg_callback);
+        SSL_set_msg_callback_arg(ssl, (void *)cb);
+    }
 
     rb_call_super(0, NULL);
 
@@ -2824,6 +3024,30 @@ Init_ossl_ssl(void)
     rb_attr(cSSLContext, rb_intern_const("verify_callback"), 1, 1, Qfalse);
 
     /*
+     * A callback invoked for each TLS message processed.
+     *
+     * The callback is invoked for every TLS message, so is not recommended
+     * to be used outside of debugging contexts. The callback will receive
+     * multiple arguments:
+     *  - +write_p+: +true+ or +false+ indicating whether the message is being written or read
+     *  - +version+: A string representing the protocol version (e.g., "TLS 1.2")
+     *  - +content_type+: A string representing the type of the message (e.g., "Handshake", "Alert", "ApplicationData")
+     *  - +details1+: "warning" or "fatal" for Alerts; the message name for Handshake messages (e.g., "ClientHello"); +nil+ for other content_types
+     *  - +details2+: The alert data for Alerts; +nil+ for other content_types
+     *  - +buf+: The raw message data as a String
+     * 
+     * === Example
+     * 
+     *   # This matches the output of `openssl s_client -msg`
+     *   ssl_context.msg_callback = proc do |write_p, version, content_type, details1, details2, buf|
+     *     details = [details1, details2].compact.join(", ")
+     *     details = " #{details}" unless details.empty?
+     *     puts "#{write_p ? ">>>" : "<<<"} #{version}, #{content_type} [length #{format("%04x", buf.length)}]#{details}"
+     *   end
+     */
+    rb_attr(cSSLContext, rb_intern_const("msg_callback"), 1, 1, Qfalse);
+
+    /*
      * Whether to check the server certificate is valid for the hostname.
      *
      * In order to make this work, verify_mode must be set to VERIFY_PEER and
@@ -3274,6 +3498,7 @@ Init_ossl_ssl(void)
     DefIVarID(cert_store);
     DefIVarID(ca_file);
     DefIVarID(ca_path);
+    DefIVarID(msg_callback);
     DefIVarID(verify_mode);
     DefIVarID(verify_depth);
     DefIVarID(verify_callback);
