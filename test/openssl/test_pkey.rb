@@ -310,6 +310,20 @@ class OpenSSL::TestPKey < OpenSSL::PKeyTestCase
     end
   end
 
+  def test_size
+    key1 = Fixtures.pkey("rsa-1")
+    key2 = Fixtures.pkey("rsa-2")
+    key3 = Fixtures.pkey("p256")
+
+    assert_equal(512, key1.size)
+    assert_equal(512, key2.size)
+    assert_equal(72, key3.size)
+
+    # Should match the number of bits of the public component for RSA keys
+    assert_equal(key1.n.num_bits / 8, key1.size)
+    assert_equal(key1.n.num_bits / 8, key2.size)
+  end
+
   def test_to_text
     rsa = Fixtures.pkey("rsa-1")
     assert_include rsa.to_text, "publicExponent"
