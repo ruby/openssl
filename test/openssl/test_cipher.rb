@@ -155,6 +155,192 @@ class OpenSSL::TestCipher < OpenSSL::TestCase
     assert_equal expected, shared + cipher.final
   end
 
+  def test_final_with_buffer
+    cipher = OpenSSL::Cipher.new("aes-128-ecb").encrypt
+    cipher.random_key
+    update_result = cipher.update("data")
+    expected_final = cipher.final
+    expected = update_result + expected_final
+
+    # Without buffer - existing behavior returns new string
+    cipher.reset
+    final_result = cipher.update("data") + cipher.final
+    assert_equal expected, final_result
+
+    # With buffer - should return the buffer
+    cipher.reset
+    buf = String.new
+    cipher.update("data")
+    result = cipher.final(buf)
+    assert_same buf, result
+    assert_equal expected_final, buf
+
+    # Buffer is frozen - should raise FrozenError
+    cipher.reset
+    cipher.update("data")
+    assert_raise(FrozenError) { cipher.final(String.new.freeze) }
+
+    # Buffer is a shared string
+    cipher.reset
+    buf = "x" * 1024
+    shared = buf[-(expected_final.bytesize + 32)..-1]
+    cipher.update("data")
+    result = cipher.final(shared)
+    assert_same shared, result
+    assert_equal expected_final, shared
+
+    # Buffer reused across multiple operations
+    cipher.reset
+    buf = String.new
+    cipher.update("data")
+    cipher.final(buf)
+    first_result = buf.dup
+
+    cipher.reset
+    buf.clear
+    cipher.update("data")
+    cipher.final(buf)
+    second_result = buf.dup
+
+    assert_equal first_result, second_result
+  end
+
+  def test_final_with_buffer_encryption_decryption
+    # Test encryption with buffer
+    key = ["2b7e151628aed2a6abf7158809cf4f3c"].pack("H*")
+    iv =  ["000102030405060708090a0b0c0d0e0f"].pack("H*")
+    pt =  ["6bc1bee22e409f96e93d7e117393172a" \
+           "ae2d8a571e03ac9c9eb76fac45af8e51"].pack("H*")
+    ct =  ["7649abac8119b246cee98e9b12e9197d" \
+           "5086cb9b507219ee95db113a917678b2"].pack("H*")
+
+    # Encryption with buffer
+    cipher = new_encryptor("aes-128-cbc", key: key, iv: iv, padding: 0)
+    update_buf = String.new
+    final_buf = String.new
+    cipher.update(pt, update_buf)
+    cipher.final(final_buf)
+    assert_equal ct, update_buf + final_buf
+
+    # Decryption with buffer
+    cipher = new_decryptor("aes-128-cbc", key: key, iv: iv, padding: 0)
+    update_buf = String.new
+    final_buf = String.new
+    cipher.update(ct, update_buf)
+    cipher.final(final_buf)
+    assert_equal pt, update_buf + final_buf
+  end
+
+  def test_final_with_buffer_aead_gcm
+    # Test with AEAD cipher (GCM)
+    key = ["feffe9928665731c6d6a8f9467308308"].pack("H*")
+    iv =  ["cafebabefacedbaddecaf888"].pack("H*")
+    aad = ["feedfacedeadbeeffeedfacedeadbeef" \
+           "abaddad2"].pack("H*")
+    pt =  ["d9313225f88406e5a55909c5aff5269a" \
+           "86a7a9531534f7da2e4c303d8a318a72" \
+           "1c3c0c95956809532fcf0e2449a6b525" \
+           "b16aedf5aa0de657ba637b39"].pack("H*")
+    ct =  ["42831ec2217774244b7221b784d0d49c" \
+           "e3aa212f2c02a4e035c17e2329aca12e" \
+           "21d514b25466931c7d8f6a5aac84aa05" \
+           "1ba30b396a0aac973d58e091"].pack("H*")
+    tag = ["5bc94fbc3221a5db94fae95ae7121a47"].pack("H*")
+
+    # Encryption with buffer
+    cipher = new_encryptor("aes-128-gcm", key: key, iv: iv, auth_data: aad)
+    update_buf = String.new
+    final_buf = String.new
+    cipher.update(pt, update_buf)
+    cipher.final(final_buf)
+    assert_equal ct, update_buf + final_buf
+    assert_equal tag, cipher.auth_tag
+
+    # Decryption with buffer
+    cipher = new_decryptor("aes-128-gcm", key: key, iv: iv, auth_tag: tag, auth_data: aad)
+    update_buf = String.new
+    final_buf = String.new
+    cipher.update(ct, update_buf)
+    cipher.final(final_buf)
+    assert_equal pt, update_buf + final_buf
+  end
+
+  def test_final_with_buffer_aead_ccm
+    # Test with AEAD cipher (CCM)
+    key = ["c0c1c2c3c4c5c6c7c8c9cacbcccdcecf"].pack("H*")
+    iv =  ["00000003020100a0a1a2a3a4a5"].pack("H*")
+    aad = ["0001020304050607"].pack("H*")
+    pt =  ["08090a0b0c0d0e0f101112131415161718191a1b1c1d1e"].pack("H*")
+    ct =  ["588c979a61c663d2f066d0c2c0f989806d5f6b61dac384"].pack("H*")
+    tag = ["17e8d12cfdf926e0"].pack("H*")
+
+    kwargs = {auth_tag_len: 8, iv_len: 13, key: key, iv: iv}
+
+    # Encryption with buffer
+    cipher = new_encryptor("aes-128-ccm", **kwargs, ccm_data_len: pt.length, auth_data: aad)
+    update_buf = String.new
+    final_buf = String.new
+    cipher.update(pt, update_buf)
+    cipher.final(final_buf)
+    assert_equal ct, update_buf + final_buf
+    assert_equal tag, cipher.auth_tag
+
+    # Decryption with buffer
+    cipher = new_decryptor("aes-128-ccm", **kwargs, ccm_data_len: ct.length, auth_tag: tag, auth_data: aad)
+    update_buf = String.new
+    final_buf = String.new
+    cipher.update(ct, update_buf)
+    cipher.final(final_buf)
+    assert_equal pt, update_buf + final_buf
+  end if has_cipher?("aes-128-ccm") &&
+         OpenSSL::Cipher.new("aes-128-ccm").authenticated? &&
+         openssl?(1, 1, 1, 0x03, 0xf) # version >= 1.1.1c
+
+  def test_final_with_buffer_padding
+    # Test with default PKCS padding enabled
+    cipher = OpenSSL::Cipher.new("aes-128-cbc").encrypt
+    cipher.random_key
+    cipher.random_iv
+    pt = "short data"
+
+    # Without buffer
+    expected_ct = cipher.update(pt) + cipher.final
+
+    # With buffer
+    cipher.reset
+    update_buf = String.new
+    final_buf = String.new
+    cipher.update(pt, update_buf)
+    cipher.final(final_buf)
+    assert_equal expected_ct, update_buf + final_buf
+
+    # Verify padding added space to final block
+    assert_operator final_buf.bytesize, :>, 0
+  end
+
+  def test_final_with_buffer_no_padding
+    # Test with padding disabled and aligned data
+    cipher = OpenSSL::Cipher.new("aes-128-cbc").encrypt
+    cipher.padding = 0
+    cipher.random_key
+    cipher.random_iv
+    pt = "x" * 32  # Exactly 2 blocks, no padding needed
+
+    # Without buffer
+    expected_ct = cipher.update(pt) + cipher.final
+
+    # With buffer - final should be empty since no padding
+    cipher.reset
+    update_buf = String.new
+    final_buf = String.new
+    cipher.update(pt, update_buf)
+    result = cipher.final(final_buf)
+
+    assert_same final_buf, result
+    assert_equal expected_ct, update_buf + final_buf
+    assert_equal "", final_buf  # No padding, so final returns empty
+  end
+
   def test_ciphers
     ciphers = OpenSSL::Cipher.ciphers
     assert_kind_of Array, ciphers
