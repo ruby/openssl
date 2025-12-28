@@ -474,6 +474,7 @@ module OpenSSL::Buffering
 
   def write(*s)
     s.inject(0) do |written, str|
+      str = str.to_s
       do_write(str)
       written + str.bytesize
     end
@@ -526,7 +527,7 @@ module OpenSSL::Buffering
   # +.to_s+ method.
 
   def <<(s)
-    do_write(s)
+    do_write(s.to_s)
     self
   end
 
