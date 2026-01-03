@@ -29,4 +29,8 @@
 #  define EVP_PKEY_eq(a, b) EVP_PKEY_cmp(a, b)
 #endif
 
+#ifndef HAVE_EVP_PKEY_GET_SIZE
+#  define EVP_PKEY_get_size(x) EVP_PKEY_size(x)
+#endif
+
 #endif /* _OSSL_OPENSSL_MISSING_H_ */
