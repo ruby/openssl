@@ -2702,7 +2702,7 @@ ossl_ssl_get_group(VALUE self)
 
 #endif /* !defined(OPENSSL_NO_SOCK) */
 
-#ifdef HAVE_BIO_METH_NEW
+#ifdef OSSL_CUSTOM_BIO
 /*
  * call-seq:
  *    ssl.bio_method => method or nil
@@ -3221,7 +3221,7 @@ Init_ossl_ssl(void)
     rb_define_method(cSSLSocket, "tmp_key", ossl_ssl_tmp_key, 0);
     rb_define_method(cSSLSocket, "alpn_protocol", ossl_ssl_alpn_protocol, 0);
     rb_define_method(cSSLSocket, "export_keying_material", ossl_ssl_export_keying_material, -1);
-#ifdef HAVE_BIO_METH_NEW
+#ifdef OSSL_CUSTOM_BIO
     rb_define_method(cSSLSocket, "bio_method", ossl_ssl_get_bio_method, 0);
     rb_define_method(cSSLSocket, "bio_method=", ossl_ssl_set_bio_method, 1);
 #endif

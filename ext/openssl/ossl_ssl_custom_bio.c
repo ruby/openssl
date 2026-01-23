@@ -9,7 +9,7 @@
 */
 #include "ossl.h"
 
-#ifdef HAVE_BIO_METH_NEW
+#ifdef OSSL_CUSTOM_BIO
 
 #include "ossl_ssl_custom_bio.h"
 #include "ruby/io/buffer.h"

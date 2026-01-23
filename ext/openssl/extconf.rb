@@ -171,6 +171,8 @@ have_func("TS_VERIFY_CTX_set0_certs(NULL, NULL)", ts_h)
 # added in 3.5.0
 have_func("SSL_get0_peer_signature_name(NULL, NULL)", ssl_h)
 
+have_func("rb_io_buffer_new")
+
 Logging::message "=== Checking done. ===\n"
 
 # Append flags from environment variables.
