@@ -30,7 +30,7 @@ ossl_ssl_custom_bio_in_read(BIO *bio, char *buf, int blen)
             long slen = RSTRING_LEN(str);
             memcpy(buf, RSTRING_PTR(str), slen);
             RB_GC_GUARD(str);
-            return slen;
+            return (int)slen;
         }
         case T_ARRAY: {
             VALUE read_proc = rb_ary_entry(target, 0);
