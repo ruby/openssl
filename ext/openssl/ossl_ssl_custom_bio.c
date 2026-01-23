@@ -27,7 +27,7 @@ ossl_ssl_custom_bio_in_read(BIO *bio, char *buf, int blen)
         case T_OBJECT:
         case T_STRUCT: {
             VALUE str = rb_funcall(target, id_read, 1, INT2NUM(blen));
-            int slen = RSTRING_LEN(str);
+            long slen = RSTRING_LEN(str);
             memcpy(buf, RSTRING_PTR(str), slen);
             RB_GC_GUARD(str);
             return slen;
