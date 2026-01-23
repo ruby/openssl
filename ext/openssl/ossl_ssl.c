@@ -10,6 +10,7 @@
  * (See the file 'COPYING'.)
  */
 #include "ossl.h"
+#include "ossl_ssl_custom_bio.h"
 
 #ifndef OPENSSL_NO_SOCK
 #define numberof(ary) (int)(sizeof(ary)/sizeof((ary)[0]))
@@ -29,7 +30,7 @@
 } while (0)
 
 VALUE mSSL;
-static VALUE eSSLError;
+VALUE eSSLError;
 static VALUE cSSLContext;
 VALUE cSSLSocket;
 
@@ -48,6 +49,7 @@ static ID id_i_cert_store, id_i_ca_file, id_i_ca_path, id_i_verify_mode,
           id_i_alpn_select_cb, id_i_alpn_protocols, id_i_servername_cb,
           id_i_verify_hostname, id_i_keylog_cb, id_i_tmp_dh_callback;
 static ID id_i_io, id_i_context, id_i_hostname;
+static ID id_i_bio_method;
 
 static int ossl_ssl_ex_ptr_idx;
 static int ossl_sslctx_ex_ptr_idx;
@@ -2700,6 +2702,92 @@ ossl_ssl_get_group(VALUE self)
 
 #endif /* !defined(OPENSSL_NO_SOCK) */
 
+#ifdef HAVE_BIO_METH_NEW
+/*
+ * call-seq:
+ *    ssl.bio_method => method or nil
+ *
+ * Returns the BIO method for the socket, or nil if not set. See also
+ * SSLSocket#bio_method=.
+ */
+static VALUE
+ossl_ssl_get_bio_method(VALUE self)
+{
+    return rb_ivar_get(self, id_i_bio_method);
+}
+
+/*
+ * call-seq:
+ *    ssl.bio_method = nil
+ *    ssl.bio_method = io
+ *    ssl.bio_method = [->(buf, maxlen) { ... }, ->(buf, len) { ... }]
+ *
+ * Sets the BIO method for the SSL socket. By default, the SSL connection uses a
+ * socket BIO for performing I/O, which means that OpenSSL will bypass the
+ * I/O implementation in the standard library, only using it for checking for
+ * I/O readiness.
+ *
+ * When the BIO method is set to an IO instance (normally the underlying socket
+ * instance), OpenSSL will read and write to the connection by calling the
+ * `#read` and `#write` methods on the given IO instance. This also allows
+ * better integration with a fiber scheduler for applications that use
+ * fiber-based concurrency.
+ *
+ * Alternatively, the BIO method may be customized by setting it to an array
+ * containing a read proc and a write proc. The read proc takes as parameters an
+ * IO::Buffer and the maximum number of bytes to read. The proc should return
+ * the number of bytes read. The write proc takes as parameters an IO::Buffer
+ * and the number of bytes to write. It should return the number of bytes
+ * written. Example usage:
+ *
+ *     io = ssl.to_io
+ *     ssl.bio_method = [
+ *       ->(buf, maxlen) {
+ *         str = io.read(maxlen)
+ *         len = str.bytesize
+ *         buf.set_string(str)
+ *         len
+ *       },
+ *       ->(buf, len) {
+ *         str = buf.get_string(0, len)
+ *         io.write(str)
+ *       }
+ *     ]
+ */
+static VALUE
+ossl_ssl_set_bio_method(VALUE self, VALUE method)
+{
+    SSL *ssl;
+    GetSSL(self, ssl);
+
+    switch(TYPE(method)) {
+        case T_FILE:
+        case T_OBJECT:
+        case T_STRUCT:
+            break;
+        case T_ARRAY:
+            if (RARRAY_LEN(method) != 2)
+                rb_raise(eSSLError, "Invalid BIO method");
+            break;
+        default:
+            rb_raise(eSSLError, "Invalid BIO method");
+    }
+
+    rb_ivar_set(self, id_i_bio_method, method);
+
+    if (NIL_P(method)) {
+        VALUE io = rb_ivar_get(self, id_i_io);
+        if (!SSL_set_fd(ssl, TO_SOCKET(rb_io_descriptor(io))))
+            ossl_raise(eSSLError, "SSL_set_fd");
+    }
+    else {
+        ossl_ssl_set_custom_bio(ssl, method);
+    }
+
+    return self;
+}
+#endif
+
 void
 Init_ossl_ssl(void)
 {
@@ -3133,6 +3221,10 @@ Init_ossl_ssl(void)
     rb_define_method(cSSLSocket, "tmp_key", ossl_ssl_tmp_key, 0);
     rb_define_method(cSSLSocket, "alpn_protocol", ossl_ssl_alpn_protocol, 0);
     rb_define_method(cSSLSocket, "export_keying_material", ossl_ssl_export_keying_material, -1);
+#ifdef HAVE_BIO_METH_NEW
+    rb_define_method(cSSLSocket, "bio_method", ossl_ssl_get_bio_method, 0);
+    rb_define_method(cSSLSocket, "bio_method=", ossl_ssl_set_bio_method, 1);
+#endif
 # ifdef OSSL_USE_NEXTPROTONEG
     rb_define_method(cSSLSocket, "npn_protocol", ossl_ssl_npn_protocol, 0);
 # endif
@@ -3300,5 +3392,6 @@ Init_ossl_ssl(void)
     DefIVarID(io);
     DefIVarID(context);
     DefIVarID(hostname);
+    DefIVarID(bio_method);
 #endif /* !defined(OPENSSL_NO_SOCK) */
 }

@@ -2313,6 +2313,180 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     sock2.close
   end
 
+  def test_bio_method_io
+    omit_on_no_bio_method
+
+    start_server { |port|
+      begin
+        ssl = OpenSSL::SSL::SSLSocket.open("127.0.0.1", port)
+        ssl.sync_close = true
+        ssl.bio_method = ssl.to_io
+        assert_equal ssl.to_io, ssl.bio_method
+        ssl.connect
+
+        ssl.puts "abc"; assert_equal "abc\n", ssl.gets
+      ensure
+        ssl&.close
+      end
+    }
+  end
+
+  def test_bio_method_io_like
+    omit_on_no_bio_method
+
+    custom_class = Struct.new(:io, :ops) do
+      def read(len)
+        (self.ops ||= []) << :read
+        self.io.read(len)
+      end
+
+      def write(buf)
+        (self.ops ||= []) << :write
+        self.io.write(buf)
+      end
+    end
+
+    start_server { |port|
+      begin
+        ssl = OpenSSL::SSL::SSLSocket.open("127.0.0.1", port)
+        ssl.sync_close = true
+        custom = custom_class.new(io: ssl.to_io)
+        ssl.bio_method = custom
+        assert_equal custom, ssl.bio_method
+        ssl.connect
+
+        ssl.puts "abc"; assert_equal "abc\n", ssl.gets
+        refute_empty custom.ops
+      ensure
+        ssl&.close
+      end
+    }
+  end
+
+  class MyIOError < StandardError; end
+
+  def test_bio_method_io_like_exception
+    omit_on_no_bio_method
+
+    custom_class = Struct.new(:io, :ops) do
+      def read(len)
+        (self.ops ||= []) << :read
+        self.io.read(len)
+      end
+
+      def write(buf)
+        (self.ops ||= []) << :write
+        raise MyIOError
+      end
+    end
+
+    start_server(ignore_listener_error: true) { |port|
+      begin
+        ssl = OpenSSL::SSL::SSLSocket.open("127.0.0.1", port)
+        ssl.sync_close = true
+        custom = custom_class.new(io: ssl.to_io)
+        ssl.bio_method = custom
+        assert_equal custom, ssl.bio_method
+
+        assert_raise(MyIOError) { ssl.connect }
+        assert_equal [:write], custom.ops
+      ensure
+        ssl&.close rescue nil
+      end
+    }
+  end
+
+  def test_bio_method_custom
+    omit_on_no_bio_method
+
+    start_server { |port|
+      begin
+        ops = []
+        ssl = OpenSSL::SSL::SSLSocket.open("127.0.0.1", port)
+        ssl.sync_close = true
+
+        io = ssl.to_io
+        read_proc = ->(buf, maxlen) {
+          ops << :read
+          str = io.read(maxlen)
+          len = str.bytesize
+          buf.set_string(str)
+          len
+        }
+        write_proc = ->(buf, len) {
+          ops << :write
+          str = buf.get_string(0, len)
+          len = io.write(str)
+          len
+        }
+
+        ssl.bio_method = [read_proc, write_proc]
+        ssl.connect
+
+        ssl.puts "abc"; assert_equal "abc\n", ssl.gets
+        refute_empty ops
+      ensure
+        ssl&.close
+      end
+    }    
+  end
+
+  def test_bio_method_custom_exception
+    omit_on_no_bio_method
+
+    start_server(ignore_listener_error: true) { |port|
+      begin
+        ops = []
+        ssl = OpenSSL::SSL::SSLSocket.open("127.0.0.1", port)
+        ssl.sync_close = true
+
+        io = ssl.to_io
+        read_proc = ->(buf, maxlen) {
+          ops << :read
+          str = io.read(maxlen)
+          len = str.bytesize
+          buf.set_string(str)
+          len
+        }
+        write_proc = ->(buf, len) {
+          ops << :write
+          raise MyIOError
+        }
+
+        ssl.bio_method = [read_proc, write_proc]
+
+        assert_raise(MyIOError) { ssl.connect }
+        assert_equal [:write], ops
+      ensure
+        ssl&.close rescue nil
+      end
+    }    
+  end
+  def test_bio_method_invalid
+    omit_on_no_bio_method
+
+    start_server { |port|
+      begin
+        ssl = OpenSSL::SSL::SSLSocket.open("127.0.0.1", port)
+        ssl.sync_close = true
+
+        assert_raise(OpenSSL::SSL::SSLError) { ssl.bio_method = 42 }
+        assert_raise(OpenSSL::SSL::SSLError) { ssl.bio_method = "foo" }
+        assert_raise(OpenSSL::SSL::SSLError) { ssl.bio_method = :foo }
+        assert_raise(OpenSSL::SSL::SSLError) { ssl.bio_method = [] }
+        assert_raise(OpenSSL::SSL::SSLError) { ssl.bio_method = [:foo] }
+
+        assert_nil ssl.bio_method
+
+        ssl.connect
+
+        ssl.puts "abc"; assert_equal "abc\n", ssl.gets
+      ensure
+        ssl&.close rescue nil
+      end
+    }    
+  end
+
   def test_export_keying_material
     start_server do |port|
       cli_ctx = OpenSSL::SSL::SSLContext.new
