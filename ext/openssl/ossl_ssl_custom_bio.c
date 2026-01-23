@@ -102,7 +102,7 @@ ossl_ssl_custom_bio_ctrl(BIO *bio, int cmd, long num, void *ptr)
 }
 
 BIO_METHOD *
-ossl_ssl_create_custom_bio_method()
+ossl_ssl_create_custom_bio_method(void)
 {
     BIO_METHOD *m = BIO_meth_new(BIO_TYPE_MEM, "OpenSSL Ruby BIO");
     if(m) {
