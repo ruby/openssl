@@ -35,9 +35,9 @@ ossl_ssl_custom_bio_in_read(BIO *bio, char *buf, int blen)
         case T_ARRAY: {
             VALUE read_proc = rb_ary_entry(target, 0);
             VALUE buffer = rb_io_buffer_new(buf, blen, RB_IO_BUFFER_LOCKED);
-            VALUE len = rb_funcall(read_proc, id_call, 2, buffer, INT2NUM(blen));
+            VALUE res = rb_funcall(read_proc, id_call, 2, buffer, INT2NUM(blen));
             rb_io_buffer_free_locked(buffer);
-            return NUM2INT(len);
+            return NUM2INT(res);
         }
         default:
             rb_raise(eSSLError, "Invalid BIO target");
@@ -55,15 +55,15 @@ ossl_ssl_custom_bio_out_write(BIO *bio, const char *buf, int blen)
             VALUE str = rb_str_new(buf, blen);
             VALUE res = rb_funcall(target, id_write, 1, str);
             RB_GC_GUARD(str);
-            return NUM2SIZET(res);
+            return NUM2INT(res);
         }
         case T_ARRAY: {
             VALUE write_proc = rb_ary_entry(target, 1);
             VALUE buffer = rb_io_buffer_new((char *)buf, blen, RB_IO_BUFFER_LOCKED | RB_IO_BUFFER_READONLY);
-            VALUE len = rb_funcall(write_proc, id_call, 2, buffer, INT2NUM(blen));
+            VALUE res = rb_funcall(write_proc, id_call, 2, buffer, INT2NUM(blen));
             RB_GC_GUARD(buffer);
             rb_io_buffer_free_locked(buffer);
-            return NUM2INT(len);
+            return NUM2INT(res);
         }
         default:
             rb_raise(eSSLError, "Invalid BIO target");
