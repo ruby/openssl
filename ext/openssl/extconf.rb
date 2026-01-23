@@ -172,6 +172,7 @@ have_func("TS_VERIFY_CTX_set0_certs(NULL, NULL)", ts_h)
 have_func("SSL_get0_peer_signature_name(NULL, NULL)", ssl_h)
 
 have_func("rb_io_buffer_new")
+have_func("rb_io_buffer_free_locked")
 
 Logging::message "=== Checking done. ===\n"
 
