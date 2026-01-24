@@ -80,7 +80,6 @@ module OpenSSL::SSLPairIOish
     def write_nonblock(*args, **kwargs) @io.write_nonblock(*args, **kwargs) end
     def wait_readable() @io.wait_readable end
     def wait_writable() @io.wait_writable end
-    def flush() @io.flush end
     def close() @io.close end
     def closed?() @io.closed? end
 
