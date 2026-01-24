@@ -197,7 +197,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     start_server(ignore_listener_error: true) do |port|
       tcp = TCPSocket.new("127.0.0.1", port)
       obj = Object.new
-      [:read_nonblock, :wait_readable, :wait_writable, :flush, :closed?].each do |name|
+      [:read_nonblock, :wait_readable, :wait_writable, :closed?].each do |name|
         obj.define_singleton_method(name) { |*args, **kwargs|
           tcp.__send__(name, *args, **kwargs) }
       end
