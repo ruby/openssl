@@ -1652,7 +1652,6 @@ is_real_socket(VALUE io)
  * - <tt>read_nonblock</tt> with the <tt>exception: false</tt> option
  * - <tt>wait_readable</tt>
  * - <tt>wait_writable</tt>
- * - <tt>flush</tt>
  * - <tt>close</tt>
  * - <tt>closed?</tt>
  *
