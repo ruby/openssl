@@ -1654,6 +1654,7 @@ is_real_socket(VALUE io)
  * - <tt>wait_writable</tt>
  * - <tt>close</tt>
  * - <tt>closed?</tt>
+ * - <tt>flush</tt> (optional)
  *
  * Note that future versions may require additional methods to be implemented.
  */
