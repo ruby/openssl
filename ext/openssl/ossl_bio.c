@@ -314,7 +314,7 @@ static VALUE
 bio_flush0(VALUE vctx)
 {
     struct ossl_bio_ctx *ctx = (void *)vctx;
-    return rb_funcallv(ctx->io, rb_intern("flush"), 0, NULL);
+    return rb_check_funcall(ctx->io, rb_intern("flush"), 0, NULL);
 }
 
 static long
