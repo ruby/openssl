@@ -2474,15 +2474,27 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
           buf.set_string(str)
           len
         }
+
+        first = true
         write_proc = ->(buf, len) {
           ops << :write
-          raise MyIOError
+          if first
+            first = false
+            raise MyIOError
+          end
+
+          str = buf.get_string(0, len)
+          len = io.write(str)
+          len
         }
 
         ssl.bio_method = [read_proc, write_proc]
 
         assert_raise(MyIOError) { ssl.connect }
         assert_equal [:write], ops
+
+        ssl.connect
+        assert_equal [:write, :read], ops.uniq
       ensure
         ssl&.close rescue nil
       end
