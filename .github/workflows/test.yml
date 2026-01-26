@@ -112,7 +112,8 @@ jobs:
           # http://www.libressl.org/releases.html
           - libressl-3.9.2 # EOL 2025-04-05
           - libressl-4.0.1 # Supported until 2025-10-08
-          - libressl-4.1.1 # Supported until 2026-04-28
+          - libressl-4.1.2 # Supported until 2026-04-28
+          - libressl-4.2.1
           # https://github.com/aws/aws-lc/tags
           - aws-lc-latest
         include:
