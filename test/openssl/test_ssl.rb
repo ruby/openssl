@@ -2488,6 +2488,49 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
       end
     }    
   end
+
+  def test_bio_method_custom_nonblock
+    omit_on_no_bio_method
+
+    start_server(ignore_listener_error: true) { |port|
+      begin
+        ops = []
+        ssl = OpenSSL::SSL::SSLSocket.open("127.0.0.1", port)
+        ssl.sync_close = true
+
+        io = ssl.to_io
+        read_proc = ->(buf, maxlen) {
+          ops << :read
+          ret = io.read_nonblock(maxlen, exception: false)
+          return ret if ret.is_a?(Symbol)
+
+          len = ret.bytesize
+          buf.set_string(ret)
+          len
+        }
+        write_proc = ->(buf, len) {
+          ops << :write
+          str = buf.get_string(0, len)
+          io.write_nonblock(str, exception: false)
+        }
+
+        ssl.bio_method = [read_proc, write_proc]
+
+       return_values = []
+        loop do
+          ret = ssl.connect_nonblock(exception: false)
+          return_values << ret
+          break if ret == ssl
+        end
+        
+        assert_equal [:write, :read], ops.uniq
+        assert_equal [:wait_readable, ssl], return_values.uniq
+      ensure
+        ssl&.close rescue nil
+      end
+    }
+  end
+
   def test_bio_method_invalid
     omit_on_no_bio_method
 

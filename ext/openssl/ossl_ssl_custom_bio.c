@@ -15,7 +15,17 @@
 #include "ruby/io/buffer.h"
 
 extern VALUE eSSLError;
+extern VALUE sym_wait_readable, sym_wait_writable;
 static ID id_read, id_write, id_call, id_eof_p;
+
+inline void bio_set_retry_state(BIO *bio, VALUE sym) {
+    if (sym == sym_wait_readable)
+        BIO_set_retry_read(bio);
+    else if (sym == sym_wait_writable)
+        BIO_set_retry_write(bio);
+    else
+        rb_raise(eSSLError, "Invalid return value from custom BIO");
+}
 
 static int
 ossl_ssl_custom_bio_in_read(BIO *bio, char *buf, int blen)
@@ -37,6 +47,11 @@ ossl_ssl_custom_bio_in_read(BIO *bio, char *buf, int blen)
             VALUE buffer = rb_io_buffer_new(buf, blen, RB_IO_BUFFER_LOCKED);
             VALUE res = rb_funcall(read_proc, id_call, 2, buffer, INT2NUM(blen));
             rb_io_buffer_free_locked(buffer);
+
+            if (TYPE(res) == T_SYMBOL) {
+                bio_set_retry_state(bio, res);
+                return 0;
+            }
             return NUM2INT(res);
         }
         default:
@@ -63,6 +78,11 @@ ossl_ssl_custom_bio_out_write(BIO *bio, const char *buf, int blen)
             VALUE res = rb_funcall(write_proc, id_call, 2, buffer, INT2NUM(blen));
             RB_GC_GUARD(buffer);
             rb_io_buffer_free_locked(buffer);
+
+            if (TYPE(res) == T_SYMBOL) {
+                bio_set_retry_state(bio, res);
+                return 0;
+            }
             return NUM2INT(res);
         }
         default:

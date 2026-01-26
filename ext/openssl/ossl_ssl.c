@@ -38,7 +38,8 @@ static VALUE eSSLErrorWaitReadable;
 static VALUE eSSLErrorWaitWritable;
 
 static ID id_call, ID_callback_state, id_npn_protocols_encoded, id_each;
-static VALUE sym_exception, sym_wait_readable, sym_wait_writable;
+static VALUE sym_exception;
+VALUE sym_wait_readable, sym_wait_writable;
 
 static ID id_i_cert_store, id_i_ca_file, id_i_ca_path, id_i_verify_mode,
           id_i_verify_depth, id_i_verify_callback, id_i_client_ca,
