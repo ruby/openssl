@@ -146,6 +146,8 @@ have_func("SSL_CTX_set1_client_sigalgs_list(NULL, NULL)", ssl_h)
 
 # added in 1.1.0, currently not in LibreSSL
 have_func("EVP_PBE_scrypt(\"\", 0, (unsigned char *)\"\", 0, 0, 0, 0, 0, NULL, 0)", evp_h)
+have_func("BIO_meth_new");
+have_func("SSL_set0_rbio");
 
 # added in OpenSSL 1.1.1 and LibreSSL 3.5.0, then removed in LibreSSL 4.0.0
 have_func("EVP_PKEY_check(NULL)", evp_h)
@@ -168,6 +170,9 @@ have_func("TS_VERIFY_CTX_set0_certs(NULL, NULL)", ts_h)
 
 # added in 3.5.0
 have_func("SSL_get0_peer_signature_name(NULL, NULL)", ssl_h)
+
+have_func("rb_io_buffer_new")
+have_func("rb_io_buffer_free_locked")
 
 Logging::message "=== Checking done. ===\n"
 

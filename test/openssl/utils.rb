@@ -163,6 +163,12 @@ class OpenSSL::TestCase < Test::Unit::TestCase
 
     omit "Only for OpenSSL FIPS"
   end
+
+  def omit_on_no_bio_method
+    return if OpenSSL::SSL::SSLSocket.instance_methods.include?(:bio_method)
+
+    omit "No support for setting BIO method"
+  end
 end
 
 class OpenSSL::SSLTestCase < OpenSSL::TestCase
