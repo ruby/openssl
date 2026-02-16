@@ -48,7 +48,7 @@ static const rb_data_type_t ossl_x509_type = {
  * Public
  */
 VALUE
-ossl_x509_new(X509 *x509)
+ossl_x509_new(const X509 *x509)
 {
     X509 *new;
     VALUE obj;
@@ -345,7 +345,7 @@ static VALUE
 ossl_x509_get_subject(VALUE self)
 {
     X509 *x509;
-    X509_NAME *name;
+    const X509_NAME *name;
 
     GetX509(self, x509);
     if (!(name = X509_get_subject_name(x509))) { /* NO DUP - don't free! */
@@ -380,7 +380,7 @@ static VALUE
 ossl_x509_get_issuer(VALUE self)
 {
     X509 *x509;
-    X509_NAME *name;
+    const X509_NAME *name;
 
     GetX509(self, x509);
     if(!(name = X509_get_issuer_name(x509))) { /* NO DUP - don't free! */
@@ -603,14 +603,13 @@ ossl_x509_get_extensions(VALUE self)
 {
     X509 *x509;
     int count, i;
-    X509_EXTENSION *ext;
     VALUE ary;
 
     GetX509(self, x509);
     count = X509_get_ext_count(x509);
     ary = rb_ary_new_capa(count);
     for (i=0; i<count; i++) {
-        ext = X509_get_ext(x509, i); /* NO DUP - don't free! */
+        const X509_EXTENSION *ext = X509_get_ext(x509, i);
         rb_ary_push(ary, ossl_x509ext_new(ext));
     }
 

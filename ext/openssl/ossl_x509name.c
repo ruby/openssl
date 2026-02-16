@@ -53,7 +53,7 @@ static const rb_data_type_t ossl_x509name_type = {
  * Public
  */
 VALUE
-ossl_x509name_new(X509_NAME *name)
+ossl_x509name_new(const X509_NAME *name)
 {
     X509_NAME *new;
     VALUE obj;

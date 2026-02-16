@@ -48,7 +48,7 @@ static const rb_data_type_t ossl_x509rev_type = {
  * PUBLIC
  */
 VALUE
-ossl_x509revoked_new(X509_REVOKED *rev)
+ossl_x509revoked_new(const X509_REVOKED *rev)
 {
     X509_REVOKED *new;
     VALUE obj;
@@ -185,7 +185,7 @@ ossl_x509revoked_get_extensions(VALUE self)
 {
     X509_REVOKED *rev;
     int count, i;
-    X509_EXTENSION *ext;
+    const X509_EXTENSION *ext;
     VALUE ary;
 
     GetX509Rev(self, rev);
