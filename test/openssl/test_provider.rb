@@ -71,6 +71,25 @@ class OpenSSL::TestProvider < OpenSSL::TestCase
     end;
   end
 
+  def test_add_conf_parameter
+    with_openssl <<-'end;'
+      prov = OpenSSL::Provider.load("null")
+      assert_raise(TypeError) { prov.add_conf_parameter("foo", nil) }
+
+      # This assumes that ML-DSA is provided by the "default" provider, which
+      # may not always be the case.
+      # TODO: OpenSSL::PKey should allow specifying the provider to use
+      return if OpenSSL.fips_mode
+      pkey = OpenSSL::PKey.generate_key("ML-DSA-44")
+      out_a = pkey.private_to_der
+      prov = OpenSSL::Provider.load("default")
+      prov.add_conf_parameter("ml-dsa.output_formats", "seed-only")
+      out_b = pkey.private_to_der
+      omit "ML-DSA not provided by the \"default\" provider?" if out_a == out_b
+      assert_not_equal(out_a, out_b)
+    end;
+  end if openssl?(3, 5, 0)
+
   private
 
   # this is required because OpenSSL::Provider methods change global state
