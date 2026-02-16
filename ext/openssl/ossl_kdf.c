@@ -236,6 +236,79 @@ kdf_hkdf(int argc, VALUE *argv, VALUE self)
     return str;
 }
 
+#ifdef HAVE_TYPE_EVP_KDF_P
+/*
+ * call-seq:
+ *    KDF.derive(algo, length, params) -> String
+ *
+ * Derives _length_ bytes of key material from _params_ using the \KDF algorithm
+ * specified by the String _algo_.
+ *
+ * _params_ is an Enumerable that lists the parameters and their values to be
+ * passed to the \KDF algorithm. Consult the respective EVP_KDF-* documentation
+ * for the available parameters.
+ *
+ * See the man page EVP_KDF_derive(3) for more information. Available when
+ * compiled with \OpenSSL 3.0 or later.
+ *
+ * === Example
+ *   # See the man page EVP_KDF-PBKDF2(7).
+ *   # RFC 6070 PBKDF2 HMAC-SHA1 Test Vectors, 3rd example
+ *   # https://www.rfc-editor.org/rfc/rfc6070
+ *   ret = OpenSSL::KDF.derive("PBKDF2", 20, {
+ *     "pass" => "password",
+ *     "salt" => "salt",
+ *     "iter" => 4096,
+ *     "digest" => "SHA1",
+ *   })
+ *   p ret.unpack1("H*")
+ *   #=> "4b007901b765489abead49d926f721d065a429c1"
+ */
+static VALUE
+kdf_derive(int argc, VALUE *argv, VALUE self)
+{
+    VALUE algo, keylen, hash, out;
+    int state;
+
+    rb_scan_args(argc, argv, "21", &algo, &keylen, &hash);
+    out = rb_str_new(NULL, NUM2LONG(keylen));
+
+    EVP_KDF *kdf = EVP_KDF_fetch(NULL, StringValueCStr(algo), NULL);
+    if (!kdf)
+        ossl_raise(eKDF, "EVP_KDF_fetch");
+
+    EVP_KDF_CTX *ctx = EVP_KDF_CTX_new(kdf);
+    if (!ctx) {
+        EVP_KDF_free(kdf);
+        ossl_raise(eKDF, "EVP_KDF_CTX_new");
+    }
+
+    const OSSL_PARAM *settable = EVP_KDF_CTX_settable_params(ctx);
+    if (!settable) {
+        EVP_KDF_CTX_free(ctx);
+        EVP_KDF_free(kdf);
+        ossl_raise(eKDF, "EVP_KDF_CTX_settable_params");
+    }
+
+    OSSL_PARAM *params = ossl_build_params(settable, hash, &state);
+    if (state) {
+        EVP_KDF_CTX_free(ctx);
+        EVP_KDF_free(kdf);
+        rb_jump_tag(state);
+    }
+
+    int ret = EVP_KDF_derive(ctx, (unsigned char *)RSTRING_PTR(out),
+                             RSTRING_LEN(out), params);
+    OSSL_PARAM_free(params);
+    EVP_KDF_CTX_free(ctx);
+    EVP_KDF_free(kdf);
+    if (ret != 1)
+        ossl_raise(eKDF, "EVP_KDF_derive");
+
+    return out;
+}
+#endif
+
 void
 Init_ossl_kdf(void)
 {
@@ -297,4 +370,7 @@ Init_ossl_kdf(void)
     rb_define_module_function(mKDF, "scrypt", kdf_scrypt, -1);
 #endif
     rb_define_module_function(mKDF, "hkdf", kdf_hkdf, -1);
+#ifdef HAVE_TYPE_EVP_KDF_P
+    rb_define_module_function(mKDF, "derive", kdf_derive, -1);
+#endif
 }
