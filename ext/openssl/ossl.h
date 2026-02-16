@@ -25,6 +25,10 @@
 
 #include <openssl/opensslv.h>
 
+#if !defined(OPENSSL_NO_CMS)
+#include <openssl/cms.h>
+
+#endif
 #include <openssl/err.h>
 #include <openssl/asn1.h>
 #include <openssl/x509v3.h>
@@ -189,6 +193,7 @@ extern VALUE dOSSL;
 #include "ossl_bn.h"
 #include "ossl_cipher.h"
 #include "ossl_config.h"
+#include "ossl_cms.h"
 #include "ossl_digest.h"
 #include "ossl_engine.h"
 #include "ossl_hmac.h"
