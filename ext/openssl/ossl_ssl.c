@@ -1553,6 +1553,63 @@ ossl_sslctx_flush_sessions(int argc, VALUE *argv, VALUE self)
 }
 
 /*
+ * QUIC support
+ */
+#ifdef OSSL_USE_QUIC
+/*
+ * call-seq:
+ *    SSLContext.quic(:client)        -> ctx
+ *    SSLContext.quic(:client_thread) -> ctx
+ *    SSLContext.quic(:server)        -> ctx
+ *
+ * Creates a new SSLContext for QUIC. The argument specifies the QUIC mode.
+ * Requires OpenSSL 3.2+.
+ */
+static VALUE
+ossl_sslctx_s_quic(VALUE klass, VALUE quic_sym)
+{
+    SSL_CTX *ctx;
+    const SSL_METHOD *method;
+    long mode;
+    VALUE obj;
+    ID quic_id;
+
+    Check_Type(quic_sym, T_SYMBOL);
+    quic_id = SYM2ID(quic_sym);
+
+    if (quic_id == rb_intern("client"))
+        method = OSSL_QUIC_client_method();
+#ifdef HAVE_OSSL_QUIC_CLIENT_THREAD_METHOD
+    else if (quic_id == rb_intern("client_thread"))
+        method = OSSL_QUIC_client_thread_method();
+#endif
+#ifdef HAVE_OSSL_QUIC_SERVER_METHOD
+    else if (quic_id == rb_intern("server"))
+        method = OSSL_QUIC_server_method();
+#endif
+    else
+        ossl_raise(rb_eArgError, "unknown QUIC mode: %"PRIsVALUE, quic_sym);
+
+    obj = TypedData_Wrap_Struct(klass, &ossl_sslctx_type, 0);
+    ctx = SSL_CTX_new(method);
+    if (!ctx)
+        ossl_raise(eSSLError, "SSL_CTX_new");
+
+    mode = SSL_MODE_ENABLE_PARTIAL_WRITE |
+           SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER |
+           SSL_MODE_RELEASE_BUFFERS;
+    SSL_CTX_set_mode(ctx, mode);
+    RTYPEDDATA_DATA(obj) = ctx;
+    SSL_CTX_set_ex_data(ctx, ossl_sslctx_ex_ptr_idx, (void *)obj);
+
+    rb_obj_call_init(obj, 0, NULL);
+    rb_ivar_set(obj, rb_intern("@quic"), quic_sym);
+
+    return obj;
+}
+#endif
+
+/*
  * SSLSocket class
  */
 static inline int
@@ -1674,6 +1731,11 @@ ossl_ssl_initialize(int argc, VALUE *argv, VALUE self)
 
     SSL_set_ex_data(ssl, ossl_ssl_ex_ptr_idx, (void *)self);
     SSL_set_info_callback(ssl, ssl_info_cb);
+#ifdef HAVE_SSL_SET_BLOCKING_MODE
+    // Always set non-blocking mode for QUIC connections
+    // This is a no-op on non-QUIC connections
+    SSL_set_blocking_mode(ssl, 0);
+#endif
 
     rb_call_super(0, NULL);
 
@@ -2723,6 +2785,496 @@ ossl_ssl_get_group(VALUE self)
 }
 #endif
 
+/*
+ * QUIC stream and event methods
+ */
+#ifdef OSSL_USE_QUIC
+static ID id_i_connection;
+
+/*
+ * call-seq:
+ *    ssl.new_stream(flags = 0) => SSLSocket or nil
+ *
+ * Creates a new QUIC stream on this connection. Returns a new SSLSocket
+ * representing the stream. The +flags+ parameter can include
+ * OpenSSL::SSL::STREAM_FLAG_UNI to create a unidirectional stream.
+ *
+ * When STREAM_FLAG_NO_BLOCK is set, returns +nil+ if the stream cannot be
+ * created immediately (e.g. the handshake is not yet complete). Without
+ * NO_BLOCK, raises SSLError on failure.
+ */
+static VALUE
+ossl_ssl_new_stream(int argc, VALUE *argv, VALUE self)
+{
+    SSL *ssl, *stream_ssl;
+    VALUE flags_v, stream_obj;
+    uint64_t flags = 0;
+
+    rb_scan_args(argc, argv, "01", &flags_v);
+    if (!NIL_P(flags_v))
+        flags = NUM2UINT64T(flags_v);
+
+    GetSSL(self, ssl);
+    stream_ssl = SSL_new_stream(ssl, flags);
+    if (!stream_ssl) {
+        if (flags & SSL_STREAM_FLAG_NO_BLOCK)
+            return Qnil;
+        ossl_raise(eSSLError, "SSL_new_stream");
+    }
+
+    stream_obj = TypedData_Wrap_Struct(cSSLSocket, &ossl_ssl_type, stream_ssl);
+    SSL_set_ex_data(stream_ssl, ossl_ssl_ex_ptr_idx, (void *)stream_obj);
+
+    /* Set @io and @context from the parent, and @connection to prevent GC */
+    rb_ivar_set(stream_obj, id_i_io, rb_attr_get(self, id_i_io));
+    rb_ivar_set(stream_obj, id_i_context, rb_attr_get(self, id_i_context));
+    rb_ivar_set(stream_obj, id_i_connection, self);
+    rb_funcall(stream_obj, rb_intern("initialize_buffer"), 0);
+
+    return stream_obj;
+}
+
+/*
+ * call-seq:
+ *    ssl.accept_stream(flags = 0) => SSLSocket or nil
+ *
+ * Accepts an incoming QUIC stream from the peer. Returns a new SSLSocket
+ * representing the stream, or +nil+ if no stream is available (when
+ * using non-blocking mode or STREAM_FLAG_NO_BLOCK).
+ */
+static VALUE
+ossl_ssl_accept_stream(int argc, VALUE *argv, VALUE self)
+{
+    SSL *ssl, *stream_ssl;
+    VALUE flags_v, stream_obj;
+    uint64_t flags = 0;
+
+    rb_scan_args(argc, argv, "01", &flags_v);
+    if (!NIL_P(flags_v))
+        flags = NUM2UINT64T(flags_v);
+
+    GetSSL(self, ssl);
+    stream_ssl = SSL_accept_stream(ssl, flags);
+    if (!stream_ssl)
+        return Qnil;
+
+    stream_obj = TypedData_Wrap_Struct(cSSLSocket, &ossl_ssl_type, stream_ssl);
+    SSL_set_ex_data(stream_ssl, ossl_ssl_ex_ptr_idx, (void *)stream_obj);
+
+    rb_ivar_set(stream_obj, id_i_io, rb_attr_get(self, id_i_io));
+    rb_ivar_set(stream_obj, id_i_context, rb_attr_get(self, id_i_context));
+    rb_ivar_set(stream_obj, id_i_connection, self);
+    rb_funcall(stream_obj, rb_intern("initialize_buffer"), 0);
+
+    return stream_obj;
+}
+
+/*
+ * call-seq:
+ *    ssl.stream_conclude => self
+ *
+ * Signals FIN on the QUIC stream, indicating that no more data will be sent.
+ */
+static VALUE
+ossl_ssl_stream_conclude(VALUE self)
+{
+    SSL *ssl;
+
+    GetSSL(self, ssl);
+    if (!SSL_stream_conclude(ssl, 0))
+        ossl_raise(eSSLError, "SSL_stream_conclude");
+
+    return self;
+}
+
+/*
+ * call-seq:
+ *    ssl.stream_id => Integer
+ *
+ * Returns the QUIC stream ID for this SSL object.
+ */
+static VALUE
+ossl_ssl_stream_id(VALUE self)
+{
+    SSL *ssl;
+    uint64_t id;
+
+    GetSSL(self, ssl);
+    id = SSL_get_stream_id(ssl);
+    return ULL2NUM(id);
+}
+
+/*
+ * call-seq:
+ *    ssl.default_stream_mode = mode
+ *
+ * Sets the default stream mode for a QUIC connection. +mode+ should be
+ * one of the symbols :none, :auto_bidi, or :auto_uni.
+ */
+static VALUE
+ossl_ssl_set_default_stream_mode(VALUE self, VALUE mode)
+{
+    SSL *ssl;
+    uint32_t m;
+    ID mode_id;
+
+    GetSSL(self, ssl);
+
+    mode_id = SYM2ID(mode);
+    if (mode_id == rb_intern("none"))
+        m = SSL_DEFAULT_STREAM_MODE_NONE;
+    else if (mode_id == rb_intern("auto_bidi"))
+        m = SSL_DEFAULT_STREAM_MODE_AUTO_BIDI;
+    else if (mode_id == rb_intern("auto_uni"))
+        m = SSL_DEFAULT_STREAM_MODE_AUTO_UNI;
+    else
+        ossl_raise(rb_eArgError, "unknown default stream mode");
+
+    if (!SSL_set_default_stream_mode(ssl, m))
+        ossl_raise(eSSLError, "SSL_set_default_stream_mode");
+
+    return mode;
+}
+
+/*
+ * call-seq:
+ *    ssl.handle_events => nil
+ *
+ * Processes any pending QUIC events. This should be called periodically
+ * when using non-blocking mode.
+ */
+static VALUE
+ossl_ssl_handle_events(VALUE self)
+{
+    SSL *ssl;
+
+    GetSSL(self, ssl);
+    SSL_handle_events(ssl);
+
+    return Qnil;
+}
+
+/*
+ * call-seq:
+ *    ssl.net_read_desired? => true or false
+ *
+ * Returns +true+ if the QUIC engine wants to read from the network.
+ * Use this to determine whether to include the underlying socket in the
+ * read set when calling IO.select.
+ */
+static VALUE
+ossl_ssl_net_read_desired(VALUE self)
+{
+    SSL *ssl;
+
+    GetSSL(self, ssl);
+    return SSL_net_read_desired(ssl) ? Qtrue : Qfalse;
+}
+
+/*
+ * call-seq:
+ *    ssl.net_write_desired? => true or false
+ *
+ * Returns +true+ if the QUIC engine wants to write to the network.
+ * Use this to determine whether to include the underlying socket in the
+ * write set when calling IO.select.
+ */
+static VALUE
+ossl_ssl_net_write_desired(VALUE self)
+{
+    SSL *ssl;
+
+    GetSSL(self, ssl);
+    return SSL_net_write_desired(ssl) ? Qtrue : Qfalse;
+}
+
+/*
+ * call-seq:
+ *    ssl.event_timeout => Float or nil
+ *
+ * Returns the amount of time in seconds until the next QUIC timeout event,
+ * or +nil+ if no timeout is currently active (infinite).
+ */
+static VALUE
+ossl_ssl_event_timeout(VALUE self)
+{
+    SSL *ssl;
+    struct timeval tv;
+    int is_infinite;
+
+    GetSSL(self, ssl);
+    if (!SSL_get_event_timeout(ssl, &tv, &is_infinite))
+        ossl_raise(eSSLError, "SSL_get_event_timeout");
+
+    if (is_infinite)
+        return Qnil;
+
+    return DBL2NUM((double)tv.tv_sec + (double)tv.tv_usec / 1000000.0);
+}
+
+/*
+ * call-seq:
+ *    ssl.connection? => true or false
+ *
+ * Returns +true+ if this SSL object represents a QUIC connection (as opposed
+ * to a QUIC stream).
+ */
+static VALUE
+ossl_ssl_is_connection(VALUE self)
+{
+    SSL *ssl;
+
+    GetSSL(self, ssl);
+    return SSL_is_connection(ssl) ? Qtrue : Qfalse;
+}
+
+/*
+ * call-seq:
+ *    ssl.init_finished? => true or false
+ *
+ * Returns +true+ if the TLS/QUIC handshake has completed for this connection.
+ */
+static VALUE
+ossl_ssl_is_init_finished(VALUE self)
+{
+    SSL *ssl;
+
+    GetSSL(self, ssl);
+    return SSL_is_init_finished(ssl) ? Qtrue : Qfalse;
+}
+
+#ifdef HAVE_SSL_NEW_LISTENER
+/*
+ * call-seq:
+ *    SSLSocket.new_listener(io, context:) => SSLSocket
+ *
+ * Creates a new QUIC listener bound to the given UDP socket _io_.
+ * The _context_ must be an SSLContext created with <tt>quic: :server</tt>.
+ */
+static VALUE
+ossl_ssl_new_listener(int argc, VALUE *argv, VALUE klass)
+{
+    VALUE v_io, opts, v_ctx, listener_obj;
+    SSL_CTX *ctx;
+    SSL *listener;
+    rb_io_t *fptr;
+
+    static ID kw_ids[1];
+    VALUE kw_args[1];
+
+    rb_scan_args(argc, argv, "1:", &v_io, &opts);
+
+    if (!kw_ids[0])
+        kw_ids[0] = rb_intern_const("context");
+    rb_get_kwargs(opts, kw_ids, 1, 0, kw_args);
+    v_ctx = kw_args[0];
+
+    GetSSLCTX(v_ctx, ctx);
+    ossl_sslctx_setup(v_ctx);
+
+    listener = SSL_new_listener(ctx, 0);
+    if (!listener)
+        ossl_raise(eSSLError, "SSL_new_listener");
+
+    Check_Type(v_io, T_FILE);
+    GetOpenFile(v_io, fptr);
+    if (!SSL_set_fd(listener, TO_SOCKET(rb_io_descriptor(v_io)))) {
+        SSL_free(listener);
+        ossl_raise(eSSLError, "SSL_set_fd");
+    }
+
+    listener_obj = TypedData_Wrap_Struct(cSSLSocket, &ossl_ssl_type, listener);
+    SSL_set_ex_data(listener, ossl_ssl_ex_ptr_idx, (void *)listener_obj);
+
+    rb_ivar_set(listener_obj, id_i_io, v_io);
+    rb_ivar_set(listener_obj, id_i_context, v_ctx);
+    rb_funcall(listener_obj, rb_intern("initialize_buffer"), 0);
+
+    return listener_obj;
+}
+#endif
+
+#ifdef HAVE_SSL_ACCEPT_CONNECTION
+/*
+ * call-seq:
+ *    ssl.accept_connection(flags = 0) => SSLSocket or nil
+ *
+ * Accepts an incoming QUIC connection from the listener. Returns a new
+ * SSLSocket representing the connection, or +nil+ if no connection is
+ * available (when using non-blocking mode or ACCEPT_CONNECTION_NO_BLOCK).
+ */
+static VALUE
+ossl_ssl_accept_connection(int argc, VALUE *argv, VALUE self)
+{
+    SSL *ssl, *conn_ssl;
+    VALUE flags_v, conn_obj;
+    uint64_t flags = 0;
+
+    rb_scan_args(argc, argv, "01", &flags_v);
+    if (!NIL_P(flags_v))
+        flags = NUM2UINT64T(flags_v);
+
+    GetSSL(self, ssl);
+    conn_ssl = SSL_accept_connection(ssl, flags);
+    if (!conn_ssl)
+        return Qnil;
+
+    conn_obj = TypedData_Wrap_Struct(cSSLSocket, &ossl_ssl_type, conn_ssl);
+    SSL_set_ex_data(conn_ssl, ossl_ssl_ex_ptr_idx, (void *)conn_obj);
+
+    rb_ivar_set(conn_obj, id_i_io, rb_attr_get(self, id_i_io));
+    rb_ivar_set(conn_obj, id_i_context, rb_attr_get(self, id_i_context));
+    rb_ivar_set(conn_obj, id_i_connection, self);
+    rb_funcall(conn_obj, rb_intern("initialize_buffer"), 0);
+
+    return conn_obj;
+}
+#endif
+
+#ifdef HAVE_SSL_LISTEN
+/*
+ * call-seq:
+ *    ssl.listen => self
+ *
+ * Starts listening for incoming QUIC connections on this listener.
+ */
+static VALUE
+ossl_ssl_listen(VALUE self)
+{
+    SSL *ssl;
+
+    GetSSL(self, ssl);
+    if (!SSL_listen(ssl))
+        ossl_raise(eSSLError, "SSL_listen");
+
+    return self;
+}
+#endif
+
+#ifdef HAVE_SSL_GET_ACCEPT_CONNECTION_QUEUE_LEN
+/*
+ * call-seq:
+ *    ssl.accept_connection_queue_len => Integer
+ *
+ * Returns the number of pending incoming QUIC connections waiting
+ * to be accepted on this listener.
+ */
+static VALUE
+ossl_ssl_accept_connection_queue_len(VALUE self)
+{
+    SSL *ssl;
+
+    GetSSL(self, ssl);
+    return SIZET2NUM(SSL_get_accept_connection_queue_len(ssl));
+}
+#endif
+
+#ifdef HAVE_SSL_SET_INCOMING_STREAM_POLICY
+/*
+ * call-seq:
+ *    ssl.incoming_stream_policy = policy
+ *
+ * Sets the incoming stream policy for a QUIC connection.
+ * _policy_ should be one of +INCOMING_STREAM_POLICY_AUTO+,
+ * +INCOMING_STREAM_POLICY_ACCEPT+, or +INCOMING_STREAM_POLICY_REJECT+.
+ */
+static VALUE
+ossl_ssl_set_incoming_stream_policy(VALUE self, VALUE policy)
+{
+    SSL *ssl;
+
+    GetSSL(self, ssl);
+    if (!SSL_set_incoming_stream_policy(ssl, NUM2INT(policy), 0))
+        ossl_raise(eSSLError, "SSL_set_incoming_stream_policy");
+
+    return policy;
+}
+#endif
+
+#ifdef HAVE_SSL_POLL
+/*
+ * call-seq:
+ *    SSLSocket.poll(items, timeout = nil, flags = 0) => Array
+ *
+ * Polls multiple QUIC SSL objects for events. _items_ is an Array of
+ * <tt>[ssl, events]</tt> pairs where _events_ is a bitmask of
+ * +POLL_EVENT_*+ constants.
+ *
+ * _timeout_ is the maximum time to wait in seconds (Float), or +nil+
+ * to block indefinitely, or +0+ to return immediately.
+ *
+ * Returns an Array of <tt>[ssl, revents]</tt> pairs for items that
+ * have events ready.
+ */
+static VALUE
+ossl_ssl_poll(int argc, VALUE *argv, VALUE klass)
+{
+    VALUE items_ary, timeout_v, flags_v, result;
+    uint64_t flags = 0;
+    long i, n;
+    SSL_POLL_ITEM *items;
+    struct timeval tv;
+    int has_timeout, ret;
+    size_t result_count = 0;
+
+    rb_scan_args(argc, argv, "12", &items_ary, &timeout_v, &flags_v);
+    Check_Type(items_ary, T_ARRAY);
+
+    if (!NIL_P(flags_v))
+        flags = NUM2ULL(flags_v);
+
+    n = RARRAY_LEN(items_ary);
+    items = ALLOCA_N(SSL_POLL_ITEM, n);
+
+    for (i = 0; i < n; i++) {
+        VALUE pair = RARRAY_AREF(items_ary, i);
+        VALUE ssl_obj, events_v;
+        SSL *ssl;
+
+        Check_Type(pair, T_ARRAY);
+        if (RARRAY_LEN(pair) != 2)
+            rb_raise(rb_eArgError, "each item must be [ssl, events]");
+
+        ssl_obj = RARRAY_AREF(pair, 0);
+        events_v = RARRAY_AREF(pair, 1);
+
+        GetSSL(ssl_obj, ssl);
+        items[i].desc.type = BIO_POLL_DESCRIPTOR_TYPE_SSL;
+        items[i].desc.value.ssl = ssl;
+        items[i].events = NUM2ULL(events_v);
+        items[i].revents = 0;
+    }
+
+    if (NIL_P(timeout_v)) {
+        has_timeout = 0;
+    } else {
+        double t = NUM2DBL(timeout_v);
+        tv.tv_sec = (time_t)t;
+        tv.tv_usec = (suseconds_t)((t - (double)tv.tv_sec) * 1000000.0);
+        has_timeout = 1;
+    }
+
+    ret = SSL_poll(items, (size_t)n, sizeof(SSL_POLL_ITEM),
+                   has_timeout ? &tv : NULL, flags, &result_count);
+
+    if (!ret)
+        ossl_raise(eSSLError, "SSL_poll");
+
+    result = rb_ary_new();
+    for (i = 0; i < n; i++) {
+        if (items[i].revents) {
+            rb_ary_push(result, rb_ary_new_from_args(2,
+                RARRAY_AREF(RARRAY_AREF(items_ary, i), 0),
+                ULL2NUM(items[i].revents)));
+        }
+    }
+
+    return result;
+}
+#endif
+
+#endif /* OSSL_USE_QUIC */
+
 #endif /* !defined(OPENSSL_NO_SOCK) */
 
 void
@@ -3064,6 +3616,9 @@ Init_ossl_ssl(void)
 
     rb_define_method(cSSLContext, "setup", ossl_sslctx_setup, 0);
     rb_define_alias(cSSLContext, "freeze", "setup");
+#ifdef OSSL_USE_QUIC
+    rb_define_singleton_method(cSSLContext, "quic", ossl_sslctx_s_quic, 1);
+#endif
 
     /*
      * No session caching for client or server
@@ -3167,6 +3722,72 @@ Init_ossl_ssl(void)
 #endif
 #ifdef HAVE_SSL_GET0_GROUP_NAME
     rb_define_method(cSSLSocket, "group", ossl_ssl_get_group, 0);
+#endif
+
+#ifdef OSSL_USE_QUIC
+    rb_define_method(cSSLSocket, "new_stream", ossl_ssl_new_stream, -1);
+    rb_define_method(cSSLSocket, "accept_stream", ossl_ssl_accept_stream, -1);
+    rb_define_method(cSSLSocket, "stream_conclude", ossl_ssl_stream_conclude, 0);
+    rb_define_method(cSSLSocket, "stream_id", ossl_ssl_stream_id, 0);
+    rb_define_method(cSSLSocket, "default_stream_mode=", ossl_ssl_set_default_stream_mode, 1);
+    rb_define_method(cSSLSocket, "handle_events", ossl_ssl_handle_events, 0);
+    rb_define_method(cSSLSocket, "net_read_desired?", ossl_ssl_net_read_desired, 0);
+    rb_define_method(cSSLSocket, "net_write_desired?", ossl_ssl_net_write_desired, 0);
+    rb_define_method(cSSLSocket, "event_timeout", ossl_ssl_event_timeout, 0);
+    rb_define_method(cSSLSocket, "connection?", ossl_ssl_is_connection, 0);
+    rb_define_method(cSSLSocket, "init_finished?", ossl_ssl_is_init_finished, 0);
+
+    /* Create a unidirectional stream */
+    rb_define_const(mSSL, "STREAM_FLAG_UNI", UINT2NUM(SSL_STREAM_FLAG_UNI));
+    /* Do not block when creating or accepting a stream */
+    rb_define_const(mSSL, "STREAM_FLAG_NO_BLOCK", UINT2NUM(SSL_STREAM_FLAG_NO_BLOCK));
+#ifdef HAVE_SSL_NEW_LISTENER
+    rb_define_singleton_method(cSSLSocket, "new_listener", ossl_ssl_new_listener, -1);
+#endif
+#ifdef HAVE_SSL_ACCEPT_CONNECTION
+    rb_define_method(cSSLSocket, "accept_connection", ossl_ssl_accept_connection, -1);
+    rb_define_const(mSSL, "ACCEPT_CONNECTION_NO_BLOCK", ULL2NUM(SSL_ACCEPT_CONNECTION_NO_BLOCK));
+#endif
+#ifdef HAVE_SSL_LISTEN
+    rb_define_method(cSSLSocket, "listen", ossl_ssl_listen, 0);
+#endif
+#ifdef HAVE_SSL_GET_ACCEPT_CONNECTION_QUEUE_LEN
+    rb_define_method(cSSLSocket, "accept_connection_queue_len", ossl_ssl_accept_connection_queue_len, 0);
+#endif
+#ifdef HAVE_SSL_POLL
+    rb_define_singleton_method(cSSLSocket, "poll", ossl_ssl_poll, -1);
+
+    rb_define_const(mSSL, "POLL_EVENT_F", ULL2NUM(SSL_POLL_EVENT_F));
+    rb_define_const(mSSL, "POLL_EVENT_EL", ULL2NUM(SSL_POLL_EVENT_EL));
+    rb_define_const(mSSL, "POLL_EVENT_EC", ULL2NUM(SSL_POLL_EVENT_EC));
+    rb_define_const(mSSL, "POLL_EVENT_ECD", ULL2NUM(SSL_POLL_EVENT_ECD));
+    rb_define_const(mSSL, "POLL_EVENT_ER", ULL2NUM(SSL_POLL_EVENT_ER));
+    rb_define_const(mSSL, "POLL_EVENT_EW", ULL2NUM(SSL_POLL_EVENT_EW));
+    rb_define_const(mSSL, "POLL_EVENT_R", ULL2NUM(SSL_POLL_EVENT_R));
+    rb_define_const(mSSL, "POLL_EVENT_W", ULL2NUM(SSL_POLL_EVENT_W));
+    rb_define_const(mSSL, "POLL_EVENT_IC", ULL2NUM(SSL_POLL_EVENT_IC));
+    rb_define_const(mSSL, "POLL_EVENT_ISB", ULL2NUM(SSL_POLL_EVENT_ISB));
+    rb_define_const(mSSL, "POLL_EVENT_ISU", ULL2NUM(SSL_POLL_EVENT_ISU));
+    rb_define_const(mSSL, "POLL_EVENT_OSB", ULL2NUM(SSL_POLL_EVENT_OSB));
+    rb_define_const(mSSL, "POLL_EVENT_OSU", ULL2NUM(SSL_POLL_EVENT_OSU));
+    rb_define_const(mSSL, "POLL_EVENT_RW", ULL2NUM(SSL_POLL_EVENT_RW));
+    rb_define_const(mSSL, "POLL_EVENT_RE", ULL2NUM(SSL_POLL_EVENT_RE));
+    rb_define_const(mSSL, "POLL_EVENT_WE", ULL2NUM(SSL_POLL_EVENT_WE));
+    rb_define_const(mSSL, "POLL_EVENT_RWE", ULL2NUM(SSL_POLL_EVENT_RWE));
+    rb_define_const(mSSL, "POLL_EVENT_E", ULL2NUM(SSL_POLL_EVENT_E));
+    rb_define_const(mSSL, "POLL_EVENT_IS", ULL2NUM(SSL_POLL_EVENT_IS));
+    rb_define_const(mSSL, "POLL_EVENT_ISE", ULL2NUM(SSL_POLL_EVENT_ISE));
+    rb_define_const(mSSL, "POLL_EVENT_I", ULL2NUM(SSL_POLL_EVENT_I));
+    rb_define_const(mSSL, "POLL_EVENT_OS", ULL2NUM(SSL_POLL_EVENT_OS));
+    rb_define_const(mSSL, "POLL_EVENT_OSE", ULL2NUM(SSL_POLL_EVENT_OSE));
+    rb_define_const(mSSL, "POLL_FLAG_NO_HANDLE_EVENTS", ULL2NUM(SSL_POLL_FLAG_NO_HANDLE_EVENTS));
+#endif
+#ifdef HAVE_SSL_SET_INCOMING_STREAM_POLICY
+    rb_define_method(cSSLSocket, "incoming_stream_policy=", ossl_ssl_set_incoming_stream_policy, 1);
+    rb_define_const(mSSL, "INCOMING_STREAM_POLICY_AUTO", INT2NUM(SSL_INCOMING_STREAM_POLICY_AUTO));
+    rb_define_const(mSSL, "INCOMING_STREAM_POLICY_ACCEPT", INT2NUM(SSL_INCOMING_STREAM_POLICY_ACCEPT));
+    rb_define_const(mSSL, "INCOMING_STREAM_POLICY_REJECT", INT2NUM(SSL_INCOMING_STREAM_POLICY_REJECT));
+#endif
 #endif
 
     rb_define_const(mSSL, "VERIFY_NONE", INT2NUM(SSL_VERIFY_NONE));
@@ -3326,5 +3947,8 @@ Init_ossl_ssl(void)
     DefIVarID(context);
     DefIVarID(hostname);
     DefIVarID(sync_close);
+#ifdef OSSL_USE_QUIC
+    DefIVarID(connection);
+#endif
 #endif /* !defined(OPENSSL_NO_SOCK) */
 }
