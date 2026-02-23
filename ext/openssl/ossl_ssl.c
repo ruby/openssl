@@ -24,6 +24,14 @@
 #  define TO_SOCKET(s) (s)
 #endif
 
+#ifndef TYPEOF_TIMEVAL_TV_USEC
+# if INT_MAX >= 1000000
+#  define TYPEOF_TIMEVAL_TV_USEC int
+# else
+#  define TYPEOF_TIMEVAL_TV_USEC long
+# endif
+#endif
+
 #define GetSSLCTX(obj, ctx) do { \
     TypedData_Get_Struct((obj), SSL_CTX, &ossl_sslctx_type, (ctx)); \
 } while (0)
@@ -3250,7 +3258,7 @@ ossl_ssl_poll(int argc, VALUE *argv, VALUE klass)
     } else {
         double t = NUM2DBL(timeout_v);
         tv.tv_sec = (time_t)t;
-        tv.tv_usec = (suseconds_t)((t - (double)tv.tv_sec) * 1000000.0);
+        tv.tv_usec = (TYPEOF_TIMEVAL_TV_USEC)((t - (double)tv.tv_sec) * 1000000.0);
         has_timeout = 1;
     }
 
