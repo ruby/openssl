@@ -1170,7 +1170,7 @@ ossl_asn1prim_to_der(VALUE self)
 
     asn1 = ossl_asn1_get_asn1type(self);
     alllen = i2d_ASN1_TYPE(asn1, NULL);
-    if (alllen < 0) {
+    if (alllen <= 0) {
         ASN1_TYPE_free(asn1);
         ossl_raise(eASN1Error, "i2d_ASN1_TYPE");
     }
@@ -1180,7 +1180,7 @@ ossl_asn1prim_to_der(VALUE self)
         rb_jump_tag(state);
     }
     p0 = p1 = (unsigned char *)RSTRING_PTR(str);
-    if (i2d_ASN1_TYPE(asn1, &p0) < 0) {
+    if (i2d_ASN1_TYPE(asn1, &p0) <= 0) {
         ASN1_TYPE_free(asn1);
         ossl_raise(eASN1Error, "i2d_ASN1_TYPE");
     }
