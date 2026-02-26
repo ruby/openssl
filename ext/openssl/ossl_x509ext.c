@@ -68,7 +68,8 @@ ossl_x509ext_new(const X509_EXTENSION *ext)
     VALUE obj;
 
     obj = NewX509Ext(cX509Ext);
-    new = X509_EXTENSION_dup(ext);
+    /* OpenSSL 1.1.1 takes a non-const pointer */
+    new = X509_EXTENSION_dup((X509_EXTENSION *)ext);
     if (!new)
         ossl_raise(eX509ExtError, "X509_EXTENSION_dup");
     SetX509Ext(obj, new);

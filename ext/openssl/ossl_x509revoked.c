@@ -54,7 +54,8 @@ ossl_x509revoked_new(const X509_REVOKED *rev)
     VALUE obj;
 
     obj = NewX509Rev(cX509Rev);
-    new = X509_REVOKED_dup(rev);
+    /* OpenSSL 1.1.1 takes a non-const pointer */
+    new = X509_REVOKED_dup((X509_REVOKED *)rev);
     if (!new)
         ossl_raise(eX509RevError, "X509_REVOKED_dup");
     SetX509Rev(obj, new);

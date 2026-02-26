@@ -64,7 +64,8 @@ ossl_x509crl_new(const X509_CRL *crl)
     VALUE obj;
 
     obj = NewX509CRL(cX509CRL);
-    tmp = X509_CRL_dup(crl);
+    /* OpenSSL 1.1.1 takes a non-const pointer */
+    tmp = X509_CRL_dup((X509_CRL *)crl);
     if (!tmp)
         ossl_raise(eX509CRLError, "X509_CRL_dup");
     SetX509CRL(obj, tmp);

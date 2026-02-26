@@ -54,7 +54,8 @@ ossl_x509_new(const X509 *x509)
     VALUE obj;
 
     obj = NewX509(cX509Cert);
-    new = X509_dup(x509);
+    /* OpenSSL 1.1.1 takes a non-const pointer */
+    new = X509_dup((X509 *)x509);
     if (!new)
         ossl_raise(eX509CertError, "X509_dup");
     SetX509(obj, new);
