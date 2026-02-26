@@ -54,7 +54,8 @@ ossl_x509attr_new(const X509_ATTRIBUTE *attr)
     VALUE obj;
 
     obj = NewX509Attr(cX509Attr);
-    new = X509_ATTRIBUTE_dup(attr);
+    /* OpenSSL 1.1.1 takes a non-const pointer */
+    new = X509_ATTRIBUTE_dup((X509_ATTRIBUTE *)attr);
     if (!new)
         ossl_raise(eX509AttrError, "X509_ATTRIBUTE_dup");
     SetX509Attr(obj, new);
