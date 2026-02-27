@@ -1743,6 +1743,8 @@ ossl_ssl_initialize(int argc, VALUE *argv, VALUE self)
     // Always set non-blocking mode for QUIC connections
     // This is a no-op on non-QUIC connections
     SSL_set_blocking_mode(ssl, 0);
+    // This is also a no-op on non-QUIC connections
+    SSL_set_default_stream_mode(ssl, SSL_DEFAULT_STREAM_MODE_NONE);
 #endif
 
     rb_call_super(0, NULL);
@@ -2914,38 +2916,6 @@ ossl_ssl_stream_id(VALUE self)
 
 /*
  * call-seq:
- *    ssl.default_stream_mode = mode
- *
- * Sets the default stream mode for a QUIC connection. +mode+ should be
- * one of the symbols :none, :auto_bidi, or :auto_uni.
- */
-static VALUE
-ossl_ssl_set_default_stream_mode(VALUE self, VALUE mode)
-{
-    SSL *ssl;
-    uint32_t m;
-    ID mode_id;
-
-    GetSSL(self, ssl);
-
-    mode_id = SYM2ID(mode);
-    if (mode_id == rb_intern("none"))
-        m = SSL_DEFAULT_STREAM_MODE_NONE;
-    else if (mode_id == rb_intern("auto_bidi"))
-        m = SSL_DEFAULT_STREAM_MODE_AUTO_BIDI;
-    else if (mode_id == rb_intern("auto_uni"))
-        m = SSL_DEFAULT_STREAM_MODE_AUTO_UNI;
-    else
-        ossl_raise(rb_eArgError, "unknown default stream mode");
-
-    if (!SSL_set_default_stream_mode(ssl, m))
-        ossl_raise(eSSLError, "SSL_set_default_stream_mode");
-
-    return mode;
-}
-
-/*
- * call-seq:
  *    ssl.handle_events => nil
  *
  * Processes any pending QUIC events. This should be called periodically
@@ -3737,7 +3707,6 @@ Init_ossl_ssl(void)
     rb_define_method(cSSLSocket, "accept_stream", ossl_ssl_accept_stream, -1);
     rb_define_method(cSSLSocket, "stream_conclude", ossl_ssl_stream_conclude, 0);
     rb_define_method(cSSLSocket, "stream_id", ossl_ssl_stream_id, 0);
-    rb_define_method(cSSLSocket, "default_stream_mode=", ossl_ssl_set_default_stream_mode, 1);
     rb_define_method(cSSLSocket, "handle_events", ossl_ssl_handle_events, 0);
     rb_define_method(cSSLSocket, "net_read_desired?", ossl_ssl_net_read_desired, 0);
     rb_define_method(cSSLSocket, "net_write_desired?", ossl_ssl_net_write_desired, 0);
