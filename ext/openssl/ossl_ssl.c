@@ -3063,6 +3063,13 @@ ossl_ssl_new_listener(int argc, VALUE *argv, VALUE klass)
 
     listener_obj = TypedData_Wrap_Struct(cSSLSocket, &ossl_ssl_type, listener);
     SSL_set_ex_data(listener, ossl_ssl_ex_ptr_idx, (void *)listener_obj);
+#ifdef HAVE_SSL_SET_BLOCKING_MODE
+    // Always set non-blocking mode for QUIC connections
+    // This is a no-op on non-QUIC connections
+    SSL_set_blocking_mode(listener, 0);
+    // This is also a no-op on non-QUIC connections
+    SSL_set_default_stream_mode(listener, SSL_DEFAULT_STREAM_MODE_NONE);
+#endif
 
     rb_ivar_set(listener_obj, id_i_io, v_io);
     rb_ivar_set(listener_obj, id_i_context, v_ctx);
@@ -3099,6 +3106,13 @@ ossl_ssl_accept_connection(int argc, VALUE *argv, VALUE self)
 
     conn_obj = TypedData_Wrap_Struct(cSSLSocket, &ossl_ssl_type, conn_ssl);
     SSL_set_ex_data(conn_ssl, ossl_ssl_ex_ptr_idx, (void *)conn_obj);
+#ifdef HAVE_SSL_SET_BLOCKING_MODE
+    // Always set non-blocking mode for QUIC connections
+    // This is a no-op on non-QUIC connections
+    SSL_set_blocking_mode(ssl, 0);
+    // This is also a no-op on non-QUIC connections
+    SSL_set_default_stream_mode(ssl, SSL_DEFAULT_STREAM_MODE_NONE);
+#endif
 
     rb_ivar_set(conn_obj, id_i_io, rb_attr_get(self, id_i_io));
     rb_ivar_set(conn_obj, id_i_context, rb_attr_get(self, id_i_context));
