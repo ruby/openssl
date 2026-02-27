@@ -189,7 +189,6 @@ have_func("SSL_new_listener(NULL, 0)", ssl_h)
 have_func("SSL_accept_connection(NULL, 0)", ssl_h)
 have_func("SSL_get_accept_connection_queue_len(NULL)", ssl_h)
 have_func("SSL_listen(NULL)", ssl_h)
-have_func("SSL_poll(NULL, 0, 0, NULL, 0, NULL)", ssl_h)
 have_func("SSL_set_incoming_stream_policy(NULL, 0, 0)", ssl_h)
 
 Logging::message "=== Checking done. ===\n"
