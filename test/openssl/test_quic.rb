@@ -82,12 +82,6 @@ class OpenSSL::TestQUIC < Test::Unit::TestCase
   LISTENER_SUPPORTED = QUIC_SUPPORTED &&
     OpenSSL::SSL::SSLSocket.respond_to?(:new_listener)
 
-  def test_new_listener_method_defined
-    pend "QUIC listener not supported" unless LISTENER_SUPPORTED
-
-    assert_respond_to OpenSSL::SSL::SSLSocket, :new_listener
-  end
-
   def test_new_listener_creates_socket
     pend "QUIC listener not supported" unless LISTENER_SUPPORTED
 
@@ -102,60 +96,37 @@ class OpenSSL::TestQUIC < Test::Unit::TestCase
     end
   end
 
-  def test_accept_connection_method_defined
+  def test_accept_connection_nonblock_no_exception
     pend "QUIC listener not supported" unless LISTENER_SUPPORTED
-    pend "accept_connection not available" unless
-      OpenSSL::SSL::SSLSocket.method_defined?(:accept_connection)
 
     ctx = OpenSSL::SSL::SSLContext.quic(:server)
     udp = UDPSocket.new
     begin
       udp.bind("127.0.0.1", 0)
       listener = OpenSSL::SSL::SSLSocket.new_listener(udp, context: ctx)
-      assert_respond_to listener, :accept_connection
+      listener.listen
+      result = listener.accept_connection_nonblock(exception: false)
+      assert_equal :wait_readable, result
     ensure
       udp.close rescue nil
     end
   end
 
-  def test_listen_method_defined
+  def test_accept_connection_nonblock_raises
     pend "QUIC listener not supported" unless LISTENER_SUPPORTED
-    pend "listen not available" unless
-      OpenSSL::SSL::SSLSocket.method_defined?(:listen)
 
     ctx = OpenSSL::SSL::SSLContext.quic(:server)
     udp = UDPSocket.new
     begin
       udp.bind("127.0.0.1", 0)
       listener = OpenSSL::SSL::SSLSocket.new_listener(udp, context: ctx)
-      assert_respond_to listener, :listen
+      listener.listen
+      assert_raise(OpenSSL::SSL::SSLErrorWaitReadable) do
+        listener.accept_connection_nonblock
+      end
     ensure
       udp.close rescue nil
     end
-  end
-
-  def test_accept_connection_queue_len_method_defined
-    pend "QUIC listener not supported" unless LISTENER_SUPPORTED
-    pend "accept_connection_queue_len not available" unless
-      OpenSSL::SSL::SSLSocket.method_defined?(:accept_connection_queue_len)
-
-    ctx = OpenSSL::SSL::SSLContext.quic(:server)
-    udp = UDPSocket.new
-    begin
-      udp.bind("127.0.0.1", 0)
-      listener = OpenSSL::SSL::SSLSocket.new_listener(udp, context: ctx)
-      assert_respond_to listener, :accept_connection_queue_len
-    ensure
-      udp.close rescue nil
-    end
-  end
-
-  def test_accept_connection_no_block_constant
-    pend "QUIC listener not supported" unless LISTENER_SUPPORTED
-    pend "ACCEPT_CONNECTION_NO_BLOCK not defined" unless
-      OpenSSL::SSL.const_defined?(:ACCEPT_CONNECTION_NO_BLOCK)
-
-    assert_kind_of Integer, OpenSSL::SSL::ACCEPT_CONNECTION_NO_BLOCK
   end
 end
 
