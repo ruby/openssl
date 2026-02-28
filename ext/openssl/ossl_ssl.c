@@ -3693,47 +3693,16 @@ Init_ossl_ssl(void)
     rb_define_const(mSSL, "STREAM_FLAG_UNI", UINT2NUM(SSL_STREAM_FLAG_UNI));
     /* Do not block when creating a stream */
     rb_define_const(mSSL, "STREAM_FLAG_NO_BLOCK", UINT2NUM(SSL_STREAM_FLAG_NO_BLOCK));
-#ifdef OSSL_USE_QUIC
     rb_define_singleton_method(cSSLSocket, "new_listener", ossl_ssl_new_listener, -1);
     rb_define_method(cSSLSocket, "accept_connection", ossl_ssl_accept_connection, 0);
     rb_define_method(cSSLSocket, "accept_connection_nonblock", ossl_ssl_accept_connection_nonblock, -1);
     rb_define_method(cSSLSocket, "listen", ossl_ssl_listen, 0);
     rb_define_method(cSSLSocket, "accept_connection_queue_len", ossl_ssl_accept_connection_queue_len, 0);
-#endif
-#ifdef HAVE_SSL_POLL
-    rb_define_singleton_method(cSSLSocket, "poll", ossl_ssl_poll, -1);
 
-    rb_define_const(mSSL, "POLL_EVENT_F", ULL2NUM(SSL_POLL_EVENT_F));
-    rb_define_const(mSSL, "POLL_EVENT_EL", ULL2NUM(SSL_POLL_EVENT_EL));
-    rb_define_const(mSSL, "POLL_EVENT_EC", ULL2NUM(SSL_POLL_EVENT_EC));
-    rb_define_const(mSSL, "POLL_EVENT_ECD", ULL2NUM(SSL_POLL_EVENT_ECD));
-    rb_define_const(mSSL, "POLL_EVENT_ER", ULL2NUM(SSL_POLL_EVENT_ER));
-    rb_define_const(mSSL, "POLL_EVENT_EW", ULL2NUM(SSL_POLL_EVENT_EW));
-    rb_define_const(mSSL, "POLL_EVENT_R", ULL2NUM(SSL_POLL_EVENT_R));
-    rb_define_const(mSSL, "POLL_EVENT_W", ULL2NUM(SSL_POLL_EVENT_W));
-    rb_define_const(mSSL, "POLL_EVENT_IC", ULL2NUM(SSL_POLL_EVENT_IC));
-    rb_define_const(mSSL, "POLL_EVENT_ISB", ULL2NUM(SSL_POLL_EVENT_ISB));
-    rb_define_const(mSSL, "POLL_EVENT_ISU", ULL2NUM(SSL_POLL_EVENT_ISU));
-    rb_define_const(mSSL, "POLL_EVENT_OSB", ULL2NUM(SSL_POLL_EVENT_OSB));
-    rb_define_const(mSSL, "POLL_EVENT_OSU", ULL2NUM(SSL_POLL_EVENT_OSU));
-    rb_define_const(mSSL, "POLL_EVENT_RW", ULL2NUM(SSL_POLL_EVENT_RW));
-    rb_define_const(mSSL, "POLL_EVENT_RE", ULL2NUM(SSL_POLL_EVENT_RE));
-    rb_define_const(mSSL, "POLL_EVENT_WE", ULL2NUM(SSL_POLL_EVENT_WE));
-    rb_define_const(mSSL, "POLL_EVENT_RWE", ULL2NUM(SSL_POLL_EVENT_RWE));
-    rb_define_const(mSSL, "POLL_EVENT_E", ULL2NUM(SSL_POLL_EVENT_E));
-    rb_define_const(mSSL, "POLL_EVENT_IS", ULL2NUM(SSL_POLL_EVENT_IS));
-    rb_define_const(mSSL, "POLL_EVENT_ISE", ULL2NUM(SSL_POLL_EVENT_ISE));
-    rb_define_const(mSSL, "POLL_EVENT_I", ULL2NUM(SSL_POLL_EVENT_I));
-    rb_define_const(mSSL, "POLL_EVENT_OS", ULL2NUM(SSL_POLL_EVENT_OS));
-    rb_define_const(mSSL, "POLL_EVENT_OSE", ULL2NUM(SSL_POLL_EVENT_OSE));
-    rb_define_const(mSSL, "POLL_FLAG_NO_HANDLE_EVENTS", ULL2NUM(SSL_POLL_FLAG_NO_HANDLE_EVENTS));
-#endif
-#ifdef OSSL_USE_QUIC
     rb_define_method(cSSLSocket, "incoming_stream_policy=", ossl_ssl_set_incoming_stream_policy, 1);
     rb_define_const(mSSL, "INCOMING_STREAM_POLICY_AUTO", INT2NUM(SSL_INCOMING_STREAM_POLICY_AUTO));
     rb_define_const(mSSL, "INCOMING_STREAM_POLICY_ACCEPT", INT2NUM(SSL_INCOMING_STREAM_POLICY_ACCEPT));
     rb_define_const(mSSL, "INCOMING_STREAM_POLICY_REJECT", INT2NUM(SSL_INCOMING_STREAM_POLICY_REJECT));
-#endif
 #endif
 
     rb_define_const(mSSL, "VERIFY_NONE", INT2NUM(SSL_VERIFY_NONE));
