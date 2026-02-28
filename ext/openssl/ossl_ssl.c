@@ -2902,6 +2902,14 @@ ossl_ssl_accept_stream_nonblock(int argc, VALUE *argv, VALUE self)
         ossl_raise(eSSLErrorWaitReadable, "accept_stream would block");
     }
 
+#ifdef HAVE_SSL_SET_BLOCKING_MODE
+    // Always set non-blocking mode for QUIC connections
+    // This is a no-op on non-QUIC connections
+    SSL_set_blocking_mode(stream_ssl, 0);
+    // This is also a no-op on non-QUIC connections
+    SSL_set_default_stream_mode(stream_ssl, SSL_DEFAULT_STREAM_MODE_NONE);
+#endif
+
     return ossl_ssl_wrap_stream(self, stream_ssl);
 }
 
