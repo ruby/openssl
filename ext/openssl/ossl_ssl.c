@@ -2887,13 +2887,8 @@ ossl_ssl_accept_stream_nonblock(int argc, VALUE *argv, VALUE self)
         ossl_raise(eSSLErrorWaitReadable, "accept_stream would block");
     }
 
-#ifdef OSSL_USE_QUIC
-    // Always set non-blocking mode for QUIC connections
-    // This is a no-op on non-QUIC connections
     SSL_set_blocking_mode(stream_ssl, 0);
-    // This is also a no-op on non-QUIC connections
     SSL_set_default_stream_mode(stream_ssl, SSL_DEFAULT_STREAM_MODE_NONE);
-#endif
 
     return ossl_ssl_wrap_stream(self, stream_ssl);
 }
@@ -3040,7 +3035,6 @@ ossl_ssl_is_init_finished(VALUE self)
     return SSL_is_init_finished(ssl) ? Qtrue : Qfalse;
 }
 
-#ifdef OSSL_USE_QUIC
 /*
  * call-seq:
  *    SSLSocket.new_listener(io, context:) => SSLSocket
@@ -3091,9 +3085,7 @@ ossl_ssl_new_listener(int argc, VALUE *argv, VALUE klass)
 
     return listener_obj;
 }
-#endif
 
-#ifdef OSSL_USE_QUIC
 static VALUE
 ossl_ssl_wrap_connection(VALUE self, SSL *conn_ssl)
 {
@@ -3164,9 +3156,7 @@ ossl_ssl_accept_connection_nonblock(int argc, VALUE *argv, VALUE self)
 
     return ossl_ssl_wrap_connection(self, conn_ssl);
 }
-#endif
 
-#ifdef OSSL_USE_QUIC
 /*
  * call-seq:
  *    ssl.listen => self
@@ -3184,9 +3174,7 @@ ossl_ssl_listen(VALUE self)
 
     return self;
 }
-#endif
 
-#ifdef OSSL_USE_QUIC
 /*
  * call-seq:
  *    ssl.accept_connection_queue_len => Integer
@@ -3202,9 +3190,7 @@ ossl_ssl_accept_connection_queue_len(VALUE self)
     GetSSL(self, ssl);
     return SIZET2NUM(SSL_get_accept_connection_queue_len(ssl));
 }
-#endif
 
-#ifdef OSSL_USE_QUIC
 /*
  * call-seq:
  *    ssl.incoming_stream_policy = policy
@@ -3224,7 +3210,6 @@ ossl_ssl_set_incoming_stream_policy(VALUE self, VALUE policy)
 
     return policy;
 }
-#endif
 #endif /* OSSL_USE_QUIC */
 
 #endif /* !defined(OPENSSL_NO_SOCK) */
