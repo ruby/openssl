@@ -14,18 +14,6 @@ class OpenSSL::TestQUIC < Test::Unit::TestCase
     assert_predicate ctx, :quic?
   end
 
-  def test_quic_context_client_thread
-    pend "QUIC not supported" unless QUIC_SUPPORTED
-    # :client_thread may not be available on all builds
-    begin
-      ctx = OpenSSL::SSL::SSLContext.quic(:client_thread)
-      assert_equal :client_thread, ctx.quic
-      assert_predicate ctx, :quic?
-    rescue OpenSSL::SSL::SSLError
-      pend "QUIC client_thread method not available"
-    end
-  end
-
   def test_quic_context_unknown_mode_raises
     pend "QUIC not supported" unless QUIC_SUPPORTED
 

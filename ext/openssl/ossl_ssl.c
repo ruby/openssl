@@ -24,14 +24,6 @@
 #  define TO_SOCKET(s) (s)
 #endif
 
-#ifndef TYPEOF_TIMEVAL_TV_USEC
-# if INT_MAX >= 1000000
-#  define TYPEOF_TIMEVAL_TV_USEC int
-# else
-#  define TYPEOF_TIMEVAL_TV_USEC long
-# endif
-#endif
-
 #define GetSSLCTX(obj, ctx) do { \
     TypedData_Get_Struct((obj), SSL_CTX, &ossl_sslctx_type, (ctx)); \
 } while (0)
@@ -1566,9 +1558,8 @@ ossl_sslctx_flush_sessions(int argc, VALUE *argv, VALUE self)
 #ifdef OSSL_USE_QUIC
 /*
  * call-seq:
- *    SSLContext.quic(:client)        -> ctx
- *    SSLContext.quic(:client_thread) -> ctx
- *    SSLContext.quic(:server)        -> ctx
+ *    SSLContext.quic(:client) -> ctx
+ *    SSLContext.quic(:server) -> ctx
  *
  * Creates a new SSLContext for QUIC. The argument specifies the QUIC mode.
  * Requires OpenSSL 3.2+.
@@ -1587,14 +1578,8 @@ ossl_sslctx_s_quic(VALUE klass, VALUE quic_sym)
 
     if (quic_id == rb_intern("client"))
         method = OSSL_QUIC_client_method();
-#ifdef OSSL_USE_QUIC
-    else if (quic_id == rb_intern("client_thread"))
-        method = OSSL_QUIC_client_thread_method();
-#endif
-#ifdef OSSL_USE_QUIC
     else if (quic_id == rb_intern("server"))
         method = OSSL_QUIC_server_method();
-#endif
     else
         ossl_raise(rb_eArgError, "unknown QUIC mode: %"PRIsVALUE, quic_sym);
 
