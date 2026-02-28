@@ -3210,6 +3210,33 @@ ossl_ssl_set_incoming_stream_policy(VALUE self, VALUE policy)
 
     return policy;
 }
+
+/*
+ * call-seq:
+ *    ssl.stream_read_state => Integer
+ *
+ * Returns the read state of a QUIC stream as an integer. The possible values
+ * are:
+ *
+ * - +SSL_STREAM_STATE_NONE+ (0): not a QUIC stream object
+ * - +SSL_STREAM_STATE_OK+ (1): stream is readable
+ * - +SSL_STREAM_STATE_WRONG_DIR+ (2): stream is unidirectional in the wrong direction
+ * - +SSL_STREAM_STATE_FINISHED+ (3): FIN received, no more data
+ * - +SSL_STREAM_STATE_RESET_LOCAL+ (4): stream was reset locally
+ * - +SSL_STREAM_STATE_RESET_REMOTE+ (5): stream was reset by the peer (RESET_STREAM)
+ * - +SSL_STREAM_STATE_CONN_CLOSED+ (6): connection is closed
+ *
+ * A state of +SSL_STREAM_STATE_RESET_REMOTE+ or +SSL_STREAM_STATE_CONN_CLOSED+
+ * means that calling +read_nonblock+ will raise an +SSLError+.
+ */
+static VALUE
+ossl_ssl_stream_read_state(VALUE self)
+{
+    SSL *ssl;
+
+    GetSSL(self, ssl);
+    return INT2NUM(SSL_get_stream_read_state(ssl));
+}
 #endif /* OSSL_USE_QUIC */
 
 #endif /* !defined(OPENSSL_NO_SOCK) */
@@ -3688,6 +3715,14 @@ Init_ossl_ssl(void)
     rb_define_const(mSSL, "INCOMING_STREAM_POLICY_AUTO", INT2NUM(SSL_INCOMING_STREAM_POLICY_AUTO));
     rb_define_const(mSSL, "INCOMING_STREAM_POLICY_ACCEPT", INT2NUM(SSL_INCOMING_STREAM_POLICY_ACCEPT));
     rb_define_const(mSSL, "INCOMING_STREAM_POLICY_REJECT", INT2NUM(SSL_INCOMING_STREAM_POLICY_REJECT));
+    rb_define_method(cSSLSocket, "stream_read_state", ossl_ssl_stream_read_state, 0);
+    rb_define_const(mSSL, "SSL_STREAM_STATE_NONE",         INT2NUM(SSL_STREAM_STATE_NONE));
+    rb_define_const(mSSL, "SSL_STREAM_STATE_OK",           INT2NUM(SSL_STREAM_STATE_OK));
+    rb_define_const(mSSL, "SSL_STREAM_STATE_WRONG_DIR",    INT2NUM(SSL_STREAM_STATE_WRONG_DIR));
+    rb_define_const(mSSL, "SSL_STREAM_STATE_FINISHED",     INT2NUM(SSL_STREAM_STATE_FINISHED));
+    rb_define_const(mSSL, "SSL_STREAM_STATE_RESET_LOCAL",  INT2NUM(SSL_STREAM_STATE_RESET_LOCAL));
+    rb_define_const(mSSL, "SSL_STREAM_STATE_RESET_REMOTE", INT2NUM(SSL_STREAM_STATE_RESET_REMOTE));
+    rb_define_const(mSSL, "SSL_STREAM_STATE_CONN_CLOSED",  INT2NUM(SSL_STREAM_STATE_CONN_CLOSED));
 #endif
 
     rb_define_const(mSSL, "VERIFY_NONE", INT2NUM(SSL_VERIFY_NONE));
