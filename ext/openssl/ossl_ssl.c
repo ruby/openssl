@@ -1562,7 +1562,7 @@ ossl_sslctx_flush_sessions(int argc, VALUE *argv, VALUE self)
  *    SSLContext.quic(:server) -> ctx
  *
  * Creates a new SSLContext for QUIC. The argument specifies the QUIC mode.
- * Requires OpenSSL 3.2+.
+ * Requires OpenSSL 3.5+.
  */
 static VALUE
 ossl_sslctx_s_quic(VALUE klass, VALUE quic_sym)
