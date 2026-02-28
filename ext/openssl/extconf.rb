@@ -169,27 +169,11 @@ have_func("TS_VERIFY_CTX_set0_certs(NULL, NULL)", ts_h)
 # added in 3.5.0
 have_func("SSL_get0_peer_signature_name(NULL, NULL)", ssl_h)
 
-# QUIC support - added in OpenSSL 3.2.0
-have_func("OSSL_QUIC_client_method()", ssl_h)
-have_func("OSSL_QUIC_client_thread_method()", ssl_h)
-have_func("SSL_new_stream(NULL, 0)", ssl_h)
-have_func("SSL_accept_stream(NULL, 0)", ssl_h)
-have_func("SSL_stream_conclude(NULL)", ssl_h)
-have_func("SSL_get_stream_id(NULL)", ssl_h)
-have_func("SSL_set_default_stream_mode(NULL, 0)", ssl_h)
-have_func("SSL_set_blocking_mode(NULL, 0)", ssl_h)
-have_func("SSL_get_blocking_mode(NULL)", ssl_h)
-have_func("SSL_handle_events(NULL)", ssl_h)
-have_func("SSL_get_event_timeout(NULL, NULL, NULL)", ssl_h)
-have_func("SSL_get0_connection(NULL)", ssl_h)
-have_func("SSL_is_connection(NULL)", ssl_h)
-have_func("SSL_set1_initial_peer_addr(NULL, NULL)", ssl_h)
-have_func("OSSL_QUIC_server_method()", ssl_h)
-have_func("SSL_new_listener(NULL, 0)", ssl_h)
-have_func("SSL_accept_connection(NULL, 0)", ssl_h)
-have_func("SSL_get_accept_connection_queue_len(NULL)", ssl_h)
-have_func("SSL_listen(NULL)", ssl_h)
-have_func("SSL_set_incoming_stream_policy(NULL, 0, 0)", ssl_h)
+# QUIC support - requires OpenSSL 3.5.0+, not available in LibreSSL
+if is_openssl && checking_for("OpenSSL version >= 3.5.0") {
+  try_static_assert("OPENSSL_VERSION_NUMBER >= 0x30500000L", "openssl/opensslv.h") }
+  $defs.push("-DHAVE_OSSL_QUIC_CLIENT_METHOD")
+end
 
 Logging::message "=== Checking done. ===\n"
 

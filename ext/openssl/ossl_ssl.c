@@ -1587,11 +1587,11 @@ ossl_sslctx_s_quic(VALUE klass, VALUE quic_sym)
 
     if (quic_id == rb_intern("client"))
         method = OSSL_QUIC_client_method();
-#ifdef HAVE_OSSL_QUIC_CLIENT_THREAD_METHOD
+#ifdef OSSL_USE_QUIC
     else if (quic_id == rb_intern("client_thread"))
         method = OSSL_QUIC_client_thread_method();
 #endif
-#ifdef HAVE_OSSL_QUIC_SERVER_METHOD
+#ifdef OSSL_USE_QUIC
     else if (quic_id == rb_intern("server"))
         method = OSSL_QUIC_server_method();
 #endif
@@ -1739,7 +1739,7 @@ ossl_ssl_initialize(int argc, VALUE *argv, VALUE self)
 
     SSL_set_ex_data(ssl, ossl_ssl_ex_ptr_idx, (void *)self);
     SSL_set_info_callback(ssl, ssl_info_cb);
-#ifdef HAVE_SSL_SET_BLOCKING_MODE
+#ifdef OSSL_USE_QUIC
     // Always set non-blocking mode for QUIC connections
     // This is a no-op on non-QUIC connections
     SSL_set_blocking_mode(ssl, 0);
@@ -2902,7 +2902,7 @@ ossl_ssl_accept_stream_nonblock(int argc, VALUE *argv, VALUE self)
         ossl_raise(eSSLErrorWaitReadable, "accept_stream would block");
     }
 
-#ifdef HAVE_SSL_SET_BLOCKING_MODE
+#ifdef OSSL_USE_QUIC
     // Always set non-blocking mode for QUIC connections
     // This is a no-op on non-QUIC connections
     SSL_set_blocking_mode(stream_ssl, 0);
@@ -3055,7 +3055,7 @@ ossl_ssl_is_init_finished(VALUE self)
     return SSL_is_init_finished(ssl) ? Qtrue : Qfalse;
 }
 
-#ifdef HAVE_SSL_NEW_LISTENER
+#ifdef OSSL_USE_QUIC
 /*
  * call-seq:
  *    SSLSocket.new_listener(io, context:) => SSLSocket
@@ -3097,13 +3097,8 @@ ossl_ssl_new_listener(int argc, VALUE *argv, VALUE klass)
 
     listener_obj = TypedData_Wrap_Struct(cSSLSocket, &ossl_ssl_type, listener);
     SSL_set_ex_data(listener, ossl_ssl_ex_ptr_idx, (void *)listener_obj);
-#ifdef HAVE_SSL_SET_BLOCKING_MODE
-    // Always set non-blocking mode for QUIC connections
-    // This is a no-op on non-QUIC connections
     SSL_set_blocking_mode(listener, 0);
-    // This is also a no-op on non-QUIC connections
     SSL_set_default_stream_mode(listener, SSL_DEFAULT_STREAM_MODE_NONE);
-#endif
 
     rb_ivar_set(listener_obj, id_i_io, v_io);
     rb_ivar_set(listener_obj, id_i_context, v_ctx);
@@ -3113,7 +3108,7 @@ ossl_ssl_new_listener(int argc, VALUE *argv, VALUE klass)
 }
 #endif
 
-#ifdef HAVE_SSL_ACCEPT_CONNECTION
+#ifdef OSSL_USE_QUIC
 static VALUE
 ossl_ssl_wrap_connection(VALUE self, SSL *conn_ssl)
 {
@@ -3121,10 +3116,8 @@ ossl_ssl_wrap_connection(VALUE self, SSL *conn_ssl)
 
     conn_obj = TypedData_Wrap_Struct(cSSLSocket, &ossl_ssl_type, conn_ssl);
     SSL_set_ex_data(conn_ssl, ossl_ssl_ex_ptr_idx, (void *)conn_obj);
-#ifdef HAVE_SSL_SET_BLOCKING_MODE
     SSL_set_blocking_mode(conn_ssl, 0);
     SSL_set_default_stream_mode(conn_ssl, SSL_DEFAULT_STREAM_MODE_NONE);
-#endif
 
     rb_ivar_set(conn_obj, id_i_io, rb_attr_get(self, id_i_io));
     rb_ivar_set(conn_obj, id_i_context, rb_attr_get(self, id_i_context));
@@ -3188,7 +3181,7 @@ ossl_ssl_accept_connection_nonblock(int argc, VALUE *argv, VALUE self)
 }
 #endif
 
-#ifdef HAVE_SSL_LISTEN
+#ifdef OSSL_USE_QUIC
 /*
  * call-seq:
  *    ssl.listen => self
@@ -3208,7 +3201,7 @@ ossl_ssl_listen(VALUE self)
 }
 #endif
 
-#ifdef HAVE_SSL_GET_ACCEPT_CONNECTION_QUEUE_LEN
+#ifdef OSSL_USE_QUIC
 /*
  * call-seq:
  *    ssl.accept_connection_queue_len => Integer
@@ -3226,7 +3219,7 @@ ossl_ssl_accept_connection_queue_len(VALUE self)
 }
 #endif
 
-#ifdef HAVE_SSL_SET_INCOMING_STREAM_POLICY
+#ifdef OSSL_USE_QUIC
 /*
  * call-seq:
  *    ssl.incoming_stream_policy = policy
@@ -3715,17 +3708,11 @@ Init_ossl_ssl(void)
     rb_define_const(mSSL, "STREAM_FLAG_UNI", UINT2NUM(SSL_STREAM_FLAG_UNI));
     /* Do not block when creating a stream */
     rb_define_const(mSSL, "STREAM_FLAG_NO_BLOCK", UINT2NUM(SSL_STREAM_FLAG_NO_BLOCK));
-#ifdef HAVE_SSL_NEW_LISTENER
+#ifdef OSSL_USE_QUIC
     rb_define_singleton_method(cSSLSocket, "new_listener", ossl_ssl_new_listener, -1);
-#endif
-#ifdef HAVE_SSL_ACCEPT_CONNECTION
     rb_define_method(cSSLSocket, "accept_connection", ossl_ssl_accept_connection, 0);
     rb_define_method(cSSLSocket, "accept_connection_nonblock", ossl_ssl_accept_connection_nonblock, -1);
-#endif
-#ifdef HAVE_SSL_LISTEN
     rb_define_method(cSSLSocket, "listen", ossl_ssl_listen, 0);
-#endif
-#ifdef HAVE_SSL_GET_ACCEPT_CONNECTION_QUEUE_LEN
     rb_define_method(cSSLSocket, "accept_connection_queue_len", ossl_ssl_accept_connection_queue_len, 0);
 #endif
 #ifdef HAVE_SSL_POLL
@@ -3756,7 +3743,7 @@ Init_ossl_ssl(void)
     rb_define_const(mSSL, "POLL_EVENT_OSE", ULL2NUM(SSL_POLL_EVENT_OSE));
     rb_define_const(mSSL, "POLL_FLAG_NO_HANDLE_EVENTS", ULL2NUM(SSL_POLL_FLAG_NO_HANDLE_EVENTS));
 #endif
-#ifdef HAVE_SSL_SET_INCOMING_STREAM_POLICY
+#ifdef OSSL_USE_QUIC
     rb_define_method(cSSLSocket, "incoming_stream_policy=", ossl_ssl_set_incoming_stream_policy, 1);
     rb_define_const(mSSL, "INCOMING_STREAM_POLICY_AUTO", INT2NUM(SSL_INCOMING_STREAM_POLICY_AUTO));
     rb_define_const(mSSL, "INCOMING_STREAM_POLICY_ACCEPT", INT2NUM(SSL_INCOMING_STREAM_POLICY_ACCEPT));
