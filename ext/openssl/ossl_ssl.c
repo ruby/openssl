@@ -2895,7 +2895,7 @@ ossl_ssl_accept_stream_nonblock(int argc, VALUE *argv, VALUE self)
     rb_scan_args(argc, argv, "0:", &opts);
 
     GetSSL(self, ssl);
-    stream_ssl = SSL_accept_stream(ssl, SSL_STREAM_FLAG_NO_BLOCK);
+    stream_ssl = SSL_accept_stream(ssl, SSL_ACCEPT_STREAM_NO_BLOCK);
     if (!stream_ssl) {
         if (no_exception_p(opts))
             return sym_wait_readable;
@@ -3713,7 +3713,7 @@ Init_ossl_ssl(void)
 
     /* Create a unidirectional stream */
     rb_define_const(mSSL, "STREAM_FLAG_UNI", UINT2NUM(SSL_STREAM_FLAG_UNI));
-    /* Do not block when creating or accepting a stream */
+    /* Do not block when creating a stream */
     rb_define_const(mSSL, "STREAM_FLAG_NO_BLOCK", UINT2NUM(SSL_STREAM_FLAG_NO_BLOCK));
 #ifdef HAVE_SSL_NEW_LISTENER
     rb_define_singleton_method(cSSLSocket, "new_listener", ossl_ssl_new_listener, -1);
