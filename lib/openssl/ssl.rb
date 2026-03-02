@@ -113,6 +113,8 @@ module OpenSSL
         params = DEFAULT_PARAMS.merge(params)
         self.options |= params.delete(:options) # set before min_version/max_version
         params.each{|name, value| self.__send__("#{name}=", value) }
+        
+        # Set the default certificate store if we're verifying certificates:
         if self.verify_mode != OpenSSL::SSL::VERIFY_NONE
           unless self.ca_file or self.ca_path or self.cert_store
             if not defined?(Ractor) or Ractor.current == Ractor.main
@@ -125,6 +127,15 @@ module OpenSSL
             end
           end
         end
+
+        # Set the default session id context if it's not set:
+        unless self.session_id_context
+          # see #6137 - session id may not exceed 32 bytes
+          prng = ::Random.new($0.hash)
+          session_id = prng.bytes(16).unpack1('H*')
+          self.session_id_context = session_id
+        end
+
         return params
       end
 
@@ -486,12 +497,6 @@ module OpenSSL
       def initialize(svr, ctx)
         @svr = svr
         @ctx = ctx
-        unless ctx.session_id_context
-          # see #6137 - session id may not exceed 32 bytes
-          prng = ::Random.new($0.hash)
-          session_id = prng.bytes(16).unpack1('H*')
-          @ctx.session_id_context = session_id
-        end
         @start_immediately = true
       end
 
