@@ -2905,8 +2905,10 @@ ossl_ssl_accept_stream_nonblock(int argc, VALUE *argv, VALUE self)
 
     GetSSL(self, ssl);
     stream_ssl = SSL_accept_stream(ssl, SSL_ACCEPT_STREAM_NO_BLOCK);
-    if (!stream_ssl)
-        return ossl_ssl_quic_null_error(ssl, "SSL_accept_stream", opts);
+    if (!stream_ssl) {
+        if (no_exception_p(opts)) return sym_wait_readable;
+        ossl_raise(eSSLErrorWaitReadable, "accept_stream would block");
+    }
 
     SSL_set_blocking_mode(stream_ssl, 0);
     SSL_set_default_stream_mode(stream_ssl, SSL_DEFAULT_STREAM_MODE_NONE);
