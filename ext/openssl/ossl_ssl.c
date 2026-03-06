@@ -2962,7 +2962,8 @@ ossl_ssl_handle_events(VALUE self)
     SSL *ssl;
 
     GetSSL(self, ssl);
-    SSL_handle_events(ssl);
+    if (!SSL_handle_events(ssl))
+        ossl_raise(eSSLError, "SSL_handle_events");
 
     return Qnil;
 }
