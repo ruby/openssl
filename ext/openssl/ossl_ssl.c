@@ -1802,6 +1802,23 @@ no_exception_p(VALUE opts)
     return 0;
 }
 
+static VALUE
+ossl_ssl_quic_null_error(SSL *ssl, const char *funcname, VALUE opts)
+{
+    int err = SSL_get_error(ssl, 0);
+
+    switch (err) {
+      case SSL_ERROR_NONE:
+      case SSL_ERROR_WANT_READ:
+        if (no_exception_p(opts))
+            return sym_wait_readable;
+        ossl_raise(eSSLErrorWaitReadable, "%s would block", funcname);
+      default:
+        ossl_raise(eSSLError, "%s", funcname);
+    }
+}
+
+
 // Provided by Ruby 3.2.0 and later in order to support the default IO#timeout.
 #ifndef RUBY_IO_TIMEOUT_DEFAULT
 #define RUBY_IO_TIMEOUT_DEFAULT Qnil
@@ -2829,8 +2846,15 @@ ossl_ssl_new_stream(int argc, VALUE *argv, VALUE self)
     GetSSL(self, ssl);
     stream_ssl = SSL_new_stream(ssl, flags);
     if (!stream_ssl) {
-        if (flags & SSL_STREAM_FLAG_NO_BLOCK)
-            return Qnil;
+        if (flags & SSL_STREAM_FLAG_NO_BLOCK) {
+            switch (SSL_get_error(ssl, 0)) {
+              case SSL_ERROR_NONE:
+              case SSL_ERROR_WANT_READ:
+                return Qnil;
+              default:
+                ossl_raise(eSSLError, "SSL_new_stream");
+            }
+        }
         ossl_raise(eSSLError, "SSL_new_stream");
     }
 
@@ -2881,11 +2905,8 @@ ossl_ssl_accept_stream_nonblock(int argc, VALUE *argv, VALUE self)
 
     GetSSL(self, ssl);
     stream_ssl = SSL_accept_stream(ssl, SSL_ACCEPT_STREAM_NO_BLOCK);
-    if (!stream_ssl) {
-        if (no_exception_p(opts))
-            return sym_wait_readable;
-        ossl_raise(eSSLErrorWaitReadable, "accept_stream would block");
-    }
+    if (!stream_ssl)
+        return ossl_ssl_quic_null_error(ssl, "SSL_accept_stream", opts);
 
     SSL_set_blocking_mode(stream_ssl, 0);
     SSL_set_default_stream_mode(stream_ssl, SSL_DEFAULT_STREAM_MODE_NONE);
