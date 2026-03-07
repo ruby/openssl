@@ -2820,7 +2820,8 @@ ossl_ssl_wrap_stream(VALUE self, SSL *stream_ssl)
 {
     VALUE stream_obj;
 
-    stream_obj = TypedData_Wrap_Struct(cSSLSocket, &ossl_ssl_type, stream_ssl);
+    stream_obj = TypedData_Wrap_Struct(cSSLSocket, &ossl_ssl_type, NULL);
+    RTYPEDDATA_DATA(stream_obj) = stream_ssl;
     SSL_set_ex_data(stream_ssl, ossl_ssl_ex_ptr_idx, (void *)stream_obj);
 
     /* Set @io and @context from the parent, and @connection to prevent GC */
@@ -3091,15 +3092,14 @@ ossl_ssl_new_listener(int argc, VALUE *argv, VALUE klass)
     if (!listener)
         ossl_raise(eSSLError, "SSL_new_listener");
 
+    listener_obj = TypedData_Wrap_Struct(cSSLSocket, &ossl_ssl_type, NULL);
+    RTYPEDDATA_DATA(listener_obj) = listener;
+    SSL_set_ex_data(listener, ossl_ssl_ex_ptr_idx, (void *)listener_obj);
+
     Check_Type(v_io, T_FILE);
     GetOpenFile(v_io, fptr);
-    if (!SSL_set_fd(listener, TO_SOCKET(rb_io_descriptor(v_io)))) {
-        SSL_free(listener);
+    if (!SSL_set_fd(listener, TO_SOCKET(rb_io_descriptor(v_io))))
         ossl_raise(eSSLError, "SSL_set_fd");
-    }
-
-    listener_obj = TypedData_Wrap_Struct(cSSLSocket, &ossl_ssl_type, listener);
-    SSL_set_ex_data(listener, ossl_ssl_ex_ptr_idx, (void *)listener_obj);
     SSL_set_blocking_mode(listener, 0);
     SSL_set_default_stream_mode(listener, SSL_DEFAULT_STREAM_MODE_NONE);
 
@@ -3115,7 +3115,8 @@ ossl_ssl_wrap_connection(VALUE self, SSL *conn_ssl)
 {
     VALUE conn_obj;
 
-    conn_obj = TypedData_Wrap_Struct(cSSLSocket, &ossl_ssl_type, conn_ssl);
+    conn_obj = TypedData_Wrap_Struct(cSSLSocket, &ossl_ssl_type, NULL);
+    RTYPEDDATA_DATA(conn_obj) = conn_ssl;
     SSL_set_ex_data(conn_ssl, ossl_ssl_ex_ptr_idx, (void *)conn_obj);
     SSL_set_blocking_mode(conn_ssl, 0);
     SSL_set_default_stream_mode(conn_ssl, SSL_DEFAULT_STREAM_MODE_NONE);
