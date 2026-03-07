@@ -2875,11 +2875,20 @@ static VALUE
 ossl_ssl_accept_stream(VALUE self)
 {
     SSL *ssl, *stream_ssl;
+    VALUE io = rb_attr_get(self, id_i_io);
 
     GetSSL(self, ssl);
-    stream_ssl = SSL_accept_stream(ssl, 0);
-    if (!stream_ssl)
-        ossl_raise(eSSLError, "SSL_accept_stream");
+
+    /*
+     * Use NO_BLOCK flag and retry in a loop. We treat any NULL return as
+     * "not ready" and wait for the socket to become readable, rather than
+     * checking SSL_get_error(), because SSL_get_error() returns incorrect
+     * error codes for SSL_accept_stream (it stalls instead of returning a
+     * retryable error).
+     */
+    while ((stream_ssl = SSL_accept_stream(ssl, SSL_ACCEPT_STREAM_NO_BLOCK)) == NULL) {
+        io_wait_readable(io);
+    }
 
     return ossl_ssl_wrap_stream(self, stream_ssl);
 }
@@ -3142,11 +3151,20 @@ static VALUE
 ossl_ssl_accept_connection(VALUE self)
 {
     SSL *ssl, *conn_ssl;
+    VALUE io = rb_attr_get(self, id_i_io);
 
     GetSSL(self, ssl);
-    conn_ssl = SSL_accept_connection(ssl, 0);
-    if (!conn_ssl)
-        ossl_raise(eSSLError, "SSL_accept_connection");
+
+    /*
+     * Use NO_BLOCK flag and retry in a loop. We treat any NULL return as
+     * "not ready" and wait for the socket to become readable, rather than
+     * checking SSL_get_error(), because SSL_get_error() returns incorrect
+     * error codes for SSL_accept_connection (it returns "conn use only"
+     * instead of a retryable error).
+     */
+    while ((conn_ssl = SSL_accept_connection(ssl, SSL_ACCEPT_CONNECTION_NO_BLOCK)) == NULL) {
+        io_wait_readable(io);
+    }
 
     return ossl_ssl_wrap_connection(self, conn_ssl);
 }
