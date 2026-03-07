@@ -1553,6 +1553,56 @@ ossl_sslctx_flush_sessions(int argc, VALUE *argv, VALUE self)
 }
 
 /*
+ * QUIC support
+ */
+#ifdef OSSL_USE_QUIC
+/*
+ * call-seq:
+ *    SSLContext.quic(:client) -> ctx
+ *    SSLContext.quic(:server) -> ctx
+ *
+ * Creates a new SSLContext for QUIC. The argument specifies the QUIC mode.
+ * Requires OpenSSL 3.5+.
+ */
+static VALUE
+ossl_sslctx_s_quic(VALUE klass, VALUE quic_sym)
+{
+    SSL_CTX *ctx;
+    const SSL_METHOD *method;
+    long mode;
+    VALUE obj;
+    ID quic_id;
+
+    Check_Type(quic_sym, T_SYMBOL);
+    quic_id = SYM2ID(quic_sym);
+
+    if (quic_id == rb_intern("client"))
+        method = OSSL_QUIC_client_method();
+    else if (quic_id == rb_intern("server"))
+        method = OSSL_QUIC_server_method();
+    else
+        ossl_raise(rb_eArgError, "unknown QUIC mode: %"PRIsVALUE, quic_sym);
+
+    obj = TypedData_Wrap_Struct(klass, &ossl_sslctx_type, 0);
+    ctx = SSL_CTX_new(method);
+    if (!ctx)
+        ossl_raise(eSSLError, "SSL_CTX_new");
+
+    mode = SSL_MODE_ENABLE_PARTIAL_WRITE |
+           SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER |
+           SSL_MODE_RELEASE_BUFFERS;
+    SSL_CTX_set_mode(ctx, mode);
+    RTYPEDDATA_DATA(obj) = ctx;
+    SSL_CTX_set_ex_data(ctx, ossl_sslctx_ex_ptr_idx, (void *)obj);
+
+    rb_obj_call_init(obj, 0, NULL);
+    rb_ivar_set(obj, rb_intern("@quic"), quic_sym);
+
+    return obj;
+}
+#endif
+
+/*
  * SSLSocket class
  */
 static inline int
@@ -1674,6 +1724,13 @@ ossl_ssl_initialize(int argc, VALUE *argv, VALUE self)
 
     SSL_set_ex_data(ssl, ossl_ssl_ex_ptr_idx, (void *)self);
     SSL_set_info_callback(ssl, ssl_info_cb);
+#ifdef OSSL_USE_QUIC
+    // Always set non-blocking mode for QUIC connections
+    // This is a no-op on non-QUIC connections
+    SSL_set_blocking_mode(ssl, 0);
+    // This is also a no-op on non-QUIC connections
+    SSL_set_default_stream_mode(ssl, SSL_DEFAULT_STREAM_MODE_NONE);
+#endif
 
     rb_call_super(0, NULL);
 
@@ -1744,6 +1801,23 @@ no_exception_p(VALUE opts)
         return 1;
     return 0;
 }
+
+static VALUE
+ossl_ssl_quic_null_error(SSL *ssl, const char *funcname, VALUE opts)
+{
+    int err = SSL_get_error(ssl, 0);
+
+    switch (err) {
+      case SSL_ERROR_NONE:
+      case SSL_ERROR_WANT_READ:
+        if (no_exception_p(opts))
+            return sym_wait_readable;
+        ossl_raise(eSSLErrorWaitReadable, "%s would block", funcname);
+      default:
+        ossl_raise(eSSLError, "%s", funcname);
+    }
+}
+
 
 // Provided by Ruby 3.2.0 and later in order to support the default IO#timeout.
 #ifndef RUBY_IO_TIMEOUT_DEFAULT
@@ -2723,6 +2797,491 @@ ossl_ssl_get_group(VALUE self)
 }
 #endif
 
+/*
+ * QUIC stream and event methods
+ */
+#ifdef OSSL_USE_QUIC
+static ID id_i_connection;
+
+/*
+ * call-seq:
+ *    ssl.new_stream(flags = 0) => SSLSocket or nil
+ *
+ * Creates a new QUIC stream on this connection. Returns a new SSLSocket
+ * representing the stream. The +flags+ parameter can include
+ * OpenSSL::SSL::STREAM_FLAG_UNI to create a unidirectional stream.
+ *
+ * When STREAM_FLAG_NO_BLOCK is set, returns +nil+ if the stream cannot be
+ * created immediately (e.g. the handshake is not yet complete). Without
+ * NO_BLOCK, raises SSLError on failure.
+ */
+static VALUE
+ossl_ssl_wrap_stream(VALUE self, SSL *stream_ssl)
+{
+    VALUE stream_obj;
+
+    stream_obj = TypedData_Wrap_Struct(cSSLSocket, &ossl_ssl_type, NULL);
+    RTYPEDDATA_DATA(stream_obj) = stream_ssl;
+    SSL_set_ex_data(stream_ssl, ossl_ssl_ex_ptr_idx, (void *)stream_obj);
+
+    /* Set @io and @context from the parent, and @connection to prevent GC */
+    rb_ivar_set(stream_obj, id_i_io, rb_attr_get(self, id_i_io));
+    rb_ivar_set(stream_obj, id_i_context, rb_attr_get(self, id_i_context));
+    rb_ivar_set(stream_obj, id_i_connection, self);
+    rb_funcall(stream_obj, rb_intern("initialize_buffer"), 0);
+
+    return stream_obj;
+}
+
+static VALUE
+ossl_ssl_new_stream(int argc, VALUE *argv, VALUE self)
+{
+    SSL *ssl, *stream_ssl;
+    VALUE flags_v;
+    uint64_t flags = 0;
+
+    rb_scan_args(argc, argv, "01", &flags_v);
+    if (!NIL_P(flags_v))
+        flags = NUM2UINT64T(flags_v);
+
+    GetSSL(self, ssl);
+    stream_ssl = SSL_new_stream(ssl, flags);
+    if (!stream_ssl) {
+        if (flags & SSL_STREAM_FLAG_NO_BLOCK) {
+            switch (SSL_get_error(ssl, 0)) {
+              case SSL_ERROR_NONE:
+              case SSL_ERROR_WANT_READ:
+                return Qnil;
+              default:
+                ossl_raise(eSSLError, "SSL_new_stream");
+            }
+        }
+        ossl_raise(eSSLError, "SSL_new_stream");
+    }
+
+    return ossl_ssl_wrap_stream(self, stream_ssl);
+}
+
+/*
+ * call-seq:
+ *    ssl.accept_stream => SSLSocket
+ *
+ * Accepts an incoming QUIC stream from the peer. Blocks until a stream is
+ * available. Returns a new SSLSocket representing the stream.
+ *
+ * Raises OpenSSL::SSL::SSLError on failure.
+ */
+static VALUE
+ossl_ssl_accept_stream(VALUE self)
+{
+    SSL *ssl, *stream_ssl;
+    VALUE io = rb_attr_get(self, id_i_io);
+
+    GetSSL(self, ssl);
+
+    /*
+     * Use NO_BLOCK flag and retry in a loop. We treat any NULL return as
+     * "not ready" and wait for the socket to become readable, rather than
+     * checking SSL_get_error(), because SSL_get_error() returns incorrect
+     * error codes for SSL_accept_stream (it stalls instead of returning a
+     * retryable error).
+     */
+    while ((stream_ssl = SSL_accept_stream(ssl, SSL_ACCEPT_STREAM_NO_BLOCK)) == NULL) {
+        io_wait_readable(io);
+    }
+
+    return ossl_ssl_wrap_stream(self, stream_ssl);
+}
+
+/*
+ * call-seq:
+ *    ssl.accept_stream_nonblock([opts]) => SSLSocket or :wait_readable
+ *
+ * Accepts an incoming QUIC stream from the peer without blocking. Returns a
+ * new SSLSocket if a stream is available, or raises IO::WaitReadable if none
+ * is ready.
+ *
+ * By specifying a keyword argument _exception_ to +false+, you can indicate
+ * that accept_stream_nonblock should not raise an IO::WaitReadable exception,
+ * but return the symbol +:wait_readable+ instead.
+ */
+static VALUE
+ossl_ssl_accept_stream_nonblock(int argc, VALUE *argv, VALUE self)
+{
+    SSL *ssl, *stream_ssl;
+    VALUE opts;
+
+    rb_scan_args(argc, argv, "0:", &opts);
+
+    GetSSL(self, ssl);
+    stream_ssl = SSL_accept_stream(ssl, SSL_ACCEPT_STREAM_NO_BLOCK);
+    if (!stream_ssl) {
+        if (no_exception_p(opts)) return sym_wait_readable;
+        ossl_raise(eSSLErrorWaitReadable, "accept_stream would block");
+    }
+
+    SSL_set_blocking_mode(stream_ssl, 0);
+    SSL_set_default_stream_mode(stream_ssl, SSL_DEFAULT_STREAM_MODE_NONE);
+
+    return ossl_ssl_wrap_stream(self, stream_ssl);
+}
+
+/*
+ * call-seq:
+ *    ssl.stream_conclude => self
+ *
+ * Signals FIN on the QUIC stream, indicating that no more data will be sent.
+ */
+static VALUE
+ossl_ssl_stream_conclude(VALUE self)
+{
+    SSL *ssl;
+
+    GetSSL(self, ssl);
+    if (!SSL_stream_conclude(ssl, 0))
+        ossl_raise(eSSLError, "SSL_stream_conclude");
+
+    return self;
+}
+
+/*
+ * call-seq:
+ *    ssl.stream_id => Integer
+ *
+ * Returns the QUIC stream ID for this SSL object.
+ */
+static VALUE
+ossl_ssl_stream_id(VALUE self)
+{
+    SSL *ssl;
+    uint64_t id;
+
+    GetSSL(self, ssl);
+    id = SSL_get_stream_id(ssl);
+    return ULL2NUM(id);
+}
+
+/*
+ * call-seq:
+ *    ssl.handle_events => nil
+ *
+ * Processes any pending QUIC events. This should be called periodically
+ * when using non-blocking mode.
+ */
+static VALUE
+ossl_ssl_handle_events(VALUE self)
+{
+    SSL *ssl;
+
+    GetSSL(self, ssl);
+    if (!SSL_handle_events(ssl))
+        ossl_raise(eSSLError, "SSL_handle_events");
+
+    return Qnil;
+}
+
+/*
+ * call-seq:
+ *    ssl.net_read_desired? => true or false
+ *
+ * Returns +true+ if the QUIC engine wants to read from the network.
+ * Use this to determine whether to include the underlying socket in the
+ * read set when calling IO.select.
+ */
+static VALUE
+ossl_ssl_net_read_desired(VALUE self)
+{
+    SSL *ssl;
+
+    GetSSL(self, ssl);
+    return SSL_net_read_desired(ssl) ? Qtrue : Qfalse;
+}
+
+/*
+ * call-seq:
+ *    ssl.net_write_desired? => true or false
+ *
+ * Returns +true+ if the QUIC engine wants to write to the network.
+ * Use this to determine whether to include the underlying socket in the
+ * write set when calling IO.select.
+ */
+static VALUE
+ossl_ssl_net_write_desired(VALUE self)
+{
+    SSL *ssl;
+
+    GetSSL(self, ssl);
+    return SSL_net_write_desired(ssl) ? Qtrue : Qfalse;
+}
+
+/*
+ * call-seq:
+ *    ssl.event_timeout => Float or nil
+ *
+ * Returns the amount of time in seconds until the next QUIC timeout event,
+ * or +nil+ if no timeout is currently active (infinite).
+ */
+static VALUE
+ossl_ssl_event_timeout(VALUE self)
+{
+    SSL *ssl;
+    struct timeval tv;
+    int is_infinite;
+
+    GetSSL(self, ssl);
+    if (!SSL_get_event_timeout(ssl, &tv, &is_infinite))
+        ossl_raise(eSSLError, "SSL_get_event_timeout");
+
+    if (is_infinite)
+        return Qnil;
+
+    return DBL2NUM((double)tv.tv_sec + (double)tv.tv_usec / 1000000.0);
+}
+
+/*
+ * call-seq:
+ *    ssl.connection? => true or false
+ *
+ * Returns +true+ if this SSL object represents a QUIC connection (as opposed
+ * to a QUIC stream).
+ */
+static VALUE
+ossl_ssl_is_connection(VALUE self)
+{
+    SSL *ssl;
+
+    GetSSL(self, ssl);
+    return SSL_is_connection(ssl) ? Qtrue : Qfalse;
+}
+
+/*
+ * call-seq:
+ *    ssl.init_finished? => true or false
+ *
+ * Returns +true+ if the TLS/QUIC handshake has completed for this connection.
+ */
+static VALUE
+ossl_ssl_is_init_finished(VALUE self)
+{
+    SSL *ssl;
+
+    GetSSL(self, ssl);
+    return SSL_is_init_finished(ssl) ? Qtrue : Qfalse;
+}
+
+/*
+ * call-seq:
+ *    SSLSocket.new_listener(io, context:) => SSLSocket
+ *
+ * Creates a new QUIC listener bound to the given UDP socket _io_.
+ * The _context_ must be an SSLContext created with <tt>quic: :server</tt>.
+ */
+static VALUE
+ossl_ssl_new_listener(int argc, VALUE *argv, VALUE klass)
+{
+    VALUE v_io, opts, v_ctx, listener_obj;
+    SSL_CTX *ctx;
+    SSL *listener;
+    rb_io_t *fptr;
+
+    static ID kw_ids[1];
+    VALUE kw_args[1];
+
+    rb_scan_args(argc, argv, "1:", &v_io, &opts);
+
+    if (!kw_ids[0])
+        kw_ids[0] = rb_intern_const("context");
+    rb_get_kwargs(opts, kw_ids, 1, 0, kw_args);
+    v_ctx = kw_args[0];
+
+    GetSSLCTX(v_ctx, ctx);
+    ossl_sslctx_setup(v_ctx);
+
+    listener = SSL_new_listener(ctx, 0);
+    if (!listener)
+        ossl_raise(eSSLError, "SSL_new_listener");
+
+    listener_obj = TypedData_Wrap_Struct(cSSLSocket, &ossl_ssl_type, NULL);
+    RTYPEDDATA_DATA(listener_obj) = listener;
+    SSL_set_ex_data(listener, ossl_ssl_ex_ptr_idx, (void *)listener_obj);
+
+    Check_Type(v_io, T_FILE);
+    GetOpenFile(v_io, fptr);
+    if (!SSL_set_fd(listener, TO_SOCKET(rb_io_descriptor(v_io))))
+        ossl_raise(eSSLError, "SSL_set_fd");
+    SSL_set_blocking_mode(listener, 0);
+    SSL_set_default_stream_mode(listener, SSL_DEFAULT_STREAM_MODE_NONE);
+
+    rb_ivar_set(listener_obj, id_i_io, v_io);
+    rb_ivar_set(listener_obj, id_i_context, v_ctx);
+    rb_funcall(listener_obj, rb_intern("initialize_buffer"), 0);
+
+    return listener_obj;
+}
+
+static VALUE
+ossl_ssl_wrap_connection(VALUE self, SSL *conn_ssl)
+{
+    VALUE conn_obj;
+
+    conn_obj = TypedData_Wrap_Struct(cSSLSocket, &ossl_ssl_type, NULL);
+    RTYPEDDATA_DATA(conn_obj) = conn_ssl;
+    SSL_set_ex_data(conn_ssl, ossl_ssl_ex_ptr_idx, (void *)conn_obj);
+    SSL_set_blocking_mode(conn_ssl, 0);
+    SSL_set_default_stream_mode(conn_ssl, SSL_DEFAULT_STREAM_MODE_NONE);
+
+    rb_ivar_set(conn_obj, id_i_io, rb_attr_get(self, id_i_io));
+    rb_ivar_set(conn_obj, id_i_context, rb_attr_get(self, id_i_context));
+    rb_ivar_set(conn_obj, id_i_connection, self);
+    rb_funcall(conn_obj, rb_intern("initialize_buffer"), 0);
+
+    return conn_obj;
+}
+
+/*
+ * call-seq:
+ *    ssl.accept_connection => SSLSocket
+ *
+ * Accepts an incoming QUIC connection from the listener. Blocks until a
+ * connection is available. Returns a new SSLSocket representing the connection.
+ *
+ * Raises OpenSSL::SSL::SSLError on failure.
+ */
+static VALUE
+ossl_ssl_accept_connection(VALUE self)
+{
+    SSL *ssl, *conn_ssl;
+    VALUE io = rb_attr_get(self, id_i_io);
+
+    GetSSL(self, ssl);
+
+    /*
+     * Use NO_BLOCK flag and retry in a loop. We treat any NULL return as
+     * "not ready" and wait for the socket to become readable, rather than
+     * checking SSL_get_error(), because SSL_get_error() returns incorrect
+     * error codes for SSL_accept_connection (it returns "conn use only"
+     * instead of a retryable error).
+     */
+    while ((conn_ssl = SSL_accept_connection(ssl, SSL_ACCEPT_CONNECTION_NO_BLOCK)) == NULL) {
+        io_wait_readable(io);
+    }
+
+    return ossl_ssl_wrap_connection(self, conn_ssl);
+}
+
+/*
+ * call-seq:
+ *    ssl.accept_connection_nonblock([opts]) => SSLSocket or :wait_readable
+ *
+ * Accepts an incoming QUIC connection from the listener without blocking.
+ * Returns a new SSLSocket if a connection is available, or raises
+ * IO::WaitReadable if none is ready.
+ *
+ * By specifying a keyword argument _exception_ to +false+, you can indicate
+ * that accept_connection_nonblock should not raise an IO::WaitReadable
+ * exception, but return the symbol +:wait_readable+ instead.
+ */
+static VALUE
+ossl_ssl_accept_connection_nonblock(int argc, VALUE *argv, VALUE self)
+{
+    SSL *ssl, *conn_ssl;
+    VALUE opts;
+
+    rb_scan_args(argc, argv, "0:", &opts);
+
+    GetSSL(self, ssl);
+    conn_ssl = SSL_accept_connection(ssl, SSL_ACCEPT_CONNECTION_NO_BLOCK);
+    if (!conn_ssl) {
+        if (no_exception_p(opts))
+            return sym_wait_readable;
+        ossl_raise(eSSLErrorWaitReadable, "accept_connection would block");
+    }
+
+    return ossl_ssl_wrap_connection(self, conn_ssl);
+}
+
+/*
+ * call-seq:
+ *    ssl.listen => self
+ *
+ * Starts listening for incoming QUIC connections on this listener.
+ */
+static VALUE
+ossl_ssl_listen(VALUE self)
+{
+    SSL *ssl;
+
+    GetSSL(self, ssl);
+    if (!SSL_listen(ssl))
+        ossl_raise(eSSLError, "SSL_listen");
+
+    return self;
+}
+
+/*
+ * call-seq:
+ *    ssl.accept_connection_queue_len => Integer
+ *
+ * Returns the number of pending incoming QUIC connections waiting
+ * to be accepted on this listener.
+ */
+static VALUE
+ossl_ssl_accept_connection_queue_len(VALUE self)
+{
+    SSL *ssl;
+
+    GetSSL(self, ssl);
+    return SIZET2NUM(SSL_get_accept_connection_queue_len(ssl));
+}
+
+/*
+ * call-seq:
+ *    ssl.incoming_stream_policy = policy
+ *
+ * Sets the incoming stream policy for a QUIC connection.
+ * _policy_ should be one of +INCOMING_STREAM_POLICY_AUTO+,
+ * +INCOMING_STREAM_POLICY_ACCEPT+, or +INCOMING_STREAM_POLICY_REJECT+.
+ */
+static VALUE
+ossl_ssl_set_incoming_stream_policy(VALUE self, VALUE policy)
+{
+    SSL *ssl;
+
+    GetSSL(self, ssl);
+    if (!SSL_set_incoming_stream_policy(ssl, NUM2INT(policy), 0))
+        ossl_raise(eSSLError, "SSL_set_incoming_stream_policy");
+
+    return policy;
+}
+
+/*
+ * call-seq:
+ *    ssl.stream_read_state => Integer
+ *
+ * Returns the read state of a QUIC stream as an integer. The possible values
+ * are:
+ *
+ * - +SSL_STREAM_STATE_NONE+ (0): not a QUIC stream object
+ * - +SSL_STREAM_STATE_OK+ (1): stream is readable
+ * - +SSL_STREAM_STATE_WRONG_DIR+ (2): stream is unidirectional in the wrong direction
+ * - +SSL_STREAM_STATE_FINISHED+ (3): FIN received, no more data
+ * - +SSL_STREAM_STATE_RESET_LOCAL+ (4): stream was reset locally
+ * - +SSL_STREAM_STATE_RESET_REMOTE+ (5): stream was reset by the peer (RESET_STREAM)
+ * - +SSL_STREAM_STATE_CONN_CLOSED+ (6): connection is closed
+ *
+ * A state of +SSL_STREAM_STATE_RESET_REMOTE+ or +SSL_STREAM_STATE_CONN_CLOSED+
+ * means that calling +read_nonblock+ will raise an +SSLError+.
+ */
+static VALUE
+ossl_ssl_stream_read_state(VALUE self)
+{
+    SSL *ssl;
+
+    GetSSL(self, ssl);
+    return INT2NUM(SSL_get_stream_read_state(ssl));
+}
+#endif /* OSSL_USE_QUIC */
+
 #endif /* !defined(OPENSSL_NO_SOCK) */
 
 void
@@ -3064,6 +3623,9 @@ Init_ossl_ssl(void)
 
     rb_define_method(cSSLContext, "setup", ossl_sslctx_setup, 0);
     rb_define_alias(cSSLContext, "freeze", "setup");
+#ifdef OSSL_USE_QUIC
+    rb_define_singleton_method(cSSLContext, "quic", ossl_sslctx_s_quic, 1);
+#endif
 
     /*
      * No session caching for client or server
@@ -3167,6 +3729,43 @@ Init_ossl_ssl(void)
 #endif
 #ifdef HAVE_SSL_GET0_GROUP_NAME
     rb_define_method(cSSLSocket, "group", ossl_ssl_get_group, 0);
+#endif
+
+#ifdef OSSL_USE_QUIC
+    rb_define_method(cSSLSocket, "new_stream", ossl_ssl_new_stream, -1);
+    rb_define_method(cSSLSocket, "accept_stream", ossl_ssl_accept_stream, 0);
+    rb_define_method(cSSLSocket, "accept_stream_nonblock", ossl_ssl_accept_stream_nonblock, -1);
+    rb_define_method(cSSLSocket, "stream_conclude", ossl_ssl_stream_conclude, 0);
+    rb_define_method(cSSLSocket, "stream_id", ossl_ssl_stream_id, 0);
+    rb_define_method(cSSLSocket, "handle_events", ossl_ssl_handle_events, 0);
+    rb_define_method(cSSLSocket, "net_read_desired?", ossl_ssl_net_read_desired, 0);
+    rb_define_method(cSSLSocket, "net_write_desired?", ossl_ssl_net_write_desired, 0);
+    rb_define_method(cSSLSocket, "event_timeout", ossl_ssl_event_timeout, 0);
+    rb_define_method(cSSLSocket, "connection?", ossl_ssl_is_connection, 0);
+    rb_define_method(cSSLSocket, "init_finished?", ossl_ssl_is_init_finished, 0);
+
+    /* Create a unidirectional stream */
+    rb_define_const(mSSL, "STREAM_FLAG_UNI", UINT2NUM(SSL_STREAM_FLAG_UNI));
+    /* Do not block when creating a stream */
+    rb_define_const(mSSL, "STREAM_FLAG_NO_BLOCK", UINT2NUM(SSL_STREAM_FLAG_NO_BLOCK));
+    rb_define_singleton_method(cSSLSocket, "new_listener", ossl_ssl_new_listener, -1);
+    rb_define_method(cSSLSocket, "accept_connection", ossl_ssl_accept_connection, 0);
+    rb_define_method(cSSLSocket, "accept_connection_nonblock", ossl_ssl_accept_connection_nonblock, -1);
+    rb_define_method(cSSLSocket, "listen", ossl_ssl_listen, 0);
+    rb_define_method(cSSLSocket, "accept_connection_queue_len", ossl_ssl_accept_connection_queue_len, 0);
+
+    rb_define_method(cSSLSocket, "incoming_stream_policy=", ossl_ssl_set_incoming_stream_policy, 1);
+    rb_define_const(mSSL, "INCOMING_STREAM_POLICY_AUTO", INT2NUM(SSL_INCOMING_STREAM_POLICY_AUTO));
+    rb_define_const(mSSL, "INCOMING_STREAM_POLICY_ACCEPT", INT2NUM(SSL_INCOMING_STREAM_POLICY_ACCEPT));
+    rb_define_const(mSSL, "INCOMING_STREAM_POLICY_REJECT", INT2NUM(SSL_INCOMING_STREAM_POLICY_REJECT));
+    rb_define_method(cSSLSocket, "stream_read_state", ossl_ssl_stream_read_state, 0);
+    rb_define_const(mSSL, "SSL_STREAM_STATE_NONE",         INT2NUM(SSL_STREAM_STATE_NONE));
+    rb_define_const(mSSL, "SSL_STREAM_STATE_OK",           INT2NUM(SSL_STREAM_STATE_OK));
+    rb_define_const(mSSL, "SSL_STREAM_STATE_WRONG_DIR",    INT2NUM(SSL_STREAM_STATE_WRONG_DIR));
+    rb_define_const(mSSL, "SSL_STREAM_STATE_FINISHED",     INT2NUM(SSL_STREAM_STATE_FINISHED));
+    rb_define_const(mSSL, "SSL_STREAM_STATE_RESET_LOCAL",  INT2NUM(SSL_STREAM_STATE_RESET_LOCAL));
+    rb_define_const(mSSL, "SSL_STREAM_STATE_RESET_REMOTE", INT2NUM(SSL_STREAM_STATE_RESET_REMOTE));
+    rb_define_const(mSSL, "SSL_STREAM_STATE_CONN_CLOSED",  INT2NUM(SSL_STREAM_STATE_CONN_CLOSED));
 #endif
 
     rb_define_const(mSSL, "VERIFY_NONE", INT2NUM(SSL_VERIFY_NONE));
@@ -3326,5 +3925,8 @@ Init_ossl_ssl(void)
     DefIVarID(context);
     DefIVarID(hostname);
     DefIVarID(sync_close);
+#ifdef OSSL_USE_QUIC
+    DefIVarID(connection);
+#endif
 #endif /* !defined(OPENSSL_NO_SOCK) */
 }

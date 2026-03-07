@@ -169,6 +169,12 @@ have_func("TS_VERIFY_CTX_set0_certs(NULL, NULL)", ts_h)
 # added in 3.5.0
 have_func("SSL_get0_peer_signature_name(NULL, NULL)", ssl_h)
 
+# QUIC support - requires OpenSSL 3.5.0+, not available in LibreSSL
+if is_openssl && checking_for("OpenSSL version >= 3.5.0") {
+  try_static_assert("OPENSSL_VERSION_NUMBER >= 0x30500000L", "openssl/opensslv.h") }
+  $defs.push("-DHAVE_OSSL_QUIC_CLIENT_METHOD")
+end
+
 Logging::message "=== Checking done. ===\n"
 
 # Append flags from environment variables.

@@ -91,10 +91,22 @@ module OpenSSL
       # If an argument is given, #ssl_version= is called with the value. Note
       # that this form is deprecated. New applications should use #min_version=
       # and #max_version= as necessary.
+      #
+      # For QUIC contexts, use SSLContext.quic instead.
       def initialize(version = nil)
+        @quic = nil
         self.ssl_version = version if version
         self.verify_mode = OpenSSL::SSL::VERIFY_NONE
         self.verify_hostname = false
+      end
+
+      # Returns the QUIC mode (e.g. +:client+) if this is a QUIC context,
+      # or +nil+ for a TLS context.
+      attr_reader :quic
+
+      # Returns +true+ if this is a QUIC context.
+      def quic?
+        !!@quic
       end
 
       ##
@@ -468,6 +480,29 @@ module OpenSSL
             return OpenSSL::SSL::SSLSocket.new(sock)
           else
             return OpenSSL::SSL::SSLSocket.new(sock, context)
+          end
+        end
+
+        # call-seq:
+        #   SSLSocket.open_quic(remote_host, remote_port, context:) => ssl
+        #
+        # Creates a QUIC connection to _remote_host_ on _remote_port_ using
+        # a UDP socket. The _context_ must be an SSLContext created with
+        # SSLContext.quic (e.g. <tt>SSLContext.quic(:client)</tt>).
+        #
+        # Returns a connected SSLSocket with +sync_close+ set to +true+.
+        def open_quic(remote_host, remote_port, context:)
+          udp = UDPSocket.new
+          begin
+            udp.connect(remote_host, remote_port)
+            ssl = new(udp, context)
+            ssl.hostname = remote_host
+            ssl.sync_close = true
+            ssl.connect
+            ssl
+          rescue
+            udp.close rescue nil
+            raise
           end
         end
       end
