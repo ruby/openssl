@@ -78,6 +78,10 @@
 # define OSSL_HAVE_IMMUTABLE_PKEY
 #endif
 
+#if defined(HAVE_BIO_METH_NEW) && defined(HAVE_RB_IO_BUFFER_NEW) && defined(HAVE_RB_IO_BUFFER_FREE_LOCKED)
+# define OSSL_CUSTOM_BIO
+#endif
+
 /*
  * Common Module
  */
