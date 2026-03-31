@@ -1075,6 +1075,28 @@ ossl_pkey_compare(VALUE self, VALUE other)
 }
 
 /*
+ *  call-seq:
+ *      pkey.size -> integer
+ *
+ * Get the key size in bytes
+ *
+ * == Example
+ *   rsa_key = OpenSSL::PKey::RSA.new(pem_encoded_private_key)
+ *
+ *   rsa_key.size => 512
+ */
+static VALUE
+ossl_pkey_size(VALUE self) {
+    int ret = 0;
+    EVP_PKEY *selfPKey;
+
+    GetPKey(self, selfPKey);
+    ret = EVP_PKEY_get_size(selfPKey);
+
+    return INT2NUM(ret);
+}
+
+/*
  * call-seq:
  *    pkey.sign(digest, data [, options]) -> string
  *
@@ -1760,6 +1782,7 @@ Init_ossl_pkey(void)
     rb_define_method(cPKey, "raw_private_key", ossl_pkey_raw_private_key, 0);
     rb_define_method(cPKey, "raw_public_key", ossl_pkey_raw_public_key, 0);
     rb_define_method(cPKey, "compare?", ossl_pkey_compare, 1);
+    rb_define_method(cPKey, "size", ossl_pkey_size, 0);
 
     rb_define_method(cPKey, "sign", ossl_pkey_sign, -1);
     rb_define_method(cPKey, "verify", ossl_pkey_verify, -1);
