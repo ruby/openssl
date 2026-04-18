@@ -91,7 +91,8 @@ ossl_sslctx_s_alloc(VALUE klass)
     SSL_CTX_set_mode(ctx, mode);
     SSL_CTX_set_dh_auto(ctx, 1);
     RTYPEDDATA_DATA(obj) = ctx;
-    SSL_CTX_set_ex_data(ctx, ossl_sslctx_ex_ptr_idx, (void *)obj);
+    if (!SSL_CTX_set_ex_data(ctx, ossl_sslctx_ex_ptr_idx, (void *)obj))
+        ossl_raise(eSSLError, "SSL_CTX_set_ex_data");
 
     return obj;
 }
@@ -1672,7 +1673,8 @@ ossl_ssl_initialize(int argc, VALUE *argv, VALUE self)
         ossl_raise(eSSLError, NULL);
     RTYPEDDATA_DATA(self) = ssl;
 
-    SSL_set_ex_data(ssl, ossl_ssl_ex_ptr_idx, (void *)self);
+    if (!SSL_set_ex_data(ssl, ossl_ssl_ex_ptr_idx, (void *)self))
+        ossl_raise(eSSLError, "SSL_set_ex_data");
     SSL_set_info_callback(ssl, ssl_info_cb);
 
     rb_call_super(0, NULL);
