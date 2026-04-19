@@ -235,9 +235,15 @@ ossl_x509attr_get_value(VALUE self)
     unsigned char *p;
 
     GetX509Attr(self, attr);
+    count = X509_ATTRIBUTE_count(attr);
     /* there is no X509_ATTRIBUTE_get0_set() :( */
+#ifdef HAVE_OPENSSL_SK_NEW_RESERVE
+    if (!(sk = sk_ASN1_TYPE_new_reserve(NULL, count)))
+        ossl_raise(eX509AttrError, "sk_new_reserve");
+#else
     if (!(sk = sk_ASN1_TYPE_new_null()))
         ossl_raise(eX509AttrError, "sk_new");
+#endif
 
     for (i = 0; i < count; i++) {
         if (!sk_ASN1_TYPE_push(sk, (ASN1_TYPE *)X509_ATTRIBUTE_get0_type(attr, i))) {
