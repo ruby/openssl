@@ -1055,7 +1055,7 @@ ossl_pkcs7ri_initialize(VALUE self, VALUE cert)
 
     x509 = GetX509CertPtr(cert); /* NO NEED TO DUP */
     GetPKCS7ri(self, p7ri);
-    if (!PKCS7_RECIP_INFO_set(p7ri, x509)) {
+    if (PKCS7_RECIP_INFO_set(p7ri, x509) <= 0) {
         ossl_raise(ePKCS7Error, NULL);
     }
 
