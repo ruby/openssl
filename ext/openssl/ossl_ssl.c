@@ -2482,16 +2482,15 @@ ossl_ssl_get_verify_result(VALUE self)
 
 /*
  * call-seq:
- *    ssl.finished_message => "finished message"
+ *    ssl.finished_message -> string or nil
  *
- * Returns the last *Finished* message sent
- *
+ * Returns the contents of the last +Finished+ message sent to the peer.
  */
 static VALUE
 ossl_ssl_get_finished(VALUE self)
 {
     SSL *ssl;
-    char sizer[1], *buf;
+    char sizer[1];
     size_t len;
 
     GetSSL(self, ssl);
@@ -2500,23 +2499,23 @@ ossl_ssl_get_finished(VALUE self)
     if (len == 0)
         return Qnil;
 
-    buf = ALLOCA_N(char, len);
-    SSL_get_finished(ssl, buf, len);
-    return rb_str_new(buf, len);
+    VALUE str = rb_str_new(NULL, len);
+    SSL_get_finished(ssl, RSTRING_PTR(str), len);
+    return str;
 }
 
 /*
  * call-seq:
- *    ssl.peer_finished_message => "peer finished message"
+ *    ssl.peer_finished_message -> string or nil
  *
- * Returns the last *Finished* message received
- *
+ * Returns the contents of the last +Finished+ message expected to be sent
+ * by the peer.
  */
 static VALUE
 ossl_ssl_get_peer_finished(VALUE self)
 {
     SSL *ssl;
-    char sizer[1], *buf;
+    char sizer[1];
     size_t len;
 
     GetSSL(self, ssl);
@@ -2525,9 +2524,9 @@ ossl_ssl_get_peer_finished(VALUE self)
     if (len == 0)
         return Qnil;
 
-    buf = ALLOCA_N(char, len);
-    SSL_get_peer_finished(ssl, buf, len);
-    return rb_str_new(buf, len);
+    VALUE str = rb_str_new(NULL, len);
+    SSL_get_peer_finished(ssl, RSTRING_PTR(str), len);
+    return str;
 }
 
 /*
