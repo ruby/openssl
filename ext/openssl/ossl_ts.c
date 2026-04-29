@@ -11,14 +11,6 @@
 
 #ifndef OPENSSL_NO_TS
 
-#define NewTSRequest(klass) \
-    TypedData_Wrap_Struct((klass), &ossl_ts_req_type, 0)
-#define SetTSRequest(obj, req) do { \
-    if (!(req)) { \
-        ossl_raise(rb_eRuntimeError, "TS_REQ wasn't initialized."); \
-    } \
-    RTYPEDDATA_DATA(obj) = (req); \
-} while (0)
 #define GetTSRequest(obj, req) do { \
     TypedData_Get_Struct((obj), TS_REQ, &ossl_ts_req_type, (req)); \
     if (!(req)) { \
@@ -26,14 +18,6 @@
     } \
 } while (0)
 
-#define NewTSResponse(klass) \
-    TypedData_Wrap_Struct((klass), &ossl_ts_resp_type, 0)
-#define SetTSResponse(obj, resp) do { \
-    if (!(resp)) { \
-        ossl_raise(rb_eRuntimeError, "TS_RESP wasn't initialized."); \
-    } \
-    RTYPEDDATA_DATA(obj) = (resp); \
-} while (0)
 #define GetTSResponse(obj, resp) do { \
     TypedData_Get_Struct((obj), TS_RESP, &ossl_ts_resp_type, (resp)); \
     if (!(resp)) { \
@@ -41,14 +25,6 @@
     } \
 } while (0)
 
-#define NewTSTokenInfo(klass) \
-    TypedData_Wrap_Struct((klass), &ossl_ts_token_info_type, 0)
-#define SetTSTokenInfo(obj, info) do { \
-    if (!(info)) { \
-        ossl_raise(rb_eRuntimeError, "TS_TST_INFO wasn't initialized."); \
-    } \
-    RTYPEDDATA_DATA(obj) = (info); \
-} while (0)
 #define GetTSTokenInfo(obj, info) do { \
     TypedData_Get_Struct((obj), TS_TST_INFO, &ossl_ts_token_info_type, (info)); \
     if (!(info)) { \
@@ -141,19 +117,7 @@ obj_to_asn1obj_i(VALUE obj)
 static VALUE
 ossl_ts_req_alloc(VALUE klass)
 {
-    TS_REQ *req;
-    VALUE obj;
-
-    obj = NewTSRequest(klass);
-    if (!(req = TS_REQ_new()))
-        ossl_raise(eTimestampError, NULL);
-    SetTSRequest(obj, req);
-
-    /* Defaults */
-    TS_REQ_set_version(req, 1);
-    TS_REQ_set_cert_req(req, 1);
-
-    return obj;
+    return TypedData_Wrap_Struct(klass, &ossl_ts_req_type, 0);
 }
 
 /*
@@ -168,23 +132,37 @@ ossl_ts_req_alloc(VALUE klass)
 static VALUE
 ossl_ts_req_initialize(int argc, VALUE *argv, VALUE self)
 {
-    TS_REQ *ts_req = DATA_PTR(self);
+    TS_REQ *req;
     BIO *in;
     VALUE arg;
 
-    if(rb_scan_args(argc, argv, "01", &arg) == 0) {
+    rb_scan_args(argc, argv, "01", &arg);
+    rb_check_frozen(self);
+    ossl_want_uninitialized(self, &ossl_ts_req_type);
+    if (argc == 0) {
+        req = TS_REQ_new();
+        if (!req)
+            ossl_raise(eTimestampError, "TS_REQ_new");
+        RTYPEDDATA_DATA(self) = req;
+
+        /* Defaults */
+        if (!TS_REQ_set_version(req, 1))
+            ossl_raise(eTimestampError, "TS_REQ_set_version");
+        if (!TS_REQ_set_cert_req(req, 1))
+            ossl_raise(eTimestampError, "TS_REQ_set_cert_req");
+
         return self;
     }
 
     arg = ossl_to_der_if_possible(arg);
     in = ossl_obj2bio(&arg);
-    ts_req = d2i_TS_REQ_bio(in, &ts_req);
+    req = d2i_TS_REQ_bio(in, NULL);
     BIO_free(in);
-    if (!ts_req) {
-        DATA_PTR(self) = NULL;
-        ossl_raise(eTimestampError, "Error when decoding the timestamp request");
+    if (!req) {
+        ossl_raise(eTimestampError,
+                   "Error when decoding the timestamp request");
     }
-    DATA_PTR(self) = ts_req;
+    RTYPEDDATA_DATA(self) = req;
 
     return self;
 }
@@ -498,15 +476,7 @@ ossl_ts_req_to_text(VALUE self)
 static VALUE
 ossl_ts_resp_alloc(VALUE klass)
 {
-    TS_RESP *resp;
-    VALUE obj;
-
-    obj = NewTSResponse(klass);
-    if (!(resp = TS_RESP_new()))
-        ossl_raise(eTimestampError, NULL);
-    SetTSResponse(obj, resp);
-
-    return obj;
+    return TypedData_Wrap_Struct(klass, &ossl_ts_resp_type, 0);
 }
 
 /*
@@ -522,18 +492,20 @@ ossl_ts_resp_alloc(VALUE klass)
 static VALUE
 ossl_ts_resp_initialize(VALUE self, VALUE der)
 {
-    TS_RESP *ts_resp = DATA_PTR(self);
+    TS_RESP *resp;
     BIO *in;
 
+    rb_check_frozen(self);
+    ossl_want_uninitialized(self, &ossl_ts_resp_type);
     der = ossl_to_der_if_possible(der);
-    in  = ossl_obj2bio(&der);
-    ts_resp = d2i_TS_RESP_bio(in, &ts_resp);
+    in = ossl_obj2bio(&der);
+    resp = d2i_TS_RESP_bio(in, NULL);
     BIO_free(in);
-    if (!ts_resp) {
-        DATA_PTR(self) = NULL;
-        ossl_raise(eTimestampError, "Error when decoding the timestamp response");
+    if (!resp) {
+        ossl_raise(eTimestampError,
+                   "Error when decoding the timestamp response");
     }
-    DATA_PTR(self) = ts_resp;
+    RTYPEDDATA_DATA(self) = resp;
 
     return self;
 }
@@ -665,6 +637,8 @@ ossl_ts_resp_get_token(VALUE self)
     return ossl_pkcs7_new(p7);
 }
 
+static VALUE ossl_ts_token_info_alloc(VALUE klass);
+
 /*
  * Get the response's token info if present.
  *
@@ -682,12 +656,10 @@ ossl_ts_resp_get_token_info(VALUE self)
     if (!(info = TS_RESP_get_tst_info(resp)))
         return Qnil;
 
-    obj = NewTSTokenInfo(cTimestampTokenInfo);
-
+    obj = ossl_ts_token_info_alloc(cTimestampTokenInfo);
     if (!(copy = TS_TST_INFO_dup(info)))
-        ossl_raise(eTimestampError, NULL);
-
-    SetTSTokenInfo(obj, copy);
+        ossl_raise(eTimestampError, "TS_TST_INFO_dup");
+    RTYPEDDATA_DATA(obj) = copy;
 
     return obj;
 }
@@ -852,15 +824,7 @@ ossl_ts_resp_verify(int argc, VALUE *argv, VALUE self)
 static VALUE
 ossl_ts_token_info_alloc(VALUE klass)
 {
-    TS_TST_INFO *info;
-    VALUE obj;
-
-    obj = NewTSTokenInfo(klass);
-    if (!(info = TS_TST_INFO_new()))
-        ossl_raise(eTimestampError, NULL);
-    SetTSTokenInfo(obj, info);
-
-    return obj;
+    return TypedData_Wrap_Struct(klass, &ossl_ts_token_info_type, 0);
 }
 
 /*
@@ -876,18 +840,20 @@ ossl_ts_token_info_alloc(VALUE klass)
 static VALUE
 ossl_ts_token_info_initialize(VALUE self, VALUE der)
 {
-    TS_TST_INFO *info = DATA_PTR(self);
+    TS_TST_INFO *info;
     BIO *in;
 
+    rb_check_frozen(self);
+    ossl_want_uninitialized(self, &ossl_ts_token_info_type);
     der = ossl_to_der_if_possible(der);
-    in  = ossl_obj2bio(&der);
-    info = d2i_TS_TST_INFO_bio(in, &info);
+    in = ossl_obj2bio(&der);
+    info = d2i_TS_TST_INFO_bio(in, NULL);
     BIO_free(in);
     if (!info) {
-        DATA_PTR(self) = NULL;
-        ossl_raise(eTimestampError, "Error when decoding the timestamp token info");
+        ossl_raise(eTimestampError,
+                   "Error when decoding the timestamp token info");
     }
-    DATA_PTR(self) = info;
+    RTYPEDDATA_DATA(self) = info;
 
     return self;
 }
@@ -1181,7 +1147,7 @@ ossl_tsfac_create_ts(VALUE self, VALUE key, VALUE certificate, VALUE request)
     const char * err_msg = NULL;
     int status = 0;
 
-    tsresp = NewTSResponse(cTimestampResponse);
+    tsresp = ossl_ts_resp_alloc(cTimestampResponse);
     tsa_cert = GetX509CertPtr(certificate);
     sign_key = GetPrivPKeyPtr(key);
     GetTSRequest(request, req);
@@ -1278,7 +1244,7 @@ ossl_tsfac_create_ts(VALUE self, VALUE key, VALUE certificate, VALUE request)
      * information. */
     ossl_clear_error();
 
-    SetTSResponse(tsresp, response);
+    RTYPEDDATA_DATA(tsresp) = response;
     ret = tsresp;
 
   end:
