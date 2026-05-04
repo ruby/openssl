@@ -286,7 +286,7 @@ ossl_dh_to_der(VALUE self)
         ossl_raise(ePKeyError, NULL);
     str = rb_str_new(0, len);
     p = (unsigned char *)RSTRING_PTR(str);
-    if(i2d_DHparams(dh, &p) < 0)
+    if(i2d_DHparams(dh, &p) <= 0)
         ossl_raise(ePKeyError, NULL);
     ossl_str_adjust(str, p);
 
