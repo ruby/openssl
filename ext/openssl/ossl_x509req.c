@@ -9,14 +9,6 @@
  */
 #include "ossl.h"
 
-#define NewX509Req(klass) \
-    TypedData_Wrap_Struct((klass), &ossl_x509req_type, 0)
-#define SetX509Req(obj, req) do { \
-    if (!(req)) { \
-        ossl_raise(rb_eRuntimeError, "Req wasn't initialized!"); \
-    } \
-    RTYPEDDATA_DATA(obj) = (req); \
-} while (0)
 #define GetX509Req(obj, req) do { \
     TypedData_Get_Struct((obj), X509_REQ, &ossl_x509req_type, (req)); \
     if (!(req)) { \
@@ -63,27 +55,24 @@ GetX509ReqPtr(VALUE obj)
 static VALUE
 ossl_x509req_alloc(VALUE klass)
 {
-    X509_REQ *req;
-    VALUE obj;
-
-    obj = NewX509Req(klass);
-    if (!(req = X509_REQ_new())) {
-        ossl_raise(eX509ReqError, NULL);
-    }
-    SetX509Req(obj, req);
-
-    return obj;
+    return TypedData_Wrap_Struct(klass, &ossl_x509req_type, 0);
 }
 
 static VALUE
 ossl_x509req_initialize(int argc, VALUE *argv, VALUE self)
 {
     BIO *in;
-    X509_REQ *req, *req_orig = RTYPEDDATA_DATA(self);
+    X509_REQ *req;
     VALUE arg;
 
+    rb_scan_args(argc, argv, "01", &arg);
     rb_check_frozen(self);
-    if (rb_scan_args(argc, argv, "01", &arg) == 0) {
+    ossl_want_uninitialized(self, &ossl_x509req_type);
+    if (argc == 0) {
+        req = X509_REQ_new();
+        if (!req)
+            ossl_raise(eX509ReqError, "X509_REQ_new");
+        RTYPEDDATA_DATA(self) = req;
         return self;
     }
     arg = ossl_to_der_if_possible(arg);
@@ -98,7 +87,6 @@ ossl_x509req_initialize(int argc, VALUE *argv, VALUE self)
         ossl_raise(eX509ReqError, "PEM_read_bio_X509_REQ");
 
     RTYPEDDATA_DATA(self) = req;
-    X509_REQ_free(req_orig);
 
     return self;
 }
@@ -107,17 +95,15 @@ ossl_x509req_initialize(int argc, VALUE *argv, VALUE self)
 static VALUE
 ossl_x509req_copy(VALUE self, VALUE other)
 {
-    X509_REQ *a, *b, *req;
+    X509_REQ *b, *req;
 
     rb_check_frozen(self);
-    if (self == other) return self;
-    GetX509Req(self, a);
+    ossl_want_uninitialized(self, &ossl_x509req_type);
     GetX509Req(other, b);
     if (!(req = X509_REQ_dup(b))) {
         ossl_raise(eX509ReqError, NULL);
     }
-    X509_REQ_free(a);
-    DATA_PTR(self) = req;
+    RTYPEDDATA_DATA(self) = req;
 
     return self;
 }

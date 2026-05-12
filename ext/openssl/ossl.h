@@ -98,6 +98,15 @@ extern VALUE eOSSLError;
     }\
 } while (0)
 
+static inline void
+ossl_want_uninitialized(VALUE self, const rb_data_type_t *type)
+{
+    if (rb_check_typeddata(self, type)) {
+        rb_raise(rb_eTypeError, "%"PRIsVALUE" already initialized",
+                 rb_obj_class(self));
+    }
+}
+
 /*
  * Type conversions
  */
