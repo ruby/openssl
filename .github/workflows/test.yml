@@ -203,4 +203,4 @@ jobs:
           bundle exec rake debug
           bundle exec rake test_fips TESTOPTS="-v --no-show-detail-immediately" OSSL_TEST_ALL=1
         timeout-minutes: 5
-        if: ${{ startsWith(matrix.openssl, 'openssl-3') || matrix.openssl == 'openssl-master' }}
+        if: ${{ startsWith(matrix.openssl, 'openssl') && !startsWith(matrix.openssl, 'openssl-1') }}
