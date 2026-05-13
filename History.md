@@ -103,6 +103,12 @@ Notable changes
   [[GitHub #983]](https://github.com/ruby/openssl/pull/983)
 
 
+Version 3.3.3
+=============
+
+Merged changes in 3.2.4.
+
+
 Version 3.3.2
 =============
 
@@ -189,6 +195,16 @@ Notable changes
 
 And various non-user-visible changes and bug fixes. Please see the commit
 history for more details.
+
+
+Version 3.2.4
+=============
+
+Notable changes
+---------------
+
+* Add support for OpenSSL 4.0.
+  [[GitHub #1051]](https://github.com/ruby/openssl/pull/1051)
 
 
 Version 3.2.3
