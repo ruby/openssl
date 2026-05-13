@@ -1,3 +1,9 @@
+Version 4.0.2
+=============
+
+Merged changes in 3.2.4 and 3.3.3.
+
+
 Version 4.0.1
 =============
 
