@@ -441,7 +441,9 @@ ossl_ts_req_set_cert_requested(VALUE self, VALUE requested)
     TS_REQ *req;
 
     GetTSRequest(self, req);
-    TS_REQ_set_cert_req(req, RTEST(requested));
+    if (!TS_REQ_set_cert_req(req, RTEST(requested))) {
+        ossl_raise(eTimestampError, "TS_REQ_set_cert_req");
+    }
 
     return requested;
 }
@@ -1229,11 +1231,17 @@ ossl_tsfac_create_ts(VALUE self, VALUE key, VALUE certificate, VALUE request)
             goto end;
 
         /* this dups the sk_X509 and ups each cert's ref count */
-        TS_RESP_CTX_set_certs(ctx, inter_certs);
+        if (!TS_RESP_CTX_set_certs(ctx, inter_certs)) {
+            err_msg = "Certificates could not be set";
+            goto end;
+        }
         sk_X509_pop_free(inter_certs, X509_free);
     }
 
-    TS_RESP_CTX_set_signer_key(ctx, sign_key);
+    if (!TS_RESP_CTX_set_signer_key(ctx, sign_key)) {
+        err_msg = "Signer key could not be set";
+        goto end;
+    }
     if (!NIL_P(def_policy_id) && !TS_REQ_get_policy_id(req))
         TS_RESP_CTX_set_def_policy(ctx, def_policy_id_obj);
     if (TS_REQ_get_policy_id(req))
