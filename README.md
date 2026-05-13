@@ -18,9 +18,9 @@ included as a default gem in [supported Ruby branches][Ruby Maintenance Branches
 
 |Version|Minimum Ruby|OpenSSL compatibility                    |Bundled with|Maintenance  |
 |-------|------------|-----------------------------------------|------------|-------------|
-|4.0.x  |Ruby 2.7    |OpenSSL 1.1.1-3.x, LibreSSL 3.9+, AWS-LC |Ruby 4.0    |bug fixes    |
-|3.3.x  |Ruby 2.7    |OpenSSL 1.0.2-3.x, LibreSSL 3.1+         |Ruby 3.4    |bug fixes    |
-|3.2.x  |Ruby 2.7    |OpenSSL 1.0.2-3.x, LibreSSL 3.1+         |Ruby 3.3    |bug fixes    |
+|4.0.x  |Ruby 2.7    |OpenSSL 1.1.1-4.x, LibreSSL 3.9+, AWS-LC |Ruby 4.0    |bug fixes    |
+|3.3.x  |Ruby 2.7    |OpenSSL 1.0.2-4.x, LibreSSL 3.1+         |Ruby 3.4    |bug fixes    |
+|3.2.x  |Ruby 2.7    |OpenSSL 1.0.2-4.x, LibreSSL 3.1+         |Ruby 3.3    |bug fixes    |
 |3.1.x  |Ruby 2.6    |OpenSSL 1.0.2-3.x, LibreSSL 3.1+         |Ruby 3.2    |security only|
 |3.0.x  |Ruby 2.6    |OpenSSL 1.0.2-3.x, LibreSSL 3.1+         |Ruby 3.1    |end-of-life  |
 |2.2.x  |Ruby 2.3    |OpenSSL 1.0.1-1.1.1, LibreSSL 2.9+       |Ruby 3.0    |end-of-life  |
