@@ -93,6 +93,40 @@ ec_key_new_from_group(VALUE arg)
 }
 
 /*
+ * Creates a new EC_KEY from the provided EC::Point
+ */
+static EC_KEY *
+ec_key_new_from_point(VALUE arg)
+{
+    EC_KEY *ec = NULL;
+
+    if (rb_obj_is_kind_of(arg, cEC_POINT)) {
+	EC_POINT *point;
+        EC_GROUP *group;
+
+	if (!(ec = EC_KEY_new())) {
+	    ossl_raise(eECError, NULL);
+        }
+
+        GetECPointGroup(arg, group);
+	if (!EC_KEY_set_group(ec, group)) {
+	    EC_KEY_free(ec);
+	    ossl_raise(eECError, NULL);
+	}
+
+	GetECPoint(arg, point);
+	if (EC_KEY_set_public_key(ec, point) == 0) {
+	    EC_KEY_free(ec);
+	    ossl_raise(eECError, NULL);
+	}
+    } else {
+      ossl_raise(eECError, "invalid point");
+    }
+
+    return ec;
+}
+
+/*
  *  call-seq:
  *     EC.generate(ec_group) -> ec
  *     EC.generate(string) -> ec
@@ -126,7 +160,7 @@ ossl_ec_key_s_generate(VALUE klass, VALUE arg)
 /*
  * call-seq:
  *   OpenSSL::PKey::EC.new
- *   OpenSSL::PKey::EC.new(ec_key)
+ *   OpenSSL::PKey::EC.new(ec_key)       # ec_key is PKey::EC, or PKey::EC::Point.
  *   OpenSSL::PKey::EC.new(ec_group)
  *   OpenSSL::PKey::EC.new("secp112r1")
  *   OpenSSL::PKey::EC.new(pem_string [, pwd])
@@ -156,6 +190,10 @@ static VALUE ossl_ec_key_initialize(int argc, VALUE *argv, VALUE self)
             ossl_raise(ePKeyError, "EC_KEY_new");
         goto legacy;
 #endif
+    }
+    else if (rb_obj_is_kind_of(arg, cEC_POINT)) {
+        ec = ec_key_new_from_point(arg);
+        goto legacy;
     }
     else if (rb_obj_is_kind_of(arg, cEC_GROUP)) {
         ec = ec_key_new_from_group(arg);
