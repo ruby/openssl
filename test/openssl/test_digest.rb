@@ -155,6 +155,27 @@ class OpenSSL::TestDigest < OpenSSL::TestCase
     assert_include digests, "sha256"
     assert_include digests, "sha512"
   end
+
+  if defined?(Ractor) && respond_to?(:ractor)
+    ractor
+    Ractor.alias_method(:value, :take) unless Ractor.method_defined?(:value)
+
+    def test_ractor
+      experimental_before = Warning[:experimental]
+      Warning[:experimental] = false
+      assert_nothing_raised do
+        Ractor.new {
+          [
+            OpenSSL::Digest::SHA256.new(""),
+            OpenSSL::Digest::SHA256.hexdigest(""),
+            OpenSSL::Digest::SHA256.digest(""),
+          ]
+        }.value
+      end
+    ensure
+      Warning[:experimental] = experimental_before
+    end
+  end
 end
 
 end
