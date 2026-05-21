@@ -3,43 +3,76 @@ require_relative "utils"
 if defined?(OpenSSL) && defined?(OpenSSL::Timestamp)
 
 class OpenSSL::TestTimestamp < OpenSSL::TestCase
+  # 2048-bit RSA keys for intermediate_key and ee_key are required for signing
+  # and encryption in FIPS.
+  # SP 800-131A Rev. 2
+  # * 3. Digital Signatures
+  # * 6. Key Agreement and Key Transport Using RSA
+  # https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-131Ar2.pdf
+  # https://github.com/openssl/openssl/blob/71943544885ff364a10bcc5ffc62d0e651c9a021/providers/common/securitycheck.c#L72-L73
   def intermediate_key
     @intermediate_key ||= OpenSSL::PKey::RSA.new <<-_end_of_pem_
------BEGIN RSA PRIVATE KEY-----
-MIICWwIBAAKBgQCcyODxH+oTrr7l7MITWcGaYnnBma6vidCCJjuSzZpaRmXZHAyH
-0YcY4ttC0BdJ4uV+cE05IySVC7tyvVfFb8gFQ6XJV+AEktP+XkLbcxZgj9d2NVu1
-ziXdI+ldXkPnMhyWpMS5E7SD6gflv9NhUYEsmAGsUgdK6LDmm2W2/4TlewIDAQAB
-AoGAYgx6KDFWONLqjW3f/Sv/mGYHUNykUyDzpcD1Npyf797gqMMSzwlo3FZa2tC6
-D7n23XirwpTItvEsW9gvgMikJDPlThAeGLZ+L0UbVNNBHVxGP998Nda1kxqKvhRE
-pfZCKc7PLM9ZXc6jBTmgxdcAYfVCCVUoa2mEf9Ktr3BlI4kCQQDQAM09+wHDXGKP
-o2UnCwCazGtyGU2r0QCzHlh9BVY+KD2KjjhuWh86rEbdWN7hEW23Je1vXIhuM6Pa
-/Ccd+XYnAkEAwPZ91PK6idEONeGQ4I3dyMKV2SbaUjfq3MDL4iIQPQPuj7QsBO/5
-3Nf9ReSUUTRFCUVwoC8k4Z1KAJhR/K/ejQJANE7PTnPuGJQGETs09+GTcFpR9uqY
-FspDk8fg1ufdrVnvSAXF+TJewiGK3KU5v33jinhWQngRsyz3Wt2odKhEZwJACbjh
-oicQqvzzgFd7GzVKpWDYd/ZzLY1PsgusuhoJQ2m9TVRAm4cTycLAKhNYPbcqe0sa
-X5fAffWU0u7ZwqeByQJAOUAbYET4RU3iymAvAIDFj8LiQnizG9t5Ty3HXlijKQYv
-y8gsvWd4CdxwOPatWpBUX9L7IXcMJmD44xXTUvpbfQ==
------END RSA PRIVATE KEY-----
+-----BEGIN PRIVATE KEY-----
+MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC9FTDnvTJvvS0w
+mn/EANQKQsup5LRYEqj+aMnslI6eVBe0USC3dvjY6Bj4xkMVhVEb25L4KVSjqdnM
+60IvL73P9aatFbpPJM837eHXVE25qsKzc7yxdk4covODsbd/J/jztaWEFcdoIjNd
+IkuyVFo7uWlRzgboI5xHCBFBO7srimTKpICZeKslfm023J24H40GaF8+d3o0pOg/
+h5u3lYsDON9h01eWB1j2ELRelv6zeELk27AWD+jdyDOTX49aqh0PEbPEj/TeDExY
+5EdiZEwGrE075rnaR1vGz4YsGZvDMX0pxlM7efextd1jy9VWAbRq8UPV2NzthopC
+ZGh3EZnHAgMBAAECggEACMqd8gBxgmbaMuApdaG7j4M940yEzXLcqauR9pk3rQk9
+lZQ6FbMHQf/p/VMr66m9tN0M5H34zKfz6QZn7DgSNsOguCaCTvYSrnKLOs8AKCmr
+kNrI7hARSgfnk6V6jIPSxvNuBTSwB1mjvWj/+lmCsokzP5Wj65I693CFa4eNSH+7
+1Ue8LegiWz1KEwzUwE/MoDqQ+RQxQl/cIov/8oI3lYCu0S/gO5ybylLXRNy8liVM
+mZusiMe8Q8SiGD+oIUBnMgcg5MYZeYcNZuFb90xl/c4Bof0Wlyznsyyw7swlZhSm
+OTIl1OleSQ1eAcvGAJc6gTpt/Q6rPvgUdzUAlYAmPQKBgQDiWD2fZVL5s7ZRKpi+
+lNSzj/UaFUZlmnjcmr4p/y+25nP/m4Q11lHyDr/zSdX4CjGMLkg5uPrnHvJ00taW
+Yo2Akaqx8iT9ncF5gj18jfnHwGChEbMVhXSbvegcASPA4C7cA8gBwdX+ZQeahD6k
+D5dz5vC1rbVPzz3oycWn5QVO0wKBgQDV2yjhxA/wlyes5h4OATwuNwTKctCT50yr
+ZrfmbUpyXAIM4uKYLfI/zS0x9nePuTTIz8jldb68ehRNzqfw+1DCbWKBSoOlBS/u
+eGGw4ni37Nm6lmCRZHMus1UZFS41/kSuA+xWV8fbzcfzNzkVvo+91n5xm48MN7K3
+SlFk8M74vQKBgQCoj5pkqCqg9qrhy10xINk+WAjqQcnJRL6ZW0wfLoG0Le9Y/dH5
+3f/syfs9DVGhhMXdZWI4Sn/fuvZI9fMEz6QdiV2bY38UuHUrLkjoBztq/ON5UBsT
+/e0XRtgict7TdqCvDMnYNShOaaK9+ZpEx6+8itHcGt8Z7nZmdE0UecP4LQKBgQCk
+peQ21bWT/TxNsKnpDGhiCHgGyhjuFoF/4Uiq/u/3VgE6HKBqm81L89LdCa4JmIUc
+KmW4zEt6Xt8s/HNuZH9MAd16P31VWsYJauODxQk+Sftj3Y0hw12u0eEtu5Hlfgsw
+ktKts02rXCaaiaTIqfuPJAobu7GJrYRJ+8zo00H2XQKBgFMm+oGbmrx6byzfFZJX
+ZGukUi5vKR95KDjhLyM9Z2XHJUGj/z8a8fEMh51btI8AGKc84DS71FBsTheyrA7g
+y0jEXaW4MB2AwdOW7QKaD3DjuZdWLCPDboWkoRBQY7PmRsdxF0Ve+0+xMtfJDPP8
+1d4GA0IexsTOAkPAly2/vr4g
+-----END PRIVATE KEY-----
 _end_of_pem_
   end
 
   def ee_key
     @ee_key ||= OpenSSL::PKey::RSA.new <<-_end_of_pem_
------BEGIN RSA PRIVATE KEY-----
-MIICWwIBAAKBgQDA6eB5r2O5KOKNbKMBhzadl43lgpwqq28m+G0gH38kKCL1f3o9
-P8xUZm7sZqcWEervZMSSXMGBV9DgeoSR+U6FMJywgQGx/JNRx7wZTMNym3PvgLkl
-xCXh6ZA0/xbtJtcNI+UUv0ENBkTIuUWBhkAf3jQclAr9aQ0ktYBuHAcRcQIDAQAB
-AoGAKNhcAuezwZx6e18pFEXAtpVEIfgJgK9TlXi8AjUpAkrNPBWFmDpN1QDrM3p4
-nh+lEpLPW/3vqqchPqYyM4YJraMLpS3KUG+s7+m9QIia0ri2WV5Cig7WL+Tl9p7K
-b3oi2Aj/wti8GfOLFQXOQQ4Ea4GoCv2Sxe0GZR39UBxzTsECQQD1zuVIwBvqU2YR
-8innsoa+j4u2hulRmQO6Zgpzj5vyRYfA9uZxQ9nKbfJvzuWwUv+UzyS9RqxarqrP
-5nQw5EmVAkEAyOmJg6+AfGrgvSWfSpXEds/WA/sHziCO3rE4/sd6cnDc6XcTgeMs
-mT8Z3kAYGpqFDew5orUylPfJJa+PUueJbQJAY+gkvw3+Cp69FLw1lgu0wo07fwOU
-n2qu3jsNMm0DOFRUWfTAMvcd9S385L7WEnWZldUfnKK1+OGXYYrMXPbchQJAChU2
-UoaHQzc16iguM1cK0g+iJPb/MEgQA3sPajHmokGpxIm2T+lvvo0dJjs/Om6QyN8X
-EWRYkoNQ8/Q4lCeMjQJAfvDIGtyqF4PieFHYgluQAv5pGgYpakdc8SYyeRH9NKey
-GaL27FRs4fRWf9OmxPhUVgIyGzLGXrueemvQUDHObA==
------END RSA PRIVATE KEY-----
+-----BEGIN PRIVATE KEY-----
+MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCkQi2bnexNZipP
+RM0e4VLBxd9aKzN5KZKP/k4lqDmkwhJ0GDpD440RNvwqBvP31iA44O0QBeyNMexC
+djtDek61dI1jmwj3CuM4xO84AO+nrvV6sylvlxX/rEjHgQjFLlFP9uySL6faHbCn
+fmy1HvL6wdS9iqbbGkjAtAHDZmb1V6GKzsIUEyC2webwrgzkUC5CePim3oY83e1t
+DM5I1rblJk4IUpXoWsQWS2YGS6cpsoifTwsktq6olk/YW6YV+eSHuYARCByhBBlO
+E2tBAiWjaRrbmVSeAZKxQpyiW2ZgVVJBE2ar9QOjEKcYECJxBu+L87uTTfITunW8
+bSPg4Um1AgMBAAECggEAAZPWukre+eaESE41DIBF4Je7S5nLA1vgQEL4Xylpb4Kj
+O+6Ybw4TzPMfoth92VOuHyQeqR7vC0AY48TptsrJT+02bZsPwy4DydTIwChW8ay4
+rZzKeUh7LQE4X1CG7aKo10Eo1N9hfkyQslsaRV1uhsGVZUI11GunmgPG8vVCm3j5
+bD4hQoXcuUY/d8VjnIeyZ0R79Y0Z+M5Zv/HP0YVkKMpLGaIJm8p0O5whkx8ztqOD
++9XVITYuiiQb17I7ab/14ZFrVeNTz9ubo5KYWwznLeUaux5Gi4wLMSK4Pr8Bpdwz
+bGz2oL226iv/Nlz0rFsc/ftro4nvMDnlptRpM7paAQKBgQDft0HwEb9g13sIy4uI
++Ie1eniodvU/vghMJRorakLzQFtT8U7Jh7bA89zNvtUDvwl/QHNpVqnZTBPEv1j1
+Xz+n7HxDGp2eLkylvLIaqIs2Z5ZD8hRRR/d0ltx1SirFNILTEGnFF3IQ4pszUlUE
+RcYUICnQJMaahlkFYH/PtHBcNQKBgQC79mLNrRtbWkkWbf+0rlJh7+g5O5m/vZW1
+f3E6SLtELhXxQMV4K+bzkjfF5Lee2DksxtAtIoZOB+OY7LoqVdqE3zRpFyxioiJN
+bIQUTHZaXnGJn32qfuFjLOab42+Dc8t3iFw/g51dCaA/UdLwFLnCpxX4i5ShmCpA
+9p/KuLPngQKBgD1Bt6tdoLKKriS9X0q1CqvVih5O3F6E0U7QRfcnVIe40okMpQ8n
+uxHgdFBd9YPeFmKiqjdoxH88hpkz787YMtzvMyNIsWnzsYccQQRtrBjMime2bHvJ
+IefpuxneohF3jG7wqpWOEuyur+KAo8jUtiUinXBh8YO0T8HaJ4UfGjkVAoGAM87l
+zOs57yQjoRsQsCycaIJH7/6NklwfN7e47ee+Njy9r5G63DS9o8VZuiIgupe+qqji
+GI67liZ2hWA6sBCZ+qXLPGw2v7kQ22ZdwXqR5LbDdLuRV71BQqTNq4o04na4Tmo3
+gwo0BcDxeoKDMcmEqjKDy84tWZ0niGByCt5+OAECgYAKlMHNGVSyiSezrlXEVpxv
+BSM/f96hJFads4jeb4wUnKWZxJvywabJxG6ln3RgrderapY7oYTxsGTYERqUvZNm
+MkqVYbLY9Shj+faE1Xw4xP78aRGhrTsqPyORtGBeIJl6zsb1s8+7u47BkSDBumph
+tCLmQPQFmTQQUDP6g2FtHw==
+-----END PRIVATE KEY-----
 _end_of_pem_
   end
 

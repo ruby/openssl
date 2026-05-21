@@ -5,12 +5,24 @@ if defined?(OpenSSL)
 
 class OpenSSL::TestKDF < OpenSSL::TestCase
   def test_pkcs5_pbkdf2_hmac_compatibility
-    expected = OpenSSL::KDF.pbkdf2_hmac("password", salt: "salt", iterations: 1, length: 20, hash: "sha1")
-    assert_equal(expected, OpenSSL::PKCS5.pbkdf2_hmac("password", "salt", 1, 20, "sha1"))
-    assert_equal(expected, OpenSSL::PKCS5.pbkdf2_hmac_sha1("password", "salt", 1, 20))
+    # PBKDF2 salt >= 16 bytes (128 bits) and iterations >= 1000 are required in
+    # FIPS.
+    # SP 800-132.
+    # https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-132.pdf
+    # * 5.1 The Salt (S)
+    # * 5.2 The Iteration Count (C)
+    # https://github.com/openssl/openssl/blob/71943544885ff364a10bcc5ffc62d0e651c9a021/providers/implementations/kdfs/pbkdf2.c#L235-L240
+    # https://github.com/openssl/openssl/blob/71943544885ff364a10bcc5ffc62d0e651c9a021/providers/implementations/kdfs/pbkdf2.c#L247-L252
+    expected = OpenSSL::KDF.pbkdf2_hmac("password", salt: "salt567890123456", iterations: 1000, length: 20, hash: "sha1")
+    assert_equal(expected, OpenSSL::PKCS5.pbkdf2_hmac("password", "salt567890123456", 1000, 20, "sha1"))
+    assert_equal(expected, OpenSSL::PKCS5.pbkdf2_hmac_sha1("password", "salt567890123456", 1000, 20))
   end
 
   def test_pbkdf2_hmac_sha1_rfc6070_c_1_len_20
+    # PBKDF2 salt >= 16 bytes (128 bits) and iterations >= 1000 are required in
+    # FIPS.
+    omit_on_fips
+
     p ="password"
     s = "salt"
     c = 1
@@ -24,6 +36,10 @@ class OpenSSL::TestKDF < OpenSSL::TestCase
   end
 
   def test_pbkdf2_hmac_sha1_rfc6070_c_2_len_20
+    # PBKDF2 salt >= 16 bytes (128 bits) and iterations >= 1000 are required in
+    # FIPS.
+    omit_on_fips
+
     p ="password"
     s = "salt"
     c = 2
@@ -38,12 +54,12 @@ class OpenSSL::TestKDF < OpenSSL::TestCase
 
   def test_pbkdf2_hmac_sha1_rfc6070_c_4096_len_20
     p ="password"
-    s = "salt"
+    s = "salt567890123456"
     c = 4096
     dk_len = 20
-    raw = %w{ 4b 00 79 01 b7 65 48 9a
-              be ad 49 d9 26 f7 21 d0
-              65 a4 29 c1 }
+    raw = %w{ ff 9a a6 35 94 73 b8 98
+              cc 3a 8b e9 82 ff 6b 2a
+              d6 33 2a 52 }
     expected = [raw.join('')].pack('H*')
     value = OpenSSL::KDF.pbkdf2_hmac(p, salt: s, iterations: c, length: dk_len, hash: "sha1")
     assert_equal(expected, value)
@@ -80,11 +96,11 @@ class OpenSSL::TestKDF < OpenSSL::TestCase
 
   def test_pbkdf2_hmac_sha1_rfc6070_c_4096_len_16
     p ="pass\0word"
-    s = "sa\0lt"
+    s = "sa\0lt567890123456"
     c = 4096
     dk_len = 16
-    raw = %w{ 56 fa 6a a7 55 48 09 9d
-              cc 37 d7 f0 34 25 e0 c3 }
+    raw = %w{ cd c3 ad 7f 78 2b 96 48
+              d9 07 6f 5c 14 70 9f e5 }
     expected = [raw.join('')].pack('H*')
     value = OpenSSL::KDF.pbkdf2_hmac(p, salt: s, iterations: c, length: dk_len, hash: "sha1")
     assert_equal(expected, value)
@@ -103,6 +119,11 @@ class OpenSSL::TestKDF < OpenSSL::TestCase
 
   def test_scrypt_rfc7914_first
     pend "scrypt is not implemented" unless OpenSSL::KDF.respond_to?(:scrypt) # OpenSSL >= 1.1.0
+    # scrypt is not available in FIPS.
+    # EVP_KDF_fetch(ctx, OSSL_KDF_NAME_SCRYPT, propq) returns NULL in FIPS.
+    # https://github.com/openssl/openssl/blob/71943544885ff364a10bcc5ffc62d0e651c9a021/crypto/evp/pbe_scrypt.c#L67-L71
+    omit_on_fips
+
     pass = ""
     salt = ""
     n = 16
@@ -118,6 +139,9 @@ class OpenSSL::TestKDF < OpenSSL::TestCase
 
   def test_scrypt_rfc7914_second
     pend "scrypt is not implemented" unless OpenSSL::KDF.respond_to?(:scrypt) # OpenSSL >= 1.1.0
+    # scrypt is not available in FIPS.
+    omit_on_fips
+
     pass = "password"
     salt = "NaCl"
     n = 1024
@@ -131,6 +155,7 @@ class OpenSSL::TestKDF < OpenSSL::TestCase
     assert_equal(expected, OpenSSL::KDF.scrypt(pass, salt: salt, N: n, r: r, p: p, length: dklen))
   end
 
+  # https://www.rfc-editor.org/rfc/rfc5869#appendix-A.1
   def test_hkdf_rfc5869_test_case_1
     hash = "sha256"
     ikm = B("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b")
@@ -144,6 +169,7 @@ class OpenSSL::TestKDF < OpenSSL::TestCase
     assert_equal(okm, OpenSSL::KDF.hkdf(ikm, salt: salt, info: info, length: l, hash: hash))
   end
 
+  # https://www.rfc-editor.org/rfc/rfc5869#appendix-A.3
   def test_hkdf_rfc5869_test_case_3
     hash = "sha256"
     ikm = B("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b")
@@ -157,7 +183,13 @@ class OpenSSL::TestKDF < OpenSSL::TestCase
     assert_equal(okm, OpenSSL::KDF.hkdf(ikm, salt: salt, info: info, length: l, hash: hash))
   end
 
+  # https://www.rfc-editor.org/rfc/rfc5869#appendix-A.4
   def test_hkdf_rfc5869_test_case_4
+    # FIPS requires a minimum security strength of 112 bits for key-derivation
+    # key (ikm). However, ikm is 11 bytes * 8 = 88 bits.
+    # https://github.com/openssl/openssl/blob/71943544885ff364a10bcc5ffc62d0e651c9a021/providers/common/securitycheck.c#L83
+    omit_on_fips
+
     hash = "sha1"
     ikm = B("0b0b0b0b0b0b0b0b0b0b0b")
     salt = B("000102030405060708090a0b0c")
@@ -167,6 +199,35 @@ class OpenSSL::TestKDF < OpenSSL::TestCase
     okm = B("085a01ea1b10f36933068b56efa5ad81" \
             "a4f14b822f5b091568a9cdd4f155fda2" \
             "c22e422478d305f3f896")
+    assert_equal(okm, OpenSSL::KDF.hkdf(ikm, salt: salt, info: info, length: l, hash: hash))
+  end
+
+  # https://www.rfc-editor.org/rfc/rfc5869#appendix-A.5
+  def test_hkdf_rfc5869_test_case_5
+    hash = "sha1"
+    ikm = B("000102030405060708090a0b0c0d0e0f" \
+            "101112131415161718191a1b1c1d1e1f" \
+            "202122232425262728292a2b2c2d2e2f" \
+            "303132333435363738393a3b3c3d3e3f" \
+            "404142434445464748494a4b4c4d4e4f")
+    salt = B("606162636465666768696a6b6c6d6e6f" \
+             "707172737475767778797a7b7c7d7e7f" \
+             "808182838485868788898a8b8c8d8e8f" \
+             "909192939495969798999a9b9c9d9e9f" \
+             "a0a1a2a3a4a5a6a7a8a9aaabacadaeaf")
+    info = B("b0b1b2b3b4b5b6b7b8b9babbbcbdbebf" \
+             "c0c1c2c3c4c5c6c7c8c9cacbcccdcecf" \
+             "d0d1d2d3d4d5d6d7d8d9dadbdcdddedf" \
+             "e0e1e2e3e4e5e6e7e8e9eaebecedeeef" \
+             "f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff")
+    l = 82
+
+    okm = B("0bd770a74d1160f7c9f12cd5912a06eb" \
+            "ff6adcae899d92191fe4305673ba2ffe" \
+            "8fa3f1a4e5ad79f3f334b3b202b2173c" \
+            "486ea37ce3d397ed034c7f9dfeb15c5e" \
+            "927336d0441f4c4300e2cff0d0900b52" \
+            "d3b4")
     assert_equal(okm, OpenSSL::KDF.hkdf(ikm, salt: salt, info: info, length: l, hash: hash))
   end
 
