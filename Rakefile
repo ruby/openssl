@@ -14,6 +14,7 @@ task :test => :compile
 Rake::TestTask.new do |t|
   t.test_files = FileList["test/**/test_*.rb"]
   t.warning = true
+  t.ruby_opts = ["-W:no-experimental"]
 end
 
 desc 'Run tests for fips'
@@ -30,6 +31,7 @@ Rake::TestTask.new(:test_fips_internal) do |t|
     'test/openssl/test_ts.rb',
   ]
   t.warning = true
+  t.ruby_opts = ["-W:no-experimental"]
 end
 
 RDoc::Task.new do |rdoc|
