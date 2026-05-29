@@ -27,7 +27,6 @@ Rake::TestTask.new(:test_fips_internal) do |t|
   # Exclude failing test files in FIPS for this task to pass.
   # TODO: Fix failing test files.
   t.test_files = FileList['test/**/test_*.rb'] - FileList[
-    'test/openssl/test_kdf.rb',
     'test/openssl/test_ts.rb',
   ]
   t.warning = true
