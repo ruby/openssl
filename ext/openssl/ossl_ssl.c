@@ -1804,23 +1804,6 @@ no_exception_p(VALUE opts)
     return 0;
 }
 
-static VALUE
-ossl_ssl_quic_null_error(SSL *ssl, const char *funcname, VALUE opts)
-{
-    int err = SSL_get_error(ssl, 0);
-
-    switch (err) {
-      case SSL_ERROR_NONE:
-      case SSL_ERROR_WANT_READ:
-        if (no_exception_p(opts))
-            return sym_wait_readable;
-        ossl_raise(eSSLErrorWaitReadable, "%s would block", funcname);
-      default:
-        ossl_raise(eSSLError, "%s", funcname);
-    }
-}
-
-
 // Provided by Ruby 3.2.0 and later in order to support the default IO#timeout.
 #ifndef RUBY_IO_TIMEOUT_DEFAULT
 #define RUBY_IO_TIMEOUT_DEFAULT Qnil
@@ -1833,9 +1816,60 @@ ossl_ssl_quic_null_error(SSL *ssl, const char *funcname, VALUE opts)
 #endif
 
 
+#ifdef OSSL_USE_QUIC
+/*
+ * For QUIC connections, SSL_ERROR_WANT_{READ,WRITE} does not necessarily mean
+ * the underlying UDP socket is unreadable/unwritable, it reflects the QUIC
+ * engine's internal state. Use SSL_net_{read,write}_desired() to determine
+ * what the socket actually needs, and cap the wait at SSL_get_event_timeout()
+ * so QUIC timers (loss detection, PTO, etc.) can fire. Drive the engine with
+ * SSL_handle_events() after the wait.
+ */
 static void
-io_wait_writable(VALUE io)
+quic_io_wait(VALUE io, SSL *ssl)
 {
+#ifdef HAVE_RB_IO_MAYBE_WAIT
+    int events = 0;
+    if (SSL_net_read_desired(ssl))
+        events |= RUBY_IO_READABLE;
+    if (SSL_net_write_desired(ssl))
+        events |= RUBY_IO_WRITABLE;
+
+    VALUE timeout = RUBY_IO_TIMEOUT_DEFAULT;
+    struct timeval tv;
+    int is_infinite;
+    if (SSL_get_event_timeout(ssl, &tv, &is_infinite) && !is_infinite) {
+        timeout = DBL2NUM((double)tv.tv_sec + (double)tv.tv_usec / 1000000.0);
+    }
+
+    if (events) {
+        rb_io_wait(io, INT2NUM(events), timeout);
+    } else if (!NIL_P(timeout)) {
+        rb_thread_wait_for(tv);
+    } else {
+        /* Nothing to wait on; drive the engine and let the caller retry. */
+    }
+#else
+    rb_io_t *fptr;
+    GetOpenFile(io, fptr);
+    rb_thread_wait_fd(fptr->fd);
+#endif
+
+    if (!SSL_handle_events(ssl))
+        ossl_raise(eSSLError, "SSL_handle_events");
+}
+#else
+# define SSL_is_quic(ssl) 0
+# define quic_io_wait(io, ssl) ((void)0)
+#endif
+
+static void
+io_wait_writable(VALUE io, SSL *ssl)
+{
+    if (SSL_is_quic(ssl)) {
+        quic_io_wait(io, ssl);
+        return;
+    }
 #ifdef HAVE_RB_IO_MAYBE_WAIT
     if (!rb_io_wait(io, INT2NUM(RUBY_IO_WRITABLE), RUBY_IO_TIMEOUT_DEFAULT)) {
         rb_raise(IO_TIMEOUT_ERROR, "Timed out while waiting to become writable!");
@@ -1848,8 +1882,12 @@ io_wait_writable(VALUE io)
 }
 
 static void
-io_wait_readable(VALUE io)
+io_wait_readable(VALUE io, SSL *ssl)
 {
+    if (SSL_is_quic(ssl)) {
+        quic_io_wait(io, ssl);
+        return;
+    }
 #ifdef HAVE_RB_IO_MAYBE_WAIT
     if (!rb_io_wait(io, INT2NUM(RUBY_IO_READABLE), RUBY_IO_TIMEOUT_DEFAULT)) {
         rb_raise(IO_TIMEOUT_ERROR, "Timed out while waiting to become readable!");
@@ -1892,12 +1930,12 @@ ossl_start_ssl(VALUE self, int (*func)(SSL *), const char *funcname, VALUE opts)
           case SSL_ERROR_WANT_WRITE:
             if (no_exception_p(opts)) { return sym_wait_writable; }
             write_would_block(nonblock);
-            io_wait_writable(io);
+            io_wait_writable(io, ssl);
             continue;
           case SSL_ERROR_WANT_READ:
             if (no_exception_p(opts)) { return sym_wait_readable; }
             read_would_block(nonblock);
-            io_wait_readable(io);
+            io_wait_readable(io, ssl);
             continue;
           case SSL_ERROR_SYSCALL:
 #ifdef __APPLE__
@@ -2094,14 +2132,14 @@ ossl_ssl_read_internal(int argc, VALUE *argv, VALUE self, int nonblock)
                 if (no_exception_p(opts)) { return sym_wait_writable; }
                 write_would_block(nonblock);
             }
-            io_wait_writable(io);
+            io_wait_writable(io, ssl);
             break;
           case SSL_ERROR_WANT_READ:
             if (nonblock) {
                 if (no_exception_p(opts)) { return sym_wait_readable; }
                 read_would_block(nonblock);
             }
-            io_wait_readable(io);
+            io_wait_readable(io, ssl);
             break;
           case SSL_ERROR_SYSCALL:
             if (!ERR_peek_error()) {
@@ -2206,12 +2244,12 @@ ossl_ssl_write_internal_safe(VALUE _args)
           case SSL_ERROR_WANT_WRITE:
             if (no_exception_p(opts)) { return sym_wait_writable; }
             write_would_block(nonblock);
-            io_wait_writable(io);
+            io_wait_writable(io, ssl);
             continue;
           case SSL_ERROR_WANT_READ:
             if (no_exception_p(opts)) { return sym_wait_readable; }
             read_would_block(nonblock);
-            io_wait_readable(io);
+            io_wait_readable(io, ssl);
             continue;
           case SSL_ERROR_SYSCALL:
 #ifdef __APPLE__
@@ -2891,7 +2929,7 @@ ossl_ssl_accept_stream(VALUE self)
      * retryable error).
      */
     while ((stream_ssl = SSL_accept_stream(ssl, SSL_ACCEPT_STREAM_NO_BLOCK)) == NULL) {
-        io_wait_readable(io);
+        io_wait_readable(io, ssl);
     }
 
     return ossl_ssl_wrap_stream(self, stream_ssl);
@@ -3167,7 +3205,7 @@ ossl_ssl_accept_connection(VALUE self)
      * instead of a retryable error).
      */
     while ((conn_ssl = SSL_accept_connection(ssl, SSL_ACCEPT_CONNECTION_NO_BLOCK)) == NULL) {
-        io_wait_readable(io);
+        io_wait_readable(io, ssl);
     }
 
     return ossl_ssl_wrap_connection(self, conn_ssl);
