@@ -28,7 +28,7 @@ jobs:
 
     steps: &test-steps
       - name: repo checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: load ruby
         uses: ruby/setup-ruby@v1
@@ -122,7 +122,7 @@ jobs:
           - { openssl: aws-lc-latest, skip-warnings: true }
     steps:
       - name: repo checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - id: cache-openssl
         uses: actions/cache@v5
