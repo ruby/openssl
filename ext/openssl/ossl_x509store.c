@@ -246,7 +246,9 @@ ossl_x509store_set_flags(VALUE self, VALUE flags)
     long f = NUM2LONG(flags);
 
     GetX509Store(self, store);
-    X509_STORE_set_flags(store, f);
+    if (!X509_STORE_set_flags(store, f)) {
+        ossl_raise(eX509StoreError, "X509_STORE_set_flags");
+    }
 
     return flags;
 }
@@ -281,7 +283,9 @@ ossl_x509store_set_purpose(VALUE self, VALUE purpose)
     int p = NUM2INT(purpose);
 
     GetX509Store(self, store);
-    X509_STORE_set_purpose(store, p);
+    if (!X509_STORE_set_purpose(store, p)) {
+        ossl_raise(eX509StoreError, "X509_STORE_set_purpose");
+    }
 
     return purpose;
 }
@@ -305,7 +309,9 @@ ossl_x509store_set_trust(VALUE self, VALUE trust)
     int t = NUM2INT(trust);
 
     GetX509Store(self, store);
-    X509_STORE_set_trust(store, t);
+    if (!X509_STORE_set_trust(store, t)) {
+        ossl_raise(eX509StoreError, "X509_STORE_set_trust");
+    }
 
     return trust;
 }
