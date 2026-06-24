@@ -58,17 +58,11 @@ jobs:
           Copy-Item "$src\libcrypto-3-x64.dll", "$src\libssl-3-x64.dll" $dst
         if: ${{ matrix.os == 'windows-latest' && (matrix.ruby == '3.2' || matrix.ruby == '3.3' || matrix.ruby == 'mswin') }}
 
-      # Enable the verbose option in mkmf.rb to print the compiling commands.
-      - name: enable mkmf verbose
-        run:  echo "MAKEFLAGS=V=1" >> $GITHUB_ENV
-        if: runner.os == 'Linux' || runner.os == 'macOS'
-
-      - name: set flags to check compiler warnings
-        run:  echo "RUBY_OPENSSL_EXTCFLAGS=-Werror" >> $GITHUB_ENV
-        if: ${{ !matrix.skip-warnings }}
-
       - name: rake compile
         run:  bundle exec rake debug_compiler compile
+        env:
+          MAKEFLAGS: ${{ matrix.ruby != 'mswin' && 'V=1' || '' }}
+          RUBY_OPENSSL_EXTCFLAGS: ${{ matrix.extcflags || '-Werror' }}
 
       - name: rake debug
         run:  bundle exec rake debug
@@ -101,25 +95,26 @@ jobs:
         openssl:
           # https://openssl-library.org/source/
           - openssl-1.1.1w # EOL 2023-09-11, still used by RHEL 8 and Ubuntu 20.04
-          - openssl-3.0.20 # Supported until 2026-09-07 (LTS)
+          - openssl-3.0.21 # Supported until 2026-09-07 (LTS)
           - openssl-3.1.8 # EOL 2025-03-14
           - openssl-3.2.6 # EOL 2025-11-23
           - openssl-3.3.7 # EOL 2026-04-09
-          - openssl-3.4.5 # Supported until 2026-10-22
-          - openssl-3.5.6 # Supported until 2030-04-08 (LTS)
+          - openssl-3.4.6 # Supported until 2026-10-22
+          - openssl-3.5.7 # Supported until 2030-04-08 (LTS)
           - openssl-3.6.2 # Supported until 2026-11-01
-          - openssl-4.0.0 # Supported until 2027-05-14
+          - openssl-4.0.1 # Supported until 2027-05-14
           - openssl-master
           # http://www.libressl.org/releases.html
           - libressl-3.9.2 # EOL 2025-04-05
           - libressl-4.0.1 # EOL 2025-10-08
-          - libressl-4.1.2 # Supported until 2026-04-28
+          - libressl-4.1.2 # EOL 2026-04-28
           - libressl-4.2.1 # Supported until 2026-10-22
+          - libressl-4.3.2 # Supported until 2027-05-19
           # https://github.com/aws/aws-lc/tags
           - aws-lc-latest
         include:
-          - { name-extra: 'without legacy provider', openssl: openssl-4.0.0, append-configure: 'no-legacy' }
-          - { openssl: aws-lc-latest, skip-warnings: true }
+          - { name-extra: 'without legacy provider', openssl: openssl-4.0.1, append-configure: 'no-legacy' }
+          - { openssl: aws-lc-latest, extcflags: '-Werror -Wno-error=deprecated-declarations -Wno-error=sign-compare -Wno-error=discarded-qualifiers' }
     steps:
       - name: repo checkout
         uses: actions/checkout@v7
@@ -177,15 +172,11 @@ jobs:
           ruby-version: '3.0'
           bundler-cache: true
 
-      - name: enable mkmf verbose
-        run:  echo "MAKEFLAGS=V=1" >> $GITHUB_ENV
-
-      - name: set flags to check compiler warnings
-        run:  echo "RUBY_OPENSSL_EXTCFLAGS=-Werror" >> $GITHUB_ENV
-        if: ${{ !matrix.skip-warnings }}
-
       - name: rake compile
         run:  bundle exec rake debug_compiler compile -- --with-openssl-dir=$HOME/openssl
+        env:
+          MAKEFLAGS: 'V=1'
+          RUBY_OPENSSL_EXTCFLAGS: ${{ matrix.extcflags || '-Werror' }}
 
       - name: rake debug
         run:  bundle exec rake debug
