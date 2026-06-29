@@ -421,12 +421,15 @@ ossl_cipher_update(int argc, VALUE *argv, VALUE self)
 
 /*
  *  call-seq:
- *     cipher.final -> string
+ *     cipher.final([buffer]) -> string or buffer
  *
  *  Returns the remaining data held in the cipher object. Further calls to
  *  Cipher#update or Cipher#final are invalid. This call should always
  *  be made as the last call of an encryption or decryption operation, after
  *  having fed the entire plaintext or ciphertext to the Cipher instance.
+ *
+ *  If an optional _buffer_ argument is given, the output is written to it.
+ *  _buffer_ will be resized automatically. The same _buffer_ is also returned.
  *
  *  When encrypting using an AEAD cipher, the authentication tag can be
  *  retrieved by #auth_tag after #final has been called.
@@ -437,14 +440,27 @@ ossl_cipher_update(int argc, VALUE *argv, VALUE self)
  *  If the verification fails, CipherError will be raised.
  */
 static VALUE
-ossl_cipher_final(VALUE self)
+ossl_cipher_final(int argc, VALUE *argv, VALUE self)
 {
     EVP_CIPHER_CTX *ctx;
-    int out_len;
+    int out_len, block_size;
     VALUE str;
 
+    rb_scan_args(argc, argv, "01", &str);
+
     GetCipher(self, ctx);
-    str = rb_str_new(0, EVP_CIPHER_CTX_block_size(ctx));
+    block_size = EVP_CIPHER_CTX_block_size(ctx);
+
+    if (NIL_P(str)) {
+        str = rb_str_new(0, block_size);
+    } else {
+        StringValue(str);
+        if ((long)rb_str_capacity(str) >= block_size)
+            rb_str_modify(str);
+        else
+            rb_str_modify_expand(str, block_size - RSTRING_LEN(str));
+    }
+
     if (!EVP_CipherFinal_ex(ctx, (unsigned char *)RSTRING_PTR(str), &out_len)) {
         /* For AEAD ciphers, this is likely an authentication failure */
         if (EVP_CIPHER_flags(EVP_CIPHER_CTX_cipher(ctx)) & EVP_CIPH_FLAG_AEAD_CIPHER) {
@@ -457,6 +473,7 @@ ossl_cipher_final(VALUE self)
         }
     }
     rb_str_set_len(str, out_len);
+    rb_enc_associate_index(str, rb_ascii8bit_encindex());
 
     return str;
 }
@@ -1114,7 +1131,7 @@ Init_ossl_cipher(void)
     rb_define_method(cCipher, "decrypt", ossl_cipher_decrypt, 0);
     rb_define_method(cCipher, "pkcs5_keyivgen", ossl_cipher_pkcs5_keyivgen, -1);
     rb_define_method(cCipher, "update", ossl_cipher_update, -1);
-    rb_define_method(cCipher, "final", ossl_cipher_final, 0);
+    rb_define_method(cCipher, "final", ossl_cipher_final, -1);
     rb_define_method(cCipher, "name", ossl_cipher_name, 0);
     rb_define_method(cCipher, "key=", ossl_cipher_set_key, 1);
     rb_define_method(cCipher, "auth_data=", ossl_cipher_set_auth_data, 1);
