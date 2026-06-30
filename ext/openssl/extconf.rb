@@ -178,6 +178,12 @@ have_func("SSL_get0_peer_signature_name(NULL, NULL)", ssl_h)
 # added in 4.0.0
 have_func("ASN1_BIT_STRING_set1(NULL, NULL, 0, 0)", "openssl/asn1.h")
 
+# QUIC support - requires OpenSSL 3.5.0+, not available in LibreSSL
+if is_openssl && checking_for("OpenSSL version >= 3.5.0") {
+  try_static_assert("OPENSSL_VERSION_NUMBER >= 0x30500000L", "openssl/opensslv.h") }
+  $defs.push("-DHAVE_OSSL_QUIC_CLIENT_METHOD")
+end
+
 Logging::message "=== Checking done. ===\n"
 
 # Append flags from environment variables.

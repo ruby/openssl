@@ -72,6 +72,10 @@
 # define OSSL_HAVE_IMMUTABLE_PKEY
 #endif
 
+#if !OSSL_IS_LIBRESSL && defined(HAVE_OSSL_QUIC_CLIENT_METHOD)
+# define OSSL_USE_QUIC
+#endif
+
 /*
  * Common Module
  */
