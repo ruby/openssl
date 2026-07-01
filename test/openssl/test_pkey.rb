@@ -276,6 +276,7 @@ class OpenSSL::TestPKey < OpenSSL::PKeyTestCase
 
     pkey = OpenSSL::PKey.generate_key("ML-DSA-44")
     assert_match(/type_name=ML-DSA-44/, pkey.inspect)
+    assert_equal(32, pkey.get_param("seed").bytesize)
     sig = pkey.sign(nil, "data")
     assert_equal(2420, sig.bytesize)
     assert_equal(true, pkey.verify(nil, sig, "data"))

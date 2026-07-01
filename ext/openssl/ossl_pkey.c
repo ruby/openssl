@@ -832,7 +832,7 @@ ossl_pkey_get_param(VALUE self, VALUE keyv)
         { NULL, 0, NULL, 0, OSSL_PARAM_UNMODIFIED },
         OSSL_PARAM_END,
     };
-    VALUE ret, tmp = Qfalse;
+    VALUE ret, tmp = 0;
 
     GetPKey(self, pkey);
     gettable_params = EVP_PKEY_gettable_params(pkey);
@@ -849,28 +849,25 @@ ossl_pkey_get_param(VALUE self, VALUE keyv)
     if (!OSSL_PARAM_modified(&params[0]))
         ossl_raise(ePKeyError, "OSSL_PARAM_modified");
 
-    params[0].data_size = params[0].return_size > 0 ? params[0].return_size : 1;
-    params[0].data = ALLOCV(tmp, params[0].data_size);
-    if (!EVP_PKEY_get_params(pkey, params))
-        ossl_raise(ePKeyError, "EVP_PKEY_get_params");
-
     switch (p->data_type) {
       case OSSL_PARAM_INTEGER:
       case OSSL_PARAM_UNSIGNED_INTEGER:
         ret = ossl_bn_new(BN_value_one());
-        BIGNUM *bn = GetBNPtr(ret);
-        if (!OSSL_PARAM_get_BN(&params[0], &bn))
-            ossl_raise(eOSSLError, "OSSL_PARAM_get_BN");
+        params[0].data_size =
+            params[0].return_size > 0 ? params[0].return_size : 1;
+        params[0].data = ALLOCV(tmp, params[0].data_size);
         break;
       case OSSL_PARAM_UTF8_STRING:
-        ret = rb_utf8_str_new(params[0].data, params[0].return_size);
-        break;
       case OSSL_PARAM_OCTET_STRING:
-        ret = rb_str_new(params[0].data, params[0].return_size);
+        ret = rb_str_new(NULL, params[0].return_size);
+        if (p->data_type == OSSL_PARAM_UTF8_STRING)
+            rb_enc_associate_index(ret, rb_utf8_encindex());
+        params[0].data_size = params[0].return_size;
+        params[0].data = RSTRING_PTR(ret);
         break;
       default:
         /*
-         * As of OpenSSL 3.5, the following data types are defined, but are
+         * As of OpenSSL 4.0, the following data types are defined, but are
          * not actually used in EVP_PKEY_gettable_params(). So leave them
          * unimplemented for now:
          *   - OSSL_PARAM_REAL (double)
@@ -879,6 +876,22 @@ ossl_pkey_get_param(VALUE self, VALUE keyv)
          */
         ossl_raise(ePKeyError, "unsupported OSSL_PARAM data type %d for key %s",
                    p->data_type, p->key);
+    }
+    if (!EVP_PKEY_get_params(pkey, params))
+        ossl_raise(ePKeyError, "EVP_PKEY_get_params");
+
+    switch (p->data_type) {
+      case OSSL_PARAM_INTEGER:
+      case OSSL_PARAM_UNSIGNED_INTEGER: {
+        BIGNUM *bn = GetBNPtr(ret);
+        if (!OSSL_PARAM_get_BN(&params[0], &bn))
+            ossl_raise(eOSSLError, "OSSL_PARAM_get_BN");
+        break;
+      }
+      case OSSL_PARAM_UTF8_STRING:
+      case OSSL_PARAM_OCTET_STRING:
+        rb_str_set_len(ret, params[0].return_size);
+        break;
     }
     ALLOCV_END(tmp);
     return ret;
