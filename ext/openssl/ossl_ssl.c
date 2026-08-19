@@ -3171,6 +3171,8 @@ Init_ossl_ssl(void)
     rb_define_method(cSSLSocket, "connect_nonblock",    ossl_ssl_connect_nonblock, -1);
     rb_define_method(cSSLSocket, "accept",     ossl_ssl_accept, 0);
     rb_define_method(cSSLSocket, "accept_nonblock", ossl_ssl_accept_nonblock, -1);
+    rb_define_alias(cSSLSocket, "start", "accept");
+    rb_define_alias(cSSLSocket, "start_nonblock", "accept_nonblock");
     rb_define_method(cSSLSocket, "sysread",    ossl_ssl_read, -1);
     rb_define_private_method(cSSLSocket, "sysread_nonblock",    ossl_ssl_read_nonblock, -1);
     rb_define_method(cSSLSocket, "syswrite",   ossl_ssl_write, 1);

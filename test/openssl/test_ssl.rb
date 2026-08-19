@@ -4,6 +4,17 @@ require_relative "utils"
 if defined?(OpenSSL::SSL)
 
 class OpenSSL::TestSSL < OpenSSL::SSLTestCase
+  def test_server_handshake_aliases
+    assert_equal(
+      OpenSSL::SSL::SSLSocket.instance_method(:accept),
+      OpenSSL::SSL::SSLSocket.instance_method(:start),
+    )
+    assert_equal(
+      OpenSSL::SSL::SSLSocket.instance_method(:accept_nonblock),
+      OpenSSL::SSL::SSLSocket.instance_method(:start_nonblock),
+    )
+  end
+
   def test_bad_socket
     bad_socket = Struct.new(:sync).new
     assert_raise TypeError do
