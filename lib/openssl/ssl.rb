@@ -336,10 +336,6 @@ module OpenSSL
 
       attr_reader :hostname
 
-      # The underlying IO object.
-      attr_reader :io
-      alias :to_io :io
-
       # The SSLContext object used in this connection.
       attr_reader :context
 
@@ -426,18 +422,6 @@ module OpenSSL
         ctx = OpenSSL::SSL::SSLContext.new
         ctx.ciphers = "aNULL"
         ctx.ciphers.include?(cipher)
-      end
-
-      def client_cert_cb
-        @context.client_cert_cb
-      end
-
-      def session_new_cb
-        @context.session_new_cb
-      end
-
-      def session_get_cb
-        @context.session_get_cb
       end
 
       class << self

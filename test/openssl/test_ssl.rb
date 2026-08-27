@@ -4,17 +4,6 @@ require_relative "utils"
 if defined?(OpenSSL::SSL)
 
 class OpenSSL::TestSSL < OpenSSL::SSLTestCase
-  def test_bad_socket
-    bad_socket = Struct.new(:sync).new
-    assert_raise TypeError do
-      socket = OpenSSL::SSL::SSLSocket.new bad_socket
-      # if the socket is not a T_FILE, `connect` will segv because it tries
-      # to get the underlying file descriptor but the API it calls assumes
-      # the object type is T_FILE
-      socket.connect
-    end
-  end
-
   def test_ctx_setup
     ctx = OpenSSL::SSL::SSLContext.new
     assert_equal true, ctx.setup
@@ -180,6 +169,103 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     ensure
       ssl&.close
     end
+  end
+
+  def test_synthetic_io
+    start_server do |port|
+      tcp = TCPSocket.new("127.0.0.1", port)
+      obj = Object.new
+      obj.define_singleton_method(:read_nonblock) { |maxlen, exception:|
+        tcp.read_nonblock(maxlen, exception: exception) }
+      obj.define_singleton_method(:write_nonblock) { |str, exception:|
+        tcp.write_nonblock(str, exception: exception) }
+      obj.define_singleton_method(:wait_readable) { tcp.wait_readable }
+      obj.define_singleton_method(:wait_writable) { tcp.wait_writable }
+      obj.define_singleton_method(:flush) { tcp.flush }
+      obj.define_singleton_method(:closed?) { tcp.closed? }
+
+      ssl = OpenSSL::SSL::SSLSocket.new(obj)
+      assert_same obj, ssl.to_io
+
+      ssl.connect
+      ssl.puts "abc"; assert_equal "abc\n", ssl.gets
+    ensure
+      ssl&.close
+      tcp&.close
+    end
+  end
+
+  def test_synthetic_io_write_nonblock_exception
+    start_server(ignore_listener_error: true) do |port|
+      tcp = TCPSocket.new("127.0.0.1", port)
+      obj = Object.new
+      [:read_nonblock, :wait_readable, :wait_writable, :closed?].each do |name|
+        obj.define_singleton_method(name) { |*args, **kwargs|
+          tcp.__send__(name, *args, **kwargs) }
+      end
+
+      # SSLSocket#connect calls write_nonblock at least twice: to write
+      # ClientHello and Finished. Let's raise an exception in the 2nd call.
+      called = 0
+      obj.define_singleton_method(:write_nonblock) { |*args, **kwargs|
+        raise "foo" if (called += 1) == 2
+        tcp.write_nonblock(*args, **kwargs)
+      }
+
+      ssl = OpenSSL::SSL::SSLSocket.new(obj)
+      assert_raise_with_message(RuntimeError, "foo") { ssl.connect }
+    ensure
+      ssl&.close
+      tcp&.close
+    end
+  end
+
+  def test_synthetic_io_error_in_cb_then_error_in_write
+    # If SSLContext#servername_cb fails, it must send the "unrecognized_name"
+    # alert. If another error occurs while writing the alert to the underlying
+    # socket, the original exception from the servername_cb is suppressed and
+    # the new exception is raised.
+    sock1, sock2 = socketpair
+
+    t = Thread.new {
+      s1 = OpenSSL::SSL::SSLSocket.new(sock1)
+      s1.hostname = "localhost"
+      begin
+        s1.connect
+      rescue
+      end
+    }
+
+    called = []
+    ctx2 = OpenSSL::SSL::SSLContext.new
+    ctx2.servername_cb = lambda { |args|
+      called << :servername_cb
+      raise "servername_cb"
+    }
+    obj = Object.new
+    obj.define_singleton_method(:method_missing) { |name, *args, **kwargs|
+      sock2.__send__(name, *args, **kwargs)
+    }
+    obj.define_singleton_method(:respond_to_missing?) { |name, *args, **kwargs|
+      sock2.respond_to?(name, *args, **kwargs)
+    }
+    obj.define_singleton_method(:write_nonblock) { |*args, **kwargs|
+      called << :write_nonblock
+      throw :throw_from, :write_nonblock
+    }
+    s2 = OpenSSL::SSL::SSLSocket.new(obj, ctx2)
+
+    ret = assert_warning(/servername_cb/) {
+      catch(:throw_from) { s2.accept }
+    }
+    assert_equal(:write_nonblock, ret)
+    assert_equal([:servername_cb, :write_nonblock], called)
+    sock2.close
+    assert t.join
+  ensure
+    sock1.close
+    sock2.close
+    t.kill.join
   end
 
   def test_add_certificate
@@ -490,18 +576,29 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     }
   end
 
-  def test_client_cert_cb_ignore_error
+  def test_client_cert_cb_bad_return
     vflag = OpenSSL::SSL::VERIFY_PEER|OpenSSL::SSL::VERIFY_FAIL_IF_NO_PEER_CERT
     start_server(verify_mode: vflag, ignore_listener_error: true) do |port|
       ctx = OpenSSL::SSL::SSLContext.new
       ctx.client_cert_cb = -> ssl {
-        raise "exception in client_cert_cb must be suppressed"
+        assert_kind_of(OpenSSL::SSL::SSLSocket, ssl)
+        [@cli_cert, OpenSSL::PKey.read(@cli_key.public_to_der)]
       }
-      # 1. Exception in client_cert_cb is suppressed
-      # 2. No client certificate will be sent to the server
-      # 3. SSL_VERIFY_FAIL_IF_NO_PEER_CERT causes the handshake to fail
-      assert_handshake_error {
-        server_connect(port, ctx) { |ssl| ssl.puts("abc"); ssl.gets }
+      assert_raise_with_message(ArgumentError, /private key/) {
+        server_connect(port, ctx) { raise "unreachable" }
+      }
+    end
+  end
+
+  def test_client_cert_cb_error
+    vflag = OpenSSL::SSL::VERIFY_PEER|OpenSSL::SSL::VERIFY_FAIL_IF_NO_PEER_CERT
+    start_server(verify_mode: vflag, ignore_listener_error: true) do |port|
+      ctx = OpenSSL::SSL::SSLContext.new
+      ctx.client_cert_cb = -> ssl {
+        raise "exception in client_cert_cb"
+      }
+      assert_raise_with_message(RuntimeError, /exception in client_cert_cb/) {
+        server_connect(port, ctx) { raise "unreachable" }
       }
     end
   end
@@ -1580,7 +1677,12 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
       # Client only supports TLS 1.3
       ctx2 = OpenSSL::SSL::SSLContext.new
       ctx2.min_version = ctx2.max_version = OpenSSL::SSL::TLS1_3_VERSION
-      assert_nothing_raised { server_connect(port, ctx2) { } }
+      assert_nothing_raised {
+        server_connect(port, ctx2) { |ssl|
+          # Ensure SSL_accept() finishes successfully
+          ssl.puts("abc"); ssl.gets
+        }
+      }
     }
 
     # Server only supports TLS 1.2
@@ -1613,7 +1715,10 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
 
   def test_renegotiation_cb
     num_handshakes = 0
-    renegotiation_cb = Proc.new { |ssl| num_handshakes += 1 }
+    renegotiation_cb = lambda { |ssl|
+      assert_kind_of(OpenSSL::SSL::SSLSocket, ssl)
+      num_handshakes += 1
+    }
     ctx_proc = Proc.new { |ctx| ctx.renegotiation_cb = renegotiation_cb }
     start_server(ctx_proc: ctx_proc) { |port|
       server_connect(port) { |ssl|
@@ -1621,6 +1726,27 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
         ssl.puts "abc"; assert_equal "abc\n", ssl.gets
       }
     }
+
+    sock1, sock2 = socketpair
+    th = Thread.new {
+      ssl2 = OpenSSL::SSL::SSLSocket.new(sock2)
+      begin
+        ssl2.connect_nonblock(exception: false)
+      rescue OpenSSL::SSL::SSLError
+      end
+    }
+    ctx1 = OpenSSL::SSL::SSLContext.new
+    ctx1.renegotiation_cb = lambda { |ssl| raise "in renegotiation_cb" }
+    ctx1.add_certificate(@svr_cert, @svr_key)
+    ssl1 = OpenSSL::SSL::SSLSocket.new(sock1, ctx1)
+    assert_raise_with_message(RuntimeError, "in renegotiation_cb") {
+      ssl1.accept
+    }
+    th.join
+  ensure
+    th&.kill&.join
+    sock1&.close
+    sock2&.close
   end
 
   def test_alpn_protocol_selection_ary

@@ -7,7 +7,8 @@ class OpenSSL::TestBuffering < OpenSSL::TestCase
   class IO
     include OpenSSL::Buffering
 
-    attr_accessor :sync
+    attr_reader :io
+    alias to_io io
 
     def initialize
       @io = Buffer.new

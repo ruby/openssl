@@ -30,7 +30,20 @@ extern VALUE mSSL;
 extern VALUE cSSLSocket;
 extern VALUE cSSLSession;
 
+struct ossl_ssl_data {
+    VALUE self;
+    VALUE io;
+    int cb_state;
+
+    /* Used by ossl_ssl_bio_method */
+    int bio_eof;
+};
+struct ossl_ssl_data *ossl_ssl_data(const SSL *ssl);
+
+BIO *ossl_ssl_bio_setup(struct ossl_ssl_data *p);
+
 void Init_ossl_ssl(void);
 void Init_ossl_ssl_session(void);
+void Init_ossl_ssl_bio(void);
 
 #endif /* _OSSL_SSL_H_ */
