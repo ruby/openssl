@@ -5,9 +5,12 @@ module OpenSSL
     # Securely compare with another HMAC instance in constant time.
     def ==(other)
       return false unless HMAC === other
-      return false unless self.digest.bytesize == other.digest.bytesize
 
-      OpenSSL.fixed_length_secure_compare(self.digest, other.digest)
+      self_digest = digest
+      other_digest = other.digest
+      return false unless self_digest.bytesize == other_digest.bytesize
+
+      OpenSSL.fixed_length_secure_compare(self_digest, other_digest)
     end
 
     # :call-seq:
