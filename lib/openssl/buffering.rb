@@ -116,6 +116,8 @@ module OpenSSL::Buffering
   # See IO#read for full details.
 
   def read(size=nil, buf=nil)
+    raise ArgumentError, "negative length #{size} given" if size && size < 0
+
     if size == 0
       if buf
         buf.clear
@@ -143,6 +145,8 @@ module OpenSSL::Buffering
   # See IO#readpartial for full details.
 
   def readpartial(maxlen, buf=nil)
+    raise ArgumentError, "negative length #{maxlen} given" if maxlen < 0
+
     if maxlen == 0
       if buf
         buf.clear
@@ -201,6 +205,8 @@ module OpenSSL::Buffering
   # it will return +nil+ instead of raising EOFError.
 
   def read_nonblock(maxlen, buf=nil, exception: true)
+    raise ArgumentError, "negative length #{maxlen} given" if maxlen < 0
+
     if maxlen == 0
       if buf
         buf.clear
@@ -232,9 +238,11 @@ module OpenSSL::Buffering
   # Unlike IO#gets the separator must be provided if a limit is provided.
 
   def gets(eol=$/, limit=nil, chomp: false)
+    return "" if limit == 0
+
     idx = @rbuffer.index(eol)
     until @eof
-      break if idx
+      break if idx || (limit && limit > 0 && @rbuffer.bytesize >= limit)
       fill_rbuff
       idx = @rbuffer.index(eol)
     end
@@ -243,8 +251,8 @@ module OpenSSL::Buffering
     else
       size = idx ? idx+eol.size : nil
     end
-    if size && limit && limit >= 0
-      size = [size, limit].min
+    if limit && limit >= 0
+      size = [size || @rbuffer.bytesize, limit].min
     end
     line = consume_rbuff(size)
     if chomp && line
