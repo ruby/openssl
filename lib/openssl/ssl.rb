@@ -289,7 +289,7 @@ module OpenSSL
       san_parts = san.downcase.split(".")
 
       # TODO: this behavior should probably be more strict
-      return san == hostname if san_parts.size < 2
+      return san.casecmp?(hostname) if san_parts.size < 2
 
       # Matching is case-insensitive.
       host_parts = hostname.downcase.split(".")
