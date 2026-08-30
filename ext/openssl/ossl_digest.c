@@ -283,14 +283,61 @@ ossl_digest_finish(VALUE self)
 {
     EVP_MD_CTX *ctx;
     VALUE str;
+    int size;
 
     GetDigest(self, ctx);
-    str = rb_str_new(NULL, EVP_MD_CTX_size(ctx));
+    size = EVP_MD_CTX_size(ctx);
+    if (size <= 0) {
+#ifdef EVP_MD_FLAG_XOF /* Not in LibreSSL 4.3 (latest) */
+        if (EVP_MD_flags(EVP_MD_CTX_get0_md(ctx)) & EVP_MD_FLAG_XOF)
+            ossl_raise(eDigestError,
+                       "output length not set for XOF; " \
+                       "use OpenSSL::Digest#squeeze instead");
+#endif
+        ossl_raise(eDigestError, "EVP_MD_CTX_size");
+    }
+    str = rb_str_new(NULL, size);
     if (!EVP_DigestFinal_ex(ctx, (unsigned char *)RSTRING_PTR(str), NULL))
         ossl_raise(eDigestError, "EVP_DigestFinal_ex");
 
     return str;
 }
+
+#ifdef HAVE_EVP_DIGESTSQUEEZE
+/*
+ * call-seq:
+ *    digest.squeeze(length) -> string
+ *
+ * Gets the next _length_ bytes of output from the extendable-output function
+ * (XOF). This method can be called multiple times to get more output.
+ *
+ * Unlike #digest, this method mutates the digest instance. Once called, no
+ * further #update or #<< calls are allowed. Use #dup to create a copy before
+ * calling this method if you need intermediate digest values.
+ *
+ * See also the man page EVP_DigestSqueeze(3).
+ * This method is compatible with OpenSSL 3.3 or later.
+ */
+static VALUE
+ossl_digest_squeeze(VALUE self, VALUE length)
+{
+    EVP_MD_CTX *ctx;
+    VALUE str;
+    size_t size;
+
+    GetDigest(self, ctx);
+    size = NUM2SIZET(length);
+    if (size > LONG_MAX)
+        rb_raise(rb_eArgError, "length is negative or too big");
+    str = rb_str_new(NULL, (long)size);
+    if (!EVP_DigestSqueeze(ctx, (unsigned char *)RSTRING_PTR(str), size))
+        ossl_raise(eDigestError, "EVP_DigestSqueeze");
+
+    return str;
+}
+#else
+#define ossl_digest_squeeze rb_f_notimplement
+#endif
 
 /*
  *  call-seq:
@@ -466,6 +513,7 @@ Init_ossl_digest(void)
     rb_define_method(cDigest, "update", ossl_digest_update, 1);
     rb_define_alias(cDigest, "<<", "update");
     rb_define_private_method(cDigest, "finish", ossl_digest_finish, 0);
+    rb_define_method(cDigest, "squeeze", ossl_digest_squeeze, 1);
     rb_define_method(cDigest, "digest_length", ossl_digest_size, 0);
     rb_define_method(cDigest, "block_length", ossl_digest_block_length, 0);
 
