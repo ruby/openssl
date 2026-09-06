@@ -172,6 +172,7 @@ have_func("EVP_PKEY_get_params(NULL, NULL)", evp_h)
 have_func("EVP_PKEY_eq(NULL, NULL)", evp_h)
 have_func("EVP_PKEY_dup(NULL)", evp_h)
 have_func("EVP_PKEY_encapsulate_init(NULL, NULL)", evp_h)
+have_func("EVP_KDF_derive(NULL, NULL, 0, NULL)", "openssl/kdf.h")
 
 # added in 3.2.0
 have_func("SSL_get0_group_name(NULL)", ssl_h)

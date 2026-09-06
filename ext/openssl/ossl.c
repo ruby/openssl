@@ -221,6 +221,112 @@ ossl_pem_passwd_cb(char *buf, int max_len, int flag, void *pwd_)
     return (int)len;
 }
 
+#ifdef OSSL_PARAM_INTEGER
+#include <openssl/param_build.h>
+
+struct make_params_args {
+    const OSSL_PARAM *settable;
+    VALUE ary;
+    OSSL_PARAM_BLD *bld;
+};
+
+static VALUE
+make_params_push_i(RB_BLOCK_CALL_FUNC_ARGLIST(i, args_))
+{
+    struct make_params_args *args = (struct make_params_args *)args_;
+
+    Check_Type(i, T_ARRAY);
+    VALUE keyv = rb_ary_entry(i, 0), obj = rb_ary_entry(i, 1);
+    if (SYMBOL_P(keyv))
+        keyv = rb_sym2str(keyv);
+    StringValueCStr(keyv);
+
+    const OSSL_PARAM *p =
+        OSSL_PARAM_locate_const(args->settable, RSTRING_PTR(keyv));
+    if (!p) {
+        VALUE keys = rb_ary_new();
+        for (p = args->settable; p->key; p++)
+            rb_ary_push(keys, rb_str_new_cstr(p->key));
+        rb_raise(rb_eArgError, "unrecognized OSSL_PARAM key %"PRIsVALUE" " \
+                 "(supported keys: %"PRIsVALUE")",
+                 keyv, rb_ary_join(keys, rb_str_new_cstr(", ")));
+    }
+
+    switch (p->data_type) {
+      case OSSL_PARAM_INTEGER:
+      case OSSL_PARAM_UNSIGNED_INTEGER:
+        obj = ossl_try_convert_to_bn(obj);
+        if (NIL_P(obj))
+            rb_raise(rb_eArgError, "OSSL_PARAM key %s expects " \
+                     "integer value", p->key);
+        const BIGNUM *bn = GetBNPtr(obj);
+        if (p->data_type == OSSL_PARAM_UNSIGNED_INTEGER && BN_is_negative(bn))
+            rb_raise(rb_eArgError, "OSSL_PARAM key %s expects " \
+                     "non-negative integer value", p->key);
+        if (!OSSL_PARAM_BLD_push_BN(args->bld, p->key, GetBNPtr(obj)))
+            ossl_raise(eOSSLError, "OSSL_PARAM_BLD_push_BN");
+        break;
+      case OSSL_PARAM_UTF8_STRING:
+        obj = rb_check_string_type(obj);
+        if (NIL_P(obj) || memchr(RSTRING_PTR(obj), 0, RSTRING_LEN(obj)))
+            rb_raise(rb_eArgError, "OSSL_PARAM key %s expects " \
+                     "NUL-terminated string value", p->key);
+        if (!OSSL_PARAM_BLD_push_utf8_string(args->bld, p->key, RSTRING_PTR(obj),
+                                             RSTRING_LEN(obj)))
+            ossl_raise(eOSSLError, "OSSL_PARAM_BLD_push_utf8_string");
+        break;
+      case OSSL_PARAM_OCTET_STRING:
+        obj = rb_check_string_type(obj);
+        if (NIL_P(obj))
+            rb_raise(rb_eArgError, "OSSL_PARAM key %s expects string value",
+                     p->key);
+        if (!OSSL_PARAM_BLD_push_octet_string(args->bld, p->key, RSTRING_PTR(obj),
+                                              RSTRING_LEN(obj)))
+            ossl_raise(eOSSLError, "OSSL_PARAM_BLD_push_octet_string");
+        break;
+      default:
+        /*
+         * As of OpenSSL 4.0, the following data types are defined, but are
+         * not actually used by the builtin providers. So leave them
+         * unimplemented for now:
+         *   - OSSL_PARAM_REAL (double)
+         *   - OSSL_PARAM_UTF8_PTR (C string)
+         *   - OSSL_PARAM_OCTET_PTR (unknown)
+         */
+        rb_raise(eOSSLError, "unsupported OSSL_PARAM data type %d for key %s",
+                 p->data_type, p->key);
+    }
+    return Qnil;
+}
+
+static VALUE
+make_params_i(VALUE args_)
+{
+    struct make_params_args *args = (struct make_params_args *)args_;
+
+    args->bld = OSSL_PARAM_BLD_new();
+    if (!args->bld)
+        ossl_raise(eOSSLError, "OSSL_PARAM_BLD_new");
+
+    rb_block_call(args->ary, rb_intern("each"), 0, NULL, make_params_push_i,
+                  (VALUE)args);
+
+    OSSL_PARAM *ret = OSSL_PARAM_BLD_to_param(args->bld);
+    if (!ret)
+        ossl_raise(eOSSLError, "OSSL_PARAM_BLD_to_param");
+    return (VALUE)ret;
+}
+
+OSSL_PARAM *
+ossl_make_params(const OSSL_PARAM *settable, VALUE ary, int *state)
+{
+    struct make_params_args args = { settable, ary, NULL };
+    VALUE params = rb_protect(make_params_i, (VALUE)&args, state);
+    OSSL_PARAM_BLD_free(args.bld);
+    return (OSSL_PARAM *)params;
+}
+#endif
+
 /*
  * main module
  */
