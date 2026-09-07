@@ -386,10 +386,27 @@ module OpenSSL::TestPairM
       message = "abc"*1024
       s1.write(message)
       s1.close_write
+      assert_raise_with_message(IOError, /writing/) { s1.write(message) }
       assert_equal(message, s2.read)
       s2.write(message)
       s2.close_write
-      assert_equal(message, s1.read)
+      assert_equal(message, s1.read(message.bytesize))
+      s1.close_read
+      assert_raise_with_message(IOError, /closed stream/) { s1.read(1) }
+    }
+  end
+
+  def test_close_read
+    ssl_pair { |s1, s2|
+      message = "abc"*1024
+      s1.close_read
+      s1.write(message)
+      assert_equal(message, s2.read(message.bytesize))
+      s2.write(message)
+      s2.close_write
+      assert_raise_with_message(IOError, /reading/) { s1.read(1) }
+      s1.close_write
+      assert_raise_with_message(IOError, /closed stream/) { s1.write(message) }
     }
   end
 end

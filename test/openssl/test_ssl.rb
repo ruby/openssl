@@ -388,6 +388,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
         ssl.connect
         ssl.puts "abc"; assert_equal "abc\n", ssl.gets
         ssl.close
+        assert_predicate ssl, :closed?
         assert_not_predicate sock, :closed?
       ensure
         sock&.close
@@ -400,6 +401,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
         ssl.connect
         ssl.puts "abc"; assert_equal "abc\n", ssl.gets
         ssl.close
+        assert_predicate ssl, :closed?
         assert_predicate sock, :closed?
       ensure
         sock&.close
