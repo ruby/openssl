@@ -45,6 +45,8 @@ have_func("rb_io_descriptor", "ruby/io.h")
 have_func("rb_io_maybe_wait(0, Qnil, Qnil, Qnil)", "ruby/io.h")
 # Ruby 3.2
 have_func("rb_io_timeout", "ruby/io.h")
+# Ruby 4.1
+have_func("rb_str_cstr(Qnil)", "ruby.h")
 
 Logging::message "=== Checking for system dependent stuff... ===\n"
 have_library("nsl", "t_open")

@@ -312,14 +312,17 @@ ossl_engine_load_privkey(int argc, VALUE *argv, VALUE self)
     ENGINE *e;
     EVP_PKEY *pkey;
     VALUE id, data, obj;
-    char *sid, *sdata;
+    const char *sid, *sdata;
 
     rb_scan_args(argc, argv, "02", &id, &data);
-    sid = NIL_P(id) ? NULL : StringValueCStr(id);
-    sdata = NIL_P(data) ? NULL : StringValueCStr(data);
+    if (!NIL_P(id)) StringValue(id);
+    if (!NIL_P(data)) StringValue(data);
+    sid = NIL_P(id) ? NULL : rb_str_cstr(id);
+    sdata = NIL_P(data) ? NULL : rb_str_cstr(data);
     GetEngine(self, e);
-    pkey = ENGINE_load_private_key(e, sid, NULL, sdata);
-    if (!pkey) ossl_raise(eEngineError, NULL);
+    pkey = ENGINE_load_private_key(e, sid, NULL, (void *)sdata);
+    if (!pkey)
+        ossl_raise(eEngineError, "ENGINE_load_private_key");
     obj = ossl_pkey_wrap(pkey);
     OSSL_PKEY_SET_PRIVATE(obj);
 
@@ -341,14 +344,17 @@ ossl_engine_load_pubkey(int argc, VALUE *argv, VALUE self)
     ENGINE *e;
     EVP_PKEY *pkey;
     VALUE id, data;
-    char *sid, *sdata;
+    const char *sid, *sdata;
 
     rb_scan_args(argc, argv, "02", &id, &data);
-    sid = NIL_P(id) ? NULL : StringValueCStr(id);
-    sdata = NIL_P(data) ? NULL : StringValueCStr(data);
+    if (!NIL_P(id)) StringValue(id);
+    if (!NIL_P(data)) StringValue(data);
+    sid = NIL_P(id) ? NULL : rb_str_cstr(id);
+    sdata = NIL_P(data) ? NULL : rb_str_cstr(data);
     GetEngine(self, e);
-    pkey = ENGINE_load_public_key(e, sid, NULL, sdata);
-    if (!pkey) ossl_raise(eEngineError, NULL);
+    pkey = ENGINE_load_public_key(e, sid, NULL, (void *)sdata);
+    if (!pkey)
+        ossl_raise(eEngineError, "ENGINE_load_public_key");
 
     return ossl_pkey_wrap(pkey);
 }
@@ -398,9 +404,13 @@ ossl_engine_ctrl_cmd(int argc, VALUE *argv, VALUE self)
 
     GetEngine(self, e);
     rb_scan_args(argc, argv, "11", &cmd, &val);
-    ret = ENGINE_ctrl_cmd_string(e, StringValueCStr(cmd),
-                                 NIL_P(val) ? NULL : StringValueCStr(val), 0);
-    if (!ret) ossl_raise(eEngineError, NULL);
+    StringValue(cmd);
+    if (!NIL_P(val))
+        StringValue(val);
+    ret = ENGINE_ctrl_cmd_string(e, rb_str_cstr(cmd),
+                                 NIL_P(val) ? NULL : rb_str_cstr(val), 0);
+    if (!ret)
+        ossl_raise(eEngineError, "ENGINE_ctrl_cmd_string");
 
     return self;
 }

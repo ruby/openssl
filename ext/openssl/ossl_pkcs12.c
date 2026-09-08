@@ -90,7 +90,7 @@ ossl_pkcs12_s_create(int argc, VALUE *argv, VALUE self)
 {
     VALUE pass, name, pkey, cert, ca, key_nid, cert_nid, key_iter, mac_iter, keytype;
     VALUE obj;
-    char *passphrase, *friendlyname;
+    const char *passphrase, *friendlyname;
     EVP_PKEY *key;
     X509 *x509;
     STACK_OF(X509) *x509s;
@@ -98,8 +98,10 @@ ossl_pkcs12_s_create(int argc, VALUE *argv, VALUE self)
     PKCS12 *p12;
 
     rb_scan_args(argc, argv, "46", &pass, &name, &pkey, &cert, &ca, &key_nid, &cert_nid, &key_iter, &mac_iter, &keytype);
-    passphrase = NIL_P(pass) ? NULL : StringValueCStr(pass);
-    friendlyname = NIL_P(name) ? NULL : StringValueCStr(name);
+    if (!NIL_P(pass))
+        StringValue(pass);
+    if (!NIL_P(name))
+        StringValue(name);
     key = GetPKeyPtr(pkey);
     x509 = GetX509CertPtr(cert);
 /* TODO: make a VALUE to nid function */
@@ -117,6 +119,8 @@ ossl_pkcs12_s_create(int argc, VALUE *argv, VALUE self)
         miter = NUM2INT(mac_iter);
     if (!NIL_P(keytype))
         ktype = NUM2INT(keytype);
+    passphrase = NIL_P(pass) ? NULL : rb_str_cstr(pass);
+    friendlyname = NIL_P(name) ? NULL : rb_str_cstr(name);
 
 #if defined(OPENSSL_IS_AWSLC)
     if (ktype != 0) {
@@ -177,7 +181,7 @@ ossl_pkcs12_initialize(int argc, VALUE *argv, VALUE self)
     PKCS12 *p12;
     BIO *in;
     VALUE arg, pass, pkey, cert, ca;
-    char *passphrase;
+    const char *passphrase;
     EVP_PKEY *key;
     X509 *x509;
     STACK_OF(X509) *x509s = NULL;
@@ -192,7 +196,8 @@ ossl_pkcs12_initialize(int argc, VALUE *argv, VALUE self)
         RTYPEDDATA_DATA(self) = p12;
         return self;
     }
-    passphrase = NIL_P(pass) ? NULL : StringValueCStr(pass);
+    if (!NIL_P(pass))
+        StringValue(pass);
     in = ossl_obj2bio(&arg);
     p12 = d2i_PKCS12_bio(in, NULL);
     BIO_free(in);
@@ -201,6 +206,7 @@ ossl_pkcs12_initialize(int argc, VALUE *argv, VALUE self)
     RTYPEDDATA_DATA(self) = p12;
 
     pkey = cert = ca = Qnil;
+    passphrase = NIL_P(pass) ? NULL : rb_str_cstr(pass);
     if (!PKCS12_parse(p12, passphrase, &key, &x509, &x509s))
         ossl_raise(ePKCS12Error, "PKCS12_parse");
     if (key) {

@@ -23,6 +23,15 @@
 #define RUBY_TYPED_FROZEN_SHAREABLE 0
 #endif
 
+#ifndef HAVE_RB_STR_CSTR
+static inline const char *
+rb_str_cstr(VALUE str)
+{
+    RUBY_ASSERT(RB_TYPE_P(str, T_STRING));
+    return StringValueCStr(str);
+}
+#endif
+
 #include <openssl/opensslv.h>
 
 #include <openssl/err.h>

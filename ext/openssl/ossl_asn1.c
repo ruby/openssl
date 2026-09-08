@@ -1289,12 +1289,12 @@ ossl_asn1cons_each(VALUE self)
 static VALUE
 ossl_asn1obj_s_register(VALUE self, VALUE oid, VALUE sn, VALUE ln)
 {
-    StringValueCStr(oid);
-    StringValueCStr(sn);
-    StringValueCStr(ln);
+    StringValue(oid);
+    StringValue(sn);
+    StringValue(ln);
 
-    if(!OBJ_create(RSTRING_PTR(oid), RSTRING_PTR(sn), RSTRING_PTR(ln)))
-        ossl_raise(eASN1Error, NULL);
+    if (!OBJ_create(rb_str_cstr(oid), rb_str_cstr(sn), rb_str_cstr(ln)))
+        ossl_raise(eASN1Error, "OBJ_create");
 
     return Qtrue;
 }
