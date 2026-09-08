@@ -524,21 +524,28 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     }
   end
 
-  def test_client_cert_cb_ignore_error
+  def test_client_cert_cb_error
+    omit "LibreSSL doesn't support client_cert_cb in TLS 1.3" if libressl?
+
     sctx = make_server_context
     sctx.verify_mode =
       OpenSSL::SSL::VERIFY_PEER|OpenSSL::SSL::VERIFY_FAIL_IF_NO_PEER_CERT
-
     start_server(sctx, ignore_listener_error: true) do |port|
+      # Bad return value
       ctx = OpenSSL::SSL::SSLContext.new
       ctx.client_cert_cb = -> ssl {
-        raise "exception in client_cert_cb must be suppressed"
+        assert_kind_of(OpenSSL::SSL::SSLSocket, ssl)
+        [@cli_cert, OpenSSL::PKey.read(@cli_key.public_to_der)]
       }
-      # 1. Exception in client_cert_cb is suppressed
-      # 2. No client certificate will be sent to the server
-      # 3. SSL_VERIFY_FAIL_IF_NO_PEER_CERT causes the handshake to fail
-      assert_raise(OpenSSL::SSL::SSLError) {
-        server_connect(port, ctx) { |ssl| ssl.puts("abc"); ssl.gets }
+      assert_raise_with_message(ArgumentError, /private key/) {
+        server_connect(port, ctx) { raise "unreachable" }
+      }
+
+      # Exception in callback
+      ctx = OpenSSL::SSL::SSLContext.new
+      ctx.client_cert_cb = -> ssl { raise "in client_cert_cb" }
+      assert_raise_with_message(RuntimeError, /in client_cert_cb/) {
+        server_connect(port, ctx) { raise "unreachable" }
       }
     end
   end
@@ -1649,6 +1656,22 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
         ssl.puts "abc"; assert_equal "abc\n", ssl.gets
       }
     }
+
+    server_proc = proc do |sock|
+      sctx = make_server_context
+      sctx.renegotiation_cb = -> ssl { raise "in renegotiation_cb" }
+      ssl = OpenSSL::SSL::SSLSocket.new(sock, sctx)
+      assert_raise_with_message(RuntimeError, "in renegotiation_cb") {
+        ssl.accept
+      }
+    end
+    start_server_proc(server_proc) do |port|
+      sock = TCPSocket.new("127.0.0.1", port)
+      ssl = OpenSSL::SSL::SSLSocket.new(sock)
+      ssl.connect_nonblock(exception: false)
+    ensure
+      sock.close
+    end
   end
 
   def test_alpn_protocol_selection_ary
