@@ -22,8 +22,7 @@
 module OpenSSL::Buffering
   include Enumerable
 
-  # A buffer which will retain binary encoding.
-  class Buffer < String
+  class Buffer < String # :nodoc:
     unless String.method_defined?(:append_as_bytes)
       alias_method :_append, :<<
       def append_as_bytes(string)
@@ -225,32 +224,85 @@ module OpenSSL::Buffering
   # _limit_ is provided the result will not be longer than the given number of
   # bytes.
   #
-  # _eol_ may be a String or Regexp.
+  # _eol_ may be a String or Regexp. _eol_ defaults to +$/+.
   #
-  # Unlike IO#gets the line read will not be assigned to +$_+.
+  # Note that Regexp _eol_ is an extension to the standard IO#gets. This mode
+  # is incompatible with _chomp_ option.
   #
-  # Unlike IO#gets the separator must be provided if a limit is provided.
+  # Unlike IO#gets, the line read will not be assigned to +$_+.
 
-  def gets(eol=$/, limit=nil, chomp: false)
-    idx = @rbuffer.index(eol)
-    until @eof
-      break if idx
-      fill_rbuff
-      idx = @rbuffer.index(eol)
+  def gets(eol = $/, limit = nil, chomp: false)
+    if limit.nil? && Integer === eol
+      eol, limit = $/, eol
     end
-    if eol.is_a?(Regexp)
-      size = idx ? idx+$&.size : nil
+    limit = nil if limit && limit < 0
+    return String.new if limit == 0
+
+    case eol
+    when nil
+      gets_slurp(limit)
+    when Regexp
+      gets_regexp(eol, limit)
+    when ""
+      swallow_newlines
+      ret = gets_string("\n\n", limit, chomp)
+      swallow_newlines
+      ret
     else
-      size = idx ? idx+eol.size : nil
+      gets_string(eol, limit, chomp)
     end
-    if size && limit && limit >= 0
-      size = [size, limit].min
+  end
+
+  private def gets_string(eol, limit, chomp)
+    pos = 0
+    while true
+      break if idx = @rbuffer.index(eol, pos)
+      break if limit && @rbuffer.bytesize >= limit
+      pos = [0, @rbuffer.bytesize - eol.bytesize + 1].max
+      break if @eof
+      fill_rbuff
+    end
+    if idx
+      size = idx + eol.bytesize
+      size = [size, limit].min if limit
+    else
+      size = limit
     end
     line = consume_rbuff(size)
-    if chomp && line
+    if chomp && idx
       line.chomp!(eol)
     end
     line
+  end
+
+  private def gets_regexp(eol, limit)
+    while true
+      break if idx = @rbuffer.index(eol)
+      break if limit && @rbuffer.bytesize >= limit
+      break if @eof
+      fill_rbuff
+    end
+    if idx
+      size = idx + $&.size
+      size = [size, limit].min if limit
+    else
+      size = limit
+    end
+    consume_rbuff(size)
+  end
+
+  private def gets_slurp(limit)
+    ret = read(limit)
+    return nil if ret && ret.empty?
+    ret
+  end
+
+  private def swallow_newlines
+    while true
+      @rbuffer.sub!(/\A\n+/, "")
+      break if @eof || !@rbuffer.empty?
+      fill_rbuff
+    end
   end
 
   ##
@@ -259,10 +311,12 @@ module OpenSSL::Buffering
   #
   # See also #gets
 
-  def each(eol=$/)
-    while line = self.gets(eol)
+  def each(eol = $/, limit = nil, chomp: false)
+    return to_enum(__method__, eol, limit, chomp: chomp) unless block_given?
+    while line = gets(eol, limit, chomp: chomp)
       yield line
     end
+    self
   end
   alias each_line each
 
@@ -271,9 +325,9 @@ module OpenSSL::Buffering
   #
   # See also #gets
 
-  def readlines(eol=$/)
+  def readlines(eol = $/, limit = nil, chomp: false)
     ary = []
-    while line = self.gets(eol)
+    while line = gets(eol, limit, chomp: chomp)
       ary << line
     end
     ary
@@ -284,9 +338,8 @@ module OpenSSL::Buffering
   #
   # Raises EOFError if at end of file.
 
-  def readline(eol=$/)
-    raise EOFError if eof?
-    gets(eol)
+  def readline(eol = $/, limit = nil, chomp: false)
+    gets(eol, limit, chomp: chomp) or raise EOFError
   end
 
   ##
@@ -298,12 +351,25 @@ module OpenSSL::Buffering
   end
 
   ##
+  # Calls the given block once for each character in the stream.
+
+  def each_char
+    return to_enum(__method__) unless block_given?
+    while c = getc
+      yield c
+    end
+    self
+  end
+
+  ##
   # Calls the given block once for each byte in the stream.
 
   def each_byte # :yields: byte
-    while c = getc
-      yield(c.ord)
+    return to_enum(__method__) unless block_given?
+    while c = getbyte
+      yield c
     end
+    self
   end
 
   ##
@@ -324,7 +390,18 @@ module OpenSSL::Buffering
   # Has no effect on unbuffered reads (such as #sysread).
 
   def ungetc(c)
-    @rbuffer[0,0] = c.chr
+    @rbuffer[0, 0] = Integer === c ? c.chr : c
+    @rbuffer.force_encoding(Encoding::BINARY)
+    nil
+  end
+
+  ##
+  # Pushes byte _c_ back onto the stream such that a subsequent buffered byte
+  # read will return it.
+  def ungetbyte(c)
+    @rbuffer[0, 0] = Integer === c ? (c & 0xff).chr : c
+    @rbuffer.force_encoding(Encoding::BINARY)
+    nil
   end
 
   ##
@@ -386,6 +463,7 @@ module OpenSSL::Buffering
 
   def write(*s)
     s.inject(0) do |written, str|
+      str = str.to_s
       do_write(str)
       written + str.bytesize
     end
@@ -438,26 +516,54 @@ module OpenSSL::Buffering
   # +.to_s+ method.
 
   def <<(s)
-    do_write(s)
+    do_write(s.to_s)
     self
   end
 
   ##
-  # Writes _args_ to the stream along with a record separator.
+  # Writes _args_ to the stream along with a newline.
   #
   # See IO#puts for full details.
 
   def puts(*args)
-    s = Buffer.new
     if args.empty?
-      s.append_as_bytes("\n")
+      do_write("\n")
+      return nil
     end
+    s = Buffer.new
     args.each{|arg|
-      s.append_as_bytes(arg.to_s)
-      s.sub!(/(?<!\n)\z/, "\n")
+      if String === arg || !arg.respond_to?(:to_ary)
+        b = arg.to_s
+        s.append_as_bytes(b)
+        s.append_as_bytes("\n") unless b.byteslice(-1) == "\n"
+      else
+        ary = arg.to_ary
+        # IO#puts writes "[...]" when it encounters a recursion (undocumented).
+        # We ignore that for now. Array#flatten may raise ArgumentError.
+        ary.flatten.each do |e|
+          b = e.to_s
+          s.append_as_bytes(b)
+          s.append_as_bytes("\n") unless b.byteslice(-1) == "\n"
+        end
+      end
     }
     do_write(s)
     nil
+  end
+
+  ##
+  # Writes character _ch_ to the stream.
+  #
+  # See IO#putc for full details.
+
+  def putc(ch)
+    if String === ch
+      # Can be empty or more than 1 byte
+      do_write(ch[0, 1])
+    else
+      do_write((ch & 0xff).chr)
+    end
+    ch
   end
 
   ##

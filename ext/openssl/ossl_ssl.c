@@ -2211,7 +2211,7 @@ ossl_ssl_write_internal_safe(VALUE _args)
 static VALUE
 ossl_ssl_write_internal(VALUE self, VALUE str, VALUE opts)
 {
-    StringValue(str);
+    str = rb_obj_as_string(str);
     int frozen = RB_OBJ_FROZEN(str);
     if (!frozen) {
         rb_str_locktmp(str);
