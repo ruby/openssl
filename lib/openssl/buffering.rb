@@ -58,15 +58,19 @@ module OpenSSL::Buffering
 
   def initialize(*)
     super
-    @eof = false
-    @rbuffer = Buffer.new
-    @sync = @io.sync
+    initialize_buffer
   end
 
   #
   # for reading.
   #
   private
+
+  def initialize_buffer
+    @eof = false
+    @rbuffer = Buffer.new
+    @sync = @io.sync
+  end
 
   ##
   # Fills the buffer from the underlying SSLSocket
