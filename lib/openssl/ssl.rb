@@ -360,6 +360,210 @@ module OpenSSL
         io.close if sync_close
       end
 
+      # Ruby 3.2
+      IO_TimeoutError = defined?(IO::TimeoutError) ? IO::TimeoutError : IOError
+      private_constant :IO_TimeoutError
+
+      private def check_nonblock(ret)
+        case ret
+        when :wait_readable
+          raise SSLErrorWaitReadable, "read would block"
+        when :wait_writable
+          raise SSLErrorWaitWritable, "write would block"
+        when nil
+          raise EOFError, "end of file reached"
+        else
+          ret
+        end
+      end
+
+      private def with_timeout(timeout)
+        # IO#timeout= was added in Ruby 3.2
+        timeout ||= self.timeout if IO.method_defined?(:timeout)
+        if timeout.nil?
+          while true
+            yield
+          end
+        else
+          remaining = timeout
+          start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+          while remaining >= 0
+            yield remaining
+            now = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+            remaining = timeout - (now - start)
+          end
+        end
+        raise IO_TimeoutError, "user specified timeout for SSL handshake"
+      end
+
+      # :call-seq:
+      #    ssl.connect(timeout: nil) -> self
+      #
+      # Initiates an SSL/TLS handshake with a server.
+      #
+      # If _timeout_ is specified, and if the handshake does not complete
+      # within _timeout_ seconds, IO::TimeoutError is raised.
+      def connect(timeout: nil)
+        with_timeout(timeout) do |remaining|
+          case ret = ssl_connect
+          when :wait_readable
+            wait_readable(remaining)
+          when :wait_writable
+            wait_writable(remaining)
+          else
+            return ret
+          end
+        end
+      end
+
+      # :call-seq:
+      #    ssl.connect_nonblock -> self
+      #    ssl.connect_nonblock(exception: false) -> self | :wait_readable | :wait_writable
+      #
+      # Initiates the SSL/TLS handshake as a client in non-blocking manner.
+      #
+      #   # emulates blocking connect
+      #   begin
+      #     ssl.connect_nonblock
+      #   rescue IO::WaitReadable
+      #     IO.select([s2])
+      #     retry
+      #   rescue IO::WaitWritable
+      #     IO.select(nil, [s2])
+      #     retry
+      #   end
+      #
+      # By specifying a keyword argument _exception_ to +false+, you can
+      # indicate that connect_nonblock should not raise an IO::WaitReadable or
+      # IO::WaitWritable exception, but return the symbol +:wait_readable+ or
+      # +:wait_writable+ instead.
+      def connect_nonblock(exception: true)
+        ret = ssl_connect
+        check_nonblock(ret) if exception
+        ret
+      end
+
+      # :call-seq:
+      #    ssl.accept(timeout: nil) -> self
+      #
+      # Waits for a SSL/TLS client to initiate a handshake.
+      #
+      # If _timeout_ is specified, and if the handshake does not complete
+      # within _timeout_ seconds, IO::TimeoutError is raised.
+      def accept(timeout: nil)
+        with_timeout(timeout) do |remaining|
+          case ret = ssl_accept
+          when :wait_readable
+            wait_readable(remaining)
+          when :wait_writable
+            wait_writable(remaining)
+          else
+            return ret
+          end
+        end
+      end
+
+      # :call-seq:
+      #    ssl.accept_nonblock -> self
+      #    ssl.accept_nonblock(exception: false) -> self | :wait_readable | :wait_writable
+      #
+      # Initiates the SSL/TLS handshake as a server in non-blocking manner.
+      #
+      #   # emulates blocking accept
+      #   begin
+      #     ssl.accept_nonblock
+      #   rescue IO::WaitReadable
+      #     IO.select([s2])
+      #     retry
+      #   rescue IO::WaitWritable
+      #     IO.select(nil, [s2])
+      #     retry
+      #   end
+      #
+      # By specifying a keyword argument _exception_ to +false+, you can
+      # indicate that accept_nonblock should not raise an IO::WaitReadable or
+      # IO::WaitWritable exception, but return the symbol +:wait_readable+ or
+      # +:wait_writable+ instead.
+      def accept_nonblock(exception: true)
+        ret = ssl_accept
+        check_nonblock(ret) if exception
+        ret
+      end
+
+      # :call-seq:
+      #    ssl.sysread(length) -> string
+      #    ssl.sysread(length, buffer) -> buffer
+      #
+      # Reads _length_ bytes from the SSL connection.  If a pre-allocated
+      # _buffer_ is provided the data will be written into it.
+      def sysread(length, buffer = nil)
+        while true
+          case ret = ssl_read(length, buffer)
+          when :wait_readable
+            wait_readable or
+              raise IO_TimeoutError, "Timed out while waiting to become readable!"
+          when :wait_writable
+            wait_writable or
+              raise IO_TimeoutError, "Timed out while waiting to become writable!"
+          when nil
+            raise EOFError, "end of file reached"
+          else
+            return ret
+          end
+        end
+      end
+
+      # :call-seq:
+      #    ssl.sysread_nonblock(length) -> string
+      #    ssl.sysread_nonblock(length, buffer) -> buffer
+      #    ssl.sysread_nonblock(length, buffer, exception: false) -> buffer | :wait_readable | :wait_writable | nil
+      #
+      # A non-blocking version of #sysread.  Raises an SSLError if reading
+      # would block.  If "exception: false" is passed, this method returns a
+      # symbol of :wait_readable, :wait_writable, or nil, rather than raising
+      # an exception.
+      #
+      # Reads _length_ bytes from the SSL connection.  If a pre-allocated
+      # _buffer_ is provided the data will be written into it.
+      private def sysread_nonblock(length, buffer = nil, exception: true)
+        ret = ssl_read(length, buffer)
+        check_nonblock(ret) if exception
+        ret
+      end
+
+      # :call-seq:
+      #    ssl.syswrite(string) -> Integer
+      #
+      # Writes _string_ to the SSL connection.
+      def syswrite(string)
+        while true
+          case ret = ssl_write(string)
+          when :wait_readable
+            wait_readable or
+              raise IO_TimeoutError, "Timed out while waiting to become readable!"
+          when :wait_writable
+            wait_writable or
+              raise IO_TimeoutError, "Timed out while waiting to become writable!"
+          else
+            return ret
+          end
+        end
+      end
+
+      # :call-seq:
+      #    ssl.syswrite_nonblock(string) -> Integer
+      #    ssl.syswrite_nonblock(string, exception: false) -> Integer | :wait_readable | :wait_writable
+      #
+      # Writes _string_ to the SSL connection in a non-blocking manner.  Raises
+      # an SSLError if writing would block.  If "exception: false" is passed,
+      # this method returns a symbol of :wait_readable or :wait_writable,
+      # rather than raising an exception.
+      private def syswrite_nonblock(string, exception: true)
+        ret = ssl_write(string)
+        check_nonblock(ret) if exception
+        ret
+      end
+
       # call-seq:
       #   ssl.post_connection_check(hostname) -> true
       #

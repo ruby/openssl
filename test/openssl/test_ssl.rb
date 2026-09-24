@@ -186,6 +186,49 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     end
   end
 
+  def test_connect_timeout
+    timeout_error = defined?(IO::TimeoutError) ? IO::TimeoutError : IOError
+    start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    server_proc = proc do |sock|
+      # TLS 1.2 handshake takes 2 RTTs
+      ctx = make_server_context
+      ctx.max_version = OpenSSL::SSL::TLS1_2_VERSION
+      ssl = OpenSSL::SSL::SSLSocket.new(sock, ctx)
+
+      case (sleep 0.1; ssl.accept_nonblock(exception: false))
+      when :wait_readable then ssl.wait_readable
+      when :wait_writable then ssl.wait_writable
+      else break
+      end while true
+      readwrite_loop(ssl)
+    rescue OpenSSL::SSL::SSLError, SystemCallError
+    end
+    start_server_proc(server_proc) do |port|
+      th = []
+      th << Thread.new do
+        sock = TCPSocket.new("127.0.0.1", port)
+        sock.setsockopt(:TCP, :NODELAY, 1)
+        ssl = OpenSSL::SSL::SSLSocket.new(sock)
+        assert_raise(timeout_error) { ssl.connect(timeout: 0.05) }
+        taken = Process.clock_gettime(Process::CLOCK_MONOTONIC) - start
+        assert_operator(taken, :<, 0.2)
+      ensure
+        sock.close
+      end
+      th << Thread.new do
+        sock = TCPSocket.new("127.0.0.1", port)
+        sock.setsockopt(:TCP, :NODELAY, 1)
+        ssl = OpenSSL::SSL::SSLSocket.new(sock)
+        ssl.connect(timeout: 1)
+        taken = Process.clock_gettime(Process::CLOCK_MONOTONIC) - start
+        assert_operator(taken, :>=, 0.2)
+      ensure
+        sock.close
+      end
+      assert_join_threads(th)
+    end
+  end
+
   def test_low_level_socket
     start_server do |port|
       sock = Socket.tcp("127.0.0.1", port)
