@@ -15,7 +15,11 @@ require "openssl/buffering"
 if defined?(OpenSSL::SSL)
 
 require "io/nonblock"
-require "ipaddr"
+# Only OpenSSL::SSL.verify_certificate_identity uses IPAddr, and only for
+# certificates carrying an iPAddress SAN. Autoloading keeps ipaddr (and the
+# socket library it pulls in) off the require path for everyone else, while
+# leaving the IPAddr constant resolvable as before.
+autoload :IPAddr, "ipaddr"
 require "socket"
 
 module OpenSSL
