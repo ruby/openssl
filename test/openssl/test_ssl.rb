@@ -1313,7 +1313,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
         ssl.puts "abc"; assert_equal "abc\n", ssl.gets
       }
       ok = true
-    rescue OpenSSL::SSL::SSLError
+    rescue OpenSSL::SSL::SSLError, Errno::EINPROGRESS
     end
 
     ok
