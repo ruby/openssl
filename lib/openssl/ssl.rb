@@ -207,10 +207,6 @@ module OpenSSL
         to_io.fcntl(*args)
       end
 
-      def closed?
-        to_io.closed?
-      end
-
       def do_not_reverse_lookup=(flag)
         to_io.do_not_reverse_lookup = flag
       end
@@ -347,6 +343,13 @@ module OpenSSL
       # connection is shut down. This defaults to +false+.
       attr_accessor :sync_close
 
+      # :stopdoc:
+      def initialize(*args)
+        super
+        @closed_read = @closed_write = false
+      end if RUBY_VERSION < "3.0"
+      # :startdoc:
+
       # call-seq:
       #    ssl.sysclose => nil
       #
@@ -356,8 +359,210 @@ module OpenSSL
       # If sync_close is set to +true+, the underlying IO is also closed.
       def sysclose
         return if closed?
+        @closed_read = @closed_write = true
         stop
         io.close if sync_close
+      end
+
+      # Ruby 3.2
+      IO_TimeoutError = defined?(IO::TimeoutError) ? IO::TimeoutError : IOError
+      private_constant :IO_TimeoutError
+
+      private def check_nonblock(ret)
+        case ret
+        when :wait_readable
+          raise SSLErrorWaitReadable, "read would block"
+        when :wait_writable
+          raise SSLErrorWaitWritable, "write would block"
+        when nil
+          raise EOFError, "end of file reached"
+        else
+          ret
+        end
+      end
+
+      private def assert_readable
+        if @closed_read
+          raise IOError, "closed stream" if @closed_write
+          raise IOError, "not opened for reading"
+        end
+      end
+
+      private def assert_writable
+        if @closed_write
+          raise IOError, "closed stream" if @closed_read
+          raise IOError, "not opened for writing"
+        end
+      end
+
+      # :call-seq:
+      #    ssl.connect -> self
+      #
+      # Initiates an SSL/TLS handshake with a server.
+      def connect
+        while true
+          case ret = ssl_connect
+          when :wait_readable
+            wait_readable or
+              raise IO_TimeoutError, "Timed out while waiting to become readable!"
+          when :wait_writable
+            wait_writable or
+              raise IO_TimeoutError, "Timed out while waiting to become writable!"
+          else
+            return ret
+          end
+        end
+      end
+
+      # :call-seq:
+      #    ssl.connect_nonblock -> self
+      #    ssl.connect_nonblock(exception: false) -> self | :wait_readable | :wait_writable
+      #
+      # Initiates the SSL/TLS handshake as a client in non-blocking manner.
+      #
+      #   # emulates blocking connect
+      #   begin
+      #     ssl.connect_nonblock
+      #   rescue IO::WaitReadable
+      #     IO.select([s2])
+      #     retry
+      #   rescue IO::WaitWritable
+      #     IO.select(nil, [s2])
+      #     retry
+      #   end
+      #
+      # By specifying a keyword argument _exception_ to +false+, you can
+      # indicate that connect_nonblock should not raise an IO::WaitReadable or
+      # IO::WaitWritable exception, but return the symbol +:wait_readable+ or
+      # +:wait_writable+ instead.
+      def connect_nonblock(exception: true)
+        ret = ssl_connect
+        check_nonblock(ret) if exception
+        ret
+      end
+
+      # :call-seq:
+      #    ssl.accept -> self
+      #
+      # Waits for a SSL/TLS client to initiate a handshake.
+      def accept
+        while true
+          case ret = ssl_accept
+          when :wait_readable
+            wait_readable or
+              raise IO_TimeoutError, "Timed out while waiting to become readable!"
+          when :wait_writable
+            wait_writable or
+              raise IO_TimeoutError, "Timed out while waiting to become writable!"
+          else
+            return ret
+          end
+        end
+      end
+
+      # :call-seq:
+      #    ssl.accept_nonblock -> self
+      #    ssl.accept_nonblock(exception: false) -> self | :wait_readable | :wait_writable
+      #
+      # Initiates the SSL/TLS handshake as a server in non-blocking manner.
+      #
+      #   # emulates blocking accept
+      #   begin
+      #     ssl.accept_nonblock
+      #   rescue IO::WaitReadable
+      #     IO.select([s2])
+      #     retry
+      #   rescue IO::WaitWritable
+      #     IO.select(nil, [s2])
+      #     retry
+      #   end
+      #
+      # By specifying a keyword argument _exception_ to +false+, you can
+      # indicate that accept_nonblock should not raise an IO::WaitReadable or
+      # IO::WaitWritable exception, but return the symbol +:wait_readable+ or
+      # +:wait_writable+ instead.
+      def accept_nonblock(exception: true)
+        ret = ssl_accept
+        check_nonblock(ret) if exception
+        ret
+      end
+
+      # :call-seq:
+      #    ssl.sysread(length) -> string
+      #    ssl.sysread(length, buffer) -> buffer
+      #
+      # Reads _length_ bytes from the SSL connection.  If a pre-allocated
+      # _buffer_ is provided the data will be written into it.
+      def sysread(length, buffer = nil)
+        assert_readable
+        while true
+          case ret = ssl_read(length, buffer)
+          when :wait_readable
+            wait_readable or
+              raise IO_TimeoutError, "Timed out while waiting to become readable!"
+          when :wait_writable
+            wait_writable or
+              raise IO_TimeoutError, "Timed out while waiting to become writable!"
+          when nil
+            raise EOFError, "end of file reached"
+          else
+            return ret
+          end
+        end
+      end
+
+      # :call-seq:
+      #    ssl.sysread_nonblock(length) -> string
+      #    ssl.sysread_nonblock(length, buffer) -> buffer
+      #    ssl.sysread_nonblock(length, buffer, exception: false) -> buffer | :wait_readable | :wait_writable | nil
+      #
+      # A non-blocking version of #sysread.  Raises an SSLError if reading
+      # would block.  If "exception: false" is passed, this method returns a
+      # symbol of :wait_readable, :wait_writable, or nil, rather than raising
+      # an exception.
+      #
+      # Reads _length_ bytes from the SSL connection.  If a pre-allocated
+      # _buffer_ is provided the data will be written into it.
+      private def sysread_nonblock(length, buffer = nil, exception: true)
+        assert_readable
+        ret = ssl_read(length, buffer)
+        check_nonblock(ret) if exception
+        ret
+      end
+
+      # :call-seq:
+      #    ssl.syswrite(string) -> Integer
+      #
+      # Writes _string_ to the SSL connection.
+      def syswrite(string)
+        assert_writable
+        while true
+          case ret = ssl_write(string)
+          when :wait_readable
+            wait_readable or
+              raise IO_TimeoutError, "Timed out while waiting to become readable!"
+          when :wait_writable
+            wait_writable or
+              raise IO_TimeoutError, "Timed out while waiting to become writable!"
+          else
+            return ret
+          end
+        end
+      end
+
+      # :call-seq:
+      #    ssl.syswrite_nonblock(string) -> Integer
+      #    ssl.syswrite_nonblock(string, exception: false) -> Integer | :wait_readable | :wait_writable
+      #
+      # Writes _string_ to the SSL connection in a non-blocking manner.  Raises
+      # an SSLError if writing would block.  If "exception: false" is passed,
+      # this method returns a symbol of :wait_readable or :wait_writable,
+      # rather than raising an exception.
+      private def syswrite_nonblock(string, exception: true)
+        assert_writable
+        ret = ssl_write(string)
+        check_nonblock(ret) if exception
+        ret
       end
 
       # call-seq:
@@ -394,16 +599,28 @@ module OpenSSL
         nil
       end
 
-      # Close the stream for reading.
-      # This method is ignored by OpenSSL as there is no reasonable way to
-      # implement it, but exists for compatibility with IO.
-      def close_read
-        # Unsupported and ignored.
-        # Just don't read any more.
+      # Returns +true+ if the SSL/TLS connection has been closed, +false+
+      # otherwise.
+      #
+      # Before version 4.1, this method returned whether the underlying socket
+      # has been closed.
+      def closed?
+        !!(@closed_read && @closed_write)
       end
 
-      # Closes the stream for writing. The behavior of this method depends on
-      # the version of OpenSSL and the TLS protocol in use.
+      # Closes the stream for reading. Any further attempts to read from this
+      # SSLSocket will raise IOError.
+      def close_read
+        return sysclose if @closed_write
+        @closed_read = true
+        nil
+      end
+
+      # Closes the stream for writing. Any further attempts to write to this
+      # SSLSocket will raise IOError.
+      #
+      # The behavior of this method depends on the version of OpenSSL and the
+      # TLS protocol in use.
       #
       # - Sends a 'close_notify' alert to the peer.
       # - Does not wait for the peer's 'close_notify' alert in response.
@@ -417,6 +634,8 @@ module OpenSSL
       # completely shut down. On TLS 1.3, the connection will remain open for
       # reading only.
       def close_write
+        return sysclose if @closed_read
+        @closed_write = true
         stop
       end
 
