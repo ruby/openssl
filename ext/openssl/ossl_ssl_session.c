@@ -180,7 +180,9 @@ static VALUE ossl_ssl_session_set_time(VALUE self, VALUE time_v)
         time_v = rb_funcall(time_v, rb_intern("to_i"), 0);
     }
     t = NUM2LONG(time_v);
-    SSL_SESSION_set_time(ctx, t);
+    if (SSL_SESSION_set_time(ctx, t) != t) {
+        ossl_raise(eSSLSession, "SSL_SESSION_set_time");
+    }
     return ossl_ssl_session_get_time(self);
 }
 
@@ -197,7 +199,9 @@ static VALUE ossl_ssl_session_set_timeout(VALUE self, VALUE time_v)
 
     GetSSLSession(self, ctx);
     t = NUM2LONG(time_v);
-    SSL_SESSION_set_timeout(ctx, t);
+    if (SSL_SESSION_set_timeout(ctx, t) != 1) {
+        ossl_raise(eSSLSession, "SSL_SESSION_set_timeout");
+    }
     return ossl_ssl_session_get_timeout(self);
 }
 
