@@ -251,9 +251,10 @@ pkey_ctx_apply_options_i(RB_BLOCK_CALL_FUNC_ARGLIST(i, ctx_v))
 
     if (SYMBOL_P(key))
         key = rb_sym2str(key);
+    StringValue(key);
     value = rb_String(value);
 
-    if (EVP_PKEY_CTX_ctrl_str(ctx, StringValueCStr(key), StringValueCStr(value)) <= 0)
+    if (EVP_PKEY_CTX_ctrl_str(ctx, rb_str_cstr(key), rb_str_cstr(value)) <= 0)
         ossl_raise(ePKeyError, "EVP_PKEY_CTX_ctrl_str(ctx, %+"PRIsVALUE", %+"PRIsVALUE")",
                    key, value);
     return Qnil;
@@ -641,7 +642,6 @@ lookup_pkey_type(VALUE type)
     const EVP_PKEY_ASN1_METHOD *ameth;
     int pkey_id;
 
-    StringValue(type);
     /*
      * XXX: EVP_PKEY_asn1_find_str() looks up a PEM type string. Should we use
      * OBJ_txt2nid() instead (and then somehow check if the NID is an acceptable
@@ -670,11 +670,12 @@ ossl_pkey_new_raw_private_key(VALUE self, VALUE type, VALUE key)
     EVP_PKEY *pkey;
     size_t keylen;
 
+    StringValue(type);
     StringValue(key);
     keylen = RSTRING_LEN(key);
 
 #ifdef OSSL_USE_PROVIDER
-    pkey = EVP_PKEY_new_raw_private_key_ex(NULL, StringValueCStr(type), NULL,
+    pkey = EVP_PKEY_new_raw_private_key_ex(NULL, rb_str_cstr(type), NULL,
                                            (unsigned char *)RSTRING_PTR(key),
                                            keylen);
     if (!pkey)
@@ -702,11 +703,12 @@ ossl_pkey_new_raw_public_key(VALUE self, VALUE type, VALUE key)
     EVP_PKEY *pkey;
     size_t keylen;
 
+    StringValue(type);
     StringValue(key);
     keylen = RSTRING_LEN(key);
 
 #ifdef OSSL_USE_PROVIDER
-    pkey = EVP_PKEY_new_raw_public_key_ex(NULL, StringValueCStr(type), NULL,
+    pkey = EVP_PKEY_new_raw_public_key_ex(NULL, rb_str_cstr(type), NULL,
                                           (unsigned char *)RSTRING_PTR(key),
                                           keylen);
     if (!pkey)

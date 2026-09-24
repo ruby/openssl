@@ -265,14 +265,14 @@ kdf_hkdf(int argc, VALUE *argv, VALUE self)
     rb_get_kwargs(opts, kwargs_ids, 4, 0, kwargs);
 
     StringValue(ikm);
-    ikmlen = RSTRING_LENINT(ikm);
     salt = StringValue(kwargs[0]);
-    saltlen = RSTRING_LENINT(salt);
     info = StringValue(kwargs[1]);
-    infolen = RSTRING_LENINT(info);
     len = (size_t)NUM2LONG(kwargs[2]);
     if (len > LONG_MAX)
         rb_raise(rb_eArgError, "length must be non-negative");
+    ikmlen = RSTRING_LENINT(ikm);
+    saltlen = RSTRING_LENINT(salt);
+    infolen = RSTRING_LENINT(info);
     md = ossl_evp_md_fetch(kwargs[3], &md_holder);
 
     str = rb_str_new(NULL, (long)len);
