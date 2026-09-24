@@ -290,6 +290,29 @@ class OpenSSL::TestPKey < OpenSSL::PKeyTestCase
     assert_equal(true, pub3.verify(nil, sig, "data"))
   end
 
+  def test_slh_dsa
+    # SLH-DSA (FIPS 205) is supported on OpenSSL 3.5 or later.
+    return unless openssl?(3, 5, 0)
+
+    pkey = OpenSSL::PKey.generate_key("SLH-DSA-SHA2-128s")
+    assert_match(/type_name=SLH-DSA-SHA2-128s/, pkey.inspect)
+    sig = pkey.sign(nil, "data")
+    # See FIPS 205 Section 11 Parameter Sets - Table 2. SLH-DSA parameter sets -
+    # row: SLH-DSA-SHA2-128s, column: sig bytes
+    assert_equal(7856, sig.bytesize)
+    assert_equal(true, pkey.verify(nil, sig, "data"))
+
+    pub2 = OpenSSL::PKey.read(pkey.public_to_der)
+    assert_equal(true, pub2.verify(nil, sig, "data"))
+
+    raw_public_key = pkey.raw_public_key
+    # See FIPS 205 Section 11 Parameter Sets - Table 2. SLH-DSA parameter sets -
+    # row: SLH-DSA-SHA2-128s, column: pk bytes
+    assert_equal(32, raw_public_key.bytesize)
+    pub3 = OpenSSL::PKey.new_raw_public_key("SLH-DSA-SHA2-128s", raw_public_key)
+    assert_equal(true, pub3.verify(nil, sig, "data"))
+  end
+
   def test_ml_kem
     # EVP_PKEY KEM APIs were added in OpenSSL 3.0.
     omit "ML-KEM is not supported" unless openssl?(3, 5, 0)
