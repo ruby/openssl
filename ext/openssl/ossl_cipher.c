@@ -289,6 +289,7 @@ ossl_cipher_pkcs5_keyivgen(int argc, VALUE *argv, VALUE self)
     const EVP_MD *digest;
     VALUE vpass, vsalt, viter, vdigest, md_holder;
     unsigned char key[EVP_MAX_KEY_LENGTH], iv[EVP_MAX_IV_LENGTH], *salt = NULL;
+    unsigned char saltbuf[PKCS5_SALT_LEN];
     int iter;
 
     rb_scan_args(argc, argv, "13", &vpass, &vsalt, &viter, &vdigest);
@@ -297,7 +298,8 @@ ossl_cipher_pkcs5_keyivgen(int argc, VALUE *argv, VALUE self)
         StringValue(vsalt);
         if(RSTRING_LEN(vsalt) != PKCS5_SALT_LEN)
             ossl_raise(eCipherError, "salt must be an 8-octet string");
-        salt = (unsigned char *)RSTRING_PTR(vsalt);
+        memcpy(saltbuf, RSTRING_PTR(vsalt), PKCS5_SALT_LEN);
+        salt = saltbuf;
     }
     iter = NIL_P(viter) ? 2048 : NUM2INT(viter);
     if (iter <= 0)
@@ -370,6 +372,8 @@ ossl_cipher_update(int argc, VALUE *argv, VALUE self)
         ossl_raise(eCipherError, "key not set");
 
     StringValue(data);
+    if (!NIL_P(str))
+        StringValue(str);
     in = (unsigned char *)RSTRING_PTR(data);
     in_len = RSTRING_LEN(data);
     GetCipher(self, ctx);
@@ -394,7 +398,6 @@ ossl_cipher_update(int argc, VALUE *argv, VALUE self)
     if (NIL_P(str))
         str = rb_str_buf_new(out_len);
     else {
-        StringValue(str);
         if ((long)rb_str_capacity(str) >= out_len)
             rb_str_modify(str);
         else

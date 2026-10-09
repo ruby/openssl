@@ -190,11 +190,11 @@ config_get_value(VALUE self, VALUE section, VALUE key)
     CONF *conf = GetConfig(self);
     const char *str, *sectionp;
 
-    StringValueCStr(section);
-    StringValueCStr(key);
+    StringValue(section);
+    StringValue(key);
     /* For compatibility; NULL means "default". */
-    sectionp = RSTRING_LEN(section) ? RSTRING_PTR(section) : NULL;
-    str = NCONF_get_string(conf, sectionp, RSTRING_PTR(key));
+    sectionp = RSTRING_LEN(section) ? rb_str_cstr(section) : NULL;
+    str = NCONF_get_string(conf, sectionp, rb_str_cstr(key));
     if (!str) {
         ossl_clear_error();
         return Qnil;

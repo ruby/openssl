@@ -52,8 +52,9 @@ ossl_rand_seed(VALUE self, VALUE str)
 static VALUE
 ossl_rand_add(VALUE self, VALUE str, VALUE entropy)
 {
+    double randomness = NUM2DBL(entropy);
     StringValue(str);
-    RAND_add(RSTRING_PTR(str), RSTRING_LENINT(str), NUM2DBL(entropy));
+    RAND_add(RSTRING_PTR(str), RSTRING_LENINT(str), randomness);
 
     return self;
 }

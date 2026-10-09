@@ -195,26 +195,28 @@ static
 VALUE ossl_x509name_add_entry(int argc, VALUE *argv, VALUE self)
 {
     X509_NAME *name;
-    VALUE oid, value, type, opts, kwargs[2];
+    VALUE oid, value, vtype, opts, kwargs[2];
     static ID kwargs_ids[2];
-    const char *oid_name;
-    int loc = -1, set = 0;
+    int type, loc = -1, set = 0;
 
     if (!kwargs_ids[0]) {
         kwargs_ids[0] = rb_intern_const("loc");
         kwargs_ids[1] = rb_intern_const("set");
     }
-    rb_scan_args(argc, argv, "21:", &oid, &value, &type, &opts);
+    rb_scan_args(argc, argv, "21:", &oid, &value, &vtype, &opts);
     rb_get_kwargs(opts, kwargs_ids, 0, 2, kwargs);
-    oid_name = StringValueCStr(oid);
+    StringValue(oid);
     StringValue(value);
-    if(NIL_P(type)) type = rb_aref(OBJECT_TYPE_TEMPLATE, oid);
+    if (!NIL_P(vtype))
+        type = NUM2INT(vtype);
+    else
+        type = NUM2INT(rb_aref(OBJECT_TYPE_TEMPLATE, oid));
     if (kwargs[0] != Qundef)
         loc = NUM2INT(kwargs[0]);
     if (kwargs[1] != Qundef)
         set = NUM2INT(kwargs[1]);
     GetX509Name(self, name);
-    if (!X509_NAME_add_entry_by_txt(name, oid_name, NUM2INT(type),
+    if (!X509_NAME_add_entry_by_txt(name, rb_str_cstr(oid), type,
                                     (unsigned char *)RSTRING_PTR(value),
                                     RSTRING_LENINT(value), loc, set))
         ossl_raise(eX509NameError, "X509_NAME_add_entry_by_txt");
