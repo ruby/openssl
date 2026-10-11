@@ -253,6 +253,15 @@ module OpenSSL
         def timeout=(value)
           to_io.timeout=(value)
         end
+      else
+        def timeout
+          nil
+        end
+
+        def timeout=(value)
+          raise NotImplementedError,
+            "IO#timeout= is not available on this Ruby version"
+        end
       end
     end
 
@@ -374,17 +383,27 @@ module OpenSSL
       IO_TimeoutError = defined?(IO::TimeoutError) ? IO::TimeoutError : IOError
       private_constant :IO_TimeoutError
 
-      private def blocking
+      private def blocking(timeout = self.timeout)
+        if timeout
+          remaining = timeout
+          start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+        end
+
         while true
           ret = yield
           if :wait_readable == ret
-            io.wait_readable or raise IO_TimeoutError,
+            io.wait_readable(remaining) or raise IO_TimeoutError,
               "Timed out while waiting to become readable!"
           elsif :wait_writable == ret
-            io.wait_writable or raise IO_TimeoutError,
+            io.wait_writable(remaining) or raise IO_TimeoutError,
               "Timed out while waiting to become writable!"
           else
             return ret
+          end
+
+          if timeout
+            now = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+            remaining = [0, timeout - (now - start)].max
           end
         end
       end
@@ -400,11 +419,14 @@ module OpenSSL
       end
 
       # :call-seq:
-      #    ssl.connect -> self
+      #    ssl.connect(timeout: ssl.timeout) -> self
       #
       # Initiates an SSL/TLS handshake with a server.
-      def connect
-        blocking { ssl_connect }
+      #
+      # If _timeout_ is specified, and if the handshake does not complete
+      # within _timeout_ seconds, IO::TimeoutError is raised.
+      def connect(timeout: self.timeout)
+        blocking(timeout) { ssl_connect }
       end
 
       # :call-seq:
@@ -435,11 +457,14 @@ module OpenSSL
       end
 
       # :call-seq:
-      #    ssl.accept -> self
+      #    ssl.accept(timeout: ssl.timeout) -> self
       #
       # Waits for a SSL/TLS client to initiate a handshake.
-      def accept
-        blocking { ssl_accept }
+      #
+      # If _timeout_ is specified, and if the handshake does not complete
+      # within _timeout_ seconds, IO::TimeoutError is raised.
+      def accept(timeout: self.timeout)
+        blocking(timeout) { ssl_accept }
       end
 
       # :call-seq:
