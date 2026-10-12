@@ -280,61 +280,76 @@ ossl_ssl_verify_callback(int preverify_ok, X509_STORE_CTX *ctx)
     return ossl_verify_cb_call(cb, preverify_ok, ctx);
 }
 
+struct sess_get_cb_args {
+    VALUE ssl_obj;
+    const unsigned char *data;
+    int len;
+    SSL_SESSION *ret;
+};
+
 static VALUE
-ossl_call_session_get_cb(VALUE ary)
+ossl_call_session_get_cb(VALUE args_)
 {
-    VALUE ssl_obj, cb;
+    struct sess_get_cb_args *args = (struct sess_get_cb_args *)args_;
+    VALUE sslctx_obj, cb, session_id, ret;
 
-    Check_Type(ary, T_ARRAY);
-    ssl_obj = rb_ary_entry(ary, 0);
-
-    cb = rb_funcall(ssl_obj, rb_intern("session_get_cb"), 0);
+    sslctx_obj = rb_attr_get(args->ssl_obj, id_i_context);
+    cb = rb_attr_get(sslctx_obj, id_i_session_get_cb);
     if (NIL_P(cb)) return Qnil;
 
-    return rb_funcallv(cb, id_call, 1, &ary);
+    session_id = rb_str_new((const char *)args->data, args->len);
+    ret = rb_funcall(cb, id_call, 1, rb_assoc_new(args->ssl_obj, session_id));
+    if (NIL_P(ret))
+        return Qnil;
+    // XXX: Should we raise if ret is not a Session?
+    if (!rb_obj_is_instance_of(ret, cSSLSession))
+        return Qnil;
+
+    GetSSLSession(ret, args->ret);
+    return Qnil;
 }
 
 static SSL_SESSION *
 ossl_sslctx_session_get_cb(SSL *ssl, const unsigned char *buf, int len, int *copy)
 {
     struct ossl_ssl_data *p = ssl_data(ssl);
-    VALUE ary, ret_obj;
-    SSL_SESSION *sess;
-    int state = 0;
+    struct sess_get_cb_args args = { p->self, buf, len, NULL };
+    int state;
 
     if (p->cb_state)
         return NULL;
     OSSL_Debug("SSL SESSION get callback entered");
-    ary = rb_ary_new2(2);
-    rb_ary_push(ary, p->self);
-    rb_ary_push(ary, rb_str_new((const char *)buf, len));
-
-    ret_obj = rb_protect(ossl_call_session_get_cb, ary, &state);
+    rb_protect(ossl_call_session_get_cb, (VALUE)&args, &state);
     if (state) {
         p->cb_state = state;
         return NULL;
     }
-    if (!rb_obj_is_instance_of(ret_obj, cSSLSession))
-        return NULL;
-
-    GetSSLSession(ret_obj, sess);
     *copy = 1;
-
-    return sess;
+    return args.ret;
 }
 
+struct sess_new_cb_args {
+    VALUE ssl_obj;
+    SSL_SESSION *sess;
+};
+
 static VALUE
-ossl_call_session_new_cb(VALUE ary)
+ossl_call_session_new_cb(VALUE args_)
 {
-    VALUE ssl_obj, cb;
+    struct sess_new_cb_args *args = (struct sess_new_cb_args *)args_;
+    VALUE sslctx_obj, cb, sess_obj;
 
-    Check_Type(ary, T_ARRAY);
-    ssl_obj = rb_ary_entry(ary, 0);
-
-    cb = rb_funcall(ssl_obj, rb_intern("session_new_cb"), 0);
+    sslctx_obj = rb_attr_get(args->ssl_obj, id_i_context);
+    cb = rb_attr_get(sslctx_obj, id_i_session_new_cb);
     if (NIL_P(cb)) return Qnil;
 
-    return rb_funcallv(cb, id_call, 1, &ary);
+    sess_obj = rb_obj_alloc(cSSLSession);
+    if (!SSL_SESSION_up_ref(args->sess))
+        ossl_raise(eSSLError, "SSL_SESSION_up_ref");
+    RTYPEDDATA_DATA(sess_obj) = args->sess;
+
+    rb_funcall(cb, id_call, 1, rb_assoc_new(args->ssl_obj, sess_obj));
+    return Qnil;
 }
 
 /* return 1 normal.  return 0 removes the session */
@@ -342,22 +357,13 @@ static int
 ossl_sslctx_session_new_cb(SSL *ssl, SSL_SESSION *sess)
 {
     struct ossl_ssl_data *p = ssl_data(ssl);
-    VALUE ary, sess_obj;
-    int state = 0;
+    struct sess_new_cb_args args = { p->self, sess };
+    int state;
 
     if (p->cb_state)
         return 0;
     OSSL_Debug("SSL SESSION new callback entered");
-
-    sess_obj = rb_obj_alloc(cSSLSession);
-    SSL_SESSION_up_ref(sess);
-    DATA_PTR(sess_obj) = sess;
-
-    ary = rb_ary_new2(2);
-    rb_ary_push(ary, p->self);
-    rb_ary_push(ary, sess_obj);
-
-    rb_protect(ossl_call_session_new_cb, ary, &state);
+    rb_protect(ossl_call_session_new_cb, (VALUE)&args, &state);
     if (state) {
         p->cb_state = state;
     }
@@ -365,7 +371,7 @@ ossl_sslctx_session_new_cb(SSL *ssl, SSL_SESSION *sess)
     /*
      * return 0 which means to OpenSSL that the session is still
      * valid (since we created Ruby Session object) and was not freed by us
-     * with SSL_SESSION_free(). Call SSLContext#remove_session(sess) in
+     * with SSL_SESSION_free(). Call SSLContext#session_remove(sess) in
      * session_get_cb block if you don't want OpenSSL to cache the session
      * internally.
      */
@@ -418,25 +424,35 @@ ossl_sslctx_keylog_cb(const SSL *ssl, const char *line)
 }
 #endif
 
+struct sess_remove_cb_args {
+    SSL_CTX *ctx;
+    SSL_SESSION *sess;
+};
+
 static VALUE
-ossl_call_session_remove_cb(VALUE ary)
+ossl_call_session_remove_cb(VALUE args_)
 {
-    VALUE sslctx_obj, cb;
+    struct sess_remove_cb_args *args = (struct sess_remove_cb_args *)args_;
+    VALUE sslctx_obj, cb, sess_obj;
 
-    Check_Type(ary, T_ARRAY);
-    sslctx_obj = rb_ary_entry(ary, 0);
-
+    sslctx_obj = (VALUE)SSL_CTX_get_ex_data(args->ctx, ossl_sslctx_ex_ptr_idx);
     cb = rb_attr_get(sslctx_obj, id_i_session_remove_cb);
     if (NIL_P(cb)) return Qnil;
 
-    return rb_funcallv(cb, id_call, 1, &ary);
+    sess_obj = rb_obj_alloc(cSSLSession);
+    if (!SSL_SESSION_up_ref(args->sess))
+        ossl_raise(eSSLError, "SSL_SESSION_up_ref");
+    RTYPEDDATA_DATA(sess_obj) = args->sess;
+
+    rb_funcall(cb, id_call, 1, rb_assoc_new(sslctx_obj, sess_obj));
+    return Qnil;
 }
 
 static void
 ossl_sslctx_session_remove_cb(SSL_CTX *ctx, SSL_SESSION *sess)
 {
-    VALUE ary, sslctx_obj, sess_obj;
-    int state = 0;
+    struct sess_remove_cb_args args = { ctx, sess };
+    int state;
 
     /*
      * This callback is also called for all sessions in the internal store
@@ -446,23 +462,14 @@ ossl_sslctx_session_remove_cb(SSL_CTX *ctx, SSL_SESSION *sess)
         return;
 
     OSSL_Debug("SSL SESSION remove callback entered");
-
-    sslctx_obj = (VALUE)SSL_CTX_get_ex_data(ctx, ossl_sslctx_ex_ptr_idx);
-    sess_obj = rb_obj_alloc(cSSLSession);
-    SSL_SESSION_up_ref(sess);
-    DATA_PTR(sess_obj) = sess;
-
-    ary = rb_ary_new2(2);
-    rb_ary_push(ary, sslctx_obj);
-    rb_ary_push(ary, sess_obj);
-
-    rb_protect(ossl_call_session_remove_cb, ary, &state);
+    rb_protect(ossl_call_session_remove_cb, (VALUE)&args, &state);
     if (state) {
-/*
-  the SSL_CTX is frozen, nowhere to save state.
-  there is no common accessor method to check it either.
-        rb_ivar_set(sslctx_obj, ID_callback_state, INT2NUM(state));
-*/
+        /*
+         * the SSL_CTX is frozen, nowhere to save state.
+         * there is no common accessor method to check it either.
+         */
+        rb_warn("exception in session_remove_cb is ignored");
+        rb_set_errinfo(Qnil);
     }
 }
 
