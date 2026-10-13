@@ -1199,6 +1199,102 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     end
   end
 
+  def test_client_hello_cb
+    omit "LibreSSL doesn't support client_hello_cb" if libressl?
+
+    tls12_ctx = make_server_context
+    tls12_ctx.max_version = OpenSSL::SSL::TLS1_2_VERSION
+    # server_name extension (RFC 6066) containing a single host_name
+    name = "example.org"
+    ext = [name.bytesize + 3, 0, name.bytesize, name].pack("nCna*")
+    exts = []
+    saved_client_hello = nil
+    sctx = make_server_context
+    sctx.min_version = OpenSSL::SSL::TLS1_3_VERSION
+    sctx.client_hello_cb = lambda { |ssl, client_hello|
+      saved_client_hello = client_hello
+      exts << client_hello.get_extension(0) # server_name
+      exts.last ? tls12_ctx : nil
+    }
+    start_server(sctx) do |port|
+      server_connect(port, hostname: name) { |ssl|
+        assert_equal "TLSv1.2", ssl.ssl_version
+        ssl.puts "abc"
+        assert_equal "abc\n", ssl.gets
+      }
+      server_connect(port) { |ssl|
+        assert_equal "TLSv1.3", ssl.ssl_version
+        ssl.puts "abc"
+        assert_equal "abc\n", ssl.gets
+      }
+    end
+    assert_equal [ext, nil], exts
+    assert_raise_with_message(RuntimeError, /out of scope/) {
+      saved_client_hello.get_extension(0)
+    }
+  end
+
+  def test_client_hello_cb_verify_mode
+    omit "LibreSSL doesn't support client_hello_cb" if libressl?
+
+    client_auth_ctx = make_server_context
+    client_auth_ctx.verify_mode =
+      OpenSSL::SSL::VERIFY_PEER|OpenSSL::SSL::VERIFY_FAIL_IF_NO_PEER_CERT
+    sctx = make_server_context
+    sctx.client_hello_cb = lambda { |ssl, client_hello| client_auth_ctx }
+    start_server(sctx, ignore_listener_error: true) { |port|
+      assert_raise(OpenSSL::SSL::SSLError) {
+        server_connect(port) { |ssl|
+          ssl.puts("abc")
+          ssl.gets
+        }
+      }
+    }
+  end
+
+  def test_client_hello_cb_with_servername_cb
+    omit "LibreSSL doesn't support client_hello_cb" if libressl?
+
+    called = false
+    ctx_without_servername_cb = make_server_context
+    sctx = make_server_context
+    sctx.client_hello_cb = lambda { |ssl, client_hello|
+      ctx_without_servername_cb
+    }
+    # OpenSSL invokes the servername_cb of sctx instead
+    sctx.servername_cb = lambda { |args|
+      called = true
+      nil
+    }
+    start_server(sctx) do |port|
+      server_connect(port, hostname: "example.org") { |ssl|
+        ssl.puts "abc"
+        assert_equal "abc\n", ssl.gets
+      }
+    end
+    assert_equal true, called
+  end
+
+  def test_client_hello_cb_exception
+    omit "LibreSSL doesn't support client_hello_cb" if libressl?
+
+    server_proc = proc do |sock|
+      sctx = make_server_context
+      sctx.client_hello_cb = lambda { |ssl, client_hello|
+        raise RuntimeError, "foo"
+      }
+      ssl = OpenSSL::SSL::SSLSocket.new(sock, sctx)
+      assert_raise_with_message(RuntimeError, "foo") { ssl.accept }
+    end
+    start_server_proc(server_proc) do |port|
+      sock = TCPSocket.new("127.0.0.1", port)
+      ssl = OpenSSL::SSL::SSLSocket.new(sock)
+      assert_raise(OpenSSL::SSL::SSLError) { ssl.connect }
+    ensure
+      sock&.close
+    end
+  end
+
   def test_verify_hostname_on_connect
     exts = [
       ["keyUsage", "keyEncipherment,digitalSignature", true],
@@ -2446,10 +2542,11 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
 
   private
 
-  def server_connect(port, ctx = nil)
+  def server_connect(port, ctx = nil, hostname: nil)
     sock = TCPSocket.new("127.0.0.1", port)
     ssl = ctx ? OpenSSL::SSL::SSLSocket.new(sock, ctx) : OpenSSL::SSL::SSLSocket.new(sock)
     ssl.sync_close = true
+    ssl.hostname = hostname if hostname
     ssl.connect
     yield ssl if block_given?
   ensure
