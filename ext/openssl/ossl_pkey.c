@@ -447,6 +447,225 @@ pkey_generate(int argc, VALUE *argv, VALUE self, int genparam)
     return ossl_pkey_wrap(gen_arg.pkey);
 }
 
+#if OSSL_OPENSSL_PREREQ(3, 0, 0)
+#include <openssl/param_build.h>
+#include <openssl/core_names.h>
+
+struct pkey_from_data_alias {
+    const char *alias;
+    const char *param_name;
+};
+
+static const struct pkey_from_data_alias rsa_aliases[] = {
+    { "p",    OSSL_PKEY_PARAM_RSA_FACTOR1 },
+    { "q",    OSSL_PKEY_PARAM_RSA_FACTOR2 },
+    { "dmp1", OSSL_PKEY_PARAM_RSA_EXPONENT1 },
+    { "dmq1", OSSL_PKEY_PARAM_RSA_EXPONENT2 },
+    { "iqmp", OSSL_PKEY_PARAM_RSA_COEFFICIENT1 },
+    { NULL, NULL }
+};
+
+/* Maps the parameter names used by DH#params and DSA#params to the standard
+ * OSSL_PARAM names */
+static const struct pkey_from_data_alias default_aliases[] = {
+    { "pub_key",  OSSL_PKEY_PARAM_PUB_KEY },
+    { "priv_key", OSSL_PKEY_PARAM_PRIV_KEY },
+    { NULL, NULL }
+};
+
+struct pkey_from_data_arg {
+    VALUE options;
+    VALUE converted; /* list of [name, BN or String value, data type] */
+    const OSSL_PARAM *settable_params;
+    const struct pkey_from_data_alias *aliases;
+};
+
+static int
+pkey_from_data_convert_i(VALUE key, VALUE value, VALUE argp)
+{
+    const struct pkey_from_data_arg *arg = (const struct pkey_from_data_arg *)argp;
+    const struct pkey_from_data_alias *alias;
+    const OSSL_PARAM *p;
+    const char *key_ptr;
+    VALUE name, supported;
+
+    if (NIL_P(value))
+        return ST_CONTINUE;
+
+    if (SYMBOL_P(key))
+        key = rb_sym2str(key);
+    key_ptr = StringValueCStr(key);
+    name = key;
+
+    for (alias = arg->aliases; alias->alias; alias++) {
+        if (strcmp(alias->alias, key_ptr) == 0) {
+            key_ptr = alias->param_name;
+            name = rb_str_new_cstr(alias->param_name);
+            break;
+        }
+    }
+
+    for (p = arg->settable_params; p->key != NULL; p++) {
+        if (strcmp(p->key, key_ptr) != 0)
+            continue;
+        switch (p->data_type) {
+          case OSSL_PARAM_INTEGER:
+          case OSSL_PARAM_UNSIGNED_INTEGER:
+            /* GetBNPtr() replaces value with the converted OpenSSL::BN */
+            GetBNPtr(value);
+            break;
+          case OSSL_PARAM_UTF8_STRING:
+          case OSSL_PARAM_OCTET_STRING:
+            StringValue(value);
+            break;
+          default:
+            ossl_raise(ePKeyError, "Unsupported parameter \"%s\"", key_ptr);
+        }
+        rb_ary_push(arg->converted,
+                    rb_ary_new3(3, name, value, INT2FIX(p->data_type)));
+        return ST_CONTINUE;
+    }
+
+    supported = rb_ary_new();
+    for (p = arg->settable_params; p->key != NULL; p++)
+        rb_ary_push(supported, rb_str_new_cstr(p->key));
+    for (alias = arg->aliases; alias->alias; alias++)
+        rb_ary_push(supported, rb_str_new_cstr(alias->alias));
+    ossl_raise(ePKeyError, "Invalid parameter \"%s\". Supported parameters: %"PRIsVALUE,
+               key_ptr, rb_ary_join(supported, rb_str_new_cstr(", ")));
+}
+
+static VALUE
+pkey_from_data_convert(VALUE argp)
+{
+    struct pkey_from_data_arg *arg = (struct pkey_from_data_arg *)argp;
+
+    rb_hash_foreach(arg->options, pkey_from_data_convert_i, argp);
+    return Qnil;
+}
+
+/*
+ * call-seq:
+ *    OpenSSL::PKey.from_data(algo_name, parameters) -> pkey
+ *
+ * Creates a new key from the key components given in the Hash _parameters_
+ * without validating them. _algo_name_ is a String that represents the
+ * algorithm, for example "RSA", "DSA", "DH" or "EC".
+ * NOTE: Requires OpenSSL 3.0 or later.
+ *
+ * Integer and OpenSSL::BN values are converted to BIGNUM parameters,
+ * String values are passed as UTF-8 or octet string parameters, as expected
+ * by the algorithm. For the parameter names, see the OpenSSL documentation
+ * for EVP_PKEY_fromdata[https://www.openssl.org/docs/manmaster/man3/EVP_PKEY_fromdata.html].
+ *
+ * == Example
+ *   pkey = OpenSSL::PKey.from_data("RSA", n: 3161751493, e: 65537, d: 2064855961)
+ *   pkey.private? #=> true
+ *   pkey.n #=> #<OpenSSL::BN 3161751493>
+ */
+static VALUE
+ossl_pkey_s_from_data(int argc, VALUE *argv, VALUE self)
+{
+    VALUE alg, options;
+    EVP_PKEY_CTX *ctx;
+    OSSL_PARAM_BLD *param_bld;
+    OSSL_PARAM *params;
+    EVP_PKEY *pkey = NULL;
+    struct pkey_from_data_arg arg = { 0 };
+    int state;
+    long i;
+
+    rb_scan_args(argc, argv, "2", &alg, &options);
+    Check_Type(options, T_HASH);
+
+    ctx = EVP_PKEY_CTX_new_from_name(NULL, StringValueCStr(alg), NULL);
+    if (!ctx)
+        ossl_raise(ePKeyError, "EVP_PKEY_CTX_new_from_name");
+
+    arg.options = options;
+    arg.converted = rb_ary_new();
+    arg.settable_params = EVP_PKEY_fromdata_settable(ctx, EVP_PKEY_KEYPAIR);
+    if (!arg.settable_params) {
+        EVP_PKEY_CTX_free(ctx);
+        ossl_raise(ePKeyError, "EVP_PKEY_fromdata_settable");
+    }
+    arg.aliases = EVP_PKEY_CTX_is_a(ctx, "RSA") ? rsa_aliases : default_aliases;
+
+    /*
+     * Convert all keys and values to BN or String first. After this point no
+     * Ruby object is allocated until EVP_PKEY_fromdata() completes, so GC
+     * cannot free or move the buffers referenced by param_bld.
+     */
+    rb_protect(pkey_from_data_convert, (VALUE)&arg, &state);
+    if (state) {
+        EVP_PKEY_CTX_free(ctx);
+        rb_jump_tag(state);
+    }
+
+    param_bld = OSSL_PARAM_BLD_new();
+    if (!param_bld) {
+        EVP_PKEY_CTX_free(ctx);
+        ossl_raise(ePKeyError, "OSSL_PARAM_BLD_new");
+    }
+
+    for (i = 0; i < RARRAY_LEN(arg.converted); i++) {
+        VALUE tuple = RARRAY_AREF(arg.converted, i);
+        VALUE name = RARRAY_AREF(tuple, 0);
+        VALUE value = RARRAY_AREF(tuple, 1);
+        int ok;
+
+        switch (FIX2INT(RARRAY_AREF(tuple, 2))) {
+          case OSSL_PARAM_INTEGER:
+          case OSSL_PARAM_UNSIGNED_INTEGER:
+            ok = OSSL_PARAM_BLD_push_BN(param_bld, RSTRING_PTR(name),
+                                        GetBNPtr(value));
+            break;
+          case OSSL_PARAM_UTF8_STRING:
+            ok = OSSL_PARAM_BLD_push_utf8_string(param_bld, RSTRING_PTR(name),
+                                                 RSTRING_PTR(value),
+                                                 RSTRING_LENINT(value));
+            break;
+          default: /* OSSL_PARAM_OCTET_STRING */
+            ok = OSSL_PARAM_BLD_push_octet_string(param_bld, RSTRING_PTR(name),
+                                                  RSTRING_PTR(value),
+                                                  RSTRING_LENINT(value));
+            break;
+        }
+        if (!ok) {
+            OSSL_PARAM_BLD_free(param_bld);
+            EVP_PKEY_CTX_free(ctx);
+            ossl_raise(ePKeyError, "OSSL_PARAM_BLD_push(%"PRIsVALUE")", name);
+        }
+    }
+
+    params = OSSL_PARAM_BLD_to_param(param_bld);
+    OSSL_PARAM_BLD_free(param_bld);
+    if (!params) {
+        EVP_PKEY_CTX_free(ctx);
+        ossl_raise(ePKeyError, "OSSL_PARAM_BLD_to_param");
+    }
+
+    if (EVP_PKEY_fromdata_init(ctx) <= 0) {
+        OSSL_PARAM_free(params);
+        EVP_PKEY_CTX_free(ctx);
+        ossl_raise(ePKeyError, "EVP_PKEY_fromdata_init");
+    }
+
+    if (EVP_PKEY_fromdata(ctx, &pkey, EVP_PKEY_KEYPAIR, params) <= 0) {
+        OSSL_PARAM_free(params);
+        EVP_PKEY_CTX_free(ctx);
+        ossl_raise(ePKeyError, "EVP_PKEY_fromdata");
+    }
+
+    OSSL_PARAM_free(params);
+    EVP_PKEY_CTX_free(ctx);
+    RB_GC_GUARD(arg.converted);
+
+    return ossl_pkey_wrap(pkey);
+}
+
+#endif
+
 /*
  * call-seq:
  *    OpenSSL::PKey.generate_parameters(algo_name [, options]) -> pkey
@@ -1946,6 +2165,9 @@ Init_ossl_pkey(void)
     rb_define_module_function(mPKey, "read", ossl_pkey_new_from_data, -1);
     rb_define_module_function(mPKey, "generate_parameters", ossl_pkey_s_generate_parameters, -1);
     rb_define_module_function(mPKey, "generate_key", ossl_pkey_s_generate_key, -1);
+#if OSSL_OPENSSL_PREREQ(3, 0, 0)
+    rb_define_module_function(mPKey, "from_data", ossl_pkey_s_from_data, -1);
+#endif
     rb_define_module_function(mPKey, "new_raw_private_key", ossl_pkey_new_raw_private_key, 2);
     rb_define_module_function(mPKey, "new_raw_public_key", ossl_pkey_new_raw_public_key, 2);
 
