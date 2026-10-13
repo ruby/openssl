@@ -52,6 +52,10 @@ module OpenSSL
     class Digest < Digest; end # :nodoc:
     deprecate_constant :Digest
 
+    def inspect
+      "#<#{self.class}: #{name} #{hexdigest rescue $!.inspect}>"
+    end
+
   end # Digest
 
   # Returns a Digest subclass by _name_
