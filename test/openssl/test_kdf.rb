@@ -56,6 +56,27 @@ class OpenSSL::TestKDF < OpenSSL::TestCase
     assert_equal(value1, value2)
   end
 
+  def test_pbkdf2_hmac_pkcs5
+    # RFC 6070 c=1 parameters are below the SP 800-132 lower bounds
+    p = "password"
+    s = "salt"
+    c = 1
+    dk_len = 20
+    expected = B(%w{ 0c 60 c8 0f 96 1f 0e 71 f3 a9 b5 24 af 60 12 06 2f e0 37 a6 })
+
+    # pkcs5: 0 enforces the lower bound checks
+    if openssl?(3, 0, 0)
+      assert_raise(OpenSSL::KDF::KDFError) {
+        OpenSSL::KDF.pbkdf2_hmac(p, salt: s, iterations: c, length: dk_len, hash: "sha1", pkcs5: 0)
+      }
+    end
+
+    # pkcs5: 1 bypasses the lower bound checks, which is not FIPS approved
+    omit_on_fips
+    value = OpenSSL::KDF.pbkdf2_hmac(p, salt: s, iterations: c, length: dk_len, hash: "sha1", pkcs5: 1)
+    assert_equal(expected, value)
+  end
+
   def test_scrypt_rfc7914_first
     pend "scrypt is not implemented" unless OpenSSL::KDF.respond_to?(:scrypt) # OpenSSL >= 1.1.0
     # scrypt is not available in FIPS.
