@@ -369,13 +369,20 @@ module OpenSSL
       # call-seq:
       #    ssl.sysclose => nil
       #
-      # Sends "close notify" to the peer and tries to shut down the SSL
+      # Tries to send "close notify" to the peer and shut down the SSL/TLS
       # connection gracefully.
+      #
+      # If the underlying socket is not writable, the alert may not be sent,
+      # because #sysclose cannot block. See #ssl_shutdown if you need strict
+      # guarantees.
       #
       # If sync_close is set to +true+, the underlying IO is also closed.
       def sysclose
         return if closed?
-        stop
+        ssl_shutdown
+        nil
+      rescue SystemCallError, OpenSSL::SSL::SSLError
+      ensure
         io.close if sync_close
       end
 
@@ -598,8 +605,14 @@ module OpenSSL
       # Therefore, on TLS 1.2, this method will cause the connection to be
       # completely shut down. On TLS 1.3, the connection will remain open for
       # reading only.
+      #
+      # If the underlying socket is not writable, the alert may not be sent,
+      # because #close_write cannot block. See #ssl_shutdown if you need strict
+      # guarantees.
       def close_write
-        stop
+        ssl_shutdown
+        nil
+      rescue SystemCallError, OpenSSL::SSL::SSLError
       end
 
       private
