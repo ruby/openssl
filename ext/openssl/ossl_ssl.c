@@ -1120,7 +1120,11 @@ ossl_sslctx_set_ciphersuites(VALUE self, VALUE v)
  * determine the set of shared signature algorithms. OpenSSL will pick the most
  * appropriate one from it.
  *
- * See also #client_sigalgs= for the client authentication equivalent.
+ * See also the man page SSL_CTX_set1_sigalgs_list(3), and #client_sigalgs= for
+ * the client authentication equivalent.
+ *
+ * === Example
+ *   ctx.sigalgs = "ECDSA+SHA256:RSA+SHA256"
  */
 static VALUE
 ossl_sslctx_set_sigalgs(VALUE self, VALUE v)
@@ -1148,7 +1152,8 @@ ossl_sslctx_set_sigalgs(VALUE self, VALUE v)
  * For a TLS server, the list is sent to the client as part of the
  * CertificateRequest message.
  *
- * See also #sigalgs= for the server authentication equivalent.
+ * See also the man page SSL_CTX_set1_client_sigalgs_list(3), and #sigalgs= for
+ * the server authentication equivalent.
  */
 static VALUE
 ossl_sslctx_set_client_sigalgs(VALUE self, VALUE v)
