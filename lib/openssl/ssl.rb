@@ -82,6 +82,22 @@ module OpenSSL
       # callback must return an SSLContext for the server name or nil.
       attr_accessor :servername_cb
 
+      # A callback invoked when the server receives a ClientHello message,
+      # before the protocol version and session resumption are decided.
+      #
+      # The callback is invoked with an SSLSocket and an
+      # OpenSSL::SSL::ClientHello. The ClientHello is only valid while the
+      # callback is running. The callback must return an SSLContext to use
+      # for the connection or nil to keep using the current one.
+      #
+      # #verify_mode, #verify_depth, #options, #min_version= and
+      # #max_version= of the returned SSLContext take effect. To prevent a
+      # session established with one SSLContext from being resumed with
+      # another, set a different #session_id_context to each SSLContext.
+      #
+      # This is not supported by LibreSSL.
+      attr_accessor :client_hello_cb
+
       # call-seq:
       #    SSLContext.new           -> ctx
       #    SSLContext.new(:TLSv1)   -> ctx

@@ -47,7 +47,8 @@ static ID id_i_cert_store, id_i_ca_file, id_i_ca_path, id_i_verify_mode,
           id_i_session_id_context, id_i_session_get_cb, id_i_session_new_cb,
           id_i_session_remove_cb, id_i_npn_select_cb, id_i_npn_protocols,
           id_i_alpn_select_cb, id_i_alpn_protocols, id_i_servername_cb,
-          id_i_verify_hostname, id_i_keylog_cb, id_i_tmp_dh_callback;
+          id_i_client_hello_cb, id_i_verify_hostname, id_i_keylog_cb,
+          id_i_tmp_dh_callback;
 static ID id_i_io, id_i_context, id_i_hostname, id_i_sync_close;
 
 static int ossl_ssl_ex_ptr_idx;
@@ -441,16 +442,27 @@ ossl_sslctx_add_extra_chain_cert_i(RB_BLOCK_CALL_FUNC_ARGLIST(i, arg))
 
 static VALUE ossl_sslctx_setup(VALUE self);
 
+struct ossl_call_servername_cb_args {
+    SSL *ssl;
+    SSL_CTX *ctx;
+};
+
 static VALUE
 ossl_call_servername_cb(VALUE arg)
 {
-    SSL *ssl = (void *)arg;
+    struct ossl_call_servername_cb_args *args = (void *)arg;
+    SSL *ssl = args->ssl;
     const char *servername = SSL_get_servername(ssl, TLSEXT_NAMETYPE_host_name);
     if (!servername)
         return Qnil;
 
     VALUE ssl_obj = (VALUE)SSL_get_ex_data(ssl, ossl_ssl_ex_ptr_idx);
-    VALUE sslctx_obj = rb_attr_get(ssl_obj, id_i_context);
+    /*
+     * OpenSSL may invoke the callback of the original SSL_CTX after
+     * SSL_set_SSL_CTX(), so use the SSLContext that registered it
+     */
+    VALUE sslctx_obj = (VALUE)SSL_CTX_get_ex_data(args->ctx,
+                                                  ossl_sslctx_ex_ptr_idx);
     VALUE cb = rb_attr_get(sslctx_obj, id_i_servername_cb);
     VALUE ary = rb_assoc_new(ssl_obj, rb_str_new_cstr(servername));
 
@@ -473,9 +485,10 @@ ossl_call_servername_cb(VALUE arg)
 static int
 ssl_servername_cb(SSL *ssl, int *ad, void *arg)
 {
+    struct ossl_call_servername_cb_args args = { ssl, arg };
     int state;
 
-    rb_protect(ossl_call_servername_cb, (VALUE)ssl, &state);
+    rb_protect(ossl_call_servername_cb, (VALUE)&args, &state);
     if (state) {
         VALUE ssl_obj = (VALUE)SSL_get_ex_data(ssl, ossl_ssl_ex_ptr_idx);
         rb_ivar_set(ssl_obj, ID_callback_state, INT2NUM(state));
@@ -484,6 +497,115 @@ ssl_servername_cb(SSL *ssl, int *ad, void *arg)
 
     return SSL_TLSEXT_ERR_OK;
 }
+
+#ifdef HAVE_SSL_CTX_SET_CLIENT_HELLO_CB
+static VALUE cClientHello;
+
+/*
+ * The SSL object is borrowed from the SSLSocket and is only valid while
+ * the client_hello_cb is running.
+ */
+static const rb_data_type_t ossl_client_hello_type = {
+    .wrap_struct_name = "OpenSSL/SSL/ClientHello",
+    .flags = RUBY_TYPED_FREE_IMMEDIATELY | RUBY_TYPED_WB_PROTECTED,
+};
+
+static inline SSL *
+GetClientHello(VALUE obj)
+{
+    SSL *ssl;
+
+    TypedData_Get_Struct(obj, SSL, &ossl_client_hello_type, ssl);
+    if (!ssl)
+        ossl_raise(rb_eRuntimeError, "ClientHello is out of scope!");
+    return ssl;
+}
+
+/*
+ * call-seq:
+ *    client_hello.get_extension(type) -> String or nil
+ *
+ * Returns the raw data of the extension specified by the extension type
+ * number _type_, or +nil+ if the ClientHello doesn't contain it.
+ *
+ * See SSL_client_hello_get0_ext(3).
+ */
+static VALUE
+ossl_client_hello_get_extension(VALUE self, VALUE type)
+{
+    SSL *ssl;
+    const unsigned char *out;
+    size_t outlen;
+
+    ssl = GetClientHello(self);
+    if (!SSL_client_hello_get0_ext(ssl, NUM2UINT(type), &out, &outlen))
+        return Qnil;
+    return rb_str_new((const char *)out, (long)outlen);
+}
+
+struct ossl_call_client_hello_cb_args {
+    SSL *ssl;
+    VALUE client_hello;
+};
+
+static VALUE
+ossl_call_client_hello_cb(VALUE arg)
+{
+    struct ossl_call_client_hello_cb_args *args = (void *)arg;
+    SSL *ssl = args->ssl;
+    VALUE ssl_obj = (VALUE)SSL_get_ex_data(ssl, ossl_ssl_ex_ptr_idx);
+    VALUE sslctx_obj = rb_attr_get(ssl_obj, id_i_context);
+    VALUE cb = rb_attr_get(sslctx_obj, id_i_client_hello_cb);
+
+    args->client_hello =
+        TypedData_Wrap_Struct(cClientHello, &ossl_client_hello_type, ssl);
+    VALUE ret_obj = rb_funcall(cb, id_call, 2, ssl_obj, args->client_hello);
+    if (rb_obj_is_kind_of(ret_obj, cSSLContext)) {
+        SSL_CTX *ctx2;
+        ossl_sslctx_setup(ret_obj);
+        GetSSLCTX(ret_obj, ctx2);
+        if (!SSL_set_SSL_CTX(ssl, ctx2))
+            ossl_raise(eSSLError, "SSL_set_SSL_CTX");
+        /* SSL_set_SSL_CTX() doesn't update these settings */
+        SSL_set_verify(ssl,
+                       SSL_CTX_get_verify_mode(ctx2),
+                       SSL_CTX_get_verify_callback(ctx2));
+        SSL_set_verify_depth(ssl, SSL_CTX_get_verify_depth(ctx2));
+        SSL_clear_options(ssl,
+                          SSL_get_options(ssl) & ~SSL_CTX_get_options(ctx2));
+        SSL_set_options(ssl, SSL_CTX_get_options(ctx2));
+        if (!SSL_set_min_proto_version(ssl, SSL_CTX_get_min_proto_version(ctx2)))
+            ossl_raise(eSSLError, "SSL_set_min_proto_version");
+        if (!SSL_set_max_proto_version(ssl, SSL_CTX_get_max_proto_version(ctx2)))
+            ossl_raise(eSSLError, "SSL_set_max_proto_version");
+        rb_ivar_set(ssl_obj, id_i_context, ret_obj);
+    } else if (!NIL_P(ret_obj)) {
+        ossl_raise(rb_eArgError, "client_hello_cb must return an "
+                   "OpenSSL::SSL::SSLContext object or nil");
+    }
+
+    return Qnil;
+}
+
+static int
+ssl_client_hello_cb(SSL *ssl, int *al, void *arg)
+{
+    struct ossl_call_client_hello_cb_args args = { ssl, Qnil };
+    int state;
+
+    rb_protect(ossl_call_client_hello_cb, (VALUE)&args, &state);
+    if (!NIL_P(args.client_hello))
+        RTYPEDDATA_DATA(args.client_hello) = NULL;
+    if (state) {
+        VALUE ssl_obj = (VALUE)SSL_get_ex_data(ssl, ossl_ssl_ex_ptr_idx);
+        rb_ivar_set(ssl_obj, ID_callback_state, INT2NUM(state));
+        *al = SSL_AD_INTERNAL_ERROR;
+        return SSL_CLIENT_HELLO_ERROR;
+    }
+
+    return SSL_CLIENT_HELLO_SUCCESS;
+}
+#endif
 
 static void
 ssl_renegotiation_cb(const SSL *ssl)
@@ -841,6 +963,16 @@ ossl_sslctx_setup(VALUE self)
         OSSL_Debug("SSL ALPN select callback added");
     }
 
+    if (RTEST(rb_attr_get(self, id_i_client_hello_cb))) {
+#ifdef HAVE_SSL_CTX_SET_CLIENT_HELLO_CB
+        SSL_CTX_set_client_hello_cb(ctx, ssl_client_hello_cb, NULL);
+        OSSL_Debug("SSL client hello callback added");
+#else
+        rb_raise(rb_eNotImpError, "client_hello_cb is not supported "
+                 "by the linked SSL library");
+#endif
+    }
+
     rb_obj_freeze(self);
 
     val = rb_attr_get(self, id_i_session_id_context);
@@ -868,6 +1000,7 @@ ossl_sslctx_setup(VALUE self)
     val = rb_attr_get(self, id_i_servername_cb);
     if (!NIL_P(val)) {
         SSL_CTX_set_tlsext_servername_callback(ctx, ssl_servername_cb);
+        SSL_CTX_set_tlsext_servername_arg(ctx, ctx);
         OSSL_Debug("SSL TLSEXT servername callback added");
     }
 
@@ -2946,6 +3079,19 @@ Init_ossl_ssl(void)
     rb_define_method(cSSLContext, "options",     ossl_sslctx_get_options, 0);
     rb_define_method(cSSLContext, "options=",     ossl_sslctx_set_options, 1);
 
+#ifdef HAVE_SSL_CTX_SET_CLIENT_HELLO_CB
+    /*
+     * Document-class: OpenSSL::SSL::ClientHello
+     *
+     * A ClientHello message received by the server. It is passed to
+     * SSLContext#client_hello_cb and is only valid while the callback is
+     * running.
+     */
+    cClientHello = rb_define_class_under(mSSL, "ClientHello", rb_cObject);
+    rb_undef_alloc_func(cClientHello);
+    rb_define_method(cClientHello, "get_extension", ossl_client_hello_get_extension, 1);
+#endif
+
     /*
      * Document-class: OpenSSL::SSL::SSLSocket
      */
@@ -3167,6 +3313,7 @@ Init_ossl_ssl(void)
     DefIVarID(alpn_protocols);
     DefIVarID(alpn_select_cb);
     DefIVarID(servername_cb);
+    DefIVarID(client_hello_cb);
     DefIVarID(verify_hostname);
     DefIVarID(keylog_cb);
     DefIVarID(tmp_dh_callback);
