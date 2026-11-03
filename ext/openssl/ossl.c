@@ -1017,6 +1017,154 @@ ossl_crypto_fixed_length_secure_compare(VALUE dummy, VALUE str1, VALUE str2)
  * If the server certificate is invalid or <tt>context.ca_file</tt> is not set
  * when verifying peers an OpenSSL::SSL::SSLError will be raised.
  *
+ * == Post-Quantum Cryptography
+ *
+ * Post-quantum cryptography (PQC) secures electronic information against
+ * attacks by quantum computers. PQC is available in \OpenSSL >= 3.5.0.
+ *
+ * Two aspects of a TLS connection can use PQC algorithms:
+ *
+ * * Key exchange - ML-KEM specifying via OpenSSL::SSL::SSLContext#groups= and
+ *   getting via OpenSSL::SSL::SSLSocket#group.
+ * * Signatures - ML-DSA specifying via
+ *   OpenSSL::SSL::SSLContext#sigalgs= and getting via
+ *   OpenSSL::SSL::SSLSocket#sigalg and OpenSSL::SSL::SSLSocket#peer_sigalg.
+ *
+ * === PQC Server and Client
+ *
+ * A server using an ML-KEM key exchange and ML-DSA signature (X25519MLKEM768
+ * is a hybrid algorithm (X25519 + ML-KEM-768), a variant of ML-KEM, ML-DSA-65
+ * is a variant of ML-DSA):
+ *
+ *   require 'socket'
+ *
+ *   # ML-DSA-65 server certificate and key
+ *   cert = OpenSSL::X509::Certificate.new(File.read('mldsa65_server_cert.pem'))
+ *   key = OpenSSL::PKey.read(File.read('mldsa65_server_key.pem'))
+ *
+ *   context = OpenSSL::SSL::SSLContext.new
+ *   # Set the allowed TLS group with X25519MLKEM768
+ *   context.groups = 'X25519MLKEM768'
+ *   context.add_certificate(cert, key)
+ *   # Set the allowed signature algorithms with ML-DSA-65
+ *   context.sigalgs = 'mldsa65'
+ *
+ *   tcp_server = TCPServer.new('localhost', 5000)
+ *
+ *   loop do
+ *     tcp_connection = tcp_server.accept
+ *     ssl_connection = OpenSSL::SSL::SSLSocket.new(tcp_connection, context)
+ *     ssl_connection.accept
+ *
+ *     puts ssl_connection.group       # => "X25519MLKEM768"
+ *     puts ssl_connection.sigalg      # => "mldsa65"
+ *     puts ssl_connection.peer_sigalg # => nil
+ *
+ *     ssl_connection.close
+ *     tcp_connection.close
+ *   end
+ *
+ * A client connecting to the server:
+ *
+ *   require 'socket'
+ *
+ *   context = OpenSSL::SSL::SSLContext.new
+ *   context.ca_file = 'mldsa65_ca_cert.pem'
+ *   context.verify_mode = OpenSSL::SSL::VERIFY_PEER
+ *
+ *   tcp_socket = TCPSocket.new('localhost', 5000)
+ *   ssl_client = OpenSSL::SSL::SSLSocket.new(tcp_socket, context)
+ *   ssl_client.connect
+ *
+ *   puts ssl_client.group       # => "X25519MLKEM768"
+ *   puts ssl_client.sigalg      # => nil
+ *   puts ssl_client.peer_sigalg # => "mldsa65"
+ *
+ *   ssl_client.close
+ *   tcp_socket.close
+ *
+ * === Multiple Certificates (PQC and Classical) Server and Clients
+ *
+ * A server can be configured with both ML-DSA (PQC) and RSA (classical)
+ * certificates, with both ML-KEM (PQC) and X25519 (classical) key exchange
+ * groups, so that it can serve both PQC-capable and classical clients.
+ * \OpenSSL automatically selects the appropriate certificate based on the
+ * client's capabilities.
+ *
+ *   require 'socket'
+ *
+ *   # ML-DSA-65 server certificate and key
+ *   mldsa_cert = OpenSSL::X509::Certificate.new(File.read('mldsa65_server_cert.pem'))
+ *   mldsa_key = OpenSSL::PKey.read(File.read('mldsa65_server_key.pem'))
+ *   # RSA server certificate and key
+ *   rsa_cert = OpenSSL::X509::Certificate.new(File.read('rsa_server_cert.pem'))
+ *   rsa_key = OpenSSL::PKey::RSA.new(File.read('rsa_server_key.pem'))
+ *
+ *   context = OpenSSL::SSL::SSLContext.new
+ *   # Set the allowed TLS group with X25519MLKEM768 and X25519
+ *   context.groups = 'X25519MLKEM768:X25519'
+ *   context.add_certificate(mldsa_cert, mldsa_key)
+ *   context.add_certificate(rsa_cert, rsa_key)
+ *   # Set the allowed signature algorithms as ML-DSA-65 and RSA
+ *   context.sigalgs = 'mldsa65:rsa_pss_rsae_sha256'
+ *
+ *   tcp_server = TCPServer.new('localhost', 5000)
+ *
+ *   loop do
+ *     tcp_connection = tcp_server.accept
+ *     ssl_connection = OpenSSL::SSL::SSLSocket.new(tcp_connection, context)
+ *     ssl_connection.accept
+ *
+ *     puts ssl_connection.group
+ *     puts ssl_connection.sigalg
+ *     puts ssl_connection.peer_sigalg
+ *
+ *     ssl_connection.close
+ *     tcp_connection.close
+ *   end
+ *
+ * A client connecting with ML-DSA signature to the server:
+ *
+ *   require 'socket'
+ *
+ *   context = OpenSSL::SSL::SSLContext.new
+ *   context.groups = 'X25519MLKEM768'
+ *   context.sigalgs = 'mldsa65'
+ *   context.ca_file = 'mldsa65_ca_cert.pem'
+ *   context.verify_mode = OpenSSL::SSL::VERIFY_PEER
+ *
+ *   tcp_socket = TCPSocket.new('localhost', 5000)
+ *   ssl_client = OpenSSL::SSL::SSLSocket.new(tcp_socket, context)
+ *   ssl_client.connect
+ *
+ *   puts ssl_client.group       # => "X25519MLKEM768"
+ *   puts ssl_client.sigalg      # => nil
+ *   puts ssl_client.peer_sigalg # => "mldsa65"
+ *
+ *   ssl_client.close
+ *   tcp_socket.close
+ *
+ * A client connecting with RSA signature to the server:
+ *
+ *   require 'socket'
+ *
+ *   context = OpenSSL::SSL::SSLContext.new
+ *   context.groups = 'X25519'
+ *   context.sigalgs = 'rsa_pss_rsae_sha256'
+ *   context.ca_file = 'rsa_ca_cert.pem'
+ *   context.verify_mode = OpenSSL::SSL::VERIFY_PEER
+ *
+ *   tcp_socket = TCPSocket.new('localhost', 5000)
+ *   ssl_client = OpenSSL::SSL::SSLSocket.new(tcp_socket, context)
+ *   ssl_client.connect
+ *
+ *   puts ssl_client.group       # => "X25519"
+ *   puts ssl_client.sigalg      # => nil
+ *   puts ssl_client.peer_sigalg # => "rsa_pss_rsae_sha256"
+ *
+ *   ssl_client.close
+ *   tcp_socket.close
+ *
  */
 void
 Init_openssl(void)
