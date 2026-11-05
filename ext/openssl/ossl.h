@@ -107,6 +107,7 @@ typedef long rb_len_t;
 # define PRIdLEN "ld"
 # define NUM2LEN NUM2LONG
 # define LEN2NUM LONG2NUM
+# define FIX2LEN FIX2LONG
 static inline long
 rb_len2long(rb_len_t n)
 {
