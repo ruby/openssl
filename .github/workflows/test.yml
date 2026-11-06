@@ -167,7 +167,12 @@ jobs:
             git clone https://github.com/aws/aws-lc.git .
             AWS_LC_RELEASE=$(git tag --sort=-creatordate --list "v*"  | head -1)
             git checkout $AWS_LC_RELEASE
-            cmake -DCMAKE_INSTALL_PREFIX=$HOME/openssl -DCMAKE_INSTALL_LIBDIR=lib
+            cmake \
+              -DCMAKE_INSTALL_PREFIX=$HOME/openssl \
+              -DCMAKE_INSTALL_LIBDIR=lib \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DBUILD_TESTING=OFF \
+              -DBUILD_SHARED_LIBS=1
             make -j4 && make install
             ;;
           *)
