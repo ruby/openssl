@@ -98,7 +98,7 @@ ossl_time_split(VALUE time, time_t *sec, int *days)
     VALUE num = rb_Integer(time);
 
     if (FIXNUM_P(num)) {
-        time_t t = FIX2LONG(num);
+        rb_len_t t = FIX2LEN(num);
         *sec = t % 86400;
         *days = rb_long2int(t / 86400);
     }
