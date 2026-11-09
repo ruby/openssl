@@ -145,6 +145,71 @@ ossl_bin2hex(const unsigned char *in, char *out, size_t inlen)
     }
 }
 
+#ifdef HAVE_RB_EXT_RACTOR_SAFE
+static rb_ractor_local_key_t cb_state_key;
+
+int
+ossl_cb_state_get(void)
+{
+    int *cell = rb_ractor_local_storage_ptr(cb_state_key);
+    return cell ? *cell : 0;
+}
+
+static VALUE
+ensure_cell(VALUE unused)
+{
+    int *cell = rb_ractor_local_storage_ptr(cb_state_key);
+    if (!cell) {
+        cell = ZALLOC(int);
+        rb_ractor_local_storage_ptr_set(cb_state_key, cell);
+    }
+    return (VALUE)cell;
+}
+
+void
+ossl_cb_state_set(int state)
+{
+    int *cell = (int *)rb_protect(ensure_cell, Qnil, NULL);
+    if (cell == (void *)Qnil) {
+        /* As a last resort */
+        rb_set_errinfo(Qnil);
+        return;
+    }
+    RUBY_ASSERT(!state || !*cell);
+    *cell = state;
+}
+#else
+static int cb_state;
+
+int
+ossl_cb_state_get(void)
+{
+    return cb_state;
+}
+
+void
+ossl_cb_state_set(int state)
+{
+    RUBY_ASSERT(!state || !cb_state);
+    cb_state = state;
+}
+#endif
+
+void
+ossl_cb_state_begin(void)
+{
+    RUBY_ASSERT(!ossl_cb_state_get());
+}
+
+int
+ossl_cb_state_end(void)
+{
+    int state = ossl_cb_state_get();
+    if (state)
+        ossl_cb_state_set(0);
+    return state;
+}
+
 /*
  * our default PEM callback
  */
@@ -1023,6 +1088,8 @@ Init_openssl(void)
 {
 #ifdef HAVE_RB_EXT_RACTOR_SAFE
     rb_ext_ractor_safe(true);
+    cb_state_key =
+        rb_ractor_local_storage_ptr_newkey(RB_RACTOR_LOCAL_STORAGE_TYPE_FREE);
 #endif
 
 #undef rb_intern

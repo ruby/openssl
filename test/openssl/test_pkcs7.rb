@@ -62,6 +62,13 @@ class OpenSSL::TestPKCS7 < OpenSSL::TestCase
     assert_in_delta(Time.now, signers[0].signed_time, 10) unless aws_lc?
 
     assert_false(p7.verify([@ca_cert], OpenSSL::X509::Store.new))
+
+    # Exceptions raised in verify_callback are re-raised
+    store = OpenSSL::X509::Store.new
+    store.verify_callback = proc { raise "verify_callback" }
+    assert_raise_with_message(RuntimeError, "verify_callback") {
+      p7.verify([], store)
+    }
   end
 
   def test_signed_flags
