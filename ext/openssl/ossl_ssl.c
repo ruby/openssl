@@ -36,8 +36,7 @@ VALUE cSSLSocket;
 static VALUE eSSLErrorWaitReadable;
 static VALUE eSSLErrorWaitWritable;
 
-static ID id_call, ID_callback_state, id_npn_protocols_encoded, id_each,
-          id_original_context;
+static ID id_call, id_npn_protocols_encoded, id_each, id_original_context;
 static VALUE sym_wait_readable, sym_wait_writable;
 
 static ID id_i_cert_store, id_i_ca_file, id_i_ca_path, id_i_verify_mode,
@@ -182,7 +181,7 @@ ossl_tmp_dh_callback(SSL *ssl, int is_export, int keylength)
     struct tmp_dh_callback_args args = {rb_ssl, is_export, keylength};
     VALUE ret = rb_protect(ossl_call_tmp_dh_callback, (VALUE)&args, &state);
     if (state) {
-        rb_ivar_set(rb_ssl, ID_callback_state, INT2NUM(state));
+        ossl_cb_state_set(state);
         return NULL;
     }
     return (DH *)ret;
@@ -215,7 +214,7 @@ ossl_ssl_verify_callback(int preverify_ok, X509_STORE_CTX *ctx)
 {
     VALUE cb, ssl_obj, sslctx_obj, verify_hostname, ret;
     SSL *ssl;
-    int state, ok;
+    int state;
 
     ssl = X509_STORE_CTX_get_ex_data(ctx, SSL_get_ex_data_X509_STORE_CTX_idx());
     ssl_obj = (VALUE)SSL_get_ex_data(ssl, ossl_ssl_ex_ptr_idx);
@@ -227,7 +226,7 @@ ossl_ssl_verify_callback(int preverify_ok, X509_STORE_CTX *ctx)
         !X509_STORE_CTX_get_error_depth(ctx)) {
         ret = rb_protect(call_verify_certificate_identity, (VALUE)ctx, &state);
         if (state) {
-            rb_ivar_set(ssl_obj, ID_callback_state, INT2NUM(state));
+            ossl_cb_state_set(state);
             return 0;
         }
         if (ret != Qtrue) {
@@ -236,14 +235,7 @@ ossl_ssl_verify_callback(int preverify_ok, X509_STORE_CTX *ctx)
         }
     }
 
-    ossl_cb_state_begin();
-    ok = ossl_verify_cb_call(cb, preverify_ok, ctx);
-    state = ossl_cb_state_end();
-    if (state) {
-        rb_ivar_set(ssl_obj, ID_callback_state, INT2NUM(state));
-        return 0;
-    }
-    return ok;
+    return ossl_verify_cb_call(cb, preverify_ok, ctx);
 }
 
 static VALUE
@@ -275,7 +267,7 @@ ossl_sslctx_session_get_cb(SSL *ssl, const unsigned char *buf, int len, int *cop
 
     ret_obj = rb_protect(ossl_call_session_get_cb, ary, &state);
     if (state) {
-        rb_ivar_set(ssl_obj, ID_callback_state, INT2NUM(state));
+        ossl_cb_state_set(state);
         return NULL;
     }
     if (!rb_obj_is_instance_of(ret_obj, cSSLSession))
@@ -321,7 +313,7 @@ ossl_sslctx_session_new_cb(SSL *ssl, SSL_SESSION *sess)
 
     rb_protect(ossl_call_session_new_cb, ary, &state);
     if (state) {
-        rb_ivar_set(ssl_obj, ID_callback_state, INT2NUM(state));
+        ossl_cb_state_set(state);
     }
 
     /*
@@ -377,7 +369,7 @@ ossl_sslctx_keylog_cb(const SSL *ssl, const char *line)
 
     rb_protect(ossl_call_keylog_cb, (VALUE)&args, &state);
     if (state) {
-        rb_ivar_set(ssl_obj, ID_callback_state, INT2NUM(state));
+        ossl_cb_state_set(state);
     }
 }
 #endif
@@ -484,8 +476,7 @@ ssl_servername_cb(SSL *ssl, int *ad, void *arg)
 
     rb_protect(ossl_call_servername_cb, (VALUE)ssl, &state);
     if (state) {
-        VALUE ssl_obj = (VALUE)SSL_get_ex_data(ssl, ossl_ssl_ex_ptr_idx);
-        rb_ivar_set(ssl_obj, ID_callback_state, INT2NUM(state));
+        ossl_cb_state_set(state);
         return SSL_TLSEXT_ERR_ALERT_FATAL;
     }
 
@@ -566,18 +557,16 @@ ssl_npn_select_cb_common(SSL *ssl, VALUE cb, const unsigned char **out,
                          unsigned int inlen)
 {
     VALUE selected;
-    int status;
+    int state;
     struct npn_select_cb_common_args args;
 
     args.cb = cb;
     args.in = in;
     args.inlen = inlen;
 
-    selected = rb_protect(npn_select_cb_common_i, (VALUE)&args, &status);
-    if (status) {
-        VALUE ssl_obj = (VALUE)SSL_get_ex_data(ssl, ossl_ssl_ex_ptr_idx);
-
-        rb_ivar_set(ssl_obj, ID_callback_state, INT2NUM(status));
+    selected = rb_protect(npn_select_cb_common_i, (VALUE)&args, &state);
+    if (state) {
+        ossl_cb_state_set(state);
         return SSL_TLSEXT_ERR_ALERT_FATAL;
     }
 
@@ -1827,9 +1816,22 @@ ossl_ssl_setup(VALUE self)
     return Qtrue;
 }
 
-static int
-errno_mapped(void)
+static void
+ssl_call_begin(void)
 {
+    ossl_cb_state_begin();
+}
+
+static int
+ssl_call_end(void)
+{
+    int state = ossl_cb_state_end();
+    if (state) {
+        /* must cleanup OpenSSL error stack before re-raising */
+        ossl_clear_error();
+        rb_jump_tag(state);
+    }
+
 #ifdef _WIN32
     return rb_w32_map_errno(WSAGetLastError());
 #else
@@ -1841,24 +1843,15 @@ static VALUE
 ossl_start_ssl(VALUE self, int (*func)(SSL *), const char *funcname)
 {
     SSL *ssl;
-    VALUE cb_state;
-
-    rb_ivar_set(self, ID_callback_state, Qnil);
 
     GetSSL(self, ssl);
 
 #ifdef __APPLE__
   retry:;
 #endif
+    ssl_call_begin();
     int ret = func(ssl);
-    int saved_errno = errno_mapped();
-
-    cb_state = rb_attr_get(self, ID_callback_state);
-    if (!NIL_P(cb_state)) {
-        /* must cleanup OpenSSL error stack before re-raising */
-        ossl_clear_error();
-        rb_jump_tag(NUM2INT(cb_state));
-    }
+    int saved_errno = ssl_call_end();
 
     int code = SSL_get_error(ssl, ret);
     switch (code) {
@@ -1952,7 +1945,6 @@ ossl_ssl_read(VALUE self, VALUE len, VALUE str)
 {
     SSL *ssl;
     int ilen;
-    VALUE cb_state;
 
     GetSSL(self, ssl);
     if (!ssl_started(ssl))
@@ -1972,17 +1964,11 @@ ossl_ssl_read(VALUE self, VALUE len, VALUE str)
         return str;
     }
 
+    ssl_call_begin();
     rb_str_locktmp(str);
     int nread = SSL_read(ssl, RSTRING_PTR(str), ilen);
     rb_str_unlocktmp(str);
-    int saved_errno = errno_mapped();
-
-    cb_state = rb_attr_get(self, ID_callback_state);
-    if (!NIL_P(cb_state)) {
-        rb_ivar_set(self, ID_callback_state, Qnil);
-        ossl_clear_error();
-        rb_jump_tag(NUM2INT(cb_state));
-    }
+    int saved_errno = ssl_call_end();
 
     switch (SSL_get_error(ssl, nread)) {
       case SSL_ERROR_NONE:
@@ -2023,7 +2009,6 @@ static VALUE
 ossl_ssl_write(VALUE self, VALUE str)
 {
     SSL *ssl;
-    VALUE cb_state;
 
     GetSSL(self, ssl);
     if (!ssl_started(ssl))
@@ -2038,6 +2023,7 @@ ossl_ssl_write(VALUE self, VALUE str)
 #ifdef __APPLE__
   retry:;
 #endif
+    ssl_call_begin();
     int frozen = RB_OBJ_FROZEN(str);
     if (!frozen) {
         rb_str_locktmp(str);
@@ -2046,14 +2032,7 @@ ossl_ssl_write(VALUE self, VALUE str)
     if (!frozen) {
         rb_str_unlocktmp(str);
     }
-    int saved_errno = errno_mapped();
-
-    cb_state = rb_attr_get(self, ID_callback_state);
-    if (!NIL_P(cb_state)) {
-        rb_ivar_set(self, ID_callback_state, Qnil);
-        ossl_clear_error();
-        rb_jump_tag(NUM2INT(cb_state));
-    }
+    int saved_errno = ssl_call_end();
 
     switch (SSL_get_error(ssl, nwritten)) {
       case SSL_ERROR_NONE:
@@ -2615,9 +2594,6 @@ Init_ossl_ssl(void)
 #endif
 
 #ifndef OPENSSL_NO_SOCK
-    id_call = rb_intern_const("call");
-    ID_callback_state = rb_intern_const("callback_state");
-
     ossl_ssl_ex_ptr_idx = SSL_get_ex_new_index(0, (void *)"ossl_ssl_ex_ptr_idx", 0, 0, 0);
     if (ossl_ssl_ex_ptr_idx < 0)
         ossl_raise(rb_eRuntimeError, "SSL_get_ex_new_index");
@@ -3198,6 +3174,7 @@ Init_ossl_ssl(void)
     sym_wait_readable = ID2SYM(rb_intern_const("wait_readable"));
     sym_wait_writable = ID2SYM(rb_intern_const("wait_writable"));
 
+    id_call = rb_intern_const("call");
     id_npn_protocols_encoded = rb_intern_const("npn_protocols_encoded");
     id_each = rb_intern_const("each");
     id_original_context = rb_intern_const("original_context");
