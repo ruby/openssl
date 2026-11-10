@@ -185,9 +185,15 @@ static VALUE ossl_ssl_session_set_time(VALUE self, VALUE time_v)
         time_v = rb_funcall(time_v, rb_intern("to_i"), 0);
     }
 #ifdef HAVE_SSL_SESSION_GET_TIME_EX
-    SSL_SESSION_set_time_ex(ctx, NUM2TIMET(time_v));
+    time_t t = NUM2TIMET(time_v);
+    if (SSL_SESSION_set_time_ex(ctx, t) != t) {
+        ossl_raise(eSSLSession, "SSL_SESSION_set_time_ex");
+    }
 #else
-    SSL_SESSION_set_time(ctx, NUM2LONG(time_v));
+    long t = NUM2LONG(time_v);
+    if (SSL_SESSION_set_time(ctx, t) != t) {
+        ossl_raise(eSSLSession, "SSL_SESSION_set_time");
+    }
 #endif
     return ossl_ssl_session_get_time(self);
 }
@@ -205,7 +211,9 @@ static VALUE ossl_ssl_session_set_timeout(VALUE self, VALUE time_v)
 
     GetSSLSession(self, ctx);
     t = NUM2LONG(time_v);
-    SSL_SESSION_set_timeout(ctx, t);
+    if (SSL_SESSION_set_timeout(ctx, t) != 1) {
+        ossl_raise(eSSLSession, "SSL_SESSION_set_timeout");
+    }
     return ossl_ssl_session_get_timeout(self);
 }
 
@@ -249,7 +257,8 @@ static VALUE ossl_ssl_session_to_der(VALUE self)
 
     str = rb_str_new(0, len);
     p = (unsigned char *)RSTRING_PTR(str);
-    i2d_SSL_SESSION(ctx, &p);
+    if (i2d_SSL_SESSION(ctx, &p) <= 0)
+        ossl_raise(eSSLSession, "i2d_SSL_SESSION");
     ossl_str_adjust(str, p);
     return str;
 }

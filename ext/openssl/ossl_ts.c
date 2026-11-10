@@ -418,7 +418,9 @@ ossl_ts_req_set_cert_requested(VALUE self, VALUE requested)
     TS_REQ *req;
 
     GetTSRequest(self, req);
-    TS_REQ_set_cert_req(req, RTEST(requested));
+    if (!TS_REQ_set_cert_req(req, RTEST(requested))) {
+        ossl_raise(eTimestampError, "TS_REQ_set_cert_req");
+    }
 
     return requested;
 }
@@ -682,6 +684,8 @@ ossl_ts_resp_get_tsa_certificate(VALUE self)
     if (!(p7 = TS_RESP_get_token(resp)))
         return Qnil;
     ts_info = sk_PKCS7_SIGNER_INFO_value(p7->d.sign->signer_info, 0);
+    if (!ts_info)
+        return Qnil;
     cert = PKCS7_cert_from_signer_info(p7, ts_info);
     if (!cert)
         return Qnil;
