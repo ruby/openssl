@@ -398,6 +398,13 @@ ossl_cipher_update(int argc, VALUE *argv, VALUE self)
     }
     out_len = in_len + EVP_MAX_BLOCK_LENGTH;
 
+    /*
+     * In-place EVP_CipherUpdate() is not reliable if the context may be
+     * holding a partial or withheld block.
+     */
+    if (data == str && EVP_CIPHER_CTX_block_size(ctx) != 1)
+        data = rb_str_new_frozen(data);
+
     if (NIL_P(str))
         str = rb_str_buf_new(out_len);
     else {
@@ -412,6 +419,7 @@ ossl_cipher_update(int argc, VALUE *argv, VALUE self)
                                  (unsigned char *)RSTRING_PTR(data), in_len))
         ossl_raise(eCipherError, "EVP_CipherUpdate");
     rb_str_set_len(str, out_len);
+    RB_GC_GUARD(data);
 
     return str;
 }

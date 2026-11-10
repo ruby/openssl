@@ -162,6 +162,29 @@ class OpenSSL::TestCipher < OpenSSL::TestCase
     assert_equal expected, shared + cipher.final
   end
 
+  def test_update_in_place_with_buffered_data
+    data = "0123456789abcdef".b * 8
+    %w[aes-128-ecb aes-128-cbc].each do |algo|
+      [:encrypt, :decrypt].each do |direction|
+        # 3 bytes leave a partial block in the context. 16 bytes leave a whole
+        # block there when decrypting, withheld until #final can unpad it.
+        [3, 16].each do |buffered_len|
+          cipher = OpenSSL::Cipher.new(algo).__send__(direction)
+          cipher.random_key
+          cipher.random_iv
+          buffered = "a" * buffered_len
+          expected = cipher.update(buffered) << cipher.update(data)
+
+          cipher.reset
+          buf = data.dup
+          actual = cipher.update(buffered) << cipher.update(buf, buf)
+          assert_equal expected, actual,
+                       "#{algo} #{direction} buffered_len=#{buffered_len}"
+        end
+      end
+    end
+  end
+
   def test_ciphers
     ciphers = OpenSSL::Cipher.ciphers
     assert_kind_of Array, ciphers
