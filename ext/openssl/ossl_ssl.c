@@ -1875,6 +1875,12 @@ ssl_call_begin(void)
 static int
 ssl_call_end(void)
 {
+#ifdef _WIN32
+    int saved_errno = rb_w32_map_errno(WSAGetLastError());
+#else
+    int saved_errno = errno;
+#endif
+
     int state = ossl_cb_state_end();
     if (state) {
         /* must cleanup OpenSSL error stack before re-raising */
