@@ -4,6 +4,9 @@
  */
 #include "ossl.h"
 #include <openssl/kdf.h>
+#ifdef OSSL_USE_PROVIDER
+# include <openssl/core_names.h>
+#endif
 
 static VALUE mKDF, eKDF;
 
@@ -16,21 +19,53 @@ struct pbkdf2_hmac_args {
     const EVP_MD *md;
     int len;
     unsigned char *out;
+    int pkcs5;
 };
 
 static void *
 pbkdf2_hmac_nogvl(void *args_)
 {
     struct pbkdf2_hmac_args *args = (struct pbkdf2_hmac_args *)args_;
+#ifdef OSSL_USE_PROVIDER
+    static char empty[] = "";
+    int ret = 0;
+    EVP_KDF *kdf;
+    EVP_KDF_CTX *kctx;
+    OSSL_PARAM params[6], *p = params;
+
+    kdf = EVP_KDF_fetch(NULL, OSSL_KDF_NAME_PBKDF2, NULL);
+    if (kdf == NULL)
+        return (void *)(uintptr_t)0;
+    kctx = EVP_KDF_CTX_new(kdf);
+    EVP_KDF_free(kdf);
+    if (kctx == NULL)
+        return (void *)(uintptr_t)0;
+    *p++ = OSSL_PARAM_construct_int(OSSL_KDF_PARAM_PKCS5, &args->pkcs5);
+    *p++ = OSSL_PARAM_construct_octet_string(OSSL_KDF_PARAM_PASSWORD,
+                                             args->passlen ? args->pass : empty,
+                                             (size_t)args->passlen);
+    *p++ = OSSL_PARAM_construct_octet_string(OSSL_KDF_PARAM_SALT,
+                                             args->saltlen ? (char *)args->salt : empty,
+                                             (size_t)args->saltlen);
+    *p++ = OSSL_PARAM_construct_int(OSSL_KDF_PARAM_ITER, &args->iters);
+    *p++ = OSSL_PARAM_construct_utf8_string(OSSL_KDF_PARAM_DIGEST,
+                                            (char *)EVP_MD_get0_name(args->md),
+                                            0);
+    *p = OSSL_PARAM_construct_end();
+    if (EVP_KDF_derive(kctx, args->out, (size_t)args->len, params) == 1)
+        ret = 1;
+    EVP_KDF_CTX_free(kctx);
+#else
     int ret = PKCS5_PBKDF2_HMAC(args->pass, args->passlen, args->salt,
                                 args->saltlen, args->iters, args->md,
                                 args->len, args->out);
+#endif
     return (void *)(uintptr_t)ret;
 }
 
 /*
  * call-seq:
- *   KDF.pbkdf2_hmac(pass, salt:, iterations:, length:, hash:) -> aString
+ *   KDF.pbkdf2_hmac(pass, salt:, iterations:, length:, hash:, pkcs5: 1) -> aString
  *
  * PKCS #5 PBKDF2 (Password-Based Key Derivation Function 2) in combination
  * with HMAC. Takes _pass_, _salt_ and _iterations_, and then derives a key
@@ -56,13 +91,39 @@ pbkdf2_hmac_nogvl(void *args_)
  * hash       :: The hash algorithm used with HMAC for the PRF. May be a String
  *               representing the algorithm name, or an instance of
  *               OpenSSL::Digest.
+ * pkcs5      :: Optional. Enforces or bypasses the SP 800-132 lower bound
+ *               checks done by OpenSSL. If 1 (the default) or any other
+ *               non-zero value, the checks are bypassed, for compatibility
+ *               with plain PKCS #5. If 0, OpenSSL 3.0 and later enforce the
+ *               lower bound checks: an iteration count of at least 1000, a
+ *               salt of at least 128 bits, a derived key of at least 112
+ *               bits, and a non-empty password (at least 8 bytes with the
+ *               FIPS provider). With the FIPS provider, bypassing the checks
+ *               might still block the operation, or raise the non-approved
+ *               usage indicator, which allows it for decryption and legacy
+ *               purposes. With other libraries, such as LibreSSL, this
+ *               argument is accepted but has no effect.
+ *
+ *               The default matches the behavior of PKCS5_PBKDF2_HMAC()
+ *               prior to the OpenSSL 4.0 release. It allows existing data
+ *               to be decrypted, such as Active Record encrypted attributes,
+ *               which use a salt that is too short by default
+ *               (https://github.com/rails/rails/pull/58937).
+ *
+ * *NOTE*: The lower bounds enforced by OpenSSL are minimums, not
+ * recommendations. They are far too low to protect stored passwords
+ * against modern brute-force attacks. For security-sensitive uses, choose
+ * parameters as recommended by the OWASP Password Storage Cheat Sheet
+ * (https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html),
+ * for example 600,000 iterations with HMAC-SHA-256 or 210,000 iterations
+ * with HMAC-SHA-512.
  */
 static VALUE
 kdf_pbkdf2_hmac(int argc, VALUE *argv, VALUE self)
 {
-    VALUE pass, salt, opts, kwargs[4], str, md_holder, pass_tmp, salt_tmp;
-    static ID kwargs_ids[4];
-    int passlen, saltlen, iters, len;
+    VALUE pass, salt, opts, kwargs[5], str, md_holder, pass_tmp, salt_tmp;
+    static ID kwargs_ids[5];
+    int passlen, saltlen, iters, len, pkcs5;
     const EVP_MD *md;
 
     if (!kwargs_ids[0]) {
@@ -70,15 +131,17 @@ kdf_pbkdf2_hmac(int argc, VALUE *argv, VALUE self)
         kwargs_ids[1] = rb_intern_const("iterations");
         kwargs_ids[2] = rb_intern_const("length");
         kwargs_ids[3] = rb_intern_const("hash");
+        kwargs_ids[4] = rb_intern_const("pkcs5");
     }
     rb_scan_args(argc, argv, "1:", &pass, &opts);
-    rb_get_kwargs(opts, kwargs_ids, 4, 0, kwargs);
+    rb_get_kwargs(opts, kwargs_ids, 4, 1, kwargs);
 
     StringValue(pass);
     salt = StringValue(kwargs[0]);
     iters = NUM2INT(kwargs[1]);
     len = NUM2INT(kwargs[2]);
     md = ossl_evp_md_fetch(kwargs[3], &md_holder);
+    pkcs5 = kwargs[4] == Qundef ? 1 : NUM2INT(kwargs[4]);
     passlen = RSTRING_LENINT(pass);
     saltlen = RSTRING_LENINT(salt);
     str = rb_str_new(NULL, len);
@@ -91,11 +154,16 @@ kdf_pbkdf2_hmac(int argc, VALUE *argv, VALUE self)
         .md = md,
         .len = len,
         .out = (unsigned char *)RSTRING_PTR(str),
+        .pkcs5 = pkcs5,
     };
     memcpy(args.pass, RSTRING_PTR(pass), passlen);
     memcpy(args.salt, RSTRING_PTR(salt), saltlen);
     if (!rb_thread_call_without_gvl(pbkdf2_hmac_nogvl, &args, NULL, NULL))
+#ifdef OSSL_USE_PROVIDER
+        ossl_raise(eKDF, "EVP_KDF_derive");
+#else
         ossl_raise(eKDF, "PKCS5_PBKDF2_HMAC");
+#endif
     OPENSSL_cleanse(args.pass, passlen);
     ALLOCV_END(pass_tmp);
     ALLOCV_END(salt_tmp);
