@@ -145,55 +145,34 @@ ossl_bin2hex(const unsigned char *in, char *out, size_t inlen)
     }
 }
 
-#ifdef HAVE_RB_EXT_RACTOR_SAFE
-static rb_ractor_local_key_t cb_state_key;
+static ID id_cb_state;
 
 int
 ossl_cb_state_get(void)
 {
-    int *cell = rb_ractor_local_storage_ptr(cb_state_key);
-    return cell ? *cell : 0;
+    VALUE val = rb_thread_local_aref(rb_thread_current(), id_cb_state);
+    return FIXNUM_P(val) ? FIX2INT(val) : 0;
 }
 
 static VALUE
-ensure_cell(VALUE unused)
+cb_state_set_i(VALUE vstate)
 {
-    int *cell = rb_ractor_local_storage_ptr(cb_state_key);
-    if (!cell) {
-        cell = ZALLOC(int);
-        rb_ractor_local_storage_ptr_set(cb_state_key, cell);
-    }
-    return (VALUE)cell;
+    rb_thread_local_aset(rb_thread_current(), id_cb_state, vstate);
+    return Qnil;
 }
 
 void
 ossl_cb_state_set(int state)
 {
-    int *cell = (int *)rb_protect(ensure_cell, Qnil, NULL);
-    if (cell == (void *)Qnil) {
+    int s;
+    RUBY_ASSERT(!state || !ossl_cb_state_get());
+    rb_protect(cb_state_set_i, state ? INT2FIX(state) : Qnil, &s);
+    if (s) {
         /* As a last resort */
         rb_set_errinfo(Qnil);
         return;
     }
-    RUBY_ASSERT(!state || !*cell);
-    *cell = state;
 }
-#else
-static int cb_state;
-
-int
-ossl_cb_state_get(void)
-{
-    return cb_state;
-}
-
-void
-ossl_cb_state_set(int state)
-{
-    RUBY_ASSERT(!state || !cb_state);
-    cb_state = state;
-}
-#endif
 
 void
 ossl_cb_state_begin(void)
@@ -1124,8 +1103,6 @@ Init_openssl(void)
 {
 #ifdef HAVE_RB_EXT_RACTOR_SAFE
     rb_ext_ractor_safe(true);
-    cb_state_key =
-        rb_ractor_local_storage_ptr_newkey(RB_RACTOR_LOCAL_STORAGE_TYPE_FREE);
 #endif
 
 #undef rb_intern
@@ -1258,6 +1235,7 @@ Init_openssl(void)
      */
     ossl_s_to_der = rb_intern("to_der");
     id_i_errors = rb_intern("@errors");
+    id_cb_state = rb_intern("__openssl_cb_state__");
 
     /*
      * Init components
