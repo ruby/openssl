@@ -394,6 +394,18 @@ class OpenSSL::TestCipher < OpenSSL::TestCase
     assert_equal tag1, tag2
   end
 
+  def test_aes_keywrap
+    # RFC 3394 Section 4.1
+    kek = ["000102030405060708090a0b0c0d0e0f"].pack("H*")
+    key = ["00112233445566778899aabbccddeeff"].pack("H*")
+    wrap = ["1fa68b0a8112b447aef34bd8fb5a7b829d3e862371d2cfe5"].pack("H*")
+
+    cipher = new_encryptor("id-aes128-wrap", key: kek)
+    assert_equal wrap, cipher.update(key) << cipher.final
+    cipher = new_decryptor("id-aes128-wrap", key: kek)
+    assert_equal key, cipher.update(wrap) << cipher.final
+  end if has_cipher?("id-aes128-wrap")
+
   def test_aes_keywrap_pad
     # RFC 5649 Section 6; The second example
     kek = ["5840df6e29b02af1ab493b705bf16ea1ae8338f4dcc176a8"].pack("H*")

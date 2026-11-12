@@ -15,6 +15,7 @@
     (ctx) = EVP_CIPHER_CTX_new(); \
     if (!(ctx)) \
         ossl_raise(rb_eRuntimeError, NULL); \
+    EVP_CIPHER_CTX_set_flags((ctx), EVP_CIPHER_CTX_FLAG_WRAP_ALLOW); \
     RTYPEDDATA_DATA(obj) = (ctx); \
 } while (0)
 #define GetCipher(obj, ctx) do { \
