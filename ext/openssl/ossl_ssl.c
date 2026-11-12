@@ -1888,11 +1888,7 @@ ssl_call_end(void)
         rb_jump_tag(state);
     }
 
-#ifdef _WIN32
-    return rb_w32_map_errno(WSAGetLastError());
-#else
-    return errno;
-#endif
+    return saved_errno;
 }
 
 static VALUE
