@@ -430,8 +430,8 @@ pkey_generate(int argc, VALUE *argv, VALUE self, int genparam)
     if (gen_arg.yield)
         pkey_blocking_gen(&gen_arg);
     else
-        rb_thread_call_without_gvl(pkey_blocking_gen, &gen_arg,
-                                   pkey_blocking_gen_stop, &gen_arg);
+        ossl_thread_call_without_gvl(pkey_blocking_gen, &gen_arg,
+                                     pkey_blocking_gen_stop, &gen_arg);
     EVP_PKEY_CTX_free(ctx);
     if (!gen_arg.pkey) {
         if (gen_arg.state) {

@@ -183,6 +183,9 @@ PRINTF_ARGS(NORETURN(void ossl_raise(VALUE, const char *, ...)), 2, 3);
 VALUE ossl_make_error(VALUE exc, VALUE str);
 /* Clear OpenSSL error queue. If dOSSL is set, rb_warn() them. */
 void ossl_clear_error(void);
+/* rb_thread_call_without_gvl() that keeps the errors raised in func. */
+void *ossl_thread_call_without_gvl(void *(*func)(void *), void *data1,
+                                   rb_unblock_function_t *ubf, void *data2);
 
 /*
  * String to DER String

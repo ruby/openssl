@@ -369,6 +369,61 @@ ossl_clear_error(void)
 }
 
 /*
+ * The native thread may switch across rb_thread_call_without_gvl() under
+ * M:N threads, so move the error queue of func to the current thread.
+ */
+#ifdef HAVE_OSSL_ERR_STATE_NEW
+struct nogvl_arg {
+    void *(*func)(void *);
+    void *data1;
+    rb_unblock_function_t *ubf;
+    void *data2;
+    ERR_STATE *err;
+    void *ret;
+};
+
+static void *
+nogvl_func(void *ptr)
+{
+    struct nogvl_arg *arg = ptr;
+    void *ret = arg->func(arg->data1);
+    OSSL_ERR_STATE_save(arg->err);
+    return ret;
+}
+
+static VALUE
+nogvl_call(VALUE ptr)
+{
+    struct nogvl_arg *arg = (struct nogvl_arg *)ptr;
+    arg->ret = rb_thread_call_without_gvl(nogvl_func, arg, arg->ubf, arg->data2);
+    OSSL_ERR_STATE_restore(arg->err);
+    return Qnil;
+}
+
+static VALUE
+nogvl_free(VALUE ptr)
+{
+    OSSL_ERR_STATE_free(((struct nogvl_arg *)ptr)->err);
+    return Qnil;
+}
+#endif
+
+void *
+ossl_thread_call_without_gvl(void *(*func)(void *), void *data1,
+                             rb_unblock_function_t *ubf, void *data2)
+{
+#ifdef HAVE_OSSL_ERR_STATE_NEW
+    struct nogvl_arg arg = { func, data1, ubf, data2, OSSL_ERR_STATE_new() };
+    if (!arg.err)
+        rb_memerror();
+    rb_ensure(nogvl_call, (VALUE)&arg, nogvl_free, (VALUE)&arg);
+    return arg.ret;
+#else
+    return rb_thread_call_without_gvl(func, data1, ubf, data2);
+#endif
+}
+
+/*
  * call-seq:
  *    ossl_error.detailed_message(**) -> string
  *
