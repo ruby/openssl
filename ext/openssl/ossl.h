@@ -121,6 +121,10 @@ rb_len2long(rb_len_t n)
 }
 #endif
 
+#if !defined(FIX2INTPTR)
+# define FIX2INTPTR FIX2LONG
+#endif
+
 #if !defined(NUM2UINT64T) /* in case Ruby starts to provide */
 #  if SIZEOF_LONG == 8
 #    define NUM2UINT64T(x) ((uint64_t)NUM2ULONG(x))
