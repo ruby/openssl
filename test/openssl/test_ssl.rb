@@ -1213,6 +1213,7 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
       sctx.servername_cb = lambda { |args| raise RuntimeError, "foo" }
       ssl = OpenSSL::SSL::SSLSocket.new(sock, sctx)
       assert_raise_with_message(RuntimeError, "foo") { ssl.accept }
+      assert_raise(OpenSSL::SSL::SSLError) { ssl.syswrite("abc") }
     end
     start_server_proc(server_proc) do |port|
       sock = TCPSocket.new("127.0.0.1", port)
