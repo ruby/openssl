@@ -94,7 +94,7 @@ kdf_pbkdf2_hmac(int argc, VALUE *argv, VALUE self)
     };
     memcpy(args.pass, RSTRING_PTR(pass), passlen);
     memcpy(args.salt, RSTRING_PTR(salt), saltlen);
-    if (!rb_thread_call_without_gvl(pbkdf2_hmac_nogvl, &args, NULL, NULL))
+    if (!ossl_thread_call_without_gvl(pbkdf2_hmac_nogvl, &args, NULL, NULL))
         ossl_raise(eKDF, "PKCS5_PBKDF2_HMAC");
     OPENSSL_cleanse(args.pass, passlen);
     ALLOCV_END(pass_tmp);
@@ -206,7 +206,7 @@ kdf_scrypt(int argc, VALUE *argv, VALUE self)
     };
     memcpy(args.pass, RSTRING_PTR(pass), passlen);
     memcpy(args.salt, RSTRING_PTR(salt), saltlen);
-    if (!rb_thread_call_without_gvl(scrypt_nogvl, &args, NULL, NULL))
+    if (!ossl_thread_call_without_gvl(scrypt_nogvl, &args, NULL, NULL))
         ossl_raise(eKDF, "EVP_PBE_scrypt");
     OPENSSL_cleanse(args.pass, passlen);
     ALLOCV_END(pass_tmp);

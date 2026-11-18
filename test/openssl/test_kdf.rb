@@ -151,6 +151,27 @@ class OpenSSL::TestKDF < OpenSSL::TestCase
     assert_equal(okm, OpenSSL::KDF.hkdf(ikm, salt: salt, info: info, length: l, hash: hash))
   end
 
+  if respond_to?(:ractor) && defined?(Ractor.shareable_proc)
+    ractor
+
+    def test_pbkdf2_hmac_error_in_ractors
+      msgs = 8.times.map {
+        Ractor.new {
+          4.times.map {
+            Thread.new {
+              2000.times.map do
+                OpenSSL::KDF.pbkdf2_hmac("", salt: "", iterations: 0, length: 1, hash: "sha256")
+              rescue OpenSSL::KDF::KDFError => e
+                e.message
+              end.uniq
+            }
+          }.flat_map(&:value).uniq
+        }
+      }.flat_map(&:value).uniq
+      assert_equal ["PKCS5_PBKDF2_HMAC: invalid iteration count"], msgs
+    end if openssl?(3, 2, 0)
+  end
+
   private
 
   def B(ary)
