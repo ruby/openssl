@@ -69,29 +69,23 @@ ossl_bn_new(const BIGNUM *bn)
     return obj;
 }
 
-static BIGNUM *
-integer_to_bnptr(VALUE obj, BIGNUM *orig)
+static void
+integer_to_bnptr(VALUE obj, BIGNUM *bn)
 {
-    BIGNUM *bn;
+    /*
+     * OpenSSL's BN_ULONG is usually pointer-sized, but is technically
+     * configurable and could be larger or smaller.
+     * LibreSSL's and AWS-LC's are always the same size as a pointer.
+     */
+    if (sizeof(BN_ULONG) >= sizeof(uintptr_t) && FIXNUM_P(obj)) {
+        intptr_t n = FIX2INTPTR(obj);
 
-    if (FIXNUM_P(obj)) {
-        long i;
-        unsigned char bin[sizeof(long)];
-        long n = FIX2LONG(obj);
-        unsigned long un = labs(n);
-
-        for (i = sizeof(long) - 1; 0 <= i; i--) {
-            bin[i] = un & 0xff;
-            un >>= 8;
-        }
-
-        bn = BN_bin2bn(bin, sizeof(bin), orig);
-        if (!bn)
-            ossl_raise(eBNError, "BN_bin2bn");
+        if (!BN_set_word(bn, n < 0 ? -n : n))
+            ossl_raise(eBNError, "BN_set_word");
         if (n < 0)
             BN_set_negative(bn, 1);
     }
-    else { /* assuming Bignum */
+    else {
         size_t len = rb_absint_size(obj, NULL);
         unsigned char *bin;
         VALUE buf;
@@ -103,15 +97,13 @@ integer_to_bnptr(VALUE obj, BIGNUM *orig)
         bin = (unsigned char*)ALLOCV_N(unsigned char, buf, len);
         sign = rb_integer_pack(obj, bin, len, 1, 0, INTEGER_PACK_BIG_ENDIAN);
 
-        bn = BN_bin2bn(bin, (int)len, orig);
+        bn = BN_bin2bn(bin, (int)len, bn);
         ALLOCV_END(buf);
         if (!bn)
             ossl_raise(eBNError, "BN_bin2bn");
         if (sign < 0)
             BN_set_negative(bn, 1);
     }
-
-    return bn;
 }
 
 static VALUE
@@ -124,8 +116,11 @@ try_convert_to_bn(VALUE obj)
         return obj;
     if (RB_INTEGER_TYPE_P(obj)) {
         newobj = NewBN(cBN); /* Handle potential mem leaks */
-        bn = integer_to_bnptr(obj, NULL);
+        bn = BN_new();
+        if (!bn)
+            ossl_raise(eBNError, "BN_new");
         SetBN(newobj, bn);
+        integer_to_bnptr(obj, bn);
     }
 
     return newobj;
