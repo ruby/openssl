@@ -156,6 +156,23 @@ do{\
 void ossl_bin2hex(const unsigned char *in, char *out, size_t len);
 
 /*
+ * Ractor-local storage for storing rb_protect() jump tag. Use this only if
+ * the OpenSSL API doesn't let you pass arbitrary data to the callback.
+ *
+ * _begin() expects that there's no currently pending jump.
+ * No context switch is expected between _set() and _end().
+ */
+void ossl_cb_state_begin(void);
+int ossl_cb_state_end(void);
+int ossl_cb_state_get(void);
+void ossl_cb_state_set(int state);
+/*
+ * Equivalent to rb_protect(func, args, NULL) except that this avoids
+ * clobbering the existing errinfo on the ec.
+ */
+void ossl_suppress(VALUE (*func)(VALUE args), VALUE args);
+
+/*
  * Our default PEM callback
  */
 /* Convert the argument to String and validate the length. Note this may raise. */
