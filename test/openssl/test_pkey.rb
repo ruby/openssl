@@ -394,4 +394,312 @@ class OpenSSL::TestPKey < OpenSSL::PKeyTestCase
     assert_same(OpenSSL::PKey::PKeyError, OpenSSL::PKey::ECError)
     assert_same(OpenSSL::PKey::PKeyError, OpenSSL::PKey::RSAError)
   end
+
+  if openssl?(3, 0, 0)
+    def test_s_from_data_with_invalid_alg
+      assert_raise_with_message(OpenSSL::PKey::PKeyError, /EVP_PKEY_CTX_new_from_name/) do
+        OpenSSL::PKey.from_data("ASR", {})
+      end
+    end
+
+    def test_s_from_data_argument_errors
+      assert_raise(ArgumentError) { OpenSSL::PKey.from_data("RSA") }
+      assert_raise(TypeError) { OpenSSL::PKey.from_data("RSA", "not a hash") }
+    end
+
+    def test_s_from_data_under_gc_stress
+      # The converted values must be protected from GC until
+      # EVP_PKEY_fromdata() has consumed them
+      new_key = begin
+        GC.stress = true
+        OpenSSL::PKey.from_data("RSA", "n" => 3161751493, "e" => 65537, "d" => 2064855961)
+      ensure
+        GC.stress = false
+      end
+
+      assert_equal OpenSSL::BN.new(3161751493), new_key.n
+      assert_equal OpenSSL::BN.new(65537), new_key.e
+      assert_equal OpenSSL::BN.new(2064855961), new_key.d
+    end
+
+    def test_s_from_data_rsa_with_n_e_and_d_given_as_integers
+      new_key = OpenSSL::PKey.from_data("RSA", "n" => 3161751493,
+                                               "e" => 65537,
+                                               "d" => 2064855961)
+
+      assert_instance_of OpenSSL::PKey::RSA, new_key
+      assert_equal true, new_key.private?
+      assert_equal OpenSSL::BN.new(3161751493), new_key.n
+      assert_equal OpenSSL::BN.new(65537), new_key.e
+      assert_equal OpenSSL::BN.new(2064855961), new_key.d
+    end
+
+    def test_s_from_data_rsa_with_n_e_and_d_given_as_symbols
+      new_key = OpenSSL::PKey.from_data("RSA", n: OpenSSL::BN.new(3161751493),
+                                               e: OpenSSL::BN.new(65537),
+                                               d: OpenSSL::BN.new(2064855961))
+
+      assert_instance_of OpenSSL::PKey::RSA, new_key
+      assert_equal true, new_key.private?
+      assert_equal OpenSSL::BN.new(3161751493), new_key.n
+      assert_equal OpenSSL::BN.new(65537), new_key.e
+      assert_equal OpenSSL::BN.new(2064855961), new_key.d
+    end
+
+    def test_s_from_data_rsa_with_n_and_e_given
+      new_key = OpenSSL::PKey.from_data("RSA", "n" => OpenSSL::BN.new(3161751493),
+                                               "e" => OpenSSL::BN.new(65537))
+
+      assert_instance_of OpenSSL::PKey::RSA, new_key
+      assert_equal false, new_key.private?
+      assert_equal OpenSSL::BN.new(3161751493), new_key.n
+      assert_equal OpenSSL::BN.new(65537), new_key.e
+      assert_nil new_key.d
+    end
+
+    def test_s_from_data_rsa_with_openssl_internal_names
+      source  = Fixtures.pkey("rsa2048")
+      new_key = OpenSSL::PKey.from_data("RSA", "n" => source.n,
+                                               "e" => source.e,
+                                               "d" => source.d,
+                                               "rsa-factor1" => source.p,
+                                               "rsa-factor2" => source.q,
+                                               "rsa-exponent1" => source.dmp1,
+                                               "rsa-exponent2" => source.dmq1,
+                                               "rsa-coefficient1" => source.iqmp)
+
+      assert_equal source.n, new_key.n
+      assert_equal source.e, new_key.e
+      assert_equal source.d, new_key.d
+      assert_equal source.p, new_key.p
+      assert_equal source.q, new_key.q
+      assert_equal source.dmp1, new_key.dmp1
+      assert_equal source.dmq1, new_key.dmq1
+      assert_equal source.iqmp, new_key.iqmp
+      assert_equal source.to_pem, new_key.to_pem
+    end
+
+    def test_s_from_data_rsa_with_simple_names
+      source  = Fixtures.pkey("rsa2048")
+      new_key = OpenSSL::PKey.from_data("RSA", "n" => source.n,
+                                               "e" => source.e,
+                                               "d" => source.d,
+                                               "p" => source.p,
+                                               "q" => source.q,
+                                               "dmp1" => source.dmp1,
+                                               "dmq1" => source.dmq1,
+                                               "iqmp" => source.iqmp)
+
+      assert_equal source.n, new_key.n
+      assert_equal source.e, new_key.e
+      assert_equal source.d, new_key.d
+      assert_equal source.p, new_key.p
+      assert_equal source.q, new_key.q
+      assert_equal source.dmp1, new_key.dmp1
+      assert_equal source.dmq1, new_key.dmq1
+      assert_equal source.iqmp, new_key.iqmp
+      assert_equal source.to_pem, new_key.to_pem
+    end
+
+    def test_s_from_data_rsa_with_invalid_parameter
+      assert_raise_with_message(OpenSSL::PKey::PKeyError, /Invalid parameter "invalid"/) do
+        OpenSSL::PKey.from_data("RSA", "invalid" => 1234)
+      end
+    end
+
+    def test_s_from_data_ec_pub_given_as_string
+      source  = OpenSSL::PKey::EC.generate("prime256v1")
+      new_key = OpenSSL::PKey.from_data("EC", "group" => source.group.curve_name,
+                                              "pub" => source.public_key.to_bn.to_s(2))
+      assert_instance_of OpenSSL::PKey::EC, new_key
+      assert_equal source.group.curve_name, new_key.group.curve_name
+      assert_equal source.public_key, new_key.public_key
+      assert_nil new_key.private_key
+    end
+
+    def test_s_from_data_ec_priv_given_as_bn
+      source  = OpenSSL::PKey::EC.generate("prime256v1")
+      new_key = OpenSSL::PKey.from_data("EC", "group" => source.group.curve_name,
+                                              "priv" => source.private_key.to_bn)
+      assert_instance_of OpenSSL::PKey::EC, new_key
+      assert_equal source.group.curve_name, new_key.group.curve_name
+      assert_equal source.private_key, new_key.private_key
+      assert_nil new_key.public_key
+    end
+
+    def test_s_from_data_ec_priv_given_as_integer
+      source  = OpenSSL::PKey::EC.generate("prime256v1")
+      new_key = OpenSSL::PKey.from_data("EC", "group" => source.group.curve_name,
+                                              "priv" => source.private_key.to_i)
+      assert_instance_of OpenSSL::PKey::EC, new_key
+      assert_equal source.group.curve_name, new_key.group.curve_name
+      assert_equal source.private_key, new_key.private_key
+      assert_nil new_key.public_key
+    end
+
+    def test_s_from_data_ec_priv_and_pub_given_for_different_curves
+      [OpenSSL::PKey::EC.generate("prime256v1"),
+       OpenSSL::PKey::EC.generate("secp384r1"),
+       OpenSSL::PKey::EC.generate("secp521r1")].each do |source|
+        new_key = OpenSSL::PKey.from_data("EC", "group" => source.group.curve_name,
+                                                "pub" => source.public_key.to_bn.to_s(2),
+                                                "priv" => source.private_key.to_i)
+        assert_instance_of OpenSSL::PKey::EC, new_key
+        assert_equal source.group.curve_name, new_key.group.curve_name
+        assert_equal source.private_key, new_key.private_key
+        assert_equal source.public_key, new_key.public_key
+      end
+    end
+
+    def test_s_from_data_ec_pub_given_as_integer
+      assert_raise_with_message(TypeError, "no implicit conversion of Integer into String") do
+        OpenSSL::PKey.from_data("EC", { "group" => "prime256v1", "pub" => 12345 })
+      end
+    end
+
+    def test_s_from_data_ec_with_invalid_parameter
+      assert_raise_with_message(OpenSSL::PKey::PKeyError, /Invalid parameter "invalid"/) do
+        OpenSSL::PKey.from_data("EC", "invalid" => 1234)
+      end
+    end
+
+    def test_s_from_data_dsa_with_all_supported_parameters
+      source  = Fixtures.pkey("dsa2048")
+      new_key = OpenSSL::PKey.from_data("DSA", "pub" => source.params["pub_key"],
+                                               "priv" => source.params["priv_key"],
+                                               "p" => source.params["p"],
+                                               "q" => source.params["q"],
+                                               "g" => source.params["g"])
+
+      assert_instance_of OpenSSL::PKey::DSA, new_key
+      assert_equal source.params, new_key.params
+    end
+
+    def test_s_from_data_dsa_with_gem_specific_keys
+      source  = Fixtures.pkey("dsa2048")
+      new_key = OpenSSL::PKey.from_data("DSA", source.params)
+
+      assert_equal source.params, new_key.params
+    end
+
+    def test_s_from_data_dsa_with_invalid_parameter
+      assert_raise_with_message(OpenSSL::PKey::PKeyError, /Invalid parameter "invalid"/) do
+        OpenSSL::PKey.from_data("DSA", "invalid" => 1234)
+      end
+    end
+
+    def test_s_from_data_dh_with_all_supported_parameters
+      source  = Fixtures.pkey("dh2048_ffdhe2048")
+      new_key = OpenSSL::PKey.from_data("DH", source.params)
+
+      assert_instance_of OpenSSL::PKey::DH, new_key
+      assert_equal source.params, new_key.params
+    end
+
+    def test_s_from_data_dh_with_invalid_parameter
+      assert_raise_with_message(OpenSSL::PKey::PKeyError, /Invalid parameter "invalid"/) do
+        OpenSSL::PKey.from_data("DH", "invalid" => 1234)
+      end
+    end
+
+    def test_s_from_data_rsa_pss_with_simple_names
+      source = Fixtures.pkey("rsa-1")
+      new_key = OpenSSL::PKey.from_data("RSA-PSS", source.params)
+
+      assert_equal "RSASSA-PSS", new_key.oid
+      sig = new_key.sign("SHA256", "data")
+      assert_true source.verify_pss("SHA256", sig, "data", salt_length: :auto, mgf1_hash: "SHA256")
+    end
+
+    def test_s_from_data_duplicate_parameter
+      assert_raise_with_message(OpenSSL::PKey::PKeyError, /Duplicate parameter "n"/) do
+        OpenSSL::PKey.from_data("RSA", { n: 3161751493, "n" => 3, e: 65537 })
+      end
+      source = Fixtures.pkey("rsa-1")
+      assert_raise_with_message(OpenSSL::PKey::PKeyError, /Duplicate parameter "rsa-factor1"/) do
+        OpenSSL::PKey.from_data("RSA", source.params.merge("rsa-factor1" => source.p))
+      end
+    end
+
+    def test_s_from_data_negative_unsigned_integer
+      assert_raise_with_message(OpenSSL::PKey::PKeyError, /"n" must not be negative/) do
+        OpenSSL::PKey.from_data("RSA", n: -3161751493, e: 65537)
+      end
+    end
+
+    def test_s_from_data_native_integer_parameters
+      source = Fixtures.pkey("dsa2048")
+      # "gindex" and "pcounter" are signed C ints that use -1 for "unset"
+      new_key = OpenSSL::PKey.from_data("DSA", source.params.merge("gindex" => -1, "pcounter" => -1))
+      assert_equal source.params, new_key.params
+
+      dh = Fixtures.pkey("dh2048_ffdhe2048")
+      new_key = OpenSSL::PKey.from_data("DH", { p: dh.p, g: dh.g, "priv_len" => OpenSSL::BN.new(256) },
+                                        :parameters)
+      assert_equal dh.p, new_key.p
+    end
+
+    def test_s_from_data_selection
+      dh = Fixtures.pkey("dh2048_ffdhe2048")
+      params = OpenSSL::PKey.from_data("DH", { p: dh.p, g: dh.g }, :parameters)
+      assert_equal dh.p, params.p
+      assert_nil params.pub_key
+
+      ec = Fixtures.pkey("p256")
+      pub = OpenSSL::PKey.from_data("EC", { group: ec.group.curve_name,
+                                            pub: ec.public_key.to_octet_string(:uncompressed) },
+                                    :public_key)
+      assert_not_predicate pub, :private?
+      assert_equal ec.public_key, pub.public_key
+
+      assert_raise(ArgumentError) { OpenSSL::PKey.from_data("DH", {}, :bogus) }
+      assert_raise(TypeError) { OpenSSL::PKey.from_data("DH", {}, "parameters") }
+    end
+
+    def test_s_from_data_invalid_parameter_message
+      e = assert_raise(OpenSSL::PKey::PKeyError) do
+        OpenSSL::PKey.from_data("RSA", priv_key: 1)
+      end
+      assert_match(/Invalid parameter "priv_key"/, e.message)
+      assert_match(/\bdmp1\b/, e.message)
+      # Aliases for other key types are not offered
+      assert_no_match(/pub_key/, e.message.sub(/\A[^.]*\./, ""))
+    end
+
+    def test_s_from_data_hash_mutated_during_conversion
+      hash = { "n" => nil, "e" => 65537 }
+      evil = Object.new
+      evil.define_singleton_method(:to_str) { hash["extra"] = 1; "x" }
+      hash["n"] = 3161751493
+      hash["group"] = evil
+      # The mutation must not raise "can't add a new key into hash during
+      # iteration"; "group" is simply invalid for RSA
+      assert_raise_with_message(OpenSSL::PKey::PKeyError, /Invalid parameter "group"/) do
+        OpenSSL::PKey.from_data("RSA", hash)
+      end
+
+      ec = Fixtures.pkey("p256")
+      hash = { "pub" => ec.public_key.to_octet_string(:uncompressed) }
+      evil = Object.new
+      evil.define_singleton_method(:to_str) { hash["extra"] = 1; ec.group.curve_name }
+      hash["group"] = evil
+      key = OpenSSL::PKey.from_data("EC", hash, :public_key)
+      assert_equal ec.public_key, key.public_key
+    end
+
+    def test_s_from_data_ed25519
+      # Ed25519 is not FIPS-approved.
+      omit_on_fips
+
+      pub_pem = <<~EOF
+    -----BEGIN PUBLIC KEY-----
+    MCowBQYDK2VwAyEA0I6olrZGYml7JGusuKJW9G7D0DZ9UormSady9kR7V4Q=
+    -----END PUBLIC KEY-----
+    EOF
+
+      key = OpenSSL::PKey.from_data("ED25519", "pub" => "\xD0\x8E\xA8\x96\xB6Fbi{$k\xAC\xB8\xA2V\xF4n\xC3\xD06}R\x8A\xE6I\xA7r\xF6D{W\x84")
+      assert_instance_of OpenSSL::PKey::PKey, key
+      assert_equal pub_pem, key.public_to_pem
+    end
+  end
 end
