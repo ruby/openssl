@@ -1898,6 +1898,7 @@ ossl_start_ssl(VALUE self, int (*func)(SSL *), const char *funcname)
 
     cb_state = rb_attr_get(self, ID_callback_state);
     if (!NIL_P(cb_state)) {
+        rb_ivar_set(self, ID_callback_state, Qnil);
         /* must cleanup OpenSSL error stack before re-raising */
         ossl_clear_error();
         rb_jump_tag(NUM2INT(cb_state));
