@@ -36,7 +36,8 @@ VALUE cSSLSocket;
 static VALUE eSSLErrorWaitReadable;
 static VALUE eSSLErrorWaitWritable;
 
-static ID id_call, id_npn_protocols_encoded, id_each, id_original_context;
+static ID id_call, id_npn_protocols_encoded, id_each, id_original_context,
+          id_io;
 static VALUE sym_wait_readable, sym_wait_writable;
 
 static ID id_i_cert_store, id_i_ca_file, id_i_ca_path, id_i_verify_mode,
@@ -47,7 +48,7 @@ static ID id_i_cert_store, id_i_ca_file, id_i_ca_path, id_i_verify_mode,
           id_i_session_remove_cb, id_i_npn_select_cb, id_i_npn_protocols,
           id_i_alpn_select_cb, id_i_alpn_protocols, id_i_servername_cb,
           id_i_verify_hostname, id_i_keylog_cb, id_i_tmp_dh_callback;
-static ID id_i_io, id_i_context, id_i_hostname, id_i_sync_close;
+static ID id_i_context, id_i_hostname, id_i_sync_close;
 
 static int ossl_ssl_ex_ptr_idx;
 static int ossl_sslctx_ex_ptr_idx;
@@ -1780,28 +1781,6 @@ ossl_ssl_s_alloc(VALUE klass)
     return TypedData_Wrap_Struct(klass, &ossl_ssl_type, NULL);
 }
 
-static VALUE
-peer_ip_address(VALUE io)
-{
-    VALUE remote_address = rb_funcall(io, rb_intern("remote_address"), 0);
-
-    return rb_funcall(remote_address, rb_intern("inspect_sockaddr"), 0);
-}
-
-static VALUE
-fallback_peer_ip_address(VALUE self, VALUE exc)
-{
-    return rb_str_new_cstr("(null)");
-}
-
-static VALUE
-peeraddr_ip_str(VALUE self)
-{
-    VALUE io = rb_attr_get(self, id_i_io);
-    return rb_rescue2(peer_ip_address, io, fallback_peer_ip_address, Qnil,
-                      rb_eSystemCallError, (VALUE)0);
-}
-
 /*
  * call-seq:
  *    SSLSocket.new(io) => aSSLSocket
@@ -1853,7 +1832,7 @@ ossl_ssl_initialize(int argc, VALUE *argv, VALUE self)
     ossl_sslctx_setup(v_ctx);
 
     Check_Type(io, T_FILE);
-    rb_ivar_set(self, id_i_io, io);
+    rb_ivar_set(self, id_io, io);
 
     ssl = SSL_new(ctx);
     if (!ssl)
@@ -1866,6 +1845,19 @@ ossl_ssl_initialize(int argc, VALUE *argv, VALUE self)
     rb_call_super(0, NULL);
 
     return self;
+}
+
+/*
+ * call-seq:
+ *    ssl.io -> io
+ *    ssl.to_io -> io
+ *
+ * Returns the underlying IO object.
+ */
+static VALUE
+ossl_ssl_get_io(VALUE self)
+{
+    return rb_attr_get(self, id_io);
 }
 
 #ifndef HAVE_RB_IO_DESCRIPTOR
@@ -1890,7 +1882,7 @@ ossl_ssl_setup(VALUE self)
     if (ssl_started(ssl))
         return Qtrue;
 
-    io = rb_attr_get(self, id_i_io);
+    io = ossl_ssl_get_io(self);
     GetOpenFile(io, fptr);
     rb_io_check_readable(fptr);
     rb_io_check_writable(fptr);
@@ -1926,6 +1918,28 @@ ssl_call_end(VALUE self)
     }
 
     return saved_errno;
+}
+
+static VALUE
+peer_ip_address(VALUE io)
+{
+    VALUE remote_address = rb_funcall(io, rb_intern("remote_address"), 0);
+
+    return rb_funcall(remote_address, rb_intern("inspect_sockaddr"), 0);
+}
+
+static VALUE
+fallback_peer_ip_address(VALUE self, VALUE exc)
+{
+    return rb_str_new_cstr("(null)");
+}
+
+static VALUE
+peeraddr_ip_str(VALUE self)
+{
+    VALUE io = ossl_ssl_get_io(self);
+    return rb_rescue2(peer_ip_address, io, fallback_peer_ip_address, Qnil,
+                      rb_eSystemCallError, (VALUE)0);
 }
 
 static VALUE
@@ -3101,6 +3115,8 @@ Init_ossl_ssl(void)
     rb_define_alloc_func(cSSLSocket, ossl_ssl_s_alloc);
     rb_define_method(cSSLSocket, "initialize", ossl_ssl_initialize, -1);
     rb_undef_method(cSSLSocket, "initialize_copy");
+    rb_define_method(cSSLSocket, "io", ossl_ssl_get_io, 0);
+    rb_define_alias(cSSLSocket, "to_io", "io");
     rb_define_private_method(cSSLSocket, "ssl_connect", ossl_ssl_connect, 0);
     rb_define_private_method(cSSLSocket, "ssl_accept", ossl_ssl_accept, 0);
     rb_define_private_method(cSSLSocket, "string_new_capacity", ossl_ssl_string_new_capacity, 1);
@@ -3293,6 +3309,7 @@ Init_ossl_ssl(void)
     id_npn_protocols_encoded = rb_intern_const("npn_protocols_encoded");
     id_each = rb_intern_const("each");
     id_original_context = rb_intern_const("original_context");
+    id_io = rb_intern_const("io");
 
 #define DefIVarID(name) do \
     id_i_##name = rb_intern_const("@"#name); while (0)
@@ -3323,7 +3340,6 @@ Init_ossl_ssl(void)
     DefIVarID(keylog_cb);
     DefIVarID(tmp_dh_callback);
 
-    DefIVarID(io);
     DefIVarID(context);
     DefIVarID(hostname);
     DefIVarID(sync_close);

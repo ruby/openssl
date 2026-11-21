@@ -380,10 +380,6 @@ module OpenSSL
 
       attr_reader :hostname
 
-      # The underlying IO object.
-      attr_reader :io
-      alias :to_io :io
-
       # The SSLContext object used in this connection.
       attr_reader :context
 
