@@ -160,6 +160,7 @@ have_func("EVP_PKEY_check(NULL)", evp_h)
 
 # added in OpenSSL 1.1.1, currently not in LibreSSL
 have_func("OPENSSL_sk_new_reserve(NULL, 0)", stack_h)
+have_func("SSL_CTX_set_client_hello_cb(NULL, NULL, NULL)", ssl_h)
 
 # added in 3.0.0
 have_func("SSL_CTX_set0_tmp_dh_pkey(NULL, NULL)", ssl_h)
