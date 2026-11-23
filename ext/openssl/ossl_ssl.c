@@ -1987,6 +1987,14 @@ ossl_ssl_string_new_capacity(VALUE self, VALUE len)
     return rb_str_buf_new(capa >= 0 ? capa : 0);
 }
 
+static void
+ssl_check_io_open(VALUE self)
+{
+    rb_io_t *fptr;
+
+    GetOpenFile(rb_attr_get(self, id_i_io), fptr);
+}
+
 /*
  * call-seq:
  *    ssl.ssl_read(len, str) -> str, nil, :wait_readable, or :wait_writable
@@ -1999,6 +2007,7 @@ ossl_ssl_read(VALUE self, VALUE len, VALUE str)
     VALUE cb_state;
 
     GetSSL(self, ssl);
+    ssl_check_io_open(self);
     if (!ssl_started(ssl))
         rb_raise(eSSLError, "SSL session is not started yet");
 
@@ -2070,6 +2079,7 @@ ossl_ssl_write(VALUE self, VALUE str)
     VALUE cb_state;
 
     GetSSL(self, ssl);
+    ssl_check_io_open(self);
     if (!ssl_started(ssl))
         rb_raise(eSSLError, "SSL session is not started yet");
 
