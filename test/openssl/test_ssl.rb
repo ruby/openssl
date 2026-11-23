@@ -1941,6 +1941,23 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     }
   end
 
+  def test_read_write_after_socket_close
+    sctx = make_server_context
+    if defined?(OpenSSL::SSL::OP_IGNORE_UNEXPECTED_EOF)
+      sctx.options |= OpenSSL::SSL::OP_IGNORE_UNEXPECTED_EOF
+    end
+
+    start_server(sctx) { |port|
+      sock = TCPSocket.new("127.0.0.1", port)
+      ssl = OpenSSL::SSL::SSLSocket.new(sock)
+      ssl.connect
+      ssl.puts "abc"; assert_equal "abc\n", ssl.gets
+      sock.close
+      assert_raise(IOError) { ssl.syswrite("abc") }
+      assert_raise(IOError) { ssl.sysread(1) }
+    }
+  end
+
   def test_sync_close_without_connect
     Socket.open(:INET, :STREAM) {|s|
       ssl = OpenSSL::SSL::SSLSocket.new(s)
