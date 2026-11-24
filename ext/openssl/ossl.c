@@ -145,6 +145,29 @@ ossl_bin2hex(const unsigned char *in, char *out, size_t inlen)
     }
 }
 
+struct nogvl_args {
+    void *(*func)(void *);
+    void *data1;
+    rb_unblock_function_t *ubf;
+    void *data2;
+};
+
+static VALUE
+nogvl_i(VALUE args_)
+{
+    struct nogvl_args *args = (struct nogvl_args *)args_;
+    return (VALUE)rb_thread_call_without_gvl(args->func, args->data1,
+                                             args->ubf, args->data2);
+}
+
+void *
+ossl_nogvl(void *(*func)(void *), void *data1,
+           rb_unblock_function_t *ubf, void *data2, int *state)
+{
+    struct nogvl_args args = { func, data1, ubf, data2 };
+    return (void *)rb_protect(nogvl_i, (VALUE)&args, state);
+}
+
 static ID id_cb_state;
 
 int

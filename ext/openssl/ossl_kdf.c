@@ -16,6 +16,7 @@ struct pbkdf2_hmac_args {
     const EVP_MD *md;
     int len;
     unsigned char *out;
+    struct ossl_err_state es;
 };
 
 static void *
@@ -25,7 +26,8 @@ pbkdf2_hmac_nogvl(void *args_)
     int ret = PKCS5_PBKDF2_HMAC(args->pass, args->passlen, args->salt,
                                 args->saltlen, args->iters, args->md,
                                 args->len, args->out);
-    return (void *)(uintptr_t)ret;
+    ossl_err_state_save(&args->es);
+    return (void *)(intptr_t)ret;
 }
 
 /*
@@ -62,8 +64,9 @@ kdf_pbkdf2_hmac(int argc, VALUE *argv, VALUE self)
 {
     VALUE pass, salt, opts, kwargs[4], str, md_holder, pass_tmp, salt_tmp;
     static ID kwargs_ids[4];
-    int passlen, saltlen, iters, len;
+    int passlen, saltlen, iters, len, state;
     const EVP_MD *md;
+    void *ret;
 
     if (!kwargs_ids[0]) {
         kwargs_ids[0] = rb_intern_const("salt");
@@ -94,11 +97,17 @@ kdf_pbkdf2_hmac(int argc, VALUE *argv, VALUE self)
     };
     memcpy(args.pass, RSTRING_PTR(pass), passlen);
     memcpy(args.salt, RSTRING_PTR(salt), saltlen);
-    if (!rb_thread_call_without_gvl(pbkdf2_hmac_nogvl, &args, NULL, NULL))
-        ossl_raise(eKDF, "PKCS5_PBKDF2_HMAC");
+    ret = ossl_nogvl(pbkdf2_hmac_nogvl, &args, NULL, NULL, &state);
     OPENSSL_cleanse(args.pass, passlen);
     ALLOCV_END(pass_tmp);
     ALLOCV_END(salt_tmp);
+    ossl_err_state_restore(&args.es);
+    if (state) {
+        ossl_clear_error();
+        rb_jump_tag(state);
+    }
+    if (!ret)
+        ossl_raise(eKDF, "PKCS5_PBKDF2_HMAC");
     return str;
 }
 
@@ -111,6 +120,7 @@ struct scrypt_args {
     uint64_t N, r, p;
     size_t len;
     unsigned char *out;
+    struct ossl_err_state es;
 };
 
 static void *
@@ -126,7 +136,8 @@ scrypt_nogvl(void *args_)
     int ret = EVP_PBE_scrypt(args->pass, args->passlen,
                              args->salt, args->saltlen, args->N, args->r,
                              args->p, maxmem, args->out, args->len);
-    return (void *)(uintptr_t)ret;
+    ossl_err_state_save(&args->es);
+    return (void *)(intptr_t)ret;
 }
 
 /*
@@ -173,6 +184,8 @@ kdf_scrypt(int argc, VALUE *argv, VALUE self)
     size_t passlen, saltlen;
     rb_len_t len;
     uint64_t N, r, p;
+    int state;
+    void *ret;
 
     if (!kwargs_ids[0]) {
         kwargs_ids[0] = rb_intern_const("salt");
@@ -206,11 +219,17 @@ kdf_scrypt(int argc, VALUE *argv, VALUE self)
     };
     memcpy(args.pass, RSTRING_PTR(pass), passlen);
     memcpy(args.salt, RSTRING_PTR(salt), saltlen);
-    if (!rb_thread_call_without_gvl(scrypt_nogvl, &args, NULL, NULL))
-        ossl_raise(eKDF, "EVP_PBE_scrypt");
+    ret = ossl_nogvl(scrypt_nogvl, &args, NULL, NULL, &state);
     OPENSSL_cleanse(args.pass, passlen);
     ALLOCV_END(pass_tmp);
     ALLOCV_END(salt_tmp);
+    ossl_err_state_restore(&args.es);
+    if (state) {
+        ossl_clear_error();
+        rb_jump_tag(state);
+    }
+    if (!ret)
+        ossl_raise(eKDF, "EVP_PBE_scrypt");
     return str;
 }
 #endif

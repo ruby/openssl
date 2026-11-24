@@ -155,6 +155,9 @@ do{\
  */
 void ossl_bin2hex(const unsigned char *in, char *out, size_t len);
 
+void *ossl_nogvl(void *(*func)(void *), void *data1,
+                 rb_unblock_function_t *ubf, void *data2, int *state);
+
 /*
  * Use Fiber-local storage for rb_protect() states. This is fragile!
  */
