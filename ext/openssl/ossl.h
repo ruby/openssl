@@ -198,6 +198,24 @@ VALUE ossl_make_error(VALUE exc, VALUE str);
 void ossl_clear_error(void);
 
 /*
+ * Note that marks set by ERR_set_mark() are lost.
+ */
+struct ossl_err_state {
+#ifdef HAVE_OSSL_ERR_STATE_NEW
+    ERR_STATE *err_state;
+#else
+    size_t len;
+    struct ossl_err_state_entry {
+        unsigned long code;
+        int line;
+        char *file, *func, *data;
+    } entries[16/* ERR_NUM_ERRORS */];
+#endif
+};
+void ossl_err_state_save(struct ossl_err_state *state);
+void ossl_err_state_restore(struct ossl_err_state *state);
+
+/*
  * String to DER String
  */
 VALUE ossl_to_der(VALUE);
