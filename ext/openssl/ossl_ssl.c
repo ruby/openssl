@@ -113,13 +113,16 @@ ossl_sslctx_s_alloc(VALUE klass)
 static int
 ssl_cb_call(VALUE (*func)(VALUE args), VALUE args, VALUE *ret)
 {
+    struct ossl_err_state es;
     int state;
 
     if (ossl_cb_state_get()) {
         *ret = Qnil;
         return 0;
     }
+    ossl_err_state_save(&es);
     *ret = rb_protect(func, args, &state);
+    ossl_err_state_restore(&es);
     if (state) {
         ossl_cb_state_set(state);
         return 0;
@@ -436,6 +439,7 @@ static void
 ossl_sslctx_session_remove_cb(SSL_CTX *ctx, SSL_SESSION *sess)
 {
     struct sess_remove_cb_args args = { ctx, sess };
+    struct ossl_err_state es;
 
     /*
      * This callback is also called for all sessions in the internal store
@@ -445,7 +449,9 @@ ossl_sslctx_session_remove_cb(SSL_CTX *ctx, SSL_SESSION *sess)
         return;
 
     OSSL_Debug("SSL SESSION remove callback entered");
+    ossl_err_state_save(&es);
     ossl_suppress(ossl_call_session_remove_cb, (VALUE)&args);
+    ossl_err_state_restore(&es);
 }
 
 static VALUE
