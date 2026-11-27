@@ -36,7 +36,9 @@ VALUE cSSLSocket;
 static VALUE eSSLErrorWaitReadable;
 static VALUE eSSLErrorWaitWritable;
 
-static ID id_call, id_npn_protocols_encoded, id_each, id_original_context;
+static ID id_call, id_npn_protocols_encoded, id_each, id_original_context,
+          id_io, id_read_nonblock, id_write_nonblock, id_bio_eof,
+          id_bio_rbuf, id_bio_wbuf;
 static VALUE sym_wait_readable, sym_wait_writable;
 
 static ID id_i_cert_store, id_i_ca_file, id_i_ca_path, id_i_verify_mode,
@@ -47,10 +49,13 @@ static ID id_i_cert_store, id_i_ca_file, id_i_ca_path, id_i_verify_mode,
           id_i_session_remove_cb, id_i_npn_select_cb, id_i_npn_protocols,
           id_i_alpn_select_cb, id_i_alpn_protocols, id_i_servername_cb,
           id_i_verify_hostname, id_i_keylog_cb, id_i_tmp_dh_callback;
-static ID id_i_io, id_i_context, id_i_hostname, id_i_sync_close;
+static ID id_i_context, id_i_hostname, id_i_sync_close;
 
 static int ossl_ssl_ex_ptr_idx;
 static int ossl_sslctx_ex_ptr_idx;
+
+static BIO_METHOD *ossl_ssl_bio_meth;
+static VALUE nonblock_kwargs;
 
 static void
 ossl_sslctx_mark(void *ptr)
@@ -113,13 +118,16 @@ ossl_sslctx_s_alloc(VALUE klass)
 static int
 ssl_cb_call(VALUE (*func)(VALUE args), VALUE args, VALUE *ret)
 {
+    struct ossl_err_state es;
     int state;
 
     if (ossl_cb_state_get()) {
         *ret = Qnil;
         return 0;
     }
+    ossl_err_state_save(&es);
     *ret = rb_protect(func, args, &state);
+    ossl_err_state_restore(&es);
     if (state) {
         ossl_cb_state_set(state);
         return 0;
@@ -436,6 +444,7 @@ static void
 ossl_sslctx_session_remove_cb(SSL_CTX *ctx, SSL_SESSION *sess)
 {
     struct sess_remove_cb_args args = { ctx, sess };
+    struct ossl_err_state es;
 
     /*
      * This callback is also called for all sessions in the internal store
@@ -445,7 +454,9 @@ ossl_sslctx_session_remove_cb(SSL_CTX *ctx, SSL_SESSION *sess)
         return;
 
     OSSL_Debug("SSL SESSION remove callback entered");
+    ossl_err_state_save(&es);
     ossl_suppress(ossl_call_session_remove_cb, (VALUE)&args);
+    ossl_err_state_restore(&es);
 }
 
 static VALUE
@@ -1774,36 +1785,16 @@ ossl_ssl_s_alloc(VALUE klass)
     return TypedData_Wrap_Struct(klass, &ossl_ssl_type, NULL);
 }
 
-static VALUE
-peer_ip_address(VALUE io)
-{
-    VALUE remote_address = rb_funcall(io, rb_intern("remote_address"), 0);
-
-    return rb_funcall(remote_address, rb_intern("inspect_sockaddr"), 0);
-}
-
-static VALUE
-fallback_peer_ip_address(VALUE self, VALUE exc)
-{
-    return rb_str_new_cstr("(null)");
-}
-
-static VALUE
-peeraddr_ip_str(VALUE self)
-{
-    VALUE io = rb_attr_get(self, id_i_io);
-    return rb_rescue2(peer_ip_address, io, fallback_peer_ip_address, Qnil,
-                      rb_eSystemCallError, (VALUE)0);
-}
-
 /*
  * call-seq:
  *    SSLSocket.new(io) => aSSLSocket
  *    SSLSocket.new(io, ctx) => aSSLSocket
  *    SSLSocket.new(io, ctx, sync_close:) => aSSLSocket
  *
- * Creates a new SSL socket from _io_ which must be a real IO object (not an
- * IO-like object that responds to read/write).
+ * Creates a new SSL socket from the underlying socket _io_ and _ctx_.
+ *
+ * _io_ must be an IO object, typically a TCPSocket or Socket from the socket
+ * library, or an IO-like object that supports the typical IO methods.
  *
  * If _ctx_ is provided the SSL Sockets initial params will be taken from
  * the context.
@@ -1816,6 +1807,23 @@ peeraddr_ip_str(VALUE self)
  *
  * This method will freeze the SSLContext if one is provided;
  * however, session management is still allowed in the frozen SSLContext.
+ *
+ * == Support for IO-like objects
+ *
+ * Support for IO-like objects was added in version 4.1 and is considered
+ * experimental.
+ * The requirements for the objects may change in future versions.
+ *
+ * As of version 4.1, SSLSocket expects the IO-like object to implement
+ * the following methods that behave like a core IO object:
+ *
+ * - <tt>write_nonblock(string, exception: false)</tt>
+ * - <tt>read_nonblock(maxlen, buffer, exception: false)</tt>
+ * - <tt>wait_readable</tt>
+ * - <tt>wait_writable</tt>
+ * - <tt>close</tt>
+ * - <tt>closed?</tt>
+ * - <tt>timeout</tt>
  */
 static VALUE
 ossl_ssl_initialize(int argc, VALUE *argv, VALUE self)
@@ -1846,8 +1854,7 @@ ossl_ssl_initialize(int argc, VALUE *argv, VALUE self)
     rb_ivar_set(self, id_original_context, v_ctx);
     ossl_sslctx_setup(v_ctx);
 
-    Check_Type(io, T_FILE);
-    rb_ivar_set(self, id_i_io, io);
+    rb_ivar_set(self, id_io, io);
 
     ssl = SSL_new(ctx);
     if (!ssl)
@@ -1862,6 +1869,19 @@ ossl_ssl_initialize(int argc, VALUE *argv, VALUE self)
     return self;
 }
 
+/*
+ * call-seq:
+ *    ssl.io -> io
+ *    ssl.to_io -> io
+ *
+ * Returns the underlying IO object.
+ */
+static VALUE
+ossl_ssl_get_io(VALUE self)
+{
+    return rb_attr_get(self, id_io);
+}
+
 #ifndef HAVE_RB_IO_DESCRIPTOR
 static int
 io_descriptor_fallback(VALUE io)
@@ -1873,24 +1893,43 @@ io_descriptor_fallback(VALUE io)
 #define rb_io_descriptor io_descriptor_fallback
 #endif
 
+static int
+ssl_io_p(VALUE io)
+{
+    // FIXME: DO NOT MERGE
+    return 0;
+    return RB_TYPE_P(io, T_FILE);
+}
+
+static BIO *ossl_ssl_bio_setup(SSL *ssl);
+
 static VALUE
 ossl_ssl_setup(VALUE self)
 {
     VALUE io;
     SSL *ssl;
-    rb_io_t *fptr;
 
     GetSSL(self, ssl);
     if (ssl_started(ssl))
         return Qtrue;
 
-    io = rb_attr_get(self, id_i_io);
-    GetOpenFile(io, fptr);
-    rb_io_check_readable(fptr);
-    rb_io_check_writable(fptr);
-    rb_io_set_nonblock(fptr);
-    if (!SSL_set_fd(ssl, TO_SOCKET(rb_io_descriptor(io))))
-        ossl_raise(eSSLError, "SSL_set_fd");
+    io = ossl_ssl_get_io(self);
+    if (ssl_io_p(io)) {
+        rb_io_t *fptr;
+        GetOpenFile(io, fptr);
+        rb_io_check_readable(fptr);
+        rb_io_check_writable(fptr);
+        rb_io_set_nonblock(fptr);
+        if (!SSL_set_fd(ssl, TO_SOCKET(rb_io_descriptor(io))))
+            ossl_raise(eSSLError, "SSL_set_fd");
+    }
+    else {
+        rb_ivar_set(self, id_bio_rbuf, rb_str_buf_new(0));
+        rb_ivar_set(self, id_bio_wbuf, rb_str_buf_new(0));
+
+        BIO *bio = ossl_ssl_bio_setup(ssl);
+        SSL_set_bio(ssl, bio, bio);
+    }
 
     return Qtrue;
 }
@@ -1920,6 +1959,29 @@ ssl_call_end(VALUE self)
     }
 
     return saved_errno;
+}
+
+static VALUE
+peer_ip_address(VALUE io)
+{
+    VALUE remote_address =
+        rb_check_funcall(io, rb_intern("remote_address"), 0, NULL);
+    if (remote_address == Qundef)
+        return rb_str_new_cstr("(error: remote_address not supported)");
+    return rb_funcall(remote_address, rb_intern("inspect_sockaddr"), 0);
+}
+
+static VALUE
+fallback_peer_ip_address(VALUE self, VALUE exc)
+{
+    return rb_sprintf("(error: %"PRIsVALUE")", exc);
+}
+
+static VALUE
+peeraddr_ip_str(VALUE self)
+{
+    VALUE io = ossl_ssl_get_io(self);
+    return rb_rescue(peer_ip_address, io, fallback_peer_ip_address, Qnil);
 }
 
 static VALUE
@@ -2691,6 +2753,219 @@ ossl_ssl_get_group(VALUE self)
 }
 #endif
 
+/*
+ * ossl_ssl_bio_meth
+ */
+static BIO *
+ossl_ssl_bio_setup(SSL *ssl)
+{
+    BIO *bio = BIO_new(ossl_ssl_bio_meth);
+    if (!bio)
+        ossl_raise(eOSSLError, "BIO_new");
+
+    BIO_set_data(bio, ssl);
+    BIO_set_init(bio, 1);
+    return bio;
+}
+
+struct bio_call_args {
+    int state;
+    VALUE (*func)(VALUE);
+    VALUE args;
+};
+
+static VALUE
+bio_call_jump(VALUE args_)
+{
+    struct bio_call_args *args = (void *)args_;
+    rb_jump_tag(args->state);
+}
+
+static VALUE
+bio_call_rescue(VALUE args_, VALUE exc)
+{
+    struct bio_call_args *args = (void *)args_;
+    return args->func(args->args);
+}
+
+static VALUE
+bio_call_pending(VALUE args_)
+{
+    return rb_rescue2(bio_call_jump, args_, bio_call_rescue, args_,
+                      rb_eException, (VALUE)0);
+}
+
+/*
+ * BIO functions may be called by OpenSSL when something has already gone
+ * wrong, such as when a Ruby callback registered to SSLContext raised an
+ * exception or was interrupted by Thread#kill.
+ *
+ * Here, we execute func(args) when a jump is already pending, but only if it
+ * is an ordinary exception, because we don't want to swallow a fatal like
+ * Thread#kill.
+ */
+static int
+bio_call(VALUE (*func)(VALUE), VALUE args)
+{
+    int ok;
+    VALUE discard;
+
+    if (!ossl_cb_state_get()) {
+        ok = ssl_cb_call(func, args, &discard);
+    }
+    else {
+        int state = ossl_cb_state_end();
+        struct bio_call_args pargs = { state, func, args };
+        ossl_cb_state_begin();
+        ok = ssl_cb_call(bio_call_pending, (VALUE)&pargs, &discard);
+        if (ok)
+            ossl_cb_state_set(state);
+    }
+
+    errno = 0;
+#ifdef _WIN32
+    WSASetLastError(0);
+#endif
+    return ok;
+}
+
+struct bwrite_args {
+    BIO *bio;
+    const char *data;
+    int dlen;
+    int ret;
+};
+
+static VALUE
+bio_bwrite0(VALUE args_)
+{
+    struct bwrite_args *args = (void *)args_;
+    SSL *ssl;
+    VALUE self, io, buf, fargs[2], ret;
+
+    ssl = BIO_get_data(args->bio);
+    self = (VALUE)SSL_get_ex_data(ssl, ossl_ssl_ex_ptr_idx);
+    io = ossl_ssl_get_io(self);
+
+    buf = rb_attr_get(self, id_bio_wbuf);
+    if ((rb_len_t)rb_str_capacity(buf) >= args->dlen)
+        rb_str_modify(buf);
+    else
+        rb_str_modify_expand(buf, args->dlen - RSTRING_LEN(buf));
+    memcpy(RSTRING_PTR(buf), args->data, args->dlen);
+    rb_str_set_len(buf, args->dlen);
+
+    fargs[0] = buf;
+    fargs[1] = nonblock_kwargs;
+    ret = rb_funcallv_kw(io, id_write_nonblock, 2, fargs, RB_PASS_KEYWORDS);
+
+    BIO_clear_retry_flags(args->bio);
+    if (RB_INTEGER_TYPE_P(ret)) {
+        int len = NUM2INT(ret);
+        if (len < 0 || len > args->dlen)
+            rb_raise(rb_eTypeError, "write_nonblock wrote too much data");
+        args->ret = len;
+    }
+    else if (ret == sym_wait_readable) {
+        BIO_set_retry_read(args->bio);
+        args->ret = -1;
+    }
+    else if (ret == sym_wait_writable) {
+        BIO_set_retry_write(args->bio);
+        args->ret = -1;
+    }
+    else {
+        rb_raise(rb_eTypeError, "write_nonblock must return an Integer, "
+                 ":wait_readable, or :wait_writable");
+    }
+    return Qnil;
+}
+
+static int
+bio_bwrite(BIO *bio, const char *data, int dlen)
+{
+    struct bwrite_args args = { bio, data, dlen, 0 };
+    if (bio_call(bio_bwrite0, (VALUE)&args))
+        return args.ret;
+    return -1;
+}
+
+struct bread_args {
+    BIO *bio;
+    char *data;
+    int dlen;
+    int ret;
+};
+
+static VALUE
+bio_bread0(VALUE args_)
+{
+    struct bread_args *args = (void *)args_;
+    SSL *ssl;
+    VALUE self, io, fargs[3], ret;
+
+    ssl = BIO_get_data(args->bio);
+    self = (VALUE)SSL_get_ex_data(ssl, ossl_ssl_ex_ptr_idx);
+    io = ossl_ssl_get_io(self);
+
+    fargs[0] = INT2NUM(args->dlen);
+    fargs[1] = rb_attr_get(self, id_bio_rbuf);
+    fargs[2] = nonblock_kwargs;
+    ret = rb_funcallv_kw(io, id_read_nonblock, 3, fargs, RB_PASS_KEYWORDS);
+
+    BIO_clear_retry_flags(args->bio);
+    if (RB_TYPE_P(ret, T_STRING)) {
+        int len = RSTRING_LENINT(ret);
+        if (len > args->dlen)
+            rb_raise(rb_eTypeError, "read_nonblock returned too much data");
+        memcpy(args->data, RSTRING_PTR(ret), len);
+        args->ret = len;
+    }
+    else if (NIL_P(ret)) {
+        // In OpenSSL >= 1.1.1e: BIO_set_flags(args->bio, BIO_FLAGS_IN_EOF);
+        rb_ivar_set(self, id_bio_eof, Qtrue);
+        args->ret = 0;
+    }
+    else if (ret == sym_wait_readable) {
+        BIO_set_retry_read(args->bio);
+        args->ret = -1;
+    }
+    else if (ret == sym_wait_writable) {
+        BIO_set_retry_write(args->bio);
+        args->ret = -1;
+    }
+    else {
+        rb_raise(rb_eTypeError, "read_nonblock must return a String, nil, "
+                 ":wait_readable, or :wait_writable");
+    }
+    return Qnil;
+}
+
+static int
+bio_bread(BIO *bio, char *data, int dlen)
+{
+    struct bread_args args = { bio, data, dlen, 0 };
+    if (bio_call(bio_bread0, (VALUE)&args))
+        return args.ret;
+    return -1;
+}
+
+static long
+bio_ctrl(BIO *bio, int cmd, long larg, void *parg)
+{
+    SSL *ssl = BIO_get_data(bio);
+    VALUE self = (VALUE)SSL_get_ex_data(ssl, ossl_ssl_ex_ptr_idx);
+
+    switch (cmd) {
+      case BIO_CTRL_EOF:
+        return RTEST(rb_attr_get(self, id_bio_eof));
+      case BIO_CTRL_FLUSH:
+        return 1;
+      default:
+        return 0;
+    }
+}
+
 #endif /* !defined(OPENSSL_NO_SOCK) */
 
 void
@@ -3095,6 +3370,8 @@ Init_ossl_ssl(void)
     rb_define_alloc_func(cSSLSocket, ossl_ssl_s_alloc);
     rb_define_method(cSSLSocket, "initialize", ossl_ssl_initialize, -1);
     rb_undef_method(cSSLSocket, "initialize_copy");
+    rb_define_method(cSSLSocket, "io", ossl_ssl_get_io, 0);
+    rb_define_alias(cSSLSocket, "to_io", "io");
     rb_define_private_method(cSSLSocket, "ssl_connect", ossl_ssl_connect, 0);
     rb_define_private_method(cSSLSocket, "ssl_accept", ossl_ssl_accept, 0);
     rb_define_private_method(cSSLSocket, "string_new_capacity", ossl_ssl_string_new_capacity, 1);
@@ -3287,6 +3564,12 @@ Init_ossl_ssl(void)
     id_npn_protocols_encoded = rb_intern_const("npn_protocols_encoded");
     id_each = rb_intern_const("each");
     id_original_context = rb_intern_const("original_context");
+    id_io = rb_intern_const("io");
+    id_read_nonblock = rb_intern_const("read_nonblock");
+    id_write_nonblock = rb_intern_const("write_nonblock");
+    id_bio_eof = rb_intern_const("bio_eof");
+    id_bio_rbuf = rb_intern_const("bio_rbuf");
+    id_bio_wbuf = rb_intern_const("bio_wbuf");
 
 #define DefIVarID(name) do \
     id_i_##name = rb_intern_const("@"#name); while (0)
@@ -3317,9 +3600,28 @@ Init_ossl_ssl(void)
     DefIVarID(keylog_cb);
     DefIVarID(tmp_dh_callback);
 
-    DefIVarID(io);
     DefIVarID(context);
     DefIVarID(hostname);
     DefIVarID(sync_close);
+
+    int bio_index = BIO_get_new_index();
+    if (bio_index < 0)
+        rb_raise(rb_eRuntimeError, "BIO_get_new_index");
+    ossl_ssl_bio_meth = BIO_meth_new(BIO_TYPE_SOURCE_SINK | bio_index,
+                                     "Ruby IO-like object");
+    if (!ossl_ssl_bio_meth)
+        rb_raise(rb_eRuntimeError, "BIO_meth_new");
+    if (!BIO_meth_set_write(ossl_ssl_bio_meth, bio_bwrite) ||
+        !BIO_meth_set_read(ossl_ssl_bio_meth, bio_bread) ||
+        !BIO_meth_set_ctrl(ossl_ssl_bio_meth, bio_ctrl)) {
+        BIO_meth_free(ossl_ssl_bio_meth);
+        ossl_ssl_bio_meth = NULL;
+        rb_raise(rb_eRuntimeError, "BIO_meth_set_*");
+    }
+
+    nonblock_kwargs = rb_hash_new();
+    rb_hash_aset(nonblock_kwargs, ID2SYM(rb_intern_const("exception")), Qfalse);
+    rb_obj_freeze(nonblock_kwargs);
+    rb_global_variable(&nonblock_kwargs);
 #endif /* !defined(OPENSSL_NO_SOCK) */
 }

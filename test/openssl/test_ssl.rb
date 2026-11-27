@@ -4,17 +4,6 @@ require_relative "utils"
 if defined?(OpenSSL::SSL)
 
 class OpenSSL::TestSSL < OpenSSL::SSLTestCase
-  def test_bad_socket
-    bad_socket = Struct.new(:sync).new
-    assert_raise TypeError do
-      socket = OpenSSL::SSL::SSLSocket.new bad_socket
-      # if the socket is not a T_FILE, `connect` will segv because it tries
-      # to get the underlying file descriptor but the API it calls assumes
-      # the object type is T_FILE
-      socket.connect
-    end
-  end
-
   def test_ctx_setup
     ctx = OpenSSL::SSL::SSLContext.new
     assert_equal true, ctx.setup
@@ -243,6 +232,117 @@ class OpenSSL::TestSSL < OpenSSL::SSLTestCase
     ensure
       ssl&.close
       sock&.close
+    end
+  end
+
+  def test_io_like
+    start_server do |port|
+      tcp = TCPSocket.new("127.0.0.1", port)
+      obj = Object.new
+      obj.define_singleton_method(:read_nonblock) { |maxlen, buf, exception:|
+        tcp.read_nonblock(maxlen, buf, exception: exception) }
+      obj.define_singleton_method(:write_nonblock) { |str, exception:|
+        tcp.write_nonblock(str, exception: exception) }
+      obj.define_singleton_method(:wait_readable) { |*args|
+        tcp.wait_readable(*args) }
+      obj.define_singleton_method(:wait_writable) { |*args|
+        tcp.wait_writable(*args) }
+      obj.define_singleton_method(:closed?) { tcp.closed? }
+      obj.define_singleton_method(:timeout) { tcp.timeout }
+
+      ssl = OpenSSL::SSL::SSLSocket.new(obj)
+      assert_same(obj, ssl.to_io)
+
+      ssl.connect
+      ssl.puts("abc"); assert_equal("abc\n", ssl.gets)
+    ensure
+      ssl&.close
+      tcp&.close
+    end
+  end
+
+  def test_io_like_write_nonblock_exception
+    start_server(ignore_listener_error: true) do |port|
+      tcp = TCPSocket.new("127.0.0.1", port)
+      obj = Object.new
+      [:read_nonblock, :wait_readable, :wait_writable, :closed?, :timeout].each do |name|
+        obj.define_singleton_method(name) { |*args, **kwargs|
+          tcp.__send__(name, *args, **kwargs) }
+      end
+
+      # SSLSocket#connect calls write_nonblock at least twice: to write
+      # ClientHello and Finished. Let's raise an exception in the 2nd call.
+      called = 0
+      obj.define_singleton_method(:write_nonblock) { |*args, **kwargs|
+        raise "foo" if (called += 1) == 2
+        tcp.write_nonblock(*args, **kwargs)
+      }
+
+      ssl = OpenSSL::SSL::SSLSocket.new(obj)
+      assert_raise_with_message(RuntimeError, "foo") { ssl.connect }
+    ensure
+      ssl&.close
+      tcp&.close
+    end
+  end
+
+  def test_io_like_error_in_cb_then_error_in_write
+    # If SSLContext#servername_cb fails, it must send the "unrecognized_name"
+    # alert. If another error occurs while writing the alert to the underlying
+    # socket, the original exception from the servername_cb is suppressed and
+    # the new exception is raised.
+    with_io_like_cb_and_write(
+      proc { raise "servername_cb" },
+      proc { raise "write_nonblock" },
+    ) do |ssl, called|
+      assert_raise_with_message(RuntimeError, "write_nonblock") { ssl.accept }
+      assert_equal([:servername_cb, :write_nonblock], called)
+    end
+  end
+
+  def test_io_like_throw_in_cb
+    # If the pending jump is not an exception, we do not attempt to write to
+    # the underlying socket.
+    with_io_like_cb_and_write(
+      proc { throw :servername_cb },
+      proc { raise "write_nonblock" },
+    ) do |ssl, called|
+      assert_throw(:servername_cb) { ssl.accept }
+      assert_equal([:servername_cb], called)
+    end
+  end
+
+  private def with_io_like_cb_and_write(servername_cb, write_nonblock)
+    client_can_close = Thread::Queue.new
+    server_proc = proc do |sock|
+      called = []
+      obj = Object.new
+      obj.define_singleton_method(:method_missing) { |name, *args, **kwargs|
+        sock.__send__(name, *args, **kwargs) }
+      obj.define_singleton_method(:respond_to_missing?) { |name, *args|
+        sock.respond_to?(name, *args) }
+      obj.define_singleton_method(:write_nonblock) { |*args, **kwargs|
+        called << :write_nonblock
+        write_nonblock.call(*args, **kwargs)
+      }
+      ctx = OpenSSL::SSL::SSLContext.new
+      ctx.servername_cb = -> ssl {
+        called << :servername_cb
+        servername_cb.call
+      }
+      yield OpenSSL::SSL::SSLSocket.new(obj, ctx), called
+    ensure
+      client_can_close.close
+    end
+    start_server_proc(server_proc) do |port|
+      sock = TCPSocket.new("127.0.0.1", port)
+      ssl = OpenSSL::SSL::SSLSocket.new(sock)
+      ssl.hostname = "localhost"
+      # Just send ClientHello to trigger servername_cb
+      ssl.connect_nonblock(exception: false)
+      client_can_close.pop
+    ensure
+      sock.close
     end
   end
 

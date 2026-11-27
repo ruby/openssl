@@ -457,14 +457,14 @@ module OpenSSL::TestPairM
         assert_instance_of(OpenSSL::SSL::SSLErrorWaitReadable, err)
       end
       s1.write "abc\ndef\n"
-      IO.select([s2])
+      s2.wait_readable
       assert_equal("ab", s2.read_nonblock(2))
       assert_equal("c\n", s2.gets)
       ret = nil
       assert_nothing_raised("[ruby-core:20298]") { ret = s2.read_nonblock(10) }
       assert_equal("def\n", ret)
       s1.close
-      IO.select([s2])
+      s2.wait_readable
       assert_raise(EOFError) { s2.read_nonblock(10) }
 
       assert_raise(ArgumentError) { s2.read_nonblock(-1) }
@@ -475,14 +475,14 @@ module OpenSSL::TestPairM
     ssl_pair {|s1, s2|
       assert_equal :wait_readable, s2.read_nonblock(10, exception: false)
       s1.write "abc\ndef\n"
-      IO.select([s2])
+      s2.wait_readable
       assert_equal("ab", s2.read_nonblock(2, exception: false))
       assert_equal("c\n", s2.gets)
       ret = nil
       assert_nothing_raised("[ruby-core:20298]") { ret = s2.read_nonblock(10, exception: false) }
       assert_equal("def\n", ret)
       s1.close
-      IO.select([s2])
+      s2.wait_readable
       assert_equal(nil, s2.read_nonblock(10, exception: false))
     }
   end
@@ -660,52 +660,8 @@ module OpenSSL::TestPairM
   end
 end
 
-class OpenSSL::TestSSLPair < OpenSSL::TestCase
-  include OpenSSL::TestPairM
-  include OpenSSL::TestEOF
-
-  def ssl_pair
-    svr_dn = OpenSSL::X509::Name.parse("/DC=org/DC=ruby-lang/CN=localhost")
-    ee_exts = [
-      ["keyUsage", "keyEncipherment,digitalSignature", true],
-    ]
-    svr_key = OpenSSL::TestUtils::Fixtures.pkey("rsa-1")
-    svr_cert = issue_cert(svr_dn, svr_key, 1, ee_exts, nil, nil)
-
-    host = "127.0.0.1"
-    svr = TCPServer.new(host, 0)
-    svr.setsockopt(:TCP, :NODELAY, 1)
-    port = svr.connect_address.ip_port
-
-    tcps = nil
-    th = Thread.new {
-      tcps = svr.accept
-      sctx = OpenSSL::SSL::SSLContext.new
-      sctx.add_certificate(svr_cert, svr_key)
-      ssl = OpenSSL::SSL::SSLSocket.new(tcps, sctx)
-      ssl.accept
-      ssl
-    }
-
-    tcpc = TCPSocket.new(host, port)
-    tcpc.setsockopt(:TCP, :NODELAY, 1)
-    c = OpenSSL::SSL::SSLSocket.new(tcpc)
-    c.connect
-    s = th.value
-
-    yield c, s
-  ensure
-    tcpc&.close
-    tcps&.close
-    svr&.close
-  end
-end
-
-class OpenSSL::TestSocketPair < OpenSSL::TestCase
-  include OpenSSL::TestPairM
-  include OpenSSL::TestEOF
-
-  def ssl_pair
+module OpenSSL::TestSSLPairUtils
+  def socketpair
     host = "127.0.0.1"
     svr = TCPServer.new(host, 0)
     svr.setsockopt(:TCP, :NODELAY, 1)
@@ -723,5 +679,78 @@ class OpenSSL::TestSocketPair < OpenSSL::TestCase
     tcpc&.close
     tcps&.close
     svr&.close
+  end
+
+  def do_handshake(tcpc, tcps)
+    svr_dn = OpenSSL::X509::Name.parse("/DC=org/DC=ruby-lang/CN=localhost")
+    ee_exts = [
+      ["keyUsage", "keyEncipherment,digitalSignature", true],
+    ]
+    svr_key = OpenSSL::TestUtils::Fixtures.pkey("rsa-1")
+    svr_cert = issue_cert(svr_dn, svr_key, 1, ee_exts, nil, nil)
+
+    th = Thread.new {
+      sctx = OpenSSL::SSL::SSLContext.new
+      sctx.add_certificate(svr_cert, svr_key)
+      ssl = OpenSSL::SSL::SSLSocket.new(tcps, sctx)
+      ssl.accept
+      ssl
+    }
+
+    c = OpenSSL::SSL::SSLSocket.new(tcpc)
+    c.connect
+    s = th.value
+
+    [c, s]
+  end
+end
+
+class OpenSSL::TestSSLPair < OpenSSL::TestCase
+  include OpenSSL::TestPairM
+  include OpenSSL::TestEOF
+  include OpenSSL::TestSSLPairUtils
+
+  def ssl_pair
+    socketpair do |tcpc, tcps|
+      yield do_handshake(tcpc, tcps)
+    end
+  end
+end
+
+class OpenSSL::TestSSLPairIOLike < OpenSSL::TestCase
+  include OpenSSL::TestPairM
+  include OpenSSL::TestEOF
+  include OpenSSL::TestSSLPairUtils
+
+  class IOWrapper
+    attr_reader :io
+    alias to_io io
+    def initialize(io) @io = io end
+    def read_nonblock(*args, **kwargs) @io.read_nonblock(*args, **kwargs) end
+    def write_nonblock(*args, **kwargs) @io.write_nonblock(*args, **kwargs) end
+    def wait_readable(*args) @io.wait_readable(*args) end
+    def wait_writable(*args) @io.wait_writable(*args) end
+    def close() @io.close end
+    def closed?() @io.closed? end
+    def timeout() @io.timeout end
+    def timeout=(val) @io.timeout = val end
+  end
+
+  def ssl_pair
+    socketpair do |tcpc, tcps|
+      yield do_handshake(IOWrapper.new(tcpc), IOWrapper.new(tcps))
+    end
+  end
+end
+
+class OpenSSL::TestSocketPair < OpenSSL::TestCase
+  include OpenSSL::TestPairM
+  include OpenSSL::TestEOF
+  include OpenSSL::TestSSLPairUtils
+
+  def ssl_pair
+    socketpair do |tcpc, tcps|
+      yield tcpc, tcps
+    end
   end
 end if RUBY_ENGINE != "truffleruby"

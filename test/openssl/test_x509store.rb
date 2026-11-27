@@ -175,6 +175,22 @@ class OpenSSL::TestX509Store < OpenSSL::TestCase
     blk = proc { |preverify_ok, sctx| called = :block; preverify_ok }
     assert_equal(true, store.verify(ee1_cert, [ca2_cert], &blk))
     assert_equal(:block, called)
+
+    # verify_callback may be called with OpenSSL error queue entries, but
+    # they must not be visible to Ruby code
+    ee1_cert_bad_sig = (
+      asn1 = OpenSSL::ASN1.decode(ee1_cert.to_der)
+      asn1.value[2].value = "x"
+      OpenSSL::X509::Certificate.new(asn1.to_der)
+    )
+    store = OpenSSL::X509::Store.new
+    store.add_cert(ca1_cert)
+    ret = store.verify(ee1_cert_bad_sig, [ca2_cert]) do |preverify_ok, sctx|
+      assert_clean_thread
+      preverify_ok
+    end
+    assert_equal(false, ret)
+    assert_equal(OpenSSL::X509::V_ERR_CERT_SIGNATURE_FAILURE, store.error)
   end
 
   def test_verify_callback_warning_raises

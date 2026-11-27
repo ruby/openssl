@@ -280,6 +280,7 @@ pkey_ctx_apply_options(EVP_PKEY_CTX *ctx, VALUE options, int *state)
 struct pkey_blocking_generate_arg {
     EVP_PKEY_CTX *ctx;
     EVP_PKEY *pkey;
+    struct ossl_err_state es;
     int state;
     unsigned int yield: 1;
     unsigned int genparam: 1;
@@ -320,10 +321,15 @@ static int
 pkey_gen_cb(EVP_PKEY_CTX *ctx)
 {
     struct pkey_blocking_generate_arg *arg = EVP_PKEY_CTX_get_app_data(ctx);
+    struct ossl_err_state es;
     int state;
 
+    if (arg->state)
+        return 0;
     if (arg->yield) {
+        ossl_err_state_save(&es);
         rb_protect(pkey_gen_cb_yield, (VALUE)ctx, &state);
+        ossl_err_state_restore(&es);
         if (state) {
             arg->state = state;
             return 0;
@@ -331,7 +337,9 @@ pkey_gen_cb(EVP_PKEY_CTX *ctx)
     }
     if (arg->interrupted) {
         arg->interrupted = 0;
+        ossl_err_state_save(&es);
         state = (int)(VALUE)rb_thread_call_with_gvl(call_check_ints, NULL);
+        ossl_err_state_restore(&es);
         if (state) {
             arg->state = state;
             return 0;
@@ -351,12 +359,14 @@ static void *
 pkey_blocking_gen(void *ptr)
 {
     struct pkey_blocking_generate_arg *arg = ptr;
+    int ret;
 
-    if (arg->genparam && EVP_PKEY_paramgen(arg->ctx, &arg->pkey) <= 0)
-        return NULL;
-    if (!arg->genparam && EVP_PKEY_keygen(arg->ctx, &arg->pkey) <= 0)
-        return NULL;
-    return arg->pkey;
+    if (arg->genparam)
+        ret = EVP_PKEY_paramgen(arg->ctx, &arg->pkey);
+    else
+        ret = EVP_PKEY_keygen(arg->ctx, &arg->pkey);
+    ossl_err_state_save(&arg->es);
+    return (void *)(intptr_t)ret;
 }
 
 static VALUE
@@ -365,6 +375,7 @@ pkey_generate(int argc, VALUE *argv, VALUE self, int genparam)
     EVP_PKEY_CTX *ctx;
     VALUE alg, options;
     struct pkey_blocking_generate_arg gen_arg = { 0 };
+    void *ret;
     int state;
 
     rb_scan_args(argc, argv, "11", &alg, &options);
@@ -425,21 +436,24 @@ pkey_generate(int argc, VALUE *argv, VALUE self, int genparam)
     gen_arg.yield = rb_block_given_p();
     EVP_PKEY_CTX_set_app_data(ctx, &gen_arg);
     EVP_PKEY_CTX_set_cb(ctx, pkey_gen_cb);
-    if (gen_arg.yield)
-        pkey_blocking_gen(&gen_arg);
-    else
-        rb_thread_call_without_gvl(pkey_blocking_gen, &gen_arg,
-                                   pkey_blocking_gen_stop, &gen_arg);
-    EVP_PKEY_CTX_free(ctx);
-    if (!gen_arg.pkey) {
-        if (gen_arg.state) {
-            ossl_clear_error();
-            rb_jump_tag(gen_arg.state);
-        }
-        else {
-            ossl_raise(ePKeyError, genparam ? "EVP_PKEY_paramgen" : "EVP_PKEY_keygen");
-        }
+    if (gen_arg.yield) {
+        ret = pkey_blocking_gen(&gen_arg);
     }
+    else {
+        ret = ossl_nogvl(pkey_blocking_gen, &gen_arg, pkey_blocking_gen_stop,
+                         &gen_arg, &state);
+        if (state)
+            gen_arg.state = state;
+    }
+    ossl_err_state_restore(&gen_arg.es);
+    EVP_PKEY_CTX_free(ctx);
+    if (gen_arg.state) {
+        EVP_PKEY_free(gen_arg.pkey);
+        ossl_clear_error();
+        rb_jump_tag(gen_arg.state);
+    }
+    if ((int)(intptr_t)ret != 1)
+        ossl_raise(ePKeyError, genparam ? "EVP_PKEY_paramgen" : "EVP_PKEY_keygen");
 
     return ossl_pkey_wrap(gen_arg.pkey);
 }

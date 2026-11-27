@@ -31,29 +31,26 @@ static VALUE ossl_x509stctx_new(X509_STORE_CTX *);
 
 struct ossl_verify_cb_args {
     VALUE proc;
-    VALUE preverify_ok;
+    int preverify_ok;
+    X509_STORE_CTX *ctx;
     VALUE store_ctx;
 };
-
-static VALUE
-ossl_x509stctx_new_i(VALUE arg)
-{
-    return ossl_x509stctx_new((X509_STORE_CTX *)arg);
-}
 
 static VALUE
 call_verify_cb_proc(VALUE arg)
 {
     struct ossl_verify_cb_args *args = (struct ossl_verify_cb_args *)arg;
+    args->store_ctx = ossl_x509stctx_new(args->ctx);
     return rb_funcall(args->proc, rb_intern("call"), 2,
-                      args->preverify_ok, args->store_ctx);
+                      args->preverify_ok ? Qtrue : Qfalse, args->store_ctx);
 }
 
 int
 ossl_verify_cb_call(VALUE proc, int ok, X509_STORE_CTX *ctx)
 {
-    VALUE rctx, ret;
-    struct ossl_verify_cb_args args;
+    VALUE ret;
+    struct ossl_verify_cb_args args = { proc, ok, ctx, Qnil };
+    struct ossl_err_state es;
     int state;
 
     if (ossl_cb_state_get())
@@ -61,16 +58,11 @@ ossl_verify_cb_call(VALUE proc, int ok, X509_STORE_CTX *ctx)
     if (NIL_P(proc))
         return ok;
 
-    rctx = rb_protect(ossl_x509stctx_new_i, (VALUE)ctx, &state);
-    if (state) {
-        ossl_cb_state_set(state);
-        goto err;
-    }
-    args.proc = proc;
-    args.preverify_ok = ok ? Qtrue : Qfalse;
-    args.store_ctx = rctx;
+    ossl_err_state_save(&es);
     ret = rb_protect(call_verify_cb_proc, (VALUE)&args, &state);
-    RTYPEDDATA_DATA(rctx) = NULL;
+    ossl_err_state_restore(&es);
+    if (!NIL_P(args.store_ctx))
+        RTYPEDDATA_DATA(args.store_ctx) = NULL;
     if (state) {
         ossl_cb_state_set(state);
         goto err;
