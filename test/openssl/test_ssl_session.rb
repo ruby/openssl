@@ -428,6 +428,32 @@ __EOS__
     end
   end
 
+  def test_session_remove_cb_preserves_error_queue
+    server_proc = proc do |sock|
+      OpenSSL::SSL::SSLSocket.new(sock, make_server_context).accept
+      sock.close_write
+    end
+    start_server_proc(server_proc) do |port|
+      ctx = OpenSSL::SSL::SSLContext.new
+      ctx.options &= ~OpenSSL::SSL::OP_IGNORE_UNEXPECTED_EOF
+      ctx.session_cache_mode = OpenSSL::SSL::SSLContext::SESSION_CACHE_CLIENT
+      cb_exc = false
+      ctx.session_remove_cb = ->(_) {
+        begin
+          assert_clean_thread
+          cb_exc = nil
+        rescue Exception => e
+          cb_exc = e
+        end
+      }
+      server_connect_with_session(port, ctx) do |ssl|
+        exc = assert_raise(OpenSSL::SSL::SSLError) { ssl.sysread(1) }
+        assert_not_empty(exc.errors)
+        assert_nil(cb_exc)
+      end
+    end
+  end if openssl?(3, 0, 0)
+
   def test_dup
     sess_orig = OpenSSL::SSL::Session.new(DUMMY_SESSION)
     sess_dup = sess_orig.dup

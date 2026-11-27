@@ -145,6 +145,29 @@ ossl_bin2hex(const unsigned char *in, char *out, size_t inlen)
     }
 }
 
+struct nogvl_args {
+    void *(*func)(void *);
+    void *data1;
+    rb_unblock_function_t *ubf;
+    void *data2;
+};
+
+static VALUE
+nogvl_i(VALUE args_)
+{
+    struct nogvl_args *args = (struct nogvl_args *)args_;
+    return (VALUE)rb_thread_call_without_gvl(args->func, args->data1,
+                                             args->ubf, args->data2);
+}
+
+void *
+ossl_nogvl(void *(*func)(void *), void *data1,
+           rb_unblock_function_t *ubf, void *data2, int *state)
+{
+    struct nogvl_args args = { func, data1, ubf, data2 };
+    return (void *)rb_protect(nogvl_i, (VALUE)&args, state);
+}
+
 static ID id_cb_state;
 
 int
@@ -445,6 +468,92 @@ ossl_clear_error(void)
     if (dOSSL == Qtrue)
         ossl_suppress(collect_errors_into, Qnil);
     ERR_clear_error();
+}
+
+void
+ossl_err_state_save(struct ossl_err_state *state)
+{
+#ifdef HAVE_OSSL_ERR_STATE_NEW
+    if (!ERR_peek_error()) {
+        state->err_state = NULL;
+        return;
+    }
+    state->err_state = OSSL_ERR_STATE_new();
+    if (!state->err_state) {
+        ERR_clear_error();
+        return;
+    }
+    OSSL_ERR_STATE_save(state->err_state);
+#else
+    size_t capa = sizeof(state->entries) / sizeof(state->entries[0]);
+    for (state->len = 0; state->len < capa; state->len++) {
+        struct ossl_err_state_entry *e = &state->entries[state->len];
+        const char *file, *data;
+        int flags;
+
+# ifdef HAVE_ERR_GET_ERROR_ALL
+        /*
+         * OpenSSL 3.x. file and func are dynamically allocated and owned by
+         * ERR_STATE, even after the entry is removed by ERR_get_error_all().
+         * See also https://github.com/openssl/openssl/pull/14213
+         */
+        const char *func;
+        e->code = ERR_get_error_all(&file, &e->line, &func, &data, &flags);
+        if (!e->code)
+            break;
+        e->file = OPENSSL_strdup(file);
+        e->func = OPENSSL_strdup(func);
+# else
+        /* OpenSSL 1.1.1, LibreSSL, and AWS-LC. file should be a C literal */
+        e->code = ERR_get_error_line_data(&file, &e->line, &data, &flags);
+        if (!e->code)
+            break;
+        e->file = (char *)file;
+        e->func = NULL;
+# endif
+        e->data = flags & ERR_TXT_STRING ? OPENSSL_strdup(data) : NULL;
+    }
+    /*
+     * As of writing (OpenSSL 3.1, LibreSSL 4.4, AWS-LC 5.15), the thread-local
+     * error queue can hold at most 16 entries, so the error queue should
+     * already be empty at this point. But clearing it here just in case.
+     */
+    if (ERR_peek_error())
+        ERR_clear_error();
+#endif
+}
+
+void
+ossl_err_state_restore(struct ossl_err_state *state)
+{
+    if (ERR_peek_error())
+        ERR_clear_error();
+
+#ifdef HAVE_OSSL_ERR_STATE_NEW
+    if (state->err_state) {
+        OSSL_ERR_STATE_restore(state->err_state);
+        OSSL_ERR_STATE_free(state->err_state);
+        state->err_state = NULL;
+    }
+#else
+    for (size_t i = 0; i < state->len; i++) {
+        struct ossl_err_state_entry *e = &state->entries[i];
+
+# ifdef HAVE_ERR_GET_ERROR_ALL
+        ERR_new();
+        ERR_set_debug(e->file, e->line, e->func);
+        ERR_set_error(ERR_GET_LIB(e->code), ERR_GET_REASON(e->code), NULL);
+        OPENSSL_free(e->file);
+        OPENSSL_free(e->func);
+# else
+        ERR_put_error(ERR_GET_LIB(e->code), ERR_GET_FUNC(e->code),
+                      ERR_GET_REASON(e->code), e->file, e->line);
+# endif
+        if (e->data)
+            ERR_set_error_data(e->data, ERR_TXT_MALLOCED | ERR_TXT_STRING);
+    }
+    state->len = 0;
+#endif
 }
 
 /*

@@ -155,6 +155,9 @@ do{\
  */
 void ossl_bin2hex(const unsigned char *in, char *out, size_t len);
 
+void *ossl_nogvl(void *(*func)(void *), void *data1,
+                 rb_unblock_function_t *ubf, void *data2, int *state);
+
 /*
  * Use Fiber-local storage for rb_protect() states. This is fragile!
  */
@@ -196,6 +199,24 @@ PRINTF_ARGS(NORETURN(void ossl_raise(VALUE, const char *, ...)), 2, 3);
 VALUE ossl_make_error(VALUE exc, VALUE str);
 /* Clear OpenSSL error queue. If dOSSL is set, rb_warn() them. */
 void ossl_clear_error(void);
+
+/*
+ * Note that marks set by ERR_set_mark() are lost.
+ */
+struct ossl_err_state {
+#ifdef HAVE_OSSL_ERR_STATE_NEW
+    ERR_STATE *err_state;
+#else
+    size_t len;
+    struct ossl_err_state_entry {
+        unsigned long code;
+        int line;
+        char *file, *func, *data;
+    } entries[16/* ERR_NUM_ERRORS */];
+#endif
+};
+void ossl_err_state_save(struct ossl_err_state *state);
+void ossl_err_state_restore(struct ossl_err_state *state);
 
 /*
  * String to DER String
